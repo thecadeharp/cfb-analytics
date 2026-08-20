@@ -182,7 +182,7 @@ function renderGames(){
     return{g,proj,books,market,edge,wp};
   }).sort((a,b)=>b.edge-a.edge);
   const rows=enriched.map(({g,proj,books,market,edge,wp})=>{
-    const ec=edge>=PLAY_THR?'play':edge>=LEAN_THR?'lean':'flat';
+    if(!g.home_team||!g.away_team)return'';
     if(ef==='play'&&ec!=='play')return'';
     if(ef==='lean'&&ec==='flat')return'';
     const projStr=fmt(proj),marketStr=fmt(market);
