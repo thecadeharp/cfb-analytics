@@ -28,13 +28,13 @@ function switchTab(tab){
   if(tab==='plays')renderPlays();
   if(tab==='lines'&&!currentGames.length)loadGames();
   if(tab==='playoff')loadPlayoff();
-  if(tab==='efficiency')renderEff();
+  if(tab==='efficiency'&&metricsData&&allTeams.length)filterEff();
 }
 function switchEff(side,el){
   currentEffView=side;
   document.querySelectorAll('.eff-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  filterEff();
+  if(metricsData&&allTeams.length)filterEff();
 }
 
 async function init(){
