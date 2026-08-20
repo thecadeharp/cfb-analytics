@@ -1,0 +1,44 @@
+name: Weekly CFB Metrics Update
+
+on:
+  schedule:
+    # Runs every Tuesday at 6:00 AM UTC (2:00 AM ET)
+    # Gives Monday night games time to be logged in CFBD
+    - cron: '0 6 * * 2'
+  
+  # Also allows manual trigger from GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  update-metrics:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write  # needed to push the updated JSON back to repo
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests pandas numpy scipy
+
+      - name: Run weekly update script
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+        run: |
+          python scripts/weekly_update.py
+
+      - name: Commit and push updated metrics
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Actions"
+          git add data/cfb_metrics.json
+          git diff --staged --quiet || git commit -m "Weekly metrics update - $(date +'%Y-%m-%d')"
+          git push
