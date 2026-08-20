@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CFB Analytics</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+:root {
+  --bg:#fff; --bg2:#fafafa; --bg3:#f4f4f5; --border:#e4e4e7;
+  --text:#18181b; --muted:#71717a; --subtle:#d4d4d8;
+  --green:#16a34a; --yg:#65a30d; --amber:#d97706; --red:#dc2626; --blue:#2563eb;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+header{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--text);}
+.logo span{color:var(--muted);font-size:12px;font-family:'Inter',sans-serif;font-weight:500;letter-spacing:1px;margin-left:10px;text-transform:uppercase;}
+.beta{background:var(--text);color:#fff;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:3px 8px;border-radius:3px;text-transform:uppercase;}
+.nav-tabs{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;display:flex;overflow-x:auto;}
+.nav-tab{padding:12px 18px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.15s;}
+.nav-tab:hover{color:var(--text);}
+.nav-tab.active{color:var(--text);border-bottom-color:var(--text);}
+.main{max-width:1500px;margin:0 auto;padding:24px;}
+.view{display:none;}.view.active{display:block;}
+/* CONTROLS */
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px;}
+select,input[type="text"]{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-size:13px;font-family:'Inter',sans-serif;outline:none;}
+select:focus,input:focus{border-color:var(--text);}
+.btn{background:var(--text);color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;transition:opacity 0.15s;}
+.btn:hover{opacity:0.8;}
+.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text);}
+.btn.ghost:hover{border-color:var(--text);}
+.btn.danger{background:var(--red);color:#fff;}
+/* SECTION */
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;margin-bottom:4px;}
+.section-sub{font-size:13px;color:var(--muted);margin-bottom:20px;}
+/* TABLE */
+.tbl-wrap{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead tr{background:var(--bg3);border-bottom:1px solid var(--border);}
+th{padding:10px 12px;text-align:left;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);cursor:pointer;white-space:nowrap;user-select:none;}
+th:hover{color:var(--text);}
+th.sorted{color:var(--text);}
+tbody tr{border-bottom:1px solid var(--border);transition:background 0.1s;cursor:pointer;}
+tbody tr:hover{background:var(--bg3);}
+tbody tr:last-child{border-bottom:none;}
+td{padding:10px 12px;white-space:nowrap;}
+.mono{font-family:'JetBrains Mono',monospace;font-size:12px;}
+/* RANK BADGE */
+.rank-badge{display:inline-flex;align-items:center;justify-content:center;min-width:32px;padding:2px 5px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;}
+.r-elite{background:rgba(22,163,74,0.12);color:#15803d;}
+.r-good{background:rgba(101,163,13,0.12);color:#4d7c0f;}
+.r-mid{background:rgba(217,119,6,0.12);color:#b45309;}
+.r-bad{background:rgba(220,38,38,0.12);color:#b91c1c;}
+.r-neu{background:var(--bg3);color:var(--muted);}
+/* METRIC VALUE */
+.mv-pos{color:var(--green);font-weight:600;}
+.mv-neg{color:var(--red);font-weight:600;}
+.mv-neu{color:var(--muted);}
+/* OVERVIEW CARDS */
+.ov-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.ov-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
+.ov-label{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.ov-val{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--text);line-height:1;}
+.ov-sub{font-size:12px;color:var(--muted);margin-top:4px;}
+/* GAMES TABLE */
+.gt-wrap{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.gt{width:100%;border-collapse:collapse;font-size:13px;}
+.gt thead tr{background:var(--bg3);border-bottom:1px solid var(--border);}
+.gt th{padding:10px 16px;text-align:left;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.gt th.right{text-align:right;}
+.gt tbody tr{border-bottom:1px solid var(--border);transition:background 0.1s;cursor:pointer;}
+.gt tbody tr:hover{background:var(--bg3);}
+.gt tbody tr:last-child{border-bottom:none;}
+.gt td{padding:14px 16px;vertical-align:middle;}
+.gt td.right{text-align:right;}
+.mc-name{font-weight:700;font-size:13px;}
+.mc-prob{font-size:11px;color:var(--muted);margin-left:6px;}
+.mc-away{margin-bottom:5px;}
+.at-sign{font-size:10px;color:var(--muted);margin-right:3px;}
+.ol-val{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;}
+.ml-val{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;}
+.ml-books{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.7;}
+.dis-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;text-align:right;}
+.dis-val.play{color:var(--green);}
+.dis-val.lean{color:var(--amber);}
+.dis-val.flat{color:var(--muted);}
+.dis-lbl{font-size:11px;color:var(--muted);margin-top:3px;text-align:right;}
+.status-badge{display:inline-flex;align-items:center;justify-content:center;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity 0.15s;white-space:nowrap;}
+.status-badge:hover{opacity:0.85;}
+.status-badge.play{background:var(--green);color:#fff;}
+.status-badge.watch{background:var(--bg3);border:1px solid var(--border);color:var(--text);}
+.status-badge.inline{background:var(--bg3);border:1px solid var(--border);color:var(--muted);}
+.status-badge.logged{border:1px solid var(--green);color:var(--green);background:transparent;}
+/* PLAY LOG */
+.pl-record{display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap;}
+.pl-stat{background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px 18px;min-width:110px;}
+.pl-stat-val{font-family:'Bebas Neue',sans-serif;font-size:32px;line-height:1;color:var(--text);}
+.pl-stat-val.g{color:var(--green);}
+.pl-stat-val.r{color:var(--red);}
+.pl-stat-label{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:1px;}
+.result-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;}
+.result-badge.W{background:rgba(22,163,74,0.1);color:var(--green);}
+.result-badge.L{background:rgba(220,38,38,0.1);color:var(--red);}
+.result-badge.P{background:var(--bg3);color:var(--muted);}
+.result-badge.pending{background:rgba(217,119,6,0.1);color:var(--amber);}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border:1px solid var(--border);border-radius:12px;padding:28px;width:460px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,0.15);max-height:90vh;overflow-y:auto;}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;margin-bottom:20px;}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:6px;font-size:14px;font-family:'Inter',sans-serif;outline:none;}
+.form-input:focus{border-color:var(--text);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.modal-actions{display:flex;gap:10px;margin-top:20px;}
+/* DOSSIER */
+.back-btn{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;margin-bottom:20px;text-transform:uppercase;letter-spacing:1px;transition:color 0.15s;width:fit-content;}
+.back-btn:hover{color:var(--text);}
+.dossier-grid{display:grid;grid-template-columns:280px 1fr;gap:20px;}
+.card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:20px;}
+.card-title{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);}
+.stat-row:last-child{border-bottom:none;}
+.stat-label{font-size:12px;color:var(--muted);}
+.stat-value{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;}
+.big-num{font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--text);line-height:1;text-align:center;}
+.big-num-sub{font-size:11px;color:var(--muted);text-align:center;letter-spacing:1px;text-transform:uppercase;margin-top:4px;}
+/* TALE OF THE TAPE */
+.tape-wrap{display:grid;grid-template-columns:1fr 2fr 1fr;gap:0;background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+.tape-team{padding:20px;background:var(--bg2);}
+.tape-team h3{font-weight:700;font-size:15px;margin-bottom:14px;}
+.tape-team-stat{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.tape-team-stat:last-child{border-bottom:none;}
+.tape-center{border-left:1px solid var(--border);border-right:1px solid var(--border);}
+.tape-row{display:grid;grid-template-columns:60px 1fr 120px 1fr 60px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--border);font-size:12px;}
+.tape-row:last-child{border-bottom:none;}
+.tape-row:first-child{background:var(--bg3);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.tape-metric{text-align:center;color:var(--muted);}
+.tape-val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;}
+.tape-val.left{text-align:right;}
+.tape-val.right{text-align:left;}
+/* PLAYOFF */
+.playoff-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+.po-table{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.po-table table{width:100%;border-collapse:collapse;font-size:13px;}
+.po-table thead tr{background:var(--bg3);border-bottom:1px solid var(--border);}
+.po-table th{padding:10px 14px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:left;}
+.po-table td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.po-table tr:last-child td{border-bottom:none;}
+.po-table tr:hover td{background:var(--bg3);}
+.seed-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);width:24px;display:inline-block;}
+.seed-num.bye{color:var(--green);font-weight:700;}
+.prob-bar-wrap{display:flex;align-items:center;gap:8px;}
+.prob-bar{height:4px;border-radius:3px;background:var(--border);flex:1;overflow:hidden;}
+.prob-bar-fill{height:100%;border-radius:3px;background:var(--green);transition:width 0.4s;}
+.prob-pct{font-family:'JetBrains Mono',monospace;font-size:12px;min-width:36px;text-align:right;}
+.prob-pct.high{color:var(--green);font-weight:700;}
+.prob-pct.mid{color:var(--amber);}
+.prob-pct.low{color:var(--muted);}
+.bracket-lbl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.bracket-grid{display:grid;gap:10px;}
+.mu-card{background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.mu-card-hdr{background:var(--bg3);padding:6px 12px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;}
+.mu-team-row{padding:10px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.mu-team-row:last-child{border-bottom:none;}
+.mu-team-row.fav{background:rgba(22,163,74,0.03);}
+.mt-left{display:flex;align-items:center;gap:8px;}
+.mt-seed{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);min-width:20px;}
+.mt-name{font-weight:600;font-size:13px;}
+.mt-rec{font-size:11px;color:var(--muted);margin-left:4px;}
+.mt-wp{font-size:11px;color:var(--muted);min-width:32px;text-align:right;}
+.mt-wp.fav{color:var(--green);font-weight:700;}
+.champ-card{background:linear-gradient(135deg,rgba(22,163,74,0.06),rgba(22,163,74,0.01));border:1px solid rgba(22,163,74,0.25);border-radius:10px;padding:24px;text-align:center;margin-bottom:24px;}
+.champ-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:12px;}
+.champ-team{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:2px;}
+.champ-prob{font-size:14px;color:var(--muted);margin-top:6px;}
+.round-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.round-tab{padding:6px 14px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;background:#fff;border:1px solid var(--border);color:var(--muted);transition:all 0.15s;}
+.round-tab.active{background:var(--text);color:#fff;border-color:var(--text);}
+.bracket-section{margin-bottom:24px;}
+/* LOADING */
+.loading-state{text-align:center;padding:80px 20px;color:var(--muted);}
+.spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--text);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;}
+.hint{font-size:11px;color:var(--muted);text-align:right;margin-top:8px;}
+/* EFFICIENCY VIEW TABS */
+.eff-tabs{display:flex;gap:0;margin-bottom:20px;border:1px solid var(--border);border-radius:8px;overflow:hidden;width:fit-content;}
+.eff-tab{padding:8px 20px;font-size:12px;font-weight:600;cursor:pointer;background:#fff;color:var(--muted);transition:all 0.15s;border-right:1px solid var(--border);}
+.eff-tab:last-child{border-right:none;}
+.eff-tab.active{background:var(--text);color:#fff;}
+@media(max-width:900px){
+  .ov-grid{grid-template-columns:repeat(2,1fr);}
+  .dossier-grid{grid-template-columns:1fr;}
+  .playoff-layout{grid-template-columns:1fr;}
+  .tape-wrap{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">CFB Analytics <span>2026 Season</span></div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span id="data-updated" style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;"></span>
+    <span class="beta">Beta</span>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <div class="nav-tab active" onclick="switchTab('ratings')">Power Ratings</div>
+  <div class="nav-tab" onclick="switchTab('efficiency')">Efficiency</div>
+  <div class="nav-tab" onclick="switchTab('lines')">Lines & Edges</div>
+  <div class="nav-tab" onclick="switchTab('plays')">Play Log</div>
+  <div class="nav-tab" onclick="switchTab('playoff')">Playoff Simulator</div>
+  <div class="nav-tab" onclick="switchTab('dossier')">Team Dossier</div>
+</nav>
+
+<div class="main">
+
+  <!-- POWER RATINGS -->
+  <div id="view-ratings" class="view active">
+    <div class="section-title">Power Ratings</div>
+    <div class="section-sub">Weighted composite rating: Net EPA (30%) · Net Pass EPA (15%) · Net Rush EPA (15%) · Net SR (10%) · Def Havoc (20%) · Off Havoc Avoided (10%)</div>
+    <div class="ov-grid">
+      <div class="ov-card"><div class="ov-label">Teams</div><div class="ov-val" id="ov-teams">—</div><div class="ov-sub">FBS programs</div></div>
+      <div class="ov-card"><div class="ov-label">Top Rated</div><div class="ov-val" id="ov-top" style="font-size:20px;padding-top:8px;">—</div><div class="ov-sub" id="ov-top-sub">Power rating</div></div>
+      <div class="ov-card"><div class="ov-label">Best Offense</div><div class="ov-val" id="ov-off" style="font-size:20px;padding-top:8px;">—</div><div class="ov-sub" id="ov-off-sub">EPA/play</div></div>
+      <div class="ov-card"><div class="ov-label">Best Defense</div><div class="ov-val" id="ov-def" style="font-size:20px;padding-top:8px;">—</div><div class="ov-sub" id="ov-def-sub">EPA/play allowed</div></div>
+    </div>
+    <div class="controls">
+      <input type="text" placeholder="Search team..." oninput="filterRatings(this.value)" style="min-width:180px;">
+      <select id="conf-filter" onchange="filterRatings()">
+        <option value="">All Conferences</option>
+      </select>
+      <select id="sort-ratings" onchange="filterRatings()">
+        <option value="power_rating">Power Rating</option>
+        <option value="off_epa">Offense EPA</option>
+        <option value="def_epa">Defense EPA</option>
+        <option value="net_epa">Net EPA</option>
+      </select>
+    </div>
+    <div id="ratings-container"><div class="loading-state"><div class="spinner"></div><p>Loading ratings...</p></div></div>
+    <div class="hint">Click any row → Team Dossier</div>
+  </div>
+
+  <!-- EFFICIENCY -->
+  <div id="view-efficiency" class="view">
+    <div class="section-title">Team Efficiency</div>
+    <div class="section-sub">Advanced EPA, success rate, and havoc metrics — FBS vs FBS only, garbage time removed</div>
+    <div class="eff-tabs">
+      <div class="eff-tab active" onclick="switchEff('offense',this)">Offense</div>
+      <div class="eff-tab" onclick="switchEff('defense',this)">Defense</div>
+      <div class="eff-tab" onclick="switchEff('net',this)">Net</div>
+    </div>
+    <div class="controls">
+      <input type="text" placeholder="Search team..." oninput="filterEff(this.value)" style="min-width:180px;">
+      <select id="eff-conf" onchange="filterEff()"><option value="">All Conferences</option></select>
+    </div>
+    <div id="eff-container"><div class="loading-state"><div class="spinner"></div><p>Loading efficiency data...</p></div></div>
+  </div>
+
+  <!-- LINES & EDGES -->
+  <div id="view-lines" class="view">
+    <div class="section-title">Lines & Edges</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:13px;color:var(--muted);line-height:1.7;">
+      Projected spreads auto-generated from power ratings + 2.5pt home field advantage. Market lines from CFBD.
+      <strong style="color:var(--green)">🎯 PLAY = 5+ pt edge</strong> · <strong style="color:var(--amber)">WATCH = 2–4.5 pts</strong> · IN LINE &lt;2 pts.
+    </div>
+    <div class="controls">
+      <select id="lines-week" onchange="loadGames()">
+        <option value="0">Week 0</option><option value="1">Week 1</option><option value="2">Week 2</option>
+        <option value="3">Week 3</option><option value="4">Week 4</option><option value="5">Week 5</option>
+        <option value="6">Week 6</option><option value="7">Week 7</option><option value="8">Week 8</option>
+        <option value="9">Week 9</option><option value="10">Week 10</option><option value="11">Week 11</option>
+        <option value="12">Week 12</option><option value="13">Week 13</option>
+      </select>
+      <select id="lines-edge" onchange="renderGames()">
+        <option value="">All Games</option>
+        <option value="play">Plays Only (5+)</option>
+        <option value="lean">Leans + Plays</option>
+      </select>
+    </div>
+    <div id="lines-container"><div class="loading-state"><div class="spinner"></div><p>Loading games...</p></div></div>
+  </div>
+
+  <!-- PLAY LOG -->
+  <div id="view-plays" class="view">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div class="section-title">Play Log</div>
+      <button class="btn" onclick="openLogger(null)">+ Add Play</button>
+    </div>
+    <div id="pl-record" class="pl-record"></div>
+    <div id="plays-container"></div>
+  </div>
+
+  <!-- PLAYOFF SIMULATOR -->
+  <div id="view-playoff" class="view">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div class="section-title">Playoff Simulator</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span id="playoff-updated" style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;"></span>
+        <button class="btn ghost" onclick="loadPlayoff()">↻ Refresh</button>
+      </div>
+    </div>
+    <div class="section-sub">12-team CFP bracket projected from power ratings + live results. 5,000 simulations. Auto-updates weekly.</div>
+    <div id="playoff-container"><div class="loading-state"><div class="spinner"></div><p>Running simulations...</p></div></div>
+  </div>
+
+  <!-- TEAM DOSSIER -->
+  <div id="view-dossier" class="view">
+    <div class="back-btn" onclick="switchTab('ratings')">← Back to Ratings</div>
+    <div id="dossier-container"><div class="empty-state">Select a team from Power Ratings to view their dossier.</div></div>
+  </div>
+
+</div>
+
+<!-- TALE OF THE TAPE MODAL -->
+<div class="modal-overlay" id="tape-modal">
+  <div class="modal" style="width:900px;max-width:98vw;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div class="modal-title" id="tape-title">Tale of the Tape</div>
+      <button class="btn ghost" onclick="closeTape()">✕ Close</button>
+    </div>
+    <div id="tape-container"></div>
+  </div>
+</div>
+
+<!-- LOG PLAY MODAL -->
+<div class="modal-overlay" id="log-modal">
+  <div class="modal">
+    <div class="modal-title">Log <span style="color:var(--green)">Play</span></div>
+    <div class="form-group">
+      <label class="form-label">Game / Matchup</label>
+      <input class="form-input" id="log-game" placeholder="e.g. Ohio State @ Texas">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Side</label>
+        <input class="form-input" id="log-side" placeholder="e.g. Ohio State -3.5">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Line</label>
+        <input class="form-input" id="log-line" type="number" step="0.5" placeholder="-7">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Closing Line <span style="font-size:10px;color:var(--muted);font-weight:400;">(after kickoff)</span></label>
+        <input class="form-input" id="log-close" type="number" step="0.5" placeholder="e.g. -9">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Units</label>
+        <input class="form-input" id="log-units" type="number" step="0.5" placeholder="1.0" value="1">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Book</label>
+        <input class="form-input" id="log-book" placeholder="DK, FD, etc.">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Result</label>
+        <select class="form-input" id="log-result">
+          <option value="pending">Pending</option>
+          <option value="W">Win</option>
+          <option value="L">Loss</option>
+          <option value="P">Push</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes (optional)</label>
+      <input class="form-input" id="log-notes" placeholder="Why you like this play...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="savePlay()" style="flex:1;">Save Play</button>
+      <button class="btn ghost" onclick="closeLogger()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
