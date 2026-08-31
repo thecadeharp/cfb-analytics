@@ -16,45 +16,30 @@ jobs:
 
     steps:
 
-      # ------------------------------------------------------------
-      # GET REPOSITORY
-      # ------------------------------------------------------------
-
+      # Get repository files
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ------------------------------------------------------------
-      # SET UP PYTHON
-      # ------------------------------------------------------------
-
+      # Install Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # ------------------------------------------------------------
-      # INSTALL DEPENDENCIES
-      # ------------------------------------------------------------
-
+      # Install everything our scripts need
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests
+          pip install requests pandas
 
-      # ------------------------------------------------------------
-      # UPDATE TEAM METRICS
-      # ------------------------------------------------------------
-
+      # Update team analytics from CFBD
       - name: Update team analytics
         env:
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
         run: |
           python scripts/weekly_update.py
 
-      # ------------------------------------------------------------
-      # BUILD SCHEDULE + ODDS + PROJECTIONS
-      # ------------------------------------------------------------
-
+      # Build schedules, odds, and projections
       - name: Build projections
         env:
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
@@ -62,10 +47,7 @@ jobs:
         run: |
           python scripts/build_projections.py
 
-      # ------------------------------------------------------------
-      # COMMIT UPDATED DATA
-      # ------------------------------------------------------------
-
+      # Save any updated data back into GitHub
       - name: Commit updated analytics
         run: |
           git config --global user.name "github-actions[bot]"
