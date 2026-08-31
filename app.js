@@ -227,9 +227,11 @@ async function loadGames(){
   document.getElementById('lines-container').innerHTML=`<div class="loading-state"><div class="spinner"></div><p>Loading Week ${week} games + live odds...</p></div>`;
   try{
     // Pull live CFB odds from The Odds API
-    const oddsRes=await fetch(`https://corsproxy.io/?${encodeURIComponent(ODDS_BASE+'/sports/americanfootball_ncaaf/odds/?apiKey='+ODDS_KEY+'&regions=us&markets=spreads&oddsFormat=american&bookmakers=draftkings,fanduel,caesars,betmgm')}`);
+    const oddsUrl=`${ODDS_BASE}/sports/americanfootball_ncaaf/odds/?apiKey=${ODDS_KEY}&regions=us&markets=spreads&oddsFormat=american&bookmakers=draftkings,fanduel,caesars,betmgm`;
+    const oddsRes=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(oddsUrl)}`);
     if(!oddsRes.ok)throw new Error(`Odds API: ${oddsRes.status}`);
-    const oddsData=await oddsRes.json();
+    const oddsWrapper=await oddsRes.json();
+    const oddsData=JSON.parse(oddsWrapper.contents);
 
     // Also try to get games from CFBD for schedule structure
     let cfbdGames=[];
