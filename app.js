@@ -614,7 +614,6 @@ function renderPlays(){
     const rowLineDisplay=p.lineDisplay||(p.line>=0?'+':'')+p.line;
     const clvLabel=p.betType==='ml'?'odds pts':'pts';
     const clvD=p.clv!=null?`<span class="${p.clv>=0?'mv-pos':'mv-neg'}">${p.clv>=0?'+':''}${p.clv.toFixed(1)}${p.betType==='ml'?'%':''}</span>`:'<span style="font-size:10px;color:var(--muted)">Add close</span>';
-    const lineDisplay=p.betType==='ml'?(p.line>=0?'+':'')+p.line:(p.line>=0?'+':'')+p.line;
     const tl=typeLabel[p.betType]||'Spread';
     return`<tr>
       <td style="font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis">${p.game||'—'}</td>
