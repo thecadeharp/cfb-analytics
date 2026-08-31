@@ -476,6 +476,7 @@ function openLogger(prefill){
   document.getElementById('log-line').value=prefill?.line??'';
   document.getElementById('log-units').value='1';
   document.getElementById('log-result').value='pending';
+  document.getElementById('log-type').value='spread';
   document.getElementById('log-modal').classList.add('open');
 }
 function closeLogger(){document.getElementById('log-modal').classList.remove('open');}
@@ -485,7 +486,21 @@ function savePlay(){
   const cv=document.getElementById('log-close').value;
   const closingLine=cv!==''?parseFloat(cv):null;
   const clv=closingLine!==null?(line-closingLine):null;
-  const play={id:editingPlayId??Date.now(),game:document.getElementById('log-game').value,side:document.getElementById('log-side').value,line,closingLine,clv,units:parseFloat(document.getElementById('log-units').value)||1,book:document.getElementById('log-book').value,result:document.getElementById('log-result').value,notes:document.getElementById('log-notes').value,ts:Date.now()};
+  const betType=document.getElementById('log-type').value;
+  const units=parseFloat(document.getElementById('log-units').value)||1;
+  const result=document.getElementById('log-result').value;
+
+  // Calculate P/L based on bet type
+  // Spread/Total: assume -110 juice → win = units * 0.909
+  // ML: actual odds calculation
+  // Prop: same as spread
+  let winUnits=units*0.909; // default -110
+  if(betType==='ml'&&line!==0){
+    if(line<0) winUnits=units*(100/Math.abs(line));
+    else winUnits=units*(line/100);
+  }
+
+  const play={id:editingPlayId??Date.now(),game:document.getElementById('log-game').value,side:document.getElementById('log-side').value,betType,line,closingLine,clv,units,winUnits,book:document.getElementById('log-book').value,result,notes:document.getElementById('log-notes').value,ts:Date.now()};
   if(editingPlayId){const idx=plays.findIndex(p=>p.id===editingPlayId);if(idx!==-1)plays[idx]=play;}else{plays.unshift(play);}
   localStorage.setItem('ht_plays',JSON.stringify(plays));
   closeLogger();renderPlays();
@@ -498,12 +513,15 @@ function editPlay(id){
   document.getElementById('log-line').value=p.line;document.getElementById('log-close').value=p.closingLine??'';
   document.getElementById('log-units').value=p.units;document.getElementById('log-book').value=p.book;
   document.getElementById('log-result').value=p.result;document.getElementById('log-notes').value=p.notes;
+  document.getElementById('log-type').value=p.betType||'spread';
   document.getElementById('log-modal').classList.add('open');
 }
 
 function renderPlays(){
   const wins=plays.filter(p=>p.result==='W'),losses=plays.filter(p=>p.result==='L'),pending=plays.filter(p=>p.result==='pending');
-  const netUnits=wins.reduce((s,p)=>s+p.units*0.909,0)-losses.reduce((s,p)=>s+p.units,0);
+  const unitsWon=wins.reduce((s,p)=>s+(p.winUnits??p.units*0.909),0);
+  const unitsLost=losses.reduce((s,p)=>s+p.units,0);
+  const netUnits=unitsWon-unitsLost;
   const cp=plays.filter(p=>p.clv!=null),avgCLV=cp.length?cp.reduce((s,p)=>s+p.clv,0)/cp.length:null;
   const clvPct=cp.length?Math.round(cp.filter(p=>p.clv>0).length/cp.length*100):null;
   const cc=avgCLV===null?'var(--muted)':avgCLV>=1?'#16a34a':avgCLV>=0?'#d97706':'#dc2626';
@@ -515,15 +533,25 @@ function renderPlays(){
     <div class="pl-stat" style="border-left:2px solid var(--green);padding-left:16px"><div class="pl-stat-val" style="color:${cc}">${avgCLV===null?'—':(avgCLV>=0?'+':'')+avgCLV.toFixed(2)}</div><div class="pl-stat-label">Avg CLV</div></div>
     <div class="pl-stat"><div class="pl-stat-val" style="color:${clvPct===null?'var(--muted)':clvPct>=55?'#16a34a':'#d97706'}">${clvPct===null?'—':clvPct+'%'}</div><div class="pl-stat-label">+CLV Rate</div></div>`;
   if(!plays.length){document.getElementById('plays-container').innerHTML='<div class="empty-state"><div style="font-size:32px;margin-bottom:12px">🎯</div><p style="margin-bottom:8px;color:var(--text)">No plays logged yet.</p><p>Click + Add Play or log from Lines & Edges.</p></div>';return;}
+
+  const typeLabel={spread:'Spread',total:'Total',team_total:'Team Total',ml:'ML',prop:'Prop'};
+
   const rows=plays.map(p=>{
     const rc=p.result==='W'?'W':p.result==='L'?'L':p.result==='P'?'P':'pending';
-    const pu=p.result==='W'?`+${(p.units*0.909).toFixed(2)}u`:p.result==='L'?`-${p.units}u`:p.result==='P'?'0u':'—';
+    const wu=p.winUnits??p.units*0.909;
+    const pu=p.result==='W'?`+${wu.toFixed(2)}u`:p.result==='L'?`-${p.units}u`:p.result==='P'?'0u':'—';
     const puC=p.result==='W'?'mv-pos':p.result==='L'?'mv-neg':'mv-neu';
     const clvD=p.clv!=null?`<span class="${p.clv>=0?'mv-pos':'mv-neg'}">${p.clv>=0?'+':''}${p.clv.toFixed(1)}</span>`:'<span style="font-size:10px;color:var(--muted)">Add close</span>';
+    const lineDisplay=p.betType==='ml'?(p.line>=0?'+':'')+p.line:(p.line>=0?'+':'')+p.line;
+    const tl=typeLabel[p.betType]||'Spread';
     return`<tr>
-      <td style="font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis">${p.game||'—'}</td>
-      <td class="mono">${p.side||'—'}</td><td class="mono">${p.line>=0?'+':''}${p.line}</td>
-      <td class="mono">${clvD}</td><td class="mono">${p.units}u</td><td>${p.book||'—'}</td>
+      <td style="font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis">${p.game||'—'}</td>
+      <td><span style="font-size:10px;padding:2px 6px;border-radius:3px;background:var(--bg3);border:1px solid var(--border);color:var(--muted)">${tl}</span></td>
+      <td class="mono">${p.side||'—'}</td>
+      <td class="mono">${lineDisplay}</td>
+      <td class="mono">${clvD}</td>
+      <td class="mono">${p.units}u</td>
+      <td>${p.book||'—'}</td>
       <td><span class="result-badge ${rc}">${p.result==='pending'?'Pending':p.result}</span></td>
       <td class="mono ${puC}">${pu}</td>
       <td style="white-space:nowrap">
@@ -532,10 +560,11 @@ function renderPlays(){
       </td>
     </tr>`;
   }).join('');
+
   document.getElementById('plays-container').innerHTML=`
-    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">CLV = Closing Line Value. Positive = beat the close. Enter closing line by editing after kickoff.</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">CLV = Closing Line Value. Positive = beat the close. Enter closing line by editing after kickoff. ML P/L calculated from actual odds.</div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Game</th><th>Side</th><th>Line</th><th style="color:var(--green)">CLV</th><th>Units</th><th>Book</th><th>Result</th><th>P/L</th><th>Actions</th></tr></thead>
+      <thead><tr><th>Game</th><th>Type</th><th>Side</th><th>Line</th><th style="color:var(--green)">CLV</th><th>Units</th><th>Book</th><th>Result</th><th>P/L</th><th>Actions</th></tr></thead>
       <tbody>${rows}</tbody></table></div>`;
 }
 
