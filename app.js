@@ -611,7 +611,7 @@ function renderPlays(){
     const wu=p.winUnits??p.units*0.909;
     const pu=p.result==='W'?`+${wu.toFixed(2)}u`:p.result==='L'?`-${p.units}u`:p.result==='P'?'0u':'—';
     const puC=p.result==='W'?'mv-pos':p.result==='L'?'mv-neg':'mv-neu';
-    const lineDisplay=p.lineDisplay||(p.line>=0?'+':'')+p.line;
+    const rowLineDisplay=p.lineDisplay||(p.line>=0?'+':'')+p.line;
     const clvLabel=p.betType==='ml'?'odds pts':'pts';
     const clvD=p.clv!=null?`<span class="${p.clv>=0?'mv-pos':'mv-neg'}">${p.clv>=0?'+':''}${p.clv.toFixed(1)}${p.betType==='ml'?'%':''}</span>`:'<span style="font-size:10px;color:var(--muted)">Add close</span>';
     const lineDisplay=p.betType==='ml'?(p.line>=0?'+':'')+p.line:(p.line>=0?'+':'')+p.line;
@@ -620,7 +620,7 @@ function renderPlays(){
       <td style="font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis">${p.game||'—'}</td>
       <td><span style="font-size:10px;padding:2px 6px;border-radius:3px;background:var(--bg3);border:1px solid var(--border);color:var(--muted)">${tl}</span></td>
       <td class="mono">${p.side||'—'}</td>
-      <td class="mono">${lineDisplay}</td>
+      <td class="mono">${rowLineDisplay}</td>
       <td class="mono">${clvD}</td>
       <td class="mono">${p.units}u</td>
       <td>${p.book||'—'}</td>
