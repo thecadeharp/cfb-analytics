@@ -1,5 +1,5 @@
 """
-HAMMER TIME CFB ANALYTICS
+CFB ANALYTICS
 build_projections.py
 
 Builds:
@@ -7,31 +7,26 @@ Builds:
     data/odds.json
     data/projections.json
 
-Architecture:
-    APIs
-      ↓
-    GitHub Actions
-      ↓
-    Static JSON
-      ↓
-    GitHub Pages
+IMPORTANT:
+CFBD schedule matching is STRICT.
 
-API keys are used only inside GitHub Actions.
-They are never sent to the browser.
+Indiana State != Indiana
+Florida State != Florida
+South Carolina State != South Carolina
+
+Sportsbook names may include mascots, so sportsbook matching has a
+separate, carefully guarded matcher.
 """
 
 import json
 import os
 import statistics
 import sys
+import unicodedata
 from datetime import datetime
 
 import requests
 
-
-# =============================================================================
-# CONFIG
-# =============================================================================
 
 YEAR = 2026
 
@@ -49,14 +44,14 @@ BASE_TOTAL = 52.5
 
 
 # =============================================================================
-# API KEY CLEANING
+# KEYS
 # =============================================================================
 
-def clean_api_key(raw_key):
-    if raw_key is None:
+def clean_api_key(raw):
+    if raw is None:
         return ""
 
-    key = str(raw_key).strip()
+    key = str(raw).strip()
 
     if (
         len(key) >= 2
@@ -68,15 +63,13 @@ def clean_api_key(raw_key):
     if key.lower().startswith("bearer "):
         key = key[7:].strip()
 
-    key = (
+    return (
         key
         .replace("\r", "")
         .replace("\n", "")
         .replace("\t", "")
         .strip()
     )
-
-    return key
 
 
 CFBD_API_KEY = clean_api_key(
@@ -89,7 +82,7 @@ ODDS_API_KEY = clean_api_key(
 
 
 # =============================================================================
-# BASIC HELPERS
+# HELPERS
 # =============================================================================
 
 def safe_number(value, default=0.0):
@@ -108,10 +101,6 @@ def round_half(value):
 
 
 def first_value(data, *keys, default=None):
-    """
-    Accept both old snake_case and newer camelCase API fields.
-    """
-
     for key in keys:
         if key in data and data.get(key) is not None:
             return data.get(key)
@@ -120,320 +109,226 @@ def first_value(data, *keys, default=None):
 
 
 def canonical_name(value):
-    """
-    Converts provider team names to a comparison-friendly string.
-
-    Example:
-        "Ohio State Buckeyes" -> "ohio state buckeyes"
-        "San José State"      -> "san jose state"
-    """
-
     if not value:
         return ""
 
-    text = str(value).strip().lower()
+    text = unicodedata.normalize(
+        "NFKD",
+        str(value)
+    )
+
+    text = "".join(
+        character
+        for character in text
+        if not unicodedata.combining(character)
+    )
+
+    text = text.lower().strip()
 
     replacements = {
-        "á": "a",
-        "é": "e",
-        "í": "i",
-        "ó": "o",
-        "ú": "u",
-        "ñ": "n",
-        "’": "",
+        "&": "and",
         "'": "",
+        "’": "",
         ".": "",
         ",": "",
-        "&": "and",
         "-": " ",
         "_": " ",
+        "(": " ",
+        ")": " ",
     }
 
     for old, new in replacements.items():
         text = text.replace(old, new)
 
-    return " ".join(
-        text.split()
-    )
+    return " ".join(text.split())
 
 
 # =============================================================================
-# TEAM NAME ALIASES
+# APPROVED SCHOOL ALIASES
 # =============================================================================
 
-TEAM_ALIASES = {
-    # Miami
+ALIASES = {
     "miami fl": "Miami",
     "miami florida": "Miami",
-    "miami hurricanes": "Miami",
 
-    # Connecticut
     "uconn": "Connecticut",
-    "uconn huskies": "Connecticut",
-    "connecticut huskies": "Connecticut",
+    "connecticut": "Connecticut",
 
-    # Massachusetts
     "umass": "Massachusetts",
-    "umass minutemen": "Massachusetts",
 
-    # Southern Miss
     "southern miss": "Southern Mississippi",
-    "southern miss golden eagles": "Southern Mississippi",
 
-    # UTSA
     "utsa": "UT San Antonio",
-    "utsa roadrunners": "UT San Antonio",
     "texas san antonio": "UT San Antonio",
-    "texas san antonio roadrunners": "UT San Antonio",
 
-    # UTEP
-    "utep miners": "UTEP",
-
-    # FIU
     "fiu": "Florida International",
-    "fiu panthers": "Florida International",
 
-    # FAU
     "fau": "Florida Atlantic",
-    "fau owls": "Florida Atlantic",
 
-    # Appalachian State
     "app state": "Appalachian State",
-    "app state mountaineers": "Appalachian State",
 
-    # NC State
+    "nc state": "NC State",
     "n c state": "NC State",
-    "nc state wolfpack": "NC State",
 
-    # San Jose State
-    "san jose state spartans": "San Jose State",
-
-    # Hawaii
     "hawaii": "Hawai'i",
-    "hawaii rainbow warriors": "Hawai'i",
 
-    # Ole Miss
-    "mississippi rebels": "Ole Miss",
-    "ole miss rebels": "Ole Miss",
+    "mississippi": "Ole Miss",
 
-    # Louisiana
-    "louisiana lafayette": "Louisiana",
     "ul lafayette": "Louisiana",
-    "louisiana ragin cajuns": "Louisiana",
+    "louisiana lafayette": "Louisiana",
 
-    # Louisiana Monroe
-    "ul monroe": "Louisiana Monroe",
     "ulm": "Louisiana Monroe",
-    "louisiana monroe warhawks": "Louisiana Monroe",
+    "ul monroe": "Louisiana Monroe",
 
-    # Middle Tennessee
     "middle tennessee state": "Middle Tennessee",
-    "middle tennessee blue raiders": "Middle Tennessee",
 
-    # Bowling Green
-    "bowling green falcons": "Bowling Green",
-
-    # Western Kentucky
-    "western kentucky hilltoppers": "Western Kentucky",
-
-    # Eastern Michigan
-    "eastern michigan eagles": "Eastern Michigan",
-
-    # Central Michigan
-    "central michigan chippewas": "Central Michigan",
-
-    # Western Michigan
-    "western michigan broncos": "Western Michigan",
-
-    # Georgia Southern
-    "georgia southern eagles": "Georgia Southern",
-
-    # Georgia State
-    "georgia state panthers": "Georgia State",
-
-    # Coastal Carolina
-    "coastal carolina chanticleers": "Coastal Carolina",
-
-    # James Madison
-    "james madison dukes": "James Madison",
-
-    # Jacksonville State
-    "jacksonville state gamecocks": "Jacksonville State",
-
-    # Kennesaw State
-    "kennesaw state owls": "Kennesaw State",
-
-    # Sam Houston
     "sam houston state": "Sam Houston",
-    "sam houston bearkats": "Sam Houston",
-
-    # New Mexico State
-    "new mexico state aggies": "New Mexico State",
-
-    # Liberty
-    "liberty flames": "Liberty",
-
-    # Army
-    "army black knights": "Army",
-
-    # Navy
-    "navy midshipmen": "Navy",
-
-    # Air Force
-    "air force falcons": "Air Force",
-
-    # Notre Dame
-    "notre dame fighting irish": "Notre Dame",
-
-    # BYU
-    "byu cougars": "BYU",
-
-    # TCU
-    "tcu horned frogs": "TCU",
-
-    # SMU
-    "smu mustangs": "SMU",
-
-    # UCF
-    "ucf knights": "UCF",
-
-    # USC
-    "usc trojans": "USC",
-
-    # UCLA
-    "ucla bruins": "UCLA",
-
-    # LSU
-    "lsu tigers": "LSU",
-
-    # UNLV
-    "unlv rebels": "UNLV",
 }
 
 
 # =============================================================================
-# TEAM MATCHING
+# TEAM MATCHERS
 # =============================================================================
 
-def build_team_matcher(valid_teams):
-    """
-    Build canonical lookup from the exact names contained in
-    data/cfb_metrics.json.
-    """
-
-    lookup = {}
-
-    for team_name in valid_teams:
-        lookup[
-            canonical_name(team_name)
-        ] = team_name
-
-    return lookup
+def build_team_lookup(teams):
+    return {
+        canonical_name(team): team
+        for team in teams
+    }
 
 
-def resolve_team_name(
+def resolve_cfbd_team(
     provider_name,
     valid_teams,
-    team_lookup
+    lookup
 ):
     """
-    Resolve CFBD / sportsbook names to our model team names.
+    STRICT school matching for CFBD.
 
-    Strategy:
-    1. Explicit aliases.
-    2. Exact canonical match.
-    3. Remove common sportsbook mascot suffixes automatically by
-       checking whether the provider name begins with one of our
-       model team names.
-    4. A few directional/state-name compatibility checks.
+    We NEVER use prefix matching here.
+
+    Indiana State cannot become Indiana.
+    Florida State cannot become Florida.
     """
 
     if not provider_name:
         return None
 
-    raw = str(provider_name).strip()
-    canon = canonical_name(raw)
+    canon = canonical_name(
+        provider_name
+    )
 
-    # -------------------------------------------------------------------------
-    # EXPLICIT ALIAS
-    # -------------------------------------------------------------------------
+    # Exact model name.
+    if canon in lookup:
+        return lookup[canon]
 
-    if canon in TEAM_ALIASES:
-        alias = TEAM_ALIASES[canon]
+    # Explicitly approved alias.
+    alias = ALIASES.get(canon)
 
-        if alias in valid_teams:
-            return alias
-
-    # -------------------------------------------------------------------------
-    # EXACT MATCH
-    # -------------------------------------------------------------------------
-
-    if canon in team_lookup:
-        return team_lookup[canon]
-
-    # -------------------------------------------------------------------------
-    # PROVIDER NAME MAY INCLUDE MASCOT
-    #
-    # Example:
-    # Ohio State Buckeyes
-    #
-    # Model:
-    # Ohio State
-    # -------------------------------------------------------------------------
-
-    candidate_matches = []
-
-    for model_canon, model_name in (
-        team_lookup.items()
-    ):
-        if canon.startswith(
-            model_canon + " "
-        ):
-            candidate_matches.append(
-                (
-                    len(model_canon),
-                    model_name
-                )
-            )
-
-    if candidate_matches:
-        candidate_matches.sort(
-            reverse=True
-        )
-
-        return candidate_matches[0][1]
-
-    # -------------------------------------------------------------------------
-    # REVERSE CHECK
-    # -------------------------------------------------------------------------
-
-    candidate_matches = []
-
-    for model_canon, model_name in (
-        team_lookup.items()
-    ):
-        if model_canon.startswith(
-            canon + " "
-        ):
-            candidate_matches.append(
-                (
-                    len(canon),
-                    model_name
-                )
-            )
-
-    if candidate_matches:
-        candidate_matches.sort(
-            reverse=True
-        )
-
-        return candidate_matches[0][1]
+    if alias in valid_teams:
+        return alias
 
     return None
 
 
+SCHOOL_STRUCTURE_WORDS = {
+    "state",
+    "tech",
+    "technical",
+    "international",
+    "christian",
+    "southern",
+    "northern",
+    "western",
+    "eastern",
+    "central",
+    "university",
+    "college",
+    "aandm",
+    "a&m",
+}
+
+
+def resolve_odds_team(
+    provider_name,
+    valid_teams,
+    lookup
+):
+    """
+    Sportsbooks commonly append mascots:
+
+        Ohio State Buckeyes
+        Georgia Bulldogs
+        Alabama Crimson Tide
+
+    Exact names and aliases are preferred.
+
+    Prefix matching is allowed ONLY when the text immediately after the
+    model school name does not look like part of another school's name.
+    """
+
+    if not provider_name:
+        return None
+
+    canon = canonical_name(
+        provider_name
+    )
+
+    # Exact.
+    if canon in lookup:
+        return lookup[canon]
+
+    # Explicit alias.
+    if canon in ALIASES:
+        alias = ALIASES[canon]
+
+        if alias in valid_teams:
+            return alias
+
+    candidates = []
+
+    for model_canon, model_name in lookup.items():
+
+        prefix = model_canon + " "
+
+        if not canon.startswith(prefix):
+            continue
+
+        remainder = canon[
+            len(prefix):
+        ].strip()
+
+        if not remainder:
+            continue
+
+        first_word = remainder.split()[0]
+
+        # Important:
+        # Indiana State Sycamores must NOT match Indiana.
+        if first_word in SCHOOL_STRUCTURE_WORDS:
+            continue
+
+        candidates.append(
+            (
+                len(model_canon),
+                model_name
+            )
+        )
+
+    if not candidates:
+        return None
+
+    # Longest legitimate school name wins.
+    candidates.sort(
+        key=lambda item: item[0],
+        reverse=True
+    )
+
+    return candidates[0][1]
+
+
 # =============================================================================
-# CFBD API
+# API REQUESTS
 # =============================================================================
 
 def cfbd_get(
@@ -442,37 +337,34 @@ def cfbd_get(
     required=True
 ):
     if not CFBD_API_KEY:
-        print("")
-        print("❌ CFBD_API_KEY is missing.")
+        print("❌ CFBD_API_KEY missing.")
         sys.exit(1)
-
-    headers = {
-        "Authorization": (
-            f"Bearer {CFBD_API_KEY}"
-        ),
-        "Accept": "application/json",
-    }
 
     try:
         response = requests.get(
             f"{CFBD_BASE}{endpoint}",
-            headers=headers,
+            headers={
+                "Authorization":
+                    f"Bearer {CFBD_API_KEY}",
+
+                "Accept":
+                    "application/json",
+            },
             params=params,
             timeout=45
         )
 
     except requests.RequestException as error:
-        print("")
+
         print(
-            f"❌ CFBD request error: "
-            f"{endpoint}"
+            f"❌ CFBD request failed: "
+            f"{error}"
         )
-        print(f"   {error}")
 
         if required:
             sys.exit(1)
 
-        return None
+        return []
 
     if response.status_code in (
         401,
@@ -483,98 +375,93 @@ def cfbd_get(
             "❌ CFBD AUTHENTICATION FAILED"
         )
         print(
-            f"   HTTP {response.status_code}"
-        )
-        print(
-            "   Check the CFBD_API_KEY "
-            "GitHub Secret."
+            f"HTTP {response.status_code}"
         )
 
         sys.exit(1)
 
     if not response.ok:
+
         print("")
         print(
-            f"⚠ CFBD {endpoint} returned "
+            f"❌ CFBD {endpoint}: "
             f"HTTP {response.status_code}"
         )
 
-        try:
-            print(
-                f"   {response.text[:500]}"
-            )
-        except Exception:
-            pass
+        print(
+            response.text[:500]
+        )
 
         if required:
             sys.exit(1)
 
-        return None
+        return []
 
     try:
         return response.json()
 
     except ValueError:
-        print("")
+
         print(
-            f"❌ CFBD returned invalid JSON "
-            f"for {endpoint}"
+            "❌ CFBD returned invalid JSON."
         )
 
         if required:
             sys.exit(1)
 
-        return None
+        return []
 
 
-# =============================================================================
-# ODDS API
-# =============================================================================
-
-def odds_get(
-    endpoint,
-    params=None
-):
+def odds_get():
     if not ODDS_API_KEY:
-        print("")
+
         print(
             "⚠ ODDS_API_KEY missing."
-        )
-        print(
-            "   Continuing without market odds."
         )
 
         return []
 
     try:
+
         response = requests.get(
-            f"{ODDS_BASE}{endpoint}",
-            params=params,
+            (
+                f"{ODDS_BASE}/sports/"
+                "americanfootball_ncaaf/odds"
+            ),
+            params={
+                "apiKey":
+                    ODDS_API_KEY,
+
+                "regions":
+                    "us",
+
+                "markets":
+                    "spreads,totals",
+
+                "oddsFormat":
+                    "american",
+
+                "dateFormat":
+                    "iso",
+            },
             timeout=45
         )
 
     except requests.RequestException as error:
-        print("")
+
         print(
-            "⚠ Odds API request failed."
+            f"⚠ Odds API request failed: "
+            f"{error}"
         )
-        print(f"   {error}")
 
         return []
 
     if not response.ok:
-        print("")
-        print(
-            f"⚠ Odds API returned "
-            f"HTTP {response.status_code}"
-        )
 
-        try:
-            print(
-                f"   {response.text[:500]}"
-            )
-        except Exception:
-            pass
+        print(
+            f"⚠ Odds API HTTP "
+            f"{response.status_code}"
+        )
 
         return []
 
@@ -598,19 +485,11 @@ def odds_get(
             f"{used}"
         )
 
-    try:
-        return response.json()
-
-    except ValueError:
-        print(
-            "⚠ Odds API returned invalid JSON."
-        )
-
-        return []
+    return response.json()
 
 
 # =============================================================================
-# LOAD MODEL DATA
+# LOAD METRICS
 # =============================================================================
 
 def load_metrics():
@@ -618,9 +497,9 @@ def load_metrics():
         METRICS_PATH
     ):
         print(
-            f"❌ Could not find "
-            f"{METRICS_PATH}"
+            f"❌ Missing {METRICS_PATH}"
         )
+
         sys.exit(1)
 
     with open(
@@ -628,6 +507,7 @@ def load_metrics():
         "r",
         encoding="utf-8"
     ) as file:
+
         data = json.load(file)
 
     teams = data.get(
@@ -635,15 +515,17 @@ def load_metrics():
         {}
     )
 
-    if not teams:
+    if len(teams) < 100:
+
         print(
-            "❌ No teams found in "
-            "cfb_metrics.json"
+            "❌ Metrics file contains "
+            "too few teams."
         )
+
         sys.exit(1)
 
     print(
-        f"✅ Loaded existing ratings for "
+        f"✅ Loaded ratings for "
         f"{len(teams)} teams"
     )
 
@@ -651,14 +533,10 @@ def load_metrics():
 
 
 # =============================================================================
-# POWER RATING CALIBRATION
+# RATING CALIBRATION
 # =============================================================================
 
 def calculate_rating_scale(teams):
-    """
-    Convert our normalized model rating scale into approximate
-    football points by regressing against SP+.
-    """
 
     x_values = []
     y_values = []
@@ -672,7 +550,7 @@ def calculate_rating_scale(teams):
             None
         )
 
-        sp_plus = safe_number(
+        sp = safe_number(
             (
                 team.get(
                     "sp_plus",
@@ -685,33 +563,17 @@ def calculate_rating_scale(teams):
             None
         )
 
-        if (
-            power is None
-            or sp_plus is None
-        ):
+        if power is None or sp is None:
             continue
 
-        x_values.append(
-            power
-        )
-
-        y_values.append(
-            sp_plus
-        )
+        x_values.append(power)
+        y_values.append(sp)
 
     if len(x_values) < 10:
-        print("")
-        print(
-            "⚠ Not enough SP+ values "
-            "for calibration."
-        )
-        print(
-            "   Using fallback slope 7.5."
-        )
 
         return {
             "slope": 7.5,
-            "intercept": 0.0,
+            "intercept": 0,
             "method": "fallback",
         }
 
@@ -724,13 +586,9 @@ def calculate_rating_scale(teams):
     )
 
     numerator = sum(
-        (
-            x - x_mean
-        )
+        (x - x_mean)
         *
-        (
-            y - y_mean
-        )
+        (y - y_mean)
         for x, y
         in zip(
             x_values,
@@ -739,19 +597,15 @@ def calculate_rating_scale(teams):
     )
 
     denominator = sum(
-        (
-            x - x_mean
-        ) ** 2
+        (x - x_mean) ** 2
         for x in x_values
     )
 
-    if denominator == 0:
-        slope = 7.5
-    else:
-        slope = (
-            numerator
-            / denominator
-        )
+    slope = (
+        numerator / denominator
+        if denominator
+        else 7.5
+    )
 
     intercept = (
         y_mean
@@ -768,50 +622,21 @@ def calculate_rating_scale(teams):
         f"{slope:.3f}"
     )
 
-    print(
-        "   Method: regression against "
-        "SP+ scale"
-    )
-
     return {
         "slope": slope,
         "intercept": intercept,
-        "method": (
-            "sp_plus_regression"
-        ),
+        "method":
+            "regression against SP+ scale",
     }
 
 
 # =============================================================================
-# ODDS MARKET EXTRACTION
+# ODDS
 # =============================================================================
 
-def extract_best_market(raw_game):
-    """
-    Choose a representative sportsbook.
+def extract_market(raw_game):
 
-    Preference:
-        DraftKings
-        FanDuel
-        BetMGM
-        Caesars
-        BetOnline
-        first available
-    """
-
-    bookmakers = raw_game.get(
-        "bookmakers",
-        []
-    )
-
-    if not bookmakers:
-        return {
-            "spread": None,
-            "total": None,
-            "bookmaker": None,
-        }
-
-    preference = [
+    preferred_books = [
         "draftkings",
         "fanduel",
         "betmgm",
@@ -819,22 +644,43 @@ def extract_best_market(raw_game):
         "betonlineag",
     ]
 
+    bookmakers = raw_game.get(
+        "bookmakers",
+        []
+    )
+
     selected = None
 
-    for key in preference:
-        for book in bookmakers:
-            if book.get("key") == key:
-                selected = book
+    for bookmaker_key in preferred_books:
+
+        for bookmaker in bookmakers:
+
+            if (
+                bookmaker.get("key")
+                == bookmaker_key
+            ):
+
+                selected = bookmaker
                 break
 
         if selected:
             break
 
-    if not selected:
+    if not selected and bookmakers:
         selected = bookmakers[0]
 
-    raw_home = raw_game.get(
-        "home_team"
+    if not selected:
+
+        return {
+            "spread": None,
+            "total": None,
+            "bookmaker": None,
+        }
+
+    raw_home = canonical_name(
+        raw_game.get(
+            "home_team"
+        )
     )
 
     spread = None
@@ -845,11 +691,7 @@ def extract_best_market(raw_game):
         []
     ):
 
-        market_key = market.get(
-            "key"
-        )
-
-        if market_key == "spreads":
+        if market.get("key") == "spreads":
 
             for outcome in market.get(
                 "outcomes",
@@ -858,20 +700,21 @@ def extract_best_market(raw_game):
 
                 if (
                     canonical_name(
-                        outcome.get("name")
+                        outcome.get(
+                            "name"
+                        )
                     )
-                    ==
-                    canonical_name(
-                        raw_home
-                    )
+                    == raw_home
                 ):
+
                     spread = safe_number(
-                        outcome.get("point"),
+                        outcome.get(
+                            "point"
+                        ),
                         None
                     )
-                    break
 
-        elif market_key == "totals":
+        elif market.get("key") == "totals":
 
             for outcome in market.get(
                 "outcomes",
@@ -887,103 +730,84 @@ def extract_best_market(raw_game):
                     ).lower()
                     == "over"
                 ):
+
                     total = safe_number(
-                        outcome.get("point"),
+                        outcome.get(
+                            "point"
+                        ),
                         None
                     )
-                    break
 
     return {
         "spread": spread,
         "total": total,
-        "bookmaker": selected.get(
-            "title"
-        ),
+        "bookmaker":
+            selected.get(
+                "title"
+            ),
     }
 
 
-# =============================================================================
-# FETCH ODDS
-# =============================================================================
-
 def fetch_odds(
     valid_teams,
-    team_lookup
+    lookup
 ):
+
     print("")
     print(
         "💰 Fetching current NCAAF "
         "market odds..."
     )
 
-    raw_odds = odds_get(
-        (
-            "/sports/"
-            "americanfootball_ncaaf/"
-            "odds"
-        ),
-        {
-            "apiKey": ODDS_API_KEY,
-            "regions": "us",
-            "markets": (
-                "spreads,totals"
-            ),
-            "oddsFormat": "american",
-            "dateFormat": "iso",
-        }
-    )
+    raw_games = odds_get()
 
     games = []
-
     unmatched = set()
 
-    for raw_game in raw_odds:
+    for raw in raw_games:
 
-        raw_home = raw_game.get(
+        raw_home = raw.get(
             "home_team"
         )
 
-        raw_away = raw_game.get(
+        raw_away = raw.get(
             "away_team"
         )
 
-        home = resolve_team_name(
+        home = resolve_odds_team(
             raw_home,
             valid_teams,
-            team_lookup
+            lookup
         )
 
-        away = resolve_team_name(
+        away = resolve_odds_team(
             raw_away,
             valid_teams,
-            team_lookup
+            lookup
         )
 
         if not home and raw_home:
-            unmatched.add(
-                str(raw_home)
-            )
+            unmatched.add(raw_home)
 
         if not away and raw_away:
-            unmatched.add(
-                str(raw_away)
-            )
+            unmatched.add(raw_away)
 
-        market = extract_best_market(
-            raw_game
-        )
+        market = extract_market(raw)
 
         games.append({
-            "id": raw_game.get("id"),
+            "id":
+                raw.get("id"),
 
             "commence_time":
-                raw_game.get(
+                raw.get(
                     "commence_time"
                 ),
 
-            "home_team": home,
+            "home_team":
+                home,
 
-            "away_team": away,
+            "away_team":
+                away,
 
             "provider_home_team":
                 raw_home,
@@ -992,55 +816,46 @@ def fetch_odds(
                 raw_away,
 
             "spread_home":
-                market.get(
-                    "spread"
-                ),
+                market["spread"],
 
             "total":
-                market.get(
-                    "total"
-                ),
+                market["total"],
 
             "bookmaker":
-                market.get(
-                    "bookmaker"
-                ),
-
-            "last_update":
-                raw_game.get(
-                    "last_update"
-                ),
+                market["bookmaker"],
         })
+
+    matched = sum(
+        1
+        for game in games
+        if (
+            game["home_team"]
+            and game["away_team"]
+        )
+    )
 
     print(
         f"✅ Market games found: "
         f"{len(games)}"
     )
 
-    matched_games = sum(
-        1
-        for game in games
-        if (
-            game.get("home_team")
-            and game.get("away_team")
-        )
-    )
-
     print(
-        f"✅ Market games matched to "
-        f"model teams: {matched_games}"
+        f"✅ Market games matched: "
+        f"{matched}"
     )
 
     if unmatched:
+
         print("")
         print(
-            "🔎 Example unmatched "
-            "Odds API team names:"
+            "🔎 Unmatched sportsbook "
+            "team examples:"
         )
 
         for team in sorted(
             unmatched
         )[:15]:
+
             print(
                 f"   - {team}"
             )
@@ -1048,90 +863,120 @@ def fetch_odds(
     return {
         "meta": {
             "year": YEAR,
+
             "generated":
                 datetime.now().isoformat(),
-            "games": len(games),
+
+            "games":
+                len(games),
+
             "matched_games":
-                matched_games,
-            "source": "The Odds API",
+                matched,
+
+            "source":
+                "The Odds API",
         },
 
-        "games": games,
+        "games":
+            games,
     }
 
 
 # =============================================================================
-# CFBD SCHEDULE PARSER
+# SCHEDULE
 # =============================================================================
 
-def process_cfbd_games(
-    raw_games,
+def fetch_schedule(
     valid_teams,
-    team_lookup
+    lookup
 ):
-    """
-    Parse either old CFBD snake_case fields or new camelCase fields.
-    """
 
-    processed = []
+    print("")
+    print(
+        f"📅 Fetching {YEAR} FBS "
+        f"schedule..."
+    )
 
-    unmatched = set()
+    raw_games = cfbd_get(
+        "/games",
+        {
+            "year":
+                YEAR,
+
+            "seasonType":
+                "regular",
+
+            # Important:
+            # Ask CFBD specifically for FBS schedule data.
+            "classification":
+                "fbs",
+        }
+    )
+
+    print(
+        f"   Raw CFBD games returned: "
+        f"{len(raw_games)}"
+    )
+
+    games = []
+
+    rejected_fcs = 0
+    rejected_examples = set()
 
     seen = set()
 
-    if not isinstance(
-        raw_games,
-        list
-    ):
-        return processed, unmatched
-
-    for game in raw_games:
+    for raw in raw_games:
 
         raw_home = first_value(
-            game,
+            raw,
             "homeTeam",
             "home_team"
         )
 
         raw_away = first_value(
-            game,
+            raw,
             "awayTeam",
             "away_team"
         )
 
-        home = resolve_team_name(
+        # STRICT MATCHER.
+        home = resolve_cfbd_team(
             raw_home,
             valid_teams,
-            team_lookup
+            lookup
         )
 
-        away = resolve_team_name(
+        away = resolve_cfbd_team(
             raw_away,
             valid_teams,
-            team_lookup
+            lookup
         )
 
-        if not home:
-            if raw_home:
-                unmatched.add(
+        # If either side isn't one of our rated FBS teams,
+        # exclude the game entirely.
+        if not home or not away:
+
+            rejected_fcs += 1
+
+            if not home and raw_home:
+                rejected_examples.add(
                     str(raw_home)
                 )
-            continue
 
-        if not away:
-            if raw_away:
-                unmatched.add(
+            if not away and raw_away:
+                rejected_examples.add(
                     str(raw_away)
                 )
+
             continue
 
         game_id = first_value(
-            game,
+            raw,
             "id"
         )
 
         start_date = first_value(
-            game,
+            raw,
             "startDate",
             "start_date"
         )
@@ -1149,53 +994,39 @@ def process_cfbd_games(
         if unique_key in seen:
             continue
 
-        seen.add(
-            unique_key
-        )
+        seen.add(unique_key)
 
         home_points = first_value(
-            game,
+            raw,
             "homePoints",
             "home_points"
         )
 
         away_points = first_value(
-            game,
+            raw,
             "awayPoints",
             "away_points"
         )
 
         completed = first_value(
-            game,
+            raw,
             "completed",
             default=False
         )
 
-        status = (
-            "completed"
-            if (
-                completed is True
-                or (
-                    home_points is not None
-                    and away_points is not None
-                )
-            )
-            else "scheduled"
-        )
-
-        processed.append({
+        games.append({
             "id":
                 game_id,
 
             "week":
                 first_value(
-                    game,
+                    raw,
                     "week"
                 ),
 
             "season_type":
                 first_value(
-                    game,
+                    raw,
                     "seasonType",
                     "season_type",
                     default="regular"
@@ -1204,46 +1035,40 @@ def process_cfbd_games(
             "start_date":
                 start_date,
 
-            "start_time_tbd":
-                first_value(
-                    game,
-                    "startTimeTBD",
-                    "start_time_tbd",
-                    default=False
-                ),
-
             "home_team":
                 home,
-
-            "home_conference":
-                first_value(
-                    game,
-                    "homeConference",
-                    "home_conference"
-                ),
 
             "away_team":
                 away,
 
+            "home_conference":
+                first_value(
+                    raw,
+                    "homeConference",
+                    "home_conference"
+                ),
+
             "away_conference":
                 first_value(
-                    game,
+                    raw,
                     "awayConference",
                     "away_conference"
                 ),
 
             "venue":
                 first_value(
-                    game,
+                    raw,
                     "venue"
                 ),
 
             "neutral_site":
-                first_value(
-                    game,
-                    "neutralSite",
-                    "neutral_site",
-                    default=False
+                bool(
+                    first_value(
+                        raw,
+                        "neutralSite",
+                        "neutral_site",
+                        default=False
+                    )
                 ),
 
             "home_points":
@@ -1253,497 +1078,237 @@ def process_cfbd_games(
                 away_points,
 
             "status":
-                status,
+                (
+                    "completed"
+                    if (
+                        completed is True
+                        or (
+                            home_points
+                            is not None
+                            and away_points
+                            is not None
+                        )
+                    )
+                    else "scheduled"
+                ),
         })
-
-    return processed, unmatched
-
-
-# =============================================================================
-# FETCH CFBD SCHEDULE
-# =============================================================================
-
-def fetch_schedule(
-    valid_teams,
-    team_lookup
-):
-    print("")
-    print(
-        f"📅 Fetching {YEAR} college "
-        f"football schedule..."
-    )
-
-    print(
-        "   Attempt 1: full-season "
-        "schedule request..."
-    )
-
-    raw_games = cfbd_get(
-        "/games",
-        {
-            "year": YEAR,
-            "seasonType": "regular",
-        },
-        required=True
-    )
-
-    if not isinstance(
-        raw_games,
-        list
-    ):
-        print(
-            "❌ CFBD schedule response "
-            "was not a list."
-        )
-        sys.exit(1)
-
-    print(
-        f"   Raw games returned: "
-        f"{len(raw_games)}"
-    )
-
-    games, unmatched = (
-        process_cfbd_games(
-            raw_games,
-            valid_teams,
-            team_lookup
-        )
-    )
-
-    print(
-        f"   Model-team games matched: "
-        f"{len(games)}"
-    )
-
-    # -------------------------------------------------------------------------
-    # DIAGNOSTICS
-    # -------------------------------------------------------------------------
-
-    if unmatched:
-        print("")
-        print(
-            "🔎 Example unmatched CFBD "
-            "team names:"
-        )
-
-        for team in sorted(
-            unmatched
-        )[:20]:
-            print(
-                f"   - {team}"
-            )
-
-    # -------------------------------------------------------------------------
-    # IF FULL-SEASON RETURNED DATA BUT NONE MATCHED,
-    # DO NOT SILENTLY PRETEND THAT IS OK.
-    # -------------------------------------------------------------------------
-
-    if raw_games and not games:
-        print("")
-        print(
-            "❌ CFBD returned games, but "
-            "ZERO matched our team ratings."
-        )
-
-        print(
-            "   This means the schedule "
-            "parser/team-name matcher is broken."
-        )
-
-        sys.exit(1)
-
-    # -------------------------------------------------------------------------
-    # DEDUPE
-    # -------------------------------------------------------------------------
-
-    unique = {}
-
-    for game in games:
-
-        if game.get("id") is not None:
-            key = str(
-                game.get("id")
-            )
-
-        else:
-            key = str((
-                game.get(
-                    "home_team"
-                ),
-                game.get(
-                    "away_team"
-                ),
-                game.get(
-                    "start_date"
-                ),
-            ))
-
-        unique[key] = game
-
-    games = list(
-        unique.values()
-    )
 
     games.sort(
         key=lambda game: (
             (
-                game.get("week")
-                if game.get("week")
+                game["week"]
+                if game["week"]
                 is not None
                 else 99
             ),
-            game.get(
-                "start_date"
-            ) or "",
-        )
-    )
 
-    print(
-        f"✅ Schedule games found: "
-        f"{len(games)}"
-    )
-
-    return {
-        "meta": {
-            "year": YEAR,
-            "generated":
-                datetime.now().isoformat(),
-            "games":
-                len(games),
-            "source":
-                "CollegeFootballData",
-        },
-
-        "games": games,
-    }
-
-
-# =============================================================================
-# ODDS FALLBACK SCHEDULE
-# =============================================================================
-
-def schedule_from_odds(
-    odds,
-    valid_teams
-):
-    print("")
-    print(
-        "🛟 Building temporary "
-        "schedule from odds..."
-    )
-
-    games = []
-
-    for market_game in odds.get(
-        "games",
-        []
-    ):
-
-        home = market_game.get(
-            "home_team"
-        )
-
-        away = market_game.get(
-            "away_team"
-        )
-
-        if (
-            not home
-            or not away
-            or home not in valid_teams
-            or away not in valid_teams
-        ):
-            continue
-
-        games.append({
-            "id":
-                market_game.get(
-                    "id"
-                ),
-
-            "week":
-                None,
-
-            "season_type":
-                "regular",
-
-            "start_date":
-                market_game.get(
-                    "commence_time"
-                ),
-
-            "start_time_tbd":
-                False,
-
-            "home_team":
-                home,
-
-            "home_conference":
-                (
-                    valid_teams
-                    .get(
-                        home,
-                        {}
-                    )
-                    .get(
-                        "conference"
-                    )
-                ),
-
-            "away_team":
-                away,
-
-            "away_conference":
-                (
-                    valid_teams
-                    .get(
-                        away,
-                        {}
-                    )
-                    .get(
-                        "conference"
-                    )
-                ),
-
-            "venue":
-                None,
-
-            "neutral_site":
-                False,
-
-            "home_points":
-                None,
-
-            "away_points":
-                None,
-
-            "status":
-                "scheduled",
-        })
-
-    games.sort(
-        key=lambda game: (
             game.get(
                 "start_date"
             )
-            or ""
+            or "",
         )
     )
 
     print(
-        f"🛟 Fallback schedule games: "
+        f"✅ TRUE FBS-vs-FBS games: "
         f"{len(games)}"
     )
 
+    print(
+        f"🚫 Games rejected because "
+        f"one side isn't in our FBS model: "
+        f"{rejected_fcs}"
+    )
+
+    if rejected_examples:
+
+        print("")
+        print(
+            "🔎 Correctly rejected examples:"
+        )
+
+        for team in sorted(
+            rejected_examples
+        )[:20]:
+
+            print(
+                f"   - {team}"
+            )
+
+    # Sanity check.
+    if len(games) < 400:
+
+        print("")
+        print(
+            "❌ SANITY CHECK FAILED"
+        )
+
+        print(
+            f"Only {len(games)} "
+            "FBS-vs-FBS games matched."
+        )
+
+        print(
+            "Refusing to publish until "
+            "team matching is checked."
+        )
+
+        sys.exit(1)
+
     return {
         "meta": {
-            "year": YEAR,
+            "year":
+                YEAR,
+
             "generated":
                 datetime.now().isoformat(),
+
             "games":
                 len(games),
+
             "source":
-                "The Odds API fallback",
+                "CollegeFootballData",
+
+            "matching":
+                "strict_fbs_school_names",
         },
 
-        "games": games,
+        "games":
+            games,
     }
 
 
 # =============================================================================
-# MATCHUP ADJUSTMENTS
+# MATCHUP MODEL
 # =============================================================================
 
 def metric_advantage(
-    offense_value,
-    defense_value,
+    offense,
+    defense,
     scale,
-    max_points
+    cap
 ):
-    offense = safe_number(
-        offense_value
-    )
-
-    defense = safe_number(
-        defense_value
-    )
-
-    if (
-        offense == 0
-        and defense == 0
-    ):
-        return 0.0
 
     advantage = (
-        offense
-        - defense
+        safe_number(offense)
+        -
+        safe_number(defense)
     ) * scale
 
     return max(
-        -max_points,
+        -cap,
         min(
-            max_points,
+            cap,
             advantage
         )
     )
 
 
 def calculate_matchup_adjustment(
-    team_a,
-    team_b
+    home,
+    away
 ):
-    """
-    team_a = home
-    team_b = away
 
-    Power rating is the main engine.
-    Matchup adjustments remain intentionally capped.
-    """
-
-    a_off = team_a.get(
+    ho = home.get(
         "offense",
         {}
     ) or {}
 
-    a_def = team_a.get(
+    hd = home.get(
         "defense",
         {}
     ) or {}
 
-    b_off = team_b.get(
+    ao = away.get(
         "offense",
         {}
     ) or {}
 
-    b_def = team_b.get(
+    ad = away.get(
         "defense",
         {}
     ) or {}
 
-    adjustments = {}
-
-    # Passing
-    home_pass = metric_advantage(
-        a_off.get(
-            "epa_pass"
-        ),
-        b_def.get(
-            "epa_pass"
-        ),
-        2.0,
-        1.25
+    passing = (
+        metric_advantage(
+            ho.get("epa_pass"),
+            ad.get("epa_pass"),
+            2.0,
+            1.25
+        )
+        -
+        metric_advantage(
+            ao.get("epa_pass"),
+            hd.get("epa_pass"),
+            2.0,
+            1.25
+        )
     )
 
-    away_pass = metric_advantage(
-        b_off.get(
-            "epa_pass"
-        ),
-        a_def.get(
-            "epa_pass"
-        ),
-        2.0,
-        1.25
+    rushing = (
+        metric_advantage(
+            ho.get("epa_rush"),
+            ad.get("epa_rush"),
+            1.5,
+            1.0
+        )
+        -
+        metric_advantage(
+            ao.get("epa_rush"),
+            hd.get("epa_rush"),
+            1.5,
+            1.0
+        )
     )
 
-    adjustments[
-        "passing"
-    ] = (
-        home_pass
-        - away_pass
+    efficiency = (
+        metric_advantage(
+            ho.get("epa_play"),
+            ad.get("epa_play"),
+            1.5,
+            1.0
+        )
+        -
+        metric_advantage(
+            ao.get("epa_play"),
+            hd.get("epa_play"),
+            1.5,
+            1.0
+        )
     )
 
-    # Rushing
-    home_rush = metric_advantage(
-        a_off.get(
-            "epa_rush"
-        ),
-        b_def.get(
-            "epa_rush"
-        ),
-        1.5,
-        1.0
+    success = (
+        metric_advantage(
+            ho.get("success_rate"),
+            ad.get("success_rate"),
+            0.08,
+            0.75
+        )
+        -
+        metric_advantage(
+            ao.get("success_rate"),
+            hd.get("success_rate"),
+            0.08,
+            0.75
+        )
     )
 
-    away_rush = metric_advantage(
-        b_off.get(
-            "epa_rush"
-        ),
-        a_def.get(
-            "epa_rush"
-        ),
-        1.5,
-        1.0
-    )
+    components = {
+        "passing":
+            passing,
 
-    adjustments[
-        "rushing"
-    ] = (
-        home_rush
-        - away_rush
-    )
+        "rushing":
+            rushing,
 
-    # EPA/play
-    home_epa = metric_advantage(
-        a_off.get(
-            "epa_play"
-        ),
-        b_def.get(
-            "epa_play"
-        ),
-        1.5,
-        1.0
-    )
+        "overall_efficiency":
+            efficiency,
 
-    away_epa = metric_advantage(
-        b_off.get(
-            "epa_play"
-        ),
-        a_def.get(
-            "epa_play"
-        ),
-        1.5,
-        1.0
-    )
-
-    adjustments[
-        "overall_efficiency"
-    ] = (
-        home_epa
-        - away_epa
-    )
-
-    # Success rate
-    home_sr = metric_advantage(
-        a_off.get(
-            "success_rate"
-        ),
-        b_def.get(
-            "success_rate"
-        ),
-        0.08,
-        0.75
-    )
-
-    away_sr = metric_advantage(
-        b_off.get(
-            "success_rate"
-        ),
-        a_def.get(
-            "success_rate"
-        ),
-        0.08,
-        0.75
-    )
-
-    adjustments[
-        "success_rate"
-    ] = (
-        home_sr
-        - away_sr
-    )
+        "success_rate":
+            success,
+    }
 
     raw_total = sum(
-        adjustments.values()
+        components.values()
     )
 
     total = max(
@@ -1755,95 +1320,83 @@ def calculate_matchup_adjustment(
     )
 
     return {
-        "total": round(
-            total,
-            2
-        ),
+        "total":
+            round(
+                total,
+                2
+            ),
 
         "components": {
-            key: round(
-                value,
-                2
-            )
+            key:
+                round(
+                    value,
+                    2
+                )
+
             for key, value
-            in adjustments.items()
+            in components.items()
         },
     }
 
 
-# =============================================================================
-# TOTAL PROJECTION
-# =============================================================================
-
-def calculate_projected_total(
+def calculate_total(
     home,
     away
 ):
-    home_off = home.get(
+
+    ho = home.get(
         "offense",
         {}
     ) or {}
 
-    home_def = home.get(
+    hd = home.get(
         "defense",
         {}
     ) or {}
 
-    away_off = away.get(
+    ao = away.get(
         "offense",
         {}
     ) or {}
 
-    away_def = away.get(
+    ad = away.get(
         "defense",
         {}
     ) or {}
 
-    efficiency_signal = (
+    efficiency = (
         safe_number(
-            home_off.get(
-                "epa_play"
-            )
+            ho.get("epa_play")
         )
         +
         safe_number(
-            away_off.get(
-                "epa_play"
-            )
+            ao.get("epa_play")
         )
         -
         safe_number(
-            home_def.get(
-                "epa_play"
-            )
+            hd.get("epa_play")
         )
         -
         safe_number(
-            away_def.get(
-                "epa_play"
-            )
+            ad.get("epa_play")
         )
     )
 
-    success_signal = (
+    success = (
         safe_number(
-            home_off.get(
-                "success_rate"
-            )
+            ho.get("success_rate")
         )
         +
         safe_number(
-            away_off.get(
-                "success_rate"
-            )
+            ao.get("success_rate")
         )
         - 85
     )
 
     total = (
         BASE_TOTAL
-        + efficiency_signal * 5.0
-        + success_signal * 0.15
+        + efficiency * 5
+        + success * 0.15
     )
 
     total = max(
@@ -1854,25 +1407,12 @@ def calculate_projected_total(
         )
     )
 
-    return round_half(
-        total
-    )
+    return round_half(total)
 
 
 # =============================================================================
-# WRITTEN INSIGHTS
+# INSIGHTS
 # =============================================================================
-
-def rank_text(team):
-    rank = team.get(
-        "power_rating_rank"
-    )
-
-    if rank:
-        return f"#{rank}"
-
-    return "unranked"
-
 
 def generate_insights(
     home_name,
@@ -1880,231 +1420,133 @@ def generate_insights(
     home,
     away,
     matchup,
-    projected_home_spread,
-    market_home_spread
+    model_spread,
+    market_spread
 ):
+
     insights = []
 
-    home_rating = safe_number(
-        home.get(
-            "power_rating"
+    home_rank = home.get(
+        "power_rating_rank"
+    )
+
+    away_rank = away.get(
+        "power_rating_rank"
+    )
+
+    if (
+        home_rank
+        and away_rank
+        and home_rank != away_rank
+    ):
+
+        stronger = (
+            home_name
+            if home_rank < away_rank
+            else away_name
         )
-    )
-
-    away_rating = safe_number(
-        away.get(
-            "power_rating"
-        )
-    )
-
-    rating_diff = (
-        home_rating
-        - away_rating
-    )
-
-    # -------------------------------------------------------------------------
-    # POWER RATING
-    # -------------------------------------------------------------------------
-
-    if abs(
-        rating_diff
-    ) > 0.10:
-
-        if rating_diff > 0:
-            stronger_name = home_name
-            stronger_team = home
-            weaker_team = away
-
-        else:
-            stronger_name = away_name
-            stronger_team = away
-            weaker_team = home
 
         insights.append({
-            "type":
-                "power_rating",
-
             "title":
                 "POWER RATING EDGE",
 
-            "text": (
-                f"{stronger_name} owns the stronger "
-                f"underlying team profile "
-                f"({rank_text(stronger_team)} vs "
-                f"{rank_text(weaker_team)} in the "
-                f"model's power ratings)."
-            ),
+            "text":
+                (
+                    f"{stronger} owns the "
+                    f"stronger overall model profile."
+                ),
         })
 
-    # -------------------------------------------------------------------------
-    # PASSING
-    # -------------------------------------------------------------------------
-
-    passing = (
-        matchup
-        .get(
-            "components",
-            {}
-        )
-        .get(
-            "passing",
-            0
-        )
+    passing = matchup[
+        "components"
+    ].get(
+        "passing",
+        0
     )
 
-    if abs(
-        passing
-    ) >= 0.30:
+    if abs(passing) >= 0.3:
 
-        team = (
+        favored = (
             home_name
             if passing > 0
             else away_name
         )
 
         insights.append({
-            "type":
-                "passing",
-
             "title":
                 "PASSING MATCHUP",
 
-            "text": (
-                f"{team} owns the more favorable "
-                f"passing efficiency matchup, adding "
-                f"support to the model's projected margin."
-            ),
+            "text":
+                (
+                    f"{favored} has the more "
+                    f"favorable passing efficiency matchup."
+                ),
         })
 
-    # -------------------------------------------------------------------------
-    # RUSHING
-    # -------------------------------------------------------------------------
+    if market_spread is not None:
 
-    rushing = (
-        matchup
-        .get(
-            "components",
-            {}
-        )
-        .get(
-            "rushing",
-            0
-        )
-    )
-
-    if abs(
-        rushing
-    ) >= 0.30:
-
-        team = (
-            home_name
-            if rushing > 0
-            else away_name
+        difference = (
+            model_spread
+            -
+            market_spread
         )
 
-        insights.append({
-            "type":
-                "rushing",
+        if abs(difference) >= 1.5:
 
-            "title":
-                "GROUND GAME EDGE",
-
-            "text": (
-                f"{team} grades better in the rushing "
-                f"matchup and receives an additional "
-                f"matchup adjustment."
-            ),
-        })
-
-    # -------------------------------------------------------------------------
-    # MARKET
-    # -------------------------------------------------------------------------
-
-    if market_home_spread is not None:
-
-        disagreement = (
-            projected_home_spread
-            - market_home_spread
-        )
-
-        if abs(
-            disagreement
-        ) >= 1.5:
-
-            preferred = (
+            favored = (
                 home_name
-                if disagreement < 0
+                if difference < 0
                 else away_name
             )
 
             insights.append({
-                "type":
-                    "market",
-
                 "title":
                     "MARKET VS MODEL",
 
-                "text": (
-                    f"The model differs from the current "
-                    f"market toward {preferred} by "
-                    f"{abs(disagreement):.1f} points."
-                ),
+                "text":
+                    (
+                        f"The model differs from "
+                        f"the market toward "
+                        f"{favored} by "
+                        f"{abs(difference):.1f} points."
+                    ),
             })
-
-    if not insights:
-        insights.append({
-            "type":
-                "balanced",
-
-            "title":
-                "BALANCED MATCHUP",
-
-            "text": (
-                "No single efficiency matchup creates "
-                "a major adjustment beyond the base "
-                "power-rating projection."
-            ),
-        })
 
     return insights[:4]
 
 
 # =============================================================================
-# BUILD ODDS LOOKUP
+# BUILD PROJECTIONS
 # =============================================================================
 
 def build_odds_lookup(odds):
+
     lookup = {}
 
-    for market_game in odds.get(
+    for game in odds.get(
         "games",
         []
     ):
 
-        home = market_game.get(
+        home = game.get(
             "home_team"
         )
 
-        away = market_game.get(
+        away = game.get(
             "away_team"
         )
 
-        if not home or not away:
-            continue
+        if home and away:
 
-        lookup[
-            (
-                home,
-                away
-            )
-        ] = market_game
+            lookup[
+                (
+                    home,
+                    away
+                )
+            ] = game
 
     return lookup
 
-
-# =============================================================================
-# PROJECTION ENGINE
-# =============================================================================
 
 def build_projections(
     teams,
@@ -2112,6 +1554,7 @@ def build_projections(
     odds,
     calibration
 ):
+
     print("")
     print(
         "🧮 Building projections..."
@@ -2119,45 +1562,35 @@ def build_projections(
 
     projections = []
 
-    skipped = 0
-
-    odds_matched = 0
+    market_matches = 0
 
     odds_lookup = build_odds_lookup(
         odds
     )
 
-    slope = safe_number(
-        calibration.get(
-            "slope"
-        ),
-        7.5
-    )
+    slope = calibration[
+        "slope"
+    ]
 
-    for game in schedule.get(
-        "games",
-        []
-    ):
+    for game in schedule[
+        "games"
+    ]:
 
-        home_name = game.get(
+        home_name = game[
             "home_team"
-        )
+        ]
 
-        away_name = game.get(
+        away_name = game[
             "away_team"
-        )
+        ]
 
-        home = teams.get(
+        home = teams[
             home_name
-        )
+        ]
 
-        away = teams.get(
+        away = teams[
             away_name
-        )
-
-        if not home or not away:
-            skipped += 1
-            continue
+        ]
 
         home_rating = safe_number(
             home.get(
@@ -2173,28 +1606,28 @@ def build_projections(
 
         rating_difference = (
             home_rating
-            - away_rating
+            -
+            away_rating
         )
 
         point_difference = (
             rating_difference
-            * slope
+            *
+            slope
         )
 
-        neutral = bool(
-            game.get(
-                "neutral_site",
-                False
-            )
+        neutral = game.get(
+            "neutral_site",
+            False
         )
 
         hfa = (
-            0.0
+            0
             if neutral
             else HOME_FIELD_ADVANTAGE
         )
 
-        base_home_spread = (
+        base_spread = (
             -point_difference
             - hfa
         )
@@ -2206,27 +1639,16 @@ def build_projections(
             )
         )
 
-        projected_home_spread = (
-            base_home_spread
-            - matchup["total"]
+        model_spread = round_half(
+            base_spread
+            -
+            matchup["total"]
         )
 
-        projected_home_spread = (
-            round_half(
-                projected_home_spread
-            )
+        model_total = calculate_total(
+            home,
+            away
         )
-
-        projected_total = (
-            calculate_projected_total(
-                home,
-                away
-            )
-        )
-
-        # ---------------------------------------------------------------------
-        # MARKET
-        # ---------------------------------------------------------------------
 
         market = odds_lookup.get(
             (
@@ -2235,14 +1657,15 @@ def build_projections(
             )
         )
 
-        market_home_spread = None
+        market_spread = None
         market_total = None
         bookmaker = None
 
         if market:
-            odds_matched += 1
 
-            market_home_spread = (
+            market_matches += 1
+
+            market_spread = (
                 market.get(
                     "spread_home"
                 )
@@ -2260,78 +1683,49 @@ def build_projections(
                 )
             )
 
-        # ---------------------------------------------------------------------
-        # MARKET DISAGREEMENT
-        # ---------------------------------------------------------------------
+        disagreement = None
+        preferred = None
+        label = "NO MARKET"
 
-        disagreement_signed = None
+        if market_spread is not None:
 
-        disagreement_abs = None
-
-        preferred_side = None
-
-        status = "NO MARKET"
-
-        if (
-            market_home_spread
-            is not None
-        ):
-
-            market_home_spread = (
-                safe_number(
-                    market_home_spread
-                )
+            difference = (
+                model_spread
+                -
+                market_spread
             )
 
-            disagreement_signed = (
-                projected_home_spread
-                - market_home_spread
+            disagreement = abs(
+                difference
             )
 
-            disagreement_abs = abs(
-                disagreement_signed
-            )
+            if difference < 0:
 
-            if disagreement_signed < 0:
-                preferred_side = (
-                    home_name
-                )
+                preferred = home_name
 
-            elif disagreement_signed > 0:
-                preferred_side = (
-                    away_name
-                )
+            elif difference > 0:
 
-            if disagreement_abs >= 7:
-                status = "PLAY"
+                preferred = away_name
 
-            elif disagreement_abs >= 4:
-                status = "WATCH"
+            if disagreement >= 7:
+
+                label = "PLAY"
+
+            elif disagreement >= 4:
+
+                label = "WATCH"
 
             else:
-                status = "IN LINE"
 
-        # ---------------------------------------------------------------------
-        # CONFIDENCE
-        # ---------------------------------------------------------------------
+                label = "IN LINE"
 
         confidence = 50
 
-        confidence += min(
-            20,
-            abs(
-                rating_difference
-            ) * 5
-        )
-
-        if (
-            disagreement_abs
-            is not None
-        ):
+        if disagreement is not None:
 
             confidence += min(
-                20,
-                disagreement_abs * 2
+                30,
+                disagreement * 2
             )
 
         confidence = int(
@@ -2342,16 +1736,6 @@ def build_projections(
                     confidence
                 )
             )
-        )
-
-        insights = generate_insights(
-            home_name,
-            away_name,
-            home,
-            away,
-            matchup,
-            projected_home_spread,
-            market_home_spread
         )
 
         projections.append({
@@ -2380,8 +1764,7 @@ def build_projections(
 
             "status":
                 game.get(
-                    "status",
-                    "scheduled"
+                    "status"
                 ),
 
             "home": {
@@ -2394,10 +1777,7 @@ def build_projections(
                     ),
 
                 "power_rating":
-                    round(
-                        home_rating,
-                        3
-                    ),
+                    home_rating,
 
                 "power_rating_rank":
                     home.get(
@@ -2415,10 +1795,7 @@ def build_projections(
                     ),
 
                 "power_rating":
-                    round(
-                        away_rating,
-                        3
-                    ),
+                    away_rating,
 
                 "power_rating_rank":
                     away.get(
@@ -2428,14 +1805,14 @@ def build_projections(
 
             "projection": {
                 "home_spread":
-                    projected_home_spread,
+                    model_spread,
 
                 "total":
-                    projected_total,
+                    model_total,
 
                 "base_home_spread":
                     round_half(
-                        base_home_spread
+                        base_spread
                     ),
 
                 "home_field_advantage":
@@ -2450,7 +1827,7 @@ def build_projections(
 
             "market": {
                 "home_spread":
-                    market_home_spread,
+                    market_spread,
 
                 "total":
                     market_total,
@@ -2460,70 +1837,63 @@ def build_projections(
             },
 
             "comparison": {
-                "disagreement": (
-                    round(
-                        disagreement_abs,
-                        1
-                    )
-                    if disagreement_abs
-                    is not None
-                    else None
-                ),
+                "disagreement":
+                    (
+                        round(
+                            disagreement,
+                            1
+                        )
+                        if disagreement
+                        is not None
+                        else None
+                    ),
 
                 "preferred_side":
-                    preferred_side,
+                    preferred,
 
                 "status":
-                    status,
+                    label,
             },
 
             "insights":
-                insights,
+                generate_insights(
+                    home_name,
+                    away_name,
+                    home,
+                    away,
+                    matchup,
+                    model_spread,
+                    market_spread
+                ),
         })
 
-    # -------------------------------------------------------------------------
-    # SORT
-    # -------------------------------------------------------------------------
-
-    def sort_key(projection):
-
-        week = projection.get(
-            "week"
-        )
-
-        if week is None:
-            week_sort = 99
-        else:
-            week_sort = week
-
-        disagreement = (
-            projection
-            .get(
-                "comparison",
-                {}
-            )
-            .get(
-                "disagreement"
-            )
-        )
-
-        if disagreement is None:
-            disagreement_sort = -1
-        else:
-            disagreement_sort = (
-                disagreement
-            )
-
-        return (
-            week_sort,
-            -disagreement_sort,
-            projection.get(
-                "start_date"
-            ) or "",
-        )
-
     projections.sort(
-        key=sort_key
+        key=lambda game: (
+            (
+                game.get(
+                    "week"
+                )
+                if game.get(
+                    "week"
+                )
+                is not None
+                else 99
+            ),
+
+            -(
+                game[
+                    "comparison"
+                ].get(
+                    "disagreement"
+                )
+                or -1
+            ),
+
+            game.get(
+                "start_date"
+            )
+            or "",
+        )
     )
 
     print(
@@ -2533,41 +1903,133 @@ def build_projections(
 
     print(
         f"✅ Projections with market "
-        f"match: {odds_matched}"
-    )
-
-    print(
-        f"⚠ Games skipped without "
-        f"ratings: {skipped}"
+        f"match: {market_matches}"
     )
 
     return projections
 
 
 # =============================================================================
-# SAVE JSON
+# SANITY CHECKS
+# =============================================================================
+
+def verify_known_schedule_errors(
+    schedule
+):
+    """
+    Explicit guardrails against the exact false matches we discovered.
+    """
+
+    games = schedule.get(
+        "games",
+        []
+    )
+
+    bad_games = []
+
+    for game in games:
+
+        home = game.get(
+            "home_team"
+        )
+
+        away = game.get(
+            "away_team"
+        )
+
+        date = str(
+            game.get(
+                "start_date",
+                ""
+            )
+        )
+
+        # Indiana / Purdue is Nov 28,
+        # not Purdue's Indiana State opener.
+        if {
+            home,
+            away
+        } == {
+            "Indiana",
+            "Purdue"
+        }:
+
+            if not date.startswith(
+                "2026-11-28"
+            ):
+
+                bad_games.append(
+                    (
+                        "Indiana/Purdue",
+                        date
+                    )
+                )
+
+        # Florida hosts South Carolina Oct 10.
+        if {
+            home,
+            away
+        } == {
+            "Florida",
+            "South Carolina"
+        }:
+
+            if not date.startswith(
+                "2026-10-10"
+            ):
+
+                bad_games.append(
+                    (
+                        "Florida/South Carolina",
+                        date
+                    )
+                )
+
+    if bad_games:
+
+        print("")
+        print(
+            "❌ SCHEDULE SANITY CHECK FAILED"
+        )
+
+        for matchup, date in bad_games:
+
+            print(
+                f"   {matchup}: {date}"
+            )
+
+        print(
+            "Refusing to publish "
+            "known-false schedule data."
+        )
+
+        sys.exit(1)
+
+    print("")
+    print(
+        "✅ Known schedule sanity "
+        "checks passed"
+    )
+
+
+# =============================================================================
+# SAVE
 # =============================================================================
 
 def save_json(
     path,
     data
 ):
-    directory = os.path.dirname(
-        path
+
+    os.makedirs(
+        os.path.dirname(path),
+        exist_ok=True
     )
 
-    if directory:
-        os.makedirs(
-            directory,
-            exist_ok=True
-        )
-
-    temp_path = (
-        path + ".tmp"
-    )
+    temp = path + ".tmp"
 
     with open(
-        temp_path,
+        temp,
         "w",
         encoding="utf-8"
     ) as file:
@@ -2579,29 +2041,23 @@ def save_json(
             ensure_ascii=False
         )
 
-    # Validate that we can read it back.
+    # Make sure JSON is valid.
     with open(
-        temp_path,
+        temp,
         "r",
         encoding="utf-8"
     ) as file:
+
         json.load(file)
 
     os.replace(
-        temp_path,
+        temp,
         path
-    )
-
-    size_kb = (
-        os.path.getsize(
-            path
-        )
-        / 1024
     )
 
     print(
         f"💾 Saved {path} "
-        f"({size_kb:.1f} KB)"
+        f"({os.path.getsize(path) / 1024:.1f} KB)"
     )
 
 
@@ -2612,12 +2068,10 @@ def save_json(
 def main():
 
     print("=" * 70)
-
     print(
-        "🏈 HAMMER TIME CFB "
+        "🏈 CFB ANALYTICS — "
         "PROJECTION ENGINE"
     )
-
     print("=" * 70)
 
     print(
@@ -2629,25 +2083,15 @@ def main():
         f"{datetime.now().isoformat()}"
     )
 
-    # -------------------------------------------------------------------------
-    # LOAD MODEL
-    # -------------------------------------------------------------------------
-
     _, teams = load_metrics()
 
     valid_teams = set(
         teams.keys()
     )
 
-    team_lookup = (
-        build_team_matcher(
-            valid_teams
-        )
+    lookup = build_team_lookup(
+        valid_teams
     )
-
-    # -------------------------------------------------------------------------
-    # CALIBRATION
-    # -------------------------------------------------------------------------
 
     calibration = (
         calculate_rating_scale(
@@ -2661,7 +2105,7 @@ def main():
 
     odds = fetch_odds(
         valid_teams,
-        team_lookup
+        lookup
     )
 
     save_json(
@@ -2675,59 +2119,13 @@ def main():
 
     schedule = fetch_schedule(
         valid_teams,
-        team_lookup
+        lookup
     )
 
-    # -------------------------------------------------------------------------
-    # FALLBACK
-    # -------------------------------------------------------------------------
-
-    if not schedule.get(
-        "games"
-    ):
-
-        print("")
-        print(
-            "⚠ CFBD returned zero "
-            "usable schedule games."
-        )
-
-        print(
-            "   Trying Odds API "
-            "schedule fallback."
-        )
-
-        schedule = (
-            schedule_from_odds(
-                odds,
-                teams
-            )
-        )
-
-    # -------------------------------------------------------------------------
-    # HARD SAFETY CHECK
-    # -------------------------------------------------------------------------
-
-    if not schedule.get(
-        "games"
-    ):
-        print("")
-        print(
-            "❌ PROJECTION BUILD STOPPED"
-        )
-
-        print(
-            "   Both CFBD and the Odds "
-            "fallback produced zero "
-            "usable games."
-        )
-
-        print(
-            "   Refusing to publish "
-            "an empty schedule."
-        )
-
-        sys.exit(1)
+    # Explicit checks for the bugs we just found.
+    verify_known_schedule_errors(
+        schedule
+    )
 
     save_json(
         SCHEDULE_PATH,
@@ -2738,29 +2136,22 @@ def main():
     # PROJECTIONS
     # -------------------------------------------------------------------------
 
-    projections = (
-        build_projections(
-            teams,
-            schedule,
-            odds,
-            calibration
-        )
+    projections = build_projections(
+        teams,
+        schedule,
+        odds,
+        calibration
     )
 
-    # -------------------------------------------------------------------------
-    # HARD SAFETY CHECK
-    # -------------------------------------------------------------------------
+    if len(projections) < 400:
 
-    if not projections:
         print("")
         print(
-            "❌ ZERO PROJECTIONS BUILT"
+            "❌ Too few projections built."
         )
 
         print(
-            "   The workflow will fail "
-            "instead of publishing an "
-            "empty projections file."
+            "Refusing to publish."
         )
 
         sys.exit(1)
@@ -2776,11 +2167,8 @@ def main():
             "games":
                 len(projections),
 
-            "model":
-                "Hammer Time CFB Analytics",
-
             "version":
-                "1.2",
+                "1.3-strict-schedule",
 
             "calibration":
                 calibration,
@@ -2788,12 +2176,11 @@ def main():
             "home_field_advantage":
                 HOME_FIELD_ADVANTAGE,
 
-            "notes": (
-                "Power rating is the foundation "
-                "of the projection. Matchup "
-                "adjustments are intentionally "
-                "conservative."
-            ),
+            "schedule_matching":
+                (
+                    "Strict exact FBS school "
+                    "matching; no CFBD prefix matching."
+                ),
         },
 
         "games":
@@ -2805,27 +2192,21 @@ def main():
         output
     )
 
-    # -------------------------------------------------------------------------
-    # FINAL REPORT
-    # -------------------------------------------------------------------------
-
     print("")
     print("=" * 70)
-
     print(
         "🎉 PROJECTION BUILD COMPLETE"
     )
-
     print("=" * 70)
 
     print(
-        f"Schedule games: "
-        f"{len(schedule.get('games', []))}"
+        f"FBS-vs-FBS schedule games: "
+        f"{len(schedule['games'])}"
     )
 
     print(
         f"Market games: "
-        f"{len(odds.get('games', []))}"
+        f"{len(odds['games'])}"
     )
 
     print(
