@@ -359,9 +359,21 @@ td{padding:10px 12px;white-space:nowrap;}
     </div>
     <div class="form-row">
       <div class="form-group">
+        <label class="form-label">Bet Type</label>
+        <select class="form-input" id="log-type">
+          <option value="spread">Spread</option>
+          <option value="total">Total (O/U)</option>
+          <option value="team_total">Team Total</option>
+          <option value="ml">Moneyline</option>
+          <option value="prop">Prop</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label class="form-label">Book</label>
         <input class="form-input" id="log-book" placeholder="DK, FD, etc.">
       </div>
+    </div>
+    <div class="form-row">
       <div class="form-group">
         <label class="form-label">Result</label>
         <select class="form-input" id="log-result">
