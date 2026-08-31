@@ -469,38 +469,92 @@ async function openDossier(school){
   }catch(e){document.getElementById('dossier-container').innerHTML=`<div class="empty-state" style="color:var(--red)">Failed: ${e}</div>`;}
 }
 
+function updateLoggerFields(){
+  const type=document.getElementById('log-type').value;
+  document.getElementById('fields-spread').style.display=type==='spread'?'block':'none';
+  document.getElementById('fields-total').style.display=(type==='total'||type==='team_total')?'block':'none';
+  document.getElementById('fields-ml').style.display=type==='ml'?'block':'none';
+  document.getElementById('fields-prop').style.display=type==='prop'?'block':'none';
+}
+
 function openLogger(prefill){
   editingPlayId=null;
-  ['log-game','log-side','log-close','log-book','log-notes'].forEach(id=>document.getElementById(id).value='');
+  ['log-game','log-side','log-line','log-close','log-book','log-notes',
+   'log-total-num','log-close-total','log-ml-odds','log-close-ml','log-prop-line'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
   document.getElementById('log-game').value=prefill?.game??'';
   document.getElementById('log-line').value=prefill?.line??'';
   document.getElementById('log-units').value='1';
   document.getElementById('log-result').value='pending';
   document.getElementById('log-type').value='spread';
+  updateLoggerFields();
   document.getElementById('log-modal').classList.add('open');
 }
 function closeLogger(){document.getElementById('log-modal').classList.remove('open');}
 
 function savePlay(){
-  const line=parseFloat(document.getElementById('log-line').value)||0;
-  const cv=document.getElementById('log-close').value;
-  const closingLine=cv!==''?parseFloat(cv):null;
-  const clv=closingLine!==null?(line-closingLine):null;
   const betType=document.getElementById('log-type').value;
   const units=parseFloat(document.getElementById('log-units').value)||1;
   const result=document.getElementById('log-result').value;
+  let line=0,closingLine=null,clv=null,winUnits=units*0.909,lineDisplay='',closeDisplay='';
 
-  // Calculate P/L based on bet type
-  // Spread/Total: assume -110 juice → win = units * 0.909
-  // ML: actual odds calculation
-  // Prop: same as spread
-  let winUnits=units*0.909; // default -110
-  if(betType==='ml'&&line!==0){
+  if(betType==='spread'){
+    line=parseFloat(document.getElementById('log-line').value)||0;
+    const cv=document.getElementById('log-close').value;
+    closingLine=cv!==''?parseFloat(cv):null;
+    clv=closingLine!==null?(line-closingLine):null;
+    lineDisplay=(line>=0?'+':'')+line;
+    closeDisplay=closingLine!=null?(closingLine>=0?'+':'')+closingLine:'';
+
+  }else if(betType==='total'||betType==='team_total'){
+    const num=parseFloat(document.getElementById('log-total-num').value)||0;
+    const ou=document.getElementById('log-ou').value;
+    line=num;
+    lineDisplay=`${ou==='over'?'O':'U'} ${num}`;
+    const closeNum=document.getElementById('log-close-total').value;
+    const closeOu=document.getElementById('log-close-ou').value;
+    if(closeNum!==''){
+      closingLine=parseFloat(closeNum);
+      closeDisplay=`${closeOu==='over'?'O':'U'} ${closingLine}`;
+      // CLV for totals: if you bet Over and line moves up, that's negative CLV
+      clv=ou==='over'?(line-closingLine):(closingLine-line);
+    }
+
+  }else if(betType==='ml'){
+    line=parseFloat(document.getElementById('log-ml-odds').value)||0;
+    lineDisplay=(line>=0?'+':'')+line;
+    const cv=document.getElementById('log-close-ml').value;
+    closingLine=cv!==''?parseFloat(cv):null;
+    closeDisplay=closingLine!=null?(closingLine>=0?'+':'')+closingLine:'';
+    // CLV for ML: getting a better number means closer to 0 for favorites, higher for dogs
+    if(closingLine!==null){
+      // Convert both to implied prob and compare
+      const toProb=o=>o<0?Math.abs(o)/(Math.abs(o)+100):100/(o+100);
+      clv=toProb(closingLine)-toProb(line); // positive = you got better of it
+      clv=parseFloat((clv*100).toFixed(2));
+    }
+    // P/L calculation from actual ML odds
     if(line<0) winUnits=units*(100/Math.abs(line));
     else winUnits=units*(line/100);
+
+  }else if(betType==='prop'){
+    line=parseFloat(document.getElementById('log-prop-line').value)||0;
+    const dir=document.getElementById('log-prop-dir').value;
+    lineDisplay=`${dir} ${line}`;
   }
 
-  const play={id:editingPlayId??Date.now(),game:document.getElementById('log-game').value,side:document.getElementById('log-side').value,betType,line,closingLine,clv,units,winUnits,book:document.getElementById('log-book').value,result,notes:document.getElementById('log-notes').value,ts:Date.now()};
+  const play={
+    id:editingPlayId??Date.now(),
+    game:document.getElementById('log-game').value,
+    side:document.getElementById('log-side').value,
+    betType,line,lineDisplay:lineDisplay||(line>=0?'+':'')+line,
+    closingLine,closeDisplay,clv,units,winUnits,
+    book:document.getElementById('log-book').value,
+    result,
+    notes:document.getElementById('log-notes').value,
+    ts:Date.now()
+  };
   if(editingPlayId){const idx=plays.findIndex(p=>p.id===editingPlayId);if(idx!==-1)plays[idx]=play;}else{plays.unshift(play);}
   localStorage.setItem('ht_plays',JSON.stringify(plays));
   closeLogger();renderPlays();
@@ -509,11 +563,27 @@ function deletePlay(id){plays=plays.filter(p=>p.id!==id);localStorage.setItem('h
 function editPlay(id){
   const p=plays.find(p=>p.id===id);if(!p)return;
   editingPlayId=id;
-  document.getElementById('log-game').value=p.game;document.getElementById('log-side').value=p.side;
-  document.getElementById('log-line').value=p.line;document.getElementById('log-close').value=p.closingLine??'';
-  document.getElementById('log-units').value=p.units;document.getElementById('log-book').value=p.book;
-  document.getElementById('log-result').value=p.result;document.getElementById('log-notes').value=p.notes;
+  document.getElementById('log-game').value=p.game;
+  document.getElementById('log-side').value=p.side;
   document.getElementById('log-type').value=p.betType||'spread';
+  document.getElementById('log-units').value=p.units;
+  document.getElementById('log-book').value=p.book;
+  document.getElementById('log-result').value=p.result;
+  document.getElementById('log-notes').value=p.notes;
+  updateLoggerFields();
+
+  if(p.betType==='ml'){
+    document.getElementById('log-ml-odds').value=p.line||'';
+    document.getElementById('log-close-ml').value=p.closingLine??'';
+  }else if(p.betType==='total'||p.betType==='team_total'){
+    document.getElementById('log-total-num').value=p.line||'';
+    document.getElementById('log-close-total').value=p.closingLine??'';
+  }else if(p.betType==='prop'){
+    document.getElementById('log-prop-line').value=p.line||'';
+  }else{
+    document.getElementById('log-line').value=p.line||'';
+    document.getElementById('log-close').value=p.closingLine??'';
+  }
   document.getElementById('log-modal').classList.add('open');
 }
 
@@ -541,7 +611,9 @@ function renderPlays(){
     const wu=p.winUnits??p.units*0.909;
     const pu=p.result==='W'?`+${wu.toFixed(2)}u`:p.result==='L'?`-${p.units}u`:p.result==='P'?'0u':'—';
     const puC=p.result==='W'?'mv-pos':p.result==='L'?'mv-neg':'mv-neu';
-    const clvD=p.clv!=null?`<span class="${p.clv>=0?'mv-pos':'mv-neg'}">${p.clv>=0?'+':''}${p.clv.toFixed(1)}</span>`:'<span style="font-size:10px;color:var(--muted)">Add close</span>';
+    const lineDisplay=p.lineDisplay||(p.line>=0?'+':'')+p.line;
+    const clvLabel=p.betType==='ml'?'odds pts':'pts';
+    const clvD=p.clv!=null?`<span class="${p.clv>=0?'mv-pos':'mv-neg'}">${p.clv>=0?'+':''}${p.clv.toFixed(1)}${p.betType==='ml'?'%':''}</span>`:'<span style="font-size:10px;color:var(--muted)">Add close</span>';
     const lineDisplay=p.betType==='ml'?(p.line>=0?'+':'')+p.line:(p.line>=0?'+':'')+p.line;
     const tl=typeLabel[p.betType]||'Spread';
     return`<tr>
