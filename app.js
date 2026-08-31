@@ -100,7 +100,10 @@ function filterRatings(q=''){
 }
 
 function filterEff(q=''){
-  if(!metricsData)return;
+  if(!metricsData||!allTeams.length){
+    document.getElementById('eff-container').innerHTML='<div class="empty-state">Loading data...</div>';
+    return;
+  }
   const search=q||document.querySelector('#view-efficiency input')?.value||'';
   const conf=document.getElementById('eff-conf').value;
   const side=currentEffView;
@@ -160,27 +163,151 @@ function getPR(team){return metricsData?.teams?.[team]?.power_rating??null;}
 function projSpread(h,a){const hp=getPR(h),ap=getPR(a);if(hp==null||ap==null)return null;return-((hp-ap)+HFA*0.3);}
 function winProb(h,a){const hp=getPR(h)??0,ap=getPR(a)??0,diff=(hp-ap)+HFA*0.3,wp=Math.round(50+diff*5);return{home:Math.min(99,Math.max(1,wp)),away:Math.min(99,Math.max(1,100-wp))};}
 
+const ODDS_KEY='ea5ecbb48466b55c9d83a78d520afba3';
+const ODDS_BASE='https://api.the-odds-api.com/v4';
+
+// Team name mapping from Odds API format to our metrics format
+const TEAM_MAP={
+  'Ohio State Buckeyes':'Ohio State','Michigan Wolverines':'Michigan','Georgia Bulldogs':'Georgia',
+  'Alabama Crimson Tide':'Alabama','Notre Dame Fighting Irish':'Notre Dame','Texas Longhorns':'Texas',
+  'Penn State Nittany Lions':'Penn State','Oregon Ducks':'Oregon','Indiana Hoosiers':'Indiana',
+  'Miami Hurricanes':'Miami','LSU Tigers':'LSU','Tennessee Volunteers':'Tennessee',
+  'Oklahoma Sooners':'Oklahoma','Clemson Tigers':'Clemson','Utah Utes':'Utah',
+  'Florida State Seminoles':'Florida State','TCU Horned Frogs':'TCU','USC Trojans':'USC',
+  'Wisconsin Badgers':'Wisconsin','Iowa Hawkeyes':'Iowa','Ole Miss Rebels':'Ole Miss',
+  'Texas A&M Aggies':'Texas A&M','Kansas State Wildcats':'Kansas State','Washington Huskies':'Washington',
+  'North Carolina Tar Heels':'North Carolina','Missouri Tigers':'Missouri','Arkansas Razorbacks':'Arkansas',
+  'Mississippi State Bulldogs':'Mississippi State','Louisville Cardinals':'Louisville',
+  'Pittsburgh Panthers':'Pittsburgh','Cincinnati Bearcats':'Cincinnati','UCF Knights':'UCF',
+  'Houston Cougars':'Houston','BYU Cougars':'BYU','Baylor Bears':'Baylor',
+  'Iowa State Cyclones':'Iowa State','Oklahoma State Cowboys':'Oklahoma State',
+  'Kansas Jayhawks':'Kansas','West Virginia Mountaineers':'West Virginia',
+  'Texas Tech Red Raiders':'Texas Tech','Colorado Buffaloes':'Colorado',
+  'Arizona Wildcats':'Arizona','Arizona State Sun Devils':'Arizona State',
+  'Utah Utes':'Utah','Air Force Falcons':'Air Force','Boise State Broncos':'Boise State',
+  'Colorado State Rams':'Colorado State','Fresno State Bulldogs':'Fresno State',
+  'Hawaii Rainbow Warriors':'Hawaii','Nevada Wolf Pack':'Nevada',
+  'New Mexico Lobos':'New Mexico','San Diego State Aztecs':'San Diego State',
+  'San Jose State Spartans':'San Jose State','UNLV Rebels':'UNLV',
+  'Utah State Aggies':'Utah State','Wyoming Cowboys':'Wyoming',
+  'Appalachian State Mountaineers':'Appalachian State','Arkansas State Red Wolves':'Arkansas State',
+  'Georgia Southern Eagles':'Georgia Southern','Georgia State Panthers':'Georgia State',
+  'Louisiana Ragin Cajuns':'Louisiana','Louisiana Monroe Warhawks':'Louisiana Monroe',
+  'South Alabama Jaguars':'South Alabama','Texas State Bobcats':'Texas State',
+  'Troy Trojans':'Troy','Marshall Thundering Herd':'Marshall',
+  'Middle Tennessee Blue Raiders':'Middle Tennessee','Florida Atlantic Owls':'Florida Atlantic',
+  'Florida International Panthers':'FIU','Louisiana Tech Bulldogs':'Louisiana Tech',
+  'North Texas Mean Green':'North Texas','Old Dominion Monarchs':'Old Dominion',
+  'Rice Owls':'Rice','Southern Miss Golden Eagles':'Southern Miss',
+  'UTEP Miners':'UTEP','UTSA Roadrunners':'UTSA','Western Kentucky Hilltoppers':'Western Kentucky',
+  'Akron Zips':'Akron','Ball State Cardinals':'Ball State','Bowling Green Falcons':'Bowling Green',
+  'Buffalo Bulls':'Buffalo','Central Michigan Chippewas':'Central Michigan',
+  'Eastern Michigan Eagles':'Eastern Michigan','Kent State Golden Flashes':'Kent State',
+  'Miami Ohio RedHawks':'Miami (OH)','Northern Illinois Huskies':'Northern Illinois',
+  'Ohio Bobcats':'Ohio','Toledo Rockets':'Toledo','Western Michigan Broncos':'Western Michigan',
+  'Charlotte 49ers':'Charlotte','East Carolina Pirates':'East Carolina',
+  'Memphis Tigers':'Memphis','Navy Midshipmen':'Navy','South Florida Bulls':'South Florida',
+  'Temple Owls':'Temple','Tulane Green Wave':'Tulane','Tulsa Golden Hurricane':'Tulsa',
+  'Wichita State Shockers':'Wichita State','Duke Blue Devils':'Duke',
+  'Florida State Seminoles':'Florida State','Georgia Tech Yellow Jackets':'Georgia Tech',
+  'Miami Hurricanes':'Miami','North Carolina State Wolfpack':'NC State',
+  'Syracuse Orange':'Syracuse','Virginia Cavaliers':'Virginia','Virginia Tech Hokies':'Virginia Tech',
+  'Wake Forest Demon Deacons':'Wake Forest','Boston College Eagles':'Boston College',
+  'California Golden Bears':'California','Stanford Cardinal':'Stanford',
+  'Army Black Knights':'Army','Liberty Flames':'Liberty',
+  'New Mexico State Aggies':'New Mexico State','Sam Houston Bearkats':'Sam Houston',
+  'Jacksonville State Gamecocks':'Jacksonville State','Kennesaw State Owls':'Kennesaw State',
+  'Western Kentucky Hilltoppers':'Western Kentucky',
+};
+
+function mapTeam(name){return TEAM_MAP[name]||name.replace(/ (Buckeyes|Wolverines|Bulldogs|Crimson Tide|Fighting Irish|Longhorns|Nittany Lions|Ducks|Hoosiers|Hurricanes|Tigers|Volunteers|Sooners|Wildcats|Utes|Seminoles|Horned Frogs|Trojans|Badgers|Hawkeyes|Rebels|Aggies|Huskies|Tar Heels|Cardinals|Panthers|Bearcats|Knights|Cougars|Bears|Cyclones|Cowboys|Jayhawks|Mountaineers|Red Raiders|Buffaloes|Sun Devils|Falcons|Broncos|Rams|Wolf Pack|Lobos|Aztecs|Spartans|Rebels|Rainbow Warriors|Cowboys|Eagles|Warhawks|Jaguars|Bobcats|Thundering Herd|Blue Raiders|Owls|Panthers|Bulldogs|Mean Green|Monarchs|Owls|Golden Eagles|Miners|Roadrunners|Hilltoppers|Zips|Cardinals|Falcons|Bulls|Chippewas|Eagles|Golden Flashes|RedHawks|Huskies|Bobcats|Rockets|Broncos|49ers|Pirates|Tigers|Midshipmen|Bulls|Owls|Green Wave|Golden Hurricane|Blue Devils|Yellow Jackets|Wolfpack|Orange|Cavaliers|Hokies|Demon Deacons|Golden Bears|Cardinal|Black Knights|Flames|Bearkats|Gamecocks)$/,'').trim();}
+
 async function loadGames(){
   const week=document.getElementById('lines-week').value;
-  document.getElementById('lines-container').innerHTML=`<div class="loading-state"><div class="spinner"></div><p>Loading Week ${week} games...</p></div>`;
+  document.getElementById('lines-container').innerHTML=`<div class="loading-state"><div class="spinner"></div><p>Loading Week ${week} games + live odds...</p></div>`;
   try{
-    const[games,lines]=await Promise.all([cfbd(`/games?year=2026&week=${week}&division=fbs`),cfbd(`/lines?year=2026&week=${week}`).catch(()=>[])]);
-    currentGames=games;currentLines=lines;renderGames();
-  }catch(e){document.getElementById('lines-container').innerHTML=`<div class="empty-state" style="color:var(--red)">Failed: ${e}</div>`;}
+    // Pull live CFB odds from The Odds API
+    const oddsRes=await fetch(`${ODDS_BASE}/sports/americanfootball_ncaaf/odds/?apiKey=${ODDS_KEY}&regions=us&markets=spreads&oddsFormat=american&bookmakers=draftkings,fanduel,caesars,betmgm`);
+    if(!oddsRes.ok)throw new Error(`Odds API: ${oddsRes.status}`);
+    const oddsData=await oddsRes.json();
+
+    // Also try to get games from CFBD for schedule structure
+    let cfbdGames=[];
+    try{cfbdGames=await cfbd(`/games?year=2026&week=${week}&division=fbs`);}catch(e){console.log('CFBD unavailable, using Odds API only');}
+
+    // Build game list from odds data
+    const oddsGames=oddsData.map(g=>({
+      id:g.id,
+      home_team:mapTeam(g.home_team),
+      away_team:mapTeam(g.away_team),
+      start_time:g.commence_time,
+      week:parseInt(week),
+      bookmakers:g.bookmakers||[],
+    }));
+
+    // Merge CFBD games with odds if available, otherwise use odds data directly
+    if(cfbdGames.length>0){
+      // Match odds to CFBD games by team name
+      currentGames=cfbdGames.filter(g=>g.home_team&&g.away_team);
+      currentLines=oddsGames; // store odds separately
+    }else{
+      // Use odds API games directly
+      currentGames=oddsGames;
+      currentLines=oddsGames;
+    }
+
+    renderGames();
+  }catch(e){
+    document.getElementById('lines-container').innerHTML=`<div class="empty-state" style="color:var(--red)">Failed to load odds: ${e}<br><small>The Odds API may be at its request limit for today.</small></div>`;
+  }
+}
+
+function getMarketSpread(homeTeam, awayTeam){
+  // Find this game in odds data
+  const g=currentLines.find(l=>{
+    const h=l.home_team||'',a=l.away_team||'';
+    return(h===homeTeam&&a===awayTeam)||(h===awayTeam&&a===homeTeam);
+  });
+  if(!g||!g.bookmakers)return{dk:null,fd:null,market:null,flipped:false};
+
+  const flipped=g.home_team===awayTeam; // odds API has teams reversed
+  let dk=null,fd=null,cs=null,mgm=null;
+
+  g.bookmakers.forEach(bk=>{
+    const spreads=bk.markets?.find(m=>m.key==='spreads');
+    if(!spreads)return;
+    const homeOutcome=spreads.outcomes?.find(o=>o.name===g.home_team);
+    if(!homeOutcome)return;
+    let spread=homeOutcome.point;
+    if(flipped)spread=-spread; // flip if teams are reversed
+
+    if(/draftkings/i.test(bk.key))dk=spread;
+    else if(/fanduel/i.test(bk.key))fd=spread;
+    else if(/caesars/i.test(bk.key))cs=spread;
+    else if(/betmgm/i.test(bk.key))mgm=spread;
+  });
+
+  const market=dk??fd??cs??mgm??null;
+  return{dk,fd,cs,mgm,market};
 }
 
 function getBooks(gameId){
-  const gl=currentLines.filter(l=>l.id===gameId&&l.spread!=null);
-  return{dk:gl.find(l=>/draftkings/i.test(l.provider))?.spread??null,fd:gl.find(l=>/fanduel/i.test(l.provider))?.spread??null,cons:gl.find(l=>/consensus/i.test(l.provider))?.spread??null,market:(gl.find(l=>/consensus/i.test(l.provider))??gl[0])?.spread??null};
+  // Legacy function for CFBD lines — now replaced by getMarketSpread
+  return{dk:null,fd:null,cons:null,market:null};
 }
 
 function renderGames(){
   const ef=document.getElementById('lines-edge').value;
   if(!currentGames.length){document.getElementById('lines-container').innerHTML='<div class="empty-state">No games found.</div>';return;}
   const enriched=currentGames.map(g=>{
-    const proj=projSpread(g.home_team,g.away_team),books=getBooks(g.id),market=books.market,edge=proj!=null&&market!=null?Math.abs(market-proj):0,wp=winProb(g.home_team,g.away_team);
+    if(!g.home_team||!g.away_team)return null;
+    const proj=projSpread(g.home_team,g.away_team);
+    const books=getMarketSpread(g.home_team,g.away_team);
+    const market=books.market;
+    const edge=proj!=null&&market!=null?Math.abs(market-proj):0;
+    const wp=winProb(g.home_team,g.away_team);
     return{g,proj,books,market,edge,wp};
-  }).sort((a,b)=>b.edge-a.edge);
+  }).filter(Boolean).sort((a,b)=>b.edge-a.edge);
   const rows=enriched.map(({g,proj,books,market,edge,wp})=>{
     if(!g.home_team||!g.away_team)return'';
     if(ef==='play'&&ec!=='play')return'';
@@ -191,7 +318,11 @@ function renderGames(){
     const sc=logged?'logged':ec==='play'?'play':ec==='lean'?'watch':'inline';
     let disLbl='—';
     if(proj!=null&&market!=null){const diff=market-proj;if(Math.abs(diff)>=LEAN_THR){const fs=diff>0?g.home_team:g.away_team;disLbl=`${fs} · ${ec==='play'?'clears the gate':'under the gate'}`;}else{disLbl='we agree with the market';}}
-    const bp=[];if(books.dk!=null)bp.push(`DK ${fmt(books.dk)}`);if(books.fd!=null)bp.push(`FD ${fmt(books.fd)}`);if(books.cons!=null)bp.push(`CONS ${fmt(books.cons)}`);
+    const bp=[];
+    if(books.dk!=null)bp.push(`DK ${fmt(books.dk)}`);
+    if(books.fd!=null)bp.push(`FD ${fmt(books.fd)}`);
+    if(books.cs!=null)bp.push(`CZR ${fmt(books.cs)}`);
+    if(books.mgm!=null)bp.push(`MGM ${fmt(books.mgm)}`);
     const gk=(g.away_team+' @ '+g.home_team).replace(/'/g,"\\'"),me=marketStr.replace(/'/g,"\\'");
     return`<tr>
       <td style="min-width:200px">
