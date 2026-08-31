@@ -719,4 +719,5 @@ function showRound(r,el){
 
 document.getElementById('log-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeLogger();});
 document.getElementById('tape-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeTape();});
+document.getElementById('log-type').addEventListener('change',updateLoggerFields);
 init();
