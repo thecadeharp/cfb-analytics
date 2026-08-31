@@ -339,28 +339,8 @@ td{padding:10px 12px;white-space:nowrap;}
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Side</label>
-        <input class="form-input" id="log-side" placeholder="e.g. Ohio State -3.5">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Line</label>
-        <input class="form-input" id="log-line" type="number" step="0.5" placeholder="-7">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Closing Line <span style="font-size:10px;color:var(--muted);font-weight:400;">(after kickoff)</span></label>
-        <input class="form-input" id="log-close" type="number" step="0.5" placeholder="e.g. -9">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Units</label>
-        <input class="form-input" id="log-units" type="number" step="0.5" placeholder="1.0" value="1">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
         <label class="form-label">Bet Type</label>
-        <select class="form-input" id="log-type">
+        <select class="form-input" id="log-type" onchange="updateLoggerFields()">
           <option value="spread">Spread</option>
           <option value="total">Total (O/U)</option>
           <option value="team_total">Team Total</option>
@@ -369,8 +349,96 @@ td{padding:10px 12px;white-space:nowrap;}
         </select>
       </div>
       <div class="form-group">
+        <label class="form-label">Side / Pick</label>
+        <input class="form-input" id="log-side" placeholder="e.g. Ohio State">
+      </div>
+    </div>
+
+    <!-- SPREAD FIELDS -->
+    <div id="fields-spread">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Spread</label>
+          <input class="form-input" id="log-line" type="number" step="0.5" placeholder="-7">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Closing Spread <span style="font-size:10px;color:var(--muted);font-weight:400">(after kickoff)</span></label>
+          <input class="form-input" id="log-close" type="number" step="0.5" placeholder="e.g. -9">
+        </div>
+      </div>
+    </div>
+
+    <!-- TOTAL FIELDS -->
+    <div id="fields-total" style="display:none">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Total</label>
+          <input class="form-input" id="log-total-num" type="number" step="0.5" placeholder="47.5">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Over / Under</label>
+          <select class="form-input" id="log-ou">
+            <option value="over">Over</option>
+            <option value="under">Under</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Closing Total <span style="font-size:10px;color:var(--muted);font-weight:400">(after kickoff)</span></label>
+          <input class="form-input" id="log-close-total" type="number" step="0.5" placeholder="e.g. 48.5">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Closing O/U</label>
+          <select class="form-input" id="log-close-ou">
+            <option value="over">Over</option>
+            <option value="under">Under</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ML FIELDS -->
+    <div id="fields-ml" style="display:none">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">ML Odds</label>
+          <input class="form-input" id="log-ml-odds" type="number" step="1" placeholder="-145 or +220">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Closing ML Odds <span style="font-size:10px;color:var(--muted);font-weight:400">(after kickoff)</span></label>
+          <input class="form-input" id="log-close-ml" type="number" step="1" placeholder="e.g. -160">
+        </div>
+      </div>
+    </div>
+
+    <!-- PROP FIELDS -->
+    <div id="fields-prop" style="display:none">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Prop Line / Odds</label>
+          <input class="form-input" id="log-prop-line" type="number" step="0.5" placeholder="e.g. 24.5 or -115">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Over / Under / Yes / No</label>
+          <select class="form-input" id="log-prop-dir">
+            <option value="over">Over</option>
+            <option value="under">Under</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row" style="margin-top:4px">
+      <div class="form-group">
+        <label class="form-label">Units</label>
+        <input class="form-input" id="log-units" type="number" step="0.5" placeholder="1.0" value="1">
+      </div>
+      <div class="form-group">
         <label class="form-label">Book</label>
-        <input class="form-input" id="log-book" placeholder="DK, FD, etc.">
+        <input class="form-input" id="log-book" placeholder="DK, FD, CZR...">
       </div>
     </div>
     <div class="form-row">
@@ -383,10 +451,10 @@ td{padding:10px 12px;white-space:nowrap;}
           <option value="P">Push</option>
         </select>
       </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Notes (optional)</label>
-      <input class="form-input" id="log-notes" placeholder="Why you like this play...">
+      <div class="form-group">
+        <label class="form-label">Notes (optional)</label>
+        <input class="form-input" id="log-notes" placeholder="Why you like this...">
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="savePlay()" style="flex:1;">Save Play</button>
