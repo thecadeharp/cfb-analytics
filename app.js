@@ -1,12 +1,6 @@
 // ============================================================================
 // CFB ANALYTICS — FRONTEND
 // ============================================================================
-//
-// Static frontend.
-// GitHub Actions creates the analytics JSON.
-//
-// ============================================================================
-
 
 const DATA_URLS = {
   metrics: "./data/cfb_metrics.json",
@@ -15,7 +9,6 @@ const DATA_URLS = {
   projections: "./data/projections.json",
 };
 
-
 let metricsData = null;
 let scheduleData = null;
 let oddsData = null;
@@ -23,6 +16,7 @@ let projectionsData = null;
 
 let teams = {};
 let projections = [];
+let seasonProjections = {};
 
 let currentWeek = null;
 let currentSearch = "";
@@ -40,7 +34,6 @@ function hasValue(value) {
   );
 }
 
-
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -50,157 +43,102 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-
 function escapeJsString(value) {
   return String(value ?? "")
     .replaceAll("\\", "\\\\")
     .replaceAll("'", "\\'");
 }
 
-
 function formatNumber(value, digits = 1) {
-  if (!hasValue(value)) {
-    return "—";
-  }
-
+  if (!hasValue(value)) return "—";
   return Number(value).toFixed(digits);
 }
 
-
 function formatSigned(value, digits = 1) {
-  if (!hasValue(value)) {
-    return "—";
-  }
+  if (!hasValue(value)) return "—";
 
   const number = Number(value);
 
-  if (number > 0) {
-    return `+${number.toFixed(digits)}`;
-  }
-
-  return number.toFixed(digits);
+  return number > 0
+    ? `+${number.toFixed(digits)}`
+    : number.toFixed(digits);
 }
-
 
 function formatEPA(value) {
-  if (!hasValue(value)) {
-    return "—";
-  }
+  if (!hasValue(value)) return "—";
 
   const number = Number(value);
 
-  if (number > 0) {
-    return `+${number.toFixed(3)}`;
-  }
-
-  return number.toFixed(3);
+  return number > 0
+    ? `+${number.toFixed(3)}`
+    : number.toFixed(3);
 }
 
-
 function formatPercent(value, digits = 1) {
-  if (!hasValue(value)) {
-    return "—";
-  }
-
+  if (!hasValue(value)) return "—";
   return `${Number(value).toFixed(digits)}%`;
 }
 
-
 function formatRate(value, digits = 1) {
-  if (!hasValue(value)) {
-    return "—";
-  }
+  if (!hasValue(value)) return "—";
 
   const number = Number(value);
 
-  if (
-    number < 0 ||
-    number > 100
-  ) {
+  if (number < 0 || number > 100) {
     return "—";
   }
 
   return `${number.toFixed(digits)}%`;
 }
 
-
 function recordText(team) {
   const record = team?.record;
 
-  if (!record) {
-    return "—";
-  }
+  if (!record) return "—";
 
   return `${record.wins ?? 0}-${record.losses ?? 0}`;
 }
 
-
 function statusClass(status) {
-  if (status === "PLAY") {
-    return "play";
-  }
-
-  if (status === "WATCH") {
-    return "watch";
-  }
-
+  if (status === "PLAY") return "play";
+  if (status === "WATCH") return "watch";
   return "inline";
 }
 
-
 function displayStatus(status) {
-  if (
-    !status ||
-    status === "NO MARKET"
-  ) {
+  if (!status || status === "NO MARKET") {
     return "NO LINE";
   }
 
   return status;
 }
 
-
 function shortSpread(spread) {
-  if (!hasValue(spread)) {
-    return "—";
-  }
+  if (!hasValue(spread)) return "—";
 
   const number = Number(spread);
 
-  if (number === 0) {
-    return "PK";
-  }
+  if (number === 0) return "PK";
 
   return formatSigned(number);
 }
 
-
 function gameDateText(dateString) {
-  if (!dateString) {
-    return "TBD";
-  }
+  if (!dateString) return "TBD";
 
   const date = new Date(dateString);
 
-  if (
-    Number.isNaN(
-      date.getTime()
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return "TBD";
   }
 
-  return date.toLocaleString(
-    "en-US",
-    {
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    }
-  );
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
-
 
 function metricRank(
   team,
@@ -208,35 +146,19 @@ function metricRank(
   rankField,
   value
 ) {
-  if (!hasValue(value)) {
-    return "";
-  }
+  if (!hasValue(value)) return "";
 
-  const rank =
-    team?.[section]?.[rankField];
+  const rank = team?.[section]?.[rankField];
 
-  if (
-    !rank ||
-    rank <= 0
-  ) {
-    return "";
-  }
+  if (!rank || rank <= 0) return "";
 
   return `#${rank}`;
 }
-
 
 function powerRank(team) {
-  const rank =
-    team?.power_rating_rank;
-
-  if (!rank) {
-    return "—";
-  }
-
-  return `#${rank}`;
+  const rank = team?.power_rating_rank;
+  return rank ? `#${rank}` : "—";
 }
-
 
 function getTeam(name) {
   return teams?.[name] ?? null;
@@ -244,7 +166,7 @@ function getTeam(name) {
 
 
 // ============================================================================
-// SPREAD DISPLAY HELPERS
+// SPREAD DISPLAY
 // ============================================================================
 
 function favoredLine(
@@ -256,8 +178,7 @@ function favoredLine(
     return "—";
   }
 
-  const spread =
-    Number(homeSpread);
+  const spread = Number(homeSpread);
 
   if (spread === 0) {
     return "Pick'em";
@@ -270,7 +191,6 @@ function favoredLine(
   return `${awayTeam} ${formatSigned(-spread, 1)}`;
 }
 
-
 function marketSideForTeam(
   teamName,
   homeTeam,
@@ -281,8 +201,7 @@ function marketSideForTeam(
     return "—";
   }
 
-  const spread =
-    Number(homeSpread);
+  const spread = Number(homeSpread);
 
   if (teamName === homeTeam) {
     return `${homeTeam} ${formatSigned(spread, 1)}`;
@@ -300,16 +219,9 @@ function marketSideForTeam(
 // LIVE DATA HELPERS
 // ============================================================================
 
-function liveSection(
-  team,
-  section
-) {
-  return (
-    team?.[section]?.live_2026
-    ?? {}
-  );
+function liveSection(team, section) {
+  return team?.[section]?.live_2026 ?? {};
 }
-
 
 function liveValue(
   team,
@@ -317,54 +229,28 @@ function liveValue(
   field
 ) {
   const value =
-    liveSection(
-      team,
-      section
-    )?.[field];
+    liveSection(team, section)?.[field];
 
-  if (!hasValue(value)) {
-    return null;
-  }
-
-  return Number(value);
+  return hasValue(value)
+    ? Number(value)
+    : null;
 }
 
-
-function livePlays(
-  team,
-  section
-) {
+function livePlays(team, section) {
   const value =
-    liveSection(
-      team,
-      section
-    )?.n_plays;
+    liveSection(team, section)?.n_plays;
 
-  if (!hasValue(value)) {
-    return 0;
-  }
-
-  return Number(value);
+  return hasValue(value)
+    ? Number(value)
+    : 0;
 }
 
-
-function liveNet(
-  team,
-  field
-) {
+function liveNet(team, field) {
   const offense =
-    liveValue(
-      team,
-      "offense",
-      field
-    );
+    liveValue(team, "offense", field);
 
   const defense =
-    liveValue(
-      team,
-      "defense",
-      field
-    );
+    liveValue(team, "defense", field);
 
   if (
     offense === null ||
@@ -376,28 +262,85 @@ function liveNet(
   return offense - defense;
 }
 
-
 function liveSampleLabel(team) {
   const offense =
-    livePlays(
-      team,
-      "offense"
-    );
+    livePlays(team, "offense");
 
   const defense =
-    livePlays(
-      team,
-      "defense"
-    );
+    livePlays(team, "defense");
 
-  if (
+  return (
     offense > 0 &&
     defense > 0
-  ) {
-    return "2026 live sample available";
+  )
+    ? "2026 live sample available"
+    : "Preseason model only";
+}
+
+
+// ============================================================================
+// SEASON PROJECTION HELPERS
+// ============================================================================
+
+function getSeasonProjection(teamName) {
+  return seasonProjections?.[teamName] ?? null;
+}
+
+function usefulWinDistribution(distribution) {
+  if (!distribution) return [];
+
+  const entries =
+    Object.entries(distribution)
+      .map(([wins, probability]) => ({
+        wins: Number(wins),
+        probability: Number(probability),
+      }))
+      .filter(
+        item =>
+          !Number.isNaN(item.wins) &&
+          !Number.isNaN(item.probability)
+      );
+
+  if (!entries.length) return [];
+
+  const meaningful =
+    entries.filter(
+      item => item.probability >= 0.5
+    );
+
+  if (!meaningful.length) {
+    return entries;
   }
 
-  return "Preseason model only";
+  const minWins =
+    Math.min(...meaningful.map(item => item.wins));
+
+  const maxWins =
+    Math.max(...meaningful.map(item => item.wins));
+
+  return entries.filter(
+    item =>
+      item.wins >= Math.max(0, minWins - 1) &&
+      item.wins <= maxWins + 1
+  );
+}
+
+function seasonLocationLabel(location) {
+  if (location === "home") return "vs";
+  if (location === "away") return "@";
+  return "N";
+}
+
+function projectionSourceLabel(source) {
+  if (source === "fcs_fallback") {
+    return "FCS fallback";
+  }
+
+  if (source === "completed_result") {
+    return "Final";
+  }
+
+  return "Model";
 }
 
 
@@ -408,7 +351,7 @@ function liveSampleLabel(team) {
 function switchView(viewName) {
   document
     .querySelectorAll(".view")
-    .forEach((view) => {
+    .forEach(view => {
       view.classList.remove("active");
     });
 
@@ -418,14 +361,12 @@ function switchView(viewName) {
     );
 
   if (requested) {
-    requested
-      .classList
-      .add("active");
+    requested.classList.add("active");
   }
 
   document
     .querySelectorAll(".nav-item")
-    .forEach((button) => {
+    .forEach(button => {
       button.classList.toggle(
         "active",
         button.dataset.view === viewName
@@ -440,7 +381,7 @@ function switchView(viewName) {
 
 
 // ============================================================================
-// MATCHUP VIEW SETUP
+// EXTRA STYLES / MATCHUP VIEW
 // ============================================================================
 
 function ensureMatchupView() {
@@ -453,18 +394,12 @@ function ensureMatchupView() {
   }
 
   const main =
-    document.querySelector(
-      "main.page"
-    );
+    document.querySelector("main.page");
 
-  if (!main) {
-    return;
-  }
+  if (!main) return;
 
   const section =
-    document.createElement(
-      "section"
-    );
+    document.createElement("section");
 
   section.id = "view-matchup";
   section.className = "view";
@@ -477,17 +412,13 @@ function ensureMatchupView() {
       ← Back to projections
     </button>
 
-    <div id="matchup-container">
-    </div>
+    <div id="matchup-container"></div>
   `;
 
   main.appendChild(section);
 
-
   const style =
-    document.createElement(
-      "style"
-    );
+    document.createElement("style");
 
   style.textContent = `
 
@@ -537,10 +468,6 @@ function ensureMatchupView() {
       min-height: 105px;
     }
 
-    .analysis-card.edge-card {
-      border-color: var(--border-dark);
-    }
-
     .analysis-label {
       font-family: var(--mono);
       color: var(--muted);
@@ -577,15 +504,10 @@ function ensureMatchupView() {
       border-radius: 12px;
       padding: 18px 20px;
       margin-bottom: 18px;
-
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 20px;
-    }
-
-    .model-edge-banner-left {
-      min-width: 0;
     }
 
     .model-edge-title {
@@ -607,7 +529,6 @@ function ensureMatchupView() {
       margin-top: 6px;
       color: var(--muted);
       font-size: 11px;
-      line-height: 1.45;
     }
 
     .analysis-layout {
@@ -631,8 +552,7 @@ function ensureMatchupView() {
 
     .analysis-panel-header {
       padding: 13px 16px;
-      border-bottom:
-        1px solid var(--border);
+      border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       gap: 10px;
@@ -642,7 +562,6 @@ function ensureMatchupView() {
     .analysis-panel-title {
       font-family: var(--mono);
       font-size: 9px;
-      font-weight: 500;
       letter-spacing: 1.2px;
       text-transform: uppercase;
       color: var(--muted);
@@ -660,8 +579,7 @@ function ensureMatchupView() {
       gap: 18px;
       align-items: center;
       min-height: 48px;
-      border-bottom:
-        1px solid #eeeeeb;
+      border-bottom: 1px solid #eeeeeb;
     }
 
     .analysis-row:last-child {
@@ -682,8 +600,7 @@ function ensureMatchupView() {
 
     .insight-card {
       padding: 15px 0;
-      border-bottom:
-        1px solid #eeeeeb;
+      border-bottom: 1px solid #eeeeeb;
     }
 
     .insight-card:last-child {
@@ -752,14 +669,187 @@ function ensureMatchupView() {
       color: var(--muted);
     }
 
+
+    /* ==========================================================
+       SEASON OUTLOOK
+    ========================================================== */
+
+    .season-outlook {
+      margin-top: 12px;
+    }
+
+    .season-summary-grid {
+      display: grid;
+      grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .season-summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 17px;
+    }
+
+    .season-summary-label {
+      font-family: var(--mono);
+      color: var(--muted);
+      font-size: 8px;
+      letter-spacing: 1.1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .season-summary-value {
+      font-size: 23px;
+      font-weight: 800;
+      letter-spacing: -0.7px;
+    }
+
+    .season-summary-note {
+      color: var(--muted);
+      font-size: 10px;
+      margin-top: 5px;
+    }
+
+    .season-two-column {
+      display: grid;
+      grid-template-columns:
+        minmax(0, 1.3fr)
+        minmax(0, 0.7fr);
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .distribution-wrap {
+      padding: 18px 16px;
+    }
+
+    .distribution-row {
+      display: grid;
+      grid-template-columns:
+        30px
+        minmax(0, 1fr)
+        50px;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .distribution-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .distribution-wins {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .distribution-track {
+      height: 8px;
+      border-radius: 999px;
+      background: #ecece8;
+      overflow: hidden;
+    }
+
+    .distribution-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 999px;
+    }
+
+    .distribution-prob {
+      text-align: right;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .alt-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    .alt-table th,
+    .alt-table td {
+      padding: 11px 10px;
+      border-bottom: 1px solid #eeeeeb;
+    }
+
+    .alt-table th {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-align: left;
+    }
+
+    .alt-table td:nth-child(2),
+    .alt-table td:nth-child(3),
+    .alt-table th:nth-child(2),
+    .alt-table th:nth-child(3) {
+      text-align: right;
+    }
+
+    .alt-strong {
+      font-weight: 800;
+    }
+
+    .season-schedule-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .season-schedule-table th {
+      font-family: var(--mono);
+      color: var(--muted);
+      font-size: 8px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-align: left;
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .season-schedule-table td {
+      padding: 12px;
+      font-size: 11px;
+      border-bottom: 1px solid #eeeeeb;
+    }
+
+    .season-schedule-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .season-schedule-table th:nth-child(4),
+    .season-schedule-table td:nth-child(4),
+    .season-schedule-table th:nth-child(5),
+    .season-schedule-table td:nth-child(5) {
+      text-align: right;
+    }
+
+    .fcs-tag {
+      font-family: var(--mono);
+      font-size: 8px;
+      color: var(--muted);
+      margin-left: 5px;
+    }
+
     @media (max-width: 900px) {
 
-      .analysis-grid {
+      .analysis-grid,
+      .season-summary-grid {
         grid-template-columns:
           repeat(2, minmax(0, 1fr));
       }
 
-      .analysis-layout {
+      .analysis-layout,
+      .season-two-column {
         grid-template-columns: 1fr;
       }
 
@@ -767,19 +857,17 @@ function ensureMatchupView() {
         grid-column: auto;
       }
 
-      .matchup-header {
-        flex-direction: column;
-      }
-
+      .matchup-header,
       .model-edge-banner {
-        align-items: flex-start;
         flex-direction: column;
+        align-items: flex-start;
       }
     }
 
     @media (max-width: 520px) {
 
-      .analysis-grid {
+      .analysis-grid,
+      .season-summary-grid {
         grid-template-columns: 1fr;
       }
 
@@ -803,9 +891,7 @@ function ensureMatchupView() {
 
 async function loadJson(url) {
   const response =
-    await fetch(
-      `${url}?v=${Date.now()}`
-    );
+    await fetch(`${url}?v=${Date.now()}`);
 
   if (!response.ok) {
     throw new Error(
@@ -815,7 +901,6 @@ async function loadJson(url) {
 
   return response.json();
 }
-
 
 async function init() {
   try {
@@ -840,10 +925,12 @@ async function init() {
     projections =
       projectionsData?.games ?? [];
 
+    seasonProjections =
+      projectionsData?.season_projections ?? {};
+
     updateHeader();
 
     buildWeekTabs();
-
     renderProjections();
     renderTeams();
     renderRatings();
@@ -863,23 +950,11 @@ async function init() {
       );
 
     if (container) {
-
       container.innerHTML = `
         <div class="empty-state">
-
           Unable to load analytics data.
-
           <br><br>
-
-          <span
-            style="
-              font-family:var(--mono);
-              font-size:11px;
-            "
-          >
-            ${escapeHtml(error.message)}
-          </span>
-
+          ${escapeHtml(error.message)}
         </div>
       `;
     }
@@ -897,48 +972,33 @@ function updateHeader() {
       "data-updated"
     );
 
-  if (!header) {
-    return;
-  }
+  if (!header) return;
 
   const generated =
-    projectionsData?.meta?.generated
-    ||
+    projectionsData?.meta?.generated ||
     metricsData?.meta?.generated;
 
   if (!generated) {
-
-    header.textContent =
-      "2026 model";
-
+    header.textContent = "2026 model";
     return;
   }
 
   const date =
     new Date(generated);
 
-  if (
-    Number.isNaN(
-      date.getTime()
-    )
-  ) {
-
-    header.textContent =
-      "2026 model";
-
+  if (Number.isNaN(date.getTime())) {
+    header.textContent = "2026 model";
     return;
   }
 
   header.textContent =
-    `Updated ${
-      date.toLocaleDateString(
-        "en-US",
-        {
-          month: "short",
-          day: "numeric",
-        }
-      )
-    }`;
+    `Updated ${date.toLocaleDateString(
+      "en-US",
+      {
+        month: "short",
+        day: "numeric",
+      }
+    )}`;
 }
 
 
@@ -949,10 +1009,7 @@ function updateHeader() {
 function availableWeeks() {
   const weeks =
     projections
-      .map(
-        game =>
-          game.week
-      )
+      .map(game => game.week)
       .filter(
         week =>
           week !== null &&
@@ -966,16 +1023,10 @@ function availableWeeks() {
 
   return [
     ...new Set(weeks)
-  ].sort(
-    (a, b) =>
-      a - b
-  );
+  ].sort((a, b) => a - b);
 }
 
-
-function determineDefaultWeek(
-  weeks
-) {
+function determineDefaultWeek(weeks) {
   if (!weeks.length) {
     return null;
   }
@@ -989,25 +1040,19 @@ function determineDefaultWeek(
           )
       )
       .map(
-        game =>
-          Number(game.week)
+        game => Number(game.week)
       )
       .filter(
         week =>
           !Number.isNaN(week)
       );
 
-  if (
-    marketWeeks.length
-  ) {
-    return Math.min(
-      ...marketWeeks
-    );
+  if (marketWeeks.length) {
+    return Math.min(...marketWeeks);
   }
 
   return weeks[0];
 }
-
 
 function buildWeekTabs() {
   const container =
@@ -1015,28 +1060,19 @@ function buildWeekTabs() {
       "week-tabs"
     );
 
-  if (!container) {
-    return;
-  }
+  if (!container) return;
 
   const weeks =
     availableWeeks();
 
   if (!weeks.length) {
-
     container.innerHTML = "";
-
     return;
   }
 
-  if (
-    currentWeek === null
-  ) {
-
+  if (currentWeek === null) {
     currentWeek =
-      determineDefaultWeek(
-        weeks
-      );
+      determineDefaultWeek(weeks);
   }
 
   container.innerHTML =
@@ -1044,19 +1080,13 @@ function buildWeekTabs() {
       .map(
         week => `
           <button
-            class="
-              week-tab
-              ${
-                Number(week)
-                ===
-                Number(currentWeek)
-                  ? "active"
-                  : ""
-              }
-            "
-            onclick="
-              selectWeek(${week})
-            "
+            class="week-tab ${
+              Number(week) ===
+              Number(currentWeek)
+                ? "active"
+                : ""
+            }"
+            onclick="selectWeek(${week})"
           >
             ${
               week === 0
@@ -1069,13 +1099,10 @@ function buildWeekTabs() {
       .join("");
 }
 
-
 function selectWeek(week) {
-  currentWeek =
-    Number(week);
+  currentWeek = Number(week);
 
   buildWeekTabs();
-
   renderProjections();
 }
 
@@ -1086,79 +1113,65 @@ function selectWeek(week) {
 
 function projectionGamesForCurrentView() {
   return projections
+    .filter(game => {
 
-    .filter(
-      game => {
-
-        if (
-          currentWeek !== null &&
-          Number(game.week)
-          !==
-          Number(currentWeek)
-        ) {
-          return false;
-        }
-
-        if (!currentSearch) {
-          return true;
-        }
-
-        const query =
-          currentSearch.toLowerCase();
-
-        const home =
-          game?.home?.team
-            ?.toLowerCase()
-          ?? "";
-
-        const away =
-          game?.away?.team
-            ?.toLowerCase()
-          ?? "";
-
-        return (
-          home.includes(query)
-          ||
-          away.includes(query)
-        );
+      if (
+        currentWeek !== null &&
+        Number(game.week) !==
+        Number(currentWeek)
+      ) {
+        return false;
       }
-    )
 
-    .sort(
-      (a, b) => {
+      if (!currentSearch) {
+        return true;
+      }
 
-        const aDisagreement =
-          a?.comparison?.disagreement
-          ?? -1;
+      const query =
+        currentSearch.toLowerCase();
 
-        const bDisagreement =
-          b?.comparison?.disagreement
-          ?? -1;
+      const home =
+        game?.home?.team?.toLowerCase()
+        ?? "";
 
-        if (
-          bDisagreement
-          !==
+      const away =
+        game?.away?.team?.toLowerCase()
+        ?? "";
+
+      return (
+        home.includes(query) ||
+        away.includes(query)
+      );
+    })
+    .sort((a, b) => {
+
+      const aDisagreement =
+        a?.comparison?.disagreement ?? -1;
+
+      const bDisagreement =
+        b?.comparison?.disagreement ?? -1;
+
+      if (
+        bDisagreement !==
+        aDisagreement
+      ) {
+        return (
+          bDisagreement -
           aDisagreement
-        ) {
-          return (
-            bDisagreement -
-            aDisagreement
-          );
-        }
-
-        return (
-          new Date(
-            a.start_date || 0
-          ).getTime()
-          -
-          new Date(
-            b.start_date || 0
-          ).getTime()
         );
       }
-    );
-}
 
+      return (
+        new Date(
+          a.start_date || 0
+        ).getTime()
+        -
+        new Date(
+          b.start_date || 0
+        ).getTime()
+      );
+    });
+}
 
 function renderProjections() {
   const container =
@@ -1171,9 +1184,7 @@ function renderProjections() {
       "projection-summary"
     );
 
-  if (!container) {
-    return;
-  }
+  if (!container) return;
 
   const games =
     projectionGamesForCurrentView();
@@ -1200,60 +1211,46 @@ function renderProjections() {
         === "WATCH"
     );
 
-
   if (summary) {
-
     summary.innerHTML = `
       ${games.length} games
       · ${marketGames.length} lined
-      · <strong>
-          ${plays.length} plays
-        </strong>
+      · <strong>${plays.length} plays</strong>
       · ${watches.length} watch
     `;
   }
 
-
   if (!games.length) {
-
     container.innerHTML = `
       <div class="empty-state">
         No games match this week/search.
       </div>
     `;
-
     return;
   }
-
 
   container.innerHTML = `
     <table class="projection-table">
 
       <thead>
-
         <tr>
           <th>Matchup</th>
           <th>Our Line</th>
           <th>Market</th>
           <th>Total</th>
-
           <th class="align-right">
             Disagreement
           </th>
-
           <th class="align-right">
             Status
           </th>
         </tr>
-
       </thead>
 
       <tbody>
         ${
           games
-            .map(
-              renderProjectionRow
-            )
+            .map(renderProjectionRow)
             .join("")
         }
       </tbody>
@@ -1262,15 +1259,13 @@ function renderProjections() {
   `;
 }
 
-
 function renderProjectionRow(game) {
+
   const homeName =
-    game?.home?.team
-    ?? "Unknown";
+    game?.home?.team ?? "Unknown";
 
   const awayName =
-    game?.away?.team
-    ?? "Unknown";
+    game?.away?.team ?? "Unknown";
 
   const homeRank =
     game?.home?.power_rating_rank;
@@ -1305,7 +1300,6 @@ function renderProjectionRow(game) {
   const cssStatus =
     statusClass(status);
 
-
   const disagreementNote =
     hasValue(disagreement)
       ? (
@@ -1315,12 +1309,8 @@ function renderProjectionRow(game) {
         )
       : "No market line";
 
-
   const gameId =
-    String(
-      game.game_id ?? ""
-    );
-
+    String(game.game_id ?? "");
 
   return `
     <tr
@@ -1358,12 +1348,9 @@ function renderProjectionRow(game) {
 
         </div>
 
-
         <div class="team-line">
 
-          <span class="at-symbol">
-            @
-          </span>
+          <span class="at-symbol">@</span>
 
           <span
             class="team-name"
@@ -1387,7 +1374,6 @@ function renderProjectionRow(game) {
 
         </div>
 
-
         <div
           class="team-meta"
           style="margin-top:5px;"
@@ -1402,7 +1388,6 @@ function renderProjectionRow(game) {
         </div>
 
       </td>
-
 
       <td>
 
@@ -1422,7 +1407,6 @@ function renderProjectionRow(game) {
         </div>
 
       </td>
-
 
       <td>
 
@@ -1446,7 +1430,6 @@ function renderProjectionRow(game) {
 
       </td>
 
-
       <td>
 
         <div class="line-primary">
@@ -1461,18 +1444,15 @@ function renderProjectionRow(game) {
         <div class="line-secondary">
           ${
             hasValue(marketTotal)
-              ? `Market ${
-                  formatNumber(
-                    marketTotal,
-                    1
-                  )
-                }`
+              ? `Market ${formatNumber(
+                  marketTotal,
+                  1
+                )}`
               : "Model total"
           }
         </div>
 
       </td>
-
 
       <td class="disagreement">
 
@@ -1484,12 +1464,10 @@ function renderProjectionRow(game) {
         >
           ${
             hasValue(disagreement)
-              ? `${
-                  formatNumber(
-                    disagreement,
-                    1
-                  )
-                } pts`
+              ? `${formatNumber(
+                  disagreement,
+                  1
+                )} pts`
               : "—"
           }
         </div>
@@ -1503,7 +1481,6 @@ function renderProjectionRow(game) {
         </div>
 
       </td>
-
 
       <td class="status-cell">
 
@@ -1528,7 +1505,7 @@ function renderProjectionRow(game) {
 
 
 // ============================================================================
-// GAME LOOKUP
+// GAME ANALYSIS
 // ============================================================================
 
 function findGame(gameId) {
@@ -1540,34 +1517,22 @@ function findGame(gameId) {
   );
 }
 
-
-// ============================================================================
-// GAME ANALYSIS HELPERS
-// ============================================================================
-
 function openMatchup(gameId) {
   const game =
     findGame(gameId);
 
-  if (!game) {
-    return;
-  }
+  if (!game) return;
 
   renderMatchup(game);
-
-  switchView(
-    "matchup"
-  );
+  switchView("matchup");
 }
-
 
 function adjustmentClass(value) {
   if (!hasValue(value)) {
     return "adjustment-neutral";
   }
 
-  const number =
-    Number(value);
+  const number = Number(value);
 
   if (number > 0.05) {
     return "adjustment-positive";
@@ -1580,18 +1545,16 @@ function adjustmentClass(value) {
   return "adjustment-neutral";
 }
 
-
 function adjustmentText(value) {
   if (!hasValue(value)) {
     return "—";
   }
 
-  const number =
-    Number(value);
+  const number = Number(value);
 
   if (
-    Math.abs(number)
-    < 0.005
+    Math.abs(number) <
+    0.005
   ) {
     return "0.00";
   }
@@ -1601,7 +1564,6 @@ function adjustmentText(value) {
     2
   );
 }
-
 
 function matchupComponentRow(
   label,
@@ -1638,21 +1600,17 @@ function matchupComponentRow(
   `;
 }
 
-
 function insightMarkup(insights) {
   if (
-    !Array.isArray(insights)
-    ||
+    !Array.isArray(insights) ||
     !insights.length
   ) {
     return `
       <div class="insight-card">
-
         <div class="insight-text">
-          No additional model insight is available
-          for this matchup yet.
+          No additional model insight
+          is available yet.
         </div>
-
       </div>
     `;
   }
@@ -1665,8 +1623,8 @@ function insightMarkup(insights) {
           <div class="insight-title">
             ${
               escapeHtml(
-                insight.title
-                ?? "Model note"
+                insight.title ??
+                "Model note"
               )
             }
           </div>
@@ -1674,8 +1632,7 @@ function insightMarkup(insights) {
           <div class="insight-text">
             ${
               escapeHtml(
-                insight.text
-                ?? ""
+                insight.text ?? ""
               )
             }
           </div>
@@ -1686,38 +1643,26 @@ function insightMarkup(insights) {
     .join("");
 }
 
-
-// ============================================================================
-// GAME ANALYSIS
-// ============================================================================
-
 function renderMatchup(game) {
+
   const container =
     document.getElementById(
       "matchup-container"
     );
 
-  if (!container) {
-    return;
-  }
-
+  if (!container) return;
 
   const awayName =
-    game?.away?.team
-    ?? "Away";
+    game?.away?.team ?? "Away";
 
   const homeName =
-    game?.home?.team
-    ?? "Home";
-
+    game?.home?.team ?? "Home";
 
   const projection =
-    game?.projection
-    ?? {};
+    game?.projection ?? {};
 
   const components =
-    projection?.components
-    ?? {};
+    projection?.components ?? {};
 
   const matchup =
     components?.matchup_adjustment
@@ -1727,13 +1672,10 @@ function renderMatchup(game) {
     {};
 
   const matchupComponents =
-    matchup?.components
-    ?? {};
+    matchup?.components ?? {};
 
   const available =
-    matchup?.available
-    ?? {};
-
+    matchup?.available ?? {};
 
   const modelSpread =
     projection?.home_spread;
@@ -1747,15 +1689,11 @@ function renderMatchup(game) {
   const marketTotal =
     game?.market?.total;
 
-
   const comparison =
-    game?.comparison
-    ?? {};
+    game?.comparison ?? {};
 
   const winProb =
-    projection?.win_probability
-    ?? {};
-
+    projection?.win_probability ?? {};
 
   const awayWin =
     hasValue(winProb.away)
@@ -1767,7 +1705,6 @@ function renderMatchup(game) {
       ? Number(winProb.home)
       : null;
 
-
   const preferred =
     comparison?.preferred_side;
 
@@ -1777,12 +1714,10 @@ function renderMatchup(game) {
   const statusCss =
     statusClass(status);
 
-
   const sampleComparable =
     Boolean(
       matchup?.comparable_live_sample
     );
-
 
   const matchupNote =
     matchup?.note
@@ -1792,7 +1727,6 @@ function renderMatchup(game) {
         ? "Comparable 2026 live samples are active."
         : "No comparable live sample; matchup adjustment is held at zero."
     );
-
 
   const ratingOnly =
     components?.rating_only_home_spread;
@@ -1806,7 +1740,6 @@ function renderMatchup(game) {
   const matchupTotal =
     matchup?.total;
 
-
   const homeRating =
     components?.home_power_rating
     ??
@@ -1817,7 +1750,6 @@ function renderMatchup(game) {
     ??
     game?.away?.power_rating;
 
-
   const fairLine =
     favoredLine(
       homeName,
@@ -1825,14 +1757,12 @@ function renderMatchup(game) {
       modelSpread
     );
 
-
   const marketLine =
     favoredLine(
       homeName,
       awayName,
       marketSpread
     );
-
 
   const modelEdgeSide =
     (
@@ -1847,10 +1777,8 @@ function renderMatchup(game) {
         )
       : "No actionable market edge";
 
-
   const edgeSize =
     comparison?.disagreement;
-
 
   const edgeClass =
     status === "PLAY"
@@ -1858,7 +1786,6 @@ function renderMatchup(game) {
       : status === "WATCH"
         ? "edge-watch"
         : "";
-
 
   container.innerHTML = `
 
@@ -1889,45 +1816,32 @@ function renderMatchup(game) {
 
           ${
             game.venue
-              ? ` · ${
-                  escapeHtml(
-                    game.venue
-                  )
-                }`
+              ? ` · ${escapeHtml(game.venue)}`
               : ""
           }
         </div>
 
       </div>
 
-
-      <div>
-
-        <span
-          class="
-            status
-            ${statusCss}
-          "
-        >
-          ${
-            escapeHtml(
-              displayStatus(status)
-            )
-          }
-        </span>
-
-      </div>
+      <span
+        class="
+          status
+          ${statusCss}
+        "
+      >
+        ${
+          escapeHtml(
+            displayStatus(status)
+          )
+        }
+      </span>
 
     </div>
 
 
-    <!-- ============================================================
-         MODEL EDGE
-    ============================================================= -->
-
     <div class="model-edge-banner">
 
-      <div class="model-edge-banner-left">
+      <div>
 
         <div class="model-edge-title">
           Model Edge
@@ -1943,49 +1857,35 @@ function renderMatchup(game) {
         </div>
 
         <div class="model-edge-context">
-
           ${
             hasValue(edgeSize)
-              ? `${
-                  formatNumber(
-                    edgeSize,
-                    1
-                  )
-                }-point difference between the model fair line and current market.`
-              : "No current market line is available for comparison."
+              ? `${formatNumber(
+                  edgeSize,
+                  1
+                )}-point difference between the model fair line and current market.`
+              : "No current market line is available."
           }
-
         </div>
 
       </div>
 
-
-      <div>
-
-        <span
-          class="
-            status
-            ${statusCss}
-          "
-        >
-          ${
-            escapeHtml(
-              displayStatus(status)
-            )
-          }
-        </span>
-
-      </div>
+      <span
+        class="
+          status
+          ${statusCss}
+        "
+      >
+        ${
+          escapeHtml(
+            displayStatus(status)
+          )
+        }
+      </span>
 
     </div>
 
 
-    <!-- ============================================================
-         TOP CARDS
-    ============================================================= -->
-
     <div class="analysis-grid">
-
 
       <div class="analysis-card">
 
@@ -2043,7 +1943,6 @@ function renderMatchup(game) {
         </div>
 
         <div class="analysis-small">
-
           ${
             hasValue(marketTotal)
               ? `Market ${formatNumber(
@@ -2052,7 +1951,6 @@ function renderMatchup(game) {
                 )}`
               : "No current market total"
           }
-
         </div>
 
       </div>
@@ -2083,11 +1981,7 @@ function renderMatchup(game) {
         <div class="analysis-small">
           ${
             preferred
-              ? `Market side: ${
-                  escapeHtml(
-                    modelEdgeSide
-                  )
-                }`
+              ? `Market side: ${escapeHtml(modelEdgeSide)}`
               : "No current side edge"
           }
         </div>
@@ -2099,21 +1993,13 @@ function renderMatchup(game) {
 
     <div class="analysis-layout">
 
-
-      <!-- ==========================================================
-           WIN PROBABILITY
-      =========================================================== -->
-
       <div class="analysis-panel">
 
         <div class="analysis-panel-header">
-
           <div class="analysis-panel-title">
             Win probability
           </div>
-
         </div>
-
 
         <div class="analysis-panel-body">
 
@@ -2128,71 +2014,28 @@ function renderMatchup(game) {
                 display:flex;
                 justify-content:space-between;
                 align-items:flex-end;
-                gap:20px;
               "
             >
 
               <div>
-
-                <div
-                  style="
-                    font-size:12px;
-                    color:var(--muted);
-                  "
-                >
+                <div class="analysis-small">
                   ${escapeHtml(awayName)}
                 </div>
-
-                <div
-                  style="
-                    font-size:23px;
-                    font-weight:800;
-                  "
-                >
-                  ${
-                    formatPercent(
-                      awayWin,
-                      1
-                    )
-                  }
+                <div class="analysis-value">
+                  ${formatPercent(awayWin)}
                 </div>
-
               </div>
 
-
-              <div
-                style="
-                  text-align:right;
-                "
-              >
-
-                <div
-                  style="
-                    font-size:12px;
-                    color:var(--muted);
-                  "
-                >
+              <div style="text-align:right;">
+                <div class="analysis-small">
                   ${escapeHtml(homeName)}
                 </div>
-
-                <div
-                  style="
-                    font-size:23px;
-                    font-weight:800;
-                  "
-                >
-                  ${
-                    formatPercent(
-                      homeWin,
-                      1
-                    )
-                  }
+                <div class="analysis-value">
+                  ${formatPercent(homeWin)}
                 </div>
-
               </div>
 
             </div>
-
 
             ${
               hasValue(homeWin)
@@ -2212,21 +2055,13 @@ function renderMatchup(game) {
                             )
                           )}%;
                         "
-                      >
-                      </div>
+                      ></div>
 
                     </div>
 
                     <div class="win-prob-labels">
-
-                      <span>
-                        ${escapeHtml(awayName)}
-                      </span>
-
-                      <span>
-                        ${escapeHtml(homeName)}
-                      </span>
-
+                      <span>${escapeHtml(awayName)}</span>
+                      <span>${escapeHtml(homeName)}</span>
                     </div>
 
                   </div>
@@ -2241,67 +2076,40 @@ function renderMatchup(game) {
       </div>
 
 
-      <!-- ==========================================================
-           POWER FOUNDATION
-      =========================================================== -->
-
       <div class="analysis-panel">
 
         <div class="analysis-panel-header">
-
           <div class="analysis-panel-title">
             Power foundation
           </div>
-
         </div>
-
 
         <div class="analysis-panel-body">
 
           <div class="analysis-row">
-
             <div class="analysis-row-label">
               ${escapeHtml(awayName)}
               power rating
             </div>
-
             <div class="analysis-row-value">
-              ${
-                formatSigned(
-                  awayRating,
-                  3
-                )
-              }
+              ${formatSigned(awayRating, 3)}
             </div>
-
           </div>
 
-
           <div class="analysis-row">
-
             <div class="analysis-row-label">
               ${escapeHtml(homeName)}
               power rating
             </div>
-
             <div class="analysis-row-value">
-              ${
-                formatSigned(
-                  homeRating,
-                  3
-                )
-              }
+              ${formatSigned(homeRating, 3)}
             </div>
-
           </div>
 
-
           <div class="analysis-row">
-
             <div class="analysis-row-label">
               Rating-only fair line
             </div>
-
             <div class="analysis-row-value">
               ${
                 escapeHtml(
@@ -2313,7 +2121,6 @@ function renderMatchup(game) {
                 )
               }
             </div>
-
           </div>
 
         </div>
@@ -2321,30 +2128,20 @@ function renderMatchup(game) {
       </div>
 
 
-      <!-- ==========================================================
-           PROJECTION BUILD
-      =========================================================== -->
-
       <div class="analysis-panel">
 
         <div class="analysis-panel-header">
-
           <div class="analysis-panel-title">
             Projection build
           </div>
-
         </div>
-
 
         <div class="analysis-panel-body">
 
-
           <div class="analysis-row">
-
             <div class="analysis-row-label">
               Rating-only line
             </div>
-
             <div class="analysis-row-value">
               ${
                 escapeHtml(
@@ -2356,16 +2153,12 @@ function renderMatchup(game) {
                 )
               }
             </div>
-
           </div>
 
-
           <div class="analysis-row">
-
             <div class="analysis-row-label">
               Home-field adjustment
             </div>
-
             <div class="analysis-row-value">
               ${
                 hasValue(hfa)
@@ -2376,16 +2169,12 @@ function renderMatchup(game) {
                   : "—"
               }
             </div>
-
           </div>
 
-
           <div class="analysis-row">
-
             <div class="analysis-row-label">
               Line after home field
             </div>
-
             <div class="analysis-row-value">
               ${
                 escapeHtml(
@@ -2397,16 +2186,12 @@ function renderMatchup(game) {
                 )
               }
             </div>
-
           </div>
 
-
           <div class="analysis-row">
-
             <div class="analysis-row-label">
               Live matchup adjustment
             </div>
-
             <div
               class="
                 analysis-row-value
@@ -2423,31 +2208,21 @@ function renderMatchup(game) {
                 )
               }
             </div>
-
           </div>
 
-
           <div class="analysis-row">
-
             <div class="analysis-row-label">
               Final fair line
             </div>
-
             <div class="analysis-row-value">
               ${escapeHtml(fairLine)}
             </div>
-
           </div>
-
 
         </div>
 
       </div>
 
-
-      <!-- ==========================================================
-           LIVE MATCHUP LAYER
-      =========================================================== -->
 
       <div class="analysis-panel">
 
@@ -2467,7 +2242,6 @@ function renderMatchup(game) {
 
         </div>
 
-
         <div
           class="analysis-panel-body"
           style="
@@ -2480,58 +2254,43 @@ function renderMatchup(game) {
             ${escapeHtml(matchupNote)}
           </div>
 
-
           ${
             matchupComponentRow(
               "Passing",
               matchupComponents?.passing,
-              Boolean(
-                available?.passing
-              )
+              Boolean(available?.passing)
             )
           }
-
 
           ${
             matchupComponentRow(
               "Rushing",
               matchupComponents?.rushing,
-              Boolean(
-                available?.rushing
-              )
+              Boolean(available?.rushing)
             )
           }
-
 
           ${
             matchupComponentRow(
               "Success rate",
               matchupComponents?.success_rate,
-              Boolean(
-                available?.success_rate
-              )
+              Boolean(available?.success_rate)
             )
           }
-
 
           ${
             matchupComponentRow(
               "Explosiveness",
               matchupComponents?.explosiveness,
-              Boolean(
-                available?.explosiveness
-              )
+              Boolean(available?.explosiveness)
             )
           }
-
 
           ${
             matchupComponentRow(
               "Havoc",
               matchupComponents?.havoc,
-              Boolean(
-                available?.havoc
-              )
+              Boolean(available?.havoc)
             )
           }
 
@@ -2539,10 +2298,6 @@ function renderMatchup(game) {
 
       </div>
 
-
-      <!-- ==========================================================
-           WHY MODEL DIFFERS
-      =========================================================== -->
 
       <div
         class="
@@ -2552,26 +2307,20 @@ function renderMatchup(game) {
       >
 
         <div class="analysis-panel-header">
-
           <div class="analysis-panel-title">
             Why the model differs
           </div>
-
         </div>
 
-
         <div class="analysis-panel-body">
-
           ${
             insightMarkup(
               game?.insights
             )
           }
-
         </div>
 
       </div>
-
 
     </div>
   `;
@@ -2579,7 +2328,7 @@ function renderMatchup(game) {
 
 
 // ============================================================================
-// TEAM DATABASE
+// TEAMS / RATINGS
 // ============================================================================
 
 function sortedTeams() {
@@ -2588,17 +2337,14 @@ function sortedTeams() {
     .sort(
       (a, b) =>
         (
-          a.power_rating_rank
-          ?? 999
+          a.power_rating_rank ?? 999
         )
         -
         (
-          b.power_rating_rank
-          ?? 999
+          b.power_rating_rank ?? 999
         )
     );
 }
-
 
 function renderTeams() {
   const container =
@@ -2606,24 +2352,9 @@ function renderTeams() {
       "teams-container"
     );
 
-  if (!container) {
-    return;
-  }
+  if (!container) return;
 
-  const data =
-    sortedTeams();
-
-  if (!data.length) {
-
-    container.innerHTML = `
-      <div class="empty-state">
-        No team data available.
-      </div>
-    `;
-
-    return;
-  }
-
+  const data = sortedTeams();
 
   container.innerHTML = `
     <div class="table-scroll">
@@ -2631,7 +2362,6 @@ function renderTeams() {
       <table class="projection-table">
 
         <thead>
-
           <tr>
             <th>Rank</th>
             <th>Team</th>
@@ -2640,73 +2370,65 @@ function renderTeams() {
             <th>Power Rating</th>
             <th>SP+</th>
           </tr>
-
         </thead>
-
 
         <tbody>
 
           ${
-            data
-              .map(
-                team => `
+            data.map(
+              team => `
+                <tr
+                  style="cursor:pointer;"
+                  onclick="
+                    openDossier(
+                      '${escapeJsString(team.team)}'
+                    )
+                  "
+                >
 
-                  <tr
-                    style="
-                      cursor:pointer;
-                    "
-                    onclick="
-                      openDossier(
-                        '${escapeJsString(team.team)}'
+                  <td class="team-meta">
+                    ${powerRank(team)}
+                  </td>
+
+                  <td>
+                    <strong>
+                      ${escapeHtml(team.team)}
+                    </strong>
+                  </td>
+
+                  <td class="team-meta">
+                    ${
+                      escapeHtml(
+                        team.conference ?? "—"
                       )
-                    "
-                  >
+                    }
+                  </td>
 
-                    <td class="team-meta">
-                      ${powerRank(team)}
-                    </td>
+                  <td class="team-meta">
+                    ${recordText(team)}
+                  </td>
 
-                    <td>
-                      <strong>
-                        ${escapeHtml(team.team)}
-                      </strong>
-                    </td>
+                  <td class="line-primary">
+                    ${
+                      formatSigned(
+                        team.power_rating,
+                        3
+                      )
+                    }
+                  </td>
 
-                    <td class="team-meta">
-                      ${
-                        escapeHtml(
-                          team.conference
-                          ?? "—"
-                        )
-                      }
-                    </td>
+                  <td class="team-meta">
+                    ${
+                      formatSigned(
+                        team?.sp_plus?.overall,
+                        1
+                      )
+                    }
+                  </td>
 
-                    <td class="team-meta">
-                      ${recordText(team)}
-                    </td>
-
-                    <td class="line-primary">
-                      ${
-                        formatSigned(
-                          team.power_rating,
-                          3
-                        )
-                      }
-                    </td>
-
-                    <td class="team-meta">
-                      ${
-                        formatSigned(
-                          team?.sp_plus?.overall,
-                          1
-                        )
-                      }
-                    </td>
-
-                  </tr>
-                `
-              )
-              .join("")
+                </tr>
+              `
+            ).join("")
           }
 
         </tbody>
@@ -2717,24 +2439,15 @@ function renderTeams() {
   `;
 }
 
-
-// ============================================================================
-// RATINGS
-// ============================================================================
-
 function renderRatings() {
   const container =
     document.getElementById(
       "ratings-container"
     );
 
-  if (!container) {
-    return;
-  }
+  if (!container) return;
 
-  const data =
-    sortedTeams();
-
+  const data = sortedTeams();
 
   container.innerHTML = `
     <div class="table-scroll">
@@ -2742,7 +2455,6 @@ function renderRatings() {
       <table class="projection-table">
 
         <thead>
-
           <tr>
             <th>Rank</th>
             <th>Team</th>
@@ -2753,108 +2465,85 @@ function renderRatings() {
             <th>Def EPA/Play</th>
             <th>Def Havoc</th>
           </tr>
-
         </thead>
-
 
         <tbody>
 
           ${
-            data
-              .map(
-                team => `
+            data.map(
+              team => `
+                <tr
+                  style="cursor:pointer;"
+                  onclick="
+                    openDossier(
+                      '${escapeJsString(team.team)}'
+                    )
+                  "
+                >
 
-                  <tr
-                    style="
-                      cursor:pointer;
-                    "
-                    onclick="
-                      openDossier(
-                        '${escapeJsString(team.team)}'
+                  <td class="team-meta">
+                    ${powerRank(team)}
+                  </td>
+
+                  <td>
+                    <strong>
+                      ${escapeHtml(team.team)}
+                    </strong>
+                  </td>
+
+                  <td class="line-primary">
+                    ${
+                      formatSigned(
+                        team.power_rating,
+                        3
                       )
-                    "
-                  >
+                    }
+                  </td>
 
-                    <td class="team-meta">
-                      ${powerRank(team)}
-                    </td>
+                  <td class="team-meta">
+                    ${
+                      formatSigned(
+                        team?.sp_plus?.overall,
+                        1
+                      )
+                    }
+                  </td>
 
-                    <td>
+                  <td class="team-meta">
+                    ${
+                      formatEPA(
+                        team?.net?.epa
+                      )
+                    }
+                  </td>
 
-                      <strong>
-                        ${escapeHtml(team.team)}
-                      </strong>
+                  <td class="team-meta">
+                    ${
+                      formatEPA(
+                        team?.offense?.epa_play
+                      )
+                    }
+                  </td>
 
-                      <span
-                        class="team-meta"
-                        style="
-                          margin-left:7px;
-                        "
-                      >
-                        ${
-                          escapeHtml(
-                            team.conference
-                            ?? ""
-                          )
-                        }
-                      </span>
+                  <td class="team-meta">
+                    ${
+                      formatEPA(
+                        team?.defense?.epa_play
+                      )
+                    }
+                  </td>
 
-                    </td>
+                  <td class="team-meta">
+                    ${
+                      formatRate(
+                        team?.defense?.havoc_created
+                      )
+                    }
+                  </td>
 
-                    <td class="line-primary">
-                      ${
-                        formatSigned(
-                          team.power_rating,
-                          3
-                        )
-                      }
-                    </td>
-
-                    <td class="team-meta">
-                      ${
-                        formatSigned(
-                          team?.sp_plus?.overall,
-                          1
-                        )
-                      }
-                    </td>
-
-                    <td class="team-meta">
-                      ${
-                        formatEPA(
-                          team?.net?.epa
-                        )
-                      }
-                    </td>
-
-                    <td class="team-meta">
-                      ${
-                        formatEPA(
-                          team?.offense?.epa_play
-                        )
-                      }
-                    </td>
-
-                    <td class="team-meta">
-                      ${
-                        formatEPA(
-                          team?.defense?.epa_play
-                        )
-                      }
-                    </td>
-
-                    <td class="team-meta">
-                      ${
-                        formatRate(
-                          team?.defense?.havoc_created
-                        )
-                      }
-                    </td>
-
-                  </tr>
-                `
-              )
-              .join("")
+                </tr>
+              `
+            ).join("")
           }
 
         </tbody>
@@ -2874,44 +2563,11 @@ function openDossier(teamName) {
   const team =
     getTeam(teamName);
 
-  if (!team) {
-    return;
-  }
+  if (!team) return;
 
   renderDossier(team);
-
-  switchView(
-    "dossier"
-  );
+  switchView("dossier");
 }
-
-
-function teamSchedule(teamName) {
-  return projections
-
-    .filter(
-      game =>
-        game?.home?.team
-        === teamName
-        ||
-        game?.away?.team
-        === teamName
-    )
-
-    .sort(
-      (a, b) =>
-        (
-          a.week
-          ?? 99
-        )
-        -
-        (
-          b.week
-          ?? 99
-        )
-    );
-}
-
 
 function renderMetricRow(
   name,
@@ -2937,170 +2593,437 @@ function renderMetricRow(
   `;
 }
 
+function renderSeasonOutlook(team) {
+
+  const season =
+    getSeasonProjection(
+      team.team
+    );
+
+  if (!season) {
+    return "";
+  }
+
+  const distribution =
+    usefulWinDistribution(
+      season.exact_win_distribution
+    );
+
+  const maxProbability =
+    Math.max(
+      1,
+      ...distribution.map(
+        item => item.probability
+      )
+    );
+
+  const distributionHtml =
+    distribution
+      .map(
+        item => `
+          <div class="distribution-row">
+
+            <div class="distribution-wins">
+              ${item.wins}
+            </div>
+
+            <div class="distribution-track">
+
+              <div
+                class="distribution-fill"
+                style="
+                  width:${
+                    Math.max(
+                      2,
+                      (
+                        item.probability /
+                        maxProbability
+                      ) * 100
+                    )
+                  }%;
+                "
+              ></div>
+
+            </div>
+
+            <div class="distribution-prob">
+              ${formatPercent(item.probability)}
+            </div>
+
+          </div>
+        `
+      )
+      .join("");
+
+  const altTotals =
+    Object.entries(
+      season.alt_win_totals ?? {}
+    )
+      .filter(
+        ([line]) => {
+          const value = Number(line);
+
+          return (
+            value >= 5.5 &&
+            value <= 11.5
+          );
+        }
+      )
+      .sort(
+        (a, b) =>
+          Number(a[0]) -
+          Number(b[0])
+      );
+
+  const altRows =
+    altTotals
+      .map(([line, probabilities]) => {
+
+        const over =
+          Number(
+            probabilities?.over ?? 0
+          );
+
+        const under =
+          Number(
+            probabilities?.under ?? 0
+          );
+
+        return `
+          <tr>
+
+            <td>
+              ${escapeHtml(line)}
+            </td>
+
+            <td
+              class="${
+                over >= under
+                  ? "alt-strong"
+                  : ""
+              }"
+            >
+              ${formatPercent(over)}
+            </td>
+
+            <td
+              class="${
+                under > over
+                  ? "alt-strong"
+                  : ""
+              }"
+            >
+              ${formatPercent(under)}
+            </td>
+
+          </tr>
+        `;
+      })
+      .join("");
+
+  const scheduleRows =
+    (season.schedule ?? [])
+      .map(game => {
+
+        const source =
+          game.probability_source;
+
+        const completed =
+          source === "completed_result";
+
+        const fcs =
+          game.opponent_type === "FCS";
+
+        let probabilityText =
+          formatPercent(
+            game.win_probability
+          );
+
+        if (completed) {
+          probabilityText =
+            Number(
+              game.win_probability
+            ) >= 99
+              ? "WIN"
+              : "LOSS";
+        }
+
+        return `
+          <tr>
+
+            <td>
+              ${
+                game.week ?? "—"
+              }
+            </td>
+
+            <td>
+              ${
+                seasonLocationLabel(
+                  game.location
+                )
+              }
+              ${escapeHtml(game.opponent)}
+
+              ${
+                fcs
+                  ? `<span class="fcs-tag">FCS</span>`
+                  : ""
+              }
+            </td>
+
+            <td>
+              ${
+                projectionSourceLabel(
+                  source
+                )
+              }
+            </td>
+
+            <td>
+              ${
+                hasValue(
+                  game.team_line
+                )
+                  ? shortSpread(
+                      game.team_line
+                    )
+                  : "—"
+              }
+            </td>
+
+            <td>
+              <strong>
+                ${probabilityText}
+              </strong>
+            </td>
+
+          </tr>
+        `;
+      })
+      .join("");
+
+  return `
+
+    <div class="season-outlook">
+
+      <div class="eyebrow">
+        Season outlook
+      </div>
+
+      <div class="season-summary-grid">
+
+        <div class="season-summary-card">
+
+          <div class="season-summary-label">
+            Projected Wins
+          </div>
+
+          <div class="season-summary-value">
+            ${
+              formatNumber(
+                season.expected_wins,
+                2
+              )
+            }
+          </div>
+
+          <div class="season-summary-note">
+            ${
+              formatNumber(
+                season.expected_losses,
+                2
+              )
+            } projected losses
+          </div>
+
+        </div>
+
+
+        <div class="season-summary-card">
+
+          <div class="season-summary-label">
+            Most Likely Record
+          </div>
+
+          <div class="season-summary-value">
+            ${
+              escapeHtml(
+                season.most_likely_record
+                ?? "—"
+              )
+            }
+          </div>
+
+          <div class="season-summary-note">
+            ${
+              formatPercent(
+                season.most_likely_probability
+              )
+            } exact outcome
+          </div>
+
+        </div>
+
+
+        <div class="season-summary-card">
+
+          <div class="season-summary-label">
+            Bowl Eligible
+          </div>
+
+          <div class="season-summary-value">
+            ${
+              formatPercent(
+                season.bowl_eligible_probability
+              )
+            }
+          </div>
+
+          <div class="season-summary-note">
+            Probability of 6+ wins
+          </div>
+
+        </div>
+
+
+        <div class="season-summary-card">
+
+          <div class="season-summary-label">
+            10+ Wins
+          </div>
+
+          <div class="season-summary-value">
+            ${
+              formatPercent(
+                season?.at_least?.["10_wins"]
+              )
+            }
+          </div>
+
+          <div class="season-summary-note">
+            ${
+              formatPercent(
+                season?.at_least?.["11_wins"]
+              )
+            } for 11+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="season-two-column">
+
+        <div class="analysis-panel">
+
+          <div class="analysis-panel-header">
+
+            <div class="analysis-panel-title">
+              Win Distribution
+            </div>
+
+          </div>
+
+          <div class="distribution-wrap">
+
+            ${distributionHtml}
+
+          </div>
+
+        </div>
+
+
+        <div class="analysis-panel">
+
+          <div class="analysis-panel-header">
+
+            <div class="analysis-panel-title">
+              Alt Win Totals
+            </div>
+
+          </div>
+
+          <div
+            style="
+              padding:4px 10px 10px;
+            "
+          >
+
+            <table class="alt-table">
+
+              <thead>
+                <tr>
+                  <th>Total</th>
+                  <th>Over</th>
+                  <th>Under</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                ${altRows}
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="analysis-panel">
+
+        <div class="analysis-panel-header">
+
+          <div class="analysis-panel-title">
+            Full Season Schedule
+          </div>
+
+          <div class="team-meta">
+            ${season.games ?? "—"} games
+          </div>
+
+        </div>
+
+        <div style="overflow-x:auto;">
+
+          <table class="season-schedule-table">
+
+            <thead>
+              <tr>
+                <th>Week</th>
+                <th>Opponent</th>
+                <th>Source</th>
+                <th>Model Line</th>
+                <th>Win Probability</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              ${scheduleRows}
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+  `;
+}
 
 function renderDossier(team) {
+
   const container =
     document.getElementById(
       "dossier-container"
     );
 
-  if (!container) {
-    return;
-  }
-
-
-  const games =
-    teamSchedule(
-      team.team
-    );
-
-
-  const upcomingGames =
-    games.filter(
-      game => {
-
-        if (!game.start_date) {
-          return true;
-        }
-
-        return (
-          new Date(
-            game.start_date
-          ).getTime()
-          >=
-          Date.now()
-          -
-          86400000
-        );
-      }
-    );
-
-
-  const scheduleRows =
-    upcomingGames
-      .slice(
-        0,
-        12
-      )
-      .map(
-        game => {
-
-          const home =
-            game.home.team;
-
-          const away =
-            game.away.team;
-
-          const opponent =
-            home === team.team
-              ? away
-              : home;
-
-          const location =
-            home === team.team
-              ? "vs"
-              : "@";
-
-          const modelSpread =
-            game?.projection?.home_spread;
-
-          let teamSpread =
-            null;
-
-          if (
-            hasValue(
-              modelSpread
-            )
-          ) {
-
-            teamSpread =
-              home === team.team
-                ? Number(
-                    modelSpread
-                  )
-                : -Number(
-                    modelSpread
-                  );
-          }
-
-
-          return `
-            <div
-              class="metric-row"
-              style="
-                cursor:pointer;
-              "
-              onclick="
-                openMatchup(
-                  '${escapeJsString(String(game.game_id ?? ""))}'
-                )
-              "
-            >
-
-              <div>
-
-                <div
-                  style="
-                    font-weight:600;
-                    font-size:12px;
-                  "
-                >
-                  Week ${
-                    game.week
-                    ?? "—"
-                  }
-                  · ${location}
-                  ${escapeHtml(opponent)}
-                </div>
-
-                <div
-                  class="team-meta"
-                  style="
-                    margin-top:4px;
-                  "
-                >
-                  ${
-                    escapeHtml(
-                      gameDateText(
-                        game.start_date
-                      )
-                    )
-                  }
-                </div>
-
-              </div>
-
-
-              <div class="metric-value">
-                ${
-                  shortSpread(
-                    teamSpread
-                  )
-                }
-              </div>
-
-
-              <div class="metric-rank">
-                ${
-                  game?.comparison?.status
-                  &&
-                  game?.comparison?.status
-                  !== "NO MARKET"
-
-                    ? escapeHtml(
-                        game.comparison.status
-                      )
-
-                    : ""
-                }
-              </div>
-
-            </div>
-          `;
-        }
-      )
-      .join("");
-
+  if (!container) return;
 
   const offLive =
     liveSection(
@@ -3114,20 +3037,17 @@ function renderDossier(team) {
       "defense"
     );
 
-
   const offModelEPA =
     team?.offense?.epa_play;
 
   const defModelEPA =
     team?.defense?.epa_play;
 
-
   const offModelSR =
     team?.offense?.success_rate;
 
   const defModelSR =
     team?.defense?.success_rate;
-
 
   const offPlays =
     livePlays(
@@ -3140,7 +3060,6 @@ function renderDossier(team) {
       team,
       "defense"
     );
-
 
   container.innerHTML = `
 
@@ -3161,7 +3080,6 @@ function renderDossier(team) {
         </div>
 
         <div class="team-dossier-sub">
-
           ${
             escapeHtml(
               team.conference
@@ -3176,7 +3094,6 @@ function renderDossier(team) {
               liveSampleLabel(team)
             )
           }
-
         </div>
 
       </div>
@@ -3200,11 +3117,9 @@ function renderDossier(team) {
     <div class="dossier-stat-grid">
 
       <div class="dossier-stat">
-
         <div class="dossier-label">
           Power Rating
         </div>
-
         <div class="dossier-value">
           ${
             formatSigned(
@@ -3213,16 +3128,12 @@ function renderDossier(team) {
             )
           }
         </div>
-
       </div>
 
-
       <div class="dossier-stat">
-
         <div class="dossier-label">
           SP+ Overall
         </div>
-
         <div class="dossier-value">
           ${
             formatSigned(
@@ -3231,16 +3142,12 @@ function renderDossier(team) {
             )
           }
         </div>
-
       </div>
 
-
       <div class="dossier-stat">
-
         <div class="dossier-label">
           SP+ Offense
         </div>
-
         <div class="dossier-value">
           ${
             formatSigned(
@@ -3249,16 +3156,12 @@ function renderDossier(team) {
             )
           }
         </div>
-
       </div>
 
-
       <div class="dossier-stat">
-
         <div class="dossier-label">
           SP+ Defense
         </div>
-
         <div class="dossier-value">
           ${
             formatSigned(
@@ -3267,36 +3170,36 @@ function renderDossier(team) {
             )
           }
         </div>
-
       </div>
 
-
       <div class="dossier-stat">
-
         <div class="dossier-label">
           Record
         </div>
-
         <div class="dossier-value">
           ${recordText(team)}
         </div>
-
       </div>
 
     </div>
 
 
-    <div class="dossier-layout">
+    ${
+      renderSeasonOutlook(team)
+    }
 
+
+    <div
+      class="dossier-layout"
+      style="margin-top:12px;"
+    >
 
       <div class="panel">
 
         <div class="panel-header">
-
           <div class="panel-title">
             Offensive Profile
           </div>
-
         </div>
 
         <div class="panel-body">
@@ -3304,9 +3207,7 @@ function renderDossier(team) {
           ${
             renderMetricRow(
               "Model EPA / Play",
-              formatEPA(
-                offModelEPA
-              ),
+              formatEPA(offModelEPA),
               metricRank(
                 team,
                 "offense",
@@ -3319,9 +3220,7 @@ function renderDossier(team) {
           ${
             renderMetricRow(
               "Model Success Rate",
-              formatRate(
-                offModelSR
-              ),
+              formatRate(offModelSR),
               metricRank(
                 team,
                 "offense",
@@ -3384,11 +3283,9 @@ function renderDossier(team) {
       <div class="panel">
 
         <div class="panel-header">
-
           <div class="panel-title">
             Defensive Profile
           </div>
-
         </div>
 
         <div class="panel-body">
@@ -3396,9 +3293,7 @@ function renderDossier(team) {
           ${
             renderMetricRow(
               "Model EPA / Play",
-              formatEPA(
-                defModelEPA
-              ),
+              formatEPA(defModelEPA),
               metricRank(
                 team,
                 "defense",
@@ -3411,9 +3306,7 @@ function renderDossier(team) {
           ${
             renderMetricRow(
               "Model Success Rate Allowed",
-              formatRate(
-                defModelSR
-              ),
+              formatRate(defModelSR),
               metricRank(
                 team,
                 "defense",
@@ -3476,11 +3369,9 @@ function renderDossier(team) {
       <div class="panel">
 
         <div class="panel-header">
-
           <div class="panel-title">
             Net Efficiency
           </div>
-
         </div>
 
         <div class="panel-body">
@@ -3547,11 +3438,9 @@ function renderDossier(team) {
       <div class="panel">
 
         <div class="panel-header">
-
           <div class="panel-title">
             Model Context
           </div>
-
         </div>
 
         <div class="panel-body">
@@ -3600,9 +3489,9 @@ function renderDossier(team) {
           ${
             renderMetricRow(
               "Live Data Weight",
-              metricsData?.meta?.blend_weight
+              metricsData?.meta
+                ?.blend_weight
                 !== undefined
-
                 ? formatPercent(
                     Number(
                       metricsData
@@ -3612,7 +3501,6 @@ function renderDossier(team) {
                     * 100,
                     0
                   )
-
                 : "—"
             )
           }
@@ -3624,43 +3512,6 @@ function renderDossier(team) {
                 liveSampleLabel(team)
               )
             )
-          }
-
-        </div>
-
-      </div>
-
-
-      <div
-        class="
-          panel
-          schedule-panel
-        "
-      >
-
-        <div class="panel-header">
-
-          <div class="panel-title">
-            2026 Schedule & Model Lines
-          </div>
-
-          <div class="team-meta">
-            ${games.length} games
-          </div>
-
-        </div>
-
-
-        <div class="panel-body">
-
-          ${
-            scheduleRows
-            ||
-            `
-              <div class="empty-state">
-                No upcoming schedule available.
-              </div>
-            `
           }
 
         </div>
@@ -3689,8 +3540,7 @@ function attachEvents() {
       event => {
 
         currentSearch =
-          event.target.value
-            .trim();
+          event.target.value.trim();
 
         renderProjections();
       }
