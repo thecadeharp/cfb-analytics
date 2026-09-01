@@ -18,6 +18,8 @@ Fixes:
 - Preserves teams that have not played yet
 - Normalizes provider team names before they enter the model
 - Repairs legacy team keys in both the frozen baseline and current team data
+- Uses calendar-based week bounds so future weeks are never probed
+- Uses 5-request retries, 75s timeout, exponential backoff, and /plays fallback
 
 IMPORTANT:
 The public/model name for San Jose State is always "San Jose State".
@@ -282,16 +284,18 @@ def cfbd(
         f"{endpoint}"
     )
 
+    max_attempts = 5
+
     for attempt in range(
         1,
-        4
+        max_attempts + 1
     ):
         try:
             response = requests.get(
                 url,
                 headers=HEADERS,
                 params=params,
-                timeout=45
+                timeout=75
             )
 
         except requests.RequestException as error:
@@ -299,11 +303,11 @@ def cfbd(
             print(
                 f"⚠ CFBD request error "
                 f"{endpoint} "
-                f"({attempt}/3): {error}"
+                f"({attempt}/{max_attempts}): {error}"
             )
 
-            if attempt < 3:
-                time.sleep(2)
+            if attempt < max_attempts:
+                time.sleep(min(2 ** attempt, 20))
                 continue
 
             if required:
@@ -338,8 +342,8 @@ def cfbd(
                 f"Params: {params}"
             )
 
-            if attempt < 3:
-                time.sleep(2)
+            if attempt < max_attempts:
+                time.sleep(min(2 ** attempt, 20))
                 continue
 
             if required:
@@ -397,6 +401,90 @@ def validate_cfbd():
     print(
         "✅ CFBD authentication successful"
     )
+
+
+def current_calendar_week():
+    """
+    Determine the latest regular-season week that could possibly contain
+    completed games from the calendar instead of probing all future CFBD weeks.
+
+    2026 Week 0 begins Saturday, August 22.
+    Week numbers advance every seven days from that anchor.
+
+    Examples:
+    - Aug 22-28 -> Week 0
+    - Aug 29-Sep 4 -> Week 1
+    - Sep 5-11 -> Week 2
+
+    The value is capped to the normal regular-season range.
+    """
+    anchor = datetime(YEAR, 8, 22).date()
+    today = datetime.now().date()
+
+    if today < anchor:
+        return 0
+
+    week = (today - anchor).days // 7
+    return max(0, min(16, int(week)))
+
+
+def fetch_week_plays(week):
+    """
+    Fetch one week's play-by-play with a fallback strategy.
+
+    First try classification=fbs. If CFBD repeatedly fails or returns no data,
+    retry without classification and filter to FBS-vs-FBS locally.
+    """
+    primary_params = {
+        "year": YEAR,
+        "week": week,
+        "seasonType": "regular",
+        "classification": "fbs",
+    }
+
+    print(
+        f"   Fetching Week {week} plays "
+        "(FBS-filtered request)..."
+    )
+
+    plays = cfbd(
+        "/plays",
+        primary_params,
+        required=False
+    )
+
+    if plays:
+        return plays
+
+    print(
+        f"   ⚠ Week {week} FBS-filtered play request "
+        "failed or returned no data."
+    )
+    print(
+        "   Retrying without classification; "
+        "FBS-vs-FBS filtering will happen locally."
+    )
+
+    fallback_params = {
+        "year": YEAR,
+        "week": week,
+        "seasonType": "regular",
+    }
+
+    plays = cfbd(
+        "/plays",
+        fallback_params,
+        required=False
+    )
+
+    if plays:
+        return plays
+
+    print(
+        f"❌ Unable to retrieve Week {week} play-by-play "
+        "after both request strategies."
+    )
+    sys.exit(1)
 
 
 # =============================================================================
@@ -1362,9 +1450,16 @@ def main():
     completed_week = 0
     completed_games = 0
 
+    max_week_to_check = current_calendar_week()
+
+    print(
+        f"   Calendar allows checks through Week "
+        f"{max_week_to_check}"
+    )
+
     for week in range(
         0,
-        17
+        max_week_to_check + 1
     ):
         games = cfbd(
             "/games",
@@ -1384,38 +1479,16 @@ def main():
         completed_this_week = 0
 
         for game in games:
-
-            home_points = first_value(
-                game,
-                "homePoints",
-                "home_points"
-            )
-
-            away_points = first_value(
-                game,
-                "awayPoints",
-                "away_points"
-            )
-
             completed = first_value(
                 game,
                 "completed",
                 default=False
             )
 
-            if (
-                completed is True
-                or (
-                    home_points
-                    is not None
-                    and away_points
-                    is not None
-                )
-            ):
+            if completed is True:
                 completed_this_week += 1
 
         if completed_this_week:
-
             completed_week = max(
                 completed_week,
                 week
@@ -1425,23 +1498,19 @@ def main():
                 completed_this_week
             )
 
-            print(
-                f"   Week {week}: "
-                f"{completed_this_week} "
-                f"completed"
-            )
+        print(
+            f"   Week {week}: "
+            f"{completed_this_week} completed"
+        )
 
     if completed_games == 0:
-
         print("")
         print(
             "ℹ️ No completed games yet."
         )
-
         print(
             "Keeping baseline unchanged."
         )
-
         return
 
     print("")
@@ -1535,15 +1604,8 @@ def main():
         0,
         completed_week + 1
     ):
-        raw_plays = cfbd(
-            "/plays",
-            {
-                "year": YEAR,
-                "week": week,
-                "seasonType": "regular",
-                "classification": "fbs",
-            },
-            required=True
+        raw_plays = fetch_week_plays(
+            week
         )
 
         raw_play_count += len(
