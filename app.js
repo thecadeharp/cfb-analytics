@@ -4,12 +4,6 @@
 //
 // Static frontend.
 // GitHub Actions creates the analytics JSON.
-// This file renders:
-//   - Projections
-//   - Game analysis
-//   - Teams
-//   - Ratings
-//   - Team dossiers
 //
 // ============================================================================
 
@@ -64,29 +58,21 @@ function escapeJsString(value) {
 }
 
 
-function formatNumber(
-  value,
-  digits = 1
-) {
+function formatNumber(value, digits = 1) {
   if (!hasValue(value)) {
     return "—";
   }
 
-  return Number(value)
-    .toFixed(digits);
+  return Number(value).toFixed(digits);
 }
 
 
-function formatSigned(
-  value,
-  digits = 1
-) {
+function formatSigned(value, digits = 1) {
   if (!hasValue(value)) {
     return "—";
   }
 
-  const number =
-    Number(value);
+  const number = Number(value);
 
   if (number > 0) {
     return `+${number.toFixed(digits)}`;
@@ -101,8 +87,7 @@ function formatEPA(value) {
     return "—";
   }
 
-  const number =
-    Number(value);
+  const number = Number(value);
 
   if (number > 0) {
     return `+${number.toFixed(3)}`;
@@ -112,10 +97,7 @@ function formatEPA(value) {
 }
 
 
-function formatPercent(
-  value,
-  digits = 1
-) {
+function formatPercent(value, digits = 1) {
   if (!hasValue(value)) {
     return "—";
   }
@@ -124,16 +106,12 @@ function formatPercent(
 }
 
 
-function formatRate(
-  value,
-  digits = 1
-) {
+function formatRate(value, digits = 1) {
   if (!hasValue(value)) {
     return "—";
   }
 
-  const number =
-    Number(value);
+  const number = Number(value);
 
   if (
     number < 0 ||
@@ -147,18 +125,13 @@ function formatRate(
 
 
 function recordText(team) {
-  const record =
-    team?.record;
+  const record = team?.record;
 
   if (!record) {
     return "—";
   }
 
-  return `${
-    record.wins ?? 0
-  }-${
-    record.losses ?? 0
-  }`;
+  return `${record.wins ?? 0}-${record.losses ?? 0}`;
 }
 
 
@@ -192,16 +165,13 @@ function shortSpread(spread) {
     return "—";
   }
 
-  const number =
-    Number(spread);
+  const number = Number(spread);
 
   if (number === 0) {
     return "PK";
   }
 
-  return formatSigned(
-    number
-  );
+  return formatSigned(number);
 }
 
 
@@ -210,8 +180,7 @@ function gameDateText(dateString) {
     return "TBD";
   }
 
-  const date =
-    new Date(dateString);
+  const date = new Date(dateString);
 
   if (
     Number.isNaN(
@@ -244,8 +213,7 @@ function metricRank(
   }
 
   const rank =
-    team?.[section]
-      ?.[rankField];
+    team?.[section]?.[rankField];
 
   if (
     !rank ||
@@ -271,10 +239,60 @@ function powerRank(team) {
 
 
 function getTeam(name) {
-  return (
-    teams?.[name]
-    ?? null
-  );
+  return teams?.[name] ?? null;
+}
+
+
+// ============================================================================
+// SPREAD DISPLAY HELPERS
+// ============================================================================
+
+function favoredLine(
+  homeTeam,
+  awayTeam,
+  homeSpread
+) {
+  if (!hasValue(homeSpread)) {
+    return "—";
+  }
+
+  const spread =
+    Number(homeSpread);
+
+  if (spread === 0) {
+    return "Pick'em";
+  }
+
+  if (spread < 0) {
+    return `${homeTeam} ${formatSigned(spread, 1)}`;
+  }
+
+  return `${awayTeam} ${formatSigned(-spread, 1)}`;
+}
+
+
+function marketSideForTeam(
+  teamName,
+  homeTeam,
+  awayTeam,
+  homeSpread
+) {
+  if (!hasValue(homeSpread)) {
+    return "—";
+  }
+
+  const spread =
+    Number(homeSpread);
+
+  if (teamName === homeTeam) {
+    return `${homeTeam} ${formatSigned(spread, 1)}`;
+  }
+
+  if (teamName === awayTeam) {
+    return `${awayTeam} ${formatSigned(-spread, 1)}`;
+  }
+
+  return "—";
 }
 
 
@@ -287,8 +305,7 @@ function liveSection(
   section
 ) {
   return (
-    team?.[section]
-      ?.live_2026
+    team?.[section]?.live_2026
     ?? {}
   );
 }
@@ -356,10 +373,7 @@ function liveNet(
     return null;
   }
 
-  return (
-    offense -
-    defense
-  );
+  return offense - defense;
 }
 
 
@@ -395,9 +409,7 @@ function switchView(viewName) {
   document
     .querySelectorAll(".view")
     .forEach((view) => {
-      view.classList.remove(
-        "active"
-      );
+      view.classList.remove("active");
     });
 
   const requested =
@@ -412,14 +424,11 @@ function switchView(viewName) {
   }
 
   document
-    .querySelectorAll(
-      ".nav-item"
-    )
+    .querySelectorAll(".nav-item")
     .forEach((button) => {
       button.classList.toggle(
         "active",
-        button.dataset.view
-          === viewName
+        button.dataset.view === viewName
       );
     });
 
@@ -457,11 +466,8 @@ function ensureMatchupView() {
       "section"
     );
 
-  section.id =
-    "view-matchup";
-
-  section.className =
-    "view";
+  section.id = "view-matchup";
+  section.className = "view";
 
   section.innerHTML = `
     <button
@@ -475,9 +481,7 @@ function ensureMatchupView() {
     </div>
   `;
 
-  main.appendChild(
-    section
-  );
+  main.appendChild(section);
 
 
   const style =
@@ -533,6 +537,10 @@ function ensureMatchupView() {
       min-height: 105px;
     }
 
+    .analysis-card.edge-card {
+      border-color: var(--border-dark);
+    }
+
     .analysis-label {
       font-family: var(--mono);
       color: var(--muted);
@@ -548,11 +556,58 @@ function ensureMatchupView() {
       letter-spacing: -0.8px;
     }
 
+    .analysis-value.edge-play {
+      color: var(--green);
+    }
+
+    .analysis-value.edge-watch {
+      color: var(--amber);
+    }
+
     .analysis-small {
       color: var(--muted);
       font-size: 11px;
       margin-top: 6px;
       line-height: 1.4;
+    }
+
+    .model-edge-banner {
+      background: var(--surface);
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 18px;
+
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .model-edge-banner-left {
+      min-width: 0;
+    }
+
+    .model-edge-title {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+
+    .model-edge-side {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+    }
+
+    .model-edge-context {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
     }
 
     .analysis-layout {
@@ -697,9 +752,7 @@ function ensureMatchupView() {
       color: var(--muted);
     }
 
-    @media (
-      max-width: 900px
-    ) {
+    @media (max-width: 900px) {
 
       .analysis-grid {
         grid-template-columns:
@@ -717,11 +770,14 @@ function ensureMatchupView() {
       .matchup-header {
         flex-direction: column;
       }
+
+      .model-edge-banner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
     }
 
-    @media (
-      max-width: 520px
-    ) {
+    @media (max-width: 520px) {
 
       .analysis-grid {
         grid-template-columns: 1fr;
@@ -730,12 +786,14 @@ function ensureMatchupView() {
       .matchup-title {
         font-size: 27px;
       }
+
+      .model-edge-side {
+        font-size: 23px;
+      }
     }
   `;
 
-  document.head.appendChild(
-    style
-  );
+  document.head.appendChild(style);
 }
 
 
@@ -770,27 +828,17 @@ async function init() {
       oddsData,
       projectionsData,
     ] = await Promise.all([
-      loadJson(
-        DATA_URLS.metrics
-      ),
-      loadJson(
-        DATA_URLS.schedule
-      ),
-      loadJson(
-        DATA_URLS.odds
-      ),
-      loadJson(
-        DATA_URLS.projections
-      ),
+      loadJson(DATA_URLS.metrics),
+      loadJson(DATA_URLS.schedule),
+      loadJson(DATA_URLS.odds),
+      loadJson(DATA_URLS.projections),
     ]);
 
     teams =
-      metricsData?.teams
-      ?? {};
+      metricsData?.teams ?? {};
 
     projections =
-      projectionsData?.games
-      ?? [];
+      projectionsData?.games ?? [];
 
     updateHeader();
 
@@ -819,8 +867,7 @@ async function init() {
       container.innerHTML = `
         <div class="empty-state">
 
-          Unable to load
-          analytics data.
+          Unable to load analytics data.
 
           <br><br>
 
@@ -830,11 +877,7 @@ async function init() {
               font-size:11px;
             "
           >
-            ${
-              escapeHtml(
-                error.message
-              )
-            }
+            ${escapeHtml(error.message)}
           </span>
 
         </div>
@@ -859,11 +902,9 @@ function updateHeader() {
   }
 
   const generated =
-    projectionsData?.meta
-      ?.generated
+    projectionsData?.meta?.generated
     ||
-    metricsData?.meta
-      ?.generated;
+    metricsData?.meta?.generated;
 
   if (!generated) {
 
@@ -920,9 +961,7 @@ function availableWeeks() {
       .map(Number)
       .filter(
         week =>
-          !Number.isNaN(
-            week
-          )
+          !Number.isNaN(week)
       );
 
   return [
@@ -946,21 +985,16 @@ function determineDefaultWeek(
       .filter(
         game =>
           hasValue(
-            game?.market
-              ?.home_spread
+            game?.market?.home_spread
           )
       )
       .map(
         game =>
-          Number(
-            game.week
-          )
+          Number(game.week)
       )
       .filter(
         week =>
-          !Number.isNaN(
-            week
-          )
+          !Number.isNaN(week)
       );
 
   if (
@@ -990,8 +1024,7 @@ function buildWeekTabs() {
 
   if (!weeks.length) {
 
-    container.innerHTML =
-      "";
+    container.innerHTML = "";
 
     return;
   }
@@ -1058,8 +1091,7 @@ function projectionGamesForCurrentView() {
       game => {
 
         if (
-          currentWeek !== null
-          &&
+          currentWeek !== null &&
           Number(game.week)
           !==
           Number(currentWeek)
@@ -1072,8 +1104,7 @@ function projectionGamesForCurrentView() {
         }
 
         const query =
-          currentSearch
-            .toLowerCase();
+          currentSearch.toLowerCase();
 
         const home =
           game?.home?.team
@@ -1086,13 +1117,9 @@ function projectionGamesForCurrentView() {
           ?? "";
 
         return (
-          home.includes(
-            query
-          )
+          home.includes(query)
           ||
-          away.includes(
-            query
-          )
+          away.includes(query)
         );
       }
     )
@@ -1101,13 +1128,11 @@ function projectionGamesForCurrentView() {
       (a, b) => {
 
         const aDisagreement =
-          a?.comparison
-            ?.disagreement
+          a?.comparison?.disagreement
           ?? -1;
 
         const bDisagreement =
-          b?.comparison
-            ?.disagreement
+          b?.comparison?.disagreement
           ?? -1;
 
         if (
@@ -1116,21 +1141,18 @@ function projectionGamesForCurrentView() {
           aDisagreement
         ) {
           return (
-            bDisagreement
-            -
+            bDisagreement -
             aDisagreement
           );
         }
 
         return (
           new Date(
-            a.start_date
-            || 0
+            a.start_date || 0
           ).getTime()
           -
           new Date(
-            b.start_date
-            || 0
+            b.start_date || 0
           ).getTime()
         );
       }
@@ -1160,24 +1182,21 @@ function renderProjections() {
     games.filter(
       game =>
         hasValue(
-          game?.market
-            ?.home_spread
+          game?.market?.home_spread
         )
     );
 
   const plays =
     games.filter(
       game =>
-        game?.comparison
-          ?.status
+        game?.comparison?.status
         === "PLAY"
     );
 
   const watches =
     games.filter(
       game =>
-        game?.comparison
-          ?.status
+        game?.comparison?.status
         === "WATCH"
     );
 
@@ -1199,8 +1218,7 @@ function renderProjections() {
 
     container.innerHTML = `
       <div class="empty-state">
-        No games match this
-        week/search.
+        No games match this week/search.
       </div>
     `;
 
@@ -1255,55 +1273,41 @@ function renderProjectionRow(game) {
     ?? "Unknown";
 
   const homeRank =
-    game?.home
-      ?.power_rating_rank;
+    game?.home?.power_rating_rank;
 
   const awayRank =
-    game?.away
-      ?.power_rating_rank;
+    game?.away?.power_rating_rank;
 
   const modelSpread =
-    game?.projection
-      ?.home_spread;
+    game?.projection?.home_spread;
 
   const modelTotal =
-    game?.projection
-      ?.total;
+    game?.projection?.total;
 
   const marketSpread =
-    game?.market
-      ?.home_spread;
+    game?.market?.home_spread;
 
   const marketTotal =
-    game?.market
-      ?.total;
+    game?.market?.total;
 
   const bookmaker =
-    game?.market
-      ?.bookmaker;
+    game?.market?.bookmaker;
 
   const disagreement =
-    game?.comparison
-      ?.disagreement;
+    game?.comparison?.disagreement;
 
   const preferred =
-    game?.comparison
-      ?.preferred_side;
+    game?.comparison?.preferred_side;
 
   const status =
-    game?.comparison
-      ?.status;
+    game?.comparison?.status;
 
   const cssStatus =
-    statusClass(
-      status
-    );
+    statusClass(status);
 
 
   const disagreementNote =
-    hasValue(
-      disagreement
-    )
+    hasValue(disagreement)
       ? (
           preferred
             ? `Model favors ${preferred}`
@@ -1314,8 +1318,7 @@ function renderProjectionRow(game) {
 
   const gameId =
     String(
-      game.game_id
-      ?? ""
+      game.game_id ?? ""
     );
 
 
@@ -1436,9 +1439,7 @@ function renderProjectionRow(game) {
         <div class="line-secondary">
           ${
             bookmaker
-              ? escapeHtml(
-                  bookmaker
-                )
+              ? escapeHtml(bookmaker)
               : "No current market"
           }
         </div>
@@ -1459,9 +1460,7 @@ function renderProjectionRow(game) {
 
         <div class="line-secondary">
           ${
-            hasValue(
-              marketTotal
-            )
+            hasValue(marketTotal)
               ? `Market ${
                   formatNumber(
                     marketTotal,
@@ -1484,9 +1483,7 @@ function renderProjectionRow(game) {
           "
         >
           ${
-            hasValue(
-              disagreement
-            )
+            hasValue(disagreement)
               ? `${
                   formatNumber(
                     disagreement,
@@ -1518,9 +1515,7 @@ function renderProjectionRow(game) {
         >
           ${
             escapeHtml(
-              displayStatus(
-                status
-              )
+              displayStatus(status)
             )
           }
         </span>
@@ -1536,41 +1531,29 @@ function renderProjectionRow(game) {
 // GAME LOOKUP
 // ============================================================================
 
-function findGame(
-  gameId
-) {
+function findGame(gameId) {
   return projections.find(
     game =>
-      String(
-        game.game_id
-      )
+      String(game.game_id)
       ===
-      String(
-        gameId
-      )
+      String(gameId)
   );
 }
 
 
 // ============================================================================
-// GAME ANALYSIS
+// GAME ANALYSIS HELPERS
 // ============================================================================
 
-function openMatchup(
-  gameId
-) {
+function openMatchup(gameId) {
   const game =
-    findGame(
-      gameId
-    );
+    findGame(gameId);
 
   if (!game) {
     return;
   }
 
-  renderMatchup(
-    game
-  );
+  renderMatchup(game);
 
   switchView(
     "matchup"
@@ -1578,9 +1561,7 @@ function openMatchup(
 }
 
 
-function adjustmentClass(
-  value
-) {
+function adjustmentClass(value) {
   if (!hasValue(value)) {
     return "adjustment-neutral";
   }
@@ -1600,9 +1581,7 @@ function adjustmentClass(
 }
 
 
-function adjustmentText(
-  value
-) {
+function adjustmentText(value) {
   if (!hasValue(value)) {
     return "—";
   }
@@ -1631,16 +1610,12 @@ function matchupComponentRow(
 ) {
   const shown =
     active
-      ? adjustmentText(
-          value
-        )
+      ? adjustmentText(value)
       : "Withheld";
 
   const css =
     active
-      ? adjustmentClass(
-          value
-        )
+      ? adjustmentClass(value)
       : "adjustment-neutral";
 
   return `
@@ -1664,13 +1639,9 @@ function matchupComponentRow(
 }
 
 
-function insightMarkup(
-  insights
-) {
+function insightMarkup(insights) {
   if (
-    !Array.isArray(
-      insights
-    )
+    !Array.isArray(insights)
     ||
     !insights.length
   ) {
@@ -1678,8 +1649,7 @@ function insightMarkup(
       <div class="insight-card">
 
         <div class="insight-text">
-          No additional model
-          insight is available
+          No additional model insight is available
           for this matchup yet.
         </div>
 
@@ -1717,6 +1687,10 @@ function insightMarkup(
 }
 
 
+// ============================================================================
+// GAME ANALYSIS
+// ============================================================================
+
 function renderMatchup(game) {
   const container =
     document.getElementById(
@@ -1746,11 +1720,9 @@ function renderMatchup(game) {
     ?? {};
 
   const matchup =
-    components
-      ?.matchup_adjustment
+    components?.matchup_adjustment
     ??
-    projection
-      ?.matchup_adjustment
+    projection?.matchup_adjustment
     ??
     {};
 
@@ -1764,68 +1736,51 @@ function renderMatchup(game) {
 
 
   const modelSpread =
-    projection
-      ?.home_spread;
+    projection?.home_spread;
 
   const marketSpread =
-    game?.market
-      ?.home_spread;
+    game?.market?.home_spread;
 
   const modelTotal =
-    projection
-      ?.total;
+    projection?.total;
 
   const marketTotal =
-    game?.market
-      ?.total;
+    game?.market?.total;
+
 
   const comparison =
     game?.comparison
     ?? {};
 
   const winProb =
-    projection
-      ?.win_probability
+    projection?.win_probability
     ?? {};
 
 
   const awayWin =
-    hasValue(
-      winProb.away
-    )
-      ? Number(
-          winProb.away
-        )
+    hasValue(winProb.away)
+      ? Number(winProb.away)
       : null;
 
   const homeWin =
-    hasValue(
-      winProb.home
-    )
-      ? Number(
-          winProb.home
-        )
+    hasValue(winProb.home)
+      ? Number(winProb.home)
       : null;
 
 
   const preferred =
-    comparison
-      ?.preferred_side;
+    comparison?.preferred_side;
 
   const status =
-    comparison
-      ?.status;
+    comparison?.status;
 
   const statusCss =
-    statusClass(
-      status
-    );
+    statusClass(status);
 
 
   const sampleComparable =
     Boolean(
-      matchup
-        ?.comparable_live_sample
+      matchup?.comparable_live_sample
     );
 
 
@@ -1840,35 +1795,69 @@ function renderMatchup(game) {
 
 
   const ratingOnly =
-    components
-      ?.rating_only_home_spread;
+    components?.rating_only_home_spread;
 
   const hfa =
-    components
-      ?.home_field_advantage;
+    components?.home_field_advantage;
 
   const afterHfa =
-    components
-      ?.spread_after_home_field;
+    components?.spread_after_home_field;
 
   const matchupTotal =
-    matchup
-      ?.total;
+    matchup?.total;
 
 
   const homeRating =
-    components
-      ?.home_power_rating
+    components?.home_power_rating
     ??
-    game?.home
-      ?.power_rating;
+    game?.home?.power_rating;
 
   const awayRating =
-    components
-      ?.away_power_rating
+    components?.away_power_rating
     ??
-    game?.away
-      ?.power_rating;
+    game?.away?.power_rating;
+
+
+  const fairLine =
+    favoredLine(
+      homeName,
+      awayName,
+      modelSpread
+    );
+
+
+  const marketLine =
+    favoredLine(
+      homeName,
+      awayName,
+      marketSpread
+    );
+
+
+  const modelEdgeSide =
+    (
+      preferred &&
+      hasValue(marketSpread)
+    )
+      ? marketSideForTeam(
+          preferred,
+          homeName,
+          awayName,
+          marketSpread
+        )
+      : "No actionable market edge";
+
+
+  const edgeSize =
+    comparison?.disagreement;
+
+
+  const edgeClass =
+    status === "PLAY"
+      ? "edge-play"
+      : status === "WATCH"
+        ? "edge-watch"
+        : "";
 
 
   container.innerHTML = `
@@ -1922,9 +1911,7 @@ function renderMatchup(game) {
         >
           ${
             escapeHtml(
-              displayStatus(
-                status
-              )
+              displayStatus(status)
             )
           }
         </span>
@@ -1934,26 +1921,84 @@ function renderMatchup(game) {
     </div>
 
 
+    <!-- ============================================================
+         MODEL EDGE
+    ============================================================= -->
+
+    <div class="model-edge-banner">
+
+      <div class="model-edge-banner-left">
+
+        <div class="model-edge-title">
+          Model Edge
+        </div>
+
+        <div
+          class="
+            model-edge-side
+            ${edgeClass}
+          "
+        >
+          ${escapeHtml(modelEdgeSide)}
+        </div>
+
+        <div class="model-edge-context">
+
+          ${
+            hasValue(edgeSize)
+              ? `${
+                  formatNumber(
+                    edgeSize,
+                    1
+                  )
+                }-point difference between the model fair line and current market.`
+              : "No current market line is available for comparison."
+          }
+
+        </div>
+
+      </div>
+
+
+      <div>
+
+        <span
+          class="
+            status
+            ${statusCss}
+          "
+        >
+          ${
+            escapeHtml(
+              displayStatus(status)
+            )
+          }
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- ============================================================
+         TOP CARDS
+    ============================================================= -->
+
     <div class="analysis-grid">
 
 
       <div class="analysis-card">
 
         <div class="analysis-label">
-          Model line
+          Fair Line
         </div>
 
         <div class="analysis-value">
-          ${
-            shortSpread(
-              modelSpread
-            )
-          }
+          ${escapeHtml(fairLine)}
         </div>
 
         <div class="analysis-small">
-          ${escapeHtml(homeName)}
-          home spread
+          Model-implied spread
         </div>
 
       </div>
@@ -1962,21 +2007,16 @@ function renderMatchup(game) {
       <div class="analysis-card">
 
         <div class="analysis-label">
-          Market
+          Market Line
         </div>
 
         <div class="analysis-value">
-          ${
-            shortSpread(
-              marketSpread
-            )
-          }
+          ${escapeHtml(marketLine)}
         </div>
 
         <div class="analysis-small">
           ${
-            game?.market
-              ?.bookmaker
+            game?.market?.bookmaker
               ? escapeHtml(
                   game.market.bookmaker
                 )
@@ -1990,7 +2030,7 @@ function renderMatchup(game) {
       <div class="analysis-card">
 
         <div class="analysis-label">
-          Model total
+          Model Total
         </div>
 
         <div class="analysis-value">
@@ -2005,15 +2045,11 @@ function renderMatchup(game) {
         <div class="analysis-small">
 
           ${
-            hasValue(
-              marketTotal
-            )
-              ? `Market ${
-                  formatNumber(
-                    marketTotal,
-                    1
-                  )
-                }`
+            hasValue(marketTotal)
+              ? `Market ${formatNumber(
+                  marketTotal,
+                  1
+                )}`
               : "No current market total"
           }
 
@@ -2025,22 +2061,21 @@ function renderMatchup(game) {
       <div class="analysis-card">
 
         <div class="analysis-label">
-          Market disagreement
+          Line Difference
         </div>
 
-        <div class="analysis-value">
+        <div
+          class="
+            analysis-value
+            ${edgeClass}
+          "
+        >
           ${
-            hasValue(
-              comparison
-                ?.disagreement
-            )
-              ? `${
-                  formatNumber(
-                    comparison
-                      .disagreement,
-                    1
-                  )
-                } pts`
+            hasValue(edgeSize)
+              ? `${formatNumber(
+                  edgeSize,
+                  1
+                )} pts`
               : "—"
           }
         </div>
@@ -2048,9 +2083,9 @@ function renderMatchup(game) {
         <div class="analysis-small">
           ${
             preferred
-              ? `Model favors ${
+              ? `Market side: ${
                   escapeHtml(
-                    preferred
+                    modelEdgeSide
                   )
                 }`
               : "No current side edge"
@@ -2064,6 +2099,10 @@ function renderMatchup(game) {
 
     <div class="analysis-layout">
 
+
+      <!-- ==========================================================
+           WIN PROBABILITY
+      =========================================================== -->
 
       <div class="analysis-panel">
 
@@ -2202,6 +2241,10 @@ function renderMatchup(game) {
       </div>
 
 
+      <!-- ==========================================================
+           POWER FOUNDATION
+      =========================================================== -->
+
       <div class="analysis-panel">
 
         <div class="analysis-panel-header">
@@ -2256,13 +2299,17 @@ function renderMatchup(game) {
           <div class="analysis-row">
 
             <div class="analysis-row-label">
-              Rating-only line
+              Rating-only fair line
             </div>
 
             <div class="analysis-row-value">
               ${
-                shortSpread(
-                  ratingOnly
+                escapeHtml(
+                  favoredLine(
+                    homeName,
+                    awayName,
+                    ratingOnly
+                  )
                 )
               }
             </div>
@@ -2273,6 +2320,10 @@ function renderMatchup(game) {
 
       </div>
 
+
+      <!-- ==========================================================
+           PROJECTION BUILD
+      =========================================================== -->
 
       <div class="analysis-panel">
 
@@ -2291,13 +2342,17 @@ function renderMatchup(game) {
           <div class="analysis-row">
 
             <div class="analysis-row-label">
-              Rating-only home line
+              Rating-only line
             </div>
 
             <div class="analysis-row-value">
               ${
-                shortSpread(
-                  ratingOnly
+                escapeHtml(
+                  favoredLine(
+                    homeName,
+                    awayName,
+                    ratingOnly
+                  )
                 )
               }
             </div>
@@ -2314,12 +2369,10 @@ function renderMatchup(game) {
             <div class="analysis-row-value">
               ${
                 hasValue(hfa)
-                  ? `${
-                      formatNumber(
-                        hfa,
-                        1
-                      )
-                    } pts`
+                  ? `${formatNumber(
+                      hfa,
+                      1
+                    )} pts`
                   : "—"
               }
             </div>
@@ -2335,8 +2388,12 @@ function renderMatchup(game) {
 
             <div class="analysis-row-value">
               ${
-                shortSpread(
-                  afterHfa
+                escapeHtml(
+                  favoredLine(
+                    homeName,
+                    awayName,
+                    afterHfa
+                  )
                 )
               }
             </div>
@@ -2373,15 +2430,11 @@ function renderMatchup(game) {
           <div class="analysis-row">
 
             <div class="analysis-row-label">
-              Final model line
+              Final fair line
             </div>
 
             <div class="analysis-row-value">
-              ${
-                shortSpread(
-                  modelSpread
-                )
-              }
+              ${escapeHtml(fairLine)}
             </div>
 
           </div>
@@ -2392,6 +2445,10 @@ function renderMatchup(game) {
       </div>
 
 
+      <!-- ==========================================================
+           LIVE MATCHUP LAYER
+      =========================================================== -->
+
       <div class="analysis-panel">
 
         <div class="analysis-panel-header">
@@ -2400,9 +2457,7 @@ function renderMatchup(game) {
             Live matchup layer
           </div>
 
-          <div
-            class="team-meta"
-          >
+          <div class="team-meta">
             ${
               sampleComparable
                 ? "ACTIVE"
@@ -2429,11 +2484,9 @@ function renderMatchup(game) {
           ${
             matchupComponentRow(
               "Passing",
-              matchupComponents
-                ?.passing,
+              matchupComponents?.passing,
               Boolean(
-                available
-                  ?.passing
+                available?.passing
               )
             )
           }
@@ -2442,11 +2495,9 @@ function renderMatchup(game) {
           ${
             matchupComponentRow(
               "Rushing",
-              matchupComponents
-                ?.rushing,
+              matchupComponents?.rushing,
               Boolean(
-                available
-                  ?.rushing
+                available?.rushing
               )
             )
           }
@@ -2455,11 +2506,9 @@ function renderMatchup(game) {
           ${
             matchupComponentRow(
               "Success rate",
-              matchupComponents
-                ?.success_rate,
+              matchupComponents?.success_rate,
               Boolean(
-                available
-                  ?.success_rate
+                available?.success_rate
               )
             )
           }
@@ -2468,11 +2517,9 @@ function renderMatchup(game) {
           ${
             matchupComponentRow(
               "Explosiveness",
-              matchupComponents
-                ?.explosiveness,
+              matchupComponents?.explosiveness,
               Boolean(
-                available
-                  ?.explosiveness
+                available?.explosiveness
               )
             )
           }
@@ -2481,11 +2528,9 @@ function renderMatchup(game) {
           ${
             matchupComponentRow(
               "Havoc",
-              matchupComponents
-                ?.havoc,
+              matchupComponents?.havoc,
               Boolean(
-                available
-                  ?.havoc
+                available?.havoc
               )
             )
           }
@@ -2494,6 +2539,10 @@ function renderMatchup(game) {
 
       </div>
 
+
+      <!-- ==========================================================
+           WHY MODEL DIFFERS
+      =========================================================== -->
 
       <div
         class="
@@ -2648,8 +2697,7 @@ function renderTeams() {
                     <td class="team-meta">
                       ${
                         formatSigned(
-                          team?.sp_plus
-                            ?.overall,
+                          team?.sp_plus?.overall,
                           1
                         )
                       }
@@ -2765,8 +2813,7 @@ function renderRatings() {
                     <td class="team-meta">
                       ${
                         formatSigned(
-                          team?.sp_plus
-                            ?.overall,
+                          team?.sp_plus?.overall,
                           1
                         )
                       }
@@ -2783,8 +2830,7 @@ function renderRatings() {
                     <td class="team-meta">
                       ${
                         formatEPA(
-                          team?.offense
-                            ?.epa_play
+                          team?.offense?.epa_play
                         )
                       }
                     </td>
@@ -2792,8 +2838,7 @@ function renderRatings() {
                     <td class="team-meta">
                       ${
                         formatEPA(
-                          team?.defense
-                            ?.epa_play
+                          team?.defense?.epa_play
                         )
                       }
                     </td>
@@ -2801,8 +2846,7 @@ function renderRatings() {
                     <td class="team-meta">
                       ${
                         formatRate(
-                          team?.defense
-                            ?.havoc_created
+                          team?.defense?.havoc_created
                         )
                       }
                     </td>
@@ -2826,21 +2870,15 @@ function renderRatings() {
 // TEAM DOSSIER
 // ============================================================================
 
-function openDossier(
-  teamName
-) {
+function openDossier(teamName) {
   const team =
-    getTeam(
-      teamName
-    );
+    getTeam(teamName);
 
   if (!team) {
     return;
   }
 
-  renderDossier(
-    team
-  );
+  renderDossier(team);
 
   switchView(
     "dossier"
@@ -2848,9 +2886,7 @@ function openDossier(
 }
 
 
-function teamSchedule(
-  teamName
-) {
+function teamSchedule(teamName) {
   return projections
 
     .filter(
@@ -2966,8 +3002,7 @@ function renderDossier(team) {
               : "@";
 
           const modelSpread =
-            game?.projection
-              ?.home_spread;
+            game?.projection?.home_spread;
 
           let teamSpread =
             null;
@@ -3047,17 +3082,13 @@ function renderDossier(team) {
 
               <div class="metric-rank">
                 ${
-                  game?.comparison
-                    ?.status
+                  game?.comparison?.status
                   &&
-                  game?.comparison
-                    ?.status
+                  game?.comparison?.status
                   !== "NO MARKET"
 
                     ? escapeHtml(
-                        game
-                          .comparison
-                          .status
+                        game.comparison.status
                       )
 
                     : ""
@@ -3085,21 +3116,17 @@ function renderDossier(team) {
 
 
   const offModelEPA =
-    team?.offense
-      ?.epa_play;
+    team?.offense?.epa_play;
 
   const defModelEPA =
-    team?.defense
-      ?.epa_play;
+    team?.defense?.epa_play;
 
 
   const offModelSR =
-    team?.offense
-      ?.success_rate;
+    team?.offense?.success_rate;
 
   const defModelSR =
-    team?.defense
-      ?.success_rate;
+    team?.defense?.success_rate;
 
 
   const offPlays =
@@ -3146,9 +3173,7 @@ function renderDossier(team) {
 
           · ${
             escapeHtml(
-              liveSampleLabel(
-                team
-              )
+              liveSampleLabel(team)
             )
           }
 
@@ -3201,8 +3226,7 @@ function renderDossier(team) {
         <div class="dossier-value">
           ${
             formatSigned(
-              team?.sp_plus
-                ?.overall,
+              team?.sp_plus?.overall,
               1
             )
           }
@@ -3220,8 +3244,7 @@ function renderDossier(team) {
         <div class="dossier-value">
           ${
             formatSigned(
-              team?.sp_plus
-                ?.offense,
+              team?.sp_plus?.offense,
               1
             )
           }
@@ -3239,8 +3262,7 @@ function renderDossier(team) {
         <div class="dossier-value">
           ${
             formatSigned(
-              team?.sp_plus
-                ?.defense,
+              team?.sp_plus?.defense,
               1
             )
           }
@@ -3537,9 +3559,7 @@ function renderDossier(team) {
           ${
             renderMetricRow(
               "Power Rank",
-              powerRank(
-                team
-              )
+              powerRank(team)
             )
           }
 
@@ -3580,8 +3600,7 @@ function renderDossier(team) {
           ${
             renderMetricRow(
               "Live Data Weight",
-              metricsData?.meta
-                ?.blend_weight
+              metricsData?.meta?.blend_weight
                 !== undefined
 
                 ? formatPercent(
@@ -3602,9 +3621,7 @@ function renderDossier(team) {
             renderMetricRow(
               "Sample Status",
               escapeHtml(
-                liveSampleLabel(
-                  team
-                )
+                liveSampleLabel(team)
               )
             )
           }
