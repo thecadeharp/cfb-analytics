@@ -26,6 +26,7 @@ import math
 import os
 import statistics
 import sys
+import time
 
 import requests
 
@@ -39,15 +40,12 @@ CFBD_BASE = "https://api.collegefootballdata.com"
 START_YEAR = 2019
 END_YEAR = 2025
 
-# First year we will actually score as out-of-sample.
-# Earlier seasons become the initial training set.
 FIRST_TEST_YEAR = 2022
 
 OUTPUT_PATH = "data/backtest_report.json"
 
 MIN_TRAINING_GAMES = 500
 
-# Edge buckets are ABSOLUTE model-vs-market disagreement.
 EDGE_BUCKETS = [
     (0.0, 1.5),
     (1.5, 3.0),
@@ -58,10 +56,20 @@ EDGE_BUCKETS = [
     (10.0, 999.0),
 ]
 
-# Display thresholds we are evaluating.
 PROPOSED_WATCH_MAX = 3.0
 PROPOSED_EDGE_MIN = 3.0
 PROPOSED_HIGH_CONVICTION_MIN = 7.0
+
+MAX_REQUEST_ATTEMPTS = 6
+REQUEST_TIMEOUT = 90
+
+RETRYABLE_STATUS_CODES = {
+    429,
+    500,
+    502,
+    503,
+    504,
+}
 
 
 # =============================================================================
@@ -145,7 +153,10 @@ def mae(predictions, actuals):
     return statistics.mean(
         abs(predicted - actual)
         for predicted, actual
-        in zip(predictions, actuals)
+        in zip(
+            predictions,
+            actuals
+        )
     )
 
 
@@ -156,16 +167,30 @@ def rmse(predictions, actuals):
 
     return math.sqrt(
         statistics.mean(
-            (predicted - actual) ** 2
+            (
+                predicted
+                -
+                actual
+            ) ** 2
             for predicted, actual
-            in zip(predictions, actuals)
+            in zip(
+                predictions,
+                actuals
+            )
         )
     )
 
 
-def regression(x_values, y_values):
+def regression(
+    x_values,
+    y_values
+):
 
-    if len(x_values) != len(y_values):
+    if (
+        len(x_values)
+        !=
+        len(y_values)
+    ):
 
         raise ValueError(
             "Regression arrays must have equal length."
@@ -174,9 +199,14 @@ def regression(x_values, y_values):
     if len(x_values) < 2:
 
         return {
-            "slope": 0.0,
-            "intercept": 0.0,
-            "r_squared": 0.0,
+            "slope":
+                0.0,
+
+            "intercept":
+                0.0,
+
+            "r_squared":
+                0.0,
         }
 
     x_mean = statistics.mean(
@@ -188,9 +218,13 @@ def regression(x_values, y_values):
     )
 
     numerator = sum(
-        (x - x_mean)
+        (
+            x - x_mean
+        )
         *
-        (y - y_mean)
+        (
+            y - y_mean
+        )
         for x, y
         in zip(
             x_values,
@@ -199,8 +233,11 @@ def regression(x_values, y_values):
     )
 
     denominator = sum(
-        (x - x_mean) ** 2
-        for x in x_values
+        (
+            x - x_mean
+        ) ** 2
+        for x
+        in x_values
     )
 
     slope = (
@@ -214,23 +251,33 @@ def regression(x_values, y_values):
     intercept = (
         y_mean
         -
-        slope * x_mean
+        slope
+        *
+        x_mean
     )
 
     predictions = [
         intercept
         +
-        slope * x
-        for x in x_values
+        slope
+        *
+        x
+        for x
+        in x_values
     ]
 
     total_variance = sum(
-        (y - y_mean) ** 2
-        for y in y_values
+        (
+            y - y_mean
+        ) ** 2
+        for y
+        in y_values
     )
 
     residual_variance = sum(
-        (y - prediction) ** 2
+        (
+            y - prediction
+        ) ** 2
         for y, prediction
         in zip(
             y_values,
@@ -249,15 +296,28 @@ def regression(x_values, y_values):
     )
 
     return {
-        "slope": slope,
-        "intercept": intercept,
-        "r_squared": r_squared,
+        "slope":
+            slope,
+
+        "intercept":
+            intercept,
+
+        "r_squared":
+            r_squared,
     }
 
 
 # =============================================================================
-# CFBD REQUEST
+# ROBUST CFBD REQUEST
 # =============================================================================
+
+def retry_wait_seconds(attempt):
+
+    return min(
+        3 * (2 ** (attempt - 1)),
+        45
+    )
+
 
 def cfbd_get(
     endpoint,
@@ -273,76 +333,222 @@ def cfbd_get(
 
         sys.exit(1)
 
-    try:
+    url = (
+        f"{CFBD_BASE}{endpoint}"
+    )
 
-        response = requests.get(
-            f"{CFBD_BASE}{endpoint}",
-            headers={
-                "Authorization":
-                    f"Bearer {CFBD_API_KEY}",
-                "Accept":
-                    "application/json",
-            },
-            params=params,
-            timeout=60
-        )
+    headers = {
+        "Authorization":
+            f"Bearer {CFBD_API_KEY}",
 
-    except requests.RequestException as error:
+        "Accept":
+            "application/json",
+    }
 
-        print(
-            f"❌ CFBD request failed: {error}"
-        )
-
-        if required:
-            sys.exit(1)
-
-        return []
-
-    if response.status_code in (
-        401,
-        403
+    for attempt in range(
+        1,
+        MAX_REQUEST_ATTEMPTS + 1
     ):
 
-        if required:
+        try:
+
+            response = requests.get(
+                url,
+                headers=headers,
+                params=params,
+                timeout=REQUEST_TIMEOUT
+            )
+
+        except (
+            requests.exceptions.Timeout,
+            requests.exceptions.ConnectionError
+        ) as error:
+
+            if (
+                attempt
+                <
+                MAX_REQUEST_ATTEMPTS
+            ):
+
+                wait = retry_wait_seconds(
+                    attempt
+                )
+
+                print(
+                    f"      ⚠ CFBD connection issue "
+                    f"({attempt}/{MAX_REQUEST_ATTEMPTS}): "
+                    f"{error}"
+                )
+
+                print(
+                    f"      Retrying in {wait}s..."
+                )
+
+                time.sleep(
+                    wait
+                )
+
+                continue
+
+            print(
+                f"❌ CFBD request failed after "
+                f"{MAX_REQUEST_ATTEMPTS} attempts: "
+                f"{error}"
+            )
+
+            if required:
+                sys.exit(1)
+
+            return []
+
+        except requests.RequestException as error:
+
+            print(
+                f"❌ CFBD request failed: "
+                f"{error}"
+            )
+
+            if required:
+                sys.exit(1)
+
+            return []
+
+        if response.status_code in (
+            401,
+            403
+        ):
 
             print(
                 "❌ CFBD authentication/access failed."
             )
 
-            sys.exit(1)
+            if required:
+                sys.exit(1)
 
-        print(
-            f"⚠ CFBD access unavailable for {endpoint}."
-        )
+            return []
 
-        return []
+        if (
+            response.status_code
+            in RETRYABLE_STATUS_CODES
+        ):
 
-    if not response.ok:
+            if (
+                attempt
+                <
+                MAX_REQUEST_ATTEMPTS
+            ):
 
-        print(
-            f"⚠ CFBD {endpoint}: "
-            f"HTTP {response.status_code}"
-        )
+                wait = retry_wait_seconds(
+                    attempt
+                )
 
-        if required:
-            sys.exit(1)
+                retry_after = response.headers.get(
+                    "Retry-After"
+                )
 
-        return []
+                if retry_after:
 
-    try:
+                    try:
 
-        return response.json()
+                        wait = max(
+                            wait,
+                            int(
+                                retry_after
+                            )
+                        )
 
-    except ValueError:
+                    except ValueError:
+                        pass
 
-        print(
-            f"⚠ Invalid JSON from {endpoint}"
-        )
+                print(
+                    f"      ⚠ CFBD {endpoint}: "
+                    f"HTTP {response.status_code} "
+                    f"({attempt}/{MAX_REQUEST_ATTEMPTS})"
+                )
 
-        if required:
-            sys.exit(1)
+                print(
+                    f"      Retrying in {wait}s..."
+                )
 
-        return []
+                time.sleep(
+                    wait
+                )
+
+                continue
+
+            print(
+                f"❌ CFBD {endpoint}: "
+                f"HTTP {response.status_code} "
+                f"after {MAX_REQUEST_ATTEMPTS} attempts"
+            )
+
+            if required:
+                sys.exit(1)
+
+            return []
+
+        if not response.ok:
+
+            print(
+                f"⚠ CFBD {endpoint}: "
+                f"HTTP {response.status_code}"
+            )
+
+            print(
+                response.text[:500]
+            )
+
+            if required:
+                sys.exit(1)
+
+            return []
+
+        try:
+
+            return response.json()
+
+        except ValueError:
+
+            if (
+                attempt
+                <
+                MAX_REQUEST_ATTEMPTS
+            ):
+
+                wait = retry_wait_seconds(
+                    attempt
+                )
+
+                print(
+                    f"      ⚠ Invalid JSON from "
+                    f"{endpoint} "
+                    f"({attempt}/{MAX_REQUEST_ATTEMPTS})"
+                )
+
+                print(
+                    f"      Retrying in {wait}s..."
+                )
+
+                time.sleep(
+                    wait
+                )
+
+                continue
+
+            print(
+                f"❌ Invalid JSON from {endpoint} "
+                f"after {MAX_REQUEST_ATTEMPTS} attempts"
+            )
+
+            if required:
+                sys.exit(1)
+
+            return []
+
+    if required:
+        sys.exit(1)
+
+    return []
 
 
 # =============================================================================
@@ -358,9 +564,14 @@ def get_games(year):
     raw = cfbd_get(
         "/games",
         {
-            "year": year,
-            "seasonType": "regular",
-            "classification": "fbs",
+            "year":
+                year,
+
+            "seasonType":
+                "regular",
+
+            "classification":
+                "fbs",
         }
     )
 
@@ -439,13 +650,17 @@ def get_games(year):
 
         games.append({
             "game_id":
-                game.get("id"),
+                game.get(
+                    "id"
+                ),
 
             "year":
                 year,
 
             "week":
-                game.get("week"),
+                game.get(
+                    "week"
+                ),
 
             "home":
                 home,
@@ -463,15 +678,19 @@ def get_games(year):
                 away_elo,
 
             "elo_diff":
-                home_elo - away_elo,
+                home_elo
+                -
+                away_elo,
 
             "actual_home_margin":
                 home_points
-                - away_points,
+                -
+                away_points,
         })
 
     print(
-        f"      {len(games)} usable FBS games"
+        f"      {len(games)} "
+        "usable FBS games"
     )
 
     return games
@@ -489,19 +708,16 @@ def choose_spread_from_provider(provider):
     ):
         return None
 
-    spread = safe_number(
+    return safe_number(
         provider.get(
             "spread"
         )
     )
 
-    if spread is not None:
-        return spread
 
-    return None
-
-
-def extract_consensus_spread(line_game):
+def extract_consensus_spread(
+    line_game
+):
 
     providers = (
         line_game.get(
@@ -556,6 +772,7 @@ def extract_consensus_spread(line_game):
         )
 
         if spread is not None:
+
             all_spreads.append(
                 spread
             )
@@ -577,8 +794,11 @@ def get_lines(year):
     raw = cfbd_get(
         "/lines",
         {
-            "year": year,
-            "seasonType": "regular",
+            "year":
+                year,
+
+            "seasonType":
+                "regular",
         },
         required=False
     )
@@ -620,13 +840,16 @@ def get_lines(year):
             continue
 
         lines[
-            int(game_id)
+            int(
+                game_id
+            )
         ] = spread
 
         matched += 1
 
     print(
-        f"      {matched} games with spreads"
+        f"      {matched} "
+        "games with spreads"
     )
 
     return lines
@@ -638,48 +861,63 @@ def get_lines(year):
 
 def fit_model(training_games):
 
-    if len(training_games) < MIN_TRAINING_GAMES:
+    if (
+        len(training_games)
+        <
+        MIN_TRAINING_GAMES
+    ):
 
         raise ValueError(
             f"Only {len(training_games)} "
-            f"training games available."
+            "training games available."
         )
 
     elo_diffs = [
-        game["elo_diff"]
-        for game in training_games
+        game[
+            "elo_diff"
+        ]
+        for game
+        in training_games
     ]
 
     actual_margins = [
         game[
             "actual_home_margin"
         ]
-        for game in training_games
+        for game
+        in training_games
     ]
 
-    # Fit neutral/overall Elo relationship first.
     overall_fit = regression(
         elo_diffs,
         actual_margins
     )
 
-    # Estimate home-field advantage from
-    # residuals on non-neutral games.
     non_neutral = [
         game
-        for game in training_games
-        if not game["neutral"]
+        for game
+        in training_games
+        if not game[
+            "neutral"
+        ]
     ]
 
     residuals = [
-        game["actual_home_margin"]
+        game[
+            "actual_home_margin"
+        ]
         -
         (
-            overall_fit["slope"]
+            overall_fit[
+                "slope"
+            ]
             *
-            game["elo_diff"]
+            game[
+                "elo_diff"
+            ]
         )
-        for game in non_neutral
+        for game
+        in non_neutral
     ]
 
     hfa = mean(
@@ -691,13 +929,19 @@ def fit_model(training_games):
 
     return {
         "elo_coefficient":
-            overall_fit["slope"],
+            overall_fit[
+                "slope"
+            ],
 
         "raw_intercept":
-            overall_fit["intercept"],
+            overall_fit[
+                "intercept"
+            ],
 
         "r_squared":
-            overall_fit["r_squared"],
+            overall_fit[
+                "r_squared"
+            ],
 
         "home_field":
             hfa,
@@ -714,17 +958,6 @@ def evaluate_ats(
     model_home_margin
 ):
 
-    # Market spread convention:
-    #
-    # Home favorite -7
-    # Home underdog +7
-    #
-    # Convert market spread into the
-    # market's expected HOME margin.
-    #
-    # Example:
-    # home -7 => market expected home margin +7
-
     market_home_margin = (
         -market_home_spread
     )
@@ -737,7 +970,6 @@ def evaluate_ats(
 
     if model_edge > 0:
 
-        # Model likes HOME relative to market.
         model_side = "home"
 
         cover_margin = (
@@ -748,7 +980,6 @@ def evaluate_ats(
 
     elif model_edge < 0:
 
-        # Model likes AWAY relative to market.
         model_side = "away"
 
         cover_margin = -(
@@ -806,13 +1037,12 @@ def evaluate_ats(
 # EDGE REPORTING
 # =============================================================================
 
-def summarize_edge_games(
-    games
-):
+def summarize_edge_games(games):
 
     decisions = [
         game
-        for game in games
+        for game
+        in games
         if game.get(
             "ats_result"
         )
@@ -825,35 +1055,50 @@ def summarize_edge_games(
 
     wins = sum(
         1
-        for game in decisions
-        if game["ats_result"] == "win"
+        for game
+        in decisions
+        if game[
+            "ats_result"
+        ] == "win"
     )
 
     losses = sum(
         1
-        for game in decisions
-        if game["ats_result"] == "loss"
+        for game
+        in decisions
+        if game[
+            "ats_result"
+        ] == "loss"
     )
 
     pushes = sum(
         1
-        for game in decisions
-        if game["ats_result"] == "push"
+        for game
+        in decisions
+        if game[
+            "ats_result"
+        ] == "push"
     )
 
     graded = (
-        wins + losses
+        wins
+        +
+        losses
     )
 
     win_rate = (
-        wins / graded
+        wins
+        /
+        graded
         if graded
         else None
     )
 
     return {
         "games":
-            len(decisions),
+            len(
+                decisions
+            ),
 
         "wins":
             wins,
@@ -870,8 +1115,7 @@ def summarize_edge_games(
                     win_rate * 100,
                     2
                 )
-                if win_rate
-                is not None
+                if win_rate is not None
                 else None
             ),
     }
@@ -890,6 +1134,7 @@ def run_backtest(
     yearly_reports = []
 
     print("")
+
     print(
         "🧪 Rolling out-of-sample backtest"
     )
@@ -913,14 +1158,17 @@ def run_backtest(
                 )
             )
 
-        test_games = games_by_year.get(
-            test_year,
-            []
+        test_games = (
+            games_by_year.get(
+                test_year,
+                []
+            )
         )
 
         if (
             len(training_games)
-            < MIN_TRAINING_GAMES
+            <
+            MIN_TRAINING_GAMES
         ):
 
             print(
@@ -935,6 +1183,7 @@ def run_backtest(
         )
 
         print("")
+
         print(
             f"▶ Test season {test_year}"
         )
@@ -969,7 +1218,9 @@ def run_backtest(
 
             hfa = (
                 0.0
-                if game["neutral"]
+                if game[
+                    "neutral"
+                ]
                 else model[
                     "home_field"
                 ]
@@ -980,7 +1231,9 @@ def run_backtest(
                     "elo_coefficient"
                 ]
                 *
-                game["elo_diff"]
+                game[
+                    "elo_diff"
+                ]
                 +
                 hfa
             )
@@ -1006,11 +1259,14 @@ def run_backtest(
             market_spread = (
                 line_lookup.get(
                     int(
-                        game["game_id"]
+                        game[
+                            "game_id"
+                        ]
                     )
                 )
-                if game["game_id"]
-                is not None
+                if game[
+                    "game_id"
+                ] is not None
                 else None
             )
 
@@ -1020,16 +1276,14 @@ def run_backtest(
 
             if market_spread is not None:
 
-                ats = evaluate_ats(
-                    game[
-                        "actual_home_margin"
-                    ],
-                    market_spread,
-                    projected_home_margin
-                )
-
                 record.update(
-                    ats
+                    evaluate_ats(
+                        game[
+                            "actual_home_margin"
+                        ],
+                        market_spread,
+                        projected_home_margin
+                    )
                 )
 
             else:
@@ -1080,11 +1334,11 @@ def run_backtest(
 
         with_market = [
             game
-            for game in year_scored
+            for game
+            in year_scored
             if game[
                 "market_home_spread"
-            ]
-            is not None
+            ] is not None
         ]
 
         yearly_reports.append({
@@ -1092,13 +1346,19 @@ def run_backtest(
                 test_year,
 
             "training_games":
-                len(training_games),
+                len(
+                    training_games
+                ),
 
             "test_games":
-                len(year_scored),
+                len(
+                    year_scored
+                ),
 
             "games_with_market":
-                len(with_market),
+                len(
+                    with_market
+                ),
 
             "elo_coefficient":
                 round(
@@ -1168,25 +1428,25 @@ def build_report(
         game[
             "projected_home_margin"
         ]
-        for game in scored_games
+        for game
+        in scored_games
     ]
 
     actuals = [
         game[
             "actual_home_margin"
         ]
-        for game in scored_games
+        for game
+        in scored_games
     ]
 
     market_games = [
         game
-        for game in scored_games
-        if (
-            game.get(
-                "absolute_edge"
-            )
-            is not None
-        )
+        for game
+        in scored_games
+        if game.get(
+            "absolute_edge"
+        ) is not None
     ]
 
     edge_buckets = []
@@ -1195,7 +1455,8 @@ def build_report(
 
         bucket = [
             game
-            for game in market_games
+            for game
+            in market_games
             if (
                 game[
                     "absolute_edge"
@@ -1207,10 +1468,8 @@ def build_report(
             )
         ]
 
-        summary = (
-            summarize_edge_games(
-                bucket
-            )
+        summary = summarize_edge_games(
+            bucket
         )
 
         summary[
@@ -1229,7 +1488,8 @@ def build_report(
                     game[
                         "absolute_edge"
                     ]
-                    for game in bucket
+                    for game
+                    in bucket
                 ]),
                 3
             )
@@ -1243,44 +1503,35 @@ def build_report(
 
     watch_games = [
         game
-        for game in market_games
-        if (
-            game[
-                "absolute_edge"
-            ]
-            <
-            PROPOSED_WATCH_MAX
-        )
+        for game
+        in market_games
+        if game[
+            "absolute_edge"
+        ] < PROPOSED_WATCH_MAX
     ]
 
     edge_games = [
         game
-        for game in market_games
+        for game
+        in market_games
         if (
             game[
                 "absolute_edge"
-            ]
-            >=
-            PROPOSED_EDGE_MIN
+            ] >= PROPOSED_EDGE_MIN
             and
             game[
                 "absolute_edge"
-            ]
-            <
-            PROPOSED_HIGH_CONVICTION_MIN
+            ] < PROPOSED_HIGH_CONVICTION_MIN
         )
     ]
 
     high_conviction_games = [
         game
-        for game in market_games
-        if (
-            game[
-                "absolute_edge"
-            ]
-            >=
-            PROPOSED_HIGH_CONVICTION_MIN
-        )
+        for game
+        in market_games
+        if game[
+            "absolute_edge"
+        ] >= PROPOSED_HIGH_CONVICTION_MIN
     ]
 
     return {
@@ -1307,7 +1558,9 @@ def build_report(
 
         "overall_accuracy": {
             "games":
-                len(scored_games),
+                len(
+                    scored_games
+                ),
 
             "mae":
                 round(
@@ -1332,7 +1585,7 @@ def build_report(
             "games":
                 len(
                     market_games
-                )
+                ),
         },
 
         "proposed_labels": {
@@ -1367,6 +1620,7 @@ def build_report(
 def print_report(report):
 
     print("")
+
     print(
         "=" * 78
     )
@@ -1429,8 +1683,7 @@ def print_report(report):
             f"{bucket['win_rate']:.2f}%"
             if bucket[
                 "win_rate"
-            ]
-            is not None
+            ] is not None
             else "N/A"
         )
 
@@ -1466,8 +1719,7 @@ def print_report(report):
             f"{result['win_rate']:.2f}%"
             if result[
                 "win_rate"
-            ]
-            is not None
+            ] is not None
             else "N/A"
         )
 
@@ -1504,32 +1756,25 @@ def print_report(report):
     if (
         high[
             "win_rate"
-        ]
-        is not None
+        ] is not None
         and
         high[
             "games"
         ] >= 50
     ):
 
-        if (
-            high[
-                "win_rate"
-            ]
-            >= 54.0
-        ):
+        if high[
+            "win_rate"
+        ] >= 54.0:
 
             print(
                 "✅ 7+ point disagreements "
                 "show meaningful historical signal."
             )
 
-        elif (
-            high[
-                "win_rate"
-            ]
-            >= 52.4
-        ):
+        elif high[
+            "win_rate"
+        ] >= 52.4:
 
             print(
                 "⚠ 7+ point disagreements "
@@ -1555,20 +1800,16 @@ def print_report(report):
     if (
         edge[
             "win_rate"
-        ]
-        is not None
+        ] is not None
         and
         edge[
             "games"
         ] >= 100
     ):
 
-        if (
-            edge[
-                "win_rate"
-            ]
-            >= 52.4
-        ):
+        if edge[
+            "win_rate"
+        ] >= 52.4:
 
             print(
                 "✅ 3-7 point disagreements "
@@ -1660,6 +1901,7 @@ def save_report(
 def main():
 
     print("")
+
     print(
         "📊 CFB time-safe spread backtest"
     )
@@ -1678,6 +1920,7 @@ def main():
     lines_by_year = {}
 
     print("")
+
     print(
         "📚 Loading historical data"
     )
@@ -1688,6 +1931,7 @@ def main():
     ):
 
         print("")
+
         print(
             f"▶ {year}"
         )
