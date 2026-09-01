@@ -7,18 +7,21 @@ Builds:
     data/odds.json
     data/projections.json
 
-IMPORTANT:
-CFBD schedule matching is STRICT.
-
-Indiana State != Indiana
-Florida State != Florida
-South Carolina State != South Carolina
-
-Sportsbook names may include mascots, so sportsbook matching has a
-separate, carefully guarded matcher.
+Core principles
+---------------
+1. CFBD schedule matching is STRICT.
+2. FCS schools are never prefix-matched into FBS schools.
+3. The team power rating remains the foundation of every projection.
+4. Matchup adjustments are deliberately small.
+5. LIVE matchup adjustments require comparable samples from BOTH teams.
+6. A team does not gain a matchup edge merely because it has played while
+   its opponent has not.
+7. Every projection stores its components so the frontend can explain
+   how the number was created.
 """
 
 import json
+import math
 import os
 import statistics
 import sys
@@ -27,6 +30,10 @@ from datetime import datetime
 
 import requests
 
+
+# =============================================================================
+# CONFIG
+# =============================================================================
 
 YEAR = 2026
 
@@ -39,12 +46,24 @@ ODDS_PATH = "data/odds.json"
 PROJECTIONS_PATH = "data/projections.json"
 
 HOME_FIELD_ADVANTAGE = 2.0
+
+# Matchup information is a modifier, never the model foundation.
 MAX_MATCHUP_ADJUSTMENT = 3.0
+
 BASE_TOTAL = 52.5
+
+# Minimum LIVE samples before we allow head-to-head matchup adjustments.
+MIN_LIVE_PLAYS = 35
+MIN_LIVE_PASS_PLAYS = 15
+MIN_LIVE_RUSH_PLAYS = 15
+
+# Margin standard deviation used for game win probabilities.
+# This is intentionally conservative.
+WIN_PROB_STD_DEV = 16.0
 
 
 # =============================================================================
-# KEYS
+# API KEYS
 # =============================================================================
 
 def clean_api_key(raw):
@@ -73,36 +92,72 @@ def clean_api_key(raw):
 
 
 CFBD_API_KEY = clean_api_key(
-    os.environ.get("CFBD_API_KEY", "")
+    os.environ.get(
+        "CFBD_API_KEY",
+        ""
+    )
 )
 
 ODDS_API_KEY = clean_api_key(
-    os.environ.get("ODDS_API_KEY", "")
+    os.environ.get(
+        "ODDS_API_KEY",
+        ""
+    )
 )
 
 
 # =============================================================================
-# HELPERS
+# GENERAL HELPERS
 # =============================================================================
 
-def safe_number(value, default=0.0):
+def safe_number(
+    value,
+    default=0.0
+):
     try:
         if value is None:
             return default
 
         return float(value)
 
-    except (TypeError, ValueError):
+    except (
+        TypeError,
+        ValueError
+    ):
         return default
 
 
+def optional_number(value):
+    try:
+        if value is None:
+            return None
+
+        return float(value)
+
+    except (
+        TypeError,
+        ValueError
+    ):
+        return None
+
+
 def round_half(value):
-    return round(value * 2) / 2
+    return round(
+        value * 2
+    ) / 2
 
 
-def first_value(data, *keys, default=None):
+def first_value(
+    data,
+    *keys,
+    default=None
+):
     for key in keys:
-        if key in data and data.get(key) is not None:
+
+        if (
+            key in data
+            and data.get(key) is not None
+        ):
             return data.get(key)
 
     return default
@@ -120,7 +175,9 @@ def canonical_name(value):
     text = "".join(
         character
         for character in text
-        if not unicodedata.combining(character)
+        if not unicodedata.combining(
+            character
+        )
     )
 
     text = text.lower().strip()
@@ -138,13 +195,18 @@ def canonical_name(value):
     }
 
     for old, new in replacements.items():
-        text = text.replace(old, new)
+        text = text.replace(
+            old,
+            new
+        )
 
-    return " ".join(text.split())
+    return " ".join(
+        text.split()
+    )
 
 
 # =============================================================================
-# APPROVED SCHOOL ALIASES
+# SCHOOL ALIASES
 # =============================================================================
 
 ALIASES = {
@@ -152,42 +214,70 @@ ALIASES = {
     "miami florida": "Miami",
 
     "uconn": "Connecticut",
-    "connecticut": "Connecticut",
 
     "umass": "Massachusetts",
 
-    "southern miss": "Southern Mississippi",
+    "southern miss":
+        "Southern Mississippi",
 
-    "utsa": "UT San Antonio",
-    "texas san antonio": "UT San Antonio",
+    "utsa":
+        "UT San Antonio",
 
-    "fiu": "Florida International",
+    "texas san antonio":
+        "UT San Antonio",
 
-    "fau": "Florida Atlantic",
+    "fiu":
+        "Florida International",
 
-    "app state": "Appalachian State",
+    "fau":
+        "Florida Atlantic",
 
-    "nc state": "NC State",
-    "n c state": "NC State",
+    "app state":
+        "Appalachian State",
 
-    "hawaii": "Hawai'i",
+    "nc state":
+        "NC State",
 
-    "mississippi": "Ole Miss",
+    "n c state":
+        "NC State",
 
-    "ul lafayette": "Louisiana",
-    "louisiana lafayette": "Louisiana",
+    "north carolina state":
+        "NC State",
 
-    "ulm": "Louisiana Monroe",
-    "ul monroe": "Louisiana Monroe",
+    "hawaii":
+        "Hawai'i",
 
-    "middle tennessee state": "Middle Tennessee",
+    "mississippi":
+        "Ole Miss",
 
-    "sam houston state": "Sam Houston",
+    "ul lafayette":
+        "Louisiana",
+
+    "louisiana lafayette":
+        "Louisiana",
+
+    "ulm":
+        "Louisiana Monroe",
+
+    "ul monroe":
+        "Louisiana Monroe",
+
+    "middle tennessee state":
+        "Middle Tennessee",
+
+    "sam houston state":
+        "Sam Houston",
+
+    "miami ohio":
+        "Miami (OH)",
+
+    "miami oh":
+        "Miami (OH)",
 }
 
 
 # =============================================================================
-# TEAM MATCHERS
+# TEAM MATCHING
 # =============================================================================
 
 def build_team_lookup(teams):
@@ -203,12 +293,13 @@ def resolve_cfbd_team(
     lookup
 ):
     """
-    STRICT school matching for CFBD.
+    CFBD already supplies school names.
 
-    We NEVER use prefix matching here.
+    Therefore matching is intentionally strict.
 
-    Indiana State cannot become Indiana.
-    Florida State cannot become Florida.
+    Indiana State != Indiana
+    Florida State != Florida
+    South Carolina State != South Carolina
     """
 
     if not provider_name:
@@ -218,12 +309,12 @@ def resolve_cfbd_team(
         provider_name
     )
 
-    # Exact model name.
     if canon in lookup:
         return lookup[canon]
 
-    # Explicitly approved alias.
-    alias = ALIASES.get(canon)
+    alias = ALIASES.get(
+        canon
+    )
 
     if alias in valid_teams:
         return alias
@@ -245,7 +336,7 @@ SCHOOL_STRUCTURE_WORDS = {
     "university",
     "college",
     "aandm",
-    "a&m",
+    "ohio",
 }
 
 
@@ -255,16 +346,13 @@ def resolve_odds_team(
     lookup
 ):
     """
-    Sportsbooks commonly append mascots:
+    Sportsbooks append mascots.
 
-        Ohio State Buckeyes
-        Georgia Bulldogs
-        Alabama Crimson Tide
+    Ohio State Buckeyes -> Ohio State
 
-    Exact names and aliases are preferred.
-
-    Prefix matching is allowed ONLY when the text immediately after the
-    model school name does not look like part of another school's name.
+    But:
+    Indiana State Sycamores != Indiana
+    Florida State Seminoles != Florida
     """
 
     if not provider_name:
@@ -274,24 +362,33 @@ def resolve_odds_team(
         provider_name
     )
 
-    # Exact.
+    # Exact model school name.
     if canon in lookup:
         return lookup[canon]
 
     # Explicit alias.
-    if canon in ALIASES:
-        alias = ALIASES[canon]
+    alias = ALIASES.get(
+        canon
+    )
 
-        if alias in valid_teams:
-            return alias
+    if alias in valid_teams:
+        return alias
 
     candidates = []
 
-    for model_canon, model_name in lookup.items():
+    for (
+        model_canon,
+        model_name
+    ) in lookup.items():
 
-        prefix = model_canon + " "
+        prefix = (
+            model_canon
+            + " "
+        )
 
-        if not canon.startswith(prefix):
+        if not canon.startswith(
+            prefix
+        ):
             continue
 
         remainder = canon[
@@ -301,11 +398,16 @@ def resolve_odds_team(
         if not remainder:
             continue
 
-        first_word = remainder.split()[0]
+        first_word = (
+            remainder
+            .split()[0]
+        )
 
-        # Important:
-        # Indiana State Sycamores must NOT match Indiana.
-        if first_word in SCHOOL_STRUCTURE_WORDS:
+        if (
+            first_word
+            in
+            SCHOOL_STRUCTURE_WORDS
+        ):
             continue
 
         candidates.append(
@@ -318,7 +420,6 @@ def resolve_odds_team(
     if not candidates:
         return None
 
-    # Longest legitimate school name wins.
     candidates.sort(
         key=lambda item: item[0],
         reverse=True
@@ -337,10 +438,15 @@ def cfbd_get(
     required=True
 ):
     if not CFBD_API_KEY:
-        print("❌ CFBD_API_KEY missing.")
+
+        print(
+            "❌ CFBD_API_KEY missing."
+        )
+
         sys.exit(1)
 
     try:
+
         response = requests.get(
             f"{CFBD_BASE}{endpoint}",
             headers={
@@ -370,19 +476,14 @@ def cfbd_get(
         401,
         403
     ):
-        print("")
         print(
-            "❌ CFBD AUTHENTICATION FAILED"
-        )
-        print(
-            f"HTTP {response.status_code}"
+            "❌ CFBD authentication failed."
         )
 
         sys.exit(1)
 
     if not response.ok:
 
-        print("")
         print(
             f"❌ CFBD {endpoint}: "
             f"HTTP {response.status_code}"
@@ -469,20 +570,11 @@ def odds_get():
         "x-requests-remaining"
     )
 
-    used = response.headers.get(
-        "x-requests-used"
-    )
-
     if remaining is not None:
-        print(
-            f"   Odds API requests remaining: "
-            f"{remaining}"
-        )
 
-    if used is not None:
         print(
-            f"   Odds API requests used: "
-            f"{used}"
+            f"   Odds requests remaining: "
+            f"{remaining}"
         )
 
     return response.json()
@@ -497,7 +589,8 @@ def load_metrics():
         METRICS_PATH
     ):
         print(
-            f"❌ Missing {METRICS_PATH}"
+            f"❌ Missing "
+            f"{METRICS_PATH}"
         )
 
         sys.exit(1)
@@ -508,7 +601,9 @@ def load_metrics():
         encoding="utf-8"
     ) as file:
 
-        data = json.load(file)
+        data = json.load(
+            file
+        )
 
     teams = data.get(
         "teams",
@@ -529,28 +624,31 @@ def load_metrics():
         f"{len(teams)} teams"
     )
 
-    return data, teams
+    return (
+        data,
+        teams
+    )
 
 
 # =============================================================================
-# RATING CALIBRATION
+# POWER RATING -> POINT SCALE
 # =============================================================================
 
-def calculate_rating_scale(teams):
-
+def calculate_rating_scale(
+    teams
+):
     x_values = []
     y_values = []
 
     for team in teams.values():
 
-        power = safe_number(
+        power = optional_number(
             team.get(
                 "power_rating"
-            ),
-            None
+            )
         )
 
-        sp = safe_number(
+        sp = optional_number(
             (
                 team.get(
                     "sp_plus",
@@ -559,21 +657,28 @@ def calculate_rating_scale(teams):
                 or {}
             ).get(
                 "overall"
-            ),
-            None
+            )
         )
 
-        if power is None or sp is None:
+        if (
+            power is None
+            or sp is None
+        ):
             continue
 
-        x_values.append(power)
-        y_values.append(sp)
+        x_values.append(
+            power
+        )
+
+        y_values.append(
+            sp
+        )
 
     if len(x_values) < 10:
 
         return {
             "slope": 7.5,
-            "intercept": 0,
+            "intercept": 0.0,
             "method": "fallback",
         }
 
@@ -586,9 +691,13 @@ def calculate_rating_scale(teams):
     )
 
     numerator = sum(
-        (x - x_mean)
+        (
+            x - x_mean
+        )
         *
-        (y - y_mean)
+        (
+            y - y_mean
+        )
         for x, y
         in zip(
             x_values,
@@ -597,45 +706,56 @@ def calculate_rating_scale(teams):
     )
 
     denominator = sum(
-        (x - x_mean) ** 2
-        for x in x_values
+        (
+            x - x_mean
+        ) ** 2
+        for x
+        in x_values
     )
 
     slope = (
-        numerator / denominator
+        numerator
+        /
+        denominator
         if denominator
         else 7.5
     )
 
     intercept = (
         y_mean
-        - slope * x_mean
+        -
+        slope
+        *
+        x_mean
     )
 
     print("")
     print(
-        "📐 Power rating calibration:"
+        "📐 Power rating calibration"
     )
 
     print(
-        f"   Point conversion slope: "
-        f"{slope:.3f}"
+        f"   1 rating unit = "
+        f"{slope:.3f} points"
     )
 
     return {
-        "slope": slope,
-        "intercept": intercept,
+        "slope":
+            slope,
+
+        "intercept":
+            intercept,
+
         "method":
             "regression against SP+ scale",
     }
 
 
 # =============================================================================
-# ODDS
+# MARKET ODDS
 # =============================================================================
 
 def extract_market(raw_game):
-
     preferred_books = [
         "draftkings",
         "fanduel",
@@ -651,25 +771,27 @@ def extract_market(raw_game):
 
     selected = None
 
-    for bookmaker_key in preferred_books:
+    for key in preferred_books:
 
-        for bookmaker in bookmakers:
+        for book in bookmakers:
 
-            if (
-                bookmaker.get("key")
-                == bookmaker_key
-            ):
+            if book.get(
+                "key"
+            ) == key:
 
-                selected = bookmaker
+                selected = book
                 break
 
         if selected:
             break
 
-    if not selected and bookmakers:
+    if (
+        selected is None
+        and bookmakers
+    ):
         selected = bookmakers[0]
 
-    if not selected:
+    if selected is None:
 
         return {
             "spread": None,
@@ -691,7 +813,10 @@ def extract_market(raw_game):
         []
     ):
 
-        if market.get("key") == "spreads":
+        if (
+            market.get("key")
+            == "spreads"
+        ):
 
             for outcome in market.get(
                 "outcomes",
@@ -704,17 +829,20 @@ def extract_market(raw_game):
                             "name"
                         )
                     )
-                    == raw_home
+                    ==
+                    raw_home
                 ):
 
-                    spread = safe_number(
+                    spread = optional_number(
                         outcome.get(
                             "point"
-                        ),
-                        None
+                        )
                     )
 
-        elif market.get("key") == "totals":
+        elif (
+            market.get("key")
+            == "totals"
+        ):
 
             for outcome in market.get(
                 "outcomes",
@@ -728,19 +856,23 @@ def extract_market(raw_game):
                             ""
                         )
                     ).lower()
-                    == "over"
+                    ==
+                    "over"
                 ):
 
-                    total = safe_number(
+                    total = optional_number(
                         outcome.get(
                             "point"
-                        ),
-                        None
+                        )
                     )
 
     return {
-        "spread": spread,
-        "total": total,
+        "spread":
+            spread,
+
+        "total":
+            total,
+
         "bookmaker":
             selected.get(
                 "title"
@@ -752,11 +884,10 @@ def fetch_odds(
     valid_teams,
     lookup
 ):
-
     print("")
     print(
-        "💰 Fetching current NCAAF "
-        "market odds..."
+        "💰 Fetching current "
+        "NCAAF odds..."
     )
 
     raw_games = odds_get()
@@ -786,13 +917,25 @@ def fetch_odds(
             lookup
         )
 
-        if not home and raw_home:
-            unmatched.add(raw_home)
+        if (
+            raw_home
+            and not home
+        ):
+            unmatched.add(
+                raw_home
+            )
 
-        if not away and raw_away:
-            unmatched.add(raw_away)
+        if (
+            raw_away
+            and not away
+        ):
+            unmatched.add(
+                raw_away
+            )
 
-        market = extract_market(raw)
+        market = extract_market(
+            raw
+        )
 
         games.append({
             "id":
@@ -830,7 +973,8 @@ def fetch_odds(
         for game in games
         if (
             game["home_team"]
-            and game["away_team"]
+            and
+            game["away_team"]
         )
     )
 
@@ -849,7 +993,7 @@ def fetch_odds(
         print("")
         print(
             "🔎 Unmatched sportsbook "
-            "team examples:"
+            "examples:"
         )
 
         for team in sorted(
@@ -862,10 +1006,12 @@ def fetch_odds(
 
     return {
         "meta": {
-            "year": YEAR,
+            "year":
+                YEAR,
 
             "generated":
-                datetime.now().isoformat(),
+                datetime.now()
+                .isoformat(),
 
             "games":
                 len(games),
@@ -890,11 +1036,10 @@ def fetch_schedule(
     valid_teams,
     lookup
 ):
-
     print("")
     print(
-        f"📅 Fetching {YEAR} FBS "
-        f"schedule..."
+        f"📅 Fetching "
+        f"{YEAR} FBS schedule..."
     )
 
     raw_games = cfbd_get(
@@ -906,8 +1051,6 @@ def fetch_schedule(
             "seasonType":
                 "regular",
 
-            # Important:
-            # Ask CFBD specifically for FBS schedule data.
             "classification":
                 "fbs",
         }
@@ -919,10 +1062,8 @@ def fetch_schedule(
     )
 
     games = []
-
-    rejected_fcs = 0
+    rejected = 0
     rejected_examples = set()
-
     seen = set()
 
     for raw in raw_games:
@@ -939,7 +1080,6 @@ def fetch_schedule(
             "away_team"
         )
 
-        # STRICT MATCHER.
         home = resolve_cfbd_team(
             raw_home,
             valid_teams,
@@ -952,18 +1092,24 @@ def fetch_schedule(
             lookup
         )
 
-        # If either side isn't one of our rated FBS teams,
-        # exclude the game entirely.
-        if not home or not away:
+        if (
+            not home
+            or not away
+        ):
+            rejected += 1
 
-            rejected_fcs += 1
-
-            if not home and raw_home:
+            if (
+                raw_home
+                and not home
+            ):
                 rejected_examples.add(
                     str(raw_home)
                 )
 
-            if not away and raw_away:
+            if (
+                raw_away
+                and not away
+            ):
                 rejected_examples.add(
                     str(raw_away)
                 )
@@ -994,7 +1140,9 @@ def fetch_schedule(
         if unique_key in seen:
             continue
 
-        seen.add(unique_key)
+        seen.add(
+            unique_key
+        )
 
         home_points = first_value(
             raw,
@@ -1022,14 +1170,6 @@ def fetch_schedule(
                 first_value(
                     raw,
                     "week"
-                ),
-
-            "season_type":
-                first_value(
-                    raw,
-                    "seasonType",
-                    "season_type",
-                    default="regular"
                 ),
 
             "start_date":
@@ -1085,22 +1225,25 @@ def fetch_schedule(
                         or (
                             home_points
                             is not None
-                            and away_points
+                            and
+                            away_points
                             is not None
                         )
                     )
-                    else "scheduled"
+                    else
+                    "scheduled"
                 ),
         })
 
     games.sort(
         key=lambda game: (
-            (
-                game["week"]
-                if game["week"]
-                is not None
-                else 99
-            ),
+            game.get(
+                "week"
+            )
+            if game.get(
+                "week"
+            ) is not None
+            else 99,
 
             game.get(
                 "start_date"
@@ -1115,42 +1258,29 @@ def fetch_schedule(
     )
 
     print(
-        f"🚫 Games rejected because "
-        f"one side isn't in our FBS model: "
-        f"{rejected_fcs}"
+        f"🚫 Rejected games: "
+        f"{rejected}"
     )
 
     if rejected_examples:
 
-        print("")
         print(
             "🔎 Correctly rejected examples:"
         )
 
-        for team in sorted(
+        for name in sorted(
             rejected_examples
         )[:20]:
 
             print(
-                f"   - {team}"
+                f"   - {name}"
             )
 
-    # Sanity check.
     if len(games) < 400:
 
-        print("")
         print(
-            "❌ SANITY CHECK FAILED"
-        )
-
-        print(
-            f"Only {len(games)} "
-            "FBS-vs-FBS games matched."
-        )
-
-        print(
-            "Refusing to publish until "
-            "team matching is checked."
+            "❌ Too few FBS-vs-FBS games. "
+            "Refusing to publish."
         )
 
         sys.exit(1)
@@ -1161,7 +1291,8 @@ def fetch_schedule(
                 YEAR,
 
             "generated":
-                datetime.now().isoformat(),
+                datetime.now()
+                .isoformat(),
 
             "games":
                 len(games),
@@ -1179,27 +1310,261 @@ def fetch_schedule(
 
 
 # =============================================================================
-# MATCHUP MODEL
+# KNOWN SCHEDULE GUARDS
 # =============================================================================
 
-def metric_advantage(
-    offense,
-    defense,
-    scale,
+def verify_known_schedule_errors(
+    schedule
+):
+    bad = []
+
+    for game in schedule.get(
+        "games",
+        []
+    ):
+
+        home = game.get(
+            "home_team"
+        )
+
+        away = game.get(
+            "away_team"
+        )
+
+        date = str(
+            game.get(
+                "start_date",
+                ""
+            )
+        )
+
+        if {
+            home,
+            away
+        } == {
+            "Indiana",
+            "Purdue"
+        }:
+
+            if not date.startswith(
+                "2026-11-28"
+            ):
+                bad.append(
+                    (
+                        "Indiana/Purdue",
+                        date
+                    )
+                )
+
+        if {
+            home,
+            away
+        } == {
+            "Florida",
+            "South Carolina"
+        }:
+
+            if not date.startswith(
+                "2026-10-10"
+            ):
+                bad.append(
+                    (
+                        "Florida/South Carolina",
+                        date
+                    )
+                )
+
+    if bad:
+
+        print(
+            "❌ Known schedule "
+            "sanity check failed."
+        )
+
+        for matchup, date in bad:
+
+            print(
+                f"   {matchup}: "
+                f"{date}"
+            )
+
+        sys.exit(1)
+
+    print(
+        "✅ Known schedule sanity "
+        "checks passed"
+    )
+
+
+# =============================================================================
+# LIVE DATA HELPERS
+# =============================================================================
+
+def live_section(
+    team,
+    side
+):
+    return (
+        (
+            team.get(
+                side,
+                {}
+            )
+            or {}
+        ).get(
+            "live_2026",
+            {}
+        )
+        or {}
+    )
+
+
+def live_has_general_sample(
+    team
+):
+    offense = live_section(
+        team,
+        "offense"
+    )
+
+    defense = live_section(
+        team,
+        "defense"
+    )
+
+    return (
+        safe_number(
+            offense.get(
+                "n_plays"
+            )
+        )
+        >= MIN_LIVE_PLAYS
+        and
+        safe_number(
+            defense.get(
+                "n_plays"
+            )
+        )
+        >= MIN_LIVE_PLAYS
+    )
+
+
+def both_have_general_sample(
+    home,
+    away
+):
+    return (
+        live_has_general_sample(
+            home
+        )
+        and
+        live_has_general_sample(
+            away
+        )
+    )
+
+
+def both_have_pass_sample(
+    home,
+    away
+):
+    for team in (
+        home,
+        away
+    ):
+
+        offense = live_section(
+            team,
+            "offense"
+        )
+
+        defense = live_section(
+            team,
+            "defense"
+        )
+
+        if (
+            safe_number(
+                offense.get(
+                    "pass_plays"
+                )
+            )
+            <
+            MIN_LIVE_PASS_PLAYS
+        ):
+            return False
+
+        if (
+            safe_number(
+                defense.get(
+                    "pass_plays"
+                )
+            )
+            <
+            MIN_LIVE_PASS_PLAYS
+        ):
+            return False
+
+    return True
+
+
+def both_have_rush_sample(
+    home,
+    away
+):
+    for team in (
+        home,
+        away
+    ):
+
+        offense = live_section(
+            team,
+            "offense"
+        )
+
+        defense = live_section(
+            team,
+            "defense"
+        )
+
+        if (
+            safe_number(
+                offense.get(
+                    "rush_plays"
+                )
+            )
+            <
+            MIN_LIVE_RUSH_PLAYS
+        ):
+            return False
+
+        if (
+            safe_number(
+                defense.get(
+                    "rush_plays"
+                )
+            )
+            <
+            MIN_LIVE_RUSH_PLAYS
+        ):
+            return False
+
+    return True
+
+
+# =============================================================================
+# MATCHUP ADJUSTMENTS
+# =============================================================================
+
+def bounded(
+    value,
     cap
 ):
-
-    advantage = (
-        safe_number(offense)
-        -
-        safe_number(defense)
-    ) * scale
-
     return max(
         -cap,
         min(
             cap,
-            advantage
+            value
         )
     )
 
@@ -1208,115 +1573,423 @@ def calculate_matchup_adjustment(
     home,
     away
 ):
+    """
+    IMPORTANT:
 
-    ho = home.get(
-        "offense",
-        {}
-    ) or {}
+    These are LIVE matchup modifiers.
 
-    hd = home.get(
-        "defense",
-        {}
-    ) or {}
+    If Stanford has played and Miami has not, Stanford receives ZERO passing,
+    rushing, success-rate, explosiveness, or havoc matchup adjustment.
 
-    ao = away.get(
-        "offense",
-        {}
-    ) or {}
-
-    ad = away.get(
-        "defense",
-        {}
-    ) or {}
-
-    passing = (
-        metric_advantage(
-            ho.get("epa_pass"),
-            ad.get("epa_pass"),
-            2.0,
-            1.25
-        )
-        -
-        metric_advantage(
-            ao.get("epa_pass"),
-            hd.get("epa_pass"),
-            2.0,
-            1.25
-        )
-    )
-
-    rushing = (
-        metric_advantage(
-            ho.get("epa_rush"),
-            ad.get("epa_rush"),
-            1.5,
-            1.0
-        )
-        -
-        metric_advantage(
-            ao.get("epa_rush"),
-            hd.get("epa_rush"),
-            1.5,
-            1.0
-        )
-    )
-
-    efficiency = (
-        metric_advantage(
-            ho.get("epa_play"),
-            ad.get("epa_play"),
-            1.5,
-            1.0
-        )
-        -
-        metric_advantage(
-            ao.get("epa_play"),
-            hd.get("epa_play"),
-            1.5,
-            1.0
-        )
-    )
-
-    success = (
-        metric_advantage(
-            ho.get("success_rate"),
-            ad.get("success_rate"),
-            0.08,
-            0.75
-        )
-        -
-        metric_advantage(
-            ao.get("success_rate"),
-            hd.get("success_rate"),
-            0.08,
-            0.75
-        )
-    )
+    We require comparable live samples from BOTH teams.
+    """
 
     components = {
-        "passing":
-            passing,
-
-        "rushing":
-            rushing,
-
-        "overall_efficiency":
-            efficiency,
-
-        "success_rate":
-            success,
+        "passing": 0.0,
+        "rushing": 0.0,
+        "success_rate": 0.0,
+        "explosiveness": 0.0,
+        "havoc": 0.0,
     }
+
+    availability = {
+        "passing": False,
+        "rushing": False,
+        "success_rate": False,
+        "explosiveness": False,
+        "havoc": False,
+    }
+
+    home_off = live_section(
+        home,
+        "offense"
+    )
+
+    home_def = live_section(
+        home,
+        "defense"
+    )
+
+    away_off = live_section(
+        away,
+        "offense"
+    )
+
+    away_def = live_section(
+        away,
+        "defense"
+    )
+
+    # -------------------------------------------------------------------------
+    # PASSING
+    # -------------------------------------------------------------------------
+
+    if both_have_pass_sample(
+        home,
+        away
+    ):
+        values = [
+            optional_number(
+                home_off.get(
+                    "epa_pass"
+                )
+            ),
+            optional_number(
+                away_def.get(
+                    "epa_pass"
+                )
+            ),
+            optional_number(
+                away_off.get(
+                    "epa_pass"
+                )
+            ),
+            optional_number(
+                home_def.get(
+                    "epa_pass"
+                )
+            ),
+        ]
+
+        if all(
+            value is not None
+            for value in values
+        ):
+            (
+                home_pass,
+                away_pass_def,
+                away_pass,
+                home_pass_def
+            ) = values
+
+            home_edge = (
+                home_pass
+                -
+                away_pass_def
+            )
+
+            away_edge = (
+                away_pass
+                -
+                home_pass_def
+            )
+
+            components[
+                "passing"
+            ] = bounded(
+                (
+                    home_edge
+                    -
+                    away_edge
+                )
+                * 1.25,
+                1.0
+            )
+
+            availability[
+                "passing"
+            ] = True
+
+    # -------------------------------------------------------------------------
+    # RUSHING
+    # -------------------------------------------------------------------------
+
+    if both_have_rush_sample(
+        home,
+        away
+    ):
+        values = [
+            optional_number(
+                home_off.get(
+                    "epa_rush"
+                )
+            ),
+            optional_number(
+                away_def.get(
+                    "epa_rush"
+                )
+            ),
+            optional_number(
+                away_off.get(
+                    "epa_rush"
+                )
+            ),
+            optional_number(
+                home_def.get(
+                    "epa_rush"
+                )
+            ),
+        ]
+
+        if all(
+            value is not None
+            for value in values
+        ):
+            (
+                home_rush,
+                away_rush_def,
+                away_rush,
+                home_rush_def
+            ) = values
+
+            home_edge = (
+                home_rush
+                -
+                away_rush_def
+            )
+
+            away_edge = (
+                away_rush
+                -
+                home_rush_def
+            )
+
+            components[
+                "rushing"
+            ] = bounded(
+                (
+                    home_edge
+                    -
+                    away_edge
+                )
+                * 1.0,
+                0.75
+            )
+
+            availability[
+                "rushing"
+            ] = True
+
+    # -------------------------------------------------------------------------
+    # SUCCESS RATE
+    # -------------------------------------------------------------------------
+
+    if both_have_general_sample(
+        home,
+        away
+    ):
+        values = [
+            optional_number(
+                home_off.get(
+                    "success_rate"
+                )
+            ),
+            optional_number(
+                away_def.get(
+                    "success_rate"
+                )
+            ),
+            optional_number(
+                away_off.get(
+                    "success_rate"
+                )
+            ),
+            optional_number(
+                home_def.get(
+                    "success_rate"
+                )
+            ),
+        ]
+
+        if all(
+            value is not None
+            for value in values
+        ):
+            (
+                home_sr,
+                away_sr_def,
+                away_sr,
+                home_sr_def
+            ) = values
+
+            home_edge = (
+                home_sr
+                -
+                away_sr_def
+            )
+
+            away_edge = (
+                away_sr
+                -
+                home_sr_def
+            )
+
+            components[
+                "success_rate"
+            ] = bounded(
+                (
+                    home_edge
+                    -
+                    away_edge
+                )
+                * 0.035,
+                0.75
+            )
+
+            availability[
+                "success_rate"
+            ] = True
+
+    # -------------------------------------------------------------------------
+    # EXPLOSIVENESS
+    # -------------------------------------------------------------------------
+
+    if both_have_general_sample(
+        home,
+        away
+    ):
+        values = [
+            optional_number(
+                home_off.get(
+                    "explosive_rate"
+                )
+            ),
+            optional_number(
+                away_def.get(
+                    "explosive_rate"
+                )
+            ),
+            optional_number(
+                away_off.get(
+                    "explosive_rate"
+                )
+            ),
+            optional_number(
+                home_def.get(
+                    "explosive_rate"
+                )
+            ),
+        ]
+
+        if all(
+            value is not None
+            for value in values
+        ):
+            (
+                home_expl,
+                away_expl_def,
+                away_expl,
+                home_expl_def
+            ) = values
+
+            home_edge = (
+                home_expl
+                -
+                away_expl_def
+            )
+
+            away_edge = (
+                away_expl
+                -
+                home_expl_def
+            )
+
+            components[
+                "explosiveness"
+            ] = bounded(
+                (
+                    home_edge
+                    -
+                    away_edge
+                )
+                * 0.025,
+                0.50
+            )
+
+            availability[
+                "explosiveness"
+            ] = True
+
+    # -------------------------------------------------------------------------
+    # HAVOC
+    # -------------------------------------------------------------------------
+
+    if both_have_general_sample(
+        home,
+        away
+    ):
+        home_havoc_allowed = (
+            optional_number(
+                home_off.get(
+                    "havoc_rate"
+                )
+            )
+        )
+
+        home_havoc_created = (
+            optional_number(
+                home_def.get(
+                    "havoc_rate"
+                )
+            )
+        )
+
+        away_havoc_allowed = (
+            optional_number(
+                away_off.get(
+                    "havoc_rate"
+                )
+            )
+        )
+
+        away_havoc_created = (
+            optional_number(
+                away_def.get(
+                    "havoc_rate"
+                )
+            )
+        )
+
+        values = [
+            home_havoc_allowed,
+            home_havoc_created,
+            away_havoc_allowed,
+            away_havoc_created,
+        ]
+
+        if all(
+            value is not None
+            for value in values
+        ):
+            home_pressure_edge = (
+                home_havoc_created
+                -
+                away_havoc_allowed
+            )
+
+            away_pressure_edge = (
+                away_havoc_created
+                -
+                home_havoc_allowed
+            )
+
+            components[
+                "havoc"
+            ] = bounded(
+                (
+                    home_pressure_edge
+                    -
+                    away_pressure_edge
+                )
+                * 0.025,
+                0.50
+            )
+
+            availability[
+                "havoc"
+            ] = True
 
     raw_total = sum(
         components.values()
     )
 
-    total = max(
-        -MAX_MATCHUP_ADJUSTMENT,
-        min(
-            MAX_MATCHUP_ADJUSTMENT,
-            raw_total
-        )
+    total = bounded(
+        raw_total,
+        MAX_MATCHUP_ADJUSTMENT
+    )
+
+    comparable = any(
+        availability.values()
     )
 
     return {
@@ -1332,72 +2005,130 @@ def calculate_matchup_adjustment(
                     value,
                     2
                 )
-
-            for key, value
-            in components.items()
+            for (
+                key,
+                value
+            ) in components.items()
         },
+
+        "available": availability,
+
+        "comparable_live_sample":
+            comparable,
+
+        "note":
+            (
+                "Live matchup adjustments active."
+                if comparable
+                else
+                "No comparable 2026 live sample; "
+                "matchup adjustment held at zero."
+            ),
     }
 
+
+# =============================================================================
+# TOTAL MODEL
+# =============================================================================
 
 def calculate_total(
     home,
     away
 ):
+    """
+    Total remains based on the blended MODEL profile.
 
-    ho = home.get(
-        "offense",
-        {}
-    ) or {}
+    It does not directly compare Stanford live data to Miami missing data.
+    """
 
-    hd = home.get(
-        "defense",
-        {}
-    ) or {}
+    home_off = (
+        home.get(
+            "offense",
+            {}
+        )
+        or {}
+    )
 
-    ao = away.get(
-        "offense",
-        {}
-    ) or {}
+    home_def = (
+        home.get(
+            "defense",
+            {}
+        )
+        or {}
+    )
 
-    ad = away.get(
-        "defense",
-        {}
-    ) or {}
+    away_off = (
+        away.get(
+            "offense",
+            {}
+        )
+        or {}
+    )
+
+    away_def = (
+        away.get(
+            "defense",
+            {}
+        )
+        or {}
+    )
 
     efficiency = (
         safe_number(
-            ho.get("epa_play")
+            home_off.get(
+                "epa_play"
+            )
         )
         +
         safe_number(
-            ao.get("epa_play")
+            away_off.get(
+                "epa_play"
+            )
         )
         -
         safe_number(
-            hd.get("epa_play")
+            home_def.get(
+                "epa_play"
+            )
         )
         -
         safe_number(
-            ad.get("epa_play")
+            away_def.get(
+                "epa_play"
+            )
         )
     )
 
     success = (
         safe_number(
-            ho.get("success_rate")
+            home_off.get(
+                "success_rate"
+            )
         )
         +
         safe_number(
-            ao.get("success_rate")
+            away_off.get(
+                "success_rate"
+            )
         )
-        - 85
+        -
+        85
     )
 
     total = (
         BASE_TOTAL
-        + efficiency * 5
-        + success * 0.15
+        +
+        efficiency
+        * 5.0
+        +
+        success
+        * 0.15
     )
+
+    total = bounded(
+        total - BASE_TOTAL,
+        27.5
+    ) + BASE_TOTAL
 
     total = max(
         35,
@@ -1407,7 +2138,232 @@ def calculate_total(
         )
     )
 
-    return round_half(total)
+    return round_half(
+        total
+    )
+
+
+# =============================================================================
+# WIN PROBABILITY
+# =============================================================================
+
+def normal_cdf(value):
+    return (
+        1.0
+        +
+        math.erf(
+            value
+            /
+            math.sqrt(2.0)
+        )
+    ) / 2.0
+
+
+def calculate_win_probability(
+    home_spread
+):
+    """
+    home_spread:
+        negative = home favored
+        positive = away favored
+
+    Convert to projected home margin and apply a conservative normal
+    margin distribution.
+    """
+
+    projected_home_margin = (
+        -safe_number(
+            home_spread
+        )
+    )
+
+    z = (
+        projected_home_margin
+        /
+        WIN_PROB_STD_DEV
+    )
+
+    home_probability = (
+        normal_cdf(z)
+    )
+
+    home_probability = max(
+        0.01,
+        min(
+            0.99,
+            home_probability
+        )
+    )
+
+    away_probability = (
+        1.0
+        -
+        home_probability
+    )
+
+    return {
+        "home":
+            round(
+                home_probability
+                * 100,
+                1
+            ),
+
+        "away":
+            round(
+                away_probability
+                * 100,
+                1
+            ),
+
+        "method":
+            (
+                "Normal margin distribution, "
+                f"σ={WIN_PROB_STD_DEV:.1f}"
+            ),
+    }
+
+
+# =============================================================================
+# MARKET COMPARISON
+# =============================================================================
+
+def adjusted_status_threshold(
+    market_spread
+):
+    """
+    A seven-point disagreement near pick'em means more than seven points
+    when the market spread is -50.
+
+    Large spreads therefore require a larger raw disagreement.
+    """
+
+    if market_spread is None:
+
+        return {
+            "play":
+                None,
+
+            "watch":
+                None,
+        }
+
+    magnitude = abs(
+        market_spread
+    )
+
+    if magnitude >= 35:
+
+        return {
+            "play": 10.0,
+            "watch": 6.0,
+        }
+
+    if magnitude >= 21:
+
+        return {
+            "play": 8.5,
+            "watch": 5.0,
+        }
+
+    return {
+        "play": 7.0,
+        "watch": 4.0,
+    }
+
+
+def compare_to_market(
+    model_spread,
+    market_spread,
+    home_name,
+    away_name
+):
+    if market_spread is None:
+
+        return {
+            "disagreement":
+                None,
+
+            "preferred_side":
+                None,
+
+            "status":
+                "NO MARKET",
+
+            "play_threshold":
+                None,
+
+            "watch_threshold":
+                None,
+        }
+
+    difference = (
+        model_spread
+        -
+        market_spread
+    )
+
+    disagreement = abs(
+        difference
+    )
+
+    if difference < 0:
+
+        preferred = home_name
+
+    elif difference > 0:
+
+        preferred = away_name
+
+    else:
+
+        preferred = None
+
+    thresholds = (
+        adjusted_status_threshold(
+            market_spread
+        )
+    )
+
+    if (
+        disagreement
+        >=
+        thresholds["play"]
+    ):
+
+        status = "PLAY"
+
+    elif (
+        disagreement
+        >=
+        thresholds["watch"]
+    ):
+
+        status = "WATCH"
+
+    else:
+
+        status = "IN LINE"
+
+    return {
+        "disagreement":
+            round(
+                disagreement,
+                1
+            ),
+
+        "preferred_side":
+            preferred,
+
+        "status":
+            status,
+
+        "play_threshold":
+            thresholds["play"],
+
+        "watch_threshold":
+            thresholds["watch"],
+    }
 
 
 # =============================================================================
@@ -1423,7 +2379,6 @@ def generate_insights(
     model_spread,
     market_spread
 ):
-
     insights = []
 
     home_rank = home.get(
@@ -1439,7 +2394,6 @@ def generate_insights(
         and away_rank
         and home_rank != away_rank
     ):
-
         stronger = (
             home_name
             if home_rank < away_rank
@@ -1448,40 +2402,114 @@ def generate_insights(
 
         insights.append({
             "title":
-                "POWER RATING EDGE",
+                "OVERALL TEAM STRENGTH",
 
             "text":
                 (
-                    f"{stronger} owns the "
-                    f"stronger overall model profile."
+                    f"{stronger} owns the stronger "
+                    f"overall blended power rating."
                 ),
+
+            "source":
+                "power_rating",
         })
 
-    passing = matchup[
-        "components"
-    ].get(
-        "passing",
-        0
-    )
-
-    if abs(passing) >= 0.3:
-
-        favored = (
-            home_name
-            if passing > 0
-            else away_name
-        )
+    if not matchup[
+        "comparable_live_sample"
+    ]:
 
         insights.append({
             "title":
-                "PASSING MATCHUP",
+                "LIVE MATCHUP DATA",
 
             "text":
                 (
-                    f"{favored} has the more "
-                    f"favorable passing efficiency matchup."
+                    "No live matchup adjustment is being "
+                    "applied because both teams do not yet "
+                    "have comparable 2026 samples."
                 ),
+
+            "source":
+                "sample_guard",
         })
+
+    else:
+
+        components = matchup[
+            "components"
+        ]
+
+        available = matchup[
+            "available"
+        ]
+
+        usable = [
+            (
+                name,
+                value
+            )
+            for (
+                name,
+                value
+            )
+            in components.items()
+            if available.get(
+                name
+            )
+            and
+            abs(value) >= 0.15
+        ]
+
+        usable.sort(
+            key=lambda item:
+                abs(item[1]),
+            reverse=True
+        )
+
+        for (
+            name,
+            value
+        ) in usable[:2]:
+
+            favored = (
+                home_name
+                if value > 0
+                else away_name
+            )
+
+            label_map = {
+                "passing":
+                    "PASSING MATCHUP",
+
+                "rushing":
+                    "RUSHING MATCHUP",
+
+                "success_rate":
+                    "EFFICIENCY MATCHUP",
+
+                "explosiveness":
+                    "EXPLOSIVENESS",
+
+                "havoc":
+                    "HAVOC MATCHUP",
+            }
+
+            insights.append({
+                "title":
+                    label_map.get(
+                        name,
+                        name.upper()
+                    ),
+
+                "text":
+                    (
+                        f"The comparable 2026 sample "
+                        f"leans toward {favored}."
+                    ),
+
+                "source":
+                    name,
+            })
 
     if market_spread is not None:
 
@@ -1491,7 +2519,9 @@ def generate_insights(
             market_spread
         )
 
-        if abs(difference) >= 1.5:
+        if abs(
+            difference
+        ) >= 1.5:
 
             favored = (
                 home_name
@@ -1505,22 +2535,26 @@ def generate_insights(
 
                 "text":
                     (
-                        f"The model differs from "
-                        f"the market toward "
-                        f"{favored} by "
-                        f"{abs(difference):.1f} points."
+                        f"The model is "
+                        f"{abs(difference):.1f} points "
+                        f"more favorable to {favored} "
+                        f"than the current market."
                     ),
+
+                "source":
+                    "market",
             })
 
     return insights[:4]
 
 
 # =============================================================================
-# BUILD PROJECTIONS
+# ODDS LOOKUP
 # =============================================================================
 
-def build_odds_lookup(odds):
-
+def build_odds_lookup(
+    odds
+):
     lookup = {}
 
     for game in odds.get(
@@ -1536,8 +2570,10 @@ def build_odds_lookup(odds):
             "away_team"
         )
 
-        if home and away:
-
+        if (
+            home
+            and away
+        ):
             lookup[
                 (
                     home,
@@ -1548,13 +2584,16 @@ def build_odds_lookup(odds):
     return lookup
 
 
+# =============================================================================
+# BUILD PROJECTIONS
+# =============================================================================
+
 def build_projections(
     teams,
     schedule,
     odds,
     calibration
 ):
-
     print("")
     print(
         "🧮 Building projections..."
@@ -1562,11 +2601,14 @@ def build_projections(
 
     projections = []
 
-    market_matches = 0
-
-    odds_lookup = build_odds_lookup(
-        odds
+    odds_lookup = (
+        build_odds_lookup(
+            odds
+        )
     )
+
+    market_matches = 0
+    comparable_matchups = 0
 
     slope = calibration[
         "slope"
@@ -1592,6 +2634,10 @@ def build_projections(
             away_name
         ]
 
+        # ---------------------------------------------------------------------
+        # POWER RATING FOUNDATION
+        # ---------------------------------------------------------------------
+
         home_rating = safe_number(
             home.get(
                 "power_rating"
@@ -1610,27 +2656,44 @@ def build_projections(
             away_rating
         )
 
-        point_difference = (
+        rating_points = (
             rating_difference
             *
             slope
         )
 
-        neutral = game.get(
-            "neutral_site",
-            False
+        # Positive rating_points means home is stronger.
+        rating_home_spread = (
+            -rating_points
+        )
+
+        # ---------------------------------------------------------------------
+        # HOME FIELD
+        # ---------------------------------------------------------------------
+
+        neutral = bool(
+            game.get(
+                "neutral_site",
+                False
+            )
         )
 
         hfa = (
-            0
+            0.0
             if neutral
-            else HOME_FIELD_ADVANTAGE
+            else
+            HOME_FIELD_ADVANTAGE
         )
 
-        base_spread = (
-            -point_difference
-            - hfa
+        spread_after_hfa = (
+            rating_home_spread
+            -
+            hfa
         )
+
+        # ---------------------------------------------------------------------
+        # MATCHUP ADJUSTMENT
+        # ---------------------------------------------------------------------
 
         matchup = (
             calculate_matchup_adjustment(
@@ -1639,16 +2702,41 @@ def build_projections(
             )
         )
 
-        model_spread = round_half(
-            base_spread
+        if matchup[
+            "comparable_live_sample"
+        ]:
+            comparable_matchups += 1
+
+        model_spread_raw = (
+            spread_after_hfa
             -
             matchup["total"]
         )
 
-        model_total = calculate_total(
-            home,
-            away
+        model_spread = round_half(
+            model_spread_raw
         )
+
+        # ---------------------------------------------------------------------
+        # TOTAL / WIN PROBABILITY
+        # ---------------------------------------------------------------------
+
+        model_total = (
+            calculate_total(
+                home,
+                away
+            )
+        )
+
+        win_probability = (
+            calculate_win_probability(
+                model_spread
+            )
+        )
+
+        # ---------------------------------------------------------------------
+        # MARKET
+        # ---------------------------------------------------------------------
 
         market = odds_lookup.get(
             (
@@ -1683,60 +2771,18 @@ def build_projections(
                 )
             )
 
-        disagreement = None
-        preferred = None
-        label = "NO MARKET"
-
-        if market_spread is not None:
-
-            difference = (
-                model_spread
-                -
-                market_spread
-            )
-
-            disagreement = abs(
-                difference
-            )
-
-            if difference < 0:
-
-                preferred = home_name
-
-            elif difference > 0:
-
-                preferred = away_name
-
-            if disagreement >= 7:
-
-                label = "PLAY"
-
-            elif disagreement >= 4:
-
-                label = "WATCH"
-
-            else:
-
-                label = "IN LINE"
-
-        confidence = 50
-
-        if disagreement is not None:
-
-            confidence += min(
-                30,
-                disagreement * 2
-            )
-
-        confidence = int(
-            max(
-                35,
-                min(
-                    95,
-                    confidence
-                )
+        comparison = (
+            compare_to_market(
+                model_spread,
+                market_spread,
+                home_name,
+                away_name
             )
         )
+
+        # ---------------------------------------------------------------------
+        # OUTPUT
+        # ---------------------------------------------------------------------
 
         projections.append({
             "game_id":
@@ -1810,9 +2856,59 @@ def build_projections(
                 "total":
                     model_total,
 
+                "win_probability":
+                    win_probability,
+
+                "components": {
+                    "home_power_rating":
+                        round(
+                            home_rating,
+                            3
+                        ),
+
+                    "away_power_rating":
+                        round(
+                            away_rating,
+                            3
+                        ),
+
+                    "rating_difference":
+                        round(
+                            rating_difference,
+                            3
+                        ),
+
+                    "rating_points_home_edge":
+                        round(
+                            rating_points,
+                            2
+                        ),
+
+                    "rating_only_home_spread":
+                        round_half(
+                            rating_home_spread
+                        ),
+
+                    "home_field_advantage":
+                        hfa,
+
+                    "spread_after_home_field":
+                        round_half(
+                            spread_after_hfa
+                        ),
+
+                    "matchup_adjustment":
+                        matchup,
+
+                    "final_home_spread":
+                        model_spread,
+                },
+
+                # Keep these old fields too so the current frontend
+                # does not break before we upgrade it.
                 "base_home_spread":
                     round_half(
-                        base_spread
+                        spread_after_hfa
                     ),
 
                 "home_field_advantage":
@@ -1820,9 +2916,6 @@ def build_projections(
 
                 "matchup_adjustment":
                     matchup,
-
-                "confidence":
-                    confidence,
             },
 
             "market": {
@@ -1836,24 +2929,8 @@ def build_projections(
                     bookmaker,
             },
 
-            "comparison": {
-                "disagreement":
-                    (
-                        round(
-                            disagreement,
-                            1
-                        )
-                        if disagreement
-                        is not None
-                        else None
-                    ),
-
-                "preferred_side":
-                    preferred,
-
-                "status":
-                    label,
-            },
+            "comparison":
+                comparison,
 
             "insights":
                 generate_insights(
@@ -1906,6 +2983,12 @@ def build_projections(
         f"match: {market_matches}"
     )
 
+    print(
+        f"✅ Games with comparable "
+        f"live matchup samples: "
+        f"{comparable_matchups}"
+    )
+
     return projections
 
 
@@ -1913,101 +2996,90 @@ def build_projections(
 # SANITY CHECKS
 # =============================================================================
 
-def verify_known_schedule_errors(
-    schedule
+def validate_projection_output(
+    projections
 ):
-    """
-    Explicit guardrails against the exact false matches we discovered.
-    """
-
-    games = schedule.get(
-        "games",
-        []
-    )
-
-    bad_games = []
-
-    for game in games:
-
-        home = game.get(
-            "home_team"
-        )
-
-        away = game.get(
-            "away_team"
-        )
-
-        date = str(
-            game.get(
-                "start_date",
-                ""
-            )
-        )
-
-        # Indiana / Purdue is Nov 28,
-        # not Purdue's Indiana State opener.
-        if {
-            home,
-            away
-        } == {
-            "Indiana",
-            "Purdue"
-        }:
-
-            if not date.startswith(
-                "2026-11-28"
-            ):
-
-                bad_games.append(
-                    (
-                        "Indiana/Purdue",
-                        date
-                    )
-                )
-
-        # Florida hosts South Carolina Oct 10.
-        if {
-            home,
-            away
-        } == {
-            "Florida",
-            "South Carolina"
-        }:
-
-            if not date.startswith(
-                "2026-10-10"
-            ):
-
-                bad_games.append(
-                    (
-                        "Florida/South Carolina",
-                        date
-                    )
-                )
-
-    if bad_games:
-
-        print("")
-        print(
-            "❌ SCHEDULE SANITY CHECK FAILED"
-        )
-
-        for matchup, date in bad_games:
-
-            print(
-                f"   {matchup}: {date}"
-            )
+    if len(
+        projections
+    ) < 400:
 
         print(
-            "Refusing to publish "
-            "known-false schedule data."
+            "❌ Too few projections."
         )
 
         sys.exit(1)
 
-    print("")
+    impossible_probabilities = []
+
+    for game in projections:
+
+        win = (
+            game.get(
+                "projection",
+                {}
+            )
+            .get(
+                "win_probability",
+                {}
+            )
+        )
+
+        home = optional_number(
+            win.get(
+                "home"
+            )
+        )
+
+        away = optional_number(
+            win.get(
+                "away"
+            )
+        )
+
+        if (
+            home is None
+            or away is None
+        ):
+            impossible_probabilities.append(
+                game.get(
+                    "game_id"
+                )
+            )
+
+            continue
+
+        if (
+            home < 0
+            or home > 100
+            or away < 0
+            or away > 100
+            or abs(
+                (
+                    home + away
+                )
+                -
+                100
+            )
+            >
+            0.2
+        ):
+            impossible_probabilities.append(
+                game.get(
+                    "game_id"
+                )
+            )
+
+    if impossible_probabilities:
+
+        print(
+            "❌ Win probability "
+            "sanity check failed."
+        )
+
+        sys.exit(1)
+
     print(
-        "✅ Known schedule sanity "
+        "✅ Projection sanity "
         "checks passed"
     )
 
@@ -2020,16 +3092,21 @@ def save_json(
     path,
     data
 ):
-
     os.makedirs(
-        os.path.dirname(path),
+        os.path.dirname(
+            path
+        ),
         exist_ok=True
     )
 
-    temp = path + ".tmp"
+    temp_path = (
+        path
+        +
+        ".tmp"
+    )
 
     with open(
-        temp,
+        temp_path,
         "w",
         encoding="utf-8"
     ) as file:
@@ -2041,17 +3118,18 @@ def save_json(
             ensure_ascii=False
         )
 
-    # Make sure JSON is valid.
     with open(
-        temp,
+        temp_path,
         "r",
         encoding="utf-8"
     ) as file:
 
-        json.load(file)
+        json.load(
+            file
+        )
 
     os.replace(
-        temp,
+        temp_path,
         path
     )
 
@@ -2066,13 +3144,18 @@ def save_json(
 # =============================================================================
 
 def main():
+    print(
+        "=" * 70
+    )
 
-    print("=" * 70)
     print(
         "🏈 CFB ANALYTICS — "
         "PROJECTION ENGINE"
     )
-    print("=" * 70)
+
+    print(
+        "=" * 70
+    )
 
     print(
         f"Season: {YEAR}"
@@ -2083,14 +3166,19 @@ def main():
         f"{datetime.now().isoformat()}"
     )
 
-    _, teams = load_metrics()
+    (
+        metrics_data,
+        teams
+    ) = load_metrics()
 
     valid_teams = set(
         teams.keys()
     )
 
-    lookup = build_team_lookup(
-        valid_teams
+    lookup = (
+        build_team_lookup(
+            valid_teams
+        )
     )
 
     calibration = (
@@ -2122,7 +3210,6 @@ def main():
         lookup
     )
 
-    # Explicit checks for the bugs we just found.
     verify_known_schedule_errors(
         schedule
     )
@@ -2136,25 +3223,18 @@ def main():
     # PROJECTIONS
     # -------------------------------------------------------------------------
 
-    projections = build_projections(
-        teams,
-        schedule,
-        odds,
-        calibration
+    projections = (
+        build_projections(
+            teams,
+            schedule,
+            odds,
+            calibration
+        )
     )
 
-    if len(projections) < 400:
-
-        print("")
-        print(
-            "❌ Too few projections built."
-        )
-
-        print(
-            "Refusing to publish."
-        )
-
-        sys.exit(1)
+    validate_projection_output(
+        projections
+    )
 
     output = {
         "meta": {
@@ -2162,19 +3242,52 @@ def main():
                 YEAR,
 
             "generated":
-                datetime.now().isoformat(),
+                datetime.now()
+                .isoformat(),
 
             "games":
                 len(projections),
 
             "version":
-                "1.3-strict-schedule",
+                "2.0-explainable",
 
             "calibration":
                 calibration,
 
             "home_field_advantage":
                 HOME_FIELD_ADVANTAGE,
+
+            "max_matchup_adjustment":
+                MAX_MATCHUP_ADJUSTMENT,
+
+            "win_probability_std_dev":
+                WIN_PROB_STD_DEV,
+
+            "live_matchup_rules": {
+                "minimum_plays":
+                    MIN_LIVE_PLAYS,
+
+                "minimum_pass_plays":
+                    MIN_LIVE_PASS_PLAYS,
+
+                "minimum_rush_plays":
+                    MIN_LIVE_RUSH_PLAYS,
+
+                "requires_both_teams":
+                    True,
+            },
+
+            "metrics_through_week":
+                (
+                    metrics_data
+                    .get(
+                        "meta",
+                        {}
+                    )
+                    .get(
+                        "through_week"
+                    )
+                ),
 
             "schedule_matching":
                 (
@@ -2193,11 +3306,17 @@ def main():
     )
 
     print("")
-    print("=" * 70)
+    print(
+        "=" * 70
+    )
+
     print(
         "🎉 PROJECTION BUILD COMPLETE"
     )
-    print("=" * 70)
+
+    print(
+        "=" * 70
+    )
 
     print(
         f"FBS-vs-FBS schedule games: "
