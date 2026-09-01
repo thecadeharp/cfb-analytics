@@ -2,22 +2,23 @@
 CFB ANALYTICS
 weekly_update.py
 
-Updates the live 2026 team metrics used by the projection model.
+Updates the 2026 team efficiency data used by the model.
 
-What this script does:
-- Securely reads CFBD_API_KEY from GitHub Secrets
-- Validates CFBD authentication
-- Detects the most recently completed 2026 week
-- Pulls play-by-play
-- Calculates EPA, success rate, explosiveness and havoc
-- Blends live 2026 performance into the preseason baseline
-- Updates data/cfb_metrics.json
+2026 metrics-quality version.
 
-IMPORTANT:
-If CFBD authentication or a required API request fails, this script
-FAILS the GitHub Action instead of silently publishing bad data.
+Fixes:
+- Uses CFBD play-level PPA as our EPA-style play value
+- Uses score AT THE TIME OF THE PLAY for garbage-time filtering
+- Calculates a true explosive-play rate
+    Pass: 15+ yards
+    Rush: 10+ yards
+- Keeps pass/rush splits separate
+- Does not publish impossible percentage rates
+- Freezes a baseline so repeated workflow runs do not compound blends
+- Preserves teams that have not played yet
 """
 
+import copy
 import json
 import os
 import sys
@@ -47,25 +48,20 @@ WEIGHTS = {
     "off_havoc_allowed": 0.10,
 }
 
+MIN_TEAM_PLAYS = 5
+MIN_SPLIT_PLAYS = 4
+
 
 # =============================================================================
 # API KEY
 # =============================================================================
 
-def clean_api_key(raw_key):
-    """
-    Clean accidental whitespace, quotes, or a pasted 'Bearer ' prefix.
-
-    GitHub Secret should ideally contain ONLY the raw API key,
-    but this makes the pipeline more forgiving.
-    """
-
-    if raw_key is None:
+def clean_api_key(raw):
+    if raw is None:
         return ""
 
-    key = str(raw_key).strip()
+    key = str(raw).strip()
 
-    # Remove accidental wrapping quotes.
     if (
         len(key) >= 2
         and key[0] == key[-1]
@@ -73,25 +69,27 @@ def clean_api_key(raw_key):
     ):
         key = key[1:-1].strip()
 
-    # Remove accidental "Bearer " prefix.
     if key.lower().startswith("bearer "):
         key = key[7:].strip()
 
-    # Remove carriage returns / newlines.
-    key = key.replace("\r", "").replace("\n", "").strip()
-
-    return key
+    return (
+        key
+        .replace("\r", "")
+        .replace("\n", "")
+        .replace("\t", "")
+        .strip()
+    )
 
 
 API_KEY = clean_api_key(
-    os.environ.get("CFBD_API_KEY", "")
+    os.environ.get(
+        "CFBD_API_KEY",
+        ""
+    )
 )
-
 
 if not API_KEY:
     print("❌ CFBD_API_KEY is missing.")
-    print("   GitHub → Settings → Secrets and variables → Actions")
-    print("   Make sure CFBD_API_KEY contains the raw API key.")
     sys.exit(1)
 
 
@@ -105,65 +103,124 @@ HEADERS = {
 # GENERAL HELPERS
 # =============================================================================
 
-def first_value(data, *keys, default=None):
-    """
-    Get the first available field from old/new CFBD field names.
-
-    Example:
-        first_value(game, "homePoints", "home_points")
-    """
-
+def first_value(
+    data,
+    *keys,
+    default=None
+):
     for key in keys:
-        if key in data and data.get(key) is not None:
+        if (
+            key in data
+            and data.get(key) is not None
+        ):
             return data.get(key)
 
     return default
 
 
-def safe_float(value, default=0.0):
+def safe_float(
+    value,
+    default=0.0
+):
     try:
         if value is None:
             return default
 
         return float(value)
 
-    except (TypeError, ValueError):
+    except (
+        TypeError,
+        ValueError
+    ):
         return default
 
 
+def optional_float(value):
+    try:
+        if value is None:
+            return None
+
+        return float(value)
+
+    except (
+        TypeError,
+        ValueError
+    ):
+        return None
+
+
+def valid_rate(value):
+    value = optional_float(value)
+
+    return (
+        value is not None
+        and 0 <= value <= 100
+    )
+
+
+def clean_rate(value):
+    """
+    Percentage values must be between 0 and 100.
+
+    Anything outside that range is considered invalid legacy data.
+    """
+
+    value = optional_float(value)
+
+    if value is None:
+        return None
+
+    if not 0 <= value <= 100:
+        return None
+
+    return round(
+        value,
+        3
+    )
+
+
 def z_score(series):
-    s = series.copy().astype(float)
+    s = (
+        series
+        .copy()
+        .astype(float)
+    )
 
     mean = s.mean()
     std = s.std()
 
-    if std == 0 or pd.isna(std):
+    if (
+        std == 0
+        or pd.isna(std)
+    ):
         return pd.Series(
             0.0,
-            index=series.index
+            index=s.index
         )
 
-    return (s - mean) / std
+    return (
+        s - mean
+    ) / std
 
 
 # =============================================================================
-# CFBD REQUEST HANDLER
+# CFBD REQUEST
 # =============================================================================
 
-def cfbd(endpoint, params=None, required=True):
-    """
-    Make a CFBD request.
+def cfbd(
+    endpoint,
+    params=None,
+    required=True
+):
+    url = (
+        f"{BASE_URL}"
+        f"{endpoint}"
+    )
 
-    Behavior:
-    - 401 / 403 → immediately fail workflow
-    - repeated request failure on required data → fail workflow
-    - successful empty response → return []
-    """
-
-    url = f"{BASE_URL}{endpoint}"
-
-    for attempt in range(1, 4):
-
+    for attempt in range(
+        1,
+        4
+    ):
         try:
             response = requests.get(
                 url,
@@ -177,7 +234,7 @@ def cfbd(endpoint, params=None, required=True):
             print(
                 f"⚠ CFBD request error "
                 f"{endpoint} "
-                f"(attempt {attempt}/3): {error}"
+                f"({attempt}/3): {error}"
             )
 
             if attempt < 3:
@@ -185,86 +242,45 @@ def cfbd(endpoint, params=None, required=True):
                 continue
 
             if required:
-                print(
-                    f"❌ Required CFBD request failed: "
-                    f"{endpoint}"
-                )
                 sys.exit(1)
 
             return []
 
-        # ---------------------------------------------------------------------
-        # AUTH FAILURE
-        # ---------------------------------------------------------------------
-
-        if response.status_code in (401, 403):
-
+        if response.status_code in (
+            401,
+            403
+        ):
             print("")
-            print("❌ CFBD AUTHENTICATION FAILED")
             print(
-                f"   HTTP status: "
+                "❌ CFBD AUTHENTICATION FAILED"
+            )
+            print(
+                f"HTTP "
                 f"{response.status_code}"
             )
 
-            print(
-                "   Check the CFBD_API_KEY GitHub Secret."
-            )
-
-            print(
-                "   The secret must contain ONLY "
-                "the raw API key."
-            )
-
-            try:
-                print(
-                    f"   CFBD response: "
-                    f"{response.text[:300]}"
-                )
-            except Exception:
-                pass
-
             sys.exit(1)
-
-        # ---------------------------------------------------------------------
-        # OTHER HTTP FAILURE
-        # ---------------------------------------------------------------------
 
         if not response.ok:
 
             print(
-                f"⚠ CFBD returned HTTP "
+                f"⚠ CFBD HTTP "
                 f"{response.status_code} "
                 f"for {endpoint}"
             )
 
             print(
-                f"   Params: {params}"
+                f"Params: {params}"
             )
-
-            try:
-                print(
-                    f"   Response: "
-                    f"{response.text[:500]}"
-                )
-            except Exception:
-                pass
 
             if attempt < 3:
                 time.sleep(2)
                 continue
 
             if required:
-                print(
-                    f"❌ Required CFBD request failed "
-                    f"after 3 attempts: {endpoint}"
-                )
                 sys.exit(1)
 
             return []
-
-        # ---------------------------------------------------------------------
-        # JSON
-        # ---------------------------------------------------------------------
 
         try:
             return response.json()
@@ -272,8 +288,8 @@ def cfbd(endpoint, params=None, required=True):
         except ValueError:
 
             print(
-                f"⚠ CFBD returned invalid JSON "
-                f"for {endpoint}"
+                f"❌ Invalid JSON from "
+                f"{endpoint}"
             )
 
             if required:
@@ -281,27 +297,17 @@ def cfbd(endpoint, params=None, required=True):
 
             return []
 
-    if required:
-        sys.exit(1)
-
     return []
 
 
-# =============================================================================
-# API CONNECTION TEST
-# =============================================================================
-
 def validate_cfbd():
-    """
-    Make one lightweight real request before doing any heavy work.
-
-    This prevents a malformed secret from producing a fake-success workflow.
-    """
 
     print("")
-    print("🔐 Validating CFBD connection...")
+    print(
+        "🔐 Validating CFBD connection..."
+    )
 
-    test = cfbd(
+    result = cfbd(
         "/games",
         {
             "year": YEAR,
@@ -312,301 +318,20 @@ def validate_cfbd():
         required=True
     )
 
-    if not isinstance(test, list):
+    if not isinstance(
+        result,
+        list
+    ):
         print(
-            "❌ CFBD returned an unexpected response format."
+            "❌ Unexpected CFBD "
+            "response format."
         )
+
         sys.exit(1)
 
-    print("✅ CFBD authentication successful")
-
-
-# =============================================================================
-# EXPECTED POINTS
-# =============================================================================
-
-EP_TABLE = {
-    (1, 1): 1.62,
-    (1, 2): 1.50,
-    (1, 3): 1.35,
-    (1, 4): 1.18,
-    (1, 5): 1.00,
-    (1, 6): 0.82,
-    (1, 7): 0.65,
-    (1, 8): 0.50,
-    (1, 9): 0.38,
-    (1, 10): 0.28,
-    (1, 11): 0.18,
-    (1, 12): 0.08,
-
-    (2, 1): 2.10,
-    (2, 2): 1.95,
-    (2, 3): 1.75,
-    (2, 4): 1.52,
-    (2, 5): 1.28,
-    (2, 6): 1.05,
-    (2, 7): 0.83,
-    (2, 8): 0.62,
-    (2, 9): 0.44,
-    (2, 10): 0.28,
-    (2, 11): 0.14,
-    (2, 12): -0.02,
-
-    (3, 1): 2.85,
-    (3, 2): 2.45,
-    (3, 3): 2.05,
-    (3, 4): 1.65,
-    (3, 5): 1.28,
-    (3, 6): 0.95,
-    (3, 7): 0.65,
-    (3, 8): 0.38,
-    (3, 9): 0.14,
-    (3, 10): -0.08,
-    (3, 11): -0.28,
-    (3, 12): -0.45,
-
-    (4, 1): 1.20,
-    (4, 2): 0.85,
-    (4, 3): 0.50,
-    (4, 4): 0.18,
-    (4, 5): -0.15,
-    (4, 6): -0.45,
-    (4, 7): -0.72,
-    (4, 8): -0.95,
-    (4, 9): -1.15,
-    (4, 10): -1.32,
-    (4, 11): -1.48,
-    (4, 12): -1.62,
-}
-
-
-YARD_LINE_ADJUSTMENT = {
-    (1, 10): 3.5,
-    (11, 20): 2.8,
-    (21, 30): 2.2,
-    (31, 40): 1.7,
-    (41, 50): 1.2,
-    (51, 60): 0.7,
-    (61, 70): 0.3,
-    (71, 80): -0.1,
-    (81, 90): -0.5,
-    (91, 100): -1.0,
-}
-
-
-def get_yard_adj(yards_to_goal):
-    try:
-        ytg = int(
-            safe_float(
-                yards_to_goal,
-                50
-            )
-        )
-
-    except Exception:
-        ytg = 50
-
-    ytg = max(1, min(99, ytg))
-
-    for (low, high), adjustment in (
-        YARD_LINE_ADJUSTMENT.items()
-    ):
-        if low <= ytg <= high:
-            return adjustment
-
-    return 0.0
-
-
-def calc_ep(
-    down,
-    distance,
-    yards_to_goal
-):
-    if pd.isna(down) or pd.isna(distance):
-        return 0.0
-
-    try:
-        d = int(down)
-
-        dist_bucket = min(
-            12,
-            max(
-                1,
-                int(float(distance))
-            )
-        )
-
-    except Exception:
-        return 0.0
-
-    base = EP_TABLE.get(
-        (d, dist_bucket),
-        0.0
+    print(
+        "✅ CFBD authentication successful"
     )
-
-    adjustment = get_yard_adj(
-        yards_to_goal
-    )
-
-    return base + adjustment * 0.3
-
-
-def calc_epa(play):
-
-    try:
-        ep_before = calc_ep(
-            play.get("down"),
-            play.get("distance"),
-            play.get("yards_to_goal")
-        )
-
-        play_type = str(
-            play.get("play_type", "")
-        ).lower()
-
-        yards_gained = safe_float(
-            play.get("yards_gained"),
-            0
-        )
-
-        if (
-            "touchdown" in play_type
-            or " td" in play_type
-        ):
-            ep_after = (
-                -2.0
-                if "safety" in play_type
-                else 6.96
-            )
-
-        elif (
-            "field goal" in play_type
-            and "made" in play_type
-        ):
-            ep_after = 3.0
-
-        elif (
-            "field goal" in play_type
-            and "missed" in play_type
-        ):
-            ep_after = -0.5
-
-        elif (
-            "interception" in play_type
-            or "fumble" in play_type
-        ):
-            ep_after = (
-                -ep_before - 1.5
-            )
-
-        elif "punt" in play_type:
-
-            new_ytg = max(
-                1,
-                safe_float(
-                    play.get("yards_to_goal"),
-                    50
-                )
-                - yards_gained
-                + 40
-            )
-
-            ep_after = -calc_ep(
-                1,
-                10,
-                new_ytg
-            )
-
-        elif "sack" in play_type:
-
-            new_dist = max(
-                1,
-                safe_float(
-                    play.get("distance"),
-                    10
-                )
-                - yards_gained
-            )
-
-            new_ytg = max(
-                1,
-                safe_float(
-                    play.get("yards_to_goal"),
-                    50
-                )
-                - yards_gained
-            )
-
-            ep_after = calc_ep(
-                2,
-                new_dist,
-                new_ytg
-            )
-
-        else:
-
-            distance = safe_float(
-                play.get("distance"),
-                10
-            )
-
-            new_ytg = max(
-                1,
-                safe_float(
-                    play.get("yards_to_goal"),
-                    50
-                )
-                - yards_gained
-            )
-
-            new_dist = max(
-                1,
-                distance - yards_gained
-            )
-
-            if yards_gained >= distance:
-
-                ep_after = calc_ep(
-                    1,
-                    10,
-                    new_ytg
-                )
-
-            else:
-
-                next_down = (
-                    int(
-                        safe_float(
-                            play.get("down"),
-                            1
-                        )
-                    )
-                    + 1
-                )
-
-                if next_down > 4:
-
-                    ep_after = -calc_ep(
-                        1,
-                        10,
-                        max(
-                            1,
-                            100 - new_ytg
-                        )
-                    )
-
-                else:
-
-                    ep_after = calc_ep(
-                        next_down,
-                        new_dist,
-                        new_ytg
-                    )
-
-        return ep_after - ep_before
-
-    except Exception:
-        return 0.0
 
 
 # =============================================================================
@@ -615,160 +340,327 @@ def calc_epa(play):
 
 def normalize_play(raw):
     """
-    Convert newer camelCase CFBD fields into the snake_case names
-    our existing model expects.
+    Current CFBD /plays fields are camelCase.
+
+    We normalize them once here so the rest of the script stays simple.
     """
 
     return {
-        **raw,
+        "game_id":
+            first_value(
+                raw,
+                "gameId",
+                "game_id"
+            ),
 
-        "game_id": first_value(
-            raw,
-            "gameId",
-            "game_id"
-        ),
+        "offense":
+            first_value(
+                raw,
+                "offense"
+            ),
 
-        "play_type": first_value(
-            raw,
-            "playType",
-            "play_type",
-            default=""
-        ),
+        "defense":
+            first_value(
+                raw,
+                "defense"
+            ),
 
-        "yards_gained": first_value(
-            raw,
-            "yardsGained",
-            "yards_gained",
-            default=0
-        ),
+        "home":
+            first_value(
+                raw,
+                "home"
+            ),
 
-        "yards_to_goal": first_value(
-            raw,
-            "yardsToGoal",
-            "yards_to_goal",
-            default=50
-        ),
+        "away":
+            first_value(
+                raw,
+                "away"
+            ),
 
-        "home_score": first_value(
-            raw,
-            "homeScore",
-            "home_score",
-            default=0
-        ),
+        "offense_score":
+            first_value(
+                raw,
+                "offenseScore",
+                "offense_score",
+                default=0
+            ),
 
-        "away_score": first_value(
-            raw,
-            "awayScore",
-            "away_score",
-            default=0
-        ),
+        "defense_score":
+            first_value(
+                raw,
+                "defenseScore",
+                "defense_score",
+                default=0
+            ),
 
-        "period": first_value(
-            raw,
-            "period",
-            default=1
-        ),
+        "period":
+            first_value(
+                raw,
+                "period",
+                default=1
+            ),
 
-        "down": first_value(
-            raw,
-            "down"
-        ),
+        "down":
+            first_value(
+                raw,
+                "down"
+            ),
 
-        "distance": first_value(
-            raw,
-            "distance"
-        ),
+        "distance":
+            first_value(
+                raw,
+                "distance"
+            ),
 
-        "offense": first_value(
-            raw,
-            "offense"
-        ),
+        "yards_to_goal":
+            first_value(
+                raw,
+                "yardsToGoal",
+                "yards_to_goal"
+            ),
 
-        "defense": first_value(
-            raw,
-            "defense"
-        ),
+        "yards_gained":
+            first_value(
+                raw,
+                "yardsGained",
+                "yards_gained",
+                default=0
+            ),
+
+        "play_type":
+            first_value(
+                raw,
+                "playType",
+                "play_type",
+                default=""
+            ),
+
+        "play_text":
+            first_value(
+                raw,
+                "playText",
+                "play_text",
+                default=""
+            ),
+
+        # CFBD's play-level Predicted Points Added.
+        # This is the value we use as our EPA-style play metric.
+        "ppa":
+            first_value(
+                raw,
+                "ppa"
+            ),
     }
 
 
 # =============================================================================
-# PLAY FILTERS
+# PLAY CLASSIFICATION
 # =============================================================================
 
+def play_description(play):
+    return (
+        f"{play.get('play_type', '')} "
+        f"{play.get('play_text', '')}"
+    ).lower()
+
+
+def is_pass_play(play):
+    text = play_description(
+        play
+    )
+
+    return any(
+        word in text
+        for word in (
+            "pass",
+            "sack",
+            "interception",
+        )
+    )
+
+
+def is_rush_play(play):
+    text = play_description(
+        play
+    )
+
+    # Sacks count with passing,
+    # not rushing.
+    if "sack" in text:
+        return False
+
+    return any(
+        word in text
+        for word in (
+            "rush",
+            "run ",
+            "rushed",
+        )
+    )
+
+
+def is_excluded_play(play):
+    text = play_description(
+        play
+    )
+
+    return any(
+        phrase in text
+        for phrase in (
+            "kickoff",
+            "extra point",
+            "timeout",
+            "end of",
+            "coin toss",
+            "penalty",
+            "two point",
+            "2-point",
+        )
+    )
+
+
 def is_garbage_time(play):
+    """
+    Uses offenseScore and defenseScore from the actual play.
 
-    try:
-        period = int(
-            safe_float(
-                play.get("period"),
-                1
-            )
+    IMPORTANT:
+    We do NOT use the game's final score here.
+    """
+
+    period = int(
+        safe_float(
+            play.get(
+                "period"
+            ),
+            1
         )
+    )
 
-        score_diff = abs(
-            safe_float(
-                play.get("home_score"),
-                0
-            )
-            -
-            safe_float(
-                play.get("away_score"),
-                0
-            )
-        )
-
-        if period >= 4 and score_diff >= 28:
-            return True
-
-        if period >= 3 and score_diff >= 38:
-            return True
-
-        return False
-
-    except Exception:
-        return False
-
-
-def is_success(row):
-
-    try:
-        yards = safe_float(
-            row.get("yards_gained"),
+    score_difference = abs(
+        safe_float(
+            play.get(
+                "offense_score"
+            ),
             0
         )
-
-        distance = safe_float(
-            row.get("distance"),
-            10
+        -
+        safe_float(
+            play.get(
+                "defense_score"
+            ),
+            0
         )
+    )
 
-        down = int(
-            safe_float(
-                row.get("down"),
-                1
-            )
+    if (
+        period >= 4
+        and score_difference >= 28
+    ):
+        return True
+
+    if (
+        period >= 3
+        and score_difference >= 38
+    ):
+        return True
+
+    return False
+
+
+def is_success(play):
+    yards = safe_float(
+        play.get(
+            "yards_gained"
+        ),
+        0
+    )
+
+    distance = safe_float(
+        play.get(
+            "distance"
+        ),
+        10
+    )
+
+    down = int(
+        safe_float(
+            play.get(
+                "down"
+            ),
+            1
         )
+    )
 
-        if down == 1:
-            return yards >= distance * 0.5
-
-        if down == 2:
-            return yards >= distance * 0.7
-
-        return yards >= distance
-
-    except Exception:
+    if distance <= 0:
         return False
+
+    if down == 1:
+        return (
+            yards
+            >= distance * 0.50
+        )
+
+    if down == 2:
+        return (
+            yards
+            >= distance * 0.70
+        )
+
+    if down in (
+        3,
+        4
+    ):
+        return (
+            yards >= distance
+        )
+
+    return False
+
+
+def is_havoc(play):
+    text = play_description(
+        play
+    )
+
+    return any(
+        phrase in text
+        for phrase in (
+            "sack",
+            "interception",
+            "fumble",
+            "tackle for loss",
+            "tfl",
+            "pass breakup",
+            "broken up",
+        )
+    )
 
 
 # =============================================================================
 # TEAM METRICS
 # =============================================================================
 
+def mean_or_none(series):
+    if len(series) == 0:
+        return None
+
+    clean = pd.to_numeric(
+        series,
+        errors="coerce"
+    ).dropna()
+
+    if len(clean) == 0:
+        return None
+
+    return float(
+        clean.mean()
+    )
+
+
 def team_metrics(
-    plays_df,
+    df,
     team,
-    side="offense"
+    side
 ):
     column = (
         "offense"
@@ -776,73 +668,537 @@ def team_metrics(
         else "defense"
     )
 
-    team_plays = plays_df[
-        plays_df[column] == team
-    ]
+    team_plays = df[
+        df[column] == team
+    ].copy()
 
-    if len(team_plays) < 5:
+    if (
+        len(team_plays)
+        < MIN_TEAM_PLAYS
+    ):
         return {}
 
     pass_plays = team_plays[
-        team_plays["is_pass"]
+        team_plays[
+            "is_pass"
+        ]
     ]
 
     rush_plays = team_plays[
-        team_plays["is_rush"]
+        team_plays[
+            "is_rush"
+        ]
     ]
 
-    def mean(series):
-        if len(series) == 0:
-            return 0.0
+    epa_play = mean_or_none(
+        team_plays["epa"]
+    )
 
-        return float(series.mean())
+    success_rate = (
+        float(
+            team_plays[
+                "success"
+            ].mean()
+        )
+        * 100
+    )
+
+    explosive_rate = (
+        float(
+            team_plays[
+                "explosive"
+            ].mean()
+        )
+        * 100
+    )
+
+    havoc_rate = (
+        float(
+            team_plays[
+                "havoc"
+            ].mean()
+        )
+        * 100
+    )
+
+    epa_pass = (
+        mean_or_none(
+            pass_plays[
+                "epa"
+            ]
+        )
+        if len(pass_plays)
+        >= MIN_SPLIT_PLAYS
+        else None
+    )
+
+    epa_rush = (
+        mean_or_none(
+            rush_plays[
+                "epa"
+            ]
+        )
+        if len(rush_plays)
+        >= MIN_SPLIT_PLAYS
+        else None
+    )
+
+    pass_sr = (
+        float(
+            pass_plays[
+                "success"
+            ].mean()
+        )
+        * 100
+        if len(pass_plays)
+        >= MIN_SPLIT_PLAYS
+        else None
+    )
+
+    rush_sr = (
+        float(
+            rush_plays[
+                "success"
+            ].mean()
+        )
+        * 100
+        if len(rush_plays)
+        >= MIN_SPLIT_PLAYS
+        else None
+    )
 
     return {
-        "n_plays": len(team_plays),
+        "n_plays":
+            int(
+                len(team_plays)
+            ),
+
+        "pass_plays":
+            int(
+                len(pass_plays)
+            ),
+
+        "rush_plays":
+            int(
+                len(rush_plays)
+            ),
 
         "epa_play":
-            mean(team_plays["epa"]),
+            epa_play,
+
+        "epa_pass":
+            epa_pass,
+
+        "epa_rush":
+            epa_rush,
 
         "success_rate":
-            mean(team_plays["success"]) * 100,
+            success_rate,
+
+        "pass_sr":
+            pass_sr,
+
+        "rush_sr":
+            rush_sr,
 
         "explosive_rate":
-            mean(team_plays["explosive"]) * 100,
+            explosive_rate,
 
         "havoc_rate":
-            mean(team_plays["havoc"]) * 100,
+            havoc_rate,
+    }
 
-        "epa_pass": (
-            mean(pass_plays["epa"])
-            if len(pass_plays) > 3
-            else 0.0
-        ),
 
-        "epa_rush": (
-            mean(rush_plays["epa"])
-            if len(rush_plays) > 3
-            else 0.0
-        ),
+# =============================================================================
+# BASELINE HANDLING
+# =============================================================================
 
-        "pass_sr": (
-            mean(pass_plays["success"]) * 100
-            if len(pass_plays) > 3
-            else 0.0
-        ),
+def sanitize_baseline_team(team_data):
+    """
+    Preserve the existing preseason/model baseline,
+    but kill impossible legacy explosive percentages.
+    """
 
-        "rush_sr": (
-            mean(rush_plays["success"]) * 100
-            if len(rush_plays) > 3
-            else 0.0
-        ),
+    cleaned = copy.deepcopy(
+        team_data
+    )
 
-        "yds_play":
-            mean(
-                team_plays[
-                    "yards_gained"
-                ].abs()
+    for section in (
+        "offense",
+        "defense"
+    ):
+        section_data = (
+            cleaned.get(
+                section,
+                {}
+            )
+            or {}
+        )
+
+        explosive = section_data.get(
+            "explosive_rate"
+        )
+
+        if not valid_rate(
+            explosive
+        ):
+            section_data[
+                "explosive_rate"
+            ] = None
+
+        for rate_key in (
+            "success_rate",
+            "pass_sr",
+            "rush_sr",
+            "havoc_allowed",
+            "havoc_created",
+        ):
+            if rate_key not in section_data:
+                continue
+
+            value = section_data.get(
+                rate_key
+            )
+
+            if (
+                value is not None
+                and not valid_rate(value)
+            ):
+                section_data[
+                    rate_key
+                ] = None
+
+        cleaned[
+            section
+        ] = section_data
+
+    return cleaned
+
+
+def get_frozen_baseline(existing):
+    """
+    Once this new updater runs once, it stores a frozen baseline.
+
+    Future reruns use that same baseline instead of treating the previous
+    blended output as a new preseason starting point.
+    """
+
+    snapshot = existing.get(
+        "baseline_snapshot"
+    )
+
+    if (
+        isinstance(snapshot, dict)
+        and len(snapshot) >= 100
+    ):
+        print(
+            "✅ Using frozen model baseline"
+        )
+
+        return copy.deepcopy(
+            snapshot
+        )
+
+    print(
+        "🧊 Creating frozen baseline snapshot"
+    )
+
+    snapshot = {}
+
+    for team, data in (
+        existing.get(
+            "teams",
+            {}
+        ).items()
+    ):
+        snapshot[team] = (
+            sanitize_baseline_team(
+                data
+            )
+        )
+
+    return snapshot
+
+
+# =============================================================================
+# BLENDING
+# =============================================================================
+
+def blend_number(
+    baseline_value,
+    live_value,
+    weight
+):
+    base = optional_float(
+        baseline_value
+    )
+
+    live = optional_float(
+        live_value
+    )
+
+    if live is None:
+        return (
+            round(base, 3)
+            if base is not None
+            else None
+        )
+
+    if base is None:
+        return round(
+            live,
+            3
+        )
+
+    return round(
+        base * (
+            1 - weight
+        )
+        +
+        live * weight,
+        3
+    )
+
+
+def blended_section(
+    baseline_section,
+    live_stats,
+    weight,
+    side
+):
+    base = (
+        baseline_section
+        or {}
+    )
+
+    live = (
+        live_stats
+        or {}
+    )
+
+    havoc_key = (
+        "havoc_allowed"
+        if side == "offense"
+        else "havoc_created"
+    )
+
+    result = {
+        "epa_play":
+            blend_number(
+                base.get(
+                    "epa_play"
+                ),
+                live.get(
+                    "epa_play"
+                ),
+                weight
+            ),
+
+        "success_rate":
+            blend_number(
+                base.get(
+                    "success_rate"
+                ),
+                live.get(
+                    "success_rate"
+                ),
+                weight
+            ),
+
+        "epa_pass":
+            blend_number(
+                base.get(
+                    "epa_pass"
+                ),
+                live.get(
+                    "epa_pass"
+                ),
+                weight
+            ),
+
+        "epa_rush":
+            blend_number(
+                base.get(
+                    "epa_rush"
+                ),
+                live.get(
+                    "epa_rush"
+                ),
+                weight
+            ),
+
+        "pass_sr":
+            blend_number(
+                base.get(
+                    "pass_sr"
+                ),
+                live.get(
+                    "pass_sr"
+                ),
+                weight
+            ),
+
+        "rush_sr":
+            blend_number(
+                base.get(
+                    "rush_sr"
+                ),
+                live.get(
+                    "rush_sr"
+                ),
+                weight
+            ),
+
+        havoc_key:
+            blend_number(
+                base.get(
+                    havoc_key
+                ),
+                live.get(
+                    "havoc_rate"
+                ),
+                weight
+            ),
+
+        "n_plays":
+            int(
+                live.get(
+                    "n_plays",
+                    0
+                )
             ),
     }
+
+    # -------------------------------------------------------------------------
+    # EXPLOSIVENESS
+    #
+    # Legacy baseline values were not real percentages.
+    # Therefore we DO NOT blend them.
+    #
+    # Once live plays exist, this is the true live explosive-play percentage.
+    # Otherwise it stays unavailable.
+    # -------------------------------------------------------------------------
+
+    if live.get(
+        "n_plays",
+        0
+    ) > 0:
+        result[
+            "explosive_rate"
+        ] = clean_rate(
+            live.get(
+                "explosive_rate"
+            )
+        )
+
+    else:
+        result[
+            "explosive_rate"
+        ] = None
+
+    # Store actual live splits separately.
+    # This lets the frontend distinguish model/blended stats from current-season
+    # results later.
+    result[
+        "live_2026"
+    ] = {
+        "epa_play":
+            (
+                round(
+                    live["epa_play"],
+                    3
+                )
+                if live.get(
+                    "epa_play"
+                ) is not None
+                else None
+            ),
+
+        "epa_pass":
+            (
+                round(
+                    live["epa_pass"],
+                    3
+                )
+                if live.get(
+                    "epa_pass"
+                ) is not None
+                else None
+            ),
+
+        "epa_rush":
+            (
+                round(
+                    live["epa_rush"],
+                    3
+                )
+                if live.get(
+                    "epa_rush"
+                ) is not None
+                else None
+            ),
+
+        "success_rate":
+            clean_rate(
+                live.get(
+                    "success_rate"
+                )
+            ),
+
+        "pass_sr":
+            clean_rate(
+                live.get(
+                    "pass_sr"
+                )
+            ),
+
+        "rush_sr":
+            clean_rate(
+                live.get(
+                    "rush_sr"
+                )
+            ),
+
+        "explosive_rate":
+            clean_rate(
+                live.get(
+                    "explosive_rate"
+                )
+            ),
+
+        "havoc_rate":
+            clean_rate(
+                live.get(
+                    "havoc_rate"
+                )
+            ),
+
+        "n_plays":
+            int(
+                live.get(
+                    "n_plays",
+                    0
+                )
+            ),
+
+        "pass_plays":
+            int(
+                live.get(
+                    "pass_plays",
+                    0
+                )
+            ),
+
+        "rush_plays":
+            int(
+                live.get(
+                    "rush_plays",
+                    0
+                )
+            ),
+    }
+
+    return result
 
 
 # =============================================================================
@@ -852,29 +1208,30 @@ def team_metrics(
 def main():
 
     print("=" * 70)
-    print("🏈 CFB ANALYTICS — WEEKLY TEAM UPDATE")
+    print(
+        "🏈 CFB ANALYTICS — "
+        "2026 METRICS UPDATE"
+    )
     print("=" * 70)
 
-    print(f"Season: {YEAR}")
     print(
-        f"Timestamp: "
-        f"{datetime.now().isoformat()}"
+        f"Season: {YEAR}"
     )
 
-    # -------------------------------------------------------------------------
-    # TEST CONNECTION FIRST
-    # -------------------------------------------------------------------------
+    print(
+        f"Generated: "
+        f"{datetime.now().isoformat()}"
+    )
 
     validate_cfbd()
 
     # -------------------------------------------------------------------------
-    # LOAD EXISTING BASELINE
+    # LOAD CURRENT DATA
     # -------------------------------------------------------------------------
 
     print("")
     print(
-        f"📂 Loading existing metrics from "
-        f"{DATA_PATH}..."
+        f"📂 Loading {DATA_PATH}..."
     )
 
     try:
@@ -883,41 +1240,63 @@ def main():
             "r",
             encoding="utf-8"
         ) as file:
-            existing = json.load(file)
-
-        print(
-            f"✅ Loaded data for "
-            f"{len(existing.get('teams', {}))} teams"
-        )
+            existing = json.load(
+                file
+            )
 
     except FileNotFoundError:
 
         print(
-            "❌ Existing cfb_metrics.json "
+            "❌ Existing baseline "
             "was not found."
-        )
-
-        print(
-            "   Refusing to overwrite the baseline "
-            "with an empty dataset."
         )
 
         sys.exit(1)
 
+    existing_teams = existing.get(
+        "teams",
+        {}
+    )
+
+    if len(
+        existing_teams
+    ) < 100:
+        print(
+            "❌ Existing dataset has "
+            "too few teams."
+        )
+
+        sys.exit(1)
+
+    print(
+        f"✅ Existing teams: "
+        f"{len(existing_teams)}"
+    )
+
+    baseline_snapshot = (
+        get_frozen_baseline(
+            existing
+        )
+    )
+
     # -------------------------------------------------------------------------
-    # DETECT COMPLETED WEEK
+    # DETECT COMPLETED GAMES/WEEK
     # -------------------------------------------------------------------------
 
     print("")
-    print("📅 Detecting completed weeks...")
-
-    completed_week = 0
+    print(
+        "📅 Detecting completed games..."
+    )
 
     games_by_week = {}
 
-    # Include Week 0 because college football sometimes has it.
-    for week in range(0, 17):
+    completed_week = 0
+    completed_games = 0
 
+    for week in range(
+        0,
+        17
+    ):
         games = cfbd(
             "/games",
             {
@@ -929,9 +1308,11 @@ def main():
             required=True
         )
 
-        games_by_week[week] = games
+        games_by_week[
+            week
+        ] = games
 
-        completed = []
+        completed_this_week = 0
 
         for game in games:
 
@@ -947,85 +1328,56 @@ def main():
                 "away_points"
             )
 
-            is_completed = first_value(
+            completed = first_value(
                 game,
                 "completed",
-                default=None
+                default=False
             )
 
             if (
-                is_completed is True
+                completed is True
                 or (
-                    home_points is not None
-                    and away_points is not None
+                    home_points
+                    is not None
+                    and away_points
+                    is not None
                 )
             ):
-                completed.append(game)
+                completed_this_week += 1
 
-        if completed:
+        if completed_this_week:
 
             completed_week = max(
                 completed_week,
                 week
             )
 
+            completed_games += (
+                completed_this_week
+            )
+
             print(
                 f"   Week {week}: "
-                f"{len(completed)} completed games"
+                f"{completed_this_week} "
+                f"completed"
             )
 
-    # -------------------------------------------------------------------------
-    # NO COMPLETED FBS WEEK YET
-    # -------------------------------------------------------------------------
+    if completed_games == 0:
 
-    if completed_week == 0:
+        print("")
+        print(
+            "ℹ️ No completed games yet."
+        )
 
-        week_zero_completed = []
+        print(
+            "Keeping baseline unchanged."
+        )
 
-        for game in games_by_week.get(
-            0,
-            []
-        ):
-
-            hp = first_value(
-                game,
-                "homePoints",
-                "home_points"
-            )
-
-            ap = first_value(
-                game,
-                "awayPoints",
-                "away_points"
-            )
-
-            if hp is not None and ap is not None:
-                week_zero_completed.append(
-                    game
-                )
-
-        if not week_zero_completed:
-
-            print("")
-            print(
-                "ℹ️ No completed FBS games are "
-                "available to blend yet."
-            )
-
-            print(
-                "   Keeping the current preseason "
-                "baseline unchanged."
-            )
-
-            print(
-                "✅ CFBD connection is healthy."
-            )
-
-            return
+        return
 
     print("")
     print(
-        f"✅ Most recent completed week: "
+        f"✅ Through Week "
         f"{completed_week}"
     )
 
@@ -1034,7 +1386,9 @@ def main():
     # -------------------------------------------------------------------------
 
     print("")
-    print("🏫 Fetching FBS team list...")
+    print(
+        "🏫 Fetching FBS teams..."
+    )
 
     teams_data = cfbd(
         "/teams/fbs",
@@ -1044,15 +1398,9 @@ def main():
         required=True
     )
 
-    if not teams_data:
-        print(
-            "❌ CFBD returned zero FBS teams."
-        )
-        sys.exit(1)
-
     fbs_teams = set()
 
-    team_conferences = {}
+    conference_lookup = {}
 
     for team in teams_data:
 
@@ -1064,96 +1412,22 @@ def main():
         if not school:
             continue
 
-        fbs_teams.add(school)
+        fbs_teams.add(
+            school
+        )
 
-        team_conferences[school] = (
-            first_value(
-                team,
-                "conference",
-                default="Ind"
-            )
+        conference_lookup[
+            school
+        ] = first_value(
+            team,
+            "conference",
+            default="Ind"
         )
 
     print(
-        f"✅ FBS teams found: "
+        f"✅ FBS teams: "
         f"{len(fbs_teams)}"
     )
-
-    # -------------------------------------------------------------------------
-    # GAME SCORE CONTEXT
-    # -------------------------------------------------------------------------
-
-    all_game_scores = {}
-
-    for week in range(
-        0,
-        completed_week + 1
-    ):
-
-        games = games_by_week.get(week)
-
-        if games is None:
-
-            games = cfbd(
-                "/games",
-                {
-                    "year": YEAR,
-                    "week": week,
-                    "seasonType": "regular",
-                    "classification": "fbs",
-                },
-                required=True
-            )
-
-        for game in games:
-
-            home_points = first_value(
-                game,
-                "homePoints",
-                "home_points"
-            )
-
-            away_points = first_value(
-                game,
-                "awayPoints",
-                "away_points"
-            )
-
-            if (
-                home_points is None
-                or away_points is None
-            ):
-                continue
-
-            game_id = first_value(
-                game,
-                "id"
-            )
-
-            if game_id is None:
-                continue
-
-            all_game_scores[
-                game_id
-            ] = {
-                "home": first_value(
-                    game,
-                    "homeTeam",
-                    "home_team"
-                ),
-
-                "away": first_value(
-                    game,
-                    "awayTeam",
-                    "away_team"
-                ),
-
-                "home_score":
-                    home_points,
-
-                "away_score":
-                    away_points,
-            }
 
     # -------------------------------------------------------------------------
     # PLAY BY PLAY
@@ -1161,17 +1435,18 @@ def main():
 
     print("")
     print(
-        f"🎮 Fetching 2026 play-by-play "
-        f"through Week {completed_week}..."
+        "🎮 Fetching play-by-play..."
     )
 
     all_plays = []
+
+    raw_play_count = 0
+    missing_ppa = 0
 
     for week in range(
         0,
         completed_week + 1
     ):
-
         raw_plays = cfbd(
             "/plays",
             {
@@ -1183,11 +1458,17 @@ def main():
             required=True
         )
 
-        filtered = []
+        raw_play_count += len(
+            raw_plays
+        )
+
+        accepted = 0
 
         for raw in raw_plays:
 
-            play = normalize_play(raw)
+            play = normalize_play(
+                raw
+            )
 
             offense = play.get(
                 "offense"
@@ -1197,403 +1478,339 @@ def main():
                 "defense"
             )
 
+            # Require BOTH teams to be FBS.
             if offense not in fbs_teams:
                 continue
 
             if defense not in fbs_teams:
                 continue
 
-            play_type = str(
-                play.get(
-                    "play_type",
-                    ""
-                )
-            ).lower()
-
-            if any(
-                excluded in play_type
-                for excluded in (
-                    "kickoff",
-                    "extra point",
-                    "timeout",
-                    "end of",
-                    "coin toss",
-                    "penalty",
-                )
+            if is_excluded_play(
+                play
             ):
                 continue
 
-            game_id = play.get(
-                "game_id"
+            ppa = optional_float(
+                play.get(
+                    "ppa"
+                )
             )
 
-            if game_id in all_game_scores:
+            if ppa is None:
+                missing_ppa += 1
+                continue
 
-                score = all_game_scores[
-                    game_id
-                ]
+            if is_garbage_time(
+                play
+            ):
+                continue
 
-                play[
-                    "home_score"
-                ] = score["home_score"]
+            is_pass = is_pass_play(
+                play
+            )
 
-                play[
-                    "away_score"
-                ] = score["away_score"]
+            is_rush = is_rush_play(
+                play
+            )
 
-            filtered.append(play)
+            # We only want meaningful scrimmage plays.
+            if (
+                not is_pass
+                and not is_rush
+            ):
+                continue
 
-        all_plays.extend(filtered)
+            yards = safe_float(
+                play.get(
+                    "yards_gained"
+                ),
+                0
+            )
+
+            play[
+                "epa"
+            ] = ppa
+
+            play[
+                "is_pass"
+            ] = is_pass
+
+            play[
+                "is_rush"
+            ] = is_rush
+
+            play[
+                "success"
+            ] = is_success(
+                play
+            )
+
+            play[
+                "explosive"
+            ] = (
+                (
+                    is_pass
+                    and yards >= 15
+                )
+                or
+                (
+                    is_rush
+                    and yards >= 10
+                )
+            )
+
+            play[
+                "havoc"
+            ] = is_havoc(
+                play
+            )
+
+            all_plays.append(
+                play
+            )
+
+            accepted += 1
 
         print(
             f"   Week {week}: "
-            f"{len(filtered):,} qualifying plays"
+            f"{accepted:,} "
+            f"qualifying plays"
         )
 
-        time.sleep(0.25)
+        time.sleep(
+            0.20
+        )
+
+    print("")
+    print(
+        f"Raw plays received: "
+        f"{raw_play_count:,}"
+    )
 
     print(
-        f"   Total qualifying plays: "
+        f"Qualifying FBS plays: "
         f"{len(all_plays):,}"
     )
 
-    # -------------------------------------------------------------------------
-    # NO PLAY DATA
-    # -------------------------------------------------------------------------
+    print(
+        f"Plays missing PPA: "
+        f"{missing_ppa:,}"
+    )
 
     if not all_plays:
 
-        print("")
         print(
-            "ℹ️ CFBD returned no qualifying "
-            "play-by-play yet."
+            "❌ No usable play data."
         )
 
-        print(
-            "   Keeping existing preseason "
-            "metrics unchanged."
-        )
-
-        return
+        sys.exit(1)
 
     # -------------------------------------------------------------------------
-    # BUILD DATAFRAME
+    # DATAFRAME
     # -------------------------------------------------------------------------
 
     df = pd.DataFrame(
         all_plays
     )
 
-    required_columns = [
-        "play_type",
-        "yards_gained",
-        "offense",
-        "defense",
-    ]
-
-    for column in required_columns:
-
-        if column not in df.columns:
-
-            print(
-                f"❌ Required play field missing: "
-                f"{column}"
-            )
-
-            print(
-                "   CFBD response format may have changed."
-            )
-
-            sys.exit(1)
-
-    df["yards_gained"] = pd.to_numeric(
-        df["yards_gained"],
-        errors="coerce"
-    ).fillna(0)
-
-    df["epa"] = df.apply(
-        calc_epa,
-        axis=1
-    )
-
-    df["garbage"] = df.apply(
-        is_garbage_time,
-        axis=1
-    )
-
-    play_types = (
-        df["play_type"]
-        .astype(str)
-        .str.lower()
-    )
-
-    df["is_pass"] = play_types.str.contains(
-        "pass|sack|interception",
-        na=False
-    )
-
-    df["is_rush"] = play_types.str.contains(
-        "rush|run",
-        na=False
-    )
-
-    df["success"] = df.apply(
-        is_success,
-        axis=1
-    )
-
-    df["explosive"] = (
-        (
-            df["is_pass"]
-            & (
-                df["yards_gained"]
-                >= 15
-            )
-        )
-        |
-        (
-            df["is_rush"]
-            & (
-                df["yards_gained"]
-                >= 10
-            )
-        )
-    )
-
-    df["havoc"] = play_types.str.contains(
-        (
-            "sack|interception|fumble|"
-            "tackle for loss|tfl|"
-            "pass breakup|pbu"
-        ),
-        na=False
-    )
-
-    clean = df[
-        ~df["garbage"]
-    ].copy()
-
+    print("")
     print(
-        f"✅ Clean non-garbage plays: "
-        f"{len(clean):,}"
+        "📊 Calculating team metrics..."
     )
 
-    # -------------------------------------------------------------------------
-    # TEAM STATS
-    # -------------------------------------------------------------------------
+    team_live = {}
 
-    team_stats_2026 = {}
+    rows = []
 
     for team in sorted(
         fbs_teams
     ):
-
         offense = team_metrics(
-            clean,
+            df,
             team,
             "offense"
         )
 
         defense = team_metrics(
-            clean,
+            df,
             team,
             "defense"
         )
 
-        if offense and defense:
+        team_live[
+            team
+        ] = {
+            "offense":
+                offense,
 
-            team_stats_2026[
-                team
-            ] = {
-                "offense": offense,
-                "defense": defense,
-            }
+            "defense":
+                defense,
+        }
 
-    print(
-        f"✅ Teams with qualifying live data: "
-        f"{len(team_stats_2026)}"
-    )
+        if (
+            not offense
+            or not defense
+        ):
+            continue
 
-    # -------------------------------------------------------------------------
-    # METRIC DATAFRAME
-    # -------------------------------------------------------------------------
-
-    rows = []
-
-    for team, team_data in (
-        team_stats_2026.items()
-    ):
-
-        offense = team_data[
-            "offense"
-        ]
-
-        defense = team_data[
-            "defense"
-        ]
-
-        rows.append({
-            "team": team,
+        row = {
+            "team":
+                team,
 
             "off_epa":
-                offense.get(
-                    "epa_play",
-                    0
-                ),
-
-            "off_sr":
-                offense.get(
-                    "success_rate",
-                    0
+                safe_float(
+                    offense.get(
+                        "epa_play"
+                    )
                 ),
 
             "off_epa_pass":
-                offense.get(
-                    "epa_pass",
-                    0
+                safe_float(
+                    offense.get(
+                        "epa_pass"
+                    )
                 ),
 
             "off_epa_rush":
-                offense.get(
-                    "epa_rush",
-                    0
+                safe_float(
+                    offense.get(
+                        "epa_rush"
+                    )
                 ),
 
-            "off_pass_sr":
-                offense.get(
-                    "pass_sr",
-                    0
-                ),
-
-            "off_rush_sr":
-                offense.get(
-                    "rush_sr",
-                    0
+            "off_sr":
+                safe_float(
+                    offense.get(
+                        "success_rate"
+                    )
                 ),
 
             "off_havoc_allowed":
-                offense.get(
-                    "havoc_rate",
-                    0
-                ),
-
-            "off_expl":
-                offense.get(
-                    "explosive_rate",
-                    0
+                safe_float(
+                    offense.get(
+                        "havoc_rate"
+                    )
                 ),
 
             "def_epa":
-                defense.get(
-                    "epa_play",
-                    0
-                ),
-
-            "def_sr":
-                defense.get(
-                    "success_rate",
-                    0
+                safe_float(
+                    defense.get(
+                        "epa_play"
+                    )
                 ),
 
             "def_epa_pass":
-                defense.get(
-                    "epa_pass",
-                    0
+                safe_float(
+                    defense.get(
+                        "epa_pass"
+                    )
                 ),
 
             "def_epa_rush":
-                defense.get(
-                    "epa_rush",
-                    0
+                safe_float(
+                    defense.get(
+                        "epa_rush"
+                    )
                 ),
 
-            "def_pass_sr":
-                defense.get(
-                    "pass_sr",
-                    0
-                ),
-
-            "def_rush_sr":
-                defense.get(
-                    "rush_sr",
-                    0
+            "def_sr":
+                safe_float(
+                    defense.get(
+                        "success_rate"
+                    )
                 ),
 
             "def_havoc_created":
-                defense.get(
-                    "havoc_rate",
-                    0
+                safe_float(
+                    defense.get(
+                        "havoc_rate"
+                    )
                 ),
+        }
 
-            "def_expl":
-                defense.get(
-                    "explosive_rate",
-                    0
-                ),
-        })
+        row[
+            "net_epa"
+        ] = (
+            row["off_epa"]
+            -
+            row["def_epa"]
+        )
+
+        row[
+            "net_epa_pass"
+        ] = (
+            row["off_epa_pass"]
+            -
+            row["def_epa_pass"]
+        )
+
+        row[
+            "net_epa_rush"
+        ] = (
+            row["off_epa_rush"]
+            -
+            row["def_epa_rush"]
+        )
+
+        row[
+            "net_sr"
+        ] = (
+            row["off_sr"]
+            -
+            row["def_sr"]
+        )
+
+        rows.append(
+            row
+        )
 
     if not rows:
 
         print(
-            "ℹ️ No teams have enough live "
-            "plays to update ratings yet."
+            "❌ No teams had enough "
+            "qualifying plays."
         )
 
-        return
+        sys.exit(1)
 
-    mdf = (
-        pd.DataFrame(rows)
-        .set_index("team")
-    )
-
-    mdf["net_epa"] = (
-        mdf["off_epa"]
-        - mdf["def_epa"]
-    )
-
-    mdf["net_sr"] = (
-        mdf["off_sr"]
-        - mdf["def_sr"]
-    )
-
-    mdf["net_epa_pass"] = (
-        mdf["off_epa_pass"]
-        - mdf["def_epa_pass"]
-    )
-
-    mdf["net_epa_rush"] = (
-        mdf["off_epa_rush"]
-        - mdf["def_epa_rush"]
+    metrics_df = (
+        pd.DataFrame(
+            rows
+        )
+        .set_index(
+            "team"
+        )
     )
 
     # -------------------------------------------------------------------------
-    # POWER RATING
+    # LIVE POWER RATING
     # -------------------------------------------------------------------------
 
     z = pd.DataFrame(
-        index=mdf.index
+        index=metrics_df.index
     )
 
     for column in WEIGHTS:
 
-        if column in mdf.columns:
-            series = mdf[column]
+        series = metrics_df[
+            column
+        ].copy()
 
-        else:
-            series = pd.Series(
-                0,
-                index=mdf.index
-            )
-
-        # Less havoc allowed is better.
-        if column == "off_havoc_allowed":
+        if (
+            column
+            == "off_havoc_allowed"
+        ):
             series = -series
 
-        z[column] = z_score(
+        z[
+            column
+        ] = z_score(
             series
         )
 
-    mdf["power_rating"] = sum(
+    metrics_df[
+        "power_rating"
+    ] = sum(
         z[column] * weight
         for column, weight
         in WEIGHTS.items()
@@ -1604,7 +1821,9 @@ def main():
     # -------------------------------------------------------------------------
 
     print("")
-    print("📚 Fetching records and SP+ context...")
+    print(
+        "📚 Fetching records..."
+    )
 
     records_data = cfbd(
         "/records",
@@ -1614,50 +1833,40 @@ def main():
         required=True
     )
 
-    records_2026 = {
-        item.get("team"): item
+    records_lookup = {
+        item.get(
+            "team"
+        ): item
+
         for item in records_data
-        if item.get("team")
+
+        if item.get(
+            "team"
+        )
     }
 
-    # 2025 SP+ is contextual / baseline support.
-    sp_data = cfbd(
-        "/ratings/sp",
-        {
-            "year": 2025
-        },
-        required=False
-    )
-
-    sp_lookup = {
-        item.get("team"): item
-        for item in sp_data
-        if item.get("team")
-    }
+    # Keep SP+ from the current stored model.
+    # We do not need to call a second season here just to overwrite it.
 
     # -------------------------------------------------------------------------
-    # BLEND
+    # BLEND WEIGHT
     # -------------------------------------------------------------------------
-
-    print("")
-    print(
-        "🔀 Blending preseason baseline "
-        "with 2026 live performance..."
-    )
 
     blend_weight = min(
         1.0,
         completed_week / 10
     )
 
+    print("")
     print(
-        f"   Live 2026 data weight: "
+        f"🔀 Live 2026 model weight: "
         f"{blend_weight:.0%}"
     )
 
     output = {
         "meta": {
-            "year": YEAR,
+            "year":
+                YEAR,
 
             "generated":
                 datetime.now().isoformat(),
@@ -1665,65 +1874,94 @@ def main():
             "through_week":
                 completed_week,
 
+            "completed_games":
+                completed_games,
+
             "total_plays_2026":
-                len(clean),
+                len(df),
 
             "blend_weight":
                 blend_weight,
 
             "type":
-                "weekly_update",
+                "weekly_update_v2",
+
+            "epa_source":
+                "CFBD PPA",
+
+            "explosive_definition":
+                (
+                    "15+ yard pass / "
+                    "10+ yard rush"
+                ),
+
+            "garbage_time":
+                (
+                    "play-level score, "
+                    "not final score"
+                ),
         },
 
-        "teams": {}
+        # Frozen model baseline.
+        "baseline_snapshot":
+            baseline_snapshot,
+
+        "teams":
+            {},
     }
 
     # -------------------------------------------------------------------------
-    # BUILD FINAL TEAM OUTPUT
+    # OUTPUT TEAMS
     # -------------------------------------------------------------------------
 
-    for team in fbs_teams:
-
+    for team in sorted(
+        fbs_teams
+    ):
         baseline = (
-            existing.get(
-                "teams",
-                {}
+            baseline_snapshot.get(
+                team
             )
-            .get(
+            or existing_teams.get(
+                team
+            )
+            or {}
+        )
+
+        if not baseline:
+            continue
+
+        live_stats = (
+            team_live.get(
                 team,
                 {}
             )
+            or {}
         )
 
-        live_row = (
-            mdf.loc[team]
-            if team in mdf.index
-            else None
+        live_offense = (
+            live_stats.get(
+                "offense"
+            )
+            or {}
         )
 
-        live_team_stats = (
-            team_stats_2026.get(
+        live_defense = (
+            live_stats.get(
+                "defense"
+            )
+            or {}
+        )
+
+        record_data = (
+            records_lookup.get(
                 team,
                 {}
             )
-        )
-
-        record = (
-            records_2026.get(
-                team,
-                {}
-            )
-        )
-
-        sp = (
-            sp_lookup.get(
-                team,
-                {}
-            )
+            or {}
         )
 
         total_record = (
-            record.get(
+            record_data.get(
                 "total",
                 {}
             )
@@ -1731,508 +1969,376 @@ def main():
         )
 
         conference_record = (
-            record.get(
+            record_data.get(
                 "conferenceGames",
                 {}
             )
             or {}
         )
 
-        wins = total_record.get(
-            "wins",
-            0
-        )
-
-        losses = total_record.get(
-            "losses",
-            0
-        )
-
-        # ---------------------------------------------------------------------
-        # LIVE DATA AVAILABLE
-        # ---------------------------------------------------------------------
-
-        if live_row is not None:
-
-            base_pr = safe_float(
-                baseline.get(
-                    "power_rating"
-                ),
-                0
-            )
-
-            live_pr = safe_float(
-                live_row.get(
-                    "power_rating"
-                ),
-                0
-            )
-
-            blended_pr = (
-                base_pr
-                * (
-                    1 - blend_weight
-                )
-                +
-                live_pr
-                * blend_weight
-            )
-
-            def blend(
-                section,
-                live_value,
-                key
-            ):
-                base_value = safe_float(
-                    (
-                        baseline.get(
-                            section,
-                            {}
-                        )
-                        or {}
-                    ).get(
-                        key
-                    ),
-                    0
-                )
-
-                return round(
-                    base_value
-                    * (
-                        1 - blend_weight
-                    )
-                    +
-                    safe_float(
-                        live_value,
-                        0
-                    )
-                    * blend_weight,
-                    3
-                )
-
-            output[
-                "teams"
-            ][team] = {
-
-                "team":
-                    team,
-
-                "conference":
-                    team_conferences.get(
-                        team,
-                        "Ind"
-                    ),
-
-                "record": {
-                    "wins":
-                        wins,
-
-                    "losses":
-                        losses,
-
-                    "conf_wins":
-                        conference_record.get(
-                            "wins",
-                            0
-                        ),
-
-                    "conf_losses":
-                        conference_record.get(
-                            "losses",
-                            0
-                        ),
-                },
-
-                "sp_plus": {
-                    "overall":
-                        sp.get(
-                            "rating",
-                            (
-                                baseline.get(
-                                    "sp_plus",
-                                    {}
-                                )
-                                or {}
-                            ).get(
-                                "overall"
-                            )
-                        ),
-
-                    "offense":
-                        (
-                            sp.get(
-                                "offense",
-                                {}
-                            )
-                            or {}
-                        ).get(
-                            "rating",
-                            (
-                                baseline.get(
-                                    "sp_plus",
-                                    {}
-                                )
-                                or {}
-                            ).get(
-                                "offense"
-                            )
-                        ),
-
-                    "defense":
-                        (
-                            sp.get(
-                                "defense",
-                                {}
-                            )
-                            or {}
-                        ).get(
-                            "rating",
-                            (
-                                baseline.get(
-                                    "sp_plus",
-                                    {}
-                                )
-                                or {}
-                            ).get(
-                                "defense"
-                            )
-                        ),
-                },
-
-                "power_rating":
-                    round(
-                        blended_pr,
-                        3
-                    ),
-
-                "power_rating_rank":
-                    0,
-
-                "offense": {
-                    "epa_play":
-                        blend(
-                            "offense",
-                            live_row.get(
-                                "off_epa",
-                                0
-                            ),
-                            "epa_play"
-                        ),
-
-                    "success_rate":
-                        blend(
-                            "offense",
-                            live_row.get(
-                                "off_sr",
-                                0
-                            ),
-                            "success_rate"
-                        ),
-
-                    "explosive_rate":
-                        blend(
-                            "offense",
-                            live_row.get(
-                                "off_expl",
-                                0
-                            ),
-                            "explosive_rate"
-                        ),
-
-                    "epa_pass":
-                        blend(
-                            "offense",
-                            live_row.get(
-                                "off_epa_pass",
-                                0
-                            ),
-                            "epa_pass"
-                        ),
-
-                    "epa_rush":
-                        blend(
-                            "offense",
-                            live_row.get(
-                                "off_epa_rush",
-                                0
-                            ),
-                            "epa_rush"
-                        ),
-
-                    "pass_sr":
-                        blend(
-                            "offense",
-                            live_row.get(
-                                "off_pass_sr",
-                                0
-                            ),
-                            "pass_sr"
-                        ),
-
-                    "rush_sr":
-                        blend(
-                            "offense",
-                            live_row.get(
-                                "off_rush_sr",
-                                0
-                            ),
-                            "rush_sr"
-                        ),
-
-                    "havoc_allowed":
-                        blend(
-                            "offense",
-                            live_row.get(
-                                "off_havoc_allowed",
-                                0
-                            ),
-                            "havoc_allowed"
-                        ),
-
-                    "n_plays":
-                        int(
-                            (
-                                live_team_stats.get(
-                                    "offense",
-                                    {}
-                                )
-                                or {}
-                            ).get(
-                                "n_plays",
-                                0
-                            )
-                        ),
-                },
-
-                "defense": {
-                    "epa_play":
-                        blend(
-                            "defense",
-                            live_row.get(
-                                "def_epa",
-                                0
-                            ),
-                            "epa_play"
-                        ),
-
-                    "success_rate":
-                        blend(
-                            "defense",
-                            live_row.get(
-                                "def_sr",
-                                0
-                            ),
-                            "success_rate"
-                        ),
-
-                    "explosive_rate":
-                        blend(
-                            "defense",
-                            live_row.get(
-                                "def_expl",
-                                0
-                            ),
-                            "explosive_rate"
-                        ),
-
-                    "epa_pass":
-                        blend(
-                            "defense",
-                            live_row.get(
-                                "def_epa_pass",
-                                0
-                            ),
-                            "epa_pass"
-                        ),
-
-                    "epa_rush":
-                        blend(
-                            "defense",
-                            live_row.get(
-                                "def_epa_rush",
-                                0
-                            ),
-                            "epa_rush"
-                        ),
-
-                    "pass_sr":
-                        blend(
-                            "defense",
-                            live_row.get(
-                                "def_pass_sr",
-                                0
-                            ),
-                            "pass_sr"
-                        ),
-
-                    "rush_sr":
-                        blend(
-                            "defense",
-                            live_row.get(
-                                "def_rush_sr",
-                                0
-                            ),
-                            "rush_sr"
-                        ),
-
-                    "havoc_created":
-                        blend(
-                            "defense",
-                            live_row.get(
-                                "def_havoc_created",
-                                0
-                            ),
-                            "havoc_created"
-                        ),
-
-                    "n_plays":
-                        int(
-                            (
-                                live_team_stats.get(
-                                    "defense",
-                                    {}
-                                )
-                                or {}
-                            ).get(
-                                "n_plays",
-                                0
-                            )
-                        ),
-                },
-
-                "net": {
-                    "epa":
-                        round(
-                            safe_float(
-                                live_row.get(
-                                    "net_epa"
-                                )
-                            ),
-                            3
-                        ),
-
-                    "sr":
-                        round(
-                            safe_float(
-                                live_row.get(
-                                    "net_sr"
-                                )
-                            ),
-                            1
-                        ),
-
-                    "epa_pass":
-                        round(
-                            safe_float(
-                                live_row.get(
-                                    "net_epa_pass"
-                                )
-                            ),
-                            3
-                        ),
-
-                    "epa_rush":
-                        round(
-                            safe_float(
-                                live_row.get(
-                                    "net_epa_rush"
-                                )
-                            ),
-                            3
-                        ),
-                }
-            }
-
-        # ---------------------------------------------------------------------
-        # NO LIVE DATA — KEEP PRESEASON BASELINE
-        # ---------------------------------------------------------------------
-
-        else:
-
-            if baseline:
-
-                preserved = dict(
-                    baseline
-                )
-
-                preserved[
-                    "record"
-                ] = {
-                    "wins":
-                        wins,
-
-                    "losses":
-                        losses,
-
-                    "conf_wins":
-                        conference_record.get(
-                            "wins",
-                            0
-                        ),
-
-                    "conf_losses":
-                        conference_record.get(
-                            "losses",
-                            0
-                        ),
-                }
-
-                output[
-                    "teams"
-                ][team] = preserved
-
-    # -------------------------------------------------------------------------
-    # SAFETY CHECK
-    # -------------------------------------------------------------------------
-
-    if len(
-        output["teams"]
-    ) < 100:
-
-        print("")
-        print(
-            "❌ SAFETY CHECK FAILED"
-        )
-
-        print(
-            f"   Only "
-            f"{len(output['teams'])} "
-            f"teams would be written."
-        )
-
-        print(
-            "   Refusing to overwrite "
-            "cfb_metrics.json."
-        )
-
-        sys.exit(1)
-
-    # -------------------------------------------------------------------------
-    # RANK TEAMS
-    # -------------------------------------------------------------------------
-
-    all_ratings = []
-
-    for team, team_data in (
-        output["teams"].items()
-    ):
-
-        if not team_data:
-            continue
-
-        rating = safe_float(
-            team_data.get(
+        base_power = safe_float(
+            baseline.get(
                 "power_rating"
             ),
             0
         )
 
-        all_ratings.append(
-            (team, rating)
+        if team in metrics_df.index:
+
+            live_power = safe_float(
+                metrics_df.loc[
+                    team,
+                    "power_rating"
+                ],
+                0
+            )
+
+            blended_power = (
+                base_power
+                * (
+                    1 - blend_weight
+                )
+                +
+                live_power
+                * blend_weight
+            )
+
+        else:
+            live_power = None
+            blended_power = (
+                base_power
+            )
+
+        offense = blended_section(
+            baseline.get(
+                "offense",
+                {}
+            ),
+            live_offense,
+            blend_weight,
+            "offense"
         )
 
-    all_ratings.sort(
-        key=lambda item: item[1],
+        defense = blended_section(
+            baseline.get(
+                "defense",
+                {}
+            ),
+            live_defense,
+            blend_weight,
+            "defense"
+        )
+
+        off_epa = optional_float(
+            offense.get(
+                "epa_play"
+            )
+        )
+
+        def_epa = optional_float(
+            defense.get(
+                "epa_play"
+            )
+        )
+
+        off_sr = optional_float(
+            offense.get(
+                "success_rate"
+            )
+        )
+
+        def_sr = optional_float(
+            defense.get(
+                "success_rate"
+            )
+        )
+
+        off_pass = optional_float(
+            offense.get(
+                "epa_pass"
+            )
+        )
+
+        def_pass = optional_float(
+            defense.get(
+                "epa_pass"
+            )
+        )
+
+        off_rush = optional_float(
+            offense.get(
+                "epa_rush"
+            )
+        )
+
+        def_rush = optional_float(
+            defense.get(
+                "epa_rush"
+            )
+        )
+
+        team_output = {
+            "team":
+                team,
+
+            "conference":
+                conference_lookup.get(
+                    team,
+                    baseline.get(
+                        "conference",
+                        "Ind"
+                    )
+                ),
+
+            "record": {
+                "wins":
+                    total_record.get(
+                        "wins",
+                        0
+                    ),
+
+                "losses":
+                    total_record.get(
+                        "losses",
+                        0
+                    ),
+
+                "conf_wins":
+                    conference_record.get(
+                        "wins",
+                        0
+                    ),
+
+                "conf_losses":
+                    conference_record.get(
+                        "losses",
+                        0
+                    ),
+            },
+
+            "sp_plus":
+                copy.deepcopy(
+                    baseline.get(
+                        "sp_plus",
+                        {}
+                    )
+                ),
+
+            "power_rating":
+                round(
+                    blended_power,
+                    3
+                ),
+
+            "power_rating_rank":
+                0,
+
+            "offense":
+                offense,
+
+            "defense":
+                defense,
+
+            "net": {
+                "epa":
+                    (
+                        round(
+                            off_epa
+                            -
+                            def_epa,
+                            3
+                        )
+                        if (
+                            off_epa
+                            is not None
+                            and def_epa
+                            is not None
+                        )
+                        else None
+                    ),
+
+                "sr":
+                    (
+                        round(
+                            off_sr
+                            -
+                            def_sr,
+                            1
+                        )
+                        if (
+                            off_sr
+                            is not None
+                            and def_sr
+                            is not None
+                        )
+                        else None
+                    ),
+
+                "epa_pass":
+                    (
+                        round(
+                            off_pass
+                            -
+                            def_pass,
+                            3
+                        )
+                        if (
+                            off_pass
+                            is not None
+                            and def_pass
+                            is not None
+                        )
+                        else None
+                    ),
+
+                "epa_rush":
+                    (
+                        round(
+                            off_rush
+                            -
+                            def_rush,
+                            3
+                        )
+                        if (
+                            off_rush
+                            is not None
+                            and def_rush
+                            is not None
+                        )
+                        else None
+                    ),
+            },
+
+            "live_2026_power_rating":
+                (
+                    round(
+                        live_power,
+                        3
+                    )
+                    if live_power
+                    is not None
+                    else None
+                ),
+        }
+
+        output[
+            "teams"
+        ][team] = team_output
+
+    # -------------------------------------------------------------------------
+    # TEAM COUNT SAFETY
+    # -------------------------------------------------------------------------
+
+    if len(
+        output[
+            "teams"
+        ]
+    ) < 100:
+
+        print(
+            "❌ SAFETY CHECK FAILED: "
+            "too few teams."
+        )
+
+        sys.exit(1)
+
+    # -------------------------------------------------------------------------
+    # RATE SAFETY CHECK
+    # -------------------------------------------------------------------------
+
+    invalid_rates = []
+
+    for team, data in (
+        output[
+            "teams"
+        ].items()
+    ):
+
+        for section in (
+            "offense",
+            "defense"
+        ):
+
+            section_data = (
+                data.get(
+                    section,
+                    {}
+                )
+                or {}
+            )
+
+            for field in (
+                "success_rate",
+                "explosive_rate",
+                "pass_sr",
+                "rush_sr",
+            ):
+
+                value = section_data.get(
+                    field
+                )
+
+                if value is None:
+                    continue
+
+                if not valid_rate(
+                    value
+                ):
+
+                    invalid_rates.append(
+                        (
+                            team,
+                            section,
+                            field,
+                            value
+                        )
+                    )
+
+    if invalid_rates:
+
+        print("")
+        print(
+            "❌ RATE SANITY CHECK FAILED"
+        )
+
+        for item in (
+            invalid_rates[:20]
+        ):
+            print(
+                "   ",
+                item
+            )
+
+        print(
+            "Refusing to publish "
+            "impossible percentage values."
+        )
+
+        sys.exit(1)
+
+    print("")
+    print(
+        "✅ All percentage sanity "
+        "checks passed"
+    )
+
+    # -------------------------------------------------------------------------
+    # RANK
+    # -------------------------------------------------------------------------
+
+    ranking = sorted(
+        output[
+            "teams"
+        ].items(),
+
+        key=lambda item:
+            safe_float(
+                item[1].get(
+                    "power_rating"
+                ),
+                0
+            ),
+
         reverse=True
     )
 
@@ -2240,10 +2346,9 @@ def main():
         team,
         _
     ) in enumerate(
-        all_ratings,
+        ranking,
         start=1
     ):
-
         output[
             "teams"
         ][team][
@@ -2251,7 +2356,54 @@ def main():
         ] = rank
 
     # -------------------------------------------------------------------------
-    # SAVE
+    # DIAGNOSTICS
+    # -------------------------------------------------------------------------
+
+    teams_with_live = sum(
+        1
+        for stats in team_live.values()
+        if (
+            stats.get(
+                "offense"
+            )
+            and stats.get(
+                "defense"
+            )
+        )
+    )
+
+    teams_with_explosive = sum(
+        1
+        for data in output[
+            "teams"
+        ].values()
+        if (
+            (
+                data.get(
+                    "offense",
+                    {}
+                )
+                or {}
+            ).get(
+                "explosive_rate"
+            )
+            is not None
+        )
+    )
+
+    print("")
+    print(
+        f"Teams with live data: "
+        f"{teams_with_live}"
+    )
+
+    print(
+        f"Teams with true explosive "
+        f"rate: {teams_with_explosive}"
+    )
+
+    # -------------------------------------------------------------------------
+    # SAVE SAFELY
     # -------------------------------------------------------------------------
 
     os.makedirs(
@@ -2264,7 +2416,6 @@ def main():
         + ".tmp"
     )
 
-    # Write temporary file first.
     with open(
         temp_path,
         "w",
@@ -2275,13 +2426,10 @@ def main():
             output,
             file,
             indent=2,
-            ensure_ascii=False,
-            default=str
+            ensure_ascii=False
         )
 
-    # Make sure it can be read back.
     try:
-
         with open(
             temp_path,
             "r",
@@ -2300,14 +2448,15 @@ def main():
         ) < 100:
 
             raise ValueError(
-                "Generated dataset failed team-count validation."
+                "Too few teams "
+                "in generated file."
             )
 
     except Exception as error:
 
         print(
-            f"❌ Generated JSON failed validation: "
-            f"{error}"
+            f"❌ Generated JSON "
+            f"failed validation: {error}"
         )
 
         if os.path.exists(
@@ -2319,7 +2468,6 @@ def main():
 
         sys.exit(1)
 
-    # Only replace the real data after validation succeeds.
     os.replace(
         temp_path,
         DATA_PATH
@@ -2334,7 +2482,9 @@ def main():
 
     print("")
     print("=" * 70)
-    print("✅ WEEKLY UPDATE COMPLETE")
+    print(
+        "✅ METRICS UPDATE COMPLETE"
+    )
     print("=" * 70)
 
     print(
@@ -2348,8 +2498,13 @@ def main():
     )
 
     print(
-        f"Live plays: "
-        f"{len(clean):,}"
+        f"Qualifying plays: "
+        f"{len(df):,}"
+    )
+
+    print(
+        f"Live weight: "
+        f"{blend_weight:.0%}"
     )
 
     print(
