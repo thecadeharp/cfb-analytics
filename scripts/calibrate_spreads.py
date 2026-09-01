@@ -20,6 +20,7 @@ import math
 import os
 import statistics
 import sys
+import time
 
 import requests
 
@@ -35,13 +36,10 @@ END_YEAR = 2025
 
 OUTPUT_PATH = "data/calibration_report.json"
 
-# Exclude games where rating information is missing.
 MIN_GAMES = 500
 
-# Current live model number, for comparison only.
 CURRENT_HFA = 2.0
 
-# Buckets let us see whether large favorite projections become too aggressive.
 MARGIN_BUCKETS = [
     (0, 7),
     (7, 14),
@@ -50,6 +48,20 @@ MARGIN_BUCKETS = [
     (28, 35),
     (35, 999),
 ]
+
+# CFBD has occasionally returned transient 5xx responses / timeouts.
+# Give those requests several chances before failing the workflow.
+MAX_REQUEST_ATTEMPTS = 6
+
+REQUEST_TIMEOUT = 90
+
+RETRYABLE_STATUS_CODES = {
+    429,
+    500,
+    502,
+    503,
+    504,
+}
 
 
 # =============================================================================
@@ -136,12 +148,15 @@ def rmse(predictions, actuals):
         statistics.mean(
             (pred - actual) ** 2
             for pred, actual
-            in zip(predictions, actuals)
+        in zip(predictions, actuals)
         )
     )
 
 
-def regression(x_values, y_values):
+def regression(
+    x_values,
+    y_values
+):
 
     if len(x_values) != len(y_values):
 
@@ -157,64 +172,112 @@ def regression(x_values, y_values):
             "r_squared": 0.0,
         }
 
-    x_mean = statistics.mean(x_values)
-    y_mean = statistics.mean(y_values)
+    x_mean = statistics.mean(
+        x_values
+    )
+
+    y_mean = statistics.mean(
+        y_values
+    )
 
     numerator = sum(
-        (x - x_mean) * (y - y_mean)
+        (
+            x - x_mean
+        )
+        *
+        (
+            y - y_mean
+        )
         for x, y
-        in zip(x_values, y_values)
+        in zip(
+            x_values,
+            y_values
+        )
     )
 
     denominator = sum(
-        (x - x_mean) ** 2
-        for x in x_values
+        (
+            x - x_mean
+        ) ** 2
+        for x
+        in x_values
     )
 
     slope = (
-        numerator / denominator
+        numerator
+        /
+        denominator
         if denominator
         else 0.0
     )
 
     intercept = (
         y_mean
-        - slope * x_mean
+        -
+        slope * x_mean
     )
 
     predictions = [
-        intercept + slope * x
-        for x in x_values
+        intercept
+        +
+        slope * x
+        for x
+        in x_values
     ]
 
     total_variance = sum(
-        (y - y_mean) ** 2
-        for y in y_values
+        (
+            y - y_mean
+        ) ** 2
+        for y
+        in y_values
     )
 
     residual_variance = sum(
-        (y - pred) ** 2
-        for y, pred
-        in zip(y_values, predictions)
+        (
+            y - prediction
+        ) ** 2
+        for y, prediction
+        in zip(
+            y_values,
+            predictions
+        )
     )
 
     r_squared = (
         1.0
-        - residual_variance / total_variance
+        -
+        residual_variance
+        /
+        total_variance
         if total_variance
         else 0.0
     )
 
     return {
-        "slope": slope,
-        "intercept": intercept,
-        "r_squared": r_squared,
+        "slope":
+            slope,
+
+        "intercept":
+            intercept,
+
+        "r_squared":
+            r_squared,
     }
 
 
 # =============================================================================
-# API
+# ROBUST CFBD API
 # =============================================================================
+
+def retry_wait_seconds(attempt):
+
+    # 3, 6, 12, 24, 45 seconds.
+    return min(
+        3 * (2 ** (attempt - 1)),
+        45
+    )
+
 
 def cfbd_get(
     endpoint,
@@ -229,63 +292,212 @@ def cfbd_get(
 
         sys.exit(1)
 
-    try:
+    url = (
+        f"{CFBD_BASE}{endpoint}"
+    )
 
-        response = requests.get(
-            f"{CFBD_BASE}{endpoint}",
-            headers={
-                "Authorization":
-                    f"Bearer {CFBD_API_KEY}",
-                "Accept":
-                    "application/json",
-            },
-            params=params,
-            timeout=60
-        )
+    headers = {
+        "Authorization":
+            f"Bearer {CFBD_API_KEY}",
 
-    except requests.RequestException as error:
+        "Accept":
+            "application/json",
+    }
 
-        print(
-            f"❌ CFBD request failed: {error}"
-        )
-
-        sys.exit(1)
-
-    if response.status_code in (
-        401,
-        403
+    for attempt in range(
+        1,
+        MAX_REQUEST_ATTEMPTS + 1
     ):
 
-        print(
-            "❌ CFBD authentication failed."
-        )
+        try:
 
-        sys.exit(1)
+            response = requests.get(
+                url,
+                headers=headers,
+                params=params,
+                timeout=REQUEST_TIMEOUT
+            )
 
-    if not response.ok:
+        except (
+            requests.exceptions.Timeout,
+            requests.exceptions.ConnectionError
+        ) as error:
 
-        print(
-            f"❌ CFBD {endpoint}: "
-            f"HTTP {response.status_code}"
-        )
+            if (
+                attempt
+                <
+                MAX_REQUEST_ATTEMPTS
+            ):
 
-        print(
-            response.text[:500]
-        )
+                wait = retry_wait_seconds(
+                    attempt
+                )
 
-        sys.exit(1)
+                print(
+                    f"      ⚠ CFBD connection issue "
+                    f"({attempt}/{MAX_REQUEST_ATTEMPTS}): "
+                    f"{error}"
+                )
 
-    try:
+                print(
+                    f"      Retrying in "
+                    f"{wait}s..."
+                )
 
-        return response.json()
+                time.sleep(
+                    wait
+                )
 
-    except ValueError:
+                continue
 
-        print(
-            "❌ CFBD returned invalid JSON."
-        )
+            print(
+                f"❌ CFBD request failed after "
+                f"{MAX_REQUEST_ATTEMPTS} attempts: "
+                f"{error}"
+            )
 
-        sys.exit(1)
+            sys.exit(1)
+
+        except requests.RequestException as error:
+
+            print(
+                f"❌ CFBD request failed: "
+                f"{error}"
+            )
+
+            sys.exit(1)
+
+        if response.status_code in (
+            401,
+            403
+        ):
+
+            print(
+                "❌ CFBD authentication failed."
+            )
+
+            sys.exit(1)
+
+        if (
+            response.status_code
+            in RETRYABLE_STATUS_CODES
+        ):
+
+            if (
+                attempt
+                <
+                MAX_REQUEST_ATTEMPTS
+            ):
+
+                wait = retry_wait_seconds(
+                    attempt
+                )
+
+                retry_after = response.headers.get(
+                    "Retry-After"
+                )
+
+                if retry_after:
+
+                    try:
+
+                        wait = max(
+                            wait,
+                            int(
+                                retry_after
+                            )
+                        )
+
+                    except ValueError:
+                        pass
+
+                print(
+                    f"      ⚠ CFBD {endpoint}: "
+                    f"HTTP {response.status_code} "
+                    f"({attempt}/{MAX_REQUEST_ATTEMPTS})"
+                )
+
+                print(
+                    f"      Retrying in "
+                    f"{wait}s..."
+                )
+
+                time.sleep(
+                    wait
+                )
+
+                continue
+
+            print(
+                f"❌ CFBD {endpoint}: "
+                f"HTTP {response.status_code} "
+                f"after {MAX_REQUEST_ATTEMPTS} attempts"
+            )
+
+            print(
+                response.text[:500]
+            )
+
+            sys.exit(1)
+
+        if not response.ok:
+
+            print(
+                f"❌ CFBD {endpoint}: "
+                f"HTTP {response.status_code}"
+            )
+
+            print(
+                response.text[:500]
+            )
+
+            sys.exit(1)
+
+        try:
+
+            return response.json()
+
+        except ValueError:
+
+            if (
+                attempt
+                <
+                MAX_REQUEST_ATTEMPTS
+            ):
+
+                wait = retry_wait_seconds(
+                    attempt
+                )
+
+                print(
+                    f"      ⚠ CFBD returned "
+                    f"invalid JSON "
+                    f"({attempt}/{MAX_REQUEST_ATTEMPTS})"
+                )
+
+                print(
+                    f"      Retrying in "
+                    f"{wait}s..."
+                )
+
+                time.sleep(
+                    wait
+                )
+
+                continue
+
+            print(
+                "❌ CFBD returned invalid JSON "
+                "after repeated attempts."
+            )
+
+            sys.exit(1)
+
+    print(
+        "❌ CFBD request exhausted retries."
+    )
+
+    sys.exit(1)
 
 
 # =============================================================================
@@ -301,7 +513,8 @@ def get_sp_ratings(year):
     raw = cfbd_get(
         "/ratings/sp",
         {
-            "year": year
+            "year":
+                year
         }
     )
 
@@ -309,10 +522,14 @@ def get_sp_ratings(year):
 
     for row in raw:
 
-        team = row.get("team")
+        team = row.get(
+            "team"
+        )
 
         rating = safe_number(
-            row.get("rating")
+            row.get(
+                "rating"
+            )
         )
 
         if (
@@ -320,7 +537,9 @@ def get_sp_ratings(year):
             and rating is not None
         ):
 
-            ratings[team] = rating
+            ratings[
+                team
+            ] = rating
 
     print(
         f"      {len(ratings)} teams"
@@ -338,9 +557,14 @@ def get_games(year):
     raw = cfbd_get(
         "/games",
         {
-            "year": year,
-            "seasonType": "regular",
-            "classification": "fbs",
+            "year":
+                year,
+
+            "seasonType":
+                "regular",
+
+            "classification":
+                "fbs",
         }
     )
 
@@ -385,10 +609,14 @@ def get_games(year):
 
         games.append({
             "id":
-                game.get("id"),
+                game.get(
+                    "id"
+                ),
 
             "week":
-                game.get("week"),
+                game.get(
+                    "week"
+                ),
 
             "home":
                 home,
@@ -407,11 +635,13 @@ def get_games(year):
 
             "actual_home_margin":
                 home_points
-                - away_points,
+                -
+                away_points,
         })
 
     print(
-        f"      {len(games)} completed games"
+        f"      {len(games)} "
+        "completed games"
     )
 
     return games
@@ -426,6 +656,7 @@ def build_sample():
     sample = []
 
     print("")
+
     print(
         "📚 Building historical sample"
     )
@@ -436,6 +667,7 @@ def build_sample():
     ):
 
         print("")
+
         print(
             f"▶ {year}"
         )
@@ -453,11 +685,15 @@ def build_sample():
         for game in games:
 
             home_rating = ratings.get(
-                game["home"]
+                game[
+                    "home"
+                ]
             )
 
             away_rating = ratings.get(
-                game["away"]
+                game[
+                    "away"
+                ]
             )
 
             if (
@@ -468,7 +704,8 @@ def build_sample():
 
             rating_diff = (
                 home_rating
-                - away_rating
+                -
+                away_rating
             )
 
             sample.append({
@@ -476,16 +713,24 @@ def build_sample():
                     year,
 
                 "week":
-                    game["week"],
+                    game[
+                        "week"
+                    ],
 
                 "home":
-                    game["home"],
+                    game[
+                        "home"
+                    ],
 
                 "away":
-                    game["away"],
+                    game[
+                        "away"
+                    ],
 
                 "neutral":
-                    game["neutral"],
+                    game[
+                        "neutral"
+                    ],
 
                 "home_rating":
                     home_rating,
@@ -505,7 +750,8 @@ def build_sample():
             matched += 1
 
         print(
-            f"      {matched} rating-matched games"
+            f"      {matched} "
+            "rating-matched games"
         )
 
     return sample
@@ -517,26 +763,38 @@ def build_sample():
 
 def calibrate(sample):
 
-    if len(sample) < MIN_GAMES:
+    if (
+        len(sample)
+        <
+        MIN_GAMES
+    ):
 
         print(
-            f"❌ Only {len(sample)} usable games."
+            f"❌ Only {len(sample)} "
+            "usable games."
         )
 
         print(
-            f"   Need at least {MIN_GAMES}."
+            f"   Need at least "
+            f"{MIN_GAMES}."
         )
 
         sys.exit(1)
 
     rating_diffs = [
-        game["rating_diff"]
-        for game in sample
+        game[
+            "rating_diff"
+        ]
+        for game
+        in sample
     ]
 
     actual_margins = [
-        game["actual_home_margin"]
-        for game in sample
+        game[
+            "actual_home_margin"
+        ]
+        for game
+        in sample
     ]
 
     overall_fit = regression(
@@ -546,30 +804,42 @@ def calibrate(sample):
 
     neutral_games = [
         game
-        for game in sample
-        if game["neutral"]
+        for game
+        in sample
+        if game[
+            "neutral"
+        ]
     ]
 
     non_neutral_games = [
         game
-        for game in sample
-        if not game["neutral"]
+        for game
+        in sample
+        if not game[
+            "neutral"
+        ]
     ]
 
-    # Estimate HFA as the residual home advantage
-    # after accounting for SP+ rating difference.
-
     slope_without_hfa = (
-        overall_fit["slope"]
+        overall_fit[
+            "slope"
+        ]
     )
 
     home_residuals = [
-        game["actual_home_margin"]
-        - (
+        game[
+            "actual_home_margin"
+        ]
+        -
+        (
             slope_without_hfa
-            * game["rating_diff"]
+            *
+            game[
+                "rating_diff"
+            ]
         )
-        for game in non_neutral_games
+        for game
+        in non_neutral_games
     ]
 
     estimated_hfa = mean(
@@ -577,6 +847,7 @@ def calibrate(sample):
     )
 
     if estimated_hfa is None:
+
         estimated_hfa = CURRENT_HFA
 
     predictions = []
@@ -585,37 +856,49 @@ def calibrate(sample):
 
         hfa = (
             0.0
-            if game["neutral"]
+            if game[
+                "neutral"
+            ]
             else estimated_hfa
         )
 
         prediction = (
-            overall_fit["slope"]
-            * game["rating_diff"]
-            + hfa
+            overall_fit[
+                "slope"
+            ]
+            *
+            game[
+                "rating_diff"
+            ]
+            +
+            hfa
         )
 
         predictions.append(
             prediction
         )
 
-        game["calibrated_prediction"] = (
-            prediction
-        )
+        game[
+            "calibrated_prediction"
+        ] = prediction
 
-        game["absolute_error"] = abs(
+        game[
+            "absolute_error"
+        ] = abs(
             prediction
-            - game["actual_home_margin"]
+            -
+            game[
+                "actual_home_margin"
+            ]
         )
 
     actuals = [
-        game["actual_home_margin"]
-        for game in sample
+        game[
+            "actual_home_margin"
+        ]
+        for game
+        in sample
     ]
-
-    # -------------------------------------------------------------------------
-    # Extreme-margin audit
-    # -------------------------------------------------------------------------
 
     buckets = []
 
@@ -623,7 +906,8 @@ def calibrate(sample):
 
         bucket_games = [
             game
-            for game in sample
+            for game
+            in sample
             if (
                 abs(
                     game[
@@ -648,7 +932,8 @@ def calibrate(sample):
                     "calibrated_prediction"
                 ]
             )
-            for game in bucket_games
+            for game
+            in bucket_games
         ])
 
         actual_abs = mean([
@@ -657,12 +942,16 @@ def calibrate(sample):
                     "actual_home_margin"
                 ]
             )
-            for game in bucket_games
+            for game
+            in bucket_games
         ])
 
         bucket_mae = mean([
-            game["absolute_error"]
-            for game in bucket_games
+            game[
+                "absolute_error"
+            ]
+            for game
+            in bucket_games
         ])
 
         buckets.append({
@@ -674,7 +963,9 @@ def calibrate(sample):
                 ),
 
             "games":
-                len(bucket_games),
+                len(
+                    bucket_games
+                ),
 
             "average_projected_margin":
                 round(
@@ -697,18 +988,16 @@ def calibrate(sample):
             "actual_minus_projected":
                 round(
                     actual_abs
-                    - predicted_abs,
+                    -
+                    predicted_abs,
                     3
                 ),
         })
 
-    # -------------------------------------------------------------------------
-    # Favorite direction / bias
-    # -------------------------------------------------------------------------
-
     large_favorites = [
         game
-        for game in sample
+        for game
+        in sample
         if abs(
             game[
                 "calibrated_prediction"
@@ -722,17 +1011,15 @@ def calibrate(sample):
                 "actual_home_margin"
             ]
         )
-        - abs(
+        -
+        abs(
             game[
                 "calibrated_prediction"
             ]
         )
-        for game in large_favorites
+        for game
+        in large_favorites
     ])
-
-    # -------------------------------------------------------------------------
-    # Year-by-year holdout-style reporting
-    # -------------------------------------------------------------------------
 
     yearly = []
 
@@ -743,8 +1030,11 @@ def calibrate(sample):
 
         year_games = [
             game
-            for game in sample
-            if game["year"] == year
+            for game
+            in sample
+            if game[
+                "year"
+            ] == year
         ]
 
         if not year_games:
@@ -754,14 +1044,16 @@ def calibrate(sample):
             game[
                 "calibrated_prediction"
             ]
-            for game in year_games
+            for game
+            in year_games
         ]
 
         year_actuals = [
             game[
                 "actual_home_margin"
             ]
-            for game in year_games
+            for game
+            in year_games
         ]
 
         yearly.append({
@@ -769,7 +1061,9 @@ def calibrate(sample):
                 year,
 
             "games":
-                len(year_games),
+                len(
+                    year_games
+                ),
 
             "mae":
                 round(
@@ -799,31 +1093,43 @@ def calibrate(sample):
                 END_YEAR,
 
             "games":
-                len(sample),
+                len(
+                    sample
+                ),
 
             "neutral_games":
-                len(neutral_games),
+                len(
+                    neutral_games
+                ),
 
             "non_neutral_games":
-                len(non_neutral_games),
+                len(
+                    non_neutral_games
+                ),
         },
 
         "rating_to_margin": {
             "slope":
                 round(
-                    overall_fit["slope"],
+                    overall_fit[
+                        "slope"
+                    ],
                     5
                 ),
 
             "raw_intercept":
                 round(
-                    overall_fit["intercept"],
+                    overall_fit[
+                        "intercept"
+                    ],
                     5
                 ),
 
             "r_squared":
                 round(
-                    overall_fit["r_squared"],
+                    overall_fit[
+                        "r_squared"
+                    ],
                     5
                 ),
         },
@@ -899,6 +1205,7 @@ def calibrate(sample):
 def print_report(report):
 
     print("")
+
     print(
         "=" * 72
     )
@@ -1036,6 +1343,7 @@ def print_report(report):
         )
 
     print("")
+
     print(
         "=" * 72
     )
@@ -1077,11 +1385,13 @@ def save_report(
         os.path.getsize(
             OUTPUT_PATH
         )
-        / 1024
+        /
+        1024
     )
 
     print(
-        f"💾 Saved {OUTPUT_PATH} "
+        f"💾 Saved "
+        f"{OUTPUT_PATH} "
         f"({size_kb:.1f} KB)"
     )
 
@@ -1093,6 +1403,7 @@ def save_report(
 def main():
 
     print("")
+
     print(
         "🧪 CFB spread calibration audit"
     )
@@ -1105,6 +1416,7 @@ def main():
     sample = build_sample()
 
     print("")
+
     print(
         f"✅ Historical games matched: "
         f"{len(sample)}"
