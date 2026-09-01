@@ -47,6 +47,10 @@ jobs:
         run: |
           python scripts/backtest_composite.py
 
+      - name: Calibrate team home-field advantage
+        run: |
+          python scripts/calibrate_hfa.py
+
       - name: Update team analytics
         env:
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
@@ -72,6 +76,7 @@ jobs:
           git add data/calibration_report.json
           git add data/backtest_report.json
           git add data/composite_backtest_report.json
+          git add data/hfa_ratings.json
 
           git diff --staged --quiet || git commit -m "Update CFB analytics data"
 
