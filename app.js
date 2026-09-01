@@ -2,13 +2,15 @@
 // CFB ANALYTICS — FRONTEND
 // ============================================================================
 //
-// GitHub Actions builds:
-//   data/cfb_metrics.json
-//   data/schedule.json
-//   data/odds.json
-//   data/projections.json
+// Static frontend.
+// GitHub Actions creates the analytics JSON.
+// This file renders:
+//   - Projections
+//   - Game analysis
+//   - Teams
+//   - Ratings
+//   - Team dossiers
 //
-// The browser only reads those static files.
 // ============================================================================
 
 
@@ -62,21 +64,29 @@ function escapeJsString(value) {
 }
 
 
-function formatNumber(value, digits = 1) {
+function formatNumber(
+  value,
+  digits = 1
+) {
   if (!hasValue(value)) {
     return "—";
   }
 
-  return Number(value).toFixed(digits);
+  return Number(value)
+    .toFixed(digits);
 }
 
 
-function formatSigned(value, digits = 1) {
+function formatSigned(
+  value,
+  digits = 1
+) {
   if (!hasValue(value)) {
     return "—";
   }
 
-  const number = Number(value);
+  const number =
+    Number(value);
 
   if (number > 0) {
     return `+${number.toFixed(digits)}`;
@@ -91,7 +101,8 @@ function formatEPA(value) {
     return "—";
   }
 
-  const number = Number(value);
+  const number =
+    Number(value);
 
   if (number > 0) {
     return `+${number.toFixed(3)}`;
@@ -101,7 +112,10 @@ function formatEPA(value) {
 }
 
 
-function formatPercent(value, digits = 1) {
+function formatPercent(
+  value,
+  digits = 1
+) {
   if (!hasValue(value)) {
     return "—";
   }
@@ -110,15 +124,21 @@ function formatPercent(value, digits = 1) {
 }
 
 
-function formatRate(value, digits = 1) {
+function formatRate(
+  value,
+  digits = 1
+) {
   if (!hasValue(value)) {
     return "—";
   }
 
-  const number = Number(value);
+  const number =
+    Number(value);
 
-  // A percentage outside 0–100 is invalid.
-  if (number < 0 || number > 100) {
+  if (
+    number < 0 ||
+    number > 100
+  ) {
     return "—";
   }
 
@@ -127,13 +147,18 @@ function formatRate(value, digits = 1) {
 
 
 function recordText(team) {
-  const record = team?.record;
+  const record =
+    team?.record;
 
   if (!record) {
     return "—";
   }
 
-  return `${record.wins ?? 0}-${record.losses ?? 0}`;
+  return `${
+    record.wins ?? 0
+  }-${
+    record.losses ?? 0
+  }`;
 }
 
 
@@ -151,7 +176,10 @@ function statusClass(status) {
 
 
 function displayStatus(status) {
-  if (!status || status === "NO MARKET") {
+  if (
+    !status ||
+    status === "NO MARKET"
+  ) {
     return "NO LINE";
   }
 
@@ -164,13 +192,16 @@ function shortSpread(spread) {
     return "—";
   }
 
-  const number = Number(spread);
+  const number =
+    Number(spread);
 
   if (number === 0) {
     return "PK";
   }
 
-  return formatSigned(number);
+  return formatSigned(
+    number
+  );
 }
 
 
@@ -179,18 +210,26 @@ function gameDateText(dateString) {
     return "TBD";
   }
 
-  const date = new Date(dateString);
+  const date =
+    new Date(dateString);
 
-  if (Number.isNaN(date.getTime())) {
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
     return "TBD";
   }
 
-  return date.toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  return date.toLocaleString(
+    "en-US",
+    {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    }
+  );
 }
 
 
@@ -200,16 +239,19 @@ function metricRank(
   rankField,
   value
 ) {
-  // Don't show a rank beside unavailable data.
   if (!hasValue(value)) {
-    return "—";
+    return "";
   }
 
   const rank =
-    team?.[section]?.[rankField];
+    team?.[section]
+      ?.[rankField];
 
-  if (!rank || rank <= 0) {
-    return "—";
+  if (
+    !rank ||
+    rank <= 0
+  ) {
+    return "";
   }
 
   return `#${rank}`;
@@ -229,12 +271,15 @@ function powerRank(team) {
 
 
 function getTeam(name) {
-  return teams?.[name] ?? null;
+  return (
+    teams?.[name]
+    ?? null
+  );
 }
 
 
 // ============================================================================
-// LIVE 2026 HELPERS
+// LIVE DATA HELPERS
 // ============================================================================
 
 function liveSection(
@@ -242,7 +287,8 @@ function liveSection(
   section
 ) {
   return (
-    team?.[section]?.live_2026
+    team?.[section]
+      ?.live_2026
     ?? {}
   );
 }
@@ -310,7 +356,10 @@ function liveNet(
     return null;
   }
 
-  return offense - defense;
+  return (
+    offense -
+    defense
+  );
 }
 
 
@@ -346,7 +395,9 @@ function switchView(viewName) {
   document
     .querySelectorAll(".view")
     .forEach((view) => {
-      view.classList.remove("active");
+      view.classList.remove(
+        "active"
+      );
     });
 
   const requested =
@@ -355,17 +406,20 @@ function switchView(viewName) {
     );
 
   if (requested) {
-    requested.classList.add(
-      "active"
-    );
+    requested
+      .classList
+      .add("active");
   }
 
   document
-    .querySelectorAll(".nav-item")
+    .querySelectorAll(
+      ".nav-item"
+    )
     .forEach((button) => {
       button.classList.toggle(
         "active",
-        button.dataset.view === viewName
+        button.dataset.view
+          === viewName
       );
     });
 
@@ -377,7 +431,316 @@ function switchView(viewName) {
 
 
 // ============================================================================
-// DATA LOADING
+// MATCHUP VIEW SETUP
+// ============================================================================
+
+function ensureMatchupView() {
+  if (
+    document.getElementById(
+      "view-matchup"
+    )
+  ) {
+    return;
+  }
+
+  const main =
+    document.querySelector(
+      "main.page"
+    );
+
+  if (!main) {
+    return;
+  }
+
+  const section =
+    document.createElement(
+      "section"
+    );
+
+  section.id =
+    "view-matchup";
+
+  section.className =
+    "view";
+
+  section.innerHTML = `
+    <button
+      class="back-button"
+      onclick="switchView('projections')"
+    >
+      ← Back to projections
+    </button>
+
+    <div id="matchup-container">
+    </div>
+  `;
+
+  main.appendChild(
+    section
+  );
+
+
+  const style =
+    document.createElement(
+      "style"
+    );
+
+  style.textContent = `
+
+    .projection-table tbody tr.game-row {
+      cursor: pointer;
+    }
+
+    .projection-table tbody tr.game-row:hover {
+      background: #fafaf8;
+    }
+
+    .matchup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .matchup-title {
+      font-size: 34px;
+      line-height: 1.06;
+      font-weight: 800;
+      letter-spacing: -1.2px;
+      margin-top: 4px;
+    }
+
+    .matchup-subtitle {
+      color: var(--muted);
+      margin-top: 9px;
+      font-size: 12px;
+    }
+
+    .analysis-grid {
+      display: grid;
+      grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .analysis-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      min-height: 105px;
+    }
+
+    .analysis-label {
+      font-family: var(--mono);
+      color: var(--muted);
+      font-size: 9px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .analysis-value {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+    }
+
+    .analysis-small {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    .analysis-layout {
+      display: grid;
+      grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    .analysis-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .analysis-panel.wide {
+      grid-column: 1 / -1;
+    }
+
+    .analysis-panel-header {
+      padding: 13px 16px;
+      border-bottom:
+        1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .analysis-panel-title {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .analysis-panel-body {
+      padding: 0 16px;
+    }
+
+    .analysis-row {
+      display: grid;
+      grid-template-columns:
+        minmax(0, 1fr)
+        auto;
+      gap: 18px;
+      align-items: center;
+      min-height: 48px;
+      border-bottom:
+        1px solid #eeeeeb;
+    }
+
+    .analysis-row:last-child {
+      border-bottom: none;
+    }
+
+    .analysis-row-label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .analysis-row-value {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      text-align: right;
+    }
+
+    .insight-card {
+      padding: 15px 0;
+      border-bottom:
+        1px solid #eeeeeb;
+    }
+
+    .insight-card:last-child {
+      border-bottom: none;
+    }
+
+    .insight-title {
+      font-family: var(--mono);
+      color: var(--muted);
+      font-size: 9px;
+      letter-spacing: 1.1px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .insight-text {
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .sample-warning {
+      background: #fafaf8;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 15px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    .adjustment-positive {
+      color: var(--green);
+    }
+
+    .adjustment-negative {
+      color: var(--red);
+    }
+
+    .adjustment-neutral {
+      color: var(--muted);
+    }
+
+    .win-prob-wrap {
+      margin-top: 12px;
+    }
+
+    .win-prob-bar {
+      height: 7px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #ecece8;
+    }
+
+    .win-prob-fill {
+      height: 100%;
+      background: var(--green);
+    }
+
+    .win-prob-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 7px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    @media (
+      max-width: 900px
+    ) {
+
+      .analysis-grid {
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+      }
+
+      .analysis-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .analysis-panel.wide {
+        grid-column: auto;
+      }
+
+      .matchup-header {
+        flex-direction: column;
+      }
+    }
+
+    @media (
+      max-width: 520px
+    ) {
+
+      .analysis-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .matchup-title {
+        font-size: 27px;
+      }
+    }
+  `;
+
+  document.head.appendChild(
+    style
+  );
+}
+
+
+// ============================================================================
+// DATA
 // ============================================================================
 
 async function loadJson(url) {
@@ -398,35 +761,49 @@ async function loadJson(url) {
 
 async function init() {
   try {
+
+    ensureMatchupView();
+
     [
       metricsData,
       scheduleData,
       oddsData,
       projectionsData,
     ] = await Promise.all([
-      loadJson(DATA_URLS.metrics),
-      loadJson(DATA_URLS.schedule),
-      loadJson(DATA_URLS.odds),
-      loadJson(DATA_URLS.projections),
+      loadJson(
+        DATA_URLS.metrics
+      ),
+      loadJson(
+        DATA_URLS.schedule
+      ),
+      loadJson(
+        DATA_URLS.odds
+      ),
+      loadJson(
+        DATA_URLS.projections
+      ),
     ]);
 
     teams =
-      metricsData?.teams ?? {};
+      metricsData?.teams
+      ?? {};
 
     projections =
-      projectionsData?.games ?? [];
+      projectionsData?.games
+      ?? [];
 
     updateHeader();
 
     buildWeekTabs();
-    renderProjections();
 
+    renderProjections();
     renderTeams();
     renderRatings();
 
     attachEvents();
 
   } catch (error) {
+
     console.error(
       "Frontend initialization failed:",
       error
@@ -438,9 +815,13 @@ async function init() {
       );
 
     if (container) {
+
       container.innerHTML = `
         <div class="empty-state">
-          Unable to load analytics data.
+
+          Unable to load
+          analytics data.
+
           <br><br>
 
           <span
@@ -449,8 +830,13 @@ async function init() {
               font-size:11px;
             "
           >
-            ${escapeHtml(error.message)}
+            ${
+              escapeHtml(
+                error.message
+              )
+            }
           </span>
+
         </div>
       `;
     }
@@ -473,10 +859,14 @@ function updateHeader() {
   }
 
   const generated =
-    projectionsData?.meta?.generated ||
-    metricsData?.meta?.generated;
+    projectionsData?.meta
+      ?.generated
+    ||
+    metricsData?.meta
+      ?.generated;
 
   if (!generated) {
+
     header.textContent =
       "2026 model";
 
@@ -491,6 +881,7 @@ function updateHeader() {
       date.getTime()
     )
   ) {
+
     header.textContent =
       "2026 model";
 
@@ -498,13 +889,15 @@ function updateHeader() {
   }
 
   header.textContent =
-    `Updated ${date.toLocaleDateString(
-      "en-US",
-      {
-        month: "short",
-        day: "numeric",
-      }
-    )}`;
+    `Updated ${
+      date.toLocaleDateString(
+        "en-US",
+        {
+          month: "short",
+          day: "numeric",
+        }
+      )
+    }`;
 }
 
 
@@ -516,24 +909,27 @@ function availableWeeks() {
   const weeks =
     projections
       .map(
-        (game) =>
+        game =>
           game.week
       )
       .filter(
-        (week) =>
+        week =>
           week !== null &&
           week !== undefined
       )
       .map(Number)
       .filter(
-        (week) =>
-          !Number.isNaN(week)
+        week =>
+          !Number.isNaN(
+            week
+          )
       );
 
   return [
-    ...new Set(weeks),
+    ...new Set(weeks)
   ].sort(
-    (a, b) => a - b
+    (a, b) =>
+      a - b
   );
 }
 
@@ -548,60 +944,30 @@ function determineDefaultWeek(
   const marketWeeks =
     projections
       .filter(
-        (game) =>
+        game =>
           hasValue(
             game?.market
               ?.home_spread
           )
       )
       .map(
-        (game) =>
-          Number(game.week)
+        game =>
+          Number(
+            game.week
+          )
       )
       .filter(
-        (week) =>
-          !Number.isNaN(week)
-      );
-
-  if (marketWeeks.length) {
-    return Math.min(
-      ...marketWeeks
-    );
-  }
-
-  const upcoming =
-    projections
-      .filter((game) => {
-        if (!game.start_date) {
-          return false;
-        }
-
-        return (
-          new Date(
-            game.start_date
-          ).getTime()
-          >=
-          Date.now()
-        );
-      })
-      .sort(
-        (a, b) =>
-          new Date(
-            a.start_date
-          ).getTime()
-          -
-          new Date(
-            b.start_date
-          ).getTime()
+        week =>
+          !Number.isNaN(
+            week
+          )
       );
 
   if (
-    upcoming.length &&
-    upcoming[0].week
-      !== null
+    marketWeeks.length
   ) {
-    return Number(
-      upcoming[0].week
+    return Math.min(
+      ...marketWeeks
     );
   }
 
@@ -623,13 +989,17 @@ function buildWeekTabs() {
     availableWeeks();
 
   if (!weeks.length) {
-    container.innerHTML = "";
+
+    container.innerHTML =
+      "";
+
     return;
   }
 
   if (
     currentWeek === null
   ) {
+
     currentWeek =
       determineDefaultWeek(
         weeks
@@ -638,17 +1008,18 @@ function buildWeekTabs() {
 
   container.innerHTML =
     weeks
-      .map((week) => {
-        const active =
-          Number(week)
-          ===
-          Number(currentWeek);
-
-        return `
+      .map(
+        week => `
           <button
             class="
               week-tab
-              ${active ? "active" : ""}
+              ${
+                Number(week)
+                ===
+                Number(currentWeek)
+                  ? "active"
+                  : ""
+              }
             "
             onclick="
               selectWeek(${week})
@@ -660,8 +1031,8 @@ function buildWeekTabs() {
                 : `Week ${week}`
             }
           </button>
-        `;
-      })
+        `
+      )
       .join("");
 }
 
@@ -671,6 +1042,7 @@ function selectWeek(week) {
     Number(week);
 
   buildWeekTabs();
+
   renderProjections();
 }
 
@@ -681,72 +1053,88 @@ function selectWeek(week) {
 
 function projectionGamesForCurrentView() {
   return projections
-    .filter((game) => {
-      if (
-        currentWeek !== null &&
-        Number(game.week)
-        !==
-        Number(currentWeek)
-      ) {
-        return false;
-      }
 
-      if (!currentSearch) {
-        return true;
-      }
+    .filter(
+      game => {
 
-      const query =
-        currentSearch.toLowerCase();
+        if (
+          currentWeek !== null
+          &&
+          Number(game.week)
+          !==
+          Number(currentWeek)
+        ) {
+          return false;
+        }
 
-      const home =
-        game?.home?.team
-          ?.toLowerCase()
-        ?? "";
+        if (!currentSearch) {
+          return true;
+        }
 
-      const away =
-        game?.away?.team
-          ?.toLowerCase()
-        ?? "";
+        const query =
+          currentSearch
+            .toLowerCase();
 
-      return (
-        home.includes(query)
-        ||
-        away.includes(query)
-      );
-    })
-    .sort((a, b) => {
-      const aDisagreement =
-        a?.comparison
-          ?.disagreement
-        ?? -1;
+        const home =
+          game?.home?.team
+            ?.toLowerCase()
+          ?? "";
 
-      const bDisagreement =
-        b?.comparison
-          ?.disagreement
-        ?? -1;
+        const away =
+          game?.away?.team
+            ?.toLowerCase()
+          ?? "";
 
-      if (
-        bDisagreement
-        !==
-        aDisagreement
-      ) {
         return (
-          bDisagreement
-          -
-          aDisagreement
+          home.includes(
+            query
+          )
+          ||
+          away.includes(
+            query
+          )
         );
       }
+    )
 
-      return (
-        new Date(
-          a.start_date || 0
-        ).getTime()
-        -
-        new Date(
-          b.start_date || 0
-        ).getTime()
-      );
-    });
+    .sort(
+      (a, b) => {
+
+        const aDisagreement =
+          a?.comparison
+            ?.disagreement
+          ?? -1;
+
+        const bDisagreement =
+          b?.comparison
+            ?.disagreement
+          ?? -1;
+
+        if (
+          bDisagreement
+          !==
+          aDisagreement
+        ) {
+          return (
+            bDisagreement
+            -
+            aDisagreement
+          );
+        }
+
+        return (
+          new Date(
+            a.start_date
+            || 0
+          ).getTime()
+          -
+          new Date(
+            b.start_date
+            || 0
+          ).getTime()
+        );
+      }
+    );
 }
 
 
@@ -770,7 +1158,7 @@ function renderProjections() {
 
   const marketGames =
     games.filter(
-      (game) =>
+      game =>
         hasValue(
           game?.market
             ?.home_spread
@@ -779,7 +1167,7 @@ function renderProjections() {
 
   const plays =
     games.filter(
-      (game) =>
+      game =>
         game?.comparison
           ?.status
         === "PLAY"
@@ -787,35 +1175,44 @@ function renderProjections() {
 
   const watches =
     games.filter(
-      (game) =>
+      game =>
         game?.comparison
           ?.status
         === "WATCH"
     );
 
+
   if (summary) {
+
     summary.innerHTML = `
       ${games.length} games
       · ${marketGames.length} lined
-      · <strong>${plays.length} plays</strong>
+      · <strong>
+          ${plays.length} plays
+        </strong>
       · ${watches.length} watch
     `;
   }
 
+
   if (!games.length) {
+
     container.innerHTML = `
       <div class="empty-state">
-        No games match this week/search.
+        No games match this
+        week/search.
       </div>
     `;
 
     return;
   }
 
+
   container.innerHTML = `
     <table class="projection-table">
 
       <thead>
+
         <tr>
           <th>Matchup</th>
           <th>Our Line</th>
@@ -830,6 +1227,7 @@ function renderProjections() {
             Status
           </th>
         </tr>
+
       </thead>
 
       <tbody>
@@ -897,36 +1295,53 @@ function renderProjectionRow(game) {
       ?.status;
 
   const cssStatus =
-    statusClass(status);
+    statusClass(
+      status
+    );
 
-  let disagreementNote =
-    "No market line";
 
-  if (
+  const disagreementNote =
     hasValue(
       disagreement
     )
-  ) {
-    disagreementNote =
-      preferred
-        ? `Model favors ${preferred}`
-        : "Model agrees with market";
-  }
+      ? (
+          preferred
+            ? `Model favors ${preferred}`
+            : "Model agrees with market"
+        )
+      : "No market line";
+
+
+  const gameId =
+    String(
+      game.game_id
+      ?? ""
+    );
+
 
   return `
-    <tr>
+    <tr
+      class="game-row"
+      onclick="
+        openMatchup(
+          '${escapeJsString(gameId)}'
+        )
+      "
+    >
 
       <td class="matchup-cell">
 
-        <div
-          class="team-line"
-          onclick="
-            openDossier(
-              '${escapeJsString(awayName)}'
-            )
-          "
-        >
-          <span class="team-name">
+        <div class="team-line">
+
+          <span
+            class="team-name"
+            onclick="
+              event.stopPropagation();
+              openDossier(
+                '${escapeJsString(awayName)}'
+              );
+            "
+          >
             ${escapeHtml(awayName)}
           </span>
 
@@ -937,6 +1352,7 @@ function renderProjectionRow(game) {
                 : ""
             }
           </span>
+
         </div>
 
 
@@ -949,9 +1365,10 @@ function renderProjectionRow(game) {
           <span
             class="team-name"
             onclick="
+              event.stopPropagation();
               openDossier(
                 '${escapeJsString(homeName)}'
-              )
+              );
             "
           >
             ${escapeHtml(homeName)}
@@ -1045,10 +1462,12 @@ function renderProjectionRow(game) {
             hasValue(
               marketTotal
             )
-              ? `Market ${formatNumber(
-                  marketTotal,
-                  1
-                )}`
+              ? `Market ${
+                  formatNumber(
+                    marketTotal,
+                    1
+                  )
+                }`
               : "Model total"
           }
         </div>
@@ -1068,17 +1487,17 @@ function renderProjectionRow(game) {
             hasValue(
               disagreement
             )
-              ? `${formatNumber(
-                  disagreement,
-                  1
-                )} pts`
+              ? `${
+                  formatNumber(
+                    disagreement,
+                    1
+                  )
+                } pts`
               : "—"
           }
         </div>
 
-        <div
-          class="disagreement-note"
-        >
+        <div class="disagreement-note">
           ${
             escapeHtml(
               disagreementNote
@@ -1109,6 +1528,1003 @@ function renderProjectionRow(game) {
       </td>
 
     </tr>
+  `;
+}
+
+
+// ============================================================================
+// GAME LOOKUP
+// ============================================================================
+
+function findGame(
+  gameId
+) {
+  return projections.find(
+    game =>
+      String(
+        game.game_id
+      )
+      ===
+      String(
+        gameId
+      )
+  );
+}
+
+
+// ============================================================================
+// GAME ANALYSIS
+// ============================================================================
+
+function openMatchup(
+  gameId
+) {
+  const game =
+    findGame(
+      gameId
+    );
+
+  if (!game) {
+    return;
+  }
+
+  renderMatchup(
+    game
+  );
+
+  switchView(
+    "matchup"
+  );
+}
+
+
+function adjustmentClass(
+  value
+) {
+  if (!hasValue(value)) {
+    return "adjustment-neutral";
+  }
+
+  const number =
+    Number(value);
+
+  if (number > 0.05) {
+    return "adjustment-positive";
+  }
+
+  if (number < -0.05) {
+    return "adjustment-negative";
+  }
+
+  return "adjustment-neutral";
+}
+
+
+function adjustmentText(
+  value
+) {
+  if (!hasValue(value)) {
+    return "—";
+  }
+
+  const number =
+    Number(value);
+
+  if (
+    Math.abs(number)
+    < 0.005
+  ) {
+    return "0.00";
+  }
+
+  return formatSigned(
+    number,
+    2
+  );
+}
+
+
+function matchupComponentRow(
+  label,
+  value,
+  active
+) {
+  const shown =
+    active
+      ? adjustmentText(
+          value
+        )
+      : "Withheld";
+
+  const css =
+    active
+      ? adjustmentClass(
+          value
+        )
+      : "adjustment-neutral";
+
+  return `
+    <div class="analysis-row">
+
+      <div class="analysis-row-label">
+        ${escapeHtml(label)}
+      </div>
+
+      <div
+        class="
+          analysis-row-value
+          ${css}
+        "
+      >
+        ${escapeHtml(shown)}
+      </div>
+
+    </div>
+  `;
+}
+
+
+function insightMarkup(
+  insights
+) {
+  if (
+    !Array.isArray(
+      insights
+    )
+    ||
+    !insights.length
+  ) {
+    return `
+      <div class="insight-card">
+
+        <div class="insight-text">
+          No additional model
+          insight is available
+          for this matchup yet.
+        </div>
+
+      </div>
+    `;
+  }
+
+  return insights
+    .map(
+      insight => `
+        <div class="insight-card">
+
+          <div class="insight-title">
+            ${
+              escapeHtml(
+                insight.title
+                ?? "Model note"
+              )
+            }
+          </div>
+
+          <div class="insight-text">
+            ${
+              escapeHtml(
+                insight.text
+                ?? ""
+              )
+            }
+          </div>
+
+        </div>
+      `
+    )
+    .join("");
+}
+
+
+function renderMatchup(game) {
+  const container =
+    document.getElementById(
+      "matchup-container"
+    );
+
+  if (!container) {
+    return;
+  }
+
+
+  const awayName =
+    game?.away?.team
+    ?? "Away";
+
+  const homeName =
+    game?.home?.team
+    ?? "Home";
+
+
+  const projection =
+    game?.projection
+    ?? {};
+
+  const components =
+    projection?.components
+    ?? {};
+
+  const matchup =
+    components
+      ?.matchup_adjustment
+    ??
+    projection
+      ?.matchup_adjustment
+    ??
+    {};
+
+  const matchupComponents =
+    matchup?.components
+    ?? {};
+
+  const available =
+    matchup?.available
+    ?? {};
+
+
+  const modelSpread =
+    projection
+      ?.home_spread;
+
+  const marketSpread =
+    game?.market
+      ?.home_spread;
+
+  const modelTotal =
+    projection
+      ?.total;
+
+  const marketTotal =
+    game?.market
+      ?.total;
+
+  const comparison =
+    game?.comparison
+    ?? {};
+
+  const winProb =
+    projection
+      ?.win_probability
+    ?? {};
+
+
+  const awayWin =
+    hasValue(
+      winProb.away
+    )
+      ? Number(
+          winProb.away
+        )
+      : null;
+
+  const homeWin =
+    hasValue(
+      winProb.home
+    )
+      ? Number(
+          winProb.home
+        )
+      : null;
+
+
+  const preferred =
+    comparison
+      ?.preferred_side;
+
+  const status =
+    comparison
+      ?.status;
+
+  const statusCss =
+    statusClass(
+      status
+    );
+
+
+  const sampleComparable =
+    Boolean(
+      matchup
+        ?.comparable_live_sample
+    );
+
+
+  const matchupNote =
+    matchup?.note
+    ??
+    (
+      sampleComparable
+        ? "Comparable 2026 live samples are active."
+        : "No comparable live sample; matchup adjustment is held at zero."
+    );
+
+
+  const ratingOnly =
+    components
+      ?.rating_only_home_spread;
+
+  const hfa =
+    components
+      ?.home_field_advantage;
+
+  const afterHfa =
+    components
+      ?.spread_after_home_field;
+
+  const matchupTotal =
+    matchup
+      ?.total;
+
+
+  const homeRating =
+    components
+      ?.home_power_rating
+    ??
+    game?.home
+      ?.power_rating;
+
+  const awayRating =
+    components
+      ?.away_power_rating
+    ??
+    game?.away
+      ?.power_rating;
+
+
+  container.innerHTML = `
+
+    <div class="matchup-header">
+
+      <div>
+
+        <div class="eyebrow">
+          Game analysis
+        </div>
+
+        <div class="matchup-title">
+          ${escapeHtml(awayName)}
+          @
+          ${escapeHtml(homeName)}
+        </div>
+
+        <div class="matchup-subtitle">
+          Week ${game.week ?? "—"}
+          ·
+          ${
+            escapeHtml(
+              gameDateText(
+                game.start_date
+              )
+            )
+          }
+
+          ${
+            game.venue
+              ? ` · ${
+                  escapeHtml(
+                    game.venue
+                  )
+                }`
+              : ""
+          }
+        </div>
+
+      </div>
+
+
+      <div>
+
+        <span
+          class="
+            status
+            ${statusCss}
+          "
+        >
+          ${
+            escapeHtml(
+              displayStatus(
+                status
+              )
+            )
+          }
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="analysis-grid">
+
+
+      <div class="analysis-card">
+
+        <div class="analysis-label">
+          Model line
+        </div>
+
+        <div class="analysis-value">
+          ${
+            shortSpread(
+              modelSpread
+            )
+          }
+        </div>
+
+        <div class="analysis-small">
+          ${escapeHtml(homeName)}
+          home spread
+        </div>
+
+      </div>
+
+
+      <div class="analysis-card">
+
+        <div class="analysis-label">
+          Market
+        </div>
+
+        <div class="analysis-value">
+          ${
+            shortSpread(
+              marketSpread
+            )
+          }
+        </div>
+
+        <div class="analysis-small">
+          ${
+            game?.market
+              ?.bookmaker
+              ? escapeHtml(
+                  game.market.bookmaker
+                )
+              : "No current market"
+          }
+        </div>
+
+      </div>
+
+
+      <div class="analysis-card">
+
+        <div class="analysis-label">
+          Model total
+        </div>
+
+        <div class="analysis-value">
+          ${
+            formatNumber(
+              modelTotal,
+              1
+            )
+          }
+        </div>
+
+        <div class="analysis-small">
+
+          ${
+            hasValue(
+              marketTotal
+            )
+              ? `Market ${
+                  formatNumber(
+                    marketTotal,
+                    1
+                  )
+                }`
+              : "No current market total"
+          }
+
+        </div>
+
+      </div>
+
+
+      <div class="analysis-card">
+
+        <div class="analysis-label">
+          Market disagreement
+        </div>
+
+        <div class="analysis-value">
+          ${
+            hasValue(
+              comparison
+                ?.disagreement
+            )
+              ? `${
+                  formatNumber(
+                    comparison
+                      .disagreement,
+                    1
+                  )
+                } pts`
+              : "—"
+          }
+        </div>
+
+        <div class="analysis-small">
+          ${
+            preferred
+              ? `Model favors ${
+                  escapeHtml(
+                    preferred
+                  )
+                }`
+              : "No current side edge"
+          }
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="analysis-layout">
+
+
+      <div class="analysis-panel">
+
+        <div class="analysis-panel-header">
+
+          <div class="analysis-panel-title">
+            Win probability
+          </div>
+
+        </div>
+
+
+        <div class="analysis-panel-body">
+
+          <div
+            style="
+              padding:17px 0 19px;
+            "
+          >
+
+            <div
+              style="
+                display:flex;
+                justify-content:space-between;
+                align-items:flex-end;
+                gap:20px;
+              "
+            >
+
+              <div>
+
+                <div
+                  style="
+                    font-size:12px;
+                    color:var(--muted);
+                  "
+                >
+                  ${escapeHtml(awayName)}
+                </div>
+
+                <div
+                  style="
+                    font-size:23px;
+                    font-weight:800;
+                  "
+                >
+                  ${
+                    formatPercent(
+                      awayWin,
+                      1
+                    )
+                  }
+                </div>
+
+              </div>
+
+
+              <div
+                style="
+                  text-align:right;
+                "
+              >
+
+                <div
+                  style="
+                    font-size:12px;
+                    color:var(--muted);
+                  "
+                >
+                  ${escapeHtml(homeName)}
+                </div>
+
+                <div
+                  style="
+                    font-size:23px;
+                    font-weight:800;
+                  "
+                >
+                  ${
+                    formatPercent(
+                      homeWin,
+                      1
+                    )
+                  }
+                </div>
+
+              </div>
+
+            </div>
+
+
+            ${
+              hasValue(homeWin)
+                ? `
+                  <div class="win-prob-wrap">
+
+                    <div class="win-prob-bar">
+
+                      <div
+                        class="win-prob-fill"
+                        style="
+                          width:${Math.max(
+                            0,
+                            Math.min(
+                              100,
+                              homeWin
+                            )
+                          )}%;
+                        "
+                      >
+                      </div>
+
+                    </div>
+
+                    <div class="win-prob-labels">
+
+                      <span>
+                        ${escapeHtml(awayName)}
+                      </span>
+
+                      <span>
+                        ${escapeHtml(homeName)}
+                      </span>
+
+                    </div>
+
+                  </div>
+                `
+                : ""
+            }
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="analysis-panel">
+
+        <div class="analysis-panel-header">
+
+          <div class="analysis-panel-title">
+            Power foundation
+          </div>
+
+        </div>
+
+
+        <div class="analysis-panel-body">
+
+          <div class="analysis-row">
+
+            <div class="analysis-row-label">
+              ${escapeHtml(awayName)}
+              power rating
+            </div>
+
+            <div class="analysis-row-value">
+              ${
+                formatSigned(
+                  awayRating,
+                  3
+                )
+              }
+            </div>
+
+          </div>
+
+
+          <div class="analysis-row">
+
+            <div class="analysis-row-label">
+              ${escapeHtml(homeName)}
+              power rating
+            </div>
+
+            <div class="analysis-row-value">
+              ${
+                formatSigned(
+                  homeRating,
+                  3
+                )
+              }
+            </div>
+
+          </div>
+
+
+          <div class="analysis-row">
+
+            <div class="analysis-row-label">
+              Rating-only line
+            </div>
+
+            <div class="analysis-row-value">
+              ${
+                shortSpread(
+                  ratingOnly
+                )
+              }
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="analysis-panel">
+
+        <div class="analysis-panel-header">
+
+          <div class="analysis-panel-title">
+            Projection build
+          </div>
+
+        </div>
+
+
+        <div class="analysis-panel-body">
+
+
+          <div class="analysis-row">
+
+            <div class="analysis-row-label">
+              Rating-only home line
+            </div>
+
+            <div class="analysis-row-value">
+              ${
+                shortSpread(
+                  ratingOnly
+                )
+              }
+            </div>
+
+          </div>
+
+
+          <div class="analysis-row">
+
+            <div class="analysis-row-label">
+              Home-field adjustment
+            </div>
+
+            <div class="analysis-row-value">
+              ${
+                hasValue(hfa)
+                  ? `${
+                      formatNumber(
+                        hfa,
+                        1
+                      )
+                    } pts`
+                  : "—"
+              }
+            </div>
+
+          </div>
+
+
+          <div class="analysis-row">
+
+            <div class="analysis-row-label">
+              Line after home field
+            </div>
+
+            <div class="analysis-row-value">
+              ${
+                shortSpread(
+                  afterHfa
+                )
+              }
+            </div>
+
+          </div>
+
+
+          <div class="analysis-row">
+
+            <div class="analysis-row-label">
+              Live matchup adjustment
+            </div>
+
+            <div
+              class="
+                analysis-row-value
+                ${
+                  adjustmentClass(
+                    matchupTotal
+                  )
+                }
+              "
+            >
+              ${
+                adjustmentText(
+                  matchupTotal
+                )
+              }
+            </div>
+
+          </div>
+
+
+          <div class="analysis-row">
+
+            <div class="analysis-row-label">
+              Final model line
+            </div>
+
+            <div class="analysis-row-value">
+              ${
+                shortSpread(
+                  modelSpread
+                )
+              }
+            </div>
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+      <div class="analysis-panel">
+
+        <div class="analysis-panel-header">
+
+          <div class="analysis-panel-title">
+            Live matchup layer
+          </div>
+
+          <div
+            class="team-meta"
+          >
+            ${
+              sampleComparable
+                ? "ACTIVE"
+                : "WITHHELD"
+            }
+          </div>
+
+        </div>
+
+
+        <div
+          class="analysis-panel-body"
+          style="
+            padding-top:12px;
+            padding-bottom:12px;
+          "
+        >
+
+          <div class="sample-warning">
+            ${escapeHtml(matchupNote)}
+          </div>
+
+
+          ${
+            matchupComponentRow(
+              "Passing",
+              matchupComponents
+                ?.passing,
+              Boolean(
+                available
+                  ?.passing
+              )
+            )
+          }
+
+
+          ${
+            matchupComponentRow(
+              "Rushing",
+              matchupComponents
+                ?.rushing,
+              Boolean(
+                available
+                  ?.rushing
+              )
+            )
+          }
+
+
+          ${
+            matchupComponentRow(
+              "Success rate",
+              matchupComponents
+                ?.success_rate,
+              Boolean(
+                available
+                  ?.success_rate
+              )
+            )
+          }
+
+
+          ${
+            matchupComponentRow(
+              "Explosiveness",
+              matchupComponents
+                ?.explosiveness,
+              Boolean(
+                available
+                  ?.explosiveness
+              )
+            )
+          }
+
+
+          ${
+            matchupComponentRow(
+              "Havoc",
+              matchupComponents
+                ?.havoc,
+              Boolean(
+                available
+                  ?.havoc
+              )
+            )
+          }
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="
+          analysis-panel
+          wide
+        "
+      >
+
+        <div class="analysis-panel-header">
+
+          <div class="analysis-panel-title">
+            Why the model differs
+          </div>
+
+        </div>
+
+
+        <div class="analysis-panel-body">
+
+          ${
+            insightMarkup(
+              game?.insights
+            )
+          }
+
+        </div>
+
+      </div>
+
+
+    </div>
   `;
 }
 
@@ -1149,6 +2565,7 @@ function renderTeams() {
     sortedTeams();
 
   if (!data.length) {
+
     container.innerHTML = `
       <div class="empty-state">
         No team data available.
@@ -1158,12 +2575,14 @@ function renderTeams() {
     return;
   }
 
+
   container.innerHTML = `
     <div class="table-scroll">
 
       <table class="projection-table">
 
         <thead>
+
           <tr>
             <th>Rank</th>
             <th>Team</th>
@@ -1172,6 +2591,7 @@ function renderTeams() {
             <th>Power Rating</th>
             <th>SP+</th>
           </tr>
+
         </thead>
 
 
@@ -1180,62 +2600,63 @@ function renderTeams() {
           ${
             data
               .map(
-                (team) => `
-                <tr
-                  style="
-                    cursor:pointer;
-                  "
-                  onclick="
-                    openDossier(
-                      '${escapeJsString(team.team)}'
-                    )
-                  "
-                >
+                team => `
 
-                  <td class="team-meta">
-                    ${powerRank(team)}
-                  </td>
-
-                  <td>
-                    <strong>
-                      ${escapeHtml(team.team)}
-                    </strong>
-                  </td>
-
-                  <td class="team-meta">
-                    ${
-                      escapeHtml(
-                        team.conference
-                        ?? "—"
+                  <tr
+                    style="
+                      cursor:pointer;
+                    "
+                    onclick="
+                      openDossier(
+                        '${escapeJsString(team.team)}'
                       )
-                    }
-                  </td>
+                    "
+                  >
 
-                  <td class="team-meta">
-                    ${recordText(team)}
-                  </td>
+                    <td class="team-meta">
+                      ${powerRank(team)}
+                    </td>
 
-                  <td class="line-primary">
-                    ${
-                      formatSigned(
-                        team.power_rating,
-                        3
-                      )
-                    }
-                  </td>
+                    <td>
+                      <strong>
+                        ${escapeHtml(team.team)}
+                      </strong>
+                    </td>
 
-                  <td class="team-meta">
-                    ${
-                      formatSigned(
-                        team?.sp_plus
-                          ?.overall,
-                        1
-                      )
-                    }
-                  </td>
+                    <td class="team-meta">
+                      ${
+                        escapeHtml(
+                          team.conference
+                          ?? "—"
+                        )
+                      }
+                    </td>
 
-                </tr>
-              `
+                    <td class="team-meta">
+                      ${recordText(team)}
+                    </td>
+
+                    <td class="line-primary">
+                      ${
+                        formatSigned(
+                          team.power_rating,
+                          3
+                        )
+                      }
+                    </td>
+
+                    <td class="team-meta">
+                      ${
+                        formatSigned(
+                          team?.sp_plus
+                            ?.overall,
+                          1
+                        )
+                      }
+                    </td>
+
+                  </tr>
+                `
               )
               .join("")
           }
@@ -1250,7 +2671,7 @@ function renderTeams() {
 
 
 // ============================================================================
-// POWER RATINGS
+// RATINGS
 // ============================================================================
 
 function renderRatings() {
@@ -1266,12 +2687,14 @@ function renderRatings() {
   const data =
     sortedTeams();
 
+
   container.innerHTML = `
     <div class="table-scroll">
 
       <table class="projection-table">
 
         <thead>
+
           <tr>
             <th>Rank</th>
             <th>Team</th>
@@ -1282,6 +2705,7 @@ function renderRatings() {
             <th>Def EPA/Play</th>
             <th>Def Havoc</th>
           </tr>
+
         </thead>
 
 
@@ -1290,98 +2714,101 @@ function renderRatings() {
           ${
             data
               .map(
-                (team) => `
-                <tr
-                  style="
-                    cursor:pointer;
-                  "
-                  onclick="
-                    openDossier(
-                      '${escapeJsString(team.team)}'
-                    )
-                  "
-                >
+                team => `
 
-                  <td class="team-meta">
-                    ${powerRank(team)}
-                  </td>
+                  <tr
+                    style="
+                      cursor:pointer;
+                    "
+                    onclick="
+                      openDossier(
+                        '${escapeJsString(team.team)}'
+                      )
+                    "
+                  >
 
-                  <td>
-                    <strong>
-                      ${escapeHtml(team.team)}
-                    </strong>
+                    <td class="team-meta">
+                      ${powerRank(team)}
+                    </td>
 
-                    <span
-                      class="team-meta"
-                      style="
-                        margin-left:7px;
-                      "
-                    >
+                    <td>
+
+                      <strong>
+                        ${escapeHtml(team.team)}
+                      </strong>
+
+                      <span
+                        class="team-meta"
+                        style="
+                          margin-left:7px;
+                        "
+                      >
+                        ${
+                          escapeHtml(
+                            team.conference
+                            ?? ""
+                          )
+                        }
+                      </span>
+
+                    </td>
+
+                    <td class="line-primary">
                       ${
-                        escapeHtml(
-                          team.conference
-                          ?? ""
+                        formatSigned(
+                          team.power_rating,
+                          3
                         )
                       }
-                    </span>
-                  </td>
+                    </td>
 
-                  <td class="line-primary">
-                    ${
-                      formatSigned(
-                        team.power_rating,
-                        3
-                      )
-                    }
-                  </td>
+                    <td class="team-meta">
+                      ${
+                        formatSigned(
+                          team?.sp_plus
+                            ?.overall,
+                          1
+                        )
+                      }
+                    </td>
 
-                  <td class="team-meta">
-                    ${
-                      formatSigned(
-                        team?.sp_plus
-                          ?.overall,
-                        1
-                      )
-                    }
-                  </td>
+                    <td class="team-meta">
+                      ${
+                        formatEPA(
+                          team?.net?.epa
+                        )
+                      }
+                    </td>
 
-                  <td class="team-meta">
-                    ${
-                      formatEPA(
-                        team?.net?.epa
-                      )
-                    }
-                  </td>
+                    <td class="team-meta">
+                      ${
+                        formatEPA(
+                          team?.offense
+                            ?.epa_play
+                        )
+                      }
+                    </td>
 
-                  <td class="team-meta">
-                    ${
-                      formatEPA(
-                        team?.offense
-                          ?.epa_play
-                      )
-                    }
-                  </td>
+                    <td class="team-meta">
+                      ${
+                        formatEPA(
+                          team?.defense
+                            ?.epa_play
+                        )
+                      }
+                    </td>
 
-                  <td class="team-meta">
-                    ${
-                      formatEPA(
-                        team?.defense
-                          ?.epa_play
-                      )
-                    }
-                  </td>
+                    <td class="team-meta">
+                      ${
+                        formatRate(
+                          team?.defense
+                            ?.havoc_created
+                        )
+                      }
+                    </td>
 
-                  <td class="team-meta">
-                    ${
-                      formatRate(
-                        team?.defense
-                          ?.havoc_created
-                      )
-                    }
-                  </td>
-
-                </tr>
-              `
+                  </tr>
+                `
               )
               .join("")
           }
@@ -1403,13 +2830,17 @@ function openDossier(
   teamName
 ) {
   const team =
-    getTeam(teamName);
+    getTeam(
+      teamName
+    );
 
   if (!team) {
     return;
   }
 
-  renderDossier(team);
+  renderDossier(
+    team
+  );
 
   switchView(
     "dossier"
@@ -1421,15 +2852,16 @@ function teamSchedule(
   teamName
 ) {
   return projections
-    .filter((game) => {
-      return (
+
+    .filter(
+      game =>
         game?.home?.team
-          === teamName
+        === teamName
         ||
         game?.away?.team
-          === teamName
-      );
-    })
+        === teamName
+    )
+
     .sort(
       (a, b) =>
         (
@@ -1448,7 +2880,7 @@ function teamSchedule(
 function renderMetricRow(
   name,
   value,
-  rank = "—"
+  rank = ""
 ) {
   return `
     <div class="metric-row">
@@ -1462,7 +2894,7 @@ function renderMetricRow(
       </div>
 
       <div class="metric-rank">
-        ${rank || "—"}
+        ${rank || ""}
       </div>
 
     </div>
@@ -1481,10 +2913,6 @@ function renderDossier(team) {
   }
 
 
-  // --------------------------------------------------------------------------
-  // SCHEDULE
-  // --------------------------------------------------------------------------
-
   const games =
     teamSchedule(
       team.team
@@ -1492,145 +2920,156 @@ function renderDossier(team) {
 
 
   const upcomingGames =
-    games.filter((game) => {
-      if (!game.start_date) {
-        return true;
-      }
+    games.filter(
+      game => {
 
-      return (
-        new Date(
-          game.start_date
-        ).getTime()
-        >=
-        Date.now()
-        -
-        86400000
-      );
-    });
+        if (!game.start_date) {
+          return true;
+        }
+
+        return (
+          new Date(
+            game.start_date
+          ).getTime()
+          >=
+          Date.now()
+          -
+          86400000
+        );
+      }
+    );
 
 
   const scheduleRows =
     upcomingGames
-      .slice(0, 12)
-      .map((game) => {
+      .slice(
+        0,
+        12
+      )
+      .map(
+        game => {
 
-        const home =
-          game.home.team;
+          const home =
+            game.home.team;
 
-        const away =
-          game.away.team;
+          const away =
+            game.away.team;
 
-        const opponent =
-          home === team.team
-            ? away
-            : home;
-
-        const location =
-          home === team.team
-            ? "vs"
-            : "@";
-
-        const modelSpread =
-          game?.projection
-            ?.home_spread;
-
-        let teamSpread =
-          null;
-
-        if (
-          hasValue(
-            modelSpread
-          )
-        ) {
-          teamSpread =
+          const opponent =
             home === team.team
-              ? Number(
-                  modelSpread
+              ? away
+              : home;
+
+          const location =
+            home === team.team
+              ? "vs"
+              : "@";
+
+          const modelSpread =
+            game?.projection
+              ?.home_spread;
+
+          let teamSpread =
+            null;
+
+          if (
+            hasValue(
+              modelSpread
+            )
+          ) {
+
+            teamSpread =
+              home === team.team
+                ? Number(
+                    modelSpread
+                  )
+                : -Number(
+                    modelSpread
+                  );
+          }
+
+
+          return `
+            <div
+              class="metric-row"
+              style="
+                cursor:pointer;
+              "
+              onclick="
+                openMatchup(
+                  '${escapeJsString(String(game.game_id ?? ""))}'
                 )
-              : -Number(
-                  modelSpread
-                );
-        }
+              "
+            >
 
+              <div>
 
-        return `
-          <div class="metric-row">
+                <div
+                  style="
+                    font-weight:600;
+                    font-size:12px;
+                  "
+                >
+                  Week ${
+                    game.week
+                    ?? "—"
+                  }
+                  · ${location}
+                  ${escapeHtml(opponent)}
+                </div>
 
-            <div>
+                <div
+                  class="team-meta"
+                  style="
+                    margin-top:4px;
+                  "
+                >
+                  ${
+                    escapeHtml(
+                      gameDateText(
+                        game.start_date
+                      )
+                    )
+                  }
+                </div>
 
-              <div
-                style="
-                  font-weight:600;
-                  font-size:12px;
-                "
-              >
-                Week ${
-                  game.week
-                  ?? "—"
-                }
-                · ${location}
-                ${escapeHtml(opponent)}
               </div>
 
 
-              <div
-                class="team-meta"
-                style="
-                  margin-top:4px;
-                "
-              >
+              <div class="metric-value">
                 ${
-                  escapeHtml(
-                    gameDateText(
-                      game.start_date
-                    )
+                  shortSpread(
+                    teamSpread
                   )
                 }
               </div>
 
-            </div>
 
+              <div class="metric-rank">
+                ${
+                  game?.comparison
+                    ?.status
+                  &&
+                  game?.comparison
+                    ?.status
+                  !== "NO MARKET"
 
-            <div class="metric-value">
-              ${
-                shortSpread(
-                  teamSpread
-                )
-              }
-            </div>
+                    ? escapeHtml(
+                        game
+                          .comparison
+                          .status
+                      )
 
-
-            <div class="metric-rank">
-
-              ${
-                game?.comparison
-                  ?.status
-                &&
-                game?.comparison
-                  ?.status
-                !==
-                "NO MARKET"
-
-                  ? escapeHtml(
-                      game
-                        .comparison
-                        .status
-                    )
-
-                  : ""
-              }
+                    : ""
+                }
+              </div>
 
             </div>
-
-          </div>
-        `;
-      })
+          `;
+        }
+      )
       .join("");
 
-
-  // --------------------------------------------------------------------------
-  // MODEL + LIVE DATA
-  // --------------------------------------------------------------------------
 
   const offLive =
     liveSection(
@@ -1649,35 +3088,32 @@ function renderDossier(team) {
     team?.offense
       ?.epa_play;
 
-  const offModelSR =
-    team?.offense
-      ?.success_rate;
-
   const defModelEPA =
     team?.defense
       ?.epa_play;
+
+
+  const offModelSR =
+    team?.offense
+      ?.success_rate;
 
   const defModelSR =
     team?.defense
       ?.success_rate;
 
 
-  const offenseLivePlays =
+  const offPlays =
     livePlays(
       team,
       "offense"
     );
 
-  const defenseLivePlays =
+  const defPlays =
     livePlays(
       team,
       "defense"
     );
 
-
-  // --------------------------------------------------------------------------
-  // DOSSIER
-  // --------------------------------------------------------------------------
 
   container.innerHTML = `
 
@@ -1689,7 +3125,6 @@ function renderDossier(team) {
           Team dossier
         </div>
 
-
         <div class="team-title-row">
 
           <div class="team-title">
@@ -1697,7 +3132,6 @@ function renderDossier(team) {
           </div>
 
         </div>
-
 
         <div class="team-dossier-sub">
 
@@ -1738,12 +3172,7 @@ function renderDossier(team) {
     </div>
 
 
-    <!-- ============================================================
-         TOP STATS
-    ============================================================= -->
-
     <div class="dossier-stat-grid">
-
 
       <div class="dossier-stat">
 
@@ -1838,10 +3267,6 @@ function renderDossier(team) {
     <div class="dossier-layout">
 
 
-      <!-- ==========================================================
-           OFFENSE
-      =========================================================== -->
-
       <div class="panel">
 
         <div class="panel-header">
@@ -1852,18 +3277,14 @@ function renderDossier(team) {
 
         </div>
 
-
         <div class="panel-body">
-
 
           ${
             renderMetricRow(
               "Model EPA / Play",
-
               formatEPA(
                 offModelEPA
               ),
-
               metricRank(
                 team,
                 "offense",
@@ -1873,15 +3294,12 @@ function renderDossier(team) {
             )
           }
 
-
           ${
             renderMetricRow(
               "Model Success Rate",
-
               formatRate(
                 offModelSR
               ),
-
               metricRank(
                 team,
                 "offense",
@@ -1891,85 +3309,55 @@ function renderDossier(team) {
             )
           }
 
-
           ${
             renderMetricRow(
               "2026 EPA / Pass",
-
               formatEPA(
-                offLive
-                  ?.epa_pass
-              ),
-
-              ""
+                offLive?.epa_pass
+              )
             )
           }
-
 
           ${
             renderMetricRow(
               "2026 EPA / Rush",
-
               formatEPA(
-                offLive
-                  ?.epa_rush
-              ),
-
-              ""
+                offLive?.epa_rush
+              )
             )
           }
-
 
           ${
             renderMetricRow(
               "2026 Success Rate",
-
               formatRate(
-                offLive
-                  ?.success_rate
-              ),
-
-              ""
+                offLive?.success_rate
+              )
             )
           }
-
 
           ${
             renderMetricRow(
               "2026 Explosive Rate",
-
               formatRate(
-                offLive
-                  ?.explosive_rate
-              ),
-
-              ""
+                offLive?.explosive_rate
+              )
             )
           }
-
 
           ${
             renderMetricRow(
               "2026 Havoc Allowed",
-
               formatRate(
-                offLive
-                  ?.havoc_rate
-              ),
-
-              ""
+                offLive?.havoc_rate
+              )
             )
           }
-
 
         </div>
 
       </div>
 
-
-      <!-- ==========================================================
-           DEFENSE
-      =========================================================== -->
 
       <div class="panel">
 
@@ -1981,18 +3369,14 @@ function renderDossier(team) {
 
         </div>
 
-
         <div class="panel-body">
-
 
           ${
             renderMetricRow(
               "Model EPA / Play",
-
               formatEPA(
                 defModelEPA
               ),
-
               metricRank(
                 team,
                 "defense",
@@ -2002,15 +3386,12 @@ function renderDossier(team) {
             )
           }
 
-
           ${
             renderMetricRow(
               "Model Success Rate Allowed",
-
               formatRate(
                 defModelSR
               ),
-
               metricRank(
                 team,
                 "defense",
@@ -2020,85 +3401,55 @@ function renderDossier(team) {
             )
           }
 
-
           ${
             renderMetricRow(
               "2026 EPA / Pass Allowed",
-
               formatEPA(
-                defLive
-                  ?.epa_pass
-              ),
-
-              ""
+                defLive?.epa_pass
+              )
             )
           }
-
 
           ${
             renderMetricRow(
               "2026 EPA / Rush Allowed",
-
               formatEPA(
-                defLive
-                  ?.epa_rush
-              ),
-
-              ""
+                defLive?.epa_rush
+              )
             )
           }
-
 
           ${
             renderMetricRow(
               "2026 Success Rate Allowed",
-
               formatRate(
-                defLive
-                  ?.success_rate
-              ),
-
-              ""
+                defLive?.success_rate
+              )
             )
           }
-
 
           ${
             renderMetricRow(
               "2026 Explosive Rate Allowed",
-
               formatRate(
-                defLive
-                  ?.explosive_rate
-              ),
-
-              ""
+                defLive?.explosive_rate
+              )
             )
           }
-
 
           ${
             renderMetricRow(
               "2026 Havoc Created",
-
               formatRate(
-                defLive
-                  ?.havoc_rate
-              ),
-
-              ""
+                defLive?.havoc_rate
+              )
             )
           }
-
 
         </div>
 
       </div>
 
-
-      <!-- ==========================================================
-           NET
-      =========================================================== -->
 
       <div class="panel">
 
@@ -2110,101 +3461,66 @@ function renderDossier(team) {
 
         </div>
 
-
         <div class="panel-body">
-
 
           ${
             renderMetricRow(
               "Model Net EPA / Play",
-
               formatEPA(
                 team?.net?.epa
-              ),
-
-              team?.net
-                ?.epa_rank
-
-                ? `#${
-                    team
-                      .net
-                      .epa_rank
-                  }`
-
-                : "—"
+              )
             )
           }
-
 
           ${
             renderMetricRow(
               "Model Net Success Rate",
-
               formatPercent(
                 team?.net?.sr
-              ),
-
-              ""
+              )
             )
           }
-
 
           ${
             renderMetricRow(
               "2026 Net EPA / Pass",
-
               formatEPA(
                 liveNet(
                   team,
                   "epa_pass"
                 )
-              ),
-
-              ""
+              )
             )
           }
-
 
           ${
             renderMetricRow(
               "2026 Net EPA / Rush",
-
               formatEPA(
                 liveNet(
                   team,
                   "epa_rush"
                 )
-              ),
-
-              ""
+              )
             )
           }
-
 
           ${
             renderMetricRow(
               "2026 Net Success Rate",
-
               formatPercent(
                 liveNet(
                   team,
                   "success_rate"
                 )
-              ),
-
-              ""
+              )
             )
           }
-
 
         </div>
 
       </div>
 
-
-      <!-- ==========================================================
-           MODEL CONTEXT
-      =========================================================== -->
 
       <div class="panel">
 
@@ -2216,71 +3532,54 @@ function renderDossier(team) {
 
         </div>
 
-
         <div class="panel-body">
-
 
           ${
             renderMetricRow(
               "Power Rank",
-
-              powerRank(team),
-
-              ""
+              powerRank(
+                team
+              )
             )
           }
-
 
           ${
             renderMetricRow(
               "Conference",
-
               escapeHtml(
                 team.conference
                 ?? "—"
-              ),
-
-              ""
+              )
             )
           }
-
 
           ${
             renderMetricRow(
               "2026 Offensive Plays",
-
-              offenseLivePlays > 0
+              offPlays > 0
                 ? formatNumber(
-                    offenseLivePlays,
+                    offPlays,
                     0
                   )
-                : "—",
-
-              ""
+                : "—"
             )
           }
-
 
           ${
             renderMetricRow(
               "2026 Defensive Plays",
-
-              defenseLivePlays > 0
+              defPlays > 0
                 ? formatNumber(
-                    defenseLivePlays,
+                    defPlays,
                     0
                   )
-                : "—",
-
-              ""
+                : "—"
             )
           }
-
 
           ${
             renderMetricRow(
               "Live Data Weight",
-
               metricsData?.meta
                 ?.blend_weight
                 !== undefined
@@ -2291,42 +3590,29 @@ function renderDossier(team) {
                         .meta
                         .blend_weight
                     )
-                    *
-                    100,
-
+                    * 100,
                     0
                   )
 
-                : "—",
-
-              ""
+                : "—"
             )
           }
-
 
           ${
             renderMetricRow(
               "Sample Status",
-
               escapeHtml(
                 liveSampleLabel(
                   team
                 )
-              ),
-
-              ""
+              )
             )
           }
-
 
         </div>
 
       </div>
 
-
-      <!-- ==========================================================
-           SCHEDULE
-      =========================================================== -->
 
       <div
         class="
@@ -2364,7 +3650,6 @@ function renderDossier(team) {
 
       </div>
 
-
     </div>
   `;
 }
@@ -2381,12 +3666,13 @@ function attachEvents() {
     );
 
   if (search) {
+
     search.addEventListener(
       "input",
-      (event) => {
+      event => {
+
         currentSearch =
-          event.target
-            .value
+          event.target.value
             .trim();
 
         renderProjections();
