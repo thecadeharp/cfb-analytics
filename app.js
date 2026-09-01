@@ -2,15 +2,13 @@
 // CFB ANALYTICS — FRONTEND
 // ============================================================================
 //
-// The browser NEVER calls CFBD or The Odds API directly.
-//
-// GitHub Actions builds these files:
+// GitHub Actions builds:
 //   data/cfb_metrics.json
 //   data/schedule.json
 //   data/odds.json
 //   data/projections.json
 //
-// This frontend only reads those static JSON files.
+// The browser only reads those static files.
 // ============================================================================
 
 
@@ -38,6 +36,15 @@ let currentSearch = "";
 // HELPERS
 // ============================================================================
 
+function hasValue(value) {
+  return (
+    value !== null &&
+    value !== undefined &&
+    !Number.isNaN(Number(value))
+  );
+}
+
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -48,8 +55,15 @@ function escapeHtml(value) {
 }
 
 
+function escapeJsString(value) {
+  return String(value ?? "")
+    .replaceAll("\\", "\\\\")
+    .replaceAll("'", "\\'");
+}
+
+
 function formatNumber(value, digits = 1) {
-  if (value === null || value === undefined || Number.isNaN(Number(value))) {
+  if (!hasValue(value)) {
     return "—";
   }
 
@@ -58,7 +72,7 @@ function formatNumber(value, digits = 1) {
 
 
 function formatSigned(value, digits = 1) {
-  if (value === null || value === undefined || Number.isNaN(Number(value))) {
+  if (!hasValue(value)) {
     return "—";
   }
 
@@ -73,7 +87,7 @@ function formatSigned(value, digits = 1) {
 
 
 function formatEPA(value) {
-  if (value === null || value === undefined || Number.isNaN(Number(value))) {
+  if (!hasValue(value)) {
     return "—";
   }
 
@@ -88,11 +102,27 @@ function formatEPA(value) {
 
 
 function formatPercent(value, digits = 1) {
-  if (value === null || value === undefined || Number.isNaN(Number(value))) {
+  if (!hasValue(value)) {
     return "—";
   }
 
   return `${Number(value).toFixed(digits)}%`;
+}
+
+
+function formatRate(value, digits = 1) {
+  if (!hasValue(value)) {
+    return "—";
+  }
+
+  const number = Number(value);
+
+  // A percentage outside 0–100 is invalid.
+  if (number < 0 || number > 100) {
+    return "—";
+  }
+
+  return `${number.toFixed(digits)}%`;
 }
 
 
@@ -129,23 +159,8 @@ function displayStatus(status) {
 }
 
 
-function spreadText(spread, homeTeam) {
-  if (spread === null || spread === undefined) {
-    return "—";
-  }
-
-  const number = Number(spread);
-
-  if (number === 0) {
-    return "PK";
-  }
-
-  return `${homeTeam} ${formatSigned(number)}`;
-}
-
-
 function shortSpread(spread) {
-  if (spread === null || spread === undefined) {
+  if (!hasValue(spread)) {
     return "—";
   }
 
@@ -179,8 +194,19 @@ function gameDateText(dateString) {
 }
 
 
-function metricRank(team, section, rankField) {
-  const rank = team?.[section]?.[rankField];
+function metricRank(
+  team,
+  section,
+  rankField,
+  value
+) {
+  // Don't show a rank beside unavailable data.
+  if (!hasValue(value)) {
+    return "—";
+  }
+
+  const rank =
+    team?.[section]?.[rankField];
 
   if (!rank || rank <= 0) {
     return "—";
@@ -191,7 +217,8 @@ function metricRank(team, section, rankField) {
 
 
 function powerRank(team) {
-  const rank = team?.power_rating_rank;
+  const rank =
+    team?.power_rating_rank;
 
   if (!rank) {
     return "—";
@@ -206,13 +233,108 @@ function getTeam(name) {
 }
 
 
-function getProjectionTeams(game) {
-  return {
-    awayName: game?.away?.team,
-    homeName: game?.home?.team,
-    away: getTeam(game?.away?.team),
-    home: getTeam(game?.home?.team),
-  };
+// ============================================================================
+// LIVE 2026 HELPERS
+// ============================================================================
+
+function liveSection(
+  team,
+  section
+) {
+  return (
+    team?.[section]?.live_2026
+    ?? {}
+  );
+}
+
+
+function liveValue(
+  team,
+  section,
+  field
+) {
+  const value =
+    liveSection(
+      team,
+      section
+    )?.[field];
+
+  if (!hasValue(value)) {
+    return null;
+  }
+
+  return Number(value);
+}
+
+
+function livePlays(
+  team,
+  section
+) {
+  const value =
+    liveSection(
+      team,
+      section
+    )?.n_plays;
+
+  if (!hasValue(value)) {
+    return 0;
+  }
+
+  return Number(value);
+}
+
+
+function liveNet(
+  team,
+  field
+) {
+  const offense =
+    liveValue(
+      team,
+      "offense",
+      field
+    );
+
+  const defense =
+    liveValue(
+      team,
+      "defense",
+      field
+    );
+
+  if (
+    offense === null ||
+    defense === null
+  ) {
+    return null;
+  }
+
+  return offense - defense;
+}
+
+
+function liveSampleLabel(team) {
+  const offense =
+    livePlays(
+      team,
+      "offense"
+    );
+
+  const defense =
+    livePlays(
+      team,
+      "defense"
+    );
+
+  if (
+    offense > 0 &&
+    defense > 0
+  ) {
+    return "2026 live sample available";
+  }
+
+  return "Preseason model only";
 }
 
 
@@ -221,22 +343,31 @@ function getProjectionTeams(game) {
 // ============================================================================
 
 function switchView(viewName) {
-  document.querySelectorAll(".view").forEach((view) => {
-    view.classList.remove("active");
-  });
+  document
+    .querySelectorAll(".view")
+    .forEach((view) => {
+      view.classList.remove("active");
+    });
 
-  const requested = document.getElementById(`view-${viewName}`);
+  const requested =
+    document.getElementById(
+      `view-${viewName}`
+    );
 
   if (requested) {
-    requested.classList.add("active");
+    requested.classList.add(
+      "active"
+    );
   }
 
-  document.querySelectorAll(".nav-item").forEach((button) => {
-    button.classList.toggle(
-      "active",
-      button.dataset.view === viewName
-    );
-  });
+  document
+    .querySelectorAll(".nav-item")
+    .forEach((button) => {
+      button.classList.toggle(
+        "active",
+        button.dataset.view === viewName
+      );
+    });
 
   window.scrollTo({
     top: 0,
@@ -250,10 +381,15 @@ function switchView(viewName) {
 // ============================================================================
 
 async function loadJson(url) {
-  const response = await fetch(`${url}?v=${Date.now()}`);
+  const response =
+    await fetch(
+      `${url}?v=${Date.now()}`
+    );
 
   if (!response.ok) {
-    throw new Error(`${url} returned HTTP ${response.status}`);
+    throw new Error(
+      `${url} returned HTTP ${response.status}`
+    );
   }
 
   return response.json();
@@ -274,8 +410,11 @@ async function init() {
       loadJson(DATA_URLS.projections),
     ]);
 
-    teams = metricsData?.teams ?? {};
-    projections = projectionsData?.games ?? [];
+    teams =
+      metricsData?.teams ?? {};
+
+    projections =
+      projectionsData?.games ?? [];
 
     updateHeader();
 
@@ -288,17 +427,28 @@ async function init() {
     attachEvents();
 
   } catch (error) {
-    console.error("Frontend initialization failed:", error);
-
-    const container = document.getElementById(
-      "projections-container"
+    console.error(
+      "Frontend initialization failed:",
+      error
     );
+
+    const container =
+      document.getElementById(
+        "projections-container"
+      );
 
     if (container) {
       container.innerHTML = `
         <div class="empty-state">
-          Unable to load analytics data.<br><br>
-          <span style="font-family:var(--mono);font-size:11px;">
+          Unable to load analytics data.
+          <br><br>
+
+          <span
+            style="
+              font-family:var(--mono);
+              font-size:11px;
+            "
+          >
             ${escapeHtml(error.message)}
           </span>
         </div>
@@ -313,7 +463,10 @@ async function init() {
 // ============================================================================
 
 function updateHeader() {
-  const header = document.getElementById("data-updated");
+  const header =
+    document.getElementById(
+      "data-updated"
+    );
 
   if (!header) {
     return;
@@ -324,21 +477,34 @@ function updateHeader() {
     metricsData?.meta?.generated;
 
   if (!generated) {
-    header.textContent = "2026 model";
+    header.textContent =
+      "2026 model";
+
     return;
   }
 
-  const date = new Date(generated);
+  const date =
+    new Date(generated);
 
-  if (Number.isNaN(date.getTime())) {
-    header.textContent = "2026 model";
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    header.textContent =
+      "2026 model";
+
     return;
   }
 
-  header.textContent = `Updated ${date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  })}`;
+  header.textContent =
+    `Updated ${date.toLocaleDateString(
+      "en-US",
+      {
+        month: "short",
+        day: "numeric",
+      }
+    )}`;
 }
 
 
@@ -347,54 +513,96 @@ function updateHeader() {
 // ============================================================================
 
 function availableWeeks() {
-  const weeks = projections
-    .map((game) => game.week)
-    .filter((week) => week !== null && week !== undefined)
-    .map(Number)
-    .filter((week) => !Number.isNaN(week));
+  const weeks =
+    projections
+      .map(
+        (game) =>
+          game.week
+      )
+      .filter(
+        (week) =>
+          week !== null &&
+          week !== undefined
+      )
+      .map(Number)
+      .filter(
+        (week) =>
+          !Number.isNaN(week)
+      );
 
-  return [...new Set(weeks)].sort((a, b) => a - b);
+  return [
+    ...new Set(weeks),
+  ].sort(
+    (a, b) => a - b
+  );
 }
 
 
-function determineDefaultWeek(weeks) {
+function determineDefaultWeek(
+  weeks
+) {
   if (!weeks.length) {
     return null;
   }
 
-  const gamesWithMarket = projections.filter((game) => {
-    return (
-      game?.market?.home_spread !== null &&
-      game?.market?.home_spread !== undefined
+  const marketWeeks =
+    projections
+      .filter(
+        (game) =>
+          hasValue(
+            game?.market
+              ?.home_spread
+          )
+      )
+      .map(
+        (game) =>
+          Number(game.week)
+      )
+      .filter(
+        (week) =>
+          !Number.isNaN(week)
+      );
+
+  if (marketWeeks.length) {
+    return Math.min(
+      ...marketWeeks
     );
-  });
-
-  if (gamesWithMarket.length) {
-    const marketWeeks = gamesWithMarket
-      .map((game) => Number(game.week))
-      .filter((week) => !Number.isNaN(week));
-
-    if (marketWeeks.length) {
-      return Math.min(...marketWeeks);
-    }
   }
 
-  const upcoming = projections
-    .filter((game) => {
-      if (!game.start_date) {
-        return false;
-      }
+  const upcoming =
+    projections
+      .filter((game) => {
+        if (!game.start_date) {
+          return false;
+        }
 
-      return new Date(game.start_date).getTime() >= Date.now();
-    })
-    .sort(
-      (a, b) =>
-        new Date(a.start_date).getTime() -
-        new Date(b.start_date).getTime()
+        return (
+          new Date(
+            game.start_date
+          ).getTime()
+          >=
+          Date.now()
+        );
+      })
+      .sort(
+        (a, b) =>
+          new Date(
+            a.start_date
+          ).getTime()
+          -
+          new Date(
+            b.start_date
+          ).getTime()
+      );
+
+  if (
+    upcoming.length &&
+    upcoming[0].week
+      !== null
+  ) {
+    return Number(
+      upcoming[0].week
     );
-
-  if (upcoming.length && upcoming[0].week !== null) {
-    return Number(upcoming[0].week);
   }
 
   return weeks[0];
@@ -402,42 +610,65 @@ function determineDefaultWeek(weeks) {
 
 
 function buildWeekTabs() {
-  const container = document.getElementById("week-tabs");
+  const container =
+    document.getElementById(
+      "week-tabs"
+    );
 
   if (!container) {
     return;
   }
 
-  const weeks = availableWeeks();
+  const weeks =
+    availableWeeks();
 
   if (!weeks.length) {
     container.innerHTML = "";
     return;
   }
 
-  if (currentWeek === null) {
-    currentWeek = determineDefaultWeek(weeks);
+  if (
+    currentWeek === null
+  ) {
+    currentWeek =
+      determineDefaultWeek(
+        weeks
+      );
   }
 
-  container.innerHTML = weeks
-    .map((week) => {
-      const active = Number(week) === Number(currentWeek);
+  container.innerHTML =
+    weeks
+      .map((week) => {
+        const active =
+          Number(week)
+          ===
+          Number(currentWeek);
 
-      return `
-        <button
-          class="week-tab ${active ? "active" : ""}"
-          onclick="selectWeek(${week})"
-        >
-          ${week === 0 ? "Week 0" : `Week ${week}`}
-        </button>
-      `;
-    })
-    .join("");
+        return `
+          <button
+            class="
+              week-tab
+              ${active ? "active" : ""}
+            "
+            onclick="
+              selectWeek(${week})
+            "
+          >
+            ${
+              week === 0
+                ? "Week 0"
+                : `Week ${week}`
+            }
+          </button>
+        `;
+      })
+      .join("");
 }
 
 
 function selectWeek(week) {
-  currentWeek = Number(week);
+  currentWeek =
+    Number(week);
 
   buildWeekTabs();
   renderProjections();
@@ -453,7 +684,9 @@ function projectionGamesForCurrentView() {
     .filter((game) => {
       if (
         currentWeek !== null &&
-        Number(game.week) !== Number(currentWeek)
+        Number(game.week)
+        !==
+        Number(currentWeek)
       ) {
         return false;
       }
@@ -462,82 +695,103 @@ function projectionGamesForCurrentView() {
         return true;
       }
 
-      const query = currentSearch.toLowerCase();
+      const query =
+        currentSearch.toLowerCase();
 
       const home =
-        game?.home?.team?.toLowerCase() ?? "";
+        game?.home?.team
+          ?.toLowerCase()
+        ?? "";
 
       const away =
-        game?.away?.team?.toLowerCase() ?? "";
+        game?.away?.team
+          ?.toLowerCase()
+        ?? "";
 
       return (
-        home.includes(query) ||
+        home.includes(query)
+        ||
         away.includes(query)
       );
     })
     .sort((a, b) => {
       const aDisagreement =
-        a?.comparison?.disagreement ?? -1;
+        a?.comparison
+          ?.disagreement
+        ?? -1;
 
       const bDisagreement =
-        b?.comparison?.disagreement ?? -1;
+        b?.comparison
+          ?.disagreement
+        ?? -1;
 
-      if (bDisagreement !== aDisagreement) {
-        return bDisagreement - aDisagreement;
+      if (
+        bDisagreement
+        !==
+        aDisagreement
+      ) {
+        return (
+          bDisagreement
+          -
+          aDisagreement
+        );
       }
 
       return (
-        new Date(a.start_date || 0).getTime() -
-        new Date(b.start_date || 0).getTime()
+        new Date(
+          a.start_date || 0
+        ).getTime()
+        -
+        new Date(
+          b.start_date || 0
+        ).getTime()
       );
     });
 }
 
 
 function renderProjections() {
-  const container = document.getElementById(
-    "projections-container"
-  );
+  const container =
+    document.getElementById(
+      "projections-container"
+    );
 
-  const summary = document.getElementById(
-    "projection-summary"
-  );
+  const summary =
+    document.getElementById(
+      "projection-summary"
+    );
 
   if (!container) {
     return;
   }
 
-  if (!projections.length) {
-    container.innerHTML = `
-      <div class="empty-state">
-        No projections are currently available.
-      </div>
-    `;
+  const games =
+    projectionGamesForCurrentView();
 
-    if (summary) {
-      summary.textContent = "0 games";
-    }
+  const marketGames =
+    games.filter(
+      (game) =>
+        hasValue(
+          game?.market
+            ?.home_spread
+        )
+    );
 
-    return;
-  }
+  const plays =
+    games.filter(
+      (game) =>
+        game?.comparison
+          ?.status
+        === "PLAY"
+    );
 
-  const games = projectionGamesForCurrentView();
-
-  const marketGames = games.filter(
-    (game) =>
-      game?.market?.home_spread !== null &&
-      game?.market?.home_spread !== undefined
-  );
-
-  const plays = games.filter(
-    (game) =>
-      game?.comparison?.status === "PLAY"
-  );
-
-  const watches = games.filter(
-    (game) =>
-      game?.comparison?.status === "WATCH"
-  );
+  const watches =
+    games.filter(
+      (game) =>
+        game?.comparison
+          ?.status
+        === "WATCH"
+    );
 
   if (summary) {
     summary.innerHTML = `
@@ -554,78 +808,109 @@ function renderProjections() {
         No games match this week/search.
       </div>
     `;
+
     return;
   }
 
-  const rows = games.map(renderProjectionRow).join("");
-
   container.innerHTML = `
     <table class="projection-table">
+
       <thead>
         <tr>
           <th>Matchup</th>
           <th>Our Line</th>
           <th>Market</th>
           <th>Total</th>
-          <th class="align-right">Disagreement</th>
-          <th class="align-right">Status</th>
+
+          <th class="align-right">
+            Disagreement
+          </th>
+
+          <th class="align-right">
+            Status
+          </th>
         </tr>
       </thead>
 
       <tbody>
-        ${rows}
+        ${
+          games
+            .map(
+              renderProjectionRow
+            )
+            .join("")
+        }
       </tbody>
+
     </table>
   `;
 }
 
 
 function renderProjectionRow(game) {
-  const homeName = game?.home?.team ?? "Unknown";
-  const awayName = game?.away?.team ?? "Unknown";
+  const homeName =
+    game?.home?.team
+    ?? "Unknown";
+
+  const awayName =
+    game?.away?.team
+    ?? "Unknown";
 
   const homeRank =
-    game?.home?.power_rating_rank;
+    game?.home
+      ?.power_rating_rank;
 
   const awayRank =
-    game?.away?.power_rating_rank;
+    game?.away
+      ?.power_rating_rank;
 
   const modelSpread =
-    game?.projection?.home_spread;
+    game?.projection
+      ?.home_spread;
 
   const modelTotal =
-    game?.projection?.total;
+    game?.projection
+      ?.total;
 
   const marketSpread =
-    game?.market?.home_spread;
+    game?.market
+      ?.home_spread;
 
   const marketTotal =
-    game?.market?.total;
+    game?.market
+      ?.total;
 
   const bookmaker =
-    game?.market?.bookmaker;
+    game?.market
+      ?.bookmaker;
 
   const disagreement =
-    game?.comparison?.disagreement;
+    game?.comparison
+      ?.disagreement;
 
   const preferred =
-    game?.comparison?.preferred_side;
+    game?.comparison
+      ?.preferred_side;
 
   const status =
-    game?.comparison?.status;
+    game?.comparison
+      ?.status;
 
   const cssStatus =
     statusClass(status);
 
-  let disagreementNote = "No market line";
+  let disagreementNote =
+    "No market line";
 
   if (
-    disagreement !== null &&
-    disagreement !== undefined
+    hasValue(
+      disagreement
+    )
   ) {
-    disagreementNote = preferred
-      ? `Model favors ${preferred}`
-      : "Model agrees with market";
+    disagreementNote =
+      preferred
+        ? `Model favors ${preferred}`
+        : "Model agrees with market";
   }
 
   return `
@@ -635,119 +920,196 @@ function renderProjectionRow(game) {
 
         <div
           class="team-line"
-          onclick="openDossier('${escapeJsString(awayName)}')"
+          onclick="
+            openDossier(
+              '${escapeJsString(awayName)}'
+            )
+          "
         >
           <span class="team-name">
             ${escapeHtml(awayName)}
           </span>
 
           <span class="team-meta">
-            ${awayRank ? `#${awayRank}` : ""}
+            ${
+              awayRank
+                ? `#${awayRank}`
+                : ""
+            }
           </span>
         </div>
 
+
         <div class="team-line">
-          <span class="at-symbol">@</span>
+
+          <span class="at-symbol">
+            @
+          </span>
 
           <span
             class="team-name"
-            onclick="openDossier('${escapeJsString(homeName)}')"
+            onclick="
+              openDossier(
+                '${escapeJsString(homeName)}'
+              )
+            "
           >
             ${escapeHtml(homeName)}
           </span>
 
           <span class="team-meta">
-            ${homeRank ? `#${homeRank}` : ""}
+            ${
+              homeRank
+                ? `#${homeRank}`
+                : ""
+            }
           </span>
+
         </div>
+
 
         <div
           class="team-meta"
           style="margin-top:5px;"
         >
-          ${escapeHtml(gameDateText(game.start_date))}
+          ${
+            escapeHtml(
+              gameDateText(
+                game.start_date
+              )
+            )
+          }
         </div>
 
       </td>
 
 
       <td>
+
         <div class="line-primary">
-          ${escapeHtml(shortSpread(modelSpread))}
+          ${
+            escapeHtml(
+              shortSpread(
+                modelSpread
+              )
+            )
+          }
         </div>
 
         <div class="line-secondary">
-          ${escapeHtml(homeName)} home line
+          ${escapeHtml(homeName)}
+          home line
         </div>
+
       </td>
 
 
       <td>
+
         <div class="line-primary">
-          ${escapeHtml(shortSpread(marketSpread))}
+          ${
+            escapeHtml(
+              shortSpread(
+                marketSpread
+              )
+            )
+          }
         </div>
 
         <div class="line-secondary">
           ${
             bookmaker
-              ? escapeHtml(bookmaker)
+              ? escapeHtml(
+                  bookmaker
+                )
               : "No current market"
           }
         </div>
+
       </td>
 
 
       <td>
+
         <div class="line-primary">
-          ${formatNumber(modelTotal, 1)}
+          ${
+            formatNumber(
+              modelTotal,
+              1
+            )
+          }
         </div>
 
         <div class="line-secondary">
           ${
-            marketTotal !== null &&
-            marketTotal !== undefined
-              ? `Market ${formatNumber(marketTotal, 1)}`
+            hasValue(
+              marketTotal
+            )
+              ? `Market ${formatNumber(
+                  marketTotal,
+                  1
+                )}`
               : "Model total"
           }
         </div>
+
       </td>
 
 
       <td class="disagreement">
 
         <div
-          class="disagreement-number ${cssStatus}"
+          class="
+            disagreement-number
+            ${cssStatus}
+          "
         >
           ${
-            disagreement !== null &&
-            disagreement !== undefined
-              ? `${formatNumber(disagreement, 1)} pts`
+            hasValue(
+              disagreement
+            )
+              ? `${formatNumber(
+                  disagreement,
+                  1
+                )} pts`
               : "—"
           }
         </div>
 
-        <div class="disagreement-note">
-          ${escapeHtml(disagreementNote)}
+        <div
+          class="disagreement-note"
+        >
+          ${
+            escapeHtml(
+              disagreementNote
+            )
+          }
         </div>
 
       </td>
 
 
       <td class="status-cell">
-        <span class="status ${cssStatus}">
-          ${escapeHtml(displayStatus(status))}
+
+        <span
+          class="
+            status
+            ${cssStatus}
+          "
+        >
+          ${
+            escapeHtml(
+              displayStatus(
+                status
+              )
+            )
+          }
         </span>
+
       </td>
 
     </tr>
   `;
-}
-
-
-function escapeJsString(value) {
-  return String(value ?? "")
-    .replaceAll("\\", "\\\\")
-    .replaceAll("'", "\\'");
 }
 
 
@@ -756,28 +1118,35 @@ function escapeJsString(value) {
 // ============================================================================
 
 function sortedTeams() {
-  return Object.values(teams).sort((a, b) => {
-    const ar =
-      a.power_rating_rank ?? 999;
-
-    const br =
-      b.power_rating_rank ?? 999;
-
-    return ar - br;
-  });
+  return Object
+    .values(teams)
+    .sort(
+      (a, b) =>
+        (
+          a.power_rating_rank
+          ?? 999
+        )
+        -
+        (
+          b.power_rating_rank
+          ?? 999
+        )
+    );
 }
 
 
 function renderTeams() {
-  const container = document.getElementById(
-    "teams-container"
-  );
+  const container =
+    document.getElementById(
+      "teams-container"
+    );
 
   if (!container) {
     return;
   }
 
-  const data = sortedTeams();
+  const data =
+    sortedTeams();
 
   if (!data.length) {
     container.innerHTML = `
@@ -785,6 +1154,7 @@ function renderTeams() {
         No team data available.
       </div>
     `;
+
     return;
   }
 
@@ -804,42 +1174,71 @@ function renderTeams() {
           </tr>
         </thead>
 
+
         <tbody>
 
-          ${data
-            .map(
-              (team) => `
-              <tr
-                style="cursor:pointer;"
-                onclick="openDossier('${escapeJsString(team.team)}')"
-              >
-                <td class="team-meta">
-                  ${powerRank(team)}
-                </td>
+          ${
+            data
+              .map(
+                (team) => `
+                <tr
+                  style="
+                    cursor:pointer;
+                  "
+                  onclick="
+                    openDossier(
+                      '${escapeJsString(team.team)}'
+                    )
+                  "
+                >
 
-                <td>
-                  <strong>${escapeHtml(team.team)}</strong>
-                </td>
+                  <td class="team-meta">
+                    ${powerRank(team)}
+                  </td>
 
-                <td class="team-meta">
-                  ${escapeHtml(team.conference ?? "—")}
-                </td>
+                  <td>
+                    <strong>
+                      ${escapeHtml(team.team)}
+                    </strong>
+                  </td>
 
-                <td class="team-meta">
-                  ${recordText(team)}
-                </td>
+                  <td class="team-meta">
+                    ${
+                      escapeHtml(
+                        team.conference
+                        ?? "—"
+                      )
+                    }
+                  </td>
 
-                <td class="line-primary">
-                  ${formatSigned(team.power_rating, 3)}
-                </td>
+                  <td class="team-meta">
+                    ${recordText(team)}
+                  </td>
 
-                <td class="team-meta">
-                  ${formatSigned(team?.sp_plus?.overall, 1)}
-                </td>
-              </tr>
-            `
-            )
-            .join("")}
+                  <td class="line-primary">
+                    ${
+                      formatSigned(
+                        team.power_rating,
+                        3
+                      )
+                    }
+                  </td>
+
+                  <td class="team-meta">
+                    ${
+                      formatSigned(
+                        team?.sp_plus
+                          ?.overall,
+                        1
+                      )
+                    }
+                  </td>
+
+                </tr>
+              `
+              )
+              .join("")
+          }
 
         </tbody>
 
@@ -855,15 +1254,17 @@ function renderTeams() {
 // ============================================================================
 
 function renderRatings() {
-  const container = document.getElementById(
-    "ratings-container"
-  );
+  const container =
+    document.getElementById(
+      "ratings-container"
+    );
 
   if (!container) {
     return;
   }
 
-  const data = sortedTeams();
+  const data =
+    sortedTeams();
 
   container.innerHTML = `
     <div class="table-scroll">
@@ -883,57 +1284,107 @@ function renderRatings() {
           </tr>
         </thead>
 
+
         <tbody>
 
-          ${data
-            .map(
-              (team) => `
-              <tr
-                style="cursor:pointer;"
-                onclick="openDossier('${escapeJsString(team.team)}')"
-              >
-                <td class="team-meta">
-                  ${powerRank(team)}
-                </td>
+          ${
+            data
+              .map(
+                (team) => `
+                <tr
+                  style="
+                    cursor:pointer;
+                  "
+                  onclick="
+                    openDossier(
+                      '${escapeJsString(team.team)}'
+                    )
+                  "
+                >
 
-                <td>
-                  <strong>${escapeHtml(team.team)}</strong>
+                  <td class="team-meta">
+                    ${powerRank(team)}
+                  </td>
 
-                  <span
-                    class="team-meta"
-                    style="margin-left:7px;"
-                  >
-                    ${escapeHtml(team.conference ?? "")}
-                  </span>
-                </td>
+                  <td>
+                    <strong>
+                      ${escapeHtml(team.team)}
+                    </strong>
 
-                <td class="line-primary">
-                  ${formatSigned(team.power_rating, 3)}
-                </td>
+                    <span
+                      class="team-meta"
+                      style="
+                        margin-left:7px;
+                      "
+                    >
+                      ${
+                        escapeHtml(
+                          team.conference
+                          ?? ""
+                        )
+                      }
+                    </span>
+                  </td>
 
-                <td class="team-meta">
-                  ${formatSigned(team?.sp_plus?.overall, 1)}
-                </td>
+                  <td class="line-primary">
+                    ${
+                      formatSigned(
+                        team.power_rating,
+                        3
+                      )
+                    }
+                  </td>
 
-                <td class="team-meta">
-                  ${formatEPA(team?.net?.epa)}
-                </td>
+                  <td class="team-meta">
+                    ${
+                      formatSigned(
+                        team?.sp_plus
+                          ?.overall,
+                        1
+                      )
+                    }
+                  </td>
 
-                <td class="team-meta">
-                  ${formatEPA(team?.offense?.epa_play)}
-                </td>
+                  <td class="team-meta">
+                    ${
+                      formatEPA(
+                        team?.net?.epa
+                      )
+                    }
+                  </td>
 
-                <td class="team-meta">
-                  ${formatEPA(team?.defense?.epa_play)}
-                </td>
+                  <td class="team-meta">
+                    ${
+                      formatEPA(
+                        team?.offense
+                          ?.epa_play
+                      )
+                    }
+                  </td>
 
-                <td class="team-meta">
-                  ${formatPercent(team?.defense?.havoc_created)}
-                </td>
-              </tr>
-            `
-            )
-            .join("")}
+                  <td class="team-meta">
+                    ${
+                      formatEPA(
+                        team?.defense
+                          ?.epa_play
+                      )
+                    }
+                  </td>
+
+                  <td class="team-meta">
+                    ${
+                      formatRate(
+                        team?.defense
+                          ?.havoc_created
+                      )
+                    }
+                  </td>
+
+                </tr>
+              `
+              )
+              .join("")
+          }
 
         </tbody>
 
@@ -948,8 +1399,11 @@ function renderRatings() {
 // TEAM DOSSIER
 // ============================================================================
 
-function openDossier(teamName) {
-  const team = getTeam(teamName);
+function openDossier(
+  teamName
+) {
+  const team =
+    getTeam(teamName);
 
   if (!team) {
     return;
@@ -957,34 +1411,44 @@ function openDossier(teamName) {
 
   renderDossier(team);
 
-  switchView("dossier");
+  switchView(
+    "dossier"
+  );
 }
 
 
-function teamSchedule(teamName) {
+function teamSchedule(
+  teamName
+) {
   return projections
     .filter((game) => {
       return (
-        game?.home?.team === teamName ||
-        game?.away?.team === teamName
+        game?.home?.team
+          === teamName
+        ||
+        game?.away?.team
+          === teamName
       );
     })
-    .sort((a, b) => {
-      const aw =
-        a.week ?? 99;
-
-      const bw =
-        b.week ?? 99;
-
-      return aw - bw;
-    });
+    .sort(
+      (a, b) =>
+        (
+          a.week
+          ?? 99
+        )
+        -
+        (
+          b.week
+          ?? 99
+        )
+    );
 }
 
 
 function renderMetricRow(
   name,
   value,
-  rank
+  rank = "—"
 ) {
   return `
     <div class="metric-row">
@@ -1007,98 +1471,213 @@ function renderMetricRow(
 
 
 function renderDossier(team) {
-  const container = document.getElementById(
-    "dossier-container"
-  );
+  const container =
+    document.getElementById(
+      "dossier-container"
+    );
 
   if (!container) {
     return;
   }
 
-  const games = teamSchedule(team.team);
 
-  const upcomingGames = games.filter((game) => {
-    if (!game.start_date) {
-      return true;
-    }
+  // --------------------------------------------------------------------------
+  // SCHEDULE
+  // --------------------------------------------------------------------------
 
-    return (
-      new Date(game.start_date).getTime() >=
-      Date.now() - 86400000
+  const games =
+    teamSchedule(
+      team.team
     );
-  });
 
-  const scheduleRows = upcomingGames
-    .slice(0, 12)
-    .map((game) => {
-      const home =
-        game.home.team;
 
-      const away =
-        game.away.team;
-
-      const opponent =
-        home === team.team
-          ? away
-          : home;
-
-      const location =
-        home === team.team
-          ? "vs"
-          : "@";
-
-      const modelSpread =
-        game?.projection?.home_spread;
-
-      let teamSpread = null;
-
-      if (
-        modelSpread !== null &&
-        modelSpread !== undefined
-      ) {
-        teamSpread =
-          home === team.team
-            ? modelSpread
-            : -modelSpread;
+  const upcomingGames =
+    games.filter((game) => {
+      if (!game.start_date) {
+        return true;
       }
 
-      return `
-        <div class="metric-row">
+      return (
+        new Date(
+          game.start_date
+        ).getTime()
+        >=
+        Date.now()
+        -
+        86400000
+      );
+    });
 
-          <div>
-            <div
-              style="font-weight:600;font-size:12px;"
-            >
-              Week ${game.week ?? "—"}
-              · ${location}
-              ${escapeHtml(opponent)}
+
+  const scheduleRows =
+    upcomingGames
+      .slice(0, 12)
+      .map((game) => {
+
+        const home =
+          game.home.team;
+
+        const away =
+          game.away.team;
+
+        const opponent =
+          home === team.team
+            ? away
+            : home;
+
+        const location =
+          home === team.team
+            ? "vs"
+            : "@";
+
+        const modelSpread =
+          game?.projection
+            ?.home_spread;
+
+        let teamSpread =
+          null;
+
+        if (
+          hasValue(
+            modelSpread
+          )
+        ) {
+          teamSpread =
+            home === team.team
+              ? Number(
+                  modelSpread
+                )
+              : -Number(
+                  modelSpread
+                );
+        }
+
+
+        return `
+          <div class="metric-row">
+
+            <div>
+
+              <div
+                style="
+                  font-weight:600;
+                  font-size:12px;
+                "
+              >
+                Week ${
+                  game.week
+                  ?? "—"
+                }
+                · ${location}
+                ${escapeHtml(opponent)}
+              </div>
+
+
+              <div
+                class="team-meta"
+                style="
+                  margin-top:4px;
+                "
+              >
+                ${
+                  escapeHtml(
+                    gameDateText(
+                      game.start_date
+                    )
+                  )
+                }
+              </div>
+
             </div>
 
-            <div
-              class="team-meta"
-              style="margin-top:4px;"
-            >
-              ${escapeHtml(gameDateText(game.start_date))}
+
+            <div class="metric-value">
+              ${
+                shortSpread(
+                  teamSpread
+                )
+              }
             </div>
-          </div>
 
-          <div class="metric-value">
-            ${shortSpread(teamSpread)}
-          </div>
 
-          <div class="metric-rank">
-            ${
-              game?.comparison?.status &&
-              game?.comparison?.status !== "NO MARKET"
-                ? escapeHtml(game.comparison.status)
-                : ""
-            }
-          </div>
+            <div class="metric-rank">
 
-        </div>
-      `;
-    })
-    .join("");
+              ${
+                game?.comparison
+                  ?.status
+                &&
+                game?.comparison
+                  ?.status
+                !==
+                "NO MARKET"
+
+                  ? escapeHtml(
+                      game
+                        .comparison
+                        .status
+                    )
+
+                  : ""
+              }
+
+            </div>
+
+          </div>
+        `;
+      })
+      .join("");
+
+
+  // --------------------------------------------------------------------------
+  // MODEL + LIVE DATA
+  // --------------------------------------------------------------------------
+
+  const offLive =
+    liveSection(
+      team,
+      "offense"
+    );
+
+  const defLive =
+    liveSection(
+      team,
+      "defense"
+    );
+
+
+  const offModelEPA =
+    team?.offense
+      ?.epa_play;
+
+  const offModelSR =
+    team?.offense
+      ?.success_rate;
+
+  const defModelEPA =
+    team?.defense
+      ?.epa_play;
+
+  const defModelSR =
+    team?.defense
+      ?.success_rate;
+
+
+  const offenseLivePlays =
+    livePlays(
+      team,
+      "offense"
+    );
+
+  const defenseLivePlays =
+    livePlays(
+      team,
+      "defense"
+    );
+
+
+  // --------------------------------------------------------------------------
+  // DOSSIER
+  // --------------------------------------------------------------------------
 
   container.innerHTML = `
 
@@ -1110,6 +1689,7 @@ function renderDossier(team) {
           Team dossier
         </div>
 
+
         <div class="team-title-row">
 
           <div class="team-title">
@@ -1118,10 +1698,26 @@ function renderDossier(team) {
 
         </div>
 
+
         <div class="team-dossier-sub">
-          ${escapeHtml(team.conference ?? "Independent")}
+
+          ${
+            escapeHtml(
+              team.conference
+              ?? "Independent"
+            )
+          }
+
           · ${recordText(team)}
-          · 2026 model profile
+
+          · ${
+            escapeHtml(
+              liveSampleLabel(
+                team
+              )
+            )
+          }
+
         </div>
 
       </div>
@@ -1142,53 +1738,90 @@ function renderDossier(team) {
     </div>
 
 
+    <!-- ============================================================
+         TOP STATS
+    ============================================================= -->
+
     <div class="dossier-stat-grid">
 
+
       <div class="dossier-stat">
+
         <div class="dossier-label">
           Power Rating
         </div>
 
         <div class="dossier-value">
-          ${formatSigned(team.power_rating, 3)}
+          ${
+            formatSigned(
+              team.power_rating,
+              3
+            )
+          }
         </div>
+
       </div>
 
 
       <div class="dossier-stat">
+
         <div class="dossier-label">
           SP+ Overall
         </div>
 
         <div class="dossier-value">
-          ${formatSigned(team?.sp_plus?.overall, 1)}
+          ${
+            formatSigned(
+              team?.sp_plus
+                ?.overall,
+              1
+            )
+          }
         </div>
+
       </div>
 
 
       <div class="dossier-stat">
+
         <div class="dossier-label">
           SP+ Offense
         </div>
 
         <div class="dossier-value">
-          ${formatSigned(team?.sp_plus?.offense, 1)}
+          ${
+            formatSigned(
+              team?.sp_plus
+                ?.offense,
+              1
+            )
+          }
         </div>
+
       </div>
 
 
       <div class="dossier-stat">
+
         <div class="dossier-label">
           SP+ Defense
         </div>
 
         <div class="dossier-value">
-          ${formatSigned(team?.sp_plus?.defense, 1)}
+          ${
+            formatSigned(
+              team?.sp_plus
+                ?.defense,
+              1
+            )
+          }
         </div>
+
       </div>
 
 
       <div class="dossier-stat">
+
         <div class="dossier-label">
           Record
         </div>
@@ -1196,6 +1829,7 @@ function renderDossier(team) {
         <div class="dossier-value">
           ${recordText(team)}
         </div>
+
       </div>
 
     </div>
@@ -1204,200 +1838,502 @@ function renderDossier(team) {
     <div class="dossier-layout">
 
 
+      <!-- ==========================================================
+           OFFENSE
+      =========================================================== -->
+
       <div class="panel">
 
         <div class="panel-header">
+
           <div class="panel-title">
             Offensive Profile
           </div>
+
         </div>
+
 
         <div class="panel-body">
 
-          ${renderMetricRow(
-            "EPA / Play",
-            formatEPA(team?.offense?.epa_play),
-            metricRank(team, "offense", "epa_play_rank")
-          )}
 
-          ${renderMetricRow(
-            "EPA / Pass",
-            formatEPA(team?.offense?.epa_pass),
-            metricRank(team, "offense", "epa_pass_rank")
-          )}
+          ${
+            renderMetricRow(
+              "Model EPA / Play",
 
-          ${renderMetricRow(
-            "EPA / Rush",
-            formatEPA(team?.offense?.epa_rush),
-            metricRank(team, "offense", "epa_rush_rank")
-          )}
+              formatEPA(
+                offModelEPA
+              ),
 
-          ${renderMetricRow(
-            "Success Rate",
-            formatPercent(team?.offense?.success_rate),
-            metricRank(team, "offense", "sr_rank")
-          )}
+              metricRank(
+                team,
+                "offense",
+                "epa_play_rank",
+                offModelEPA
+              )
+            )
+          }
 
-          ${renderMetricRow(
-            "Explosive Rate",
-            formatPercent(team?.offense?.explosive_rate),
-            metricRank(team, "offense", "expl_rank")
-          )}
 
-          ${renderMetricRow(
-            "Havoc Allowed",
-            formatPercent(team?.offense?.havoc_allowed),
-            metricRank(team, "offense", "havoc_rank")
-          )}
+          ${
+            renderMetricRow(
+              "Model Success Rate",
+
+              formatRate(
+                offModelSR
+              ),
+
+              metricRank(
+                team,
+                "offense",
+                "sr_rank",
+                offModelSR
+              )
+            )
+          }
+
+
+          ${
+            renderMetricRow(
+              "2026 EPA / Pass",
+
+              formatEPA(
+                offLive
+                  ?.epa_pass
+              ),
+
+              ""
+            )
+          }
+
+
+          ${
+            renderMetricRow(
+              "2026 EPA / Rush",
+
+              formatEPA(
+                offLive
+                  ?.epa_rush
+              ),
+
+              ""
+            )
+          }
+
+
+          ${
+            renderMetricRow(
+              "2026 Success Rate",
+
+              formatRate(
+                offLive
+                  ?.success_rate
+              ),
+
+              ""
+            )
+          }
+
+
+          ${
+            renderMetricRow(
+              "2026 Explosive Rate",
+
+              formatRate(
+                offLive
+                  ?.explosive_rate
+              ),
+
+              ""
+            )
+          }
+
+
+          ${
+            renderMetricRow(
+              "2026 Havoc Allowed",
+
+              formatRate(
+                offLive
+                  ?.havoc_rate
+              ),
+
+              ""
+            )
+          }
+
 
         </div>
 
       </div>
 
 
+      <!-- ==========================================================
+           DEFENSE
+      =========================================================== -->
+
       <div class="panel">
 
         <div class="panel-header">
+
           <div class="panel-title">
             Defensive Profile
           </div>
+
         </div>
+
 
         <div class="panel-body">
 
-          ${renderMetricRow(
-            "EPA / Play",
-            formatEPA(team?.defense?.epa_play),
-            metricRank(team, "defense", "epa_play_rank")
-          )}
 
-          ${renderMetricRow(
-            "EPA / Pass",
-            formatEPA(team?.defense?.epa_pass),
-            metricRank(team, "defense", "epa_pass_rank")
-          )}
+          ${
+            renderMetricRow(
+              "Model EPA / Play",
 
-          ${renderMetricRow(
-            "EPA / Rush",
-            formatEPA(team?.defense?.epa_rush),
-            metricRank(team, "defense", "epa_rush_rank")
-          )}
+              formatEPA(
+                defModelEPA
+              ),
 
-          ${renderMetricRow(
-            "Success Rate Allowed",
-            formatPercent(team?.defense?.success_rate),
-            metricRank(team, "defense", "sr_rank")
-          )}
+              metricRank(
+                team,
+                "defense",
+                "epa_play_rank",
+                defModelEPA
+              )
+            )
+          }
 
-          ${renderMetricRow(
-            "Explosive Rate Allowed",
-            formatPercent(team?.defense?.explosive_rate),
-            metricRank(team, "defense", "expl_rank")
-          )}
 
-          ${renderMetricRow(
-            "Havoc Created",
-            formatPercent(team?.defense?.havoc_created),
-            metricRank(team, "defense", "havoc_rank")
-          )}
+          ${
+            renderMetricRow(
+              "Model Success Rate Allowed",
+
+              formatRate(
+                defModelSR
+              ),
+
+              metricRank(
+                team,
+                "defense",
+                "sr_rank",
+                defModelSR
+              )
+            )
+          }
+
+
+          ${
+            renderMetricRow(
+              "2026 EPA / Pass Allowed",
+
+              formatEPA(
+                defLive
+                  ?.epa_pass
+              ),
+
+              ""
+            )
+          }
+
+
+          ${
+            renderMetricRow(
+              "2026 EPA / Rush Allowed",
+
+              formatEPA(
+                defLive
+                  ?.epa_rush
+              ),
+
+              ""
+            )
+          }
+
+
+          ${
+            renderMetricRow(
+              "2026 Success Rate Allowed",
+
+              formatRate(
+                defLive
+                  ?.success_rate
+              ),
+
+              ""
+            )
+          }
+
+
+          ${
+            renderMetricRow(
+              "2026 Explosive Rate Allowed",
+
+              formatRate(
+                defLive
+                  ?.explosive_rate
+              ),
+
+              ""
+            )
+          }
+
+
+          ${
+            renderMetricRow(
+              "2026 Havoc Created",
+
+              formatRate(
+                defLive
+                  ?.havoc_rate
+              ),
+
+              ""
+            )
+          }
+
 
         </div>
 
       </div>
 
 
+      <!-- ==========================================================
+           NET
+      =========================================================== -->
+
       <div class="panel">
 
         <div class="panel-header">
+
           <div class="panel-title">
             Net Efficiency
           </div>
+
         </div>
+
 
         <div class="panel-body">
 
-          ${renderMetricRow(
-            "Net EPA / Play",
-            formatEPA(team?.net?.epa),
-            team?.net?.epa_rank
-              ? `#${team.net.epa_rank}`
-              : "—"
-          )}
 
-          ${renderMetricRow(
-            "Net EPA / Pass",
-            formatEPA(team?.net?.epa_pass),
-            "—"
-          )}
+          ${
+            renderMetricRow(
+              "Model Net EPA / Play",
 
-          ${renderMetricRow(
-            "Net EPA / Rush",
-            formatEPA(team?.net?.epa_rush),
-            "—"
-          )}
+              formatEPA(
+                team?.net?.epa
+              ),
 
-          ${renderMetricRow(
-            "Net Success Rate",
-            formatPercent(team?.net?.sr),
-            "—"
-          )}
+              team?.net
+                ?.epa_rank
+
+                ? `#${
+                    team
+                      .net
+                      .epa_rank
+                  }`
+
+                : "—"
+            )
+          }
+
+
+          ${
+            renderMetricRow(
+              "Model Net Success Rate",
+
+              formatPercent(
+                team?.net?.sr
+              ),
+
+              ""
+            )
+          }
+
+
+          ${
+            renderMetricRow(
+              "2026 Net EPA / Pass",
+
+              formatEPA(
+                liveNet(
+                  team,
+                  "epa_pass"
+                )
+              ),
+
+              ""
+            )
+          }
+
+
+          ${
+            renderMetricRow(
+              "2026 Net EPA / Rush",
+
+              formatEPA(
+                liveNet(
+                  team,
+                  "epa_rush"
+                )
+              ),
+
+              ""
+            )
+          }
+
+
+          ${
+            renderMetricRow(
+              "2026 Net Success Rate",
+
+              formatPercent(
+                liveNet(
+                  team,
+                  "success_rate"
+                )
+              ),
+
+              ""
+            )
+          }
+
 
         </div>
 
       </div>
 
+
+      <!-- ==========================================================
+           MODEL CONTEXT
+      =========================================================== -->
 
       <div class="panel">
 
         <div class="panel-header">
+
           <div class="panel-title">
             Model Context
           </div>
+
         </div>
+
 
         <div class="panel-body">
 
-          ${renderMetricRow(
-            "Power Rank",
-            powerRank(team),
-            ""
-          )}
 
-          ${renderMetricRow(
-            "Conference",
-            escapeHtml(team.conference ?? "—"),
-            ""
-          )}
+          ${
+            renderMetricRow(
+              "Power Rank",
 
-          ${renderMetricRow(
-            "Offensive Plays",
-            formatNumber(team?.offense?.n_plays, 0),
-            ""
-          )}
+              powerRank(team),
 
-          ${renderMetricRow(
-            "Defensive Plays",
-            formatNumber(team?.defense?.n_plays, 0),
-            ""
-          )}
+              ""
+            )
+          }
 
-          ${renderMetricRow(
-            "Live Data Weight",
-            metricsData?.meta?.blend_weight !== undefined
-              ? formatPercent(
-                  Number(metricsData.meta.blend_weight) * 100,
-                  0
+
+          ${
+            renderMetricRow(
+              "Conference",
+
+              escapeHtml(
+                team.conference
+                ?? "—"
+              ),
+
+              ""
+            )
+          }
+
+
+          ${
+            renderMetricRow(
+              "2026 Offensive Plays",
+
+              offenseLivePlays > 0
+                ? formatNumber(
+                    offenseLivePlays,
+                    0
+                  )
+                : "—",
+
+              ""
+            )
+          }
+
+
+          ${
+            renderMetricRow(
+              "2026 Defensive Plays",
+
+              defenseLivePlays > 0
+                ? formatNumber(
+                    defenseLivePlays,
+                    0
+                  )
+                : "—",
+
+              ""
+            )
+          }
+
+
+          ${
+            renderMetricRow(
+              "Live Data Weight",
+
+              metricsData?.meta
+                ?.blend_weight
+                !== undefined
+
+                ? formatPercent(
+                    Number(
+                      metricsData
+                        .meta
+                        .blend_weight
+                    )
+                    *
+                    100,
+
+                    0
+                  )
+
+                : "—",
+
+              ""
+            )
+          }
+
+
+          ${
+            renderMetricRow(
+              "Sample Status",
+
+              escapeHtml(
+                liveSampleLabel(
+                  team
                 )
-              : "—",
-            ""
-          )}
+              ),
+
+              ""
+            )
+          }
+
 
         </div>
 
       </div>
 
 
-      <div class="panel schedule-panel">
+      <!-- ==========================================================
+           SCHEDULE
+      =========================================================== -->
+
+      <div
+        class="
+          panel
+          schedule-panel
+        "
+      >
 
         <div class="panel-header">
 
@@ -1411,10 +2347,12 @@ function renderDossier(team) {
 
         </div>
 
+
         <div class="panel-body">
 
           ${
-            scheduleRows ||
+            scheduleRows
+            ||
             `
               <div class="empty-state">
                 No upcoming schedule available.
@@ -1437,17 +2375,23 @@ function renderDossier(team) {
 // ============================================================================
 
 function attachEvents() {
-  const search = document.getElementById(
-    "team-search"
-  );
+  const search =
+    document.getElementById(
+      "team-search"
+    );
 
   if (search) {
-    search.addEventListener("input", (event) => {
-      currentSearch =
-        event.target.value.trim();
+    search.addEventListener(
+      "input",
+      (event) => {
+        currentSearch =
+          event.target
+            .value
+            .trim();
 
-      renderProjections();
-    });
+        renderProjections();
+      }
+    );
   }
 }
 
