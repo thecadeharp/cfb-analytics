@@ -16,6 +16,11 @@ Fixes:
 - Does not publish impossible percentage rates
 - Freezes a baseline so repeated workflow runs do not compound blends
 - Preserves teams that have not played yet
+- Normalizes provider team names before they enter the model
+- Repairs legacy team keys in both the frozen baseline and current team data
+
+IMPORTANT:
+The public/model name for San Jose State is always "San Jose State".
 """
 
 import copy
@@ -50,6 +55,67 @@ WEIGHTS = {
 
 MIN_TEAM_PLAYS = 5
 MIN_SPLIT_PLAYS = 4
+
+
+# =============================================================================
+# TEAM NAME NORMALIZATION
+# =============================================================================
+
+TEAM_NAME_ALIASES = {
+    # Fix the bad/legacy provider spelling that leaked into the model.
+    "Sam José State": "San Jose State",
+    "Sam Jose State": "San Jose State",
+    "San José State": "San Jose State",
+
+    # Keep our preferred public names stable if providers use alternatives.
+    "Appalachian State": "App State",
+    "Connecticut": "UConn",
+    "Louisiana Monroe": "UL Monroe",
+    "Southern Mississippi": "Southern Miss",
+    "UT San Antonio": "UTSA",
+}
+
+
+def normalize_team_name(value):
+    if value is None:
+        return None
+
+    name = str(value).strip()
+    return TEAM_NAME_ALIASES.get(name, name)
+
+
+def normalize_team_dict(source):
+    """
+    Re-key an existing team dictionary using our preferred model/public names.
+
+    This repairs old keys in:
+    - teams
+    - baseline_snapshot
+
+    It also updates the nested "team" field when present.
+    """
+    if not isinstance(source, dict):
+        return {}
+
+    normalized = {}
+
+    for raw_name, raw_data in source.items():
+        name = normalize_team_name(raw_name)
+        data = copy.deepcopy(raw_data)
+
+        if isinstance(data, dict):
+            data["team"] = name
+
+        if name in normalized:
+            print(
+                f"❌ Team normalization collision: "
+                f"{raw_name} -> {name}"
+            )
+            sys.exit(1)
+
+        normalized[name] = data
+
+    return normalized
 
 
 # =============================================================================
@@ -164,7 +230,6 @@ def clean_rate(value):
 
     Anything outside that range is considered invalid legacy data.
     """
-
     value = optional_float(value)
 
     if value is None:
@@ -340,9 +405,8 @@ def validate_cfbd():
 
 def normalize_play(raw):
     """
-    Current CFBD /plays fields are camelCase.
-
-    We normalize them once here so the rest of the script stays simple.
+    Normalize CFBD fields and team names once here so bad provider labels
+    cannot propagate through the model.
     """
 
     return {
@@ -354,27 +418,35 @@ def normalize_play(raw):
             ),
 
         "offense":
-            first_value(
-                raw,
-                "offense"
+            normalize_team_name(
+                first_value(
+                    raw,
+                    "offense"
+                )
             ),
 
         "defense":
-            first_value(
-                raw,
-                "defense"
+            normalize_team_name(
+                first_value(
+                    raw,
+                    "defense"
+                )
             ),
 
         "home":
-            first_value(
-                raw,
-                "home"
+            normalize_team_name(
+                first_value(
+                    raw,
+                    "home"
+                )
             ),
 
         "away":
-            first_value(
-                raw,
-                "away"
+            normalize_team_name(
+                first_value(
+                    raw,
+                    "away"
+                )
             ),
 
         "offense_score":
@@ -877,14 +949,17 @@ def sanitize_baseline_team(team_data):
 
 def get_frozen_baseline(existing):
     """
-    Once this new updater runs once, it stores a frozen baseline.
+    Once this updater has a frozen baseline, reuse that same baseline instead
+    of treating the previous blended output as a new preseason starting point.
 
-    Future reruns use that same baseline instead of treating the previous
-    blended output as a new preseason starting point.
+    Existing baseline keys are normalized here so legacy names cannot survive
+    indefinitely.
     """
 
-    snapshot = existing.get(
-        "baseline_snapshot"
+    snapshot = normalize_team_dict(
+        existing.get(
+            "baseline_snapshot"
+        )
     )
 
     if (
@@ -905,11 +980,15 @@ def get_frozen_baseline(existing):
 
     snapshot = {}
 
-    for team, data in (
+    normalized_existing = normalize_team_dict(
         existing.get(
             "teams",
             {}
-        ).items()
+        )
+    )
+
+    for team, data in (
+        normalized_existing.items()
     ):
         snapshot[team] = (
             sanitize_baseline_team(
@@ -1069,16 +1148,7 @@ def blended_section(
             ),
     }
 
-    # -------------------------------------------------------------------------
-    # EXPLOSIVENESS
-    #
-    # Legacy baseline values were not real percentages.
-    # Therefore we DO NOT blend them.
-    #
-    # Once live plays exist, this is the true live explosive-play percentage.
-    # Otherwise it stays unavailable.
-    # -------------------------------------------------------------------------
-
+    # Legacy baseline explosiveness was not a true percentage, so do not blend.
     if live.get(
         "n_plays",
         0
@@ -1096,9 +1166,6 @@ def blended_section(
             "explosive_rate"
         ] = None
 
-    # Store actual live splits separately.
-    # This lets the frontend distinguish model/blended stats from current-season
-    # results later.
     result[
         "live_2026"
     ] = {
@@ -1253,9 +1320,11 @@ def main():
 
         sys.exit(1)
 
-    existing_teams = existing.get(
-        "teams",
-        {}
+    existing_teams = normalize_team_dict(
+        existing.get(
+            "teams",
+            {}
+        )
     )
 
     if len(
@@ -1404,9 +1473,11 @@ def main():
 
     for team in teams_data:
 
-        school = first_value(
-            team,
-            "school"
+        school = normalize_team_name(
+            first_value(
+                team,
+                "school"
+            )
         )
 
         if not school:
@@ -1427,6 +1498,23 @@ def main():
     print(
         f"✅ FBS teams: "
         f"{len(fbs_teams)}"
+    )
+
+    # Guard the exact public/model spelling we care about.
+    if "Sam José State" in fbs_teams or "Sam Jose State" in fbs_teams:
+        print(
+            "❌ Team-name normalization failed for San Jose State."
+        )
+        sys.exit(1)
+
+    if "San Jose State" not in fbs_teams:
+        print(
+            "❌ San Jose State missing after team-name normalization."
+        )
+        sys.exit(1)
+
+    print(
+        "✅ Team-name normalization: San Jose State"
     )
 
     # -------------------------------------------------------------------------
@@ -1834,8 +1922,10 @@ def main():
     )
 
     records_lookup = {
-        item.get(
-            "team"
+        normalize_team_name(
+            item.get(
+                "team"
+            )
         ): item
 
         for item in records_data
@@ -1844,9 +1934,6 @@ def main():
             "team"
         )
     }
-
-    # Keep SP+ from the current stored model.
-    # We do not need to call a second season here just to overwrite it.
 
     # -------------------------------------------------------------------------
     # BLEND WEIGHT
@@ -1884,7 +1971,7 @@ def main():
                 blend_weight,
 
             "type":
-                "weekly_update_v2",
+                "weekly_update_v3_team_names",
 
             "epa_source":
                 "CFBD PPA",
@@ -1900,6 +1987,9 @@ def main():
                     "play-level score, "
                     "not final score"
                 ),
+
+            "team_name_standard":
+                "preferred_public_names",
         },
 
         # Frozen model baseline.
@@ -2242,6 +2332,28 @@ def main():
 
         sys.exit(1)
 
+    # San Jose State must publish under its correct name.
+    if "San Jose State" not in output["teams"]:
+        print(
+            "❌ SAFETY CHECK FAILED: "
+            "San Jose State missing from output."
+        )
+        sys.exit(1)
+
+    if any(
+        bad_name in output["teams"]
+        for bad_name in (
+            "Sam José State",
+            "Sam Jose State",
+            "San José State",
+        )
+    ):
+        print(
+            "❌ SAFETY CHECK FAILED: "
+            "bad San Jose State alias survived."
+        )
+        sys.exit(1)
+
     # -------------------------------------------------------------------------
     # RATE SAFETY CHECK
     # -------------------------------------------------------------------------
@@ -2450,6 +2562,12 @@ def main():
             raise ValueError(
                 "Too few teams "
                 "in generated file."
+            )
+
+        if "San Jose State" not in validation.get("teams", {}):
+            raise ValueError(
+                "San Jose State missing "
+                "from generated file."
             )
 
     except Exception as error:
