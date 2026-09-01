@@ -2,26 +2,38 @@
 CFB ANALYTICS
 backtest_composite.py
 
-Historical, time-safe backtest of the core efficiency composite
-used by the live 2026 model.
+Time-safe historical backtest of the core efficiency composite
+used by the live 2026 projection model.
 
-IMPORTANT:
-- Each historical game is predicted using ONLY data from games
-  completed before that game.
-- This script does NOT modify the live projection engine.
-- This first composite backtest tests the in-season efficiency core:
-    Net EPA/PPA
-    Net Pass EPA/PPA
-    Net Rush EPA/PPA
-    Net Success Rate
-    Defensive Havoc Created
-    Offensive Havoc Allowed
+This version intentionally mirrors the live model's play-level logic:
 
-The goal is to learn:
-- how predictive the composite is out of sample
-- how many scoreboard points one composite rating unit is worth
-- historical home-field advantage
-- whether model/market disagreement shows ATS signal
+    Net EPA/PPA              30%
+    Net Pass EPA/PPA         15%
+    Net Rush EPA/PPA         15%
+    Net Success Rate         10%
+    Defensive Havoc Created  20%
+    Offensive Havoc Allowed  10%
+
+DATA SAFETY
+-----------
+A game in Week N is predicted using ONLY plays from Weeks < N.
+
+No game being predicted contributes to its own rating.
+No future week contributes to an earlier prediction.
+
+API EFFICIENCY
+--------------
+Instead of one advanced-box request per game, this script downloads:
+- games once per season
+- betting lines once per season
+- plays once per historical week
+
+This keeps the request count relatively small.
+
+IMPORTANT
+---------
+This script is diagnostic only.
+It does NOT modify live 2026 projections.
 """
 
 import json
@@ -48,10 +60,6 @@ FIRST_TEST_YEAR = 2022
 
 OUTPUT_PATH = "data/composite_backtest_report.json"
 
-# Require some actual prior-season/week sample before using
-# a team's live efficiency composite.
-MIN_PRIOR_GAMES = 2
-
 WEIGHTS = {
     "net_epa": 0.30,
     "net_epa_pass": 0.15,
@@ -60,6 +68,12 @@ WEIGHTS = {
     "def_havoc_created": 0.20,
     "off_havoc_allowed": 0.10,
 }
+
+# We do not want to treat 10-20 plays as a stable in-season rating.
+MIN_PRIOR_PLAYS = 100
+
+MIN_PASS_PLAYS = 30
+MIN_RUSH_PLAYS = 30
 
 EDGE_BUCKETS = [
     (0.0, 1.5),
@@ -111,15 +125,18 @@ CFBD_API_KEY = clean_api_key(
 
 
 # =============================================================================
-# HELPERS
+# GENERAL HELPERS
 # =============================================================================
 
-def safe_number(value):
+def safe_number(
+    value,
+    default=None
+):
 
     try:
 
         if value is None:
-            return None
+            return default
 
         return float(value)
 
@@ -128,7 +145,24 @@ def safe_number(value):
         ValueError
     ):
 
-        return None
+        return default
+
+
+def first_value(
+    data,
+    *keys,
+    default=None
+):
+
+    for key in keys:
+
+        if (
+            key in data
+            and data.get(key) is not None
+        ):
+            return data.get(key)
+
+    return default
 
 
 def mean(values):
@@ -142,71 +176,24 @@ def mean(values):
     if not clean:
         return None
 
-    return statistics.mean(clean)
+    return statistics.mean(
+        clean
+    )
 
 
-def population_std(values):
-
-    clean = [
-        value
-        for value in values
-        if value is not None
-    ]
-
-    if len(clean) < 2:
-        return None
-
-    return statistics.pstdev(clean)
-
-
-def z_scores(values_by_team):
-
-    values = [
-        value
-        for value in values_by_team.values()
-        if value is not None
-    ]
-
-    if len(values) < 2:
-
-        return {
-            team: 0.0
-            for team in values_by_team
-        }
-
-    avg = statistics.mean(values)
-    std = statistics.pstdev(values)
-
-    if std == 0:
-
-        return {
-            team: 0.0
-            for team in values_by_team
-        }
-
-    output = {}
-
-    for team, value in values_by_team.items():
-
-        if value is None:
-            output[team] = 0.0
-
-        else:
-            output[team] = (
-                value - avg
-            ) / std
-
-    return output
-
-
-def mae(predictions, actuals):
+def mae(
+    predictions,
+    actuals
+):
 
     if not predictions:
         return None
 
     return statistics.mean(
-        abs(predicted - actual)
-        for predicted, actual
+        abs(
+            prediction - actual
+        )
+        for prediction, actual
         in zip(
             predictions,
             actuals
@@ -214,15 +201,22 @@ def mae(predictions, actuals):
     )
 
 
-def rmse(predictions, actuals):
+def rmse(
+    predictions,
+    actuals
+):
 
     if not predictions:
         return None
 
     return math.sqrt(
         statistics.mean(
-            (predicted - actual) ** 2
-            for predicted, actual
+            (
+                prediction
+                -
+                actual
+            ) ** 2
+            for prediction, actual
             in zip(
                 predictions,
                 actuals
@@ -231,98 +225,63 @@ def rmse(predictions, actuals):
     )
 
 
-def regression(x_values, y_values):
+def z_scores(
+    values_by_team
+):
 
-    if (
-        len(x_values) != len(y_values)
-        or len(x_values) < 2
-    ):
-
-        return {
-            "slope": 0.0,
-            "intercept": 0.0,
-            "r_squared": 0.0,
-        }
-
-    x_mean = statistics.mean(
-        x_values
-    )
-
-    y_mean = statistics.mean(
-        y_values
-    )
-
-    numerator = sum(
-        (x - x_mean)
-        *
-        (y - y_mean)
-        for x, y
-        in zip(
-            x_values,
-            y_values
-        )
-    )
-
-    denominator = sum(
-        (x - x_mean) ** 2
-        for x
-        in x_values
-    )
-
-    slope = (
-        numerator / denominator
-        if denominator
-        else 0.0
-    )
-
-    intercept = (
-        y_mean
-        -
-        slope * x_mean
-    )
-
-    predictions = [
-        intercept
-        +
-        slope * x
-        for x
-        in x_values
+    clean = [
+        value
+        for value in values_by_team.values()
+        if value is not None
     ]
 
-    total_variance = sum(
-        (y - y_mean) ** 2
-        for y
-        in y_values
+    if len(clean) < 2:
+
+        return {
+            team: 0.0
+            for team
+            in values_by_team
+        }
+
+    avg = statistics.mean(
+        clean
     )
 
-    residual_variance = sum(
-        (y - prediction) ** 2
-        for y, prediction
-        in zip(
-            y_values,
-            predictions
-        )
+    std = statistics.pstdev(
+        clean
     )
 
-    r_squared = (
-        1.0
-        -
-        residual_variance
-        /
-        total_variance
-        if total_variance
-        else 0.0
-    )
+    if std == 0:
 
-    return {
-        "slope": slope,
-        "intercept": intercept,
-        "r_squared": r_squared,
-    }
+        return {
+            team: 0.0
+            for team
+            in values_by_team
+        }
+
+    output = {}
+
+    for team, value in values_by_team.items():
+
+        if value is None:
+
+            output[
+                team
+            ] = 0.0
+
+        else:
+
+            output[
+                team
+            ] = (
+                value - avg
+            ) / std
+
+    return output
 
 
 # =============================================================================
-# CFBD
+# CFBD REQUEST
 # =============================================================================
 
 def cfbd_get(
@@ -351,17 +310,18 @@ def cfbd_get(
                 headers={
                     "Authorization":
                         f"Bearer {CFBD_API_KEY}",
+
                     "Accept":
                         "application/json",
                 },
                 params=params,
-                timeout=60
+                timeout=90
             )
 
         except requests.RequestException as error:
 
             print(
-                f"⚠ Request failure "
+                f"⚠ Request error "
                 f"{endpoint} "
                 f"({attempt}/3): "
                 f"{error}"
@@ -373,9 +333,10 @@ def cfbd_get(
                 continue
 
             if required:
+
                 sys.exit(1)
 
-            return None
+            return []
 
         if response.status_code in (
             401,
@@ -391,8 +352,12 @@ def cfbd_get(
         if not response.ok:
 
             print(
-                f"⚠ {endpoint}: "
+                f"⚠ CFBD {endpoint}: "
                 f"HTTP {response.status_code}"
+            )
+
+            print(
+                response.text[:300]
             )
 
             if attempt < 3:
@@ -401,9 +366,10 @@ def cfbd_get(
                 continue
 
             if required:
+
                 sys.exit(1)
 
-            return None
+            return []
 
         try:
 
@@ -417,15 +383,16 @@ def cfbd_get(
             )
 
             if required:
+
                 sys.exit(1)
 
-            return None
+            return []
 
-    return None
+    return []
 
 
 # =============================================================================
-# HISTORICAL GAMES
+# GAMES
 # =============================================================================
 
 def get_games(year):
@@ -437,9 +404,14 @@ def get_games(year):
     raw = cfbd_get(
         "/games",
         {
-            "year": year,
-            "seasonType": "regular",
-            "classification": "fbs",
+            "year":
+                year,
+
+            "seasonType":
+                "regular",
+
+            "classification":
+                "fbs",
         }
     )
 
@@ -448,16 +420,20 @@ def get_games(year):
     for game in raw:
 
         home_class = str(
-            game.get(
+            first_value(
+                game,
                 "homeClassification",
-                ""
+                "home_classification",
+                default=""
             )
         ).lower()
 
         away_class = str(
-            game.get(
+            first_value(
+                game,
                 "awayClassification",
-                ""
+                "away_classification",
+                default=""
             )
         ).lower()
 
@@ -467,54 +443,92 @@ def get_games(year):
         ):
             continue
 
+        completed = first_value(
+            game,
+            "completed",
+            default=True
+        )
+
+        if completed is False:
+            continue
+
         home_points = safe_number(
-            game.get(
-                "homePoints"
+            first_value(
+                game,
+                "homePoints",
+                "home_points"
             )
         )
 
         away_points = safe_number(
-            game.get(
-                "awayPoints"
+            first_value(
+                game,
+                "awayPoints",
+                "away_points"
             )
         )
 
+        game_id = first_value(
+            game,
+            "id"
+        )
+
+        week = safe_number(
+            first_value(
+                game,
+                "week"
+            )
+        )
+
+        home = first_value(
+            game,
+            "homeTeam",
+            "home_team"
+        )
+
+        away = first_value(
+            game,
+            "awayTeam",
+            "away_team"
+        )
+
         if (
-            home_points is None
+            game_id is None
+            or week is None
+            or not home
+            or not away
+            or home_points is None
             or away_points is None
         ):
             continue
 
         games.append({
             "id":
-                game.get("id"),
+                int(
+                    game_id
+                ),
 
             "year":
                 year,
 
             "week":
                 int(
-                    game.get(
-                        "week",
-                        0
-                    )
+                    week
                 ),
 
             "home":
-                game.get(
-                    "homeTeam"
-                ),
+                home,
 
             "away":
-                game.get(
-                    "awayTeam"
-                ),
+                away,
 
             "neutral":
                 bool(
-                    game.get(
+                    first_value(
+                        game,
                         "neutralSite",
-                        False
+                        "neutral_site",
+                        default=False
                     )
                 ),
 
@@ -533,464 +547,982 @@ def get_games(year):
     games.sort(
         key=lambda game:
             (
-                game["week"],
-                game["id"]
-                if game["id"]
-                is not None
-                else 0
+                game[
+                    "week"
+                ],
+                game[
+                    "id"
+                ]
             )
     )
 
     print(
-        f"   {len(games)} FBS-vs-FBS games"
+        f"   {len(games)} "
+        "completed FBS-vs-FBS games"
     )
 
     return games
 
 
 # =============================================================================
-# ADVANCED BOX SCORE
+# HISTORICAL BETTING LINES
 # =============================================================================
 
-def get_advanced_box(game_id):
+def choose_spread(
+    provider
+):
 
-    return cfbd_get(
-        "/game/box/advanced",
+    if not isinstance(
+        provider,
+        dict
+    ):
+
+        return None
+
+    return safe_number(
+        provider.get(
+            "spread"
+        )
+    )
+
+
+def extract_spread(
+    game
+):
+
+    providers = (
+        game.get(
+            "lines"
+        )
+        or []
+    )
+
+    preferred = [
+        "DraftKings",
+        "FanDuel",
+        "BetMGM",
+        "Caesars",
+        "Consensus",
+    ]
+
+    for preferred_name in preferred:
+
+        for provider in providers:
+
+            provider_name = str(
+                provider.get(
+                    "provider",
+                    ""
+                )
+            )
+
+            if (
+                provider_name.lower()
+                ==
+                preferred_name.lower()
+            ):
+
+                spread = choose_spread(
+                    provider
+                )
+
+                if spread is not None:
+
+                    return spread
+
+    all_spreads = []
+
+    for provider in providers:
+
+        spread = choose_spread(
+            provider
+        )
+
+        if spread is not None:
+
+            all_spreads.append(
+                spread
+            )
+
+    if not all_spreads:
+
+        return None
+
+    return statistics.median(
+        all_spreads
+    )
+
+
+def get_lines(year):
+
+    print(
+        f"💰 Loading {year} historical lines..."
+    )
+
+    raw = cfbd_get(
+        "/lines",
         {
-            "id": game_id,
+            "year":
+                year,
+
+            "seasonType":
+                "regular",
         },
         required=False
     )
 
+    lookup = {}
 
-def find_team_record(
-    records,
-    team
+    for item in raw:
+
+        game_id = first_value(
+            item,
+            "id",
+            "gameId",
+            "game_id"
+        )
+
+        if game_id is None:
+            continue
+
+        spread = extract_spread(
+            item
+        )
+
+        if spread is None:
+            continue
+
+        lookup[
+            int(
+                game_id
+            )
+        ] = spread
+
+    print(
+        f"   {len(lookup)} games "
+        "with usable spread data"
+    )
+
+    return lookup
+
+
+# =============================================================================
+# PLAY NORMALIZATION
+# =============================================================================
+
+def normalize_play(raw):
+
+    return {
+        "game_id":
+            first_value(
+                raw,
+                "gameId",
+                "game_id"
+            ),
+
+        "offense":
+            first_value(
+                raw,
+                "offense"
+            ),
+
+        "defense":
+            first_value(
+                raw,
+                "defense"
+            ),
+
+        "offense_score":
+            safe_number(
+                first_value(
+                    raw,
+                    "offenseScore",
+                    "offense_score",
+                    default=0
+                ),
+                0
+            ),
+
+        "defense_score":
+            safe_number(
+                first_value(
+                    raw,
+                    "defenseScore",
+                    "defense_score",
+                    default=0
+                ),
+                0
+            ),
+
+        "period":
+            int(
+                safe_number(
+                    first_value(
+                        raw,
+                        "period",
+                        default=1
+                    ),
+                    1
+                )
+            ),
+
+        "down":
+            safe_number(
+                first_value(
+                    raw,
+                    "down"
+                )
+            ),
+
+        "distance":
+            safe_number(
+                first_value(
+                    raw,
+                    "distance"
+                )
+            ),
+
+        "yards_gained":
+            safe_number(
+                first_value(
+                    raw,
+                    "yardsGained",
+                    "yards_gained",
+                    default=0
+                ),
+                0
+            ),
+
+        "play_type":
+            str(
+                first_value(
+                    raw,
+                    "playType",
+                    "play_type",
+                    default=""
+                )
+            ),
+
+        "play_text":
+            str(
+                first_value(
+                    raw,
+                    "playText",
+                    "play_text",
+                    default=""
+                )
+            ),
+
+        "ppa":
+            safe_number(
+                first_value(
+                    raw,
+                    "ppa"
+                )
+            ),
+    }
+
+
+# =============================================================================
+# PLAY CLASSIFICATION
+# =============================================================================
+
+def play_description(
+    play
 ):
 
-    if not records:
-        return None
-
-    for record in records:
-
-        if (
-            record.get(
-                "team"
-            )
-            ==
-            team
-        ):
-
-            return record
-
-    return None
+    return (
+        f"{play.get('play_type', '')} "
+        f"{play.get('play_text', '')}"
+    ).lower()
 
 
-def nested_total(
-    record,
-    section
+def is_pass_play(
+    play
 ):
 
-    if not record:
-        return None
-
-    value = record.get(
-        section
+    text = play_description(
+        play
     )
 
-    if isinstance(
-        value,
-        dict
-    ):
-
-        return safe_number(
-            value.get(
-                "total"
-            )
+    return any(
+        phrase in text
+        for phrase in (
+            "pass",
+            "sack",
+            "interception",
         )
-
-    return safe_number(
-        value
     )
 
 
-def parse_advanced_game(
-    game,
-    box
+def is_rush_play(
+    play
 ):
 
-    if not box:
+    text = play_description(
+        play
+    )
 
-        return None
+    if "sack" in text:
+        return False
 
-    teams = (
-        box.get(
-            "teams"
+    return any(
+        phrase in text
+        for phrase in (
+            "rush",
+            "run ",
+            "rushed",
         )
-        or {}
     )
 
-    ppa_records = (
-        teams.get(
-            "ppa"
+
+def is_excluded_play(
+    play
+):
+
+    text = play_description(
+        play
+    )
+
+    return any(
+        phrase in text
+        for phrase in (
+            "kickoff",
+            "extra point",
+            "timeout",
+            "end of",
+            "coin toss",
+            "penalty",
+            "two point",
+            "2-point",
         )
-        or []
     )
 
-    success_records = (
-        teams.get(
-            "successRates"
-        )
-        or []
-    )
 
-    havoc_records = (
-        teams.get(
-            "havoc"
-        )
-        or []
-    )
+def is_garbage_time(
+    play
+):
 
-    home = game["home"]
-    away = game["away"]
-
-    home_ppa = find_team_record(
-        ppa_records,
-        home
-    )
-
-    away_ppa = find_team_record(
-        ppa_records,
-        away
-    )
-
-    home_success = find_team_record(
-        success_records,
-        home
-    )
-
-    away_success = find_team_record(
-        success_records,
-        away
-    )
-
-    home_havoc = find_team_record(
-        havoc_records,
-        home
-    )
-
-    away_havoc = find_team_record(
-        havoc_records,
-        away
-    )
-
-    if (
-        home_ppa is None
-        or away_ppa is None
-        or home_success is None
-        or away_success is None
-    ):
-
-        return None
-
-    home_off_epa = nested_total(
-        home_ppa,
-        "overall"
-    )
-
-    away_off_epa = nested_total(
-        away_ppa,
-        "overall"
-    )
-
-    home_pass_epa = nested_total(
-        home_ppa,
-        "passing"
-    )
-
-    away_pass_epa = nested_total(
-        away_ppa,
-        "passing"
-    )
-
-    home_rush_epa = nested_total(
-        home_ppa,
-        "rushing"
-    )
-
-    away_rush_epa = nested_total(
-        away_ppa,
-        "rushing"
-    )
-
-    home_sr = nested_total(
-        home_success,
-        "overall"
-    )
-
-    away_sr = nested_total(
-        away_success,
-        "overall"
-    )
-
-    home_havoc_rate = (
-        safe_number(
-            home_havoc.get(
-                "total"
-            )
-        )
-        if home_havoc
-        else None
-    )
-
-    away_havoc_rate = (
-        safe_number(
-            away_havoc.get(
-                "total"
-            )
-        )
-        if away_havoc
-        else None
-    )
-
-    required = [
-        home_off_epa,
-        away_off_epa,
-        home_sr,
-        away_sr,
+    period = play[
+        "period"
     ]
 
-    if any(
-        value is None
-        for value in required
+    score_difference = abs(
+        play[
+            "offense_score"
+        ]
+        -
+        play[
+            "defense_score"
+        ]
+    )
+
+    if (
+        period >= 4
+        and score_difference >= 28
     ):
+        return True
 
-        return None
+    if (
+        period >= 3
+        and score_difference >= 38
+    ):
+        return True
 
-    return {
-        home: {
-            "off_epa":
-                home_off_epa,
-
-            "def_epa_allowed":
-                away_off_epa,
-
-            "off_pass_epa":
-                home_pass_epa,
-
-            "def_pass_epa_allowed":
-                away_pass_epa,
-
-            "off_rush_epa":
-                home_rush_epa,
-
-            "def_rush_epa_allowed":
-                away_rush_epa,
-
-            "off_success":
-                home_sr,
-
-            "def_success_allowed":
-                away_sr,
-
-            "def_havoc_created":
-                home_havoc_rate,
-
-            "off_havoc_allowed":
-                away_havoc_rate,
-        },
-
-        away: {
-            "off_epa":
-                away_off_epa,
-
-            "def_epa_allowed":
-                home_off_epa,
-
-            "off_pass_epa":
-                away_pass_epa,
-
-            "def_pass_epa_allowed":
-                home_pass_epa,
-
-            "off_rush_epa":
-                away_rush_epa,
-
-            "def_rush_epa_allowed":
-                home_rush_epa,
-
-            "off_success":
-                away_sr,
-
-            "def_success_allowed":
-                home_sr,
-
-            "def_havoc_created":
-                away_havoc_rate,
-
-            "off_havoc_allowed":
-                home_havoc_rate,
-        },
-    }
+    return False
 
 
-# =============================================================================
-# TEAM RUNNING DATA
-# =============================================================================
-
-def empty_team_history():
-
-    return {
-        "games":
-            0,
-
-        "off_epa":
-            [],
-
-        "def_epa_allowed":
-            [],
-
-        "off_pass_epa":
-            [],
-
-        "def_pass_epa_allowed":
-            [],
-
-        "off_rush_epa":
-            [],
-
-        "def_rush_epa_allowed":
-            [],
-
-        "off_success":
-            [],
-
-        "def_success_allowed":
-            [],
-
-        "def_havoc_created":
-            [],
-
-        "off_havoc_allowed":
-            [],
-    }
-
-
-def update_history(
-    history,
-    team_metrics
+def is_success(
+    play
 ):
 
-    history["games"] += 1
+    yards = play[
+        "yards_gained"
+    ]
 
-    for key in (
-        "off_epa",
-        "def_epa_allowed",
-        "off_pass_epa",
-        "def_pass_epa_allowed",
-        "off_rush_epa",
-        "def_rush_epa_allowed",
-        "off_success",
-        "def_success_allowed",
-        "def_havoc_created",
-        "off_havoc_allowed",
+    distance = play[
+        "distance"
+    ]
+
+    down = play[
+        "down"
+    ]
+
+    if (
+        distance is None
+        or distance <= 0
+        or down is None
     ):
+        return False
 
-        value = team_metrics.get(
-            key
+    down = int(
+        down
+    )
+
+    if down == 1:
+
+        return (
+            yards
+            >=
+            distance * 0.50
         )
 
-        if value is not None:
+    if down == 2:
 
-            history[key].append(
-                value
+        return (
+            yards
+            >=
+            distance * 0.70
+        )
+
+    if down in (
+        3,
+        4
+    ):
+
+        return (
+            yards
+            >=
+            distance
+        )
+
+    return False
+
+
+def is_havoc(
+    play
+):
+
+    text = play_description(
+        play
+    )
+
+    return any(
+        phrase in text
+        for phrase in (
+            "sack",
+            "interception",
+            "fumble",
+            "tackle for loss",
+            "tfl",
+            "pass breakup",
+            "broken up",
+        )
+    )
+
+
+# =============================================================================
+# TEAM HISTORY
+# =============================================================================
+
+def empty_history():
+
+    return {
+        "plays":
+            0,
+
+        "epa_sum":
+            0.0,
+
+        "epa_count":
+            0,
+
+        "pass_epa_sum":
+            0.0,
+
+        "pass_epa_count":
+            0,
+
+        "rush_epa_sum":
+            0.0,
+
+        "rush_epa_count":
+            0,
+
+        "successes":
+            0,
+
+        "success_plays":
+            0,
+
+        "havoc_created":
+            0,
+
+        "havoc_def_plays":
+            0,
+
+        "havoc_allowed":
+            0,
+
+        "havoc_off_plays":
+            0,
+    }
+
+
+def add_offensive_play(
+    history,
+    play,
+    pass_play,
+    rush_play,
+    success,
+    havoc
+):
+
+    history[
+        "plays"
+    ] += 1
+
+    ppa = play[
+        "ppa"
+    ]
+
+    if ppa is not None:
+
+        history[
+            "epa_sum"
+        ] += ppa
+
+        history[
+            "epa_count"
+        ] += 1
+
+        if pass_play:
+
+            history[
+                "pass_epa_sum"
+            ] += ppa
+
+            history[
+                "pass_epa_count"
+            ] += 1
+
+        if rush_play:
+
+            history[
+                "rush_epa_sum"
+            ] += ppa
+
+            history[
+                "rush_epa_count"
+            ] += 1
+
+    history[
+        "success_plays"
+    ] += 1
+
+    if success:
+
+        history[
+            "successes"
+        ] += 1
+
+    history[
+        "havoc_off_plays"
+    ] += 1
+
+    if havoc:
+
+        history[
+            "havoc_allowed"
+        ] += 1
+
+
+def add_defensive_play(
+    history,
+    play,
+    pass_play,
+    rush_play,
+    success,
+    havoc
+):
+
+    # Defensive EPA is stored from the opponent's
+    # offensive PPA, then subtracted later.
+    ppa = play[
+        "ppa"
+    ]
+
+    key_map = (
+        ("def_epa_sum", "def_epa_count"),
+        (
+            "def_pass_epa_sum",
+            "def_pass_epa_count"
+        )
+        if pass_play
+        else (None, None),
+        (
+            "def_rush_epa_sum",
+            "def_rush_epa_count"
+        )
+        if rush_play
+        else (None, None),
+    )
+
+    if ppa is not None:
+
+        for sum_key, count_key in key_map:
+
+            if sum_key is None:
+                continue
+
+            if sum_key not in history:
+                history[
+                    sum_key
+                ] = 0.0
+
+            if count_key not in history:
+                history[
+                    count_key
+                ] = 0
+
+            history[
+                sum_key
+            ] += ppa
+
+            history[
+                count_key
+            ] += 1
+
+    if (
+        "def_successes_allowed"
+        not in history
+    ):
+        history[
+            "def_successes_allowed"
+        ] = 0
+
+    if (
+        "def_success_plays"
+        not in history
+    ):
+        history[
+            "def_success_plays"
+        ] = 0
+
+    history[
+        "def_success_plays"
+    ] += 1
+
+    if success:
+
+        history[
+            "def_successes_allowed"
+        ] += 1
+
+    history[
+        "havoc_def_plays"
+    ] += 1
+
+    if havoc:
+
+        history[
+            "havoc_created"
+        ] += 1
+
+
+# =============================================================================
+# WEEKLY PLAY DOWNLOAD
+# =============================================================================
+
+def get_week_plays(
+    year,
+    week,
+    valid_game_ids
+):
+
+    raw = cfbd_get(
+        "/plays",
+        {
+            "year":
+                year,
+
+            "week":
+                week,
+
+            "seasonType":
+                "regular",
+
+            "classification":
+                "fbs",
+        }
+    )
+
+    plays = []
+
+    for raw_play in raw:
+
+        play = normalize_play(
+            raw_play
+        )
+
+        game_id = play[
+            "game_id"
+        ]
+
+        if game_id is None:
+            continue
+
+        try:
+
+            game_id = int(
+                game_id
             )
 
+        except (
+            TypeError,
+            ValueError
+        ):
+            continue
 
-def team_snapshot(history):
+        if (
+            game_id
+            not in valid_game_ids
+        ):
+            continue
+
+        if (
+            not play[
+                "offense"
+            ]
+            or not play[
+                "defense"
+            ]
+        ):
+            continue
+
+        if is_excluded_play(
+            play
+        ):
+            continue
+
+        if is_garbage_time(
+            play
+        ):
+            continue
+
+        if play[
+            "ppa"
+        ] is None:
+            continue
+
+        plays.append(
+            play
+        )
+
+    return plays
+
+
+# =============================================================================
+# SNAPSHOT
+# =============================================================================
+
+def average(
+    total,
+    count
+):
+
+    if not count:
+        return None
+
+    return (
+        total
+        /
+        count
+    )
+
+
+def team_snapshot(
+    offense_history,
+    defense_history
+):
 
     if (
-        not history
-        or history["games"]
-        < MIN_PRIOR_GAMES
+        offense_history[
+            "plays"
+        ]
+        <
+        MIN_PRIOR_PLAYS
     ):
 
         return None
 
-    off_epa = mean(
-        history[
-            "off_epa"
-        ]
-    )
-
-    def_epa = mean(
-        history[
-            "def_epa_allowed"
-        ]
-    )
-
-    off_pass = mean(
-        history[
-            "off_pass_epa"
-        ]
-    )
-
-    def_pass = mean(
-        history[
-            "def_pass_epa_allowed"
-        ]
-    )
-
-    off_rush = mean(
-        history[
-            "off_rush_epa"
-        ]
-    )
-
-    def_rush = mean(
-        history[
-            "def_rush_epa_allowed"
-        ]
-    )
-
-    off_sr = mean(
-        history[
-            "off_success"
-        ]
-    )
-
-    def_sr = mean(
-        history[
-            "def_success_allowed"
-        ]
-    )
-
-    def_havoc = mean(
-        history[
-            "def_havoc_created"
-        ]
-    )
-
-    off_havoc = mean(
-        history[
-            "off_havoc_allowed"
-        ]
-    )
-
     if (
-        off_epa is None
-        or def_epa is None
-        or off_sr is None
-        or def_sr is None
+        offense_history[
+            "epa_count"
+        ]
+        <
+        MIN_PRIOR_PLAYS
     ):
 
         return None
+
+    if (
+        defense_history.get(
+            "def_epa_count",
+            0
+        )
+        <
+        MIN_PRIOR_PLAYS
+    ):
+
+        return None
+
+    off_epa = average(
+        offense_history[
+            "epa_sum"
+        ],
+        offense_history[
+            "epa_count"
+        ]
+    )
+
+    def_epa_allowed = average(
+        defense_history[
+            "def_epa_sum"
+        ],
+        defense_history[
+            "def_epa_count"
+        ]
+    )
+
+    off_pass = average(
+        offense_history[
+            "pass_epa_sum"
+        ],
+        offense_history[
+            "pass_epa_count"
+        ]
+    )
+
+    def_pass = average(
+        defense_history.get(
+            "def_pass_epa_sum",
+            0.0
+        ),
+        defense_history.get(
+            "def_pass_epa_count",
+            0
+        )
+    )
+
+    off_rush = average(
+        offense_history[
+            "rush_epa_sum"
+        ],
+        offense_history[
+            "rush_epa_count"
+        ]
+    )
+
+    def_rush = average(
+        defense_history.get(
+            "def_rush_epa_sum",
+            0.0
+        ),
+        defense_history.get(
+            "def_rush_epa_count",
+            0
+        )
+    )
+
+    if (
+        offense_history[
+            "pass_epa_count"
+        ] < MIN_PASS_PLAYS
+        or defense_history.get(
+            "def_pass_epa_count",
+            0
+        ) < MIN_PASS_PLAYS
+    ):
+        off_pass = None
+        def_pass = None
+
+    if (
+        offense_history[
+            "rush_epa_count"
+        ] < MIN_RUSH_PLAYS
+        or defense_history.get(
+            "def_rush_epa_count",
+            0
+        ) < MIN_RUSH_PLAYS
+    ):
+        off_rush = None
+        def_rush = None
+
+    off_sr = (
+        offense_history[
+            "successes"
+        ]
+        /
+        offense_history[
+            "success_plays"
+        ]
+        *
+        100
+        if offense_history[
+            "success_plays"
+        ]
+        else None
+    )
+
+    def_sr_allowed = (
+        defense_history.get(
+            "def_successes_allowed",
+            0
+        )
+        /
+        defense_history.get(
+            "def_success_plays",
+            1
+        )
+        *
+        100
+        if defense_history.get(
+            "def_success_plays",
+            0
+        )
+        else None
+    )
+
+    def_havoc = (
+        defense_history[
+            "havoc_created"
+        ]
+        /
+        defense_history[
+            "havoc_def_plays"
+        ]
+        *
+        100
+        if defense_history[
+            "havoc_def_plays"
+        ]
+        else None
+    )
+
+    off_havoc_allowed = (
+        offense_history[
+            "havoc_allowed"
+        ]
+        /
+        offense_history[
+            "havoc_off_plays"
+        ]
+        *
+        100
+        if offense_history[
+            "havoc_off_plays"
+        ]
+        else None
+    )
 
     return {
         "net_epa":
-            off_epa
-            -
-            def_epa,
+            (
+                off_epa
+                -
+                def_epa_allowed
+            ),
 
         "net_epa_pass":
             (
@@ -1017,32 +1549,41 @@ def team_snapshot(history):
             ),
 
         "net_sr":
-            off_sr
-            -
-            def_sr,
+            (
+                off_sr
+                -
+                def_sr_allowed
+            ),
 
         "def_havoc_created":
             def_havoc,
 
         "off_havoc_allowed":
-            off_havoc,
+            off_havoc_allowed,
     }
 
 
 # =============================================================================
-# BUILD WEEKLY COMPOSITE RATINGS
+# COMPOSITE RATING
 # =============================================================================
 
-def build_composite_ratings(
-    histories
+def build_ratings(
+    teams,
+    offense_histories,
+    defense_histories
 ):
 
     snapshots = {}
 
-    for team, history in histories.items():
+    for team in teams:
 
         snapshot = team_snapshot(
-            history
+            offense_histories[
+                team
+            ],
+            defense_histories[
+                team
+            ]
         )
 
         if snapshot is not None:
@@ -1080,29 +1621,26 @@ def build_composite_ratings(
 
         rating = 0.0
 
-        for (
-            component,
-            weight
-        ) in WEIGHTS.items():
+        for component, weight in WEIGHTS.items():
 
-            value = component_z[
+            z = component_z[
                 component
             ].get(
                 team,
                 0.0
             )
 
-            # Havoc ALLOWED is bad.
+            # Higher havoc allowed is BAD.
             if (
                 component
                 ==
                 "off_havoc_allowed"
             ):
 
-                value *= -1.0
+                z *= -1.0
 
             rating += (
-                value
+                z
                 *
                 weight
             )
@@ -1115,211 +1653,463 @@ def build_composite_ratings(
 
 
 # =============================================================================
-# HISTORICAL LINES
+# UPDATE HISTORIES
 # =============================================================================
 
-def choose_spread(provider):
+def process_week_plays(
+    plays,
+    offense_histories,
+    defense_histories
+):
 
-    if not isinstance(
-        provider,
-        dict
-    ):
+    for play in plays:
 
-        return None
+        offense = play[
+            "offense"
+        ]
 
-    return safe_number(
-        provider.get(
-            "spread"
+        defense = play[
+            "defense"
+        ]
+
+        pass_play = is_pass_play(
+            play
+        )
+
+        rush_play = is_rush_play(
+            play
+        )
+
+        success = is_success(
+            play
+        )
+
+        havoc = is_havoc(
+            play
+        )
+
+        add_offensive_play(
+            offense_histories[
+                offense
+            ],
+            play,
+            pass_play,
+            rush_play,
+            success,
+            havoc
+        )
+
+        add_defensive_play(
+            defense_histories[
+                defense
+            ],
+            play,
+            pass_play,
+            rush_play,
+            success,
+            havoc
+        )
+
+
+# =============================================================================
+# BUILD TIME-SAFE YEAR
+# =============================================================================
+
+def build_year_records(
+    year,
+    games,
+    line_lookup
+):
+
+    teams = sorted(
+        set(
+            [
+                game[
+                    "home"
+                ]
+                for game in games
+            ]
+            +
+            [
+                game[
+                    "away"
+                ]
+                for game in games
+            ]
         )
     )
 
-
-def extract_spread(line_game):
-
-    providers = (
-        line_game.get(
-            "lines"
-        )
-        or []
+    offense_histories = defaultdict(
+        empty_history
     )
 
-    preferred = [
-        "DraftKings",
-        "FanDuel",
-        "BetMGM",
-        "Caesars",
-        "Consensus",
-    ]
+    defense_histories = defaultdict(
+        empty_history
+    )
 
-    for name in preferred:
+    records = []
 
-        for provider in providers:
+    weeks = sorted(
+        set(
+            game[
+                "week"
+            ]
+            for game in games
+        )
+    )
+
+    print("")
+    print(
+        f"🧠 Building time-safe "
+        f"{year} snapshots"
+    )
+
+    for week in weeks:
+
+        week_games = [
+            game
+            for game in games
+            if game[
+                "week"
+            ] == week
+        ]
+
+        # -------------------------------------------------------------
+        # FIRST: CREATE RATINGS
+        # -------------------------------------------------------------
+        #
+        # These ratings contain only PREVIOUS weeks.
+        #
+        # We have NOT downloaded/processed this week's plays yet.
+        # -------------------------------------------------------------
+
+        ratings = build_ratings(
+            teams,
+            offense_histories,
+            defense_histories
+        )
+
+        usable = 0
+
+        for game in week_games:
+
+            home_rating = ratings.get(
+                game[
+                    "home"
+                ]
+            )
+
+            away_rating = ratings.get(
+                game[
+                    "away"
+                ]
+            )
 
             if (
-                str(
-                    provider.get(
-                        "provider",
-                        ""
-                    )
-                ).lower()
-                ==
-                name.lower()
+                home_rating is None
+                or away_rating is None
             ):
+                continue
 
-                spread = choose_spread(
-                    provider
-                )
+            records.append({
+                "game_id":
+                    game[
+                        "id"
+                    ],
 
-                if spread is not None:
-                    return spread
+                "year":
+                    year,
 
-    spreads = [
-        choose_spread(
-            provider
+                "week":
+                    week,
+
+                "home":
+                    game[
+                        "home"
+                    ],
+
+                "away":
+                    game[
+                        "away"
+                    ],
+
+                "neutral":
+                    game[
+                        "neutral"
+                    ],
+
+                "home_rating":
+                    home_rating,
+
+                "away_rating":
+                    away_rating,
+
+                "rating_diff":
+                    (
+                        home_rating
+                        -
+                        away_rating
+                    ),
+
+                "actual_home_margin":
+                    game[
+                        "actual_home_margin"
+                    ],
+
+                "market_home_spread":
+                    line_lookup.get(
+                        game[
+                            "id"
+                        ]
+                    ),
+            })
+
+            usable += 1
+
+        print(
+            f"   Week {week:>2}: "
+            f"{usable:>3} usable "
+            "pregame matchups",
+            end=""
         )
-        for provider
-        in providers
-    ]
 
-    spreads = [
-        spread
-        for spread in spreads
-        if spread is not None
-    ]
+        # -------------------------------------------------------------
+        # SECOND: DOWNLOAD THIS WEEK'S PLAYS
+        # -------------------------------------------------------------
 
-    if not spreads:
-        return None
-
-    return statistics.median(
-        spreads
-    )
-
-
-def get_lines(year):
-
-    raw = cfbd_get(
-        "/lines",
-        {
-            "year":
-                year,
-
-            "seasonType":
-                "regular",
-        },
-        required=False
-    )
-
-    lookup = {}
-
-    if not raw:
-        return lookup
-
-    for item in raw:
-
-        game_id = (
-            item.get(
+        valid_game_ids = {
+            game[
                 "id"
-            )
-            or
-            item.get(
-                "gameId"
-            )
+            ]
+            for game in week_games
+        }
+
+        plays = get_week_plays(
+            year,
+            week,
+            valid_game_ids
         )
 
-        if game_id is None:
-            continue
-
-        spread = extract_spread(
-            item
+        print(
+            f" | {len(plays):>5} "
+            "qualifying plays"
         )
 
-        if spread is None:
-            continue
+        # -------------------------------------------------------------
+        # THIRD: ADD WEEK TO HISTORY
+        # -------------------------------------------------------------
+        #
+        # These plays become available for NEXT week's ratings.
+        # -------------------------------------------------------------
 
-        lookup[
-            int(
-                game_id
-            )
-        ] = spread
+        process_week_plays(
+            plays,
+            offense_histories,
+            defense_histories
+        )
 
-    return lookup
+    print(
+        f"   Total usable "
+        f"{year} games: "
+        f"{len(records)}"
+    )
+
+    return records
 
 
 # =============================================================================
-# TRAINING MODEL
+# FIT RATING -> SCORE MARGIN
 # =============================================================================
 
 def fit_scoring_model(
     training_records
 ):
 
-    x_values = [
-        record[
+    """
+    Fit:
+
+        actual margin
+        =
+        beta * composite rating difference
+        +
+        HFA * home_indicator
+
+    Neutral-site games receive home_indicator = 0.
+
+    We solve the two-variable OLS normal equations directly.
+    No future test-season games are used.
+    """
+
+    if len(
+        training_records
+    ) < 100:
+
+        raise ValueError(
+            "Insufficient training sample."
+        )
+
+    sum_xx = 0.0
+    sum_xh = 0.0
+    sum_hh = 0.0
+
+    sum_xy = 0.0
+    sum_hy = 0.0
+
+    for record in training_records:
+
+        x = record[
             "rating_diff"
         ]
-        for record
-        in training_records
-    ]
 
-    y_values = [
-        record[
+        h = (
+            0.0
+            if record[
+                "neutral"
+            ]
+            else 1.0
+        )
+
+        y = record[
             "actual_home_margin"
         ]
-        for record
-        in training_records
-    ]
 
-    fit = regression(
-        x_values,
-        y_values
+        sum_xx += x * x
+        sum_xh += x * h
+        sum_hh += h * h
+
+        sum_xy += x * y
+        sum_hy += h * y
+
+    determinant = (
+        sum_xx
+        *
+        sum_hh
+        -
+        sum_xh
+        *
+        sum_xh
     )
 
-    non_neutral = [
-        record
-        for record
-        in training_records
-        if not record[
-            "neutral"
-        ]
-    ]
+    if abs(
+        determinant
+    ) < 1e-9:
 
-    residuals = [
-        record[
-            "actual_home_margin"
-        ]
+        raise ValueError(
+            "Scoring calibration matrix "
+            "is singular."
+        )
+
+    rating_to_points = (
+        (
+            sum_xy
+            *
+            sum_hh
+        )
         -
         (
-            fit[
-                "slope"
-            ]
+            sum_hy
+            *
+            sum_xh
+        )
+    ) / determinant
+
+    home_field = (
+        (
+            sum_hy
+            *
+            sum_xx
+        )
+        -
+        (
+            sum_xy
+            *
+            sum_xh
+        )
+    ) / determinant
+
+    predictions = []
+
+    actuals = []
+
+    for record in training_records:
+
+        prediction = (
+            rating_to_points
             *
             record[
                 "rating_diff"
             ]
+            +
+            (
+                0.0
+                if record[
+                    "neutral"
+                ]
+                else home_field
+            )
         )
-        for record
-        in non_neutral
-    ]
 
-    hfa = mean(
-        residuals
+        predictions.append(
+            prediction
+        )
+
+        actuals.append(
+            record[
+                "actual_home_margin"
+            ]
+        )
+
+    actual_mean = statistics.mean(
+        actuals
     )
 
-    if hfa is None:
-        hfa = 2.0
+    ss_total = sum(
+        (
+            actual
+            -
+            actual_mean
+        ) ** 2
+        for actual in actuals
+    )
+
+    ss_residual = sum(
+        (
+            actual
+            -
+            prediction
+        ) ** 2
+        for prediction, actual
+        in zip(
+            predictions,
+            actuals
+        )
+    )
+
+    r_squared = (
+        1.0
+        -
+        ss_residual
+        /
+        ss_total
+        if ss_total
+        else 0.0
+    )
 
     return {
         "rating_to_points":
-            fit["slope"],
-
-        "raw_intercept":
-            fit["intercept"],
-
-        "r_squared":
-            fit["r_squared"],
+            rating_to_points,
 
         "home_field":
-            hfa,
+            home_field,
+
+        "r_squared":
+            r_squared,
+
+        "training_mae":
+            mae(
+                predictions,
+                actuals
+            ),
     }
 
 
@@ -1333,6 +2123,12 @@ def evaluate_ats(
     projected_home_margin
 ):
 
+    # Historical line is treated as the HOME spread:
+    #
+    # home favorite -7
+    # =>
+    # market expected home margin +7
+
     market_expected_home_margin = (
         -market_home_spread
     )
@@ -1343,7 +2139,13 @@ def evaluate_ats(
         market_expected_home_margin
     )
 
-    if model_edge == 0:
+    absolute_edge = abs(
+        model_edge
+    )
+
+    if abs(
+        model_edge
+    ) < 1e-9:
 
         return {
             "model_edge":
@@ -1351,6 +2153,9 @@ def evaluate_ats(
 
             "absolute_edge":
                 0.0,
+
+            "model_side":
+                "none",
 
             "ats_result":
                 "no_edge",
@@ -1364,11 +2169,15 @@ def evaluate_ats(
 
     if model_edge > 0:
 
+        model_side = "home"
+
         cover_margin = (
             home_cover_margin
         )
 
     else:
+
+        model_side = "away"
 
         cover_margin = (
             -home_cover_margin
@@ -1391,171 +2200,14 @@ def evaluate_ats(
             model_edge,
 
         "absolute_edge":
-            abs(
-                model_edge
-            ),
+            absolute_edge,
+
+        "model_side":
+            model_side,
 
         "ats_result":
             result,
     }
-
-
-# =============================================================================
-# BUILD TIME-SAFE DATASET
-# =============================================================================
-
-def build_year_records(
-    year,
-    games,
-    line_lookup
-):
-
-    histories = defaultdict(
-        empty_team_history
-    )
-
-    records = []
-
-    weeks = sorted(
-        set(
-            game["week"]
-            for game in games
-        )
-    )
-
-    print("")
-    print(
-        f"🧠 Building {year} weekly snapshots"
-    )
-
-    for week in weeks:
-
-        week_games = [
-            game
-            for game in games
-            if game[
-                "week"
-            ] == week
-        ]
-
-        # IMPORTANT:
-        # Ratings are created BEFORE processing
-        # any games from this week.
-        ratings = build_composite_ratings(
-            histories
-        )
-
-        usable_this_week = 0
-
-        for game in week_games:
-
-            home_rating = ratings.get(
-                game["home"]
-            )
-
-            away_rating = ratings.get(
-                game["away"]
-            )
-
-            if (
-                home_rating is not None
-                and away_rating is not None
-            ):
-
-                record = {
-                    "game_id":
-                        game["id"],
-
-                    "year":
-                        year,
-
-                    "week":
-                        week,
-
-                    "home":
-                        game["home"],
-
-                    "away":
-                        game["away"],
-
-                    "neutral":
-                        game["neutral"],
-
-                    "home_rating":
-                        home_rating,
-
-                    "away_rating":
-                        away_rating,
-
-                    "rating_diff":
-                        home_rating
-                        -
-                        away_rating,
-
-                    "actual_home_margin":
-                        game[
-                            "actual_home_margin"
-                        ],
-
-                    "market_home_spread":
-                        (
-                            line_lookup.get(
-                                int(
-                                    game["id"]
-                                )
-                            )
-                            if game["id"]
-                            is not None
-                            else None
-                        ),
-                }
-
-                records.append(
-                    record
-                )
-
-                usable_this_week += 1
-
-        print(
-            f"   Week {week:>2}: "
-            f"{usable_this_week:>3} "
-            "pregame composite matchups"
-        )
-
-        # Only AFTER predictions are recorded
-        # do we add this week's game data.
-        for game in week_games:
-
-            if game["id"] is None:
-                continue
-
-            box = get_advanced_box(
-                game["id"]
-            )
-
-            parsed = parse_advanced_game(
-                game,
-                box
-            )
-
-            if not parsed:
-                continue
-
-            for team, metrics in parsed.items():
-
-                update_history(
-                    histories[
-                        team
-                    ],
-                    metrics
-                )
-
-    print(
-        f"   Total usable {year}: "
-        f"{len(records)}"
-    )
-
-    return records
 
 
 # =============================================================================
@@ -1567,7 +2219,21 @@ def run_out_of_sample(
 ):
 
     scored = []
-    yearly = []
+
+    yearly_reports = []
+
+    print("")
+    print(
+        "=" * 78
+    )
+
+    print(
+        "ROLLING OUT-OF-SAMPLE TEST"
+    )
+
+    print(
+        "=" * 78
+    )
 
     for test_year in range(
         FIRST_TEST_YEAR,
@@ -1594,13 +2260,13 @@ def run_out_of_sample(
         )
 
         if (
-            len(training) < 200
-            or len(testing) < 50
+            len(training) < 100
+            or len(testing) < 25
         ):
 
             print(
                 f"⚠ Skipping {test_year}: "
-                "insufficient sample"
+                "insufficient sample."
             )
 
             continue
@@ -1610,6 +2276,7 @@ def run_out_of_sample(
         )
 
         predictions = []
+
         actuals = []
 
         year_scored = []
@@ -1638,15 +2305,15 @@ def run_out_of_sample(
                 hfa
             )
 
-            scored_record = dict(
+            output = dict(
                 record
             )
 
-            scored_record[
+            output[
                 "projected_home_margin"
             ] = projected
 
-            scored_record[
+            output[
                 "absolute_error"
             ] = abs(
                 projected
@@ -1662,7 +2329,7 @@ def run_out_of_sample(
 
             if market_spread is not None:
 
-                scored_record.update(
+                output.update(
                     evaluate_ats(
                         record[
                             "actual_home_margin"
@@ -1674,15 +2341,19 @@ def run_out_of_sample(
 
             else:
 
-                scored_record[
+                output[
                     "model_edge"
                 ] = None
 
-                scored_record[
+                output[
                     "absolute_edge"
                 ] = None
 
-                scored_record[
+                output[
+                    "model_side"
+                ] = None
+
+                output[
                     "ats_result"
                 ] = None
 
@@ -1697,14 +2368,14 @@ def run_out_of_sample(
             )
 
             year_scored.append(
-                scored_record
+                output
             )
 
             scored.append(
-                scored_record
+                output
             )
 
-        year_market = [
+        market_games = [
             game
             for game in year_scored
             if game.get(
@@ -1713,18 +2384,34 @@ def run_out_of_sample(
             is not None
         ]
 
-        yearly.append({
+        year_mae = mae(
+            predictions,
+            actuals
+        )
+
+        year_rmse = rmse(
+            predictions,
+            actuals
+        )
+
+        yearly_reports.append({
             "year":
                 test_year,
 
             "training_games":
-                len(training),
+                len(
+                    training
+                ),
 
             "test_games":
-                len(testing),
+                len(
+                    testing
+                ),
 
             "market_games":
-                len(year_market),
+                len(
+                    market_games
+                ),
 
             "rating_to_points":
                 round(
@@ -1742,7 +2429,7 @@ def run_out_of_sample(
                     3
                 ),
 
-            "r_squared":
+            "training_r_squared":
                 round(
                     model[
                         "r_squared"
@@ -1752,19 +2439,13 @@ def run_out_of_sample(
 
             "mae":
                 round(
-                    mae(
-                        predictions,
-                        actuals
-                    ),
+                    year_mae,
                     3
                 ),
 
             "rmse":
                 round(
-                    rmse(
-                        predictions,
-                        actuals
-                    ),
+                    year_rmse,
                     3
                 ),
         })
@@ -1785,6 +2466,11 @@ def run_out_of_sample(
         )
 
         print(
+            f"   Market games: "
+            f"{len(market_games)}"
+        )
+
+        print(
             f"   Rating → points: "
             f"{model['rating_to_points']:.3f}"
         )
@@ -1795,28 +2481,28 @@ def run_out_of_sample(
         )
 
         print(
-            f"   MAE: "
-            f"{mae(predictions, actuals):.3f}"
+            f"   Training R²: "
+            f"{model['r_squared']:.3f}"
         )
 
         print(
-            f"   RMSE: "
-            f"{rmse(predictions, actuals):.3f}"
+            f"   Test MAE: "
+            f"{year_mae:.3f}"
         )
 
         print(
-            f"   Market games: "
-            f"{len(year_market)}"
+            f"   Test RMSE: "
+            f"{year_rmse:.3f}"
         )
 
     return (
         scored,
-        yearly
+        yearly_reports
     )
 
 
 # =============================================================================
-# REPORT
+# ATS REPORTING
 # =============================================================================
 
 def summarize_ats(
@@ -1838,8 +2524,7 @@ def summarize_ats(
 
     wins = sum(
         1
-        for game
-        in graded
+        for game in graded
         if game[
             "ats_result"
         ] == "win"
@@ -1847,8 +2532,7 @@ def summarize_ats(
 
     losses = sum(
         1
-        for game
-        in graded
+        for game in graded
         if game[
             "ats_result"
         ] == "loss"
@@ -1856,20 +2540,33 @@ def summarize_ats(
 
     pushes = sum(
         1
-        for game
-        in graded
+        for game in graded
         if game[
             "ats_result"
         ] == "push"
     )
 
     decisions = (
-        wins + losses
+        wins
+        +
+        losses
+    )
+
+    win_rate = (
+        wins
+        /
+        decisions
+        *
+        100
+        if decisions
+        else None
     )
 
     return {
         "games":
-            len(graded),
+            len(
+                graded
+            ),
 
         "wins":
             wins,
@@ -1883,14 +2580,11 @@ def summarize_ats(
         "win_rate":
             (
                 round(
-                    wins
-                    /
-                    decisions
-                    *
-                    100,
+                    win_rate,
                     2
                 )
-                if decisions
+                if win_rate
+                is not None
                 else None
             ),
     }
@@ -1898,23 +2592,21 @@ def summarize_ats(
 
 def build_report(
     scored,
-    yearly
+    yearly_reports
 ):
 
     predictions = [
         game[
             "projected_home_margin"
         ]
-        for game
-        in scored
+        for game in scored
     ]
 
     actuals = [
         game[
             "actual_home_margin"
         ]
-        for game
-        in scored
+        for game in scored
     ]
 
     market_games = [
@@ -1930,7 +2622,7 @@ def build_report(
 
     for low, high in EDGE_BUCKETS:
 
-        bucket_games = [
+        games = [
             game
             for game in market_games
             if (
@@ -1945,7 +2637,7 @@ def build_report(
         ]
 
         summary = summarize_ats(
-            bucket_games
+            games
         )
 
         summary[
@@ -1956,9 +2648,58 @@ def build_report(
             else f"{low:.1f}+"
         )
 
+        summary[
+            "average_edge"
+        ] = (
+            round(
+                mean(
+                    [
+                        game[
+                            "absolute_edge"
+                        ]
+                        for game in games
+                    ]
+                ),
+                3
+            )
+            if games
+            else None
+        )
+
         buckets.append(
             summary
         )
+
+    # Candidate site categories.
+    watch = [
+        game
+        for game in market_games
+        if game[
+            "absolute_edge"
+        ] < 3.0
+    ]
+
+    edge = [
+        game
+        for game in market_games
+        if (
+            game[
+                "absolute_edge"
+            ] >= 3.0
+            and
+            game[
+                "absolute_edge"
+            ] < 7.0
+        )
+    ]
+
+    high_conviction = [
+        game
+        for game in market_games
+        if game[
+            "absolute_edge"
+        ] >= 7.0
+    ]
 
     return {
         "methodology": {
@@ -1968,26 +2709,34 @@ def build_report(
             "first_test_year":
                 FIRST_TEST_YEAR,
 
-            "minimum_prior_games":
-                MIN_PRIOR_GAMES,
+            "time_safe":
+                True,
+
+            "minimum_prior_plays":
+                MIN_PRIOR_PLAYS,
 
             "weights":
                 WEIGHTS,
 
-            "time_safe":
-                True,
-
             "description":
                 (
-                    "Weekly historical composite "
-                    "snapshots generated before "
-                    "the games being predicted."
+                    "Weekly play-level composite "
+                    "ratings built before each "
+                    "game using only completed "
+                    "prior weeks."
                 ),
         },
 
         "overall": {
             "games":
-                len(scored),
+                len(
+                    scored
+                ),
+
+            "market_games":
+                len(
+                    market_games
+                ),
 
             "mae":
                 round(
@@ -2006,20 +2755,36 @@ def build_report(
                     ),
                     3
                 ),
-
-            "market_games":
-                len(
-                    market_games
-                ),
         },
 
         "ats_edge_buckets":
             buckets,
 
+        "candidate_labels": {
+            "watch_under_3":
+                summarize_ats(
+                    watch
+                ),
+
+            "edge_3_to_7":
+                summarize_ats(
+                    edge
+                ),
+
+            "high_conviction_7_plus":
+                summarize_ats(
+                    high_conviction
+                ),
+        },
+
         "year_by_year":
-            yearly,
+            yearly_reports,
     }
 
+
+# =============================================================================
+# PRINT REPORT
+# =============================================================================
 
 def print_report(
     report
@@ -2027,7 +2792,7 @@ def print_report(
 
     print("")
     print(
-        "=" * 76
+        "=" * 78
     )
 
     print(
@@ -2035,7 +2800,7 @@ def print_report(
     )
 
     print(
-        "=" * 76
+        "=" * 78
     )
 
     overall = report[
@@ -2068,7 +2833,7 @@ def print_report(
     )
 
     print(
-        f"   Games: "
+        f"   Games with spread: "
         f"{overall['market_games']}"
     )
 
@@ -2100,6 +2865,34 @@ def print_report(
 
     print("")
     print(
+        "CANDIDATE SITE LABELS"
+    )
+
+    labels = report[
+        "candidate_labels"
+    ]
+
+    for label, summary in labels.items():
+
+        rate = (
+            f"{summary['win_rate']:.2f}%"
+            if summary[
+                "win_rate"
+            ]
+            is not None
+            else "N/A"
+        )
+
+        print(
+            f"   {label:<28} "
+            f"{summary['games']:>4} games | "
+            f"{summary['wins']:>4}-"
+            f"{summary['losses']:<4} | "
+            f"{rate}"
+        )
+
+    print("")
+    print(
         "YEAR-BY-YEAR CALIBRATION"
     )
 
@@ -2109,25 +2902,39 @@ def print_report(
 
         print(
             f"   {year['year']} | "
-            f"scale {year['rating_to_points']:.3f} | "
-            f"HFA {year['home_field']:.2f} | "
-            f"MAE {year['mae']:.2f}"
+            f"scale "
+            f"{year['rating_to_points']:.3f} | "
+            f"HFA "
+            f"{year['home_field']:.2f} | "
+            f"MAE "
+            f"{year['mae']:.2f}"
         )
 
     print("")
     print(
-        "=" * 76
+        "=" * 78
     )
 
     print(
-        "This script does NOT change "
-        "the live 2026 model."
+        "NOTE:"
     )
 
     print(
-        "=" * 76
+        "This validates the historical "
+        "in-season efficiency core. "
+        "It does not yet reproduce the "
+        "2026 preseason prior/portal/"
+        "returning-production layer."
     )
 
+    print(
+        "=" * 78
+    )
+
+
+# =============================================================================
+# SAVE
+# =============================================================================
 
 def save_report(
     report,
@@ -2185,7 +2992,7 @@ def main():
 
     print("")
     print(
-        "📊 Composite-model historical backtest"
+        "📊 CFB composite-model backtest"
     )
 
     print(
@@ -2194,8 +3001,13 @@ def main():
     )
 
     print(
-        f"   Out-of-sample seasons: "
+        f"   Out-of-sample testing: "
         f"{FIRST_TEST_YEAR}-{END_YEAR}"
+    )
+
+    print(
+        f"   Minimum prior sample: "
+        f"{MIN_PRIOR_PLAYS} plays"
     )
 
     records_by_year = {}
@@ -2207,7 +3019,7 @@ def main():
 
         print("")
         print(
-            "#" * 76
+            "#" * 78
         )
 
         print(
@@ -2215,7 +3027,7 @@ def main():
         )
 
         print(
-            "#" * 76
+            "#" * 78
         )
 
         games = get_games(
@@ -2229,21 +3041,21 @@ def main():
         records_by_year[
             year
         ] = build_year_records(
-            year,
-            games,
-            lines
-        )
+                year,
+                games,
+                lines
+            )
 
     (
         scored,
-        yearly
+        yearly_reports
     ) = run_out_of_sample(
         records_by_year
     )
 
     report = build_report(
         scored,
-        yearly
+        yearly_reports
     )
 
     print_report(
