@@ -29,28 +29,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests pandas
 
-      - name: Audit spread calibration
-        env:
-          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
-        run: |
-          python scripts/calibrate_spreads.py
-
-      - name: Backtest historical spreads
-        env:
-          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
-        run: |
-          python scripts/backtest_spreads.py
-
-      - name: Backtest composite model
-        env:
-          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
-        run: |
-          python scripts/backtest_composite.py
-
-      - name: Calibrate team home-field advantage
-        run: |
-          python scripts/calibrate_hfa.py
-
       - name: Update team analytics
         env:
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
@@ -73,10 +51,6 @@ jobs:
           git add data/schedule.json
           git add data/odds.json
           git add data/projections.json
-          git add data/calibration_report.json
-          git add data/backtest_report.json
-          git add data/composite_backtest_report.json
-          git add data/hfa_ratings.json
 
           git diff --staged --quiet || git commit -m "Update CFB analytics data"
 
