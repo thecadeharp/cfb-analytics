@@ -16,44 +16,43 @@ jobs:
 
     steps:
 
-      # Get repository files
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Install Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # Install everything our scripts need
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install requests pandas
 
-      # Run historical spread calibration audit
       - name: Audit spread calibration
         env:
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
         run: |
           python scripts/calibrate_spreads.py
 
-      # Run time-safe historical spread backtest
       - name: Backtest historical spreads
         env:
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
         run: |
           python scripts/backtest_spreads.py
 
-      # Update team analytics from CFBD
+      - name: Backtest composite model
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+        run: |
+          python scripts/backtest_composite.py
+
       - name: Update team analytics
         env:
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
         run: |
           python scripts/weekly_update.py
 
-      # Build schedules, odds, and projections
       - name: Build projections
         env:
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
@@ -61,7 +60,6 @@ jobs:
         run: |
           python scripts/build_projections.py
 
-      # Save any updated data back into GitHub
       - name: Commit updated analytics
         run: |
           git config --global user.name "github-actions[bot]"
@@ -73,6 +71,7 @@ jobs:
           git add data/projections.json
           git add data/calibration_report.json
           git add data/backtest_report.json
+          git add data/composite_backtest_report.json
 
           git diff --staged --quiet || git commit -m "Update CFB analytics data"
 
