@@ -4,43 +4,33 @@ calibrate_hfa.py
 
 Leakage-safe validation of team-specific home-field advantage.
 
-This script uses the already-created:
+Uses:
     data/composite_backtest_report.json
 
-NO API CALLS ARE MADE.
+NO API CALLS.
 
-GOAL
-----
-Determine whether team-specific HFA actually improves predictions over
-a single national home-field value.
+PRODUCTION PHILOSOPHY
+---------------------
+Neutral-site games:
+    HFA = 0.0
+    (handled by build_projections.py)
 
-For each historical test season:
+True home games:
+    HFA may vary by team.
 
-    Test 2023 -> HFA learned only from 2022
-    Test 2024 -> HFA learned only from 2022-2023
-    Test 2025 -> HFA learned only from 2022-2024
+Production constraints:
+    - No team receives negative home-field advantage.
+    - No team receives more than 4.0 points of HFA.
+    - Team estimates are shrunk toward the national baseline.
+    - Parameter choices are evaluated out of sample.
+
+For historical validation:
+
+    Test 2023 -> learn HFA from 2022 only
+    Test 2024 -> learn HFA from 2022-2023
+    Test 2025 -> learn HFA from 2022-2024
 
 The test season never contributes to its own HFA estimate.
-
-We compare:
-
-1. FLAT
-   Every home team receives the learned national HFA.
-
-2. RAW TEAM
-   Each team receives its raw historical home residual.
-
-3. SHRUNK TEAM
-   Team-specific HFA is pulled toward the national average.
-
-4. SHRUNK + CAPPED TEAM
-   Same shrinkage, but the team-specific modifier is bounded.
-
-We also test multiple shrinkage and cap combinations and select the
-best-performing configuration on historical out-of-sample predictions.
-
-The final 2026 HFA ratings are then estimated using all available
-historical residuals and the winning configuration.
 """
 
 import json
@@ -58,39 +48,45 @@ from collections import defaultdict
 INPUT_PATH = "data/composite_backtest_report.json"
 OUTPUT_PATH = "data/hfa_ratings.json"
 
-# We need at least this many historical home games before allowing
-# a raw team estimate to stand on its own.
+FIRST_HFA_TEST_YEAR = 2023
+
 MIN_TEAM_HOME_GAMES = 3
 
-# Candidate shrinkage strengths.
-#
-# weight = n / (n + K)
-#
-# Larger K = more conservative.
+# Larger value = stronger pull toward national average.
 SHRINKAGE_CANDIDATES = [
     10,
+    15,
     20,
+    25,
     30,
     40,
+    50,
     60,
     80,
+    100,
 ]
 
-# Maximum number of points a team may move above/below national HFA.
-CAP_CANDIDATES = [
-    0.5,
-    1.0,
-    1.5,
-    2.0,
-    2.5,
+# We will test whether allowing elite home fields to reach
+# higher levels actually improves prediction accuracy.
+MAX_HFA_CANDIDATES = [
     3.0,
+    3.25,
+    3.5,
+    3.75,
+    4.0,
 ]
 
-# Simple benchmark version for the uncapped shrunk model.
-DEFAULT_SHRINKAGE = 30
+# A real home team is never penalized simply for being at home.
+MIN_HFA = 0.0
 
-# First season with a previous test-season sample available.
-FIRST_HFA_TEST_YEAR = 2023
+# Hard philosophical production ceiling.
+ABSOLUTE_MAX_HFA = 4.0
+
+TOP_CONFIGS_TO_PRINT = 12
+
+# "Near ceiling" is useful for detecting whether too many teams
+# are getting jammed against the upper constraint.
+CEILING_NEAR_DISTANCE = 0.10
 
 
 # =============================================================================
@@ -100,79 +96,16 @@ FIRST_HFA_TEST_YEAR = 2023
 def safe_number(value, default=None):
 
     try:
-
         if value is None:
             return default
 
         return float(value)
 
-    except (
-        TypeError,
-        ValueError
-    ):
-
+    except (TypeError, ValueError):
         return default
 
 
-def mean(values):
-
-    clean = [
-        value
-        for value in values
-        if value is not None
-    ]
-
-    if not clean:
-        return None
-
-    return statistics.mean(
-        clean
-    )
-
-
-def mae(predictions, actuals):
-
-    if not predictions:
-        return None
-
-    return statistics.mean(
-        abs(
-            prediction - actual
-        )
-        for prediction, actual
-        in zip(
-            predictions,
-            actuals
-        )
-    )
-
-
-def rmse(predictions, actuals):
-
-    if not predictions:
-        return None
-
-    return math.sqrt(
-        statistics.mean(
-            (
-                prediction
-                -
-                actual
-            ) ** 2
-            for prediction, actual
-            in zip(
-                predictions,
-                actuals
-            )
-        )
-    )
-
-
-def clamp(
-    value,
-    low,
-    high
-):
+def clamp(value, low, high):
 
     return max(
         low,
@@ -183,17 +116,29 @@ def clamp(
     )
 
 
-def round_or_none(
-    value,
-    digits=3
-):
+def calculate_mae(predictions, actuals):
 
-    if value is None:
+    if not predictions:
         return None
 
-    return round(
-        value,
-        digits
+    return statistics.mean(
+        abs(prediction - actual)
+        for prediction, actual
+        in zip(predictions, actuals)
+    )
+
+
+def calculate_rmse(predictions, actuals):
+
+    if not predictions:
+        return None
+
+    return math.sqrt(
+        statistics.mean(
+            (prediction - actual) ** 2
+            for prediction, actual
+            in zip(predictions, actuals)
+        )
     )
 
 
@@ -203,18 +148,11 @@ def round_or_none(
 
 def load_backtest():
 
-    if not os.path.exists(
-        INPUT_PATH
-    ):
+    if not os.path.exists(INPUT_PATH):
 
         print("")
-        print(
-            f"❌ Missing {INPUT_PATH}"
-        )
-
-        print(
-            "Run scripts/backtest_composite.py first."
-        )
+        print(f"❌ Missing {INPUT_PATH}")
+        print("Run scripts/backtest_composite.py first.")
 
         sys.exit(1)
 
@@ -224,9 +162,7 @@ def load_backtest():
         encoding="utf-8"
     ) as file:
 
-        data = json.load(
-            file
-        )
+        data = json.load(file)
 
     games = data.get(
         "games",
@@ -280,10 +216,7 @@ def load_backtest():
 
         sys.exit(1)
 
-    return (
-        games,
-        year_scales
-    )
+    return games, year_scales
 
 
 # =============================================================================
@@ -301,6 +234,9 @@ def build_home_residuals(
     missing_skipped = 0
 
     for game in games:
+
+        # Neutral-site games are deliberately excluded
+        # from learning team home-field advantage.
 
         if game.get(
             "neutral"
@@ -345,23 +281,15 @@ def build_home_residuals(
             continue
 
         try:
+            year = int(year)
 
-            year = int(
-                year
-            )
-
-        except (
-            TypeError,
-            ValueError
-        ):
+        except (TypeError, ValueError):
 
             missing_skipped += 1
             continue
 
-        rating_to_points = (
-            year_scales.get(
-                year
-            )
+        rating_to_points = year_scales.get(
+            year
         )
 
         if rating_to_points is None:
@@ -369,10 +297,8 @@ def build_home_residuals(
             missing_skipped += 1
             continue
 
-        # Strength-only expected margin.
-        #
-        # We deliberately exclude HFA here because this script
-        # is trying to estimate HFA from the remaining residual.
+        # Expected margin from team strength only.
+        # HFA is intentionally omitted here.
 
         strength_margin = (
             rating_diff
@@ -387,6 +313,7 @@ def build_home_residuals(
         )
 
         residuals.append({
+
             "year":
                 year,
 
@@ -428,13 +355,11 @@ def build_home_residuals(
     )
 
     print(
-        f"   Non-neutral games: "
-        f"{len(residuals)}"
+        f"   Non-neutral games: {len(residuals)}"
     )
 
     print(
-        f"   Neutral games skipped: "
-        f"{neutral_skipped}"
+        f"   Neutral games skipped: {neutral_skipped}"
     )
 
     if missing_skipped:
@@ -448,7 +373,7 @@ def build_home_residuals(
 
 
 # =============================================================================
-# HFA ESTIMATION
+# BUILD TRAINING SAMPLE
 # =============================================================================
 
 def build_training_hfa(
@@ -456,10 +381,9 @@ def build_training_hfa(
 ):
 
     if not training_residuals:
-
         return None
 
-    national_hfa = statistics.mean(
+    national_raw_hfa = statistics.mean(
         game[
             "home_residual"
         ]
@@ -490,10 +414,9 @@ def build_training_hfa(
         teams[
             team
         ] = {
+
             "games":
-                len(
-                    values
-                ),
+                len(values),
 
             "raw_hfa":
                 statistics.mean(
@@ -502,52 +425,51 @@ def build_training_hfa(
         }
 
     return {
-        "national_hfa":
-            national_hfa,
+
+        "national_raw_hfa":
+            national_raw_hfa,
 
         "teams":
             teams,
     }
 
 
-def team_hfa_raw(
-    team,
-    training
+# =============================================================================
+# HFA MODELS
+# =============================================================================
+
+def flat_hfa(
+    training,
+    max_hfa
 ):
 
-    national = training[
-        "national_hfa"
-    ]
-
-    info = training[
-        "teams"
-    ].get(
-        team
+    return clamp(
+        training[
+            "national_raw_hfa"
+        ],
+        MIN_HFA,
+        max_hfa
     )
 
-    if (
-        not info
-        or info[
-            "games"
-        ] < MIN_TEAM_HOME_GAMES
-    ):
 
-        return national
-
-    return info[
-        "raw_hfa"
-    ]
-
-
-def team_hfa_shrunk(
+def team_hfa(
     team,
     training,
-    shrinkage_games
+    shrinkage_games,
+    max_hfa
 ):
 
-    national = training[
-        "national_hfa"
+    national_raw = training[
+        "national_raw_hfa"
     ]
+
+    # The baseline itself must obey production bounds.
+
+    national_bounded = clamp(
+        national_raw,
+        MIN_HFA,
+        max_hfa
+    )
 
     info = training[
         "teams"
@@ -562,15 +484,21 @@ def team_hfa_shrunk(
         ] < MIN_TEAM_HOME_GAMES
     ):
 
-        return national
+        return national_bounded
 
     n = info[
         "games"
     ]
 
-    raw = info[
+    raw_team_hfa = info[
         "raw_hfa"
     ]
+
+    # Empirical-Bayes-style shrinkage:
+    #
+    # n / (n + K)
+    #
+    # Small samples remain close to national average.
 
     weight = (
         n
@@ -582,66 +510,39 @@ def team_hfa_shrunk(
         )
     )
 
-    modifier = (
-        raw
+    raw_modifier = (
+        raw_team_hfa
         -
-        national
+        national_raw
     )
 
-    return (
-        national
+    shrunk_hfa = (
+        national_raw
         +
         weight
         *
-        modifier
+        raw_modifier
     )
 
+    # Critical production rule:
+    #
+    # Home field can help by 0 to max_hfa points.
+    # It can never become a negative home penalty.
 
-def team_hfa_shrunk_capped(
-    team,
-    training,
-    shrinkage_games,
-    modifier_cap
-):
-
-    national = training[
-        "national_hfa"
-    ]
-
-    shrunk = team_hfa_shrunk(
-        team,
-        training,
-        shrinkage_games
-    )
-
-    modifier = (
-        shrunk
-        -
-        national
-    )
-
-    modifier = clamp(
-        modifier,
-        -modifier_cap,
-        modifier_cap
-    )
-
-    return (
-        national
-        +
-        modifier
+    return clamp(
+        shrunk_hfa,
+        MIN_HFA,
+        max_hfa
     )
 
 
 # =============================================================================
-# SCORE A PARTICULAR HFA SYSTEM
+# SCORE FLAT MODEL
 # =============================================================================
 
-def score_model(
-    model_name,
+def score_flat_model(
     residuals,
-    shrinkage_games=None,
-    modifier_cap=None
+    max_hfa
 ):
 
     years = sorted(
@@ -657,8 +558,8 @@ def score_model(
         )
     )
 
-    all_predictions = []
-    all_actuals = []
+    predictions = []
+    actuals = []
 
     yearly = []
 
@@ -686,11 +587,15 @@ def score_model(
             not training_games
             or not test_games
         ):
-
             continue
 
         training = build_training_hfa(
             training_games
+        )
+
+        hfa = flat_hfa(
+            training,
+            max_hfa
         )
 
         year_predictions = []
@@ -698,49 +603,7 @@ def score_model(
 
         for game in test_games:
 
-            home = game[
-                "home"
-            ]
-
-            if model_name == "flat":
-
-                hfa = training[
-                    "national_hfa"
-                ]
-
-            elif model_name == "raw_team":
-
-                hfa = team_hfa_raw(
-                    home,
-                    training
-                )
-
-            elif model_name == "shrunk_team":
-
-                hfa = team_hfa_shrunk(
-                    home,
-                    training,
-                    shrinkage_games
-                )
-
-            elif model_name == "shrunk_capped":
-
-                hfa = (
-                    team_hfa_shrunk_capped(
-                        home,
-                        training,
-                        shrinkage_games,
-                        modifier_cap
-                    )
-                )
-
-            else:
-
-                raise ValueError(
-                    f"Unknown model: {model_name}"
-                )
-
-            predicted_margin = (
+            prediction = (
                 game[
                     "strength_margin"
                 ]
@@ -748,27 +611,28 @@ def score_model(
                 hfa
             )
 
-            actual_margin = game[
+            actual = game[
                 "actual_home_margin"
             ]
 
+            predictions.append(
+                prediction
+            )
+
+            actuals.append(
+                actual
+            )
+
             year_predictions.append(
-                predicted_margin
+                prediction
             )
 
             year_actuals.append(
-                actual_margin
-            )
-
-            all_predictions.append(
-                predicted_margin
-            )
-
-            all_actuals.append(
-                actual_margin
+                actual
             )
 
         yearly.append({
+
             "year":
                 test_year,
 
@@ -782,17 +646,23 @@ def score_model(
                     test_games
                 ),
 
-            "learned_national_hfa":
+            "learned_raw_national_hfa":
                 round(
                     training[
-                        "national_hfa"
+                        "national_raw_hfa"
                     ],
+                    3
+                ),
+
+            "applied_flat_hfa":
+                round(
+                    hfa,
                     3
                 ),
 
             "mae":
                 round(
-                    mae(
+                    calculate_mae(
                         year_predictions,
                         year_actuals
                     ),
@@ -801,7 +671,7 @@ def score_model(
 
             "rmse":
                 round(
-                    rmse(
+                    calculate_rmse(
                         year_predictions,
                         year_actuals
                     ),
@@ -810,30 +680,28 @@ def score_model(
         })
 
     return {
+
         "model":
-            model_name,
+            "flat",
 
-        "shrinkage_games":
-            shrinkage_games,
-
-        "modifier_cap":
-            modifier_cap,
+        "max_hfa":
+            max_hfa,
 
         "games":
             len(
-                all_predictions
+                predictions
             ),
 
         "mae":
-            mae(
-                all_predictions,
-                all_actuals
+            calculate_mae(
+                predictions,
+                actuals
             ),
 
         "rmse":
-            rmse(
-                all_predictions,
-                all_actuals
+            calculate_rmse(
+                predictions,
+                actuals
             ),
 
         "year_by_year":
@@ -842,7 +710,222 @@ def score_model(
 
 
 # =============================================================================
-# TEST ALL HFA SYSTEMS
+# SCORE TEAM-SPECIFIC MODEL
+# =============================================================================
+
+def score_team_model(
+    residuals,
+    shrinkage_games,
+    max_hfa
+):
+
+    years = sorted(
+        set(
+            game[
+                "year"
+            ]
+            for game
+            in residuals
+            if game[
+                "year"
+            ] >= FIRST_HFA_TEST_YEAR
+        )
+    )
+
+    predictions = []
+    actuals = []
+
+    yearly = []
+
+    total_floor_hits = 0
+    total_ceiling_hits = 0
+
+    for test_year in years:
+
+        training_games = [
+            game
+            for game
+            in residuals
+            if game[
+                "year"
+            ] < test_year
+        ]
+
+        test_games = [
+            game
+            for game
+            in residuals
+            if game[
+                "year"
+            ] == test_year
+        ]
+
+        if (
+            not training_games
+            or not test_games
+        ):
+            continue
+
+        training = build_training_hfa(
+            training_games
+        )
+
+        year_predictions = []
+        year_actuals = []
+
+        year_floor_hits = 0
+        year_ceiling_hits = 0
+
+        for game in test_games:
+
+            hfa = team_hfa(
+                game[
+                    "home"
+                ],
+                training,
+                shrinkage_games,
+                max_hfa
+            )
+
+            if hfa <= (
+                MIN_HFA
+                +
+                CEILING_NEAR_DISTANCE
+            ):
+                year_floor_hits += 1
+
+            if hfa >= (
+                max_hfa
+                -
+                CEILING_NEAR_DISTANCE
+            ):
+                year_ceiling_hits += 1
+
+            prediction = (
+                game[
+                    "strength_margin"
+                ]
+                +
+                hfa
+            )
+
+            actual = game[
+                "actual_home_margin"
+            ]
+
+            predictions.append(
+                prediction
+            )
+
+            actuals.append(
+                actual
+            )
+
+            year_predictions.append(
+                prediction
+            )
+
+            year_actuals.append(
+                actual
+            )
+
+        total_floor_hits += (
+            year_floor_hits
+        )
+
+        total_ceiling_hits += (
+            year_ceiling_hits
+        )
+
+        yearly.append({
+
+            "year":
+                test_year,
+
+            "training_games":
+                len(
+                    training_games
+                ),
+
+            "test_games":
+                len(
+                    test_games
+                ),
+
+            "learned_raw_national_hfa":
+                round(
+                    training[
+                        "national_raw_hfa"
+                    ],
+                    3
+                ),
+
+            "mae":
+                round(
+                    calculate_mae(
+                        year_predictions,
+                        year_actuals
+                    ),
+                    3
+                ),
+
+            "rmse":
+                round(
+                    calculate_rmse(
+                        year_predictions,
+                        year_actuals
+                    ),
+                    3
+                ),
+
+            "near_floor_games":
+                year_floor_hits,
+
+            "near_ceiling_games":
+                year_ceiling_hits,
+        })
+
+    return {
+
+        "model":
+            "team_specific",
+
+        "shrinkage_games":
+            shrinkage_games,
+
+        "max_hfa":
+            max_hfa,
+
+        "games":
+            len(
+                predictions
+            ),
+
+        "mae":
+            calculate_mae(
+                predictions,
+                actuals
+            ),
+
+        "rmse":
+            calculate_rmse(
+                predictions,
+                actuals
+            ),
+
+        "near_floor_games":
+            total_floor_hits,
+
+        "near_ceiling_games":
+            total_ceiling_hits,
+
+        "year_by_year":
+            yearly,
+    }
+
+
+# =============================================================================
+# VALIDATION GRID
 # =============================================================================
 
 def run_validation(
@@ -851,7 +934,7 @@ def run_validation(
 
     print("")
     print(
-        "=" * 82
+        "=" * 88
     )
 
     print(
@@ -859,120 +942,127 @@ def run_validation(
     )
 
     print(
-        "=" * 82
+        "=" * 88
     )
 
-    flat = score_model(
-        "flat",
-        residuals
-    )
+    # Flat benchmark.
+    #
+    # 4.0 is used as the ceiling because it is our absolute
+    # production maximum.
 
-    raw = score_model(
-        "raw_team",
-        residuals
-    )
-
-    shrunk = score_model(
-        "shrunk_team",
+    flat = score_flat_model(
         residuals,
-        shrinkage_games=DEFAULT_SHRINKAGE
+        ABSOLUTE_MAX_HFA
     )
 
     grid_results = []
 
     for shrinkage in SHRINKAGE_CANDIDATES:
 
-        for cap in CAP_CANDIDATES:
+        for max_hfa in MAX_HFA_CANDIDATES:
 
-            result = score_model(
-                "shrunk_capped",
+            result = score_team_model(
                 residuals,
-                shrinkage_games=shrinkage,
-                modifier_cap=cap
+                shrinkage,
+                max_hfa
             )
 
             grid_results.append(
                 result
             )
 
-    valid_grid = [
-        result
-        for result
-        in grid_results
-        if result[
-            "mae"
-        ] is not None
-    ]
-
-    valid_grid.sort(
-        key=lambda result:
-            (
-                result[
-                    "mae"
-                ],
-                result[
-                    "rmse"
-                ]
-            )
+    grid_results.sort(
+        key=lambda result: (
+            result[
+                "mae"
+            ],
+            result[
+                "rmse"
+            ],
+            result[
+                "near_ceiling_games"
+            ]
+        )
     )
 
-    if not valid_grid:
+    if not grid_results:
 
         print(
-            "❌ No HFA validation models could be scored."
+            "❌ No team-specific configurations scored."
         )
 
         sys.exit(1)
 
-    best = valid_grid[
+    best = grid_results[
         0
     ]
 
     print("")
     print(
-        "OUT-OF-SAMPLE MODEL COMPARISON"
+        "FLAT HFA BENCHMARK"
     )
 
     print(
-        f"   FLAT HFA            | "
-        f"{flat['games']:>4} games | "
-        f"MAE {flat['mae']:.3f} | "
-        f"RMSE {flat['rmse']:.3f}"
+        f"   Games: {flat['games']}"
     )
 
     print(
-        f"   RAW TEAM HFA        | "
-        f"{raw['games']:>4} games | "
-        f"MAE {raw['mae']:.3f} | "
-        f"RMSE {raw['rmse']:.3f}"
+        f"   MAE:   {flat['mae']:.3f}"
     )
 
     print(
-        f"   SHRUNK TEAM HFA     | "
-        f"{shrunk['games']:>4} games | "
-        f"K={DEFAULT_SHRINKAGE:<2} | "
-        f"MAE {shrunk['mae']:.3f} | "
-        f"RMSE {shrunk['rmse']:.3f}"
+        f"   RMSE:  {flat['rmse']:.3f}"
     )
 
     print("")
     print(
-        "BEST SHRUNK + CAPPED CONFIGURATION"
+        f"TOP {TOP_CONFIGS_TO_PRINT} "
+        f"TEAM-SPECIFIC CONFIGURATIONS"
+    )
+
+    print("")
+
+    for rank, result in enumerate(
+        grid_results[
+            :TOP_CONFIGS_TO_PRINT
+        ],
+        start=1
+    ):
+
+        improvement = (
+            flat[
+                "mae"
+            ]
+            -
+            result[
+                "mae"
+            ]
+        )
+
+        print(
+            f"   {rank:>2}. "
+            f"K={result['shrinkage_games']:<3} | "
+            f"MAX={result['max_hfa']:.2f} | "
+            f"MAE {result['mae']:.3f} | "
+            f"RMSE {result['rmse']:.3f} | "
+            f"vs flat {improvement:+.3f} | "
+            f"ceiling games "
+            f"{result['near_ceiling_games']}"
+        )
+
+    print("")
+    print(
+        "MATHEMATICAL WINNER"
     )
 
     print(
-        f"   Shrinkage games: "
+        f"   Shrinkage K: "
         f"{best['shrinkage_games']}"
     )
 
     print(
-        f"   Team modifier cap: "
-        f"±{best['modifier_cap']:.1f} pts"
-    )
-
-    print(
-        f"   Games: "
-        f"{best['games']}"
+        f"   Maximum HFA: "
+        f"{best['max_hfa']:.2f}"
     )
 
     print(
@@ -985,24 +1075,14 @@ def run_validation(
         f"{best['rmse']:.3f}"
     )
 
-    flat_improvement = (
-        flat[
-            "mae"
-        ]
-        -
-        best[
-            "mae"
-        ]
-    )
-
     print(
         f"   MAE improvement vs flat: "
-        f"{flat_improvement:+.3f} pts/game"
+        f"{flat['mae'] - best['mae']:+.3f}"
     )
 
     print("")
     print(
-        "BEST MODEL YEAR BY YEAR"
+        "WINNER YEAR BY YEAR"
     )
 
     for item in best[
@@ -1011,11 +1091,13 @@ def run_validation(
 
         print(
             f"   {item['year']} | "
-            f"national HFA "
-            f"{item['learned_national_hfa']:+.3f} | "
+            f"raw national "
+            f"{item['learned_raw_national_hfa']:+.3f} | "
             f"{item['test_games']:>4} games | "
             f"MAE {item['mae']:.3f} | "
-            f"RMSE {item['rmse']:.3f}"
+            f"RMSE {item['rmse']:.3f} | "
+            f"floor {item['near_floor_games']} | "
+            f"ceiling {item['near_ceiling_games']}"
         )
 
     print("")
@@ -1031,137 +1113,96 @@ def run_validation(
     ):
 
         print(
-            "✅ Team-specific HFA improved "
-            "out-of-sample margin accuracy."
+            "✅ Constrained team-specific HFA "
+            "beat flat HFA out of sample."
         )
 
     else:
 
         print(
-            "❌ Team-specific HFA did not beat "
-            "a flat national HFA."
+            "❌ Constrained team-specific HFA "
+            "did not beat flat HFA."
         )
 
     return {
+
         "flat":
             flat,
 
-        "raw_team":
-            raw,
-
-        "shrunk_team":
-            shrunk,
-
-        "best_shrunk_capped":
+        "best":
             best,
 
-        "grid_results":
-            grid_results,
+        "top_configurations":
+            grid_results[
+                :TOP_CONFIGS_TO_PRINT
+            ],
 
-        "mae_improvement_vs_flat":
-            flat_improvement,
+        "all_configurations":
+            grid_results,
     }
 
 
 # =============================================================================
-# FINAL 2026 HFA RATINGS
+# BUILD FINAL 2026 TEAM HFA TABLE
 # =============================================================================
 
-def build_final_2026_ratings(
+def build_final_ratings(
     residuals,
-    best_model
+    configuration
 ):
 
-    national_hfa = statistics.mean(
-        game[
-            "home_residual"
-        ]
-        for game
-        in residuals
+    training = build_training_hfa(
+        residuals
     )
 
-    by_team = defaultdict(
-        list
-    )
+    national_raw = training[
+        "national_raw_hfa"
+    ]
 
-    by_team_year = defaultdict(
-        lambda:
-            defaultdict(
-                list
-            )
-    )
-
-    for game in residuals:
-
-        team = game[
-            "home"
-        ]
-
-        year = game[
-            "year"
-        ]
-
-        value = game[
-            "home_residual"
-        ]
-
-        by_team[
-            team
-        ].append(
-            value
-        )
-
-        by_team_year[
-            team
-        ][
-            year
-        ].append(
-            value
-        )
-
-    shrinkage = best_model[
+    shrinkage = configuration[
         "shrinkage_games"
     ]
 
-    cap = best_model[
-        "modifier_cap"
-    ]
+    max_hfa = min(
+        configuration[
+            "max_hfa"
+        ],
+        ABSOLUTE_MAX_HFA
+    )
+
+    national_applied = clamp(
+        national_raw,
+        MIN_HFA,
+        max_hfa
+    )
+
+    team_names = sorted(
+        training[
+            "teams"
+        ].keys()
+    )
 
     teams = []
 
-    for team in sorted(
-        by_team
-    ):
+    for team in team_names:
 
-        values = by_team[
+        info = training[
+            "teams"
+        ][
             team
         ]
 
-        n = len(
-            values
-        )
+        n = info[
+            "games"
+        ]
 
-        raw_hfa = statistics.mean(
-            values
-        )
+        raw_hfa = info[
+            "raw_hfa"
+        ]
 
-        raw_modifier = (
-            raw_hfa
-            -
-            national_hfa
-        )
+        if n >= MIN_TEAM_HOME_GAMES:
 
-        if (
-            n
-            <
-            MIN_TEAM_HOME_GAMES
-        ):
-
-            team_weight = 0.0
-
-        else:
-
-            team_weight = (
+            weight = (
                 n
                 /
                 (
@@ -1171,72 +1212,47 @@ def build_final_2026_ratings(
                 )
             )
 
-        shrunk_modifier = (
-            raw_modifier
-            *
-            team_weight
+        else:
+
+            weight = 0.0
+
+        raw_modifier = (
+            raw_hfa
+            -
+            national_raw
         )
 
-        capped_modifier = clamp(
-            shrunk_modifier,
-            -cap,
-            cap
-        )
-
-        final_hfa = (
-            national_hfa
+        shrunk_unbounded = (
+            national_raw
             +
-            capped_modifier
+            weight
+            *
+            raw_modifier
         )
 
-        yearly = {}
+        final_hfa = clamp(
+            shrunk_unbounded,
+            MIN_HFA,
+            max_hfa
+        )
 
-        for year in sorted(
-            by_team_year[
-                team
-            ]
-        ):
-
-            year_values = (
-                by_team_year[
-                    team
-                ][
-                    year
-                ]
-            )
-
-            yearly[
-                str(
-                    year
-                )
-            ] = {
-                "games":
-                    len(
-                        year_values
-                    ),
-
-                "raw_hfa":
-                    round(
-                        statistics.mean(
-                            year_values
-                        ),
-                        3
-                    ),
-            }
+        modifier_vs_baseline = (
+            final_hfa
+            -
+            national_applied
+        )
 
         if n >= 20:
-
             reliability = "HIGH"
 
         elif n >= 12:
-
             reliability = "MEDIUM"
 
         else:
-
             reliability = "LOW"
 
         teams.append({
+
             "team":
                 team,
 
@@ -1255,21 +1271,15 @@ def build_final_2026_ratings(
                     3
                 ),
 
-            "team_weight":
+            "shrinkage_weight":
                 round(
-                    team_weight,
+                    weight,
                     3
                 ),
 
-            "shrunk_modifier":
+            "shrunk_unbounded_hfa":
                 round(
-                    shrunk_modifier,
-                    3
-                ),
-
-            "capped_modifier":
-                round(
-                    capped_modifier,
+                    shrunk_unbounded,
                     3
                 ),
 
@@ -1279,11 +1289,32 @@ def build_final_2026_ratings(
                     3
                 ),
 
+            "modifier_vs_national":
+                round(
+                    modifier_vs_baseline,
+                    3
+                ),
+
+            "at_floor":
+                (
+                    final_hfa
+                    <=
+                    MIN_HFA
+                    +
+                    CEILING_NEAR_DISTANCE
+                ),
+
+            "at_ceiling":
+                (
+                    final_hfa
+                    >=
+                    max_hfa
+                    -
+                    CEILING_NEAR_DISTANCE
+                ),
+
             "reliability":
                 reliability,
-
-            "year_by_year":
-                yearly,
         })
 
     teams.sort(
@@ -1295,14 +1326,18 @@ def build_final_2026_ratings(
     )
 
     return {
-        "national_hfa":
-            national_hfa,
+
+        "national_raw_hfa":
+            national_raw,
+
+        "national_applied_hfa":
+            national_applied,
 
         "shrinkage_games":
             shrinkage,
 
-        "modifier_cap":
-            cap,
+        "max_hfa":
+            max_hfa,
 
         "teams":
             teams,
@@ -1310,119 +1345,10 @@ def build_final_2026_ratings(
 
 
 # =============================================================================
-# NATIONAL HFA SUMMARY
-# =============================================================================
-
-def national_summary(
-    residuals
-):
-
-    values = [
-        game[
-            "home_residual"
-        ]
-        for game
-        in residuals
-    ]
-
-    national = statistics.mean(
-        values
-    )
-
-    std = statistics.stdev(
-        values
-    )
-
-    se = (
-        std
-        /
-        math.sqrt(
-            len(
-                values
-            )
-        )
-    )
-
-    by_year = defaultdict(
-        list
-    )
-
-    for game in residuals:
-
-        by_year[
-            game[
-                "year"
-            ]
-        ].append(
-            game[
-                "home_residual"
-            ]
-        )
-
-    yearly = []
-
-    for year in sorted(
-        by_year
-    ):
-
-        year_values = by_year[
-            year
-        ]
-
-        yearly.append({
-            "year":
-                year,
-
-            "games":
-                len(
-                    year_values
-                ),
-
-            "hfa":
-                round(
-                    statistics.mean(
-                        year_values
-                    ),
-                    3
-                ),
-        })
-
-    return {
-        "games":
-            len(
-                values
-            ),
-
-        "hfa":
-            national,
-
-        "standard_deviation":
-            std,
-
-        "standard_error":
-            se,
-
-        "ci_95_low":
-            national
-            -
-            1.96 * se,
-
-        "ci_95_high":
-            national
-            +
-            1.96 * se,
-
-        "year_by_year":
-            yearly,
-    }
-
-
-# =============================================================================
-# PRINT FINAL RATINGS
+# PRINT FINAL TABLE
 # =============================================================================
 
 def print_final_ratings(
-    national,
     final_ratings
 ):
 
@@ -1430,54 +1356,95 @@ def print_final_ratings(
         "teams"
     ]
 
-    print("")
-    print(
-        "=" * 82
-    )
+    max_hfa = final_ratings[
+        "max_hfa"
+    ]
 
-    print(
-        "FINAL 2026 HOME-FIELD RATINGS"
-    )
+    ceiling_teams = [
+        team
+        for team in teams
+        if team[
+            "at_ceiling"
+        ]
+    ]
 
-    print(
-        "=" * 82
-    )
+    floor_teams = [
+        team
+        for team in teams
+        if team[
+            "at_floor"
+        ]
+    ]
 
-    print("")
-    print(
-        "NATIONAL HOME-FIELD ADVANTAGE"
-    )
-
-    print(
-        f"   Games: "
-        f"{national['games']}"
-    )
-
-    print(
-        f"   Historical HFA: "
-        f"{national['hfa']:+.3f} points"
-    )
-
-    print(
-        f"   95% CI: "
-        f"{national['ci_95_low']:+.3f} "
-        f"to "
-        f"{national['ci_95_high']:+.3f}"
-    )
+    four_point_teams = [
+        team
+        for team in teams
+        if team[
+            "final_hfa"
+        ] >= 3.90
+    ]
 
     print("")
     print(
-        "FINAL MODEL PARAMETERS"
+        "=" * 88
     )
 
     print(
-        f"   Shrinkage games: "
+        "FINAL 2026 CONSTRAINED HOME-FIELD RATINGS"
+    )
+
+    print(
+        "=" * 88
+    )
+
+    print("")
+    print(
+        "PRODUCTION PARAMETERS"
+    )
+
+    print(
+        f"   Historical raw national HFA: "
+        f"{final_ratings['national_raw_hfa']:+.3f}"
+    )
+
+    print(
+        f"   Applied national baseline: "
+        f"{final_ratings['national_applied_hfa']:+.3f}"
+    )
+
+    print(
+        f"   Shrinkage K: "
         f"{final_ratings['shrinkage_games']}"
     )
 
     print(
-        f"   Team modifier cap: "
-        f"±{final_ratings['modifier_cap']:.1f}"
+        f"   Maximum home-field value: "
+        f"{max_hfa:.2f}"
+    )
+
+    print(
+        f"   Minimum home-field value: "
+        f"{MIN_HFA:.2f}"
+    )
+
+    print("")
+    print(
+        "CEILING / FLOOR DIAGNOSTICS"
+    )
+
+    print(
+        f"   Teams within 0.10 of model ceiling: "
+        f"{len(ceiling_teams)}"
+    )
+
+    print(
+        f"   Teams at 3.90+ HFA: "
+        f"{len(four_point_teams)}"
+    )
+
+    print(
+        f"   Teams within 0.10 of zero: "
+        f"{len(floor_teams)}"
     )
 
     print("")
@@ -1494,8 +1461,8 @@ def print_final_ratings(
             f"   {rank:>2}. "
             f"{item['team']:<24} "
             f"{item['final_hfa']:+.2f} | "
-            f"modifier "
-            f"{item['capped_modifier']:+.2f} | "
+            f"vs national "
+            f"{item['modifier_vs_national']:+.2f} | "
             f"raw "
             f"{item['raw_hfa']:+.2f} | "
             f"{item['home_games']:>2} games | "
@@ -1507,13 +1474,13 @@ def print_final_ratings(
         "WEAKEST ADJUSTED HOME FIELDS"
     )
 
-    weakest = list(
-        reversed(
-            teams[
-                -20:
+    weakest = sorted(
+        teams,
+        key=lambda item:
+            item[
+                "final_hfa"
             ]
-        )
-    )
+    )[:20]
 
     for rank, item in enumerate(
         weakest,
@@ -1524,8 +1491,8 @@ def print_final_ratings(
             f"   {rank:>2}. "
             f"{item['team']:<24} "
             f"{item['final_hfa']:+.2f} | "
-            f"modifier "
-            f"{item['capped_modifier']:+.2f} | "
+            f"vs national "
+            f"{item['modifier_vs_national']:+.2f} | "
             f"raw "
             f"{item['raw_hfa']:+.2f} | "
             f"{item['home_games']:>2} games | "
@@ -1534,7 +1501,7 @@ def print_final_ratings(
 
     print("")
     print(
-        "=" * 82
+        "=" * 88
     )
 
 
@@ -1543,19 +1510,28 @@ def print_final_ratings(
 # =============================================================================
 
 def save_output(
-    national,
     validation,
     final_ratings
 ):
 
     output = {
+
         "methodology": {
+
             "description":
                 (
-                    "Leakage-safe team-specific HFA validation. "
-                    "Each historical test season uses only prior "
-                    "seasons to estimate national and team HFA."
+                    "Leakage-safe constrained team-specific "
+                    "home-field validation."
                 ),
+
+            "neutral_site_hfa":
+                0.0,
+
+            "minimum_home_hfa":
+                MIN_HFA,
+
+            "absolute_maximum_home_hfa":
+                ABSOLUTE_MAX_HFA,
 
             "first_test_year":
                 FIRST_HFA_TEST_YEAR,
@@ -1563,85 +1539,45 @@ def save_output(
             "minimum_team_home_games":
                 MIN_TEAM_HOME_GAMES,
 
-            "candidate_shrinkage_games":
+            "shrinkage_candidates":
                 SHRINKAGE_CANDIDATES,
 
-            "candidate_modifier_caps":
-                CAP_CANDIDATES,
+            "max_hfa_candidates":
+                MAX_HFA_CANDIDATES,
         },
 
-        "national":
-            {
-                "games":
-                    national[
-                        "games"
-                    ],
-
-                "hfa":
-                    round(
-                        national[
-                            "hfa"
-                        ],
-                        3
-                    ),
-
-                "ci_95_low":
-                    round(
-                        national[
-                            "ci_95_low"
-                        ],
-                        3
-                    ),
-
-                "ci_95_high":
-                    round(
-                        national[
-                            "ci_95_high"
-                        ],
-                        3
-                    ),
-
-                "year_by_year":
-                    national[
-                        "year_by_year"
-                    ],
-            },
-
         "validation": {
+
             "flat":
                 validation[
                     "flat"
                 ],
 
-            "raw_team":
+            "mathematical_winner":
                 validation[
-                    "raw_team"
+                    "best"
                 ],
 
-            "shrunk_team":
+            "top_configurations":
                 validation[
-                    "shrunk_team"
+                    "top_configurations"
                 ],
-
-            "best_shrunk_capped":
-                validation[
-                    "best_shrunk_capped"
-                ],
-
-            "mae_improvement_vs_flat":
-                round(
-                    validation[
-                        "mae_improvement_vs_flat"
-                    ],
-                    4
-                ),
         },
 
         "final_2026": {
-            "national_hfa":
+
+            "national_raw_hfa":
                 round(
                     final_ratings[
-                        "national_hfa"
+                        "national_raw_hfa"
+                    ],
+                    3
+                ),
+
+            "national_applied_hfa":
+                round(
+                    final_ratings[
+                        "national_applied_hfa"
                     ],
                     3
                 ),
@@ -1651,10 +1587,16 @@ def save_output(
                     "shrinkage_games"
                 ],
 
-            "modifier_cap":
+            "max_hfa":
                 final_ratings[
-                    "modifier_cap"
+                    "max_hfa"
                 ],
+
+            "neutral_site_hfa":
+                0.0,
+
+            "minimum_home_hfa":
+                MIN_HFA,
 
             "teams":
                 final_ratings[
@@ -1690,6 +1632,7 @@ def save_output(
         1024
     )
 
+    print("")
     print(
         f"💾 Saved "
         f"{OUTPUT_PATH} "
@@ -1705,11 +1648,21 @@ def main():
 
     print("")
     print(
-        "🏟️  CFB team-specific HFA validation"
+        "🏟️  CFB constrained team-specific HFA validation"
     )
 
     print(
         "   No API calls required."
+    )
+
+    print(
+        "   Neutral-site HFA = 0.0"
+    )
+
+    print(
+        "   Home HFA range = "
+        f"{MIN_HFA:.1f} to "
+        f"{ABSOLUTE_MAX_HFA:.1f}"
     )
 
     games, year_scales = load_backtest()
@@ -1734,26 +1687,18 @@ def main():
         residuals
     )
 
-    national = national_summary(
-        residuals
-    )
-
-    final_ratings = (
-        build_final_2026_ratings(
-            residuals,
-            validation[
-                "best_shrunk_capped"
-            ]
-        )
+    final_ratings = build_final_ratings(
+        residuals,
+        validation[
+            "best"
+        ]
     )
 
     print_final_ratings(
-        national,
         final_ratings
     )
 
     save_output(
-        national,
         validation,
         final_ratings
     )
