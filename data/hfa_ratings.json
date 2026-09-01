@@ -1,58 +1,35 @@
 {
   "methodology": {
-    "description": "Leakage-safe team-specific HFA validation. Each historical test season uses only prior seasons to estimate national and team HFA.",
+    "description": "Leakage-safe constrained team-specific home-field validation.",
+    "neutral_site_hfa": 0.0,
+    "minimum_home_hfa": 0.0,
+    "absolute_maximum_home_hfa": 4.0,
     "first_test_year": 2023,
     "minimum_team_home_games": 3,
-    "candidate_shrinkage_games": [
+    "shrinkage_candidates": [
       10,
+      15,
       20,
+      25,
       30,
       40,
+      50,
       60,
-      80
+      80,
+      100
     ],
-    "candidate_modifier_caps": [
-      0.5,
-      1.0,
-      1.5,
-      2.0,
-      2.5,
-      3.0
-    ]
-  },
-  "national": {
-    "games": 2247,
-    "hfa": 3.223,
-    "ci_95_low": 2.534,
-    "ci_95_high": 3.912,
-    "year_by_year": [
-      {
-        "year": 2022,
-        "games": 555,
-        "hfa": 2.164
-      },
-      {
-        "year": 2023,
-        "games": 568,
-        "hfa": 2.774
-      },
-      {
-        "year": 2024,
-        "games": 552,
-        "hfa": 3.92
-      },
-      {
-        "year": 2025,
-        "games": 572,
-        "hfa": 4.025
-      }
+    "max_hfa_candidates": [
+      3.0,
+      3.25,
+      3.5,
+      3.75,
+      4.0
     ]
   },
   "validation": {
     "flat": {
       "model": "flat",
-      "shrinkage_games": null,
-      "modifier_cap": null,
+      "max_hfa": 4.0,
       "games": 1692,
       "mae": 13.145313413536226,
       "rmse": 16.589768109773335,
@@ -61,7 +38,8 @@
           "year": 2023,
           "training_games": 555,
           "test_games": 568,
-          "learned_national_hfa": 2.164,
+          "learned_raw_national_hfa": 2.164,
+          "applied_flat_hfa": 2.164,
           "mae": 13.432,
           "rmse": 16.944
         },
@@ -69,7 +47,8 @@
           "year": 2024,
           "training_games": 1123,
           "test_games": 552,
-          "learned_national_hfa": 2.473,
+          "learned_raw_national_hfa": 2.473,
+          "applied_flat_hfa": 2.473,
           "mae": 12.861,
           "rmse": 16.339
         },
@@ -77,4008 +56,2337 @@
           "year": 2025,
           "training_games": 1675,
           "test_games": 572,
-          "learned_national_hfa": 2.95,
+          "learned_raw_national_hfa": 2.95,
+          "applied_flat_hfa": 2.95,
           "mae": 13.135,
           "rmse": 16.474
         }
       ]
     },
-    "raw_team": {
-      "model": "raw_team",
-      "shrinkage_games": null,
-      "modifier_cap": null,
+    "mathematical_winner": {
+      "model": "team_specific",
+      "shrinkage_games": 20,
+      "max_hfa": 4.0,
       "games": 1692,
-      "mae": 13.646994022036813,
-      "rmse": 17.161019249271202,
+      "mae": 13.029545592742032,
+      "rmse": 16.44584115943654,
+      "near_floor_games": 226,
+      "near_ceiling_games": 426,
       "year_by_year": [
         {
           "year": 2023,
           "training_games": 555,
           "test_games": 568,
-          "learned_national_hfa": 2.164,
-          "mae": 14.138,
-          "rmse": 17.792
+          "learned_raw_national_hfa": 2.164,
+          "mae": 13.24,
+          "rmse": 16.74,
+          "near_floor_games": 66,
+          "near_ceiling_games": 87
         },
         {
           "year": 2024,
           "training_games": 1123,
           "test_games": 552,
-          "learned_national_hfa": 2.473,
-          "mae": 13.644,
-          "rmse": 17.015
+          "learned_raw_national_hfa": 2.473,
+          "mae": 12.849,
+          "rmse": 16.241,
+          "near_floor_games": 85,
+          "near_ceiling_games": 145
         },
         {
           "year": 2025,
           "training_games": 1675,
           "test_games": 572,
-          "learned_national_hfa": 2.95,
-          "mae": 13.162,
-          "rmse": 16.656
+          "learned_raw_national_hfa": 2.95,
+          "mae": 12.994,
+          "rmse": 16.347,
+          "near_floor_games": 75,
+          "near_ceiling_games": 194
         }
       ]
     },
-    "shrunk_team": {
-      "model": "shrunk_team",
-      "shrinkage_games": 30,
-      "modifier_cap": null,
-      "games": 1692,
-      "mae": 13.005514089256605,
-      "rmse": 16.41021235854085,
-      "year_by_year": [
-        {
-          "year": 2023,
-          "training_games": 555,
-          "test_games": 568,
-          "learned_national_hfa": 2.164,
-          "mae": 13.259,
-          "rmse": 16.757
-        },
-        {
-          "year": 2024,
-          "training_games": 1123,
-          "test_games": 552,
-          "learned_national_hfa": 2.473,
-          "mae": 12.816,
-          "rmse": 16.201
-        },
-        {
-          "year": 2025,
-          "training_games": 1675,
-          "test_games": 572,
-          "learned_national_hfa": 2.95,
-          "mae": 12.937,
-          "rmse": 16.262
-        }
-      ]
-    },
-    "best_shrunk_capped": {
-      "model": "shrunk_capped",
-      "shrinkage_games": 10,
-      "modifier_cap": 3.0,
-      "games": 1692,
-      "mae": 12.987368194669344,
-      "rmse": 16.384612736416642,
-      "year_by_year": [
-        {
-          "year": 2023,
-          "training_games": 555,
-          "test_games": 568,
-          "learned_national_hfa": 2.164,
-          "mae": 13.183,
-          "rmse": 16.68
-        },
-        {
-          "year": 2024,
-          "training_games": 1123,
-          "test_games": 552,
-          "learned_national_hfa": 2.473,
-          "mae": 12.864,
-          "rmse": 16.201
-        },
-        {
-          "year": 2025,
-          "training_games": 1675,
-          "test_games": 572,
-          "learned_national_hfa": 2.95,
-          "mae": 12.913,
-          "rmse": 16.265
-        }
-      ]
-    },
-    "mae_improvement_vs_flat": 0.1579
+    "top_configurations": [
+      {
+        "model": "team_specific",
+        "shrinkage_games": 20,
+        "max_hfa": 4.0,
+        "games": 1692,
+        "mae": 13.029545592742032,
+        "rmse": 16.44584115943654,
+        "near_floor_games": 226,
+        "near_ceiling_games": 426,
+        "year_by_year": [
+          {
+            "year": 2023,
+            "training_games": 555,
+            "test_games": 568,
+            "learned_raw_national_hfa": 2.164,
+            "mae": 13.24,
+            "rmse": 16.74,
+            "near_floor_games": 66,
+            "near_ceiling_games": 87
+          },
+          {
+            "year": 2024,
+            "training_games": 1123,
+            "test_games": 552,
+            "learned_raw_national_hfa": 2.473,
+            "mae": 12.849,
+            "rmse": 16.241,
+            "near_floor_games": 85,
+            "near_ceiling_games": 145
+          },
+          {
+            "year": 2025,
+            "training_games": 1675,
+            "test_games": 572,
+            "learned_raw_national_hfa": 2.95,
+            "mae": 12.994,
+            "rmse": 16.347,
+            "near_floor_games": 75,
+            "near_ceiling_games": 194
+          }
+        ]
+      },
+      {
+        "model": "team_specific",
+        "shrinkage_games": 15,
+        "max_hfa": 4.0,
+        "games": 1692,
+        "mae": 13.030428164010905,
+        "rmse": 16.447805949466876,
+        "near_floor_games": 297,
+        "near_ceiling_games": 478,
+        "year_by_year": [
+          {
+            "year": 2023,
+            "training_games": 555,
+            "test_games": 568,
+            "learned_raw_national_hfa": 2.164,
+            "mae": 13.241,
+            "rmse": 16.745,
+            "near_floor_games": 88,
+            "near_ceiling_games": 119
+          },
+          {
+            "year": 2024,
+            "training_games": 1123,
+            "test_games": 552,
+            "learned_raw_national_hfa": 2.473,
+            "mae": 12.854,
+            "rmse": 16.24,
+            "near_floor_games": 121,
+            "near_ceiling_games": 165
+          },
+          {
+            "year": 2025,
+            "training_games": 1675,
+            "test_games": 572,
+            "learned_raw_national_hfa": 2.95,
+            "mae": 12.992,
+            "rmse": 16.349,
+            "near_floor_games": 88,
+            "near_ceiling_games": 194
+          }
+        ]
+      },
+      {
+        "model": "team_specific",
+        "shrinkage_games": 25,
+        "max_hfa": 4.0,
+        "games": 1692,
+        "mae": 13.030661188486828,
+        "rmse": 16.447622036562723,
+        "near_floor_games": 164,
+        "near_ceiling_games": 381,
+        "year_by_year": [
+          {
+            "year": 2023,
+            "training_games": 555,
+            "test_games": 568,
+            "learned_raw_national_hfa": 2.164,
+            "mae": 13.249,
+            "rmse": 16.748,
+            "near_floor_games": 43,
+            "near_ceiling_games": 67
+          },
+          {
+            "year": 2024,
+            "training_games": 1123,
+            "test_games": 552,
+            "learned_raw_national_hfa": 2.473,
+            "mae": 12.837,
+            "rmse": 16.237,
+            "near_floor_games": 55,
+            "near_ceiling_games": 136
+          },
+          {
+            "year": 2025,
+            "training_games": 1675,
+            "test_games": 572,
+            "learned_raw_national_hfa": 2.95,
+            "mae": 13.0,
+            "rmse": 16.348,
+            "near_floor_games": 66,
+            "near_ceiling_games": 178
+          }
+        ]
+      },
+      {
+        "model": "team_specific",
+        "shrinkage_games": 10,
+        "max_hfa": 4.0,
+        "games": 1692,
+        "mae": 13.032376533584696,
+        "rmse": 16.45158279869444,
+        "near_floor_games": 369,
+        "near_ceiling_games": 546,
+        "year_by_year": [
+          {
+            "year": 2023,
+            "training_games": 555,
+            "test_games": 568,
+            "learned_raw_national_hfa": 2.164,
+            "mae": 13.249,
+            "rmse": 16.76,
+            "near_floor_games": 109,
+            "near_ceiling_games": 161
+          },
+          {
+            "year": 2024,
+            "training_games": 1123,
+            "test_games": 552,
+            "learned_raw_national_hfa": 2.473,
+            "mae": 12.853,
+            "rmse": 16.232,
+            "near_floor_games": 145,
+            "near_ceiling_games": 187
+          },
+          {
+            "year": 2025,
+            "training_games": 1675,
+            "test_games": 572,
+            "learned_raw_national_hfa": 2.95,
+            "mae": 12.99,
+            "rmse": 16.352,
+            "near_floor_games": 115,
+            "near_ceiling_games": 198
+          }
+        ]
+      },
+      {
+        "model": "team_specific",
+        "shrinkage_games": 30,
+        "max_hfa": 4.0,
+        "games": 1692,
+        "mae": 13.037104934805049,
+        "rmse": 16.454511037799342,
+        "near_floor_games": 94,
+        "near_ceiling_games": 318,
+        "year_by_year": [
+          {
+            "year": 2023,
+            "training_games": 555,
+            "test_games": 568,
+            "learned_raw_national_hfa": 2.164,
+            "mae": 13.265,
+            "rmse": 16.763,
+            "near_floor_games": 17,
+            "near_ceiling_games": 37
+          },
+          {
+            "year": 2024,
+            "training_games": 1123,
+            "test_games": 552,
+            "learned_raw_national_hfa": 2.473,
+            "mae": 12.832,
+            "rmse": 16.238,
+            "near_floor_games": 39,
+            "near_ceiling_games": 115
+          },
+          {
+            "year": 2025,
+            "training_games": 1675,
+            "test_games": 572,
+            "learned_raw_national_hfa": 2.95,
+            "mae": 13.008,
+            "rmse": 16.353,
+            "near_floor_games": 38,
+            "near_ceiling_games": 166
+          }
+        ]
+      },
+      {
+        "model": "team_specific",
+        "shrinkage_games": 20,
+        "max_hfa": 3.75,
+        "games": 1692,
+        "mae": 13.03748848709865,
+        "rmse": 16.45834439917435,
+        "near_floor_games": 226,
+        "near_ceiling_games": 473,
+        "year_by_year": [
+          {
+            "year": 2023,
+            "training_games": 555,
+            "test_games": 568,
+            "learned_raw_national_hfa": 2.164,
+            "mae": 13.25,
+            "rmse": 16.752,
+            "near_floor_games": 66,
+            "near_ceiling_games": 114
+          },
+          {
+            "year": 2024,
+            "training_games": 1123,
+            "test_games": 552,
+            "learned_raw_national_hfa": 2.473,
+            "mae": 12.852,
+            "rmse": 16.252,
+            "near_floor_games": 85,
+            "near_ceiling_games": 165
+          },
+          {
+            "year": 2025,
+            "training_games": 1675,
+            "test_games": 572,
+            "learned_raw_national_hfa": 2.95,
+            "mae": 13.006,
+            "rmse": 16.362,
+            "near_floor_games": 75,
+            "near_ceiling_games": 194
+          }
+        ]
+      },
+      {
+        "model": "team_specific",
+        "shrinkage_games": 25,
+        "max_hfa": 3.75,
+        "games": 1692,
+        "mae": 13.039071451348459,
+        "rmse": 16.460199817673853,
+        "near_floor_games": 164,
+        "near_ceiling_games": 431,
+        "year_by_year": [
+          {
+            "year": 2023,
+            "training_games": 555,
+            "test_games": 568,
+            "learned_raw_national_hfa": 2.164,
+            "mae": 13.257,
+            "rmse": 16.756,
+            "near_floor_games": 43,
+            "near_ceiling_games": 82
+          },
+          {
+            "year": 2024,
+            "training_games": 1123,
+            "test_games": 552,
+            "learned_raw_national_hfa": 2.473,
+            "mae": 12.843,
+            "rmse": 16.251,
+            "near_floor_games": 55,
+            "near_ceiling_games": 155
+          },
+          {
+            "year": 2025,
+            "training_games": 1675,
+            "test_games": 572,
+            "learned_raw_national_hfa": 2.95,
+            "mae": 13.012,
+            "rmse": 16.364,
+            "near_floor_games": 66,
+            "near_ceiling_games": 194
+          }
+        ]
+      },
+      {
+        "model": "team_specific",
+        "shrinkage_games": 15,
+        "max_hfa": 3.75,
+        "games": 1692,
+        "mae": 13.039257958428669,
+        "rmse": 16.461356418671382,
+        "near_floor_games": 297,
+        "near_ceiling_games": 536,
+        "year_by_year": [
+          {
+            "year": 2023,
+            "training_games": 555,
+            "test_games": 568,
+            "learned_raw_national_hfa": 2.164,
+            "mae": 13.255,
+            "rmse": 16.762,
+            "near_floor_games": 88,
+            "near_ceiling_games": 154
+          },
+          {
+            "year": 2024,
+            "training_games": 1123,
+            "test_games": 552,
+            "learned_raw_national_hfa": 2.473,
+            "mae": 12.855,
+            "rmse": 16.248,
+            "near_floor_games": 121,
+            "near_ceiling_games": 174
+          },
+          {
+            "year": 2025,
+            "training_games": 1675,
+            "test_games": 572,
+            "learned_raw_national_hfa": 2.95,
+            "mae": 13.003,
+            "rmse": 16.364,
+            "near_floor_games": 88,
+            "near_ceiling_games": 208
+          }
+        ]
+      },
+      {
+        "model": "team_specific",
+        "shrinkage_games": 10,
+        "max_hfa": 3.75,
+        "games": 1692,
+        "mae": 13.040983782732592,
+        "rmse": 16.465517574302062,
+        "near_floor_games": 369,
+        "near_ceiling_games": 590,
+        "year_by_year": [
+          {
+            "year": 2023,
+            "training_games": 555,
+            "test_games": 568,
+            "learned_raw_national_hfa": 2.164,
+            "mae": 13.261,
+            "rmse": 16.776,
+            "near_floor_games": 109,
+            "near_ceiling_games": 165
+          },
+          {
+            "year": 2024,
+            "training_games": 1123,
+            "test_games": 552,
+            "learned_raw_national_hfa": 2.473,
+            "mae": 12.855,
+            "rmse": 16.243,
+            "near_floor_games": 145,
+            "near_ceiling_games": 203
+          },
+          {
+            "year": 2025,
+            "training_games": 1675,
+            "test_games": 572,
+            "learned_raw_national_hfa": 2.95,
+            "mae": 13.002,
+            "rmse": 16.367,
+            "near_floor_games": 115,
+            "near_ceiling_games": 222
+          }
+        ]
+      },
+      {
+        "model": "team_specific",
+        "shrinkage_games": 30,
+        "max_hfa": 3.75,
+        "games": 1692,
+        "mae": 13.044088973907353,
+        "rmse": 16.464857638431376,
+        "near_floor_games": 94,
+        "near_ceiling_games": 393,
+        "year_by_year": [
+          {
+            "year": 2023,
+            "training_games": 555,
+            "test_games": 568,
+            "learned_raw_national_hfa": 2.164,
+            "mae": 13.27,
+            "rmse": 16.769,
+            "near_floor_games": 17,
+            "near_ceiling_games": 63
+          },
+          {
+            "year": 2024,
+            "training_games": 1123,
+            "test_games": 552,
+            "learned_raw_national_hfa": 2.473,
+            "mae": 12.836,
+            "rmse": 16.247,
+            "near_floor_games": 39,
+            "near_ceiling_games": 136
+          },
+          {
+            "year": 2025,
+            "training_games": 1675,
+            "test_games": 572,
+            "learned_raw_national_hfa": 2.95,
+            "mae": 13.02,
+            "rmse": 16.369,
+            "near_floor_games": 38,
+            "near_ceiling_games": 194
+          }
+        ]
+      },
+      {
+        "model": "team_specific",
+        "shrinkage_games": 20,
+        "max_hfa": 3.5,
+        "games": 1692,
+        "mae": 13.046831603169386,
+        "rmse": 16.472994678131258,
+        "near_floor_games": 226,
+        "near_ceiling_games": 535,
+        "year_by_year": [
+          {
+            "year": 2023,
+            "training_games": 555,
+            "test_games": 568,
+            "learned_raw_national_hfa": 2.164,
+            "mae": 13.264,
+            "rmse": 16.769,
+            "near_floor_games": 66,
+            "near_ceiling_games": 135
+          },
+          {
+            "year": 2024,
+            "training_games": 1123,
+            "test_games": 552,
+            "learned_raw_national_hfa": 2.473,
+            "mae": 12.853,
+            "rmse": 16.262,
+            "near_floor_games": 85,
+            "near_ceiling_games": 178
+          },
+          {
+            "year": 2025,
+            "training_games": 1675,
+            "test_games": 572,
+            "learned_raw_national_hfa": 2.95,
+            "mae": 13.018,
+            "rmse": 16.378,
+            "near_floor_games": 75,
+            "near_ceiling_games": 222
+          }
+        ]
+      },
+      {
+        "model": "team_specific",
+        "shrinkage_games": 25,
+        "max_hfa": 3.5,
+        "games": 1692,
+        "mae": 13.047329455336998,
+        "rmse": 16.473160255351896,
+        "near_floor_games": 164,
+        "near_ceiling_games": 503,
+        "year_by_year": [
+          {
+            "year": 2023,
+            "training_games": 555,
+            "test_games": 568,
+            "learned_raw_national_hfa": 2.164,
+            "mae": 13.268,
+            "rmse": 16.768,
+            "near_floor_games": 43,
+            "near_ceiling_games": 114
+          },
+          {
+            "year": 2024,
+            "training_games": 1123,
+            "test_games": 552,
+            "learned_raw_national_hfa": 2.473,
+            "mae": 12.846,
+            "rmse": 16.262,
+            "near_floor_games": 55,
+            "near_ceiling_games": 170
+          },
+          {
+            "year": 2025,
+            "training_games": 1675,
+            "test_games": 572,
+            "learned_raw_national_hfa": 2.95,
+            "mae": 13.023,
+            "rmse": 16.38,
+            "near_floor_games": 66,
+            "near_ceiling_games": 219
+          }
+        ]
+      }
+    ]
   },
   "final_2026": {
-    "national_hfa": 3.223,
-    "shrinkage_games": 10,
-    "modifier_cap": 3.0,
+    "national_raw_hfa": 3.223,
+    "national_applied_hfa": 3.223,
+    "shrinkage_games": 20,
+    "max_hfa": 4.0,
+    "neutral_site_hfa": 0.0,
+    "minimum_home_hfa": 0.0,
     "teams": [
       {
         "team": "Alabama",
         "home_games": 16,
         "raw_hfa": 10.615,
         "raw_modifier": 7.391,
-        "team_weight": 0.615,
-        "shrunk_modifier": 4.549,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 11.822
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 13.038
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 5.811
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 11.788
-          }
-        }
-      },
-      {
-        "team": "Arkansas State",
-        "home_games": 16,
-        "raw_hfa": 9.043,
-        "raw_modifier": 5.82,
-        "team_weight": 0.615,
-        "shrunk_modifier": 3.581,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": -0.076
-          },
-          "2023": {
-            "games": 3,
-            "raw_hfa": 32.538
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 6.037
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 5.826
-          }
-        }
-      },
-      {
-        "team": "Florida",
-        "home_games": 15,
-        "raw_hfa": 15.45,
-        "raw_modifier": 12.227,
-        "team_weight": 0.6,
-        "shrunk_modifier": 7.336,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 3,
-            "raw_hfa": 11.462
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 8.456
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 26.983
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 13.904
-          }
-        }
-      },
-      {
-        "team": "Georgia",
-        "home_games": 16,
-        "raw_hfa": 14.401,
-        "raw_modifier": 11.178,
-        "team_weight": 0.615,
-        "shrunk_modifier": 6.879,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 11.851
-          },
-          "2023": {
-            "games": 3,
-            "raw_hfa": 23.053
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 9.667
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 16.379
-          }
-        }
-      },
-      {
-        "team": "Georgia Southern",
-        "home_games": 18,
-        "raw_hfa": 9.439,
-        "raw_modifier": 6.216,
-        "team_weight": 0.643,
-        "shrunk_modifier": 3.996,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 12.405
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 7.537
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 11.716
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 6.174
-          }
-        }
-      },
-      {
-        "team": "Hawai'i",
-        "home_games": 17,
-        "raw_hfa": 11.184,
-        "raw_modifier": 7.961,
-        "team_weight": 0.63,
-        "shrunk_modifier": 5.012,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 13.023
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 4.055
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 12.186
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 17.256
-          }
-        }
-      },
-      {
-        "team": "Indiana",
-        "home_games": 17,
-        "raw_hfa": 10.306,
-        "raw_modifier": 7.082,
-        "team_weight": 0.63,
-        "shrunk_modifier": 4.459,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -2.844
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 8.55
-          },
-          "2024": {
-            "games": 6,
-            "raw_hfa": 17.772
-          },
-          "2025": {
-            "games": 3,
-            "raw_hfa": 15.247
-          }
-        }
-      },
-      {
-        "team": "Iowa",
-        "home_games": 18,
-        "raw_hfa": 10.885,
-        "raw_modifier": 7.662,
-        "team_weight": 0.643,
-        "shrunk_modifier": 4.925,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 5.817
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 10.513
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 21.868
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 6.524
-          }
-        }
-      },
-      {
-        "team": "Jacksonville State",
-        "home_games": 12,
-        "raw_hfa": 8.824,
-        "raw_modifier": 5.601,
-        "team_weight": 0.545,
-        "shrunk_modifier": 3.055,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2023": {
-            "games": 3,
-            "raw_hfa": 6.855
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 12.388
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 5.847
-          }
-        }
-      },
-      {
-        "team": "Kansas State",
-        "home_games": 17,
-        "raw_hfa": 11.207,
-        "raw_modifier": 7.984,
-        "team_weight": 0.63,
-        "shrunk_modifier": 5.027,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 11.574
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 18.466
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 4.791
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 8.184
-          }
-        }
-      },
-      {
-        "team": "LSU",
-        "home_games": 20,
-        "raw_hfa": 13.532,
-        "raw_modifier": 10.309,
-        "team_weight": 0.667,
-        "shrunk_modifier": 6.873,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "HIGH",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 15.819
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 26.131
-          },
-          "2024": {
-            "games": 6,
-            "raw_hfa": 7.946
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 3.306
-          }
-        }
-      },
-      {
-        "team": "Louisville",
-        "home_games": 19,
-        "raw_hfa": 10.494,
-        "raw_modifier": 7.271,
-        "team_weight": 0.655,
-        "shrunk_modifier": 4.764,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 20.974
-          },
-          "2023": {
-            "games": 6,
-            "raw_hfa": 8.268
-          },
-          "2024": {
-            "games": 3,
-            "raw_hfa": 11.283
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 2.212
-          }
-        }
-      },
-      {
-        "team": "North Texas",
-        "home_games": 17,
-        "raw_hfa": 10.496,
-        "raw_modifier": 7.272,
-        "team_weight": 0.63,
-        "shrunk_modifier": 4.579,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 17.782
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 11.181
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 9.536
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 4.887
-          }
-        }
-      },
-      {
-        "team": "Notre Dame",
-        "home_games": 19,
-        "raw_hfa": 18.239,
-        "raw_modifier": 15.016,
-        "team_weight": 0.655,
-        "shrunk_modifier": 9.838,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 16.074
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 20.266
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 10.889
-          },
-          "2025": {
-            "games": 6,
-            "raw_hfa": 24.457
-          }
-        }
-      },
-      {
-        "team": "Ohio",
-        "home_games": 16,
-        "raw_hfa": 9.451,
-        "raw_modifier": 6.228,
-        "team_weight": 0.615,
-        "shrunk_modifier": 3.833,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 19.313
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -9.885
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 17.858
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 10.519
-          }
-        }
-      },
-      {
-        "team": "Penn State",
-        "home_games": 20,
-        "raw_hfa": 11.191,
-        "raw_modifier": 7.968,
-        "team_weight": 0.667,
-        "shrunk_modifier": 5.312,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "HIGH",
-        "year_by_year": {
-          "2022": {
-            "games": 6,
-            "raw_hfa": 14.751
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 13.224
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 8.366
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 6.841
-          }
-        }
-      },
-      {
-        "team": "SMU",
-        "home_games": 17,
-        "raw_hfa": 17.402,
-        "raw_modifier": 14.178,
-        "team_weight": 0.63,
-        "shrunk_modifier": 8.927,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 14.758
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 22.654
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 19.246
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 12.487
-          }
-        }
-      },
-      {
-        "team": "South Carolina",
-        "home_games": 17,
-        "raw_hfa": 12.92,
-        "raw_modifier": 9.697,
-        "team_weight": 0.63,
-        "shrunk_modifier": 6.105,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 15.299
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 18.6
-          },
-          "2024": {
-            "games": 3,
-            "raw_hfa": 5.804
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 9.606
-          }
-        }
-      },
-      {
-        "team": "South Florida",
-        "home_games": 14,
-        "raw_hfa": 9.145,
-        "raw_modifier": 5.922,
-        "team_weight": 0.583,
-        "shrunk_modifier": 3.454,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 3,
-            "raw_hfa": -3.67
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 2.732
-          },
-          "2024": {
-            "games": 3,
-            "raw_hfa": 11.491
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 23.41
-          }
-        }
-      },
-      {
-        "team": "TCU",
-        "home_games": 17,
-        "raw_hfa": 9.19,
-        "raw_modifier": 5.967,
-        "team_weight": 0.63,
-        "shrunk_modifier": 3.757,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 12.77
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 8.226
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 6.74
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 8.13
-          }
-        }
-      },
-      {
-        "team": "Texas",
-        "home_games": 16,
-        "raw_hfa": 10.861,
-        "raw_modifier": 7.637,
-        "team_weight": 0.615,
-        "shrunk_modifier": 4.7,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 2.788
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 19.726
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -1.226
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 22.155
-          }
-        }
-      },
-      {
-        "team": "Troy",
-        "home_games": 19,
-        "raw_hfa": 8.039,
-        "raw_modifier": 4.816,
-        "team_weight": 0.655,
-        "shrunk_modifier": 3.155,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 6,
-            "raw_hfa": 8.899
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 13.556
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 7.191
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 0.704
-          }
-        }
-      },
-      {
-        "team": "UTSA",
-        "home_games": 17,
-        "raw_hfa": 17.732,
-        "raw_modifier": 14.508,
-        "team_weight": 0.63,
-        "shrunk_modifier": 9.135,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 15.662
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 14.562
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 13.056
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 28.164
-          }
-        }
-      },
-      {
-        "team": "Utah",
-        "home_games": 17,
-        "raw_hfa": 10.088,
-        "raw_modifier": 6.864,
-        "team_weight": 0.63,
-        "shrunk_modifier": 4.322,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 12.571
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 12.386
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -4.016
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 18.835
-          }
-        }
-      },
-      {
-        "team": "Utah State",
-        "home_games": 16,
-        "raw_hfa": 11.528,
-        "raw_modifier": 8.305,
-        "team_weight": 0.615,
-        "shrunk_modifier": 5.111,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 14.934
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 2.71
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 17.931
-          },
-          "2025": {
-            "games": 3,
-            "raw_hfa": 13.147
-          }
-        }
-      },
-      {
-        "team": "Washington State",
-        "home_games": 16,
-        "raw_hfa": 9.018,
-        "raw_modifier": 5.795,
-        "team_weight": 0.615,
-        "shrunk_modifier": 3.566,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 0.508
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 4.507
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 9.267
-          },
-          "2025": {
-            "games": 3,
-            "raw_hfa": 28.886
-          }
-        }
-      },
-      {
-        "team": "Wyoming",
-        "home_games": 16,
-        "raw_hfa": 10.686,
-        "raw_modifier": 7.463,
-        "team_weight": 0.615,
-        "shrunk_modifier": 4.592,
-        "capped_modifier": 3.0,
-        "final_hfa": 6.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 3,
-            "raw_hfa": 7.406
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 13.755
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 15.227
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 4.768
-          }
-        }
-      },
-      {
-        "team": "Florida State",
-        "home_games": 18,
-        "raw_hfa": 7.876,
-        "raw_modifier": 4.652,
-        "team_weight": 0.643,
-        "shrunk_modifier": 2.991,
-        "capped_modifier": 2.991,
-        "final_hfa": 6.214,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 6,
-            "raw_hfa": 6.999
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 16.242
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -0.774
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 9.474
-          }
-        }
-      },
-      {
-        "team": "Texas A&M",
-        "home_games": 15,
-        "raw_hfa": 8.089,
-        "raw_modifier": 4.866,
-        "team_weight": 0.6,
-        "shrunk_modifier": 2.92,
-        "capped_modifier": 2.92,
-        "final_hfa": 6.143,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 9.456
-          },
-          "2023": {
-            "games": 3,
-            "raw_hfa": 1.4
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 18.012
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 1.817
-          }
-        }
-      },
-      {
-        "team": "NC State",
-        "home_games": 19,
-        "raw_hfa": 7.548,
-        "raw_modifier": 4.325,
-        "team_weight": 0.655,
-        "shrunk_modifier": 2.833,
-        "capped_modifier": 2.833,
-        "final_hfa": 6.057,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 2.518
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 14.847
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 4.961
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 7.945
-          }
-        }
-      },
-      {
-        "team": "Boise State",
-        "home_games": 22,
-        "raw_hfa": 7.193,
-        "raw_modifier": 3.97,
-        "team_weight": 0.688,
-        "shrunk_modifier": 2.729,
-        "capped_modifier": 2.729,
-        "final_hfa": 5.952,
-        "reliability": "HIGH",
-        "year_by_year": {
-          "2022": {
-            "games": 6,
-            "raw_hfa": 0.661
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 14.392
-          },
-          "2024": {
-            "games": 6,
-            "raw_hfa": 1.581
-          },
-          "2025": {
-            "games": 6,
-            "raw_hfa": 14.537
-          }
-        }
-      },
-      {
-        "team": "Oregon State",
-        "home_games": 17,
-        "raw_hfa": 7.412,
-        "raw_modifier": 4.189,
-        "team_weight": 0.63,
-        "shrunk_modifier": 2.637,
-        "capped_modifier": 2.637,
-        "final_hfa": 5.861,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 14.776
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 8.443
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 4.664
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -0.076
-          }
-        }
-      },
-      {
-        "team": "Ohio State",
-        "home_games": 17,
-        "raw_hfa": 7.322,
-        "raw_modifier": 4.098,
-        "team_weight": 0.63,
-        "shrunk_modifier": 2.58,
-        "capped_modifier": 2.58,
-        "final_hfa": 5.804,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 0.055
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 19.791
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": -1.782
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 13.497
-          }
-        }
-      },
-      {
-        "team": "Oregon",
-        "home_games": 18,
-        "raw_hfa": 7.144,
-        "raw_modifier": 3.921,
-        "team_weight": 0.643,
-        "shrunk_modifier": 2.52,
-        "capped_modifier": 2.52,
-        "final_hfa": 5.744,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 3.025
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 7.396
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 15.907
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -0.006
-          }
-        }
-      },
-      {
-        "team": "UConn",
-        "home_games": 17,
-        "raw_hfa": 7.15,
-        "raw_modifier": 3.927,
-        "team_weight": 0.63,
-        "shrunk_modifier": 2.473,
-        "capped_modifier": 2.473,
-        "final_hfa": 5.696,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 8.966
-          },
-          "2023": {
-            "games": 3,
-            "raw_hfa": -7.273
-          },
-          "2024": {
-            "games": 6,
-            "raw_hfa": 11.755
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 9.245
-          }
-        }
-      },
-      {
-        "team": "Miami (OH)",
-        "home_games": 17,
-        "raw_hfa": 7.063,
-        "raw_modifier": 3.84,
-        "team_weight": 0.63,
-        "shrunk_modifier": 2.418,
-        "capped_modifier": 2.418,
-        "final_hfa": 5.641,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -6.998
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 12.078
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 16.296
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 4.568
-          }
-        }
-      },
-      {
-        "team": "Fresno State",
-        "home_games": 17,
-        "raw_hfa": 6.958,
-        "raw_modifier": 3.735,
-        "team_weight": 0.63,
-        "shrunk_modifier": 2.352,
-        "capped_modifier": 2.352,
-        "final_hfa": 5.575,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 22.346
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": -1.397
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 7.582
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 1.392
-          }
-        }
-      },
-      {
-        "team": "Tennessee",
-        "home_games": 20,
-        "raw_hfa": 6.661,
-        "raw_modifier": 3.437,
-        "team_weight": 0.667,
-        "shrunk_modifier": 2.292,
-        "capped_modifier": 2.292,
-        "final_hfa": 5.515,
-        "reliability": "HIGH",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 13.619
-          },
-          "2023": {
-            "games": 6,
-            "raw_hfa": 8.512
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 4.527
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 1.006
-          }
-        }
-      },
-      {
-        "team": "Louisiana Tech",
-        "home_games": 16,
-        "raw_hfa": 6.918,
-        "raw_modifier": 3.695,
-        "team_weight": 0.615,
-        "shrunk_modifier": 2.274,
-        "capped_modifier": 2.274,
-        "final_hfa": 5.497,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 15.958
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -7.793
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 13.002
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 6.506
-          }
-        }
-      },
-      {
-        "team": "Delaware",
-        "home_games": 4,
-        "raw_hfa": 11.154,
-        "raw_modifier": 7.931,
-        "team_weight": 0.286,
-        "shrunk_modifier": 2.266,
-        "capped_modifier": 2.266,
-        "final_hfa": 5.489,
-        "reliability": "LOW",
-        "year_by_year": {
-          "2025": {
-            "games": 4,
-            "raw_hfa": 11.154
-          }
-        }
-      },
-      {
-        "team": "Ball State",
-        "home_games": 16,
-        "raw_hfa": 6.813,
-        "raw_modifier": 3.59,
-        "team_weight": 0.615,
-        "shrunk_modifier": 2.209,
-        "capped_modifier": 2.209,
-        "final_hfa": 5.432,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 1.309
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 13.328
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 3.095
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 9.521
-          }
-        }
-      },
-      {
-        "team": "Tulane",
-        "home_games": 20,
-        "raw_hfa": 6.349,
-        "raw_modifier": 3.125,
-        "team_weight": 0.667,
-        "shrunk_modifier": 2.084,
-        "capped_modifier": 2.084,
-        "final_hfa": 5.307,
-        "reliability": "HIGH",
-        "year_by_year": {
-          "2022": {
-            "games": 6,
-            "raw_hfa": 9.804
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": -0.27
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 11.133
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 4.994
-          }
-        }
-      },
-      {
-        "team": "Northwestern",
-        "home_games": 11,
-        "raw_hfa": 6.95,
-        "raw_modifier": 3.727,
-        "team_weight": 0.524,
-        "shrunk_modifier": 1.952,
-        "capped_modifier": 1.952,
-        "final_hfa": 5.176,
-        "reliability": "LOW",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -7.423
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 6.501
-          },
-          "2025": {
-            "games": 3,
-            "raw_hfa": 26.713
-          }
-        }
-      },
-      {
-        "team": "BYU",
-        "home_games": 17,
-        "raw_hfa": 6.276,
-        "raw_modifier": 3.052,
-        "team_weight": 0.63,
-        "shrunk_modifier": 1.922,
-        "capped_modifier": 1.922,
-        "final_hfa": 5.145,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -3.551
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 8.343
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 7.527
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 12.471
-          }
-        }
-      },
-      {
-        "team": "Kennesaw State",
-        "home_games": 9,
-        "raw_hfa": 6.662,
-        "raw_modifier": 3.439,
-        "team_weight": 0.474,
-        "shrunk_modifier": 1.629,
-        "capped_modifier": 1.629,
-        "final_hfa": 4.852,
-        "reliability": "LOW",
-        "year_by_year": {
-          "2024": {
-            "games": 4,
-            "raw_hfa": 5.094
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 7.916
-          }
-        }
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 6.508,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
       },
       {
         "team": "App State",
         "home_games": 15,
         "raw_hfa": 5.927,
         "raw_modifier": 2.704,
-        "team_weight": 0.6,
-        "shrunk_modifier": 1.622,
-        "capped_modifier": 1.622,
-        "final_hfa": 4.846,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 2,
-            "raw_hfa": 17.361
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 10.128
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 11.865
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": -6.757
-          }
-        }
+        "shrinkage_weight": 0.429,
+        "shrunk_unbounded_hfa": 4.382,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
       },
       {
-        "team": "Toledo",
-        "home_games": 15,
-        "raw_hfa": 5.555,
-        "raw_modifier": 2.332,
-        "team_weight": 0.6,
-        "shrunk_modifier": 1.399,
-        "capped_modifier": 1.399,
-        "final_hfa": 4.622,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 4.316
-          },
-          "2023": {
-            "games": 3,
-            "raw_hfa": 2.353
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -1.721
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 16.472
-          }
-        }
+        "team": "Arkansas State",
+        "home_games": 16,
+        "raw_hfa": 9.043,
+        "raw_modifier": 5.82,
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 5.81,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
       },
       {
-        "team": "Virginia Tech",
-        "home_games": 15,
-        "raw_hfa": 5.368,
-        "raw_modifier": 2.145,
-        "team_weight": 0.6,
-        "shrunk_modifier": 1.287,
-        "capped_modifier": 1.287,
-        "final_hfa": 4.51,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 3,
-            "raw_hfa": -11.145
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 15.11
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 5.715
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 7.664
-          }
-        }
-      },
-      {
-        "team": "Texas Tech",
+        "team": "BYU",
         "home_games": 17,
-        "raw_hfa": 5.217,
-        "raw_modifier": 1.993,
-        "team_weight": 0.63,
-        "shrunk_modifier": 1.255,
-        "capped_modifier": 1.255,
-        "final_hfa": 4.478,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 8.303
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 5.57
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -3.558
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 9.78
-          }
-        }
+        "raw_hfa": 6.276,
+        "raw_modifier": 3.052,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 4.626,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Ball State",
+        "home_games": 16,
+        "raw_hfa": 6.813,
+        "raw_modifier": 3.59,
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 4.819,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Boise State",
+        "home_games": 22,
+        "raw_hfa": 7.193,
+        "raw_modifier": 3.97,
+        "shrinkage_weight": 0.524,
+        "shrunk_unbounded_hfa": 5.303,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "HIGH"
+      },
+      {
+        "team": "Delaware",
+        "home_games": 4,
+        "raw_hfa": 11.154,
+        "raw_modifier": 7.931,
+        "shrinkage_weight": 0.167,
+        "shrunk_unbounded_hfa": 4.545,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "LOW"
       },
       {
         "team": "East Carolina",
         "home_games": 15,
         "raw_hfa": 5.16,
         "raw_modifier": 1.937,
-        "team_weight": 0.6,
-        "shrunk_modifier": 1.162,
-        "capped_modifier": 1.162,
-        "final_hfa": 4.385,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 3,
-            "raw_hfa": -3.458
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -0.499
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 14.133
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 8.31
-          }
-        }
+        "shrinkage_weight": 0.429,
+        "shrunk_unbounded_hfa": 4.053,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
       },
       {
-        "team": "Army",
+        "team": "Florida",
+        "home_games": 15,
+        "raw_hfa": 15.45,
+        "raw_modifier": 12.227,
+        "shrinkage_weight": 0.429,
+        "shrunk_unbounded_hfa": 8.463,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Florida State",
+        "home_games": 18,
+        "raw_hfa": 7.876,
+        "raw_modifier": 4.652,
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 5.427,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Fresno State",
+        "home_games": 17,
+        "raw_hfa": 6.958,
+        "raw_modifier": 3.735,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 4.939,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Georgia",
+        "home_games": 16,
+        "raw_hfa": 14.401,
+        "raw_modifier": 11.178,
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 8.191,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Georgia Southern",
+        "home_games": 18,
+        "raw_hfa": 9.439,
+        "raw_modifier": 6.216,
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 6.168,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Hawai'i",
+        "home_games": 17,
+        "raw_hfa": 11.184,
+        "raw_modifier": 7.961,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 6.881,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Indiana",
+        "home_games": 17,
+        "raw_hfa": 10.306,
+        "raw_modifier": 7.082,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 6.477,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Iowa",
+        "home_games": 18,
+        "raw_hfa": 10.885,
+        "raw_modifier": 7.662,
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 6.853,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Jacksonville State",
+        "home_games": 12,
+        "raw_hfa": 8.824,
+        "raw_modifier": 5.601,
+        "shrinkage_weight": 0.375,
+        "shrunk_unbounded_hfa": 5.324,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Kansas State",
+        "home_games": 17,
+        "raw_hfa": 11.207,
+        "raw_modifier": 7.984,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 6.892,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Kennesaw State",
+        "home_games": 9,
+        "raw_hfa": 6.662,
+        "raw_modifier": 3.439,
+        "shrinkage_weight": 0.31,
+        "shrunk_unbounded_hfa": 4.29,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "LOW"
+      },
+      {
+        "team": "LSU",
+        "home_games": 20,
+        "raw_hfa": 13.532,
+        "raw_modifier": 10.309,
+        "shrinkage_weight": 0.5,
+        "shrunk_unbounded_hfa": 8.378,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "HIGH"
+      },
+      {
+        "team": "Louisiana Tech",
+        "home_games": 16,
+        "raw_hfa": 6.918,
+        "raw_modifier": 3.695,
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 4.865,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Louisville",
+        "home_games": 19,
+        "raw_hfa": 10.494,
+        "raw_modifier": 7.271,
+        "shrinkage_weight": 0.487,
+        "shrunk_unbounded_hfa": 6.766,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Miami (OH)",
+        "home_games": 17,
+        "raw_hfa": 7.063,
+        "raw_modifier": 3.84,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 4.987,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "NC State",
+        "home_games": 19,
+        "raw_hfa": 7.548,
+        "raw_modifier": 4.325,
+        "shrinkage_weight": 0.487,
+        "shrunk_unbounded_hfa": 5.33,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "North Texas",
+        "home_games": 17,
+        "raw_hfa": 10.496,
+        "raw_modifier": 7.272,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 6.565,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Northwestern",
+        "home_games": 11,
+        "raw_hfa": 6.95,
+        "raw_modifier": 3.727,
+        "shrinkage_weight": 0.355,
+        "shrunk_unbounded_hfa": 4.546,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "LOW"
+      },
+      {
+        "team": "Notre Dame",
+        "home_games": 19,
+        "raw_hfa": 18.239,
+        "raw_modifier": 15.016,
+        "shrinkage_weight": 0.487,
+        "shrunk_unbounded_hfa": 10.539,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Ohio",
+        "home_games": 16,
+        "raw_hfa": 9.451,
+        "raw_modifier": 6.228,
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 5.991,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Ohio State",
+        "home_games": 17,
+        "raw_hfa": 7.322,
+        "raw_modifier": 4.098,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 5.106,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Oregon",
+        "home_games": 18,
+        "raw_hfa": 7.144,
+        "raw_modifier": 3.921,
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 5.08,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Oregon State",
+        "home_games": 17,
+        "raw_hfa": 7.412,
+        "raw_modifier": 4.189,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 5.148,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Penn State",
+        "home_games": 20,
+        "raw_hfa": 11.191,
+        "raw_modifier": 7.968,
+        "shrinkage_weight": 0.5,
+        "shrunk_unbounded_hfa": 7.207,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "HIGH"
+      },
+      {
+        "team": "SMU",
+        "home_games": 17,
+        "raw_hfa": 17.402,
+        "raw_modifier": 14.178,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 9.738,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "South Carolina",
+        "home_games": 17,
+        "raw_hfa": 12.92,
+        "raw_modifier": 9.697,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 7.678,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "South Florida",
         "home_games": 14,
-        "raw_hfa": 4.959,
-        "raw_modifier": 1.736,
-        "team_weight": 0.583,
-        "shrunk_modifier": 1.013,
-        "capped_modifier": 1.013,
-        "final_hfa": 4.236,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 2,
-            "raw_hfa": 20.985
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -0.941
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 5.999
-          },
-          "2025": {
-            "games": 3,
-            "raw_hfa": 0.408
-          }
-        }
+        "raw_hfa": 9.145,
+        "raw_modifier": 5.922,
+        "shrinkage_weight": 0.412,
+        "shrunk_unbounded_hfa": 5.662,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "TCU",
+        "home_games": 17,
+        "raw_hfa": 9.19,
+        "raw_modifier": 5.967,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 5.965,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Tennessee",
+        "home_games": 20,
+        "raw_hfa": 6.661,
+        "raw_modifier": 3.437,
+        "shrinkage_weight": 0.5,
+        "shrunk_unbounded_hfa": 4.942,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "HIGH"
+      },
+      {
+        "team": "Texas",
+        "home_games": 16,
+        "raw_hfa": 10.861,
+        "raw_modifier": 7.637,
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 6.618,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Texas A&M",
+        "home_games": 15,
+        "raw_hfa": 8.089,
+        "raw_modifier": 4.866,
+        "shrinkage_weight": 0.429,
+        "shrunk_unbounded_hfa": 5.309,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Texas Tech",
+        "home_games": 17,
+        "raw_hfa": 5.217,
+        "raw_modifier": 1.993,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 4.139,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Toledo",
+        "home_games": 15,
+        "raw_hfa": 5.555,
+        "raw_modifier": 2.332,
+        "shrinkage_weight": 0.429,
+        "shrunk_unbounded_hfa": 4.223,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Troy",
+        "home_games": 19,
+        "raw_hfa": 8.039,
+        "raw_modifier": 4.816,
+        "shrinkage_weight": 0.487,
+        "shrunk_unbounded_hfa": 5.57,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Tulane",
+        "home_games": 20,
+        "raw_hfa": 6.349,
+        "raw_modifier": 3.125,
+        "shrinkage_weight": 0.5,
+        "shrunk_unbounded_hfa": 4.786,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "HIGH"
+      },
+      {
+        "team": "UConn",
+        "home_games": 17,
+        "raw_hfa": 7.15,
+        "raw_modifier": 3.927,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 5.028,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "UTSA",
+        "home_games": 17,
+        "raw_hfa": 17.732,
+        "raw_modifier": 14.508,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 9.889,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Utah",
+        "home_games": 17,
+        "raw_hfa": 10.088,
+        "raw_modifier": 6.864,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 6.377,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Utah State",
+        "home_games": 16,
+        "raw_hfa": 11.528,
+        "raw_modifier": 8.305,
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 6.914,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Virginia Tech",
+        "home_games": 15,
+        "raw_hfa": 5.368,
+        "raw_modifier": 2.145,
+        "shrinkage_weight": 0.429,
+        "shrunk_unbounded_hfa": 4.142,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Washington State",
+        "home_games": 16,
+        "raw_hfa": 9.018,
+        "raw_modifier": 5.795,
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 5.799,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Wyoming",
+        "home_games": 16,
+        "raw_hfa": 10.686,
+        "raw_modifier": 7.463,
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 6.54,
+        "final_hfa": 4.0,
+        "modifier_vs_national": 0.777,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
       },
       {
         "team": "James Madison",
         "home_games": 18,
         "raw_hfa": 4.772,
         "raw_modifier": 1.549,
-        "team_weight": 0.643,
-        "shrunk_modifier": 0.996,
-        "capped_modifier": 0.996,
-        "final_hfa": 4.219,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 2.25
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 2.58
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 4.951
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 8.839
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 3.957,
+        "final_hfa": 3.957,
+        "modifier_vs_national": 0.734,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Army",
+        "home_games": 14,
+        "raw_hfa": 4.959,
+        "raw_modifier": 1.736,
+        "shrinkage_weight": 0.412,
+        "shrunk_unbounded_hfa": 3.938,
+        "final_hfa": 3.938,
+        "modifier_vs_national": 0.715,
+        "at_floor": false,
+        "at_ceiling": true,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Michigan",
         "home_games": 19,
         "raw_hfa": 4.532,
         "raw_modifier": 1.308,
-        "team_weight": 0.655,
-        "shrunk_modifier": 0.857,
-        "capped_modifier": 0.857,
-        "final_hfa": 4.08,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": -2.025
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 0.144
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 8.371
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 10.759
-          }
-        }
+        "shrinkage_weight": 0.487,
+        "shrunk_unbounded_hfa": 3.861,
+        "final_hfa": 3.861,
+        "modifier_vs_national": 0.637,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "San Diego State",
         "home_games": 16,
         "raw_hfa": 4.327,
         "raw_modifier": 1.104,
-        "team_weight": 0.615,
-        "shrunk_modifier": 0.679,
-        "capped_modifier": 0.679,
-        "final_hfa": 3.902,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 7.626
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 4.423
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -1.502
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 6.76
-          }
-        }
-      },
-      {
-        "team": "Missouri State",
-        "home_games": 4,
-        "raw_hfa": 5.59,
-        "raw_modifier": 2.367,
-        "team_weight": 0.286,
-        "shrunk_modifier": 0.676,
-        "capped_modifier": 0.676,
-        "final_hfa": 3.9,
-        "reliability": "LOW",
-        "year_by_year": {
-          "2025": {
-            "games": 4,
-            "raw_hfa": 5.59
-          }
-        }
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 3.714,
+        "final_hfa": 3.714,
+        "modifier_vs_national": 0.49,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Oklahoma",
         "home_games": 14,
         "raw_hfa": 4.346,
         "raw_modifier": 1.123,
-        "team_weight": 0.583,
-        "shrunk_modifier": 0.655,
-        "capped_modifier": 0.655,
-        "final_hfa": 3.878,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 0.356
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 8.749
-          },
-          "2024": {
-            "games": 2,
-            "raw_hfa": 6.433
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 2.89
-          }
-        }
+        "shrinkage_weight": 0.412,
+        "shrunk_unbounded_hfa": 3.686,
+        "final_hfa": 3.686,
+        "modifier_vs_national": 0.462,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Western Michigan",
         "home_games": 17,
         "raw_hfa": 4.136,
         "raw_modifier": 0.913,
-        "team_weight": 0.63,
-        "shrunk_modifier": 0.575,
-        "capped_modifier": 0.575,
-        "final_hfa": 3.798,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": -1.492
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -1.754
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 5.978
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 15.217
-          }
-        }
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 3.643,
+        "final_hfa": 3.643,
+        "modifier_vs_national": 0.419,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Colorado",
         "home_games": 19,
         "raw_hfa": 4.051,
         "raw_modifier": 0.827,
-        "team_weight": 0.655,
-        "shrunk_modifier": 0.542,
-        "capped_modifier": 0.542,
-        "final_hfa": 3.765,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 2.669
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 2.395
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 13.267
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": -2.459
-          }
-        }
+        "shrinkage_weight": 0.487,
+        "shrunk_unbounded_hfa": 3.626,
+        "final_hfa": 3.626,
+        "modifier_vs_national": 0.403,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Missouri State",
+        "home_games": 4,
+        "raw_hfa": 5.59,
+        "raw_modifier": 2.367,
+        "shrinkage_weight": 0.167,
+        "shrunk_unbounded_hfa": 3.618,
+        "final_hfa": 3.618,
+        "modifier_vs_national": 0.395,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "LOW"
       },
       {
         "team": "UAB",
         "home_games": 17,
         "raw_hfa": 3.932,
         "raw_modifier": 0.708,
-        "team_weight": 0.63,
-        "shrunk_modifier": 0.446,
-        "capped_modifier": 0.446,
-        "final_hfa": 3.669,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 5.77
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 3.917
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 7.066
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -1.81
-          }
-        }
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 3.549,
+        "final_hfa": 3.549,
+        "modifier_vs_national": 0.326,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Oklahoma State",
         "home_games": 18,
         "raw_hfa": 3.892,
         "raw_modifier": 0.669,
-        "team_weight": 0.643,
-        "shrunk_modifier": 0.43,
-        "capped_modifier": 0.43,
-        "final_hfa": 3.653,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 10.234
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 16.227
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -10.941
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": -1.65
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 3.54,
+        "final_hfa": 3.54,
+        "modifier_vs_national": 0.317,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Wake Forest",
         "home_games": 17,
         "raw_hfa": 3.708,
         "raw_modifier": 0.484,
-        "team_weight": 0.63,
-        "shrunk_modifier": 0.305,
-        "capped_modifier": 0.305,
-        "final_hfa": 3.528,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 8.239
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -10.447
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 1.188
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 14.718
-          }
-        }
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 3.446,
+        "final_hfa": 3.446,
+        "modifier_vs_national": 0.223,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "New Mexico State",
         "home_games": 14,
         "raw_hfa": 3.625,
         "raw_modifier": 0.402,
-        "team_weight": 0.583,
-        "shrunk_modifier": 0.234,
-        "capped_modifier": 0.234,
-        "final_hfa": 3.458,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 3,
-            "raw_hfa": -1.325
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 4.633
-          },
-          "2024": {
-            "games": 3,
-            "raw_hfa": 8.18
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 2.912
-          }
-        }
+        "shrinkage_weight": 0.412,
+        "shrunk_unbounded_hfa": 3.389,
+        "final_hfa": 3.389,
+        "modifier_vs_national": 0.165,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Minnesota",
         "home_games": 17,
         "raw_hfa": 3.551,
         "raw_modifier": 0.327,
-        "team_weight": 0.63,
-        "shrunk_modifier": 0.206,
-        "capped_modifier": 0.206,
-        "final_hfa": 3.429,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 3,
-            "raw_hfa": 8.388
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": -1.271
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 4.846
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 4.433
-          }
-        }
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 3.374,
+        "final_hfa": 3.374,
+        "modifier_vs_national": 0.15,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Washington",
         "home_games": 16,
         "raw_hfa": 3.51,
         "raw_modifier": 0.286,
-        "team_weight": 0.615,
-        "shrunk_modifier": 0.176,
-        "capped_modifier": 0.176,
-        "final_hfa": 3.399,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 3,
-            "raw_hfa": 7.022
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 0.604
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 0.4
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 6.215
-          }
-        }
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 3.351,
+        "final_hfa": 3.351,
+        "modifier_vs_national": 0.127,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "UCF",
         "home_games": 18,
         "raw_hfa": 3.431,
         "raw_modifier": 0.208,
-        "team_weight": 0.643,
-        "shrunk_modifier": 0.133,
-        "capped_modifier": 0.133,
-        "final_hfa": 3.357,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 13.176
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 1.477
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": -3.652
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 2.056
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 3.322,
+        "final_hfa": 3.322,
+        "modifier_vs_national": 0.098,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Arizona",
         "home_games": 18,
         "raw_hfa": 3.389,
         "raw_modifier": 0.166,
-        "team_weight": 0.643,
-        "shrunk_modifier": 0.107,
-        "capped_modifier": 0.107,
-        "final_hfa": 3.33,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 2.446
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 12.517
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": -7.977
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 9.649
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 3.302,
+        "final_hfa": 3.302,
+        "modifier_vs_national": 0.079,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Pittsburgh",
         "home_games": 17,
         "raw_hfa": 3.196,
         "raw_modifier": -0.027,
-        "team_weight": 0.63,
-        "shrunk_modifier": -0.017,
-        "capped_modifier": -0.017,
-        "final_hfa": 3.206,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -4.951
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 10.794
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 3.255
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 3.588
-          }
-        }
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 3.211,
+        "final_hfa": 3.211,
+        "modifier_vs_national": -0.013,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Georgia Tech",
         "home_games": 14,
         "raw_hfa": 3.065,
         "raw_modifier": -0.158,
-        "team_weight": 0.583,
-        "shrunk_modifier": -0.092,
-        "capped_modifier": -0.092,
-        "final_hfa": 3.131,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 3,
-            "raw_hfa": 1.775
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 0.811
-          },
-          "2024": {
-            "games": 3,
-            "raw_hfa": 8.503
-          },
-          "2025": {
-            "games": 3,
-            "raw_hfa": 2.673
-          }
-        }
+        "shrinkage_weight": 0.412,
+        "shrunk_unbounded_hfa": 3.158,
+        "final_hfa": 3.158,
+        "modifier_vs_national": -0.065,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Marshall",
         "home_games": 16,
         "raw_hfa": 3.06,
         "raw_modifier": -0.163,
-        "team_weight": 0.615,
-        "shrunk_modifier": -0.1,
-        "capped_modifier": -0.1,
-        "final_hfa": 3.123,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -1.111
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 2.718
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 4.724
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 5.911
-          }
-        }
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 3.151,
+        "final_hfa": 3.151,
+        "modifier_vs_national": -0.072,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Clemson",
         "home_games": 18,
         "raw_hfa": 2.949,
         "raw_modifier": -0.274,
-        "team_weight": 0.643,
-        "shrunk_modifier": -0.176,
-        "capped_modifier": -0.176,
-        "final_hfa": 3.047,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 9.531
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 7.189
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -2.45
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -5.178
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 3.093,
+        "final_hfa": 3.093,
+        "modifier_vs_national": -0.13,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Kansas",
         "home_games": 15,
         "raw_hfa": 2.884,
         "raw_modifier": -0.34,
-        "team_weight": 0.6,
-        "shrunk_modifier": -0.204,
-        "capped_modifier": -0.204,
-        "final_hfa": 3.019,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 3.551
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 4.202
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 0.899
-          }
-        }
+        "shrinkage_weight": 0.429,
+        "shrunk_unbounded_hfa": 3.078,
+        "final_hfa": 3.078,
+        "modifier_vs_national": -0.146,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Iowa State",
         "home_games": 18,
         "raw_hfa": 2.842,
         "raw_modifier": -0.381,
-        "team_weight": 0.643,
-        "shrunk_modifier": -0.245,
-        "capped_modifier": -0.245,
-        "final_hfa": 2.978,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": -7.763
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 5.257
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 6.418
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 9.214
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 3.043,
+        "final_hfa": 3.043,
+        "modifier_vs_national": -0.181,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Central Michigan",
         "home_games": 16,
         "raw_hfa": 2.78,
         "raw_modifier": -0.444,
-        "team_weight": 0.615,
-        "shrunk_modifier": -0.273,
-        "capped_modifier": -0.273,
-        "final_hfa": 2.95,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -3.946
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 10.208
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -3.697
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 8.554
-          }
-        }
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 3.026,
+        "final_hfa": 3.026,
+        "modifier_vs_national": -0.197,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Air Force",
         "home_games": 16,
         "raw_hfa": 2.762,
         "raw_modifier": -0.461,
-        "team_weight": 0.615,
-        "shrunk_modifier": -0.284,
-        "capped_modifier": -0.284,
-        "final_hfa": 2.939,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 0.211
-          },
-          "2023": {
-            "games": 3,
-            "raw_hfa": 4.708
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 7.607
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -0.354
-          }
-        }
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 3.018,
+        "final_hfa": 3.018,
+        "modifier_vs_national": -0.205,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Colorado State",
         "home_games": 18,
         "raw_hfa": 2.464,
         "raw_modifier": -0.759,
-        "team_weight": 0.643,
-        "shrunk_modifier": -0.488,
-        "capped_modifier": -0.488,
-        "final_hfa": 2.735,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 9.541
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 1.605
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 8.529
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": -8.575
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 2.864,
+        "final_hfa": 2.864,
+        "modifier_vs_national": -0.36,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Nebraska",
         "home_games": 17,
         "raw_hfa": 2.411,
         "raw_modifier": -0.812,
-        "team_weight": 0.63,
-        "shrunk_modifier": -0.511,
-        "capped_modifier": -0.511,
-        "final_hfa": 2.712,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 9.608
-          },
-          "2023": {
-            "games": 6,
-            "raw_hfa": -1.377
-          },
-          "2024": {
-            "games": 3,
-            "raw_hfa": -2.572
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 4.636
-          }
-        }
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 2.85,
+        "final_hfa": 2.85,
+        "modifier_vs_national": -0.373,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "West Virginia",
         "home_games": 17,
         "raw_hfa": 2.381,
         "raw_modifier": -0.842,
-        "team_weight": 0.63,
-        "shrunk_modifier": -0.53,
-        "capped_modifier": -0.53,
-        "final_hfa": 2.693,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 5.412
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 10.071
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 1.598
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -7.359
-          }
-        }
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 2.836,
+        "final_hfa": 2.836,
+        "modifier_vs_national": -0.387,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Illinois",
         "home_games": 18,
         "raw_hfa": 2.379,
         "raw_modifier": -0.844,
-        "team_weight": 0.643,
-        "shrunk_modifier": -0.543,
-        "capped_modifier": -0.543,
-        "final_hfa": 2.68,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -9.04
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": -3.984
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 4.252
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 16.378
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 2.823,
+        "final_hfa": 2.823,
+        "modifier_vs_national": -0.4,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Missouri",
         "home_games": 15,
         "raw_hfa": 2.237,
         "raw_modifier": -0.986,
-        "team_weight": 0.6,
-        "shrunk_modifier": -0.592,
-        "capped_modifier": -0.592,
-        "final_hfa": 2.632,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 5.627
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 3.585
-          },
-          "2024": {
-            "games": 3,
-            "raw_hfa": 3.162
-          },
-          "2025": {
-            "games": 3,
-            "raw_hfa": -6.135
-          }
-        }
+        "shrinkage_weight": 0.429,
+        "shrunk_unbounded_hfa": 2.801,
+        "final_hfa": 2.801,
+        "modifier_vs_national": -0.423,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Auburn",
         "home_games": 19,
         "raw_hfa": 2.229,
         "raw_modifier": -0.994,
-        "team_weight": 0.655,
-        "shrunk_modifier": -0.652,
-        "capped_modifier": -0.652,
-        "final_hfa": 2.572,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 9.649
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 2.081
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 1.551
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -6.014
-          }
-        }
+        "shrinkage_weight": 0.487,
+        "shrunk_unbounded_hfa": 2.739,
+        "final_hfa": 2.739,
+        "modifier_vs_national": -0.484,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Old Dominion",
         "home_games": 18,
         "raw_hfa": 1.937,
         "raw_modifier": -1.286,
-        "team_weight": 0.643,
-        "shrunk_modifier": -0.827,
-        "capped_modifier": -0.827,
-        "final_hfa": 2.397,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": -11.214
-          },
-          "2023": {
-            "games": 3,
-            "raw_hfa": 3.909
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 6.23
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 9.613
-          }
-        }
-      },
-      {
-        "team": "Memphis",
-        "home_games": 19,
-        "raw_hfa": 1.642,
-        "raw_modifier": -1.582,
-        "team_weight": 0.655,
-        "shrunk_modifier": -1.036,
-        "capped_modifier": -1.036,
-        "final_hfa": 2.187,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 3.067
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -2.349
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 1.966
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 3.084
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 2.614,
+        "final_hfa": 2.614,
+        "modifier_vs_national": -0.609,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Sam Houston",
         "home_games": 7,
         "raw_hfa": 0.611,
         "raw_modifier": -2.613,
-        "team_weight": 0.412,
-        "shrunk_modifier": -1.076,
-        "capped_modifier": -1.076,
-        "final_hfa": 2.147,
-        "reliability": "LOW",
-        "year_by_year": {
-          "2023": {
-            "games": 4,
-            "raw_hfa": 2.818
-          },
-          "2024": {
-            "games": 3,
-            "raw_hfa": -2.332
-          }
-        }
+        "shrinkage_weight": 0.259,
+        "shrunk_unbounded_hfa": 2.546,
+        "final_hfa": 2.546,
+        "modifier_vs_national": -0.677,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "LOW"
+      },
+      {
+        "team": "Memphis",
+        "home_games": 19,
+        "raw_hfa": 1.642,
+        "raw_modifier": -1.582,
+        "shrinkage_weight": 0.487,
+        "shrunk_unbounded_hfa": 2.453,
+        "final_hfa": 2.453,
+        "modifier_vs_national": -0.771,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Louisiana",
         "home_games": 18,
         "raw_hfa": 1.468,
         "raw_modifier": -1.755,
-        "team_weight": 0.643,
-        "shrunk_modifier": -1.128,
-        "capped_modifier": -1.128,
-        "final_hfa": 2.095,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 4.72
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": -0.087
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": -1.63
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 4.032
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 2.392,
+        "final_hfa": 2.392,
+        "modifier_vs_national": -0.831,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Kent State",
         "home_games": 15,
         "raw_hfa": 1.147,
         "raw_modifier": -2.077,
-        "team_weight": 0.6,
-        "shrunk_modifier": -1.246,
-        "capped_modifier": -1.246,
-        "final_hfa": 1.977,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -0.901
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 1.444
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -8.154
-          },
-          "2025": {
-            "games": 3,
-            "raw_hfa": 15.882
-          }
-        }
+        "shrinkage_weight": 0.429,
+        "shrunk_unbounded_hfa": 2.333,
+        "final_hfa": 2.333,
+        "modifier_vs_national": -0.89,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Mississippi State",
         "home_games": 18,
         "raw_hfa": 1.256,
         "raw_modifier": -1.968,
-        "team_weight": 0.643,
-        "shrunk_modifier": -1.265,
-        "capped_modifier": -1.265,
-        "final_hfa": 1.958,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 4.095
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 4.142
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 3.156
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -7.802
-          }
-        }
-      },
-      {
-        "team": "Ole Miss",
-        "home_games": 20,
-        "raw_hfa": 1.191,
-        "raw_modifier": -2.033,
-        "team_weight": 0.667,
-        "shrunk_modifier": -1.355,
-        "capped_modifier": -1.355,
-        "final_hfa": 1.868,
-        "reliability": "HIGH",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": -2.325
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 6.545
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": -7.467
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 8.009
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 2.291,
+        "final_hfa": 2.291,
+        "modifier_vs_national": -0.932,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "California",
         "home_games": 18,
         "raw_hfa": 1.106,
         "raw_modifier": -2.117,
-        "team_weight": 0.643,
-        "shrunk_modifier": -1.361,
-        "capped_modifier": -1.361,
-        "final_hfa": 1.862,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 3.717
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 2.673
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": -0.587
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -1.608
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 2.22,
+        "final_hfa": 2.22,
+        "modifier_vs_national": -1.003,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Duke",
         "home_games": 16,
         "raw_hfa": 0.955,
         "raw_modifier": -2.268,
-        "team_weight": 0.615,
-        "shrunk_modifier": -1.396,
-        "capped_modifier": -1.396,
-        "final_hfa": 1.828,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -0.165
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -0.185
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 2.165
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 2.007
-          }
-        }
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 2.215,
+        "final_hfa": 2.215,
+        "modifier_vs_national": -1.008,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Ole Miss",
+        "home_games": 20,
+        "raw_hfa": 1.191,
+        "raw_modifier": -2.033,
+        "shrinkage_weight": 0.5,
+        "shrunk_unbounded_hfa": 2.207,
+        "final_hfa": 2.207,
+        "modifier_vs_national": -1.016,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "HIGH"
       },
       {
         "team": "North Carolina",
         "home_games": 17,
         "raw_hfa": 0.951,
         "raw_modifier": -2.273,
-        "team_weight": 0.63,
-        "shrunk_modifier": -1.431,
-        "capped_modifier": -1.431,
-        "final_hfa": 1.792,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 6.18
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 3.572
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -7.038
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -0.218
-          }
-        }
-      },
-      {
-        "team": "Vanderbilt",
-        "home_games": 18,
-        "raw_hfa": 0.783,
-        "raw_modifier": -2.44,
-        "team_weight": 0.643,
-        "shrunk_modifier": -1.569,
-        "capped_modifier": -1.569,
-        "final_hfa": 1.655,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -10.283
-          },
-          "2023": {
-            "games": 3,
-            "raw_hfa": -4.108
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 2.474
-          },
-          "2025": {
-            "games": 6,
-            "raw_hfa": 9.197
-          }
-        }
-      },
-      {
-        "team": "Kentucky",
-        "home_games": 17,
-        "raw_hfa": 0.714,
-        "raw_modifier": -2.509,
-        "team_weight": 0.63,
-        "shrunk_modifier": -1.58,
-        "capped_modifier": -1.58,
-        "final_hfa": 1.644,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 6,
-            "raw_hfa": 5.759
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -8.838
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -4.601
-          },
-          "2025": {
-            "games": 3,
-            "raw_hfa": 10.45
-          }
-        }
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 2.179,
+        "final_hfa": 2.179,
+        "modifier_vs_national": -1.044,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Navy",
         "home_games": 14,
         "raw_hfa": 0.437,
         "raw_modifier": -2.786,
-        "team_weight": 0.583,
-        "shrunk_modifier": -1.625,
-        "capped_modifier": -1.625,
-        "final_hfa": 1.598,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 3,
-            "raw_hfa": 6.602
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 4.445
-          },
-          "2024": {
-            "games": 2,
-            "raw_hfa": -12.317
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -2.818
-          }
-        }
+        "shrinkage_weight": 0.412,
+        "shrunk_unbounded_hfa": 2.076,
+        "final_hfa": 2.076,
+        "modifier_vs_national": -1.147,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Kentucky",
+        "home_games": 17,
+        "raw_hfa": 0.714,
+        "raw_modifier": -2.509,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 2.071,
+        "final_hfa": 2.071,
+        "modifier_vs_national": -1.153,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Vanderbilt",
+        "home_games": 18,
+        "raw_hfa": 0.783,
+        "raw_modifier": -2.44,
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 2.067,
+        "final_hfa": 2.067,
+        "modifier_vs_national": -1.156,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Baylor",
         "home_games": 18,
         "raw_hfa": 0.585,
         "raw_modifier": -2.638,
-        "team_weight": 0.643,
-        "shrunk_modifier": -1.696,
-        "capped_modifier": -1.696,
-        "final_hfa": 1.527,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -3.612
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": -7.532
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 11.212
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 3.558
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 1.974,
+        "final_hfa": 1.974,
+        "modifier_vs_national": -1.25,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "UNLV",
         "home_games": 18,
         "raw_hfa": 0.547,
         "raw_modifier": -2.676,
-        "team_weight": 0.643,
-        "shrunk_modifier": -1.721,
-        "capped_modifier": -1.721,
-        "final_hfa": 1.503,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -12.18
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": -4.554
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 12.828
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 4.299
-          }
-        }
-      },
-      {
-        "team": "Boston College",
-        "home_games": 20,
-        "raw_hfa": 0.599,
-        "raw_modifier": -2.624,
-        "team_weight": 0.667,
-        "shrunk_modifier": -1.75,
-        "capped_modifier": -1.75,
-        "final_hfa": 1.474,
-        "reliability": "HIGH",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 6.73
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -11.916
-          },
-          "2024": {
-            "games": 6,
-            "raw_hfa": 10.936
-          },
-          "2025": {
-            "games": 6,
-            "raw_hfa": -5.482
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 1.955,
+        "final_hfa": 1.955,
+        "modifier_vs_national": -1.268,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Akron",
         "home_games": 16,
         "raw_hfa": 0.291,
         "raw_modifier": -2.932,
-        "team_weight": 0.615,
-        "shrunk_modifier": -1.804,
-        "capped_modifier": -1.804,
-        "final_hfa": 1.419,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 4.01
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -12.219
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 6.199
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 3.176
-          }
-        }
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 1.92,
+        "final_hfa": 1.92,
+        "modifier_vs_national": -1.303,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Boston College",
+        "home_games": 20,
+        "raw_hfa": 0.599,
+        "raw_modifier": -2.624,
+        "shrinkage_weight": 0.5,
+        "shrunk_unbounded_hfa": 1.911,
+        "final_hfa": 1.911,
+        "modifier_vs_national": -1.312,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "HIGH"
       },
       {
         "team": "San Jos\u00e9 State",
         "home_games": 17,
         "raw_hfa": 0.028,
         "raw_modifier": -3.195,
-        "team_weight": 0.63,
-        "shrunk_modifier": -2.012,
-        "capped_modifier": -2.012,
-        "final_hfa": 1.211,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -1.731
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 16.437
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": -8.051
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -4.523
-          }
-        }
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 1.755,
+        "final_hfa": 1.755,
+        "modifier_vs_national": -1.468,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Houston",
         "home_games": 17,
         "raw_hfa": -0.007,
         "raw_modifier": -3.23,
-        "team_weight": 0.63,
-        "shrunk_modifier": -2.034,
-        "capped_modifier": -2.034,
-        "final_hfa": 1.189,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -5.184
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 6.829
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 5.662
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -9.045
-          }
-        }
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 1.739,
+        "final_hfa": 1.739,
+        "modifier_vs_national": -1.484,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Middle Tennessee",
         "home_games": 16,
         "raw_hfa": -0.148,
         "raw_modifier": -3.372,
-        "team_weight": 0.615,
-        "shrunk_modifier": -2.075,
-        "capped_modifier": -2.075,
-        "final_hfa": 1.148,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -4.122
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 9.954
-          },
-          "2024": {
-            "games": 3,
-            "raw_hfa": -0.261
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -8.718
-          }
-        }
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 1.725,
+        "final_hfa": 1.725,
+        "modifier_vs_national": -1.498,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Stanford",
         "home_games": 18,
         "raw_hfa": -0.518,
         "raw_modifier": -3.741,
-        "team_weight": 0.643,
-        "shrunk_modifier": -2.405,
-        "capped_modifier": -2.405,
-        "final_hfa": 0.818,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -3.111
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": -4.397
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -3.212
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 7.592
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 1.451,
+        "final_hfa": 1.451,
+        "modifier_vs_national": -1.772,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Western Kentucky",
         "home_games": 15,
         "raw_hfa": -1.01,
         "raw_modifier": -4.234,
-        "team_weight": 0.6,
-        "shrunk_modifier": -2.54,
-        "capped_modifier": -2.54,
-        "final_hfa": 0.683,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -10.449
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 1.646
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 2.249
-          },
-          "2025": {
-            "games": 3,
-            "raw_hfa": 3.688
-          }
-        }
+        "shrinkage_weight": 0.429,
+        "shrunk_unbounded_hfa": 1.409,
+        "final_hfa": 1.409,
+        "modifier_vs_national": -1.814,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Arizona State",
         "home_games": 18,
         "raw_hfa": -0.748,
         "raw_modifier": -3.971,
-        "team_weight": 0.643,
-        "shrunk_modifier": -2.553,
-        "capped_modifier": -2.553,
-        "final_hfa": 0.671,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -3.919
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": -2.162
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -0.046
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 2.642
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 1.342,
+        "final_hfa": 1.342,
+        "modifier_vs_national": -1.881,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Wisconsin",
         "home_games": 18,
         "raw_hfa": -1.155,
         "raw_modifier": -4.378,
-        "team_weight": 0.643,
-        "shrunk_modifier": -2.814,
-        "capped_modifier": -2.814,
-        "final_hfa": 0.409,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 1.986
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": -9.676
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 8.91
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": -3.199
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 1.149,
+        "final_hfa": 1.149,
+        "modifier_vs_national": -2.074,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "South Alabama",
         "home_games": 18,
         "raw_hfa": -1.331,
         "raw_modifier": -4.554,
-        "team_weight": 0.643,
-        "shrunk_modifier": -2.928,
-        "capped_modifier": -2.928,
-        "final_hfa": 0.296,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": -2.426
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 3.739
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 1.737
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -9.368
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 1.066,
+        "final_hfa": 1.066,
+        "modifier_vs_national": -2.157,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "UCLA",
         "home_games": 18,
         "raw_hfa": -1.383,
         "raw_modifier": -4.607,
-        "team_weight": 0.643,
-        "shrunk_modifier": -2.961,
-        "capped_modifier": -2.961,
-        "final_hfa": 0.262,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 1.967
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -13.323
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 4.553
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -1.053
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 1.041,
+        "final_hfa": 1.041,
+        "modifier_vs_national": -2.182,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "USC",
         "home_games": 18,
         "raw_hfa": -1.431,
         "raw_modifier": -4.654,
-        "team_weight": 0.643,
-        "shrunk_modifier": -2.992,
-        "capped_modifier": -2.992,
-        "final_hfa": 0.231,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": -3.627
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -9.263
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 7.7
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": -0.273
-          }
-        }
-      },
-      {
-        "team": "Arkansas",
-        "home_games": 18,
-        "raw_hfa": -4.787,
-        "raw_modifier": -8.01,
-        "team_weight": 0.643,
-        "shrunk_modifier": -5.15,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 5.308
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -16.11
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": 0.614
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": -9.206
-          }
-        }
-      },
-      {
-        "team": "Bowling Green",
-        "home_games": 17,
-        "raw_hfa": -6.267,
-        "raw_modifier": -9.49,
-        "team_weight": 0.63,
-        "shrunk_modifier": -5.975,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -18.192
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -0.453
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": -1.353
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -6.299
-          }
-        }
-      },
-      {
-        "team": "Buffalo",
-        "home_games": 18,
-        "raw_hfa": -3.258,
-        "raw_modifier": -6.481,
-        "team_weight": 0.643,
-        "shrunk_modifier": -4.167,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -3.683
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -4.859
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 7.786
-          },
-          "2025": {
-            "games": 6,
-            "raw_hfa": -9.27
-          }
-        }
-      },
-      {
-        "team": "Charlotte",
-        "home_games": 16,
-        "raw_hfa": -6.267,
-        "raw_modifier": -9.49,
-        "team_weight": 0.615,
-        "shrunk_modifier": -5.84,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -6.693
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -8.543
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -0.52
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -9.312
-          }
-        }
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 1.019,
+        "final_hfa": 1.019,
+        "modifier_vs_national": -2.205,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Cincinnati",
         "home_games": 19,
         "raw_hfa": -1.595,
         "raw_modifier": -4.819,
-        "team_weight": 0.655,
-        "shrunk_modifier": -3.157,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": -2.721
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": -9.112
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 8.901
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": -1.35
-          }
-        }
-      },
-      {
-        "team": "Coastal Carolina",
-        "home_games": 17,
-        "raw_hfa": -3.89,
-        "raw_modifier": -7.114,
-        "team_weight": 0.63,
-        "shrunk_modifier": -4.479,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -14.602
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": 3.814
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": -12.171
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 9.467
-          }
-        }
-      },
-      {
-        "team": "Eastern Michigan",
-        "home_games": 18,
-        "raw_hfa": -3.17,
-        "raw_modifier": -6.393,
-        "team_weight": 0.643,
-        "shrunk_modifier": -4.11,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": -7.958
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -4.081
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": -3.304
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 3.894
-          }
-        }
-      },
-      {
-        "team": "Florida Atlantic",
-        "home_games": 16,
-        "raw_hfa": -3.064,
-        "raw_modifier": -6.287,
-        "team_weight": 0.615,
-        "shrunk_modifier": -3.869,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 3,
-            "raw_hfa": 6.115
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -11.33
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -6.664
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 0.922
-          }
-        }
-      },
-      {
-        "team": "Florida International",
-        "home_games": 13,
-        "raw_hfa": -10.443,
-        "raw_modifier": -13.667,
-        "team_weight": 0.565,
-        "shrunk_modifier": -7.725,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": -11.488
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -16.613
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -2.969
-          }
-        }
-      },
-      {
-        "team": "Georgia State",
-        "home_games": 16,
-        "raw_hfa": -6.893,
-        "raw_modifier": -10.116,
-        "team_weight": 0.615,
-        "shrunk_modifier": -6.225,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -1.455
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -16.995
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -12.367
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 3.247
-          }
-        }
-      },
-      {
-        "team": "Liberty",
-        "home_games": 17,
-        "raw_hfa": -3.613,
-        "raw_modifier": -6.836,
-        "team_weight": 0.63,
-        "shrunk_modifier": -4.304,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 3,
-            "raw_hfa": -18.255
-          },
-          "2023": {
-            "games": 6,
-            "raw_hfa": -2.196
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -1.343
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 2.972
-          }
-        }
-      },
-      {
-        "team": "Maryland",
-        "home_games": 17,
-        "raw_hfa": -8.134,
-        "raw_modifier": -11.357,
-        "team_weight": 0.63,
-        "shrunk_modifier": -7.151,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": 4.042
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -5.639
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -17.492
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -16.491
-          }
-        }
-      },
-      {
-        "team": "Massachusetts",
-        "home_games": 14,
-        "raw_hfa": -10.777,
-        "raw_modifier": -14.0,
-        "team_weight": 0.583,
-        "shrunk_modifier": -8.167,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -11.751
-          },
-          "2023": {
-            "games": 3,
-            "raw_hfa": -19.919
-          },
-          "2024": {
-            "games": 3,
-            "raw_hfa": -3.835
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -8.151
-          }
-        }
-      },
-      {
-        "team": "Miami",
-        "home_games": 18,
-        "raw_hfa": -4.844,
-        "raw_modifier": -8.067,
-        "team_weight": 0.643,
-        "shrunk_modifier": -5.186,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": -21.479
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -8.972
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 1.573
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 9.96
-          }
-        }
-      },
-      {
-        "team": "Michigan State",
-        "home_games": 14,
-        "raw_hfa": -7.185,
-        "raw_modifier": -10.408,
-        "team_weight": 0.583,
-        "shrunk_modifier": -6.072,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -3.378
-          },
-          "2023": {
-            "games": 2,
-            "raw_hfa": -1.052
-          },
-          "2024": {
-            "games": 5,
-            "raw_hfa": -10.931
-          },
-          "2025": {
-            "games": 3,
-            "raw_hfa": -10.107
-          }
-        }
-      },
-      {
-        "team": "Nevada",
-        "home_games": 16,
-        "raw_hfa": -6.034,
-        "raw_modifier": -9.258,
-        "team_weight": 0.615,
-        "shrunk_modifier": -5.697,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -19.323
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -6.989
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -3.431
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": 5.606
-          }
-        }
-      },
-      {
-        "team": "New Mexico",
-        "home_games": 15,
-        "raw_hfa": -3.358,
-        "raw_modifier": -6.581,
-        "team_weight": 0.6,
-        "shrunk_modifier": -3.949,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 3,
-            "raw_hfa": -17.496
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -10.325
-          },
-          "2024": {
-            "games": 3,
-            "raw_hfa": 1.495
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 7.787
-          }
-        }
-      },
-      {
-        "team": "Northern Illinois",
-        "home_games": 18,
-        "raw_hfa": -5.214,
-        "raw_modifier": -8.437,
-        "team_weight": 0.643,
-        "shrunk_modifier": -5.424,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -24.634
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": 2.301
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -2.883
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 0.943
-          }
-        }
-      },
-      {
-        "team": "Purdue",
-        "home_games": 16,
-        "raw_hfa": -5.476,
-        "raw_modifier": -8.699,
-        "team_weight": 0.615,
-        "shrunk_modifier": -5.353,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -4.237
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": -0.554
-          },
-          "2024": {
-            "games": 3,
-            "raw_hfa": -4.973
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -13.244
-          }
-        }
-      },
-      {
-        "team": "Rice",
-        "home_games": 18,
-        "raw_hfa": -5.082,
-        "raw_modifier": -8.305,
-        "team_weight": 0.643,
-        "shrunk_modifier": -5.339,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -13.222
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": -6.919
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 4.696
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": -4.554
-          }
-        }
-      },
-      {
-        "team": "Rutgers",
-        "home_games": 16,
-        "raw_hfa": -5.074,
-        "raw_modifier": -8.297,
-        "team_weight": 0.615,
-        "shrunk_modifier": -5.106,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 5,
-            "raw_hfa": -8.899
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -4.756
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -6.2
-          },
-          "2025": {
-            "games": 3,
-            "raw_hfa": 2.381
-          }
-        }
+        "shrinkage_weight": 0.487,
+        "shrunk_unbounded_hfa": 0.876,
+        "final_hfa": 0.876,
+        "modifier_vs_national": -2.348,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Southern Miss",
         "home_games": 16,
         "raw_hfa": -2.18,
         "raw_modifier": -5.403,
-        "team_weight": 0.615,
-        "shrunk_modifier": -3.325,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 1.326
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -1.347
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -5.914
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -2.784
-          }
-        }
-      },
-      {
-        "team": "Syracuse",
-        "home_games": 15,
-        "raw_hfa": -5.659,
-        "raw_modifier": -8.883,
-        "team_weight": 0.6,
-        "shrunk_modifier": -5.33,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -11.978
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -6.667
-          },
-          "2024": {
-            "games": 3,
-            "raw_hfa": 15.848
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -14.463
-          }
-        }
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 0.822,
+        "final_hfa": 0.822,
+        "modifier_vs_national": -2.401,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Temple",
         "home_games": 17,
         "raw_hfa": -2.228,
         "raw_modifier": -5.451,
-        "team_weight": 0.63,
-        "shrunk_modifier": -3.432,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 3.598
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": -11.278
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 8.216
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -7.185
-          }
-        }
-      },
-      {
-        "team": "Texas State",
-        "home_games": 17,
-        "raw_hfa": -2.75,
-        "raw_modifier": -5.973,
-        "team_weight": 0.63,
-        "shrunk_modifier": -3.761,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -8.373
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": -2.683
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 1.666
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -1.625
-          }
-        }
-      },
-      {
-        "team": "Tulsa",
-        "home_games": 16,
-        "raw_hfa": -5.265,
-        "raw_modifier": -8.488,
-        "team_weight": 0.615,
-        "shrunk_modifier": -5.223,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -5.541
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -1.444
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -13.157
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -0.916
-          }
-        }
-      },
-      {
-        "team": "UL Monroe",
-        "home_games": 13,
-        "raw_hfa": -8.179,
-        "raw_modifier": -11.402,
-        "team_weight": 0.565,
-        "shrunk_modifier": -6.445,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 3,
-            "raw_hfa": 5.246
-          },
-          "2023": {
-            "games": 3,
-            "raw_hfa": -24.067
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": 1.821
-          },
-          "2025": {
-            "games": 3,
-            "raw_hfa": -19.05
-          }
-        }
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 0.719,
+        "final_hfa": 0.719,
+        "modifier_vs_national": -2.505,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "UTEP",
         "home_games": 17,
         "raw_hfa": -2.334,
         "raw_modifier": -5.557,
-        "team_weight": 0.63,
-        "shrunk_modifier": -3.499,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": 10.234
-          },
-          "2023": {
-            "games": 5,
-            "raw_hfa": -5.395
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -5.154
-          },
-          "2025": {
-            "games": 4,
-            "raw_hfa": -8.257
-          }
-        }
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 0.67,
+        "final_hfa": 0.67,
+        "modifier_vs_national": -2.553,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Texas State",
+        "home_games": 17,
+        "raw_hfa": -2.75,
+        "raw_modifier": -5.973,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 0.479,
+        "final_hfa": 0.479,
+        "modifier_vs_national": -2.744,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Florida Atlantic",
+        "home_games": 16,
+        "raw_hfa": -3.064,
+        "raw_modifier": -6.287,
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": 0.429,
+        "final_hfa": 0.429,
+        "modifier_vs_national": -2.794,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "New Mexico",
+        "home_games": 15,
+        "raw_hfa": -3.358,
+        "raw_modifier": -6.581,
+        "shrinkage_weight": 0.429,
+        "shrunk_unbounded_hfa": 0.403,
+        "final_hfa": 0.403,
+        "modifier_vs_national": -2.82,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       },
       {
         "team": "Virginia",
         "home_games": 17,
         "raw_hfa": -2.959,
         "raw_modifier": -6.183,
-        "team_weight": 0.63,
-        "shrunk_modifier": -3.893,
-        "capped_modifier": -3.0,
-        "final_hfa": 0.223,
-        "reliability": "MEDIUM",
-        "year_by_year": {
-          "2022": {
-            "games": 4,
-            "raw_hfa": -3.954
-          },
-          "2023": {
-            "games": 4,
-            "raw_hfa": -6.563
-          },
-          "2024": {
-            "games": 4,
-            "raw_hfa": -8.682
-          },
-          "2025": {
-            "games": 5,
-            "raw_hfa": 5.297
-          }
-        }
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 0.383,
+        "final_hfa": 0.383,
+        "modifier_vs_national": -2.841,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Eastern Michigan",
+        "home_games": 18,
+        "raw_hfa": -3.17,
+        "raw_modifier": -6.393,
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 0.195,
+        "final_hfa": 0.195,
+        "modifier_vs_national": -3.028,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Buffalo",
+        "home_games": 18,
+        "raw_hfa": -3.258,
+        "raw_modifier": -6.481,
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": 0.153,
+        "final_hfa": 0.153,
+        "modifier_vs_national": -3.07,
+        "at_floor": false,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Liberty",
+        "home_games": 17,
+        "raw_hfa": -3.613,
+        "raw_modifier": -6.836,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": 0.082,
+        "final_hfa": 0.082,
+        "modifier_vs_national": -3.141,
+        "at_floor": true,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Arkansas",
+        "home_games": 18,
+        "raw_hfa": -4.787,
+        "raw_modifier": -8.01,
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": -0.571,
+        "final_hfa": 0.0,
+        "modifier_vs_national": -3.223,
+        "at_floor": true,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Bowling Green",
+        "home_games": 17,
+        "raw_hfa": -6.267,
+        "raw_modifier": -9.49,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": -1.137,
+        "final_hfa": 0.0,
+        "modifier_vs_national": -3.223,
+        "at_floor": true,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Charlotte",
+        "home_games": 16,
+        "raw_hfa": -6.267,
+        "raw_modifier": -9.49,
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": -0.995,
+        "final_hfa": 0.0,
+        "modifier_vs_national": -3.223,
+        "at_floor": true,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Coastal Carolina",
+        "home_games": 17,
+        "raw_hfa": -3.89,
+        "raw_modifier": -7.114,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": -0.045,
+        "final_hfa": 0.0,
+        "modifier_vs_national": -3.223,
+        "at_floor": true,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Florida International",
+        "home_games": 13,
+        "raw_hfa": -10.443,
+        "raw_modifier": -13.667,
+        "shrinkage_weight": 0.394,
+        "shrunk_unbounded_hfa": -2.161,
+        "final_hfa": 0.0,
+        "modifier_vs_national": -3.223,
+        "at_floor": true,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Georgia State",
+        "home_games": 16,
+        "raw_hfa": -6.893,
+        "raw_modifier": -10.116,
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": -1.273,
+        "final_hfa": 0.0,
+        "modifier_vs_national": -3.223,
+        "at_floor": true,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Maryland",
+        "home_games": 17,
+        "raw_hfa": -8.134,
+        "raw_modifier": -11.357,
+        "shrinkage_weight": 0.459,
+        "shrunk_unbounded_hfa": -1.995,
+        "final_hfa": 0.0,
+        "modifier_vs_national": -3.223,
+        "at_floor": true,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Massachusetts",
+        "home_games": 14,
+        "raw_hfa": -10.777,
+        "raw_modifier": -14.0,
+        "shrinkage_weight": 0.412,
+        "shrunk_unbounded_hfa": -2.541,
+        "final_hfa": 0.0,
+        "modifier_vs_national": -3.223,
+        "at_floor": true,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Miami",
+        "home_games": 18,
+        "raw_hfa": -4.844,
+        "raw_modifier": -8.067,
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": -0.598,
+        "final_hfa": 0.0,
+        "modifier_vs_national": -3.223,
+        "at_floor": true,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Michigan State",
+        "home_games": 14,
+        "raw_hfa": -7.185,
+        "raw_modifier": -10.408,
+        "shrinkage_weight": 0.412,
+        "shrunk_unbounded_hfa": -1.063,
+        "final_hfa": 0.0,
+        "modifier_vs_national": -3.223,
+        "at_floor": true,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Nevada",
+        "home_games": 16,
+        "raw_hfa": -6.034,
+        "raw_modifier": -9.258,
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": -0.891,
+        "final_hfa": 0.0,
+        "modifier_vs_national": -3.223,
+        "at_floor": true,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Northern Illinois",
+        "home_games": 18,
+        "raw_hfa": -5.214,
+        "raw_modifier": -8.437,
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": -0.773,
+        "final_hfa": 0.0,
+        "modifier_vs_national": -3.223,
+        "at_floor": true,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Purdue",
+        "home_games": 16,
+        "raw_hfa": -5.476,
+        "raw_modifier": -8.699,
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": -0.643,
+        "final_hfa": 0.0,
+        "modifier_vs_national": -3.223,
+        "at_floor": true,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Rice",
+        "home_games": 18,
+        "raw_hfa": -5.082,
+        "raw_modifier": -8.305,
+        "shrinkage_weight": 0.474,
+        "shrunk_unbounded_hfa": -0.711,
+        "final_hfa": 0.0,
+        "modifier_vs_national": -3.223,
+        "at_floor": true,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Rutgers",
+        "home_games": 16,
+        "raw_hfa": -5.074,
+        "raw_modifier": -8.297,
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": -0.464,
+        "final_hfa": 0.0,
+        "modifier_vs_national": -3.223,
+        "at_floor": true,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Syracuse",
+        "home_games": 15,
+        "raw_hfa": -5.659,
+        "raw_modifier": -8.883,
+        "shrinkage_weight": 0.429,
+        "shrunk_unbounded_hfa": -0.584,
+        "final_hfa": 0.0,
+        "modifier_vs_national": -3.223,
+        "at_floor": true,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "Tulsa",
+        "home_games": 16,
+        "raw_hfa": -5.265,
+        "raw_modifier": -8.488,
+        "shrinkage_weight": 0.444,
+        "shrunk_unbounded_hfa": -0.549,
+        "final_hfa": 0.0,
+        "modifier_vs_national": -3.223,
+        "at_floor": true,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
+      },
+      {
+        "team": "UL Monroe",
+        "home_games": 13,
+        "raw_hfa": -8.179,
+        "raw_modifier": -11.402,
+        "shrinkage_weight": 0.394,
+        "shrunk_unbounded_hfa": -1.269,
+        "final_hfa": 0.0,
+        "modifier_vs_national": -3.223,
+        "at_floor": true,
+        "at_ceiling": false,
+        "reliability": "MEDIUM"
       }
     ]
   }
