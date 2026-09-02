@@ -3,10 +3,12 @@ name: Settle Results - No CFBD
 on:
   workflow_dispatch:
 
-  # Run hourly on the main CFB game days.
-  # UTC times; the scripts themselves are season-long and only settle finals found.
+  # College football is played every day of the week at some point in the
+  # season (midweek conference games, holiday games, bowls and CFP).
+  # Run hourly, seven days a week. The results collector only stores finals,
+  # and the settlement script only grades games that have prospective snapshots.
   schedule:
-    - cron: "45 * * * 4,5,6,0,1"
+    - cron: "45 * * * * *"
 
 permissions:
   contents: write
@@ -33,7 +35,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
-      - name: Fetch completed results without CFBD
+      - name: Fetch all completed 2026 season results without CFBD
         env:
           CFB_SEASON: "2026"
         run: |
@@ -58,4 +60,9 @@ jobs:
           fi
 
           git commit -m "Settle completed games and refresh model report"
-          git push
+
+          # Another analytics workflow may have committed while this job ran.
+          # Rebase once before pushing so independent scheduled jobs do not
+          # unnecessarily collide.
+          git pull --rebase origin main
+          git push origin main
