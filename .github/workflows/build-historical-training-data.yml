@@ -1,4 +1,4 @@
-name: Build Historical Training Data
+name: Historical Training Data Audit
 
 on:
   workflow_dispatch:
@@ -7,9 +7,9 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 15
 
     steps:
       - name: Checkout repository
@@ -23,47 +23,23 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas numpy requests pyarrow
+          pip install pandas numpy
 
-      - name: Build SportsDataverse historical training table
+      - name: Audit historical training data
         run: |
-          python scripts/build_historical_training_data.py
+          python scripts/audit_historical_training_data.py
 
-      - name: Validate outputs exist
-        run: |
-          test -f data/training/historical_games.csv
-          test -f data/training/historical_training_manifest.json
-          python - <<'PY'
-          import json
-          import pandas as pd
-
-          df = pd.read_csv("data/training/historical_games.csv")
-          with open("data/training/historical_training_manifest.json") as f:
-              manifest = json.load(f)
-
-          print("Rows:", len(df))
-          print("Seasons:", sorted(df["season"].dropna().astype(int).unique().tolist()))
-          print("2025 sealed rows:", int((df["season"] == 2025).sum()))
-          print("Columns:", len(df.columns))
-
-          assert len(df) > 1000, "Historical game table unexpectedly small"
-          assert set(range(2019, 2026)).issubset(set(df["season"].dropna().astype(int)))
-          assert int((df["season"] == 2025).sum()) > 0
-          assert manifest["sealed_test_season"] == 2025
-          PY
-
-      - name: Commit generated training data
+      - name: Commit diagnostic audit report
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add data/training/historical_games.csv
-          git add data/training/historical_training_manifest.json
+          git add data/training/historical_training_audit.json
 
           if git diff --cached --quiet; then
-            echo "No generated changes to commit."
+            echo "No audit changes to commit."
             exit 0
           fi
 
-          git commit -m "Build SportsDataverse historical training data"
+          git commit -m "Audit historical training data"
           git push
