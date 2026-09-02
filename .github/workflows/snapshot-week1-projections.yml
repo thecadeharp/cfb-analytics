@@ -1,0 +1,41 @@
+name: Snapshot Week 1 Projections
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Capture immutable projection and market snapshot
+        run: |
+          python scripts/snapshot_projections.py
+
+      - name: Commit prospective snapshot ledger
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add data/snapshots/projection_market_snapshots.jsonl
+          git add data/snapshots/latest_snapshot.json
+
+          if git diff --cached --quiet; then
+            echo "No snapshot changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Capture prospective projection market snapshot"
+          git push
