@@ -1,6 +1,6 @@
 // ============================================================================
 // CFB ANALYTICS — FRONTEND
-// Status UI v2: AGREE W/ MARKET / LEAN / EDGE / PLAY / OUTLIER
+// The Signal UI v3: ALIGNED / SLIGHT EDGE / EDGE / STRONG EDGE / OUTLIER
 // ============================================================================
 
 const DATA_URLS = {
@@ -83,24 +83,43 @@ function recordText(team) {
 
 function statusClass(status) {
   switch (status) {
-    case "PLAY": return "play";
-    case "EDGE": return "edge";
-    case "LEAN": return "lean";
-    case "OUTLIER": return "outlier";
-    case "AGREE W/ MARKET": return "agree";
-    default: return "inline";
+    case "STRONG EDGE":
+    case "PLAY":
+      return "play";
+    case "EDGE":
+      return "edge";
+    case "SLIGHT EDGE":
+    case "LEAN":
+      return "lean";
+    case "OUTLIER":
+      return "outlier";
+    case "ALIGNED":
+    case "AGREE W/ MARKET":
+      return "agree";
+    default:
+      return "inline";
   }
 }
 
 function displayStatus(status) {
   if (!status || status === "NO MARKET") return "NO LINE";
+  if (status === "PLAY") return "STRONG EDGE";
+  if (status === "LEAN") return "SLIGHT EDGE";
+  if (status === "AGREE W/ MARKET") return "ALIGNED";
   return status;
 }
 
+function displayBetStatus(status) {
+  if (!status) return "—";
+  return String(status)
+    .toLowerCase()
+    .replace(/(^|\s)\S/g, letter => letter.toUpperCase());
+}
+
 function statusEdgeClass(status) {
-  if (status === "PLAY") return "edge-play";
+  if (status === "STRONG EDGE" || status === "PLAY") return "edge-play";
   if (status === "EDGE") return "edge-edge";
-  if (status === "LEAN") return "edge-lean";
+  if (status === "SLIGHT EDGE" || status === "LEAN") return "edge-lean";
   if (status === "OUTLIER") return "edge-outlier";
   return "";
 }
@@ -666,8 +685,8 @@ function projectionGamesForCurrentView() {
     });
 }
 
-function statusCount(games, status) {
-  return games.filter(game => game?.comparison?.status === status).length;
+function statusCount(games, ...statuses) {
+  return games.filter(game => statuses.includes(game?.comparison?.status)).length;
 }
 
 function renderProjections() {
@@ -678,18 +697,18 @@ function renderProjections() {
   const games = projectionGamesForCurrentView();
   const marketGames = games.filter(game => hasValue(game?.market?.home_spread));
 
-  const plays = statusCount(games, "PLAY");
+  const strongEdges = statusCount(games, "STRONG EDGE", "PLAY");
   const edges = statusCount(games, "EDGE");
-  const leans = statusCount(games, "LEAN");
+  const slightEdges = statusCount(games, "SLIGHT EDGE", "LEAN");
   const outliers = statusCount(games, "OUTLIER");
 
   if (summary) {
     summary.innerHTML = `
       ${games.length} games
       · ${marketGames.length} lined
-      · <span class="summary-play">${plays} plays</span>
+      · <span class="summary-play">${strongEdges} strong edges</span>
       · <span class="summary-edge">${edges} edges</span>
-      · <span class="summary-lean">${leans} leans</span>
+      · <span class="summary-lean">${slightEdges} slight edges</span>
       ${outliers ? `· <span class="summary-outlier">${outliers} outliers</span>` : ""}
     `;
   }
@@ -712,7 +731,8 @@ function renderProjections() {
           <th>Market</th>
           <th>Total</th>
           <th class="align-right">Disagreement</th>
-          <th class="align-right">Status</th>
+          <th class="align-right">The Signal</th>
+          <th class="align-right">Bet Status</th>
         </tr>
       </thead>
       <tbody>
@@ -738,7 +758,10 @@ function renderProjectionRow(game) {
 
   const disagreement = game?.comparison?.disagreement;
   const preferred = game?.comparison?.preferred_side;
-  const status = game?.comparison?.status;
+  const status = game?.comparison?.signal ?? game?.comparison?.status;
+  const betStatus =
+    game?.comparison?.bet_status ??
+    (hasValue(marketSpread) ? "TRACKING" : null);
   const cssStatus = statusClass(status);
 
   const disagreementNote = hasValue(disagreement)
@@ -810,6 +833,12 @@ function renderProjectionRow(game) {
       <td class="status-cell">
         <span class="status ${cssStatus}">
           ${escapeHtml(displayStatus(status))}
+        </span>
+      </td>
+
+      <td class="status-cell">
+        <span class="status agree">
+          ${escapeHtml(displayBetStatus(betStatus))}
         </span>
       </td>
     </tr>
@@ -900,7 +929,10 @@ function renderMatchup(game) {
   const marketTotal = game?.market?.total;
 
   const comparison = game?.comparison ?? {};
-  const status = comparison?.status;
+  const status = comparison?.signal ?? comparison?.status;
+  const betStatus =
+    comparison?.bet_status ??
+    (hasValue(marketSpread) ? "TRACKING" : null);
   const statusCss = statusClass(status);
   const edgeClass = statusEdgeClass(status);
 
@@ -937,7 +969,7 @@ function renderMatchup(game) {
   const modelEdgeSide =
     preferred && hasValue(marketSpread)
       ? marketSideForTeam(preferred, homeName, awayName, marketSpread)
-      : "No actionable market edge";
+      : "No current market signal";
 
   container.innerHTML = `
     <div class="matchup-header">
@@ -953,14 +985,19 @@ function renderMatchup(game) {
         </div>
       </div>
 
-      <span class="status ${statusCss}">
-        ${escapeHtml(displayStatus(status))}
-      </span>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+        <span class="status ${statusCss}">
+          ${escapeHtml(displayStatus(status))}
+        </span>
+        <span class="status agree">
+          Bet Status: ${escapeHtml(displayBetStatus(betStatus))}
+        </span>
+      </div>
     </div>
 
     <div class="model-edge-banner">
       <div>
-        <div class="model-edge-title">Model Edge</div>
+        <div class="model-edge-title">The Signal</div>
         <div class="model-edge-side ${edgeClass}">
           ${escapeHtml(modelEdgeSide)}
         </div>
@@ -971,9 +1008,14 @@ function renderMatchup(game) {
         </div>
       </div>
 
-      <span class="status ${statusCss}">
-        ${escapeHtml(displayStatus(status))}
-      </span>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+        <span class="status ${statusCss}">
+          ${escapeHtml(displayStatus(status))}
+        </span>
+        <span class="status agree">
+          ${escapeHtml(displayBetStatus(betStatus))}
+        </span>
+      </div>
     </div>
 
     <div class="analysis-grid">
@@ -1002,14 +1044,14 @@ function renderMatchup(game) {
       </div>
 
       <div class="analysis-card">
-        <div class="analysis-label">Line Difference</div>
+        <div class="analysis-label">Signal Size</div>
         <div class="analysis-value ${edgeClass}">
           ${hasValue(edgeSize) ? `${formatNumber(edgeSize, 1)} pts` : "—"}
         </div>
         <div class="analysis-small">
           ${preferred
             ? `Market side: ${escapeHtml(modelEdgeSide)}`
-            : "No current side edge"}
+            : "No current directional signal"}
         </div>
       </div>
     </div>
