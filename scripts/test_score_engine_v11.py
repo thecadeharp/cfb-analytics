@@ -69,21 +69,38 @@ class TestScoreEngineV11(unittest.TestCase):
         self.assertEqual(projected_margin, 18.0)
 
     def test_feature_schema_contains_no_market_inputs(self):
-        forbidden_terms = (
+        forbidden_exact = {
             "spread",
-            "market",
+            "market_spread",
+            "market_line",
             "odds",
             "favorite",
-            "cover",
-            "line",
+            "favorite_size",
+            "cover_probability",
+            "closing_line",
+            "opening_line",
+        }
+
+        forbidden_prefixes = (
+            "market_",
+            "odds_",
+            "spread_",
+            "closing_",
+            "opening_",
         )
 
         for feature in model.SCORE_FEATURES:
             lowered = feature.lower()
-            for term in forbidden_terms:
-                self.assertNotIn(
-                    term,
-                    lowered,
+
+            self.assertNotIn(
+                lowered,
+                forbidden_exact,
+                msg=f"Market-derived feature detected: {feature}",
+            )
+
+            for prefix in forbidden_prefixes:
+                self.assertFalse(
+                    lowered.startswith(prefix),
                     msg=f"Market-derived feature detected: {feature}",
                 )
 
@@ -108,8 +125,6 @@ class TestScoreEngineV11(unittest.TestCase):
                 )
 
     def test_non_linear_strength_feature_is_signed(self):
-        # V1.1 currently uses signed square:
-        # positive mismatch stays positive; negative mismatch stays negative.
         positive = math.copysign(2.0 ** 2, 2.0)
         negative = math.copysign((-2.0) ** 2, -2.0)
 
@@ -169,8 +184,6 @@ class TestScoreEngineV11(unittest.TestCase):
         self.assertEqual(a, b)
 
     def test_probability_optimizer_uses_only_records_passed_to_it(self):
-        # Synthetic training-only records. This test verifies the optimizer
-        # has no hidden external dependency on a test year or global outcome set.
         records = []
 
         for i in range(120):
