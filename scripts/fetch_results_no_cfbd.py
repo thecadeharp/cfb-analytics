@@ -1,32 +1,23 @@
+#!/usr/bin/env python3
 """
-CFB ANALYTICS
-fetch_results_no_cfbd.py
+Fetch completed FBS college-football results without CFBD.
 
-Season-long completed-results collector WITHOUT CFBD.
+Primary source:
+    NCAA scoreboard data through the open-source ncaa-api proxy.
 
-Source:
-    ESPN public college-football scoreboard endpoint
+Why this exists:
+    ESPN's public scoreboard endpoint can return HTTP 403 from GitHub-hosted
+    Actions runners. This collector avoids ESPN and does not consume CFBD quota.
 
-Coverage:
-    - Regular season
-    - Conference championship week
-    - Bowls
-    - College Football Playoff
-    - National championship
+Behavior:
+    - scans regular-season and postseason/playoff weeks
+    - keeps completed/final games only
+    - preserves previously collected results
+    - writes data/results.json
+    - does NOT modify projections, ratings, snapshots, or market data
 
-Output:
-    data/results.json
-
-This script is evaluation-only. It does NOT modify:
-    - ratings
-    - projections
-    - prospective snapshots
-    - closing-line snapshots
-    - Model A
-
-It safely re-fetches the season and merges completed games into one
-persistent results file. Existing finals are preserved unless ESPN
-returns the same game ID with updated final information.
+Environment:
+    CFB_SEASON (default: 2026)
 """
 
 from __future__ import annotations
@@ -36,330 +27,370 @@ import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 import requests
 
-
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / "data" / "results.json"
+OUTPUT_PATH = ROOT / "data" / "results.json"
 
 SEASON = int(os.getenv("CFB_SEASON", "2026"))
+BASE_URL = "https://ncaa-api.henrygd.me/scoreboard/football/fbs"
 
-# ESPN season types:
-#   2 = regular season
-#   3 = postseason
-REGULAR_SEASON_TYPE = 2
-POSTSEASON_TYPE = 3
+# NCAA's current football scoreboard uses week numbers. Scan broadly enough
+# to include the complete regular season, conference championships, bowls,
+# CFP rounds, and the national championship.
+WEEKS = range(1, 21)
 
-# Deliberately wider than the normal CFB calendar.
-# Empty ESPN responses are harmless, and this avoids hard-coding the
-# exact final regular-season/postseason week structure.
-REGULAR_WEEKS = range(1, 18)
-POSTSEASON_WEEKS = range(1, 12)
-
-ESPN_URL = (
-    "https://site.api.espn.com/apis/site/v2/sports/"
-    "football/college-football/scoreboard"
+SESSION = requests.Session()
+SESSION.headers.update(
+    {
+        "Accept": "application/json",
+        "User-Agent": "cfb-analytics-results-settlement/1.0",
+    }
 )
 
-TIMEOUT = 30
-MAX_ATTEMPTS = 3
-REQUEST_PAUSE_SECONDS = 0.20
+
+def utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
-def fetch_scoreboard(season_type: int, week: int):
-    params = {
-        "dates": str(SEASON),
-        "seasontype": str(season_type),
-        "week": str(week),
-        "limit": "1000",
-    }
+def load_existing() -> dict[str, Any]:
+    if not OUTPUT_PATH.exists():
+        return {"games": []}
 
-    last_error = None
+    try:
+        payload = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {"games": []}
 
-    for attempt in range(1, MAX_ATTEMPTS + 1):
+    if isinstance(payload, list):
+        return {"games": payload}
+    if isinstance(payload, dict):
+        return payload
+    return {"games": []}
+
+
+def fetch_week(week: int) -> dict[str, Any]:
+    url = f"{BASE_URL}/{SEASON}/{week:02d}/all-conf"
+    last_error: Exception | None = None
+
+    for attempt in range(1, 4):
         try:
-            response = requests.get(
-                ESPN_URL,
-                params=params,
-                timeout=TIMEOUT,
-                headers={
-                    "User-Agent": (
-                        "Mozilla/5.0 CFB-Analytics/1.0 "
-                        "(prospective model evaluation)"
-                    )
-                },
-            )
+            response = SESSION.get(url, timeout=30)
             response.raise_for_status()
-            payload = response.json()
-
-            if not isinstance(payload, dict):
-                raise RuntimeError("ESPN scoreboard returned a non-object payload.")
-
-            return payload
-
-        except Exception as exc:
+            return response.json()
+        except (requests.RequestException, ValueError) as exc:
             last_error = exc
-            if attempt < MAX_ATTEMPTS:
-                wait = 2 ** attempt
-                print(
-                    f"ESPN season_type={season_type} week={week} "
-                    f"attempt {attempt}/{MAX_ATTEMPTS} failed: {exc}"
-                )
-                print(f"Retrying in {wait}s...")
-                time.sleep(wait)
+            if attempt < 3:
+                time.sleep(attempt * 2)
 
     raise RuntimeError(
-        f"Unable to fetch ESPN scoreboard for season_type={season_type}, "
-        f"week={week} after {MAX_ATTEMPTS} attempts."
+        f"Unable to fetch NCAA scoreboard for season={SEASON}, week={week}"
     ) from last_error
 
 
-def parse_int(value):
-    if value is None:
+def first_nonempty(*values: Any) -> Any:
+    for value in values:
+        if value is not None and value != "":
+            return value
+    return None
+
+
+def as_int(value: Any) -> int | None:
+    if value is None or value == "":
         return None
     try:
-        return int(float(value))
+        return int(float(str(value).strip()))
     except (TypeError, ValueError):
         return None
 
 
-def competitor_name(competitor):
-    team = competitor.get("team") or {}
-    return (
-        team.get("displayName")
-        or team.get("shortDisplayName")
-        or team.get("name")
+def unwrap_games(payload: Any) -> list[dict[str, Any]]:
+    """
+    ncaa-api normally returns the NCAA-compatible scoreboard shape:
+      {"games": [{"game": {...}}, ...]}
+
+    Keep a few fallbacks so small upstream wrapper changes do not require a
+    total rewrite.
+    """
+    if isinstance(payload, list):
+        return [x for x in payload if isinstance(x, dict)]
+
+    if not isinstance(payload, dict):
+        return []
+
+    for key in ("games", "contests", "events"):
+        value = payload.get(key)
+        if isinstance(value, list):
+            return [x for x in value if isinstance(x, dict)]
+
+    data = payload.get("data")
+    if isinstance(data, dict):
+        for key in ("games", "contests", "events"):
+            value = data.get(key)
+            if isinstance(value, list):
+                return [x for x in value if isinstance(x, dict)]
+
+    return []
+
+
+def team_name(team: Any) -> str | None:
+    if not isinstance(team, dict):
+        return None
+    return first_nonempty(
+        team.get("names", {}).get("full") if isinstance(team.get("names"), dict) else None,
+        team.get("name"),
+        team.get("displayName"),
+        team.get("shortName"),
+        team.get("seo"),
     )
 
 
-def competitor_id(competitor):
-    team = competitor.get("team") or {}
-    value = team.get("id")
+def team_id(team: Any) -> str | None:
+    if not isinstance(team, dict):
+        return None
+    value = first_nonempty(
+        team.get("id"),
+        team.get("teamId"),
+        team.get("team_id"),
+        team.get("seo"),
+    )
     return str(value) if value is not None else None
 
 
-def parse_event(event, season_type: int, week: int):
-    competitions = event.get("competitions") or []
-    if not competitions:
+def team_score(team: Any) -> int | None:
+    if not isinstance(team, dict):
         return None
-
-    competition = competitions[0]
-    competitors = competition.get("competitors") or []
-
-    home = next(
-        (c for c in competitors if c.get("homeAway") == "home"),
-        None,
-    )
-    away = next(
-        (c for c in competitors if c.get("homeAway") == "away"),
-        None,
+    return as_int(
+        first_nonempty(
+            team.get("score"),
+            team.get("points"),
+            team.get("scoreValue"),
+        )
     )
 
-    if not home or not away:
-        return None
 
-    status = event.get("status") or {}
-    status_type = status.get("type") or {}
-
-    completed = bool(status_type.get("completed"))
-    state = str(status_type.get("state") or "").lower()
-    name = str(status_type.get("name") or "").lower()
-    description = str(status_type.get("description") or "").lower()
-
-    is_final = completed or state == "post" or any(
-        token in f"{name} {description}"
-        for token in ["final", "completed"]
+def is_final(game: dict[str, Any]) -> bool:
+    status = first_nonempty(
+        game.get("gameState"),
+        game.get("game_state"),
+        game.get("status"),
+        game.get("statusText"),
+        game.get("finalMessage"),
     )
 
-    if not is_final:
+    if isinstance(status, dict):
+        status = first_nonempty(
+            status.get("state"),
+            status.get("type"),
+            status.get("name"),
+            status.get("description"),
+            status.get("detail"),
+        )
+
+    text = str(status or "").strip().lower()
+    return text in {"f", "final", "post", "completed", "complete"} or "final" in text
+
+
+def normalize_entry(entry: dict[str, Any], week: int) -> dict[str, Any] | None:
+    game = entry.get("game") if isinstance(entry.get("game"), dict) else entry
+
+    home = first_nonempty(
+        game.get("home"),
+        game.get("homeTeam"),
+        game.get("home_team"),
+    )
+    away = first_nonempty(
+        game.get("away"),
+        game.get("awayTeam"),
+        game.get("away_team"),
+    )
+
+    if not isinstance(home, dict) or not isinstance(away, dict):
+        teams = game.get("teams")
+        if isinstance(teams, list):
+            for team in teams:
+                if not isinstance(team, dict):
+                    continue
+                designation = str(
+                    first_nonempty(
+                        team.get("homeAway"),
+                        team.get("designation"),
+                        team.get("location"),
+                    )
+                    or ""
+                ).lower()
+                if designation == "home":
+                    home = team
+                elif designation == "away":
+                    away = team
+
+    if not isinstance(home, dict) or not isinstance(away, dict):
         return None
 
-    home_points = parse_int(home.get("score"))
-    away_points = parse_int(away.get("score"))
+    home_points = team_score(home)
+    away_points = team_score(away)
 
     if home_points is None or away_points is None:
         return None
 
-    game_id = event.get("id")
-    if game_id is None:
+    # A completed score is the strongest final-state signal. NCAA sometimes
+    # changes status field naming between scoreboard generations.
+    if not is_final(game):
+        state_candidates = json.dumps(game, default=str).lower()
+        if '"gameState": "F"'.lower() not in state_candidates and '"final"' not in state_candidates:
+            return None
+
+    home_name = team_name(home)
+    away_name = team_name(away)
+    if not home_name or not away_name:
         return None
 
-    neutral_site = bool(
-        competition.get("neutralSite")
-        or competition.get("neutral_site")
+    game_id = first_nonempty(
+        game.get("gameID"),
+        game.get("gameId"),
+        game.get("id"),
+        game.get("contestId"),
+        game.get("contest_id"),
+    )
+
+    # If NCAA omits a numeric game ID, retain a deterministic join-safe key.
+    if game_id is None:
+        game_id = f"ncaa-{SEASON}-{week}-{away_name}-{home_name}".lower().replace(" ", "-")
+
+    neutral = bool(
+        first_nonempty(
+            game.get("neutralSite"),
+            game.get("neutral_site"),
+            False,
+        )
     )
 
     return {
-        "game_id": int(game_id) if str(game_id).isdigit() else str(game_id),
-        "espn_game_id": str(game_id),
+        "game_id": str(game_id),
         "season": SEASON,
         "week": week,
-        "season_type": season_type,
-        "phase": (
-            "regular_season"
-            if season_type == REGULAR_SEASON_TYPE
-            else "postseason"
-        ),
-        "start_date": event.get("date"),
-        "home_team": competitor_name(home),
-        "away_team": competitor_name(away),
-        "home_team_id": competitor_id(home),
-        "away_team_id": competitor_id(away),
+        "season_type": "postseason" if week >= 16 else "regular",
+        "home_team": home_name,
+        "away_team": away_name,
+        "home_team_id": team_id(home),
+        "away_team_id": team_id(away),
         "home_points": home_points,
         "away_points": away_points,
-        "actual_home_margin": home_points - away_points,
-        "neutral_site": neutral_site,
-        "completed": True,
-        "status": (
-            status_type.get("shortDetail")
-            or status_type.get("description")
-            or "Final"
-        ),
+        "neutral_site": neutral,
+        "status": "completed",
+        "source": "NCAA",
     }
 
 
-def load_existing():
-    if not OUTPUT.exists():
-        return {}
+def merge_games(existing: list[dict[str, Any]], fetched: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    merged: dict[str, dict[str, Any]] = {}
 
-    try:
-        data = json.loads(OUTPUT.read_text(encoding="utf-8"))
-    except Exception:
-        return {}
-
-    games = data.get("games") if isinstance(data, dict) else None
-    if not isinstance(games, list):
-        return {}
-
-    existing = {}
-    for game in games:
+    for game in existing:
         if not isinstance(game, dict):
             continue
-        gid = game.get("game_id")
-        if gid is not None:
-            existing[str(gid)] = game
+        key = str(first_nonempty(game.get("game_id"), game.get("id"), ""))
+        if key:
+            merged[key] = game
 
-    return existing
+    for game in fetched:
+        key = str(game["game_id"])
+        merged[key] = game
 
-
-def collect_completed_games():
-    fetched = {}
-    scan_log = []
-
-    passes = [
-        ("regular_season", REGULAR_SEASON_TYPE, REGULAR_WEEKS),
-        ("postseason", POSTSEASON_TYPE, POSTSEASON_WEEKS),
-    ]
-
-    for phase, season_type, weeks in passes:
-        for week in weeks:
-            payload = fetch_scoreboard(season_type, week)
-            events = payload.get("events") or []
-
-            completed_count = 0
-
-            for event in events:
-                if not isinstance(event, dict):
-                    continue
-
-                game = parse_event(event, season_type, week)
-                if game is None:
-                    continue
-
-                fetched[str(game["game_id"])] = game
-                completed_count += 1
-
-            scan_log.append({
-                "phase": phase,
-                "season_type": season_type,
-                "week": week,
-                "events_returned": len(events),
-                "completed_games_found": completed_count,
-            })
-
-            print(
-                f"{phase} | week {week:>2} | "
-                f"events {len(events):>3} | finals {completed_count:>3}"
-            )
-
-            time.sleep(REQUEST_PAUSE_SECONDS)
-
-    return fetched, scan_log
-
-
-def main():
-    print("=" * 72)
-    print("FETCH COMPLETED RESULTS — SEASON LONG — NO CFBD")
-    print("=" * 72)
-    print(f"Season: {SEASON}")
-
-    existing = load_existing()
-    fetched, scan_log = collect_completed_games()
-
-    # Keep all previously stored finals and replace only matching game IDs
-    # when the newest ESPN response contains updated final information.
-    merged = dict(existing)
-    merged.update(fetched)
-
-    games = sorted(
+    return sorted(
         merged.values(),
         key=lambda g: (
-            int(g.get("season_type") or 0),
-            int(g.get("week") or 0),
-            str(g.get("start_date") or ""),
-            str(g.get("game_id") or ""),
+            int(g.get("season", SEASON) or SEASON),
+            int(g.get("week", 0) or 0),
+            str(g.get("away_team", "")),
+            str(g.get("home_team", "")),
         ),
     )
 
-    regular_count = sum(
-        1 for game in games
-        if game.get("season_type") == REGULAR_SEASON_TYPE
-    )
-    postseason_count = sum(
-        1 for game in games
-        if game.get("season_type") == POSTSEASON_TYPE
-    )
+
+def main() -> None:
+    existing_payload = load_existing()
+    existing_games = existing_payload.get("games", [])
+    if not isinstance(existing_games, list):
+        existing_games = []
+
+    fetched_games: list[dict[str, Any]] = []
+    scan_log: list[dict[str, Any]] = []
+
+    print(f"Season: {SEASON}")
+    print("Results source: NCAA scoreboard (no CFBD, no ESPN)")
+
+    for week in WEEKS:
+        try:
+            payload = fetch_week(week)
+            entries = unwrap_games(payload)
+            completed = []
+
+            for entry in entries:
+                normalized = normalize_entry(entry, week)
+                if normalized is not None:
+                    completed.append(normalized)
+
+            fetched_games.extend(completed)
+            scan_log.append(
+                {
+                    "week": week,
+                    "status": "ok",
+                    "scoreboard_games": len(entries),
+                    "completed_games": len(completed),
+                }
+            )
+            print(
+                f"Week {week:02d}: {len(entries)} scoreboard games, "
+                f"{len(completed)} completed"
+            )
+        except Exception as exc:
+            # Future/postseason weeks can legitimately be unavailable before
+            # games are scheduled. Do not destroy an otherwise successful run.
+            scan_log.append(
+                {
+                    "week": week,
+                    "status": "unavailable",
+                    "error": str(exc),
+                }
+            )
+            print(f"Week {week:02d}: unavailable ({exc})")
+
+        # Stay comfortably below the public proxy's 5 req/sec limit.
+        time.sleep(0.3)
+
+    merged = merge_games(existing_games, fetched_games)
 
     output = {
         "meta": {
-            "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-            "source": "ESPN public scoreboard",
-            "source_type": "season_long_results_only_no_cfbd",
             "season": SEASON,
-            "completed_games_fetched_this_run": len(fetched),
-            "completed_games_in_file": len(games),
-            "regular_season_completed_games": regular_count,
-            "postseason_completed_games": postseason_count,
+            "generated_at": utc_now(),
+            "source": "NCAA via ncaa-api",
+            "source_type": "public_scoreboard_no_auth",
+            "completed_games": len(merged),
             "coverage": [
                 "regular season",
-                "conference championship week",
+                "weekday games",
+                "conference championship games",
                 "bowls",
                 "College Football Playoff",
                 "national championship",
             ],
-            "note": (
-                "Completed results only. Evaluation input. Never use final "
-                "results as predictive features for previously frozen "
-                "prospective projections."
-            ),
-            "scan_log": scan_log,
+            "notes": [
+                "Evaluation/results settlement only.",
+                "Does not modify Model A projections or ratings.",
+                "Previously collected completed games are preserved.",
+            ],
         },
-        "games": games,
+        "scan_log": scan_log,
+        "games": merged,
     }
 
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(
-        json.dumps(output, indent=2),
-        encoding="utf-8",
-    )
+    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    OUTPUT_PATH.write_text(json.dumps(output, indent=2) + "\n", encoding="utf-8")
 
-    print("=" * 72)
-    print(f"Completed games fetched this run: {len(fetched)}")
-    print(f"Completed games stored total: {len(games)}")
-    print(f"Regular-season finals: {regular_count}")
-    print(f"Postseason finals: {postseason_count}")
-    print(f"Wrote: {OUTPUT.relative_to(ROOT)}")
+    print(f"Wrote {len(merged)} completed games to {OUTPUT_PATH}")
 
 
 if __name__ == "__main__":
