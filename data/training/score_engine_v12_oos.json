@@ -1,0 +1,3943 @@
+{
+  "status": "OOS_COMPLETE",
+  "dataset": "historical_training_v3_sportsdataverse_espn",
+  "years_used": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "years_excluded": [
+    2025
+  ],
+  "leakage_guard": {
+    "2025_read_for_model_selection": false,
+    "market_spread_used_as_predictive_feature": false,
+    "rolling_oos_folds": [
+      [
+        [
+          2019,
+          2020,
+          2021
+        ],
+        2022
+      ],
+      [
+        [
+          2019,
+          2020,
+          2021,
+          2022
+        ],
+        2023
+      ],
+      [
+        [
+          2019,
+          2020,
+          2021,
+          2022,
+          2023
+        ],
+        2024
+      ]
+    ]
+  },
+  "v11_baseline": {
+    "alpha": 1.25,
+    "ridge_lambda": 2.0,
+    "folds": [
+      {
+        "n": 841,
+        "control_margin_mae": 15.000611,
+        "control_margin_rmse": 19.175968,
+        "score_margin_mae": 15.083137,
+        "score_margin_rmse": 19.314809,
+        "team_score_mae": 10.451799,
+        "total_mae": 13.472278,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 77,
+            "control_bias": -5.456992,
+            "score_bias": -8.92375
+          },
+          {
+            "range": "28-40",
+            "games": 61,
+            "control_bias": -17.432607,
+            "score_bias": -22.131499
+          },
+          {
+            "range": "40+",
+            "games": 36,
+            "control_bias": -21.764546,
+            "score_bias": -25.765468
+          }
+        ],
+        "train_years": [
+          2019,
+          2020,
+          2021
+        ],
+        "validation_year": 2022
+      },
+      {
+        "n": 890,
+        "control_margin_mae": 14.629351,
+        "control_margin_rmse": 18.557353,
+        "score_margin_mae": 15.125087,
+        "score_margin_rmse": 19.231907,
+        "team_score_mae": 10.282155,
+        "total_mae": 13.643573,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 86,
+            "control_bias": -10.254406,
+            "score_bias": -13.695762
+          },
+          {
+            "range": "28-40",
+            "games": 67,
+            "control_bias": -15.528012,
+            "score_bias": -20.177807
+          },
+          {
+            "range": "40+",
+            "games": 34,
+            "control_bias": -13.942504,
+            "score_bias": -23.693053
+          }
+        ],
+        "train_years": [
+          2019,
+          2020,
+          2021,
+          2022
+        ],
+        "validation_year": 2023
+      },
+      {
+        "n": 932,
+        "control_margin_mae": 14.589523,
+        "control_margin_rmse": 18.699457,
+        "score_margin_mae": 14.927101,
+        "score_margin_rmse": 19.180167,
+        "team_score_mae": 10.268563,
+        "total_mae": 13.417744,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 95,
+            "control_bias": -6.050602,
+            "score_bias": -9.977585
+          },
+          {
+            "range": "28-40",
+            "games": 76,
+            "control_bias": -15.942216,
+            "score_bias": -20.940126
+          },
+          {
+            "range": "40+",
+            "games": 28,
+            "control_bias": -23.114425,
+            "score_bias": -30.691479
+          }
+        ],
+        "train_years": [
+          2019,
+          2020,
+          2021,
+          2022,
+          2023
+        ],
+        "validation_year": 2024
+      }
+    ],
+    "aggregate": {
+      "n": 2663,
+      "control_margin_mae": 14.732659,
+      "control_margin_rmse": 18.802451,
+      "score_margin_mae": 15.042548,
+      "score_margin_rmse": 19.23998,
+      "team_score_mae": 10.330973,
+      "total_mae": 13.510441,
+      "tail": [
+        {
+          "range": "21-28",
+          "games": 258,
+          "control_bias": -7.274707,
+          "score_bias": -10.902461
+        },
+        {
+          "range": "28-40",
+          "games": 204,
+          "control_bias": -16.251834,
+          "score_bias": -21.046001
+        },
+        {
+          "range": "40+",
+          "games": 98,
+          "control_bias": -19.436456,
+          "score_bias": -26.453899
+        }
+      ]
+    }
+  },
+  "v12_search_space": {
+    "alphas": [
+      1.0,
+      1.25,
+      1.5,
+      1.75,
+      2.0
+    ],
+    "ridge_lambdas": [
+      0.5,
+      1.0,
+      2.0,
+      4.0,
+      8.0
+    ],
+    "config_count": 25
+  },
+  "v12_all_configs": [
+    {
+      "alpha": 1.0,
+      "ridge_lambda": 0.5,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.101982,
+          "score_margin_rmse": 19.401935,
+          "team_score_mae": 10.490299,
+          "total_mae": 13.55304,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.509903
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.786708
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.958226
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.899934,
+          "score_margin_rmse": 19.045445,
+          "team_score_mae": 10.264507,
+          "total_mae": 13.685858,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.947059
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.41448
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.072906
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.761243,
+          "score_margin_rmse": 18.922103,
+          "team_score_mae": 10.158383,
+          "total_mae": 13.418978,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.501013
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.841248
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.748341
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.915204,
+        "score_margin_rmse": 19.114861,
+        "team_score_mae": 10.298673,
+        "total_mae": 13.55051,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.353899
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.983795
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.713556
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 1.0,
+      "ridge_lambda": 1.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.10183,
+          "score_margin_rmse": 19.401805,
+          "team_score_mae": 10.490165,
+          "total_mae": 13.552862,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.510793
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.788165
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.958162
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.900113,
+          "score_margin_rmse": 19.045663,
+          "team_score_mae": 10.264588,
+          "total_mae": 13.685794,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.948076
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.415493
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.074608
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.761246,
+          "score_margin_rmse": 18.922137,
+          "team_score_mae": 10.1584,
+          "total_mae": 13.418922,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.501707
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.841234
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.749909
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.915217,
+        "score_margin_rmse": 19.114904,
+        "team_score_mae": 10.298664,
+        "total_mae": 13.550413,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.354759
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.984558
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.714571
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 1.0,
+      "ridge_lambda": 2.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.101532,
+          "score_margin_rmse": 19.401553,
+          "team_score_mae": 10.489903,
+          "total_mae": 13.552513,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.512559
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.791063
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.958073
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.900472,
+          "score_margin_rmse": 19.046097,
+          "team_score_mae": 10.264748,
+          "total_mae": 13.685666,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.950098
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.417508
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.078002
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.761254,
+          "score_margin_rmse": 18.922207,
+          "team_score_mae": 10.158436,
+          "total_mae": 13.418811,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.50309
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.841215
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.753033
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.915245,
+        "score_margin_rmse": 19.114994,
+        "team_score_mae": 10.298647,
+        "total_mae": 13.550221,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.356469
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.98608
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.716608
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 1.0,
+      "ridge_lambda": 4.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.100975,
+          "score_margin_rmse": 19.40108,
+          "team_score_mae": 10.489401,
+          "total_mae": 13.551852,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.516035
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.796805
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.958035
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.901179,
+          "score_margin_rmse": 19.046952,
+          "team_score_mae": 10.265063,
+          "total_mae": 13.685414,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.954097
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.421504
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.084758
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.761269,
+          "score_margin_rmse": 18.922351,
+          "team_score_mae": 10.158507,
+          "total_mae": 13.418593,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.505843
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.841211
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.759232
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.915311,
+        "score_margin_rmse": 19.115181,
+        "team_score_mae": 10.298618,
+        "total_mae": 13.549851,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.359853
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.989107
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.720709
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 1.0,
+      "ridge_lambda": 8.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.099964,
+          "score_margin_rmse": 19.400238,
+          "team_score_mae": 10.488476,
+          "total_mae": 13.550636,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.522795
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.808081
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.958467
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.902546,
+          "score_margin_rmse": 19.048619,
+          "team_score_mae": 10.265669,
+          "total_mae": 13.684914,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.961921
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.429359
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.098135
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.761308,
+          "score_margin_rmse": 18.922652,
+          "team_score_mae": 10.158652,
+          "total_mae": 13.418182,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.511291
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.841331
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.771444
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.915462,
+        "score_margin_rmse": 19.115578,
+        "team_score_mae": 10.29858,
+        "total_mae": 13.549157,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.366484
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.995104
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.728998
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 1.25,
+      "ridge_lambda": 0.5,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.101182,
+          "score_margin_rmse": 19.392608,
+          "team_score_mae": 10.490452,
+          "total_mae": 13.563471,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.512587
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.757368
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.899579
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.898683,
+          "score_margin_rmse": 19.04456,
+          "team_score_mae": 10.264304,
+          "total_mae": 13.686817,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.944706
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.413926
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.059992
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.762243,
+          "score_margin_rmse": 18.923288,
+          "team_score_mae": 10.158791,
+          "total_mae": 13.417379,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.495869
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.84316
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.751344
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.914883,
+        "score_margin_rmse": 19.112034,
+        "team_score_mae": 10.298796,
+        "total_mae": 13.553565,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.352021
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.975552
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.68839
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 1.25,
+      "ridge_lambda": 1.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.101045,
+          "score_margin_rmse": 19.392542,
+          "team_score_mae": 10.490316,
+          "total_mae": 13.563216,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.513427
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.758991
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.899922
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.898866,
+          "score_margin_rmse": 19.044781,
+          "team_score_mae": 10.264386,
+          "total_mae": 13.686743,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.945731
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.414941
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.061756
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.762243,
+          "score_margin_rmse": 18.923321,
+          "team_score_mae": 10.158809,
+          "total_mae": 13.417324,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.496577
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.843151
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.75291
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.914901,
+        "score_margin_rmse": 19.112098,
+        "team_score_mae": 10.298787,
+        "total_mae": 13.55344,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.352874
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.976367
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.689575
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 1.25,
+      "ridge_lambda": 2.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.100778,
+          "score_margin_rmse": 19.392414,
+          "team_score_mae": 10.490054,
+          "total_mae": 13.562711,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.515096
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.762221
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.900631
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.899229,
+          "score_margin_rmse": 19.04522,
+          "team_score_mae": 10.264547,
+          "total_mae": 13.686596,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.947769
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.416961
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.065273
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.762243,
+          "score_margin_rmse": 18.923387,
+          "team_score_mae": 10.158846,
+          "total_mae": 13.417215,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.497989
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.843141
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.756031
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.914937,
+        "score_margin_rmse": 19.112228,
+        "team_score_mae": 10.298771,
+        "total_mae": 13.553194,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.354572
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.977993
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.691947
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 1.25,
+      "ridge_lambda": 4.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.100263,
+          "score_margin_rmse": 19.392178,
+          "team_score_mae": 10.48955,
+          "total_mae": 13.561724,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.51839
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.76861
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.902137
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.899947,
+          "score_margin_rmse": 19.046085,
+          "team_score_mae": 10.264864,
+          "total_mae": 13.686303,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.951799
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.420965
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.072263
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.762246,
+          "score_margin_rmse": 18.923524,
+          "team_score_mae": 10.158919,
+          "total_mae": 13.417,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.500798
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.843153
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.762223
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.915016,
+        "score_margin_rmse": 19.112491,
+        "team_score_mae": 10.298743,
+        "total_mae": 13.552709,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.357932
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.981223
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.696695
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 1.25,
+      "ridge_lambda": 8.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.099312,
+          "score_margin_rmse": 19.391776,
+          "team_score_mae": 10.488663,
+          "total_mae": 13.559905,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.524827
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.78112
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.905452
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.901343,
+          "score_margin_rmse": 19.047772,
+          "team_score_mae": 10.265475,
+          "total_mae": 13.685728,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.95968
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.428836
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.086075
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.76226,
+          "score_margin_rmse": 18.923812,
+          "team_score_mae": 10.159068,
+          "total_mae": 13.416631,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.506351
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.843299
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.774418
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.915187,
+        "score_margin_rmse": 19.113028,
+        "team_score_mae": 10.298719,
+        "total_mae": 13.551813,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.364525
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.987603
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.706189
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 1.5,
+      "ridge_lambda": 0.5,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.100608,
+          "score_margin_rmse": 19.389374,
+          "team_score_mae": 10.490351,
+          "total_mae": 13.566039,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.510609
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.752667
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.882443
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.897574,
+          "score_margin_rmse": 19.04394,
+          "team_score_mae": 10.2642,
+          "total_mae": 13.688356,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.944078
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.412346
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.046815
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.76258,
+          "score_margin_rmse": 18.923627,
+          "team_score_mae": 10.158886,
+          "total_mae": 13.416597,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.493647
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.841992
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.752822
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.914449,
+        "score_margin_rmse": 19.110924,
+        "team_score_mae": 10.298763,
+        "total_mae": 13.554617,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.350403
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.973192
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.677946
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 1.5,
+      "ridge_lambda": 1.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.100476,
+          "score_margin_rmse": 19.389262,
+          "team_score_mae": 10.490221,
+          "total_mae": 13.56585,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.511468
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.754126
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.88247
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.897753,
+          "score_margin_rmse": 19.044158,
+          "team_score_mae": 10.264281,
+          "total_mae": 13.688286,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.945095
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.413358
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.048556
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.762583,
+          "score_margin_rmse": 18.923663,
+          "team_score_mae": 10.158906,
+          "total_mae": 13.416538,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.494343
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.841987
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.754394
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.914468,
+        "score_margin_rmse": 19.110974,
+        "team_score_mae": 10.298756,
+        "total_mae": 13.554513,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.351255
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.97396
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.679009
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 1.5,
+      "ridge_lambda": 2.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.100217,
+          "score_margin_rmse": 19.389046,
+          "team_score_mae": 10.489966,
+          "total_mae": 13.565474,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.513173
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.757034
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.882569
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.898109,
+          "score_margin_rmse": 19.044592,
+          "team_score_mae": 10.26444,
+          "total_mae": 13.688146,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.947118
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.415375
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.052027
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.762588,
+          "score_margin_rmse": 18.923735,
+          "team_score_mae": 10.158944,
+          "total_mae": 13.416421,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.49573
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.841987
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.757527
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.914507,
+        "score_margin_rmse": 19.111076,
+        "team_score_mae": 10.298742,
+        "total_mae": 13.554306,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.352949
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.975491
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.681144
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 1.5,
+      "ridge_lambda": 4.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.09972,
+          "score_margin_rmse": 19.388645,
+          "team_score_mae": 10.489491,
+          "total_mae": 13.56473,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.516533
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.762809
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.882926
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.898807,
+          "score_margin_rmse": 19.045447,
+          "team_score_mae": 10.264753,
+          "total_mae": 13.687869,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.951117
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.419372
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.058931
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.762601,
+          "score_margin_rmse": 18.923883,
+          "team_score_mae": 10.159022,
+          "total_mae": 13.41619,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.498488
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.842017
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.763742
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.914588,
+        "score_margin_rmse": 19.111287,
+        "team_score_mae": 10.298723,
+        "total_mae": 13.553898,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.356301
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.978542
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.685446
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 1.5,
+      "ridge_lambda": 8.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.098811,
+          "score_margin_rmse": 19.387951,
+          "team_score_mae": 10.488644,
+          "total_mae": 13.563295,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.52308
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.774205
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.884205
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.900173,
+          "score_margin_rmse": 19.047116,
+          "team_score_mae": 10.265359,
+          "total_mae": 13.687323,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.958942
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.42723
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.072594
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.762635,
+          "score_margin_rmse": 18.924193,
+          "team_score_mae": 10.159178,
+          "total_mae": 13.415784,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.503949
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.8422
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.775981
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.914769,
+        "score_margin_rmse": 19.111734,
+        "team_score_mae": 10.298713,
+        "total_mae": 13.55312,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.362873
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.984599
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.694153
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 1.75,
+      "ridge_lambda": 0.5,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.100027,
+          "score_margin_rmse": 19.386246,
+          "team_score_mae": 10.490214,
+          "total_mae": 13.568264,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.507045
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.748964
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.866279
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.896924,
+          "score_margin_rmse": 19.043792,
+          "team_score_mae": 10.264234,
+          "total_mae": 13.689813,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.945583
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.409783
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.036998
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.762911,
+          "score_margin_rmse": 18.923875,
+          "team_score_mae": 10.158953,
+          "total_mae": 13.416014,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.491503
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.840056
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.753932
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.914164,
+        "score_margin_rmse": 19.109974,
+        "team_score_mae": 10.298755,
+        "total_mae": 13.555602,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.349052
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.970522
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.668919
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 1.75,
+      "ridge_lambda": 1.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.099892,
+          "score_margin_rmse": 19.386123,
+          "team_score_mae": 10.490085,
+          "total_mae": 13.568091,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.507902
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.750383
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.86623
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.897101,
+          "score_margin_rmse": 19.044009,
+          "team_score_mae": 10.264315,
+          "total_mae": 13.689744,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.946597
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.410793
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.03873
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.762909,
+          "score_margin_rmse": 18.923912,
+          "team_score_mae": 10.158973,
+          "total_mae": 13.415946,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.492195
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.840052
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.755507
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.914179,
+        "score_margin_rmse": 19.11002,
+        "team_score_mae": 10.298748,
+        "total_mae": 13.555501,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.3499
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.971277
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.669952
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 1.75,
+      "ridge_lambda": 2.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.099627,
+          "score_margin_rmse": 19.385884,
+          "team_score_mae": 10.489833,
+          "total_mae": 13.567748,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.509602
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.753211
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.866175
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.897461,
+          "score_margin_rmse": 19.04444,
+          "team_score_mae": 10.264475,
+          "total_mae": 13.689606,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.948614
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.412804
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.042185
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.762905,
+          "score_margin_rmse": 18.923986,
+          "team_score_mae": 10.159012,
+          "total_mae": 13.415812,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.493573
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.840052
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.758643
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.914215,
+        "score_margin_rmse": 19.110114,
+        "team_score_mae": 10.298735,
+        "total_mae": 13.5553,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.351587
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.972783
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.672026
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 1.75,
+      "ridge_lambda": 4.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.09912,
+          "score_margin_rmse": 19.385438,
+          "team_score_mae": 10.489377,
+          "total_mae": 13.567069,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.512953
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.758829
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.866231
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.898228,
+          "score_margin_rmse": 19.045291,
+          "team_score_mae": 10.26479,
+          "total_mae": 13.689333,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.952601
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.41679
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.049057
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.762919,
+          "score_margin_rmse": 18.924138,
+          "team_score_mae": 10.159091,
+          "total_mae": 13.415549,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.496315
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.840083
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.764866
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.914316,
+        "score_margin_rmse": 19.110311,
+        "team_score_mae": 10.298724,
+        "total_mae": 13.554902,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.354926
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.975783
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.676209
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 1.75,
+      "ridge_lambda": 8.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.098232,
+          "score_margin_rmse": 19.384657,
+          "team_score_mae": 10.488541,
+          "total_mae": 13.565765,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.519485
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.769916
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.866934
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.899715,
+          "score_margin_rmse": 19.04695,
+          "team_score_mae": 10.265396,
+          "total_mae": 13.688793,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.9604
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.424627
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.062657
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.762958,
+          "score_margin_rmse": 18.924455,
+          "team_score_mae": 10.159249,
+          "total_mae": 13.415086,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.501744
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.84027
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.777119
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.914546,
+        "score_margin_rmse": 19.11073,
+        "team_score_mae": 10.298718,
+        "total_mae": 13.554148,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.361474
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.981742
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.684687
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 2.0,
+      "ridge_lambda": 0.5,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.099413,
+          "score_margin_rmse": 19.38331,
+          "team_score_mae": 10.490079,
+          "total_mae": 13.570139,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.502018
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.746074
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.85109
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.896863,
+          "score_margin_rmse": 19.043999,
+          "team_score_mae": 10.264391,
+          "total_mae": 13.691117,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.948736
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.406329
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.029829
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.763236,
+          "score_margin_rmse": 18.924052,
+          "team_score_mae": 10.159008,
+          "total_mae": 13.415702,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.489433
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.83756
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.754537
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.914063,
+        "score_margin_rmse": 19.109177,
+        "team_score_mae": 10.298783,
+        "total_mae": 13.556521,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.34784
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.967594
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.661025
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 2.0,
+      "ridge_lambda": 1.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.099278,
+          "score_margin_rmse": 19.383181,
+          "team_score_mae": 10.489937,
+          "total_mae": 13.569975,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.502867
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.747474
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.851004
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.897058,
+          "score_margin_rmse": 19.044215,
+          "team_score_mae": 10.264471,
+          "total_mae": 13.691049,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.949748
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.407336
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.031558
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.763235,
+          "score_margin_rmse": 18.924089,
+          "team_score_mae": 10.159028,
+          "total_mae": 13.415635,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.490121
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.837555
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.756112
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.914085,
+        "score_margin_rmse": 19.109222,
+        "team_score_mae": 10.298772,
+        "total_mae": 13.556423,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.348684
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.968341
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.662043
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 2.0,
+      "ridge_lambda": 2.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.099015,
+          "score_margin_rmse": 19.38293,
+          "team_score_mae": 10.489687,
+          "total_mae": 13.569648,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.504551
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.750265
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.850877
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.897446,
+          "score_margin_rmse": 19.044645,
+          "team_score_mae": 10.26463,
+          "total_mae": 13.690916,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.951762
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.409339
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.035009
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.763232,
+          "score_margin_rmse": 18.924165,
+          "team_score_mae": 10.159067,
+          "total_mae": 13.415501,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.491494
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.837553
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.75925
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.914131,
+        "score_margin_rmse": 19.109313,
+        "team_score_mae": 10.29876,
+        "total_mae": 13.556228,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.350364
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.969833
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.66409
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 2.0,
+      "ridge_lambda": 4.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.09851,
+          "score_margin_rmse": 19.382461,
+          "team_score_mae": 10.489241,
+          "total_mae": 13.569001,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.507873
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.755807
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.850792
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.898209,
+          "score_margin_rmse": 19.045494,
+          "team_score_mae": 10.264943,
+          "total_mae": 13.690656,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.955744
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.413312
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.041871
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.763229,
+          "score_margin_rmse": 18.924319,
+          "team_score_mae": 10.159147,
+          "total_mae": 13.415241,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.494225
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.837582
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.765476
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.914225,
+        "score_margin_rmse": 19.109502,
+        "team_score_mae": 10.298751,
+        "total_mae": 13.555846,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.353688
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.972806
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.668219
+          }
+        ]
+      }
+    },
+    {
+      "alpha": 2.0,
+      "ridge_lambda": 8.0,
+      "folds": [
+        {
+          "n": 841,
+          "control_margin_mae": 15.000611,
+          "control_margin_rmse": 19.175968,
+          "score_margin_mae": 15.097623,
+          "score_margin_rmse": 19.381636,
+          "team_score_mae": 10.488414,
+          "total_mae": 13.567771,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.456992,
+              "score_bias": -8.514353
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.432607,
+              "score_bias": -20.766746
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.764546,
+              "score_bias": -25.851223
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "control_margin_mae": 14.629351,
+          "control_margin_rmse": 18.557353,
+          "score_margin_mae": 14.899686,
+          "score_margin_rmse": 19.047147,
+          "team_score_mae": 10.265545,
+          "total_mae": 13.690139,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.254406,
+              "score_bias": -12.963531
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.528012,
+              "score_bias": -19.421122
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.942504,
+              "score_bias": -20.05545
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "control_margin_mae": 14.589523,
+          "control_margin_rmse": 18.699457,
+          "score_margin_mae": 14.76327,
+          "score_margin_rmse": 18.92464,
+          "team_score_mae": 10.159307,
+          "total_mae": 13.414792,
+          "tail": [
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.050602,
+              "score_bias": -9.49963
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.942216,
+              "score_bias": -19.837764
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.114425,
+              "score_bias": -28.777736
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.732659,
+        "control_margin_rmse": 18.802451,
+        "score_margin_mae": 14.914453,
+        "score_margin_rmse": 19.109907,
+        "team_score_mae": 10.298748,
+        "total_mae": 13.555128,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.274707,
+            "score_bias": -10.360208
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.251834,
+            "score_bias": -19.978709
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.436456,
+            "score_bias": -24.676591
+          }
+        ]
+      }
+    }
+  ],
+  "v12_winner": {
+    "alpha": 2.0,
+    "ridge_lambda": 0.5,
+    "folds": [
+      {
+        "n": 841,
+        "control_margin_mae": 15.000611,
+        "control_margin_rmse": 19.175968,
+        "score_margin_mae": 15.099413,
+        "score_margin_rmse": 19.38331,
+        "team_score_mae": 10.490079,
+        "total_mae": 13.570139,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 77,
+            "control_bias": -5.456992,
+            "score_bias": -8.502018
+          },
+          {
+            "range": "28-40",
+            "games": 61,
+            "control_bias": -17.432607,
+            "score_bias": -20.746074
+          },
+          {
+            "range": "40+",
+            "games": 36,
+            "control_bias": -21.764546,
+            "score_bias": -25.85109
+          }
+        ],
+        "train_years": [
+          2019,
+          2020,
+          2021
+        ],
+        "validation_year": 2022
+      },
+      {
+        "n": 890,
+        "control_margin_mae": 14.629351,
+        "control_margin_rmse": 18.557353,
+        "score_margin_mae": 14.896863,
+        "score_margin_rmse": 19.043999,
+        "team_score_mae": 10.264391,
+        "total_mae": 13.691117,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 86,
+            "control_bias": -10.254406,
+            "score_bias": -12.948736
+          },
+          {
+            "range": "28-40",
+            "games": 67,
+            "control_bias": -15.528012,
+            "score_bias": -19.406329
+          },
+          {
+            "range": "40+",
+            "games": 34,
+            "control_bias": -13.942504,
+            "score_bias": -20.029829
+          }
+        ],
+        "train_years": [
+          2019,
+          2020,
+          2021,
+          2022
+        ],
+        "validation_year": 2023
+      },
+      {
+        "n": 932,
+        "control_margin_mae": 14.589523,
+        "control_margin_rmse": 18.699457,
+        "score_margin_mae": 14.763236,
+        "score_margin_rmse": 18.924052,
+        "team_score_mae": 10.159008,
+        "total_mae": 13.415702,
+        "tail": [
+          {
+            "range": "21-28",
+            "games": 95,
+            "control_bias": -6.050602,
+            "score_bias": -9.489433
+          },
+          {
+            "range": "28-40",
+            "games": 76,
+            "control_bias": -15.942216,
+            "score_bias": -19.83756
+          },
+          {
+            "range": "40+",
+            "games": 28,
+            "control_bias": -23.114425,
+            "score_bias": -28.754537
+          }
+        ],
+        "train_years": [
+          2019,
+          2020,
+          2021,
+          2022,
+          2023
+        ],
+        "validation_year": 2024
+      }
+    ],
+    "aggregate": {
+      "n": 2663,
+      "control_margin_mae": 14.732659,
+      "control_margin_rmse": 18.802451,
+      "score_margin_mae": 14.914063,
+      "score_margin_rmse": 19.109177,
+      "team_score_mae": 10.298783,
+      "total_mae": 13.556521,
+      "tail": [
+        {
+          "range": "21-28",
+          "games": 258,
+          "control_bias": -7.274707,
+          "score_bias": -10.34784
+        },
+        {
+          "range": "28-40",
+          "games": 204,
+          "control_bias": -16.251834,
+          "score_bias": -19.967594
+        },
+        {
+          "range": "40+",
+          "games": 98,
+          "control_bias": -19.436456,
+          "score_bias": -24.661025
+        }
+      ]
+    }
+  },
+  "decision": {
+    "v12_beats_v11_margin_mae": true,
+    "v12_beats_v11_margin_rmse": true,
+    "v12_beats_linear_control_margin_mae": false,
+    "v12_beats_linear_control_margin_rmse": false,
+    "v12_large_favorite_bias_better_than_control_all_available_21plus": false,
+    "status": "HOLD_V12"
+  },
+  "mechanism_notes": [
+    "No favorite-size feature or market-line correction is used.",
+    "Pass/explosiveness, rush/success, havoc/explosiveness, and scoring-opportunity/EPA interactions are explicit.",
+    "Possession pressure is matchup strength multiplied by estimated drives.",
+    "The nonlinear term is applied to football matchup strength, not market favorite size.",
+    "2025 remains untouched by this experiment."
+  ]
+}
