@@ -1,0 +1,2086 @@
+{
+  "status": "OOS_COMPLETE",
+  "model": "score_engine_v1.4_realized_possession_scoring",
+  "dataset": "historical_training_v4_realized_drives",
+  "years_used": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "years_excluded": [
+    2025
+  ],
+  "leakage_guard": {
+    "audit_status": "PASS",
+    "2025_read_for_model_selection": false,
+    "market_spread_used_as_predictive_feature": false,
+    "current_game_actual_drive_targets_used_as_predictive_features": false,
+    "rolling_oos_folds": [
+      [
+        [
+          2019,
+          2020,
+          2021
+        ],
+        2022
+      ],
+      [
+        [
+          2019,
+          2020,
+          2021,
+          2022
+        ],
+        2023
+      ],
+      [
+        [
+          2019,
+          2020,
+          2021,
+          2022,
+          2023
+        ],
+        2024
+      ]
+    ]
+  },
+  "architecture": {
+    "equation": "expected_drives * expected_sdv_scoring_opportunity_rate * expected_points_per_sdv_scoring_opportunity = expected_points",
+    "scoring_opportunity_definition": "SportsDataverse scoring_opp flag aggregated once per drive, exactly as preserved by historical training V4.",
+    "note": "V1.4 uses REALIZED drive/scoring targets from V4 for training labels. Pregame prediction inputs use only shifted historical pregame_* and prev_season_* features.",
+    "fixed_prediction_bounds": {
+      "expected_drives": [
+        4.0,
+        23.0
+      ],
+      "expected_scoring_opportunity_rate": [
+        0.0,
+        1.0
+      ],
+      "expected_points_per_scoring_opportunity": [
+        0.0,
+        7.0
+      ]
+    }
+  },
+  "search_space": {
+    "ridge_lambdas": [
+      0.5,
+      1.0,
+      2.0,
+      4.0,
+      8.0
+    ],
+    "config_count": 5
+  },
+  "all_configs": [
+    {
+      "ridge_lambda": 0.5,
+      "folds": [
+        {
+          "n": 841,
+          "team_training_rows": 4082,
+          "control_margin_mae": 15.006665,
+          "control_margin_rmse": 19.179391,
+          "v14_margin_mae": 16.105077,
+          "v14_margin_rmse": 20.77883,
+          "v14_team_score_mae": 11.658726,
+          "v14_total_mae": 16.785489,
+          "v14_total_rmse": 21.057217,
+          "component_accuracy": {
+            "drives_mae": 1.597499,
+            "drives_rmse": 2.072228,
+            "scoring_opportunity_rate_mae": 0.113247,
+            "scoring_opportunity_rate_rmse": 0.142687,
+            "points_per_scoring_opportunity_mae": 0.955588,
+            "points_per_scoring_opportunity_rmse": 1.264023
+          },
+          "tail": [
+            {
+              "range": "0-3",
+              "games": 96,
+              "control_bias": -0.956599,
+              "v14_bias": -1.37402,
+              "control_mae": 13.755629,
+              "v14_mae": 12.022574
+            },
+            {
+              "range": "3-7",
+              "games": 215,
+              "control_bias": -1.483187,
+              "v14_bias": -2.741795,
+              "control_mae": 12.873872,
+              "v14_mae": 12.702409
+            },
+            {
+              "range": "7-14",
+              "games": 221,
+              "control_bias": -5.389305,
+              "v14_bias": -7.923922,
+              "control_mae": 14.213667,
+              "v14_mae": 13.706968
+            },
+            {
+              "range": "14-21",
+              "games": 130,
+              "control_bias": -6.863086,
+              "v14_bias": -12.182921,
+              "control_mae": 14.977717,
+              "v14_mae": 16.358529
+            },
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.476196,
+              "v14_bias": -13.556064,
+              "control_mae": 15.540178,
+              "v14_mae": 17.494814
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.427309,
+              "v14_bias": -28.370286,
+              "control_mae": 20.941262,
+              "v14_mae": 29.415464
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.798792,
+              "v14_bias": -35.272828,
+              "control_mae": 24.958705,
+              "v14_mae": 35.272828
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "team_training_rows": 5764,
+          "control_margin_mae": 14.622476,
+          "control_margin_rmse": 18.542706,
+          "v14_margin_mae": 16.24664,
+          "v14_margin_rmse": 20.732379,
+          "v14_team_score_mae": 11.582423,
+          "v14_total_mae": 16.812023,
+          "v14_total_rmse": 21.082133,
+          "component_accuracy": {
+            "drives_mae": 1.652173,
+            "drives_rmse": 2.13787,
+            "scoring_opportunity_rate_mae": 0.108982,
+            "scoring_opportunity_rate_rmse": 0.136267,
+            "points_per_scoring_opportunity_mae": 0.919659,
+            "points_per_scoring_opportunity_rmse": 1.15144
+          },
+          "tail": [
+            {
+              "range": "0-3",
+              "games": 114,
+              "control_bias": 0.78795,
+              "v14_bias": 0.230572,
+              "control_mae": 14.882419,
+              "v14_mae": 14.208324
+            },
+            {
+              "range": "3-7",
+              "games": 239,
+              "control_bias": -1.934761,
+              "v14_bias": -3.312114,
+              "control_mae": 11.665167,
+              "v14_mae": 11.886769
+            },
+            {
+              "range": "7-14",
+              "games": 216,
+              "control_bias": -5.21541,
+              "v14_bias": -8.175679,
+              "control_mae": 14.071149,
+              "v14_mae": 13.918573
+            },
+            {
+              "range": "14-21",
+              "games": 134,
+              "control_bias": -7.358648,
+              "v14_bias": -13.448119,
+              "control_mae": 14.671568,
+              "v14_mae": 16.81295
+            },
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.222978,
+              "v14_bias": -18.167865,
+              "control_mae": 17.487395,
+              "v14_mae": 20.490619
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.485076,
+              "v14_bias": -26.945926,
+              "control_mae": 21.631948,
+              "v14_mae": 28.254101
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.801312,
+              "v14_bias": -31.889929,
+              "control_mae": 16.78878,
+              "v14_mae": 31.889929
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "team_training_rows": 7544,
+          "control_margin_mae": 14.578893,
+          "control_margin_rmse": 18.678289,
+          "v14_margin_mae": 16.310951,
+          "v14_margin_rmse": 21.037945,
+          "v14_team_score_mae": 11.604022,
+          "v14_total_mae": 16.498787,
+          "v14_total_rmse": 21.196074,
+          "component_accuracy": {
+            "drives_mae": 1.857195,
+            "drives_rmse": 2.361261,
+            "scoring_opportunity_rate_mae": 0.112604,
+            "scoring_opportunity_rate_rmse": 0.138873,
+            "points_per_scoring_opportunity_mae": 0.920241,
+            "points_per_scoring_opportunity_rmse": 1.149977
+          },
+          "tail": [
+            {
+              "range": "0-3",
+              "games": 146,
+              "control_bias": 1.56594,
+              "v14_bias": 0.763576,
+              "control_mae": 14.253781,
+              "v14_mae": 13.032246
+            },
+            {
+              "range": "3-7",
+              "games": 210,
+              "control_bias": -0.710043,
+              "v14_bias": -2.961464,
+              "control_mae": 11.949836,
+              "v14_mae": 11.622198
+            },
+            {
+              "range": "7-14",
+              "games": 241,
+              "control_bias": -1.343244,
+              "v14_bias": -5.432328,
+              "control_mae": 14.125671,
+              "v14_mae": 14.400667
+            },
+            {
+              "range": "14-21",
+              "games": 132,
+              "control_bias": -9.358887,
+              "v14_bias": -14.731842,
+              "control_mae": 16.177885,
+              "v14_mae": 17.473067
+            },
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.144311,
+              "v14_bias": -15.802796,
+              "control_mae": 12.75349,
+              "v14_mae": 18.10793
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.862529,
+              "v14_bias": -28.409996,
+              "control_mae": 19.994129,
+              "v14_mae": 28.974874
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.027128,
+              "v14_bias": -39.638083,
+              "control_mae": 24.470439,
+              "v14_mae": 39.638083
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.728553,
+        "control_margin_rmse": 18.791229,
+        "v14_margin_mae": 16.224441,
+        "v14_margin_rmse": 20.853991,
+        "v14_team_score_mae": 11.61408,
+        "v14_total_mae": 16.694017,
+        "v14_total_rmse": 21.114141,
+        "component_accuracy": {
+          "drives_mae": 1.70666,
+          "drives_rmse": 2.195322,
+          "scoring_opportunity_rate_mae": 0.111596,
+          "scoring_opportunity_rate_rmse": 0.139206,
+          "points_per_scoring_opportunity_mae": 0.931209,
+          "points_per_scoring_opportunity_rmse": 1.186483
+        },
+        "tail": [
+          {
+            "range": "0-3",
+            "games": 356,
+            "control_bias": 0.636573,
+            "v14_bias": 0.016465,
+            "control_mae": 14.320753,
+            "v14_mae": 13.136584
+          },
+          {
+            "range": "3-7",
+            "games": 664,
+            "control_bias": -1.401208,
+            "v14_bias": -3.016549,
+            "control_mae": 12.146571,
+            "v14_mae": 12.067195
+          },
+          {
+            "range": "7-14",
+            "games": 678,
+            "control_bias": -3.895703,
+            "v14_bias": -7.118473,
+            "control_mae": 14.136984,
+            "v14_mae": 14.020962
+          },
+          {
+            "range": "14-21",
+            "games": 396,
+            "control_bias": -7.86271,
+            "v14_bias": -13.460684,
+            "control_mae": 15.274177,
+            "v14_mae": 16.88381
+          },
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.304468,
+            "v14_bias": -15.920616,
+            "control_mae": 15.163145,
+            "v14_mae": 18.719176
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.206461,
+            "v14_bias": -27.917275,
+            "control_mae": 20.815252,
+            "v14_mae": 28.869894
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.375109,
+            "v14_bias": -35.346385,
+            "control_mae": 21.984736,
+            "v14_mae": 35.346385
+          }
+        ]
+      }
+    },
+    {
+      "ridge_lambda": 1.0,
+      "folds": [
+        {
+          "n": 841,
+          "team_training_rows": 4082,
+          "control_margin_mae": 15.006665,
+          "control_margin_rmse": 19.179391,
+          "v14_margin_mae": 16.104947,
+          "v14_margin_rmse": 20.778775,
+          "v14_team_score_mae": 11.658696,
+          "v14_total_mae": 16.785449,
+          "v14_total_rmse": 21.057155,
+          "component_accuracy": {
+            "drives_mae": 1.597497,
+            "drives_rmse": 2.072225,
+            "scoring_opportunity_rate_mae": 0.113246,
+            "scoring_opportunity_rate_rmse": 0.142686,
+            "points_per_scoring_opportunity_mae": 0.95558,
+            "points_per_scoring_opportunity_rmse": 1.26401
+          },
+          "tail": [
+            {
+              "range": "0-3",
+              "games": 96,
+              "control_bias": -0.956599,
+              "v14_bias": -1.374088,
+              "control_mae": 13.755629,
+              "v14_mae": 12.022784
+            },
+            {
+              "range": "3-7",
+              "games": 215,
+              "control_bias": -1.483187,
+              "v14_bias": -2.741953,
+              "control_mae": 12.873872,
+              "v14_mae": 12.701972
+            },
+            {
+              "range": "7-14",
+              "games": 221,
+              "control_bias": -5.389305,
+              "v14_bias": -7.924292,
+              "control_mae": 14.213667,
+              "v14_mae": 13.706897
+            },
+            {
+              "range": "14-21",
+              "games": 130,
+              "control_bias": -6.863086,
+              "v14_bias": -12.182794,
+              "control_mae": 14.977717,
+              "v14_mae": 16.35825
+            },
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.476196,
+              "v14_bias": -13.556191,
+              "control_mae": 15.540178,
+              "v14_mae": 17.49466
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.427309,
+              "v14_bias": -28.370747,
+              "control_mae": 20.941262,
+              "v14_mae": 29.415673
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.798792,
+              "v14_bias": -35.273442,
+              "control_mae": 24.958705,
+              "v14_mae": 35.273442
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "team_training_rows": 5764,
+          "control_margin_mae": 14.622476,
+          "control_margin_rmse": 18.542706,
+          "v14_margin_mae": 16.24667,
+          "v14_margin_rmse": 20.732417,
+          "v14_team_score_mae": 11.582387,
+          "v14_total_mae": 16.811909,
+          "v14_total_rmse": 21.081981,
+          "component_accuracy": {
+            "drives_mae": 1.652171,
+            "drives_rmse": 2.137868,
+            "scoring_opportunity_rate_mae": 0.108981,
+            "scoring_opportunity_rate_rmse": 0.136266,
+            "points_per_scoring_opportunity_mae": 0.919656,
+            "points_per_scoring_opportunity_rmse": 1.151439
+          },
+          "tail": [
+            {
+              "range": "0-3",
+              "games": 114,
+              "control_bias": 0.78795,
+              "v14_bias": 0.230601,
+              "control_mae": 14.882419,
+              "v14_mae": 14.208239
+            },
+            {
+              "range": "3-7",
+              "games": 239,
+              "control_bias": -1.934761,
+              "v14_bias": -3.312139,
+              "control_mae": 11.665167,
+              "v14_mae": 11.886673
+            },
+            {
+              "range": "7-14",
+              "games": 216,
+              "control_bias": -5.21541,
+              "v14_bias": -8.175749,
+              "control_mae": 14.071149,
+              "v14_mae": 13.918704
+            },
+            {
+              "range": "14-21",
+              "games": 134,
+              "control_bias": -7.358648,
+              "v14_bias": -13.448171,
+              "control_mae": 14.671568,
+              "v14_mae": 16.813004
+            },
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.222978,
+              "v14_bias": -18.16801,
+              "control_mae": 17.487395,
+              "v14_mae": 20.490596
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.485076,
+              "v14_bias": -26.94615,
+              "control_mae": 21.631948,
+              "v14_mae": 28.254156
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.801312,
+              "v14_bias": -31.890579,
+              "control_mae": 16.78878,
+              "v14_mae": 31.890579
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "team_training_rows": 7544,
+          "control_margin_mae": 14.578893,
+          "control_margin_rmse": 18.678289,
+          "v14_margin_mae": 16.31094,
+          "v14_margin_rmse": 21.03795,
+          "v14_team_score_mae": 11.604,
+          "v14_total_mae": 16.498719,
+          "v14_total_rmse": 21.196002,
+          "component_accuracy": {
+            "drives_mae": 1.857194,
+            "drives_rmse": 2.361258,
+            "scoring_opportunity_rate_mae": 0.112604,
+            "scoring_opportunity_rate_rmse": 0.138873,
+            "points_per_scoring_opportunity_mae": 0.920243,
+            "points_per_scoring_opportunity_rmse": 1.149978
+          },
+          "tail": [
+            {
+              "range": "0-3",
+              "games": 146,
+              "control_bias": 1.56594,
+              "v14_bias": 0.763568,
+              "control_mae": 14.253781,
+              "v14_mae": 13.032206
+            },
+            {
+              "range": "3-7",
+              "games": 210,
+              "control_bias": -0.710043,
+              "v14_bias": -2.961437,
+              "control_mae": 11.949836,
+              "v14_mae": 11.622128
+            },
+            {
+              "range": "7-14",
+              "games": 241,
+              "control_bias": -1.343244,
+              "v14_bias": -5.432397,
+              "control_mae": 14.125671,
+              "v14_mae": 14.400674
+            },
+            {
+              "range": "14-21",
+              "games": 132,
+              "control_bias": -9.358887,
+              "v14_bias": -14.731918,
+              "control_mae": 16.177885,
+              "v14_mae": 17.47306
+            },
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.144311,
+              "v14_bias": -15.80284,
+              "control_mae": 12.75349,
+              "v14_mae": 18.107894
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.862529,
+              "v14_bias": -28.410065,
+              "control_mae": 19.994129,
+              "v14_mae": 28.974914
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.027128,
+              "v14_bias": -39.638399,
+              "control_mae": 24.470439,
+              "v14_mae": 39.638399
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.728553,
+        "control_margin_rmse": 18.791229,
+        "v14_margin_mae": 16.224406,
+        "v14_margin_rmse": 20.853988,
+        "v14_team_score_mae": 11.61405,
+        "v14_total_mae": 16.693942,
+        "v14_total_rmse": 21.114046,
+        "component_accuracy": {
+          "drives_mae": 1.706659,
+          "drives_rmse": 2.19532,
+          "scoring_opportunity_rate_mae": 0.111596,
+          "scoring_opportunity_rate_rmse": 0.139206,
+          "points_per_scoring_opportunity_mae": 0.931206,
+          "points_per_scoring_opportunity_rmse": 1.186479
+        },
+        "tail": [
+          {
+            "range": "0-3",
+            "games": 356,
+            "control_bias": 0.636573,
+            "v14_bias": 0.016452,
+            "control_mae": 14.320753,
+            "v14_mae": 13.136597
+          },
+          {
+            "range": "3-7",
+            "games": 664,
+            "control_bias": -1.401208,
+            "v14_bias": -3.016601,
+            "control_mae": 12.146571,
+            "v14_mae": 12.066997
+          },
+          {
+            "range": "7-14",
+            "games": 678,
+            "control_bias": -3.895703,
+            "v14_bias": -7.11864,
+            "control_mae": 14.136984,
+            "v14_mae": 14.020983
+          },
+          {
+            "range": "14-21",
+            "games": 396,
+            "control_bias": -7.86271,
+            "v14_bias": -13.460685,
+            "control_mae": 15.274177,
+            "v14_mae": 16.883735
+          },
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.304468,
+            "v14_bias": -15.920719,
+            "control_mae": 15.163145,
+            "v14_mae": 18.719109
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.206461,
+            "v14_bias": -27.917513,
+            "control_mae": 20.815252,
+            "v14_mae": 28.86999
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.375109,
+            "v14_bias": -35.346926,
+            "control_mae": 21.984736,
+            "v14_mae": 35.346926
+          }
+        ]
+      }
+    },
+    {
+      "ridge_lambda": 2.0,
+      "folds": [
+        {
+          "n": 841,
+          "team_training_rows": 4082,
+          "control_margin_mae": 15.006665,
+          "control_margin_rmse": 19.179391,
+          "v14_margin_mae": 16.104689,
+          "v14_margin_rmse": 20.778664,
+          "v14_team_score_mae": 11.658635,
+          "v14_total_mae": 16.785367,
+          "v14_total_rmse": 21.057033,
+          "component_accuracy": {
+            "drives_mae": 1.597494,
+            "drives_rmse": 2.072218,
+            "scoring_opportunity_rate_mae": 0.113246,
+            "scoring_opportunity_rate_rmse": 0.142686,
+            "points_per_scoring_opportunity_mae": 0.955563,
+            "points_per_scoring_opportunity_rmse": 1.263984
+          },
+          "tail": [
+            {
+              "range": "0-3",
+              "games": 96,
+              "control_bias": -0.956599,
+              "v14_bias": -1.374221,
+              "control_mae": 13.755629,
+              "v14_mae": 12.023199
+            },
+            {
+              "range": "3-7",
+              "games": 215,
+              "control_bias": -1.483187,
+              "v14_bias": -2.742266,
+              "control_mae": 12.873872,
+              "v14_mae": 12.701105
+            },
+            {
+              "range": "7-14",
+              "games": 221,
+              "control_bias": -5.389305,
+              "v14_bias": -7.925027,
+              "control_mae": 14.213667,
+              "v14_mae": 13.706757
+            },
+            {
+              "range": "14-21",
+              "games": 130,
+              "control_bias": -6.863086,
+              "v14_bias": -12.182542,
+              "control_mae": 14.977717,
+              "v14_mae": 16.357696
+            },
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.476196,
+              "v14_bias": -13.556444,
+              "control_mae": 15.540178,
+              "v14_mae": 17.494355
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.427309,
+              "v14_bias": -28.371664,
+              "control_mae": 20.941262,
+              "v14_mae": 29.416088
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.798792,
+              "v14_bias": -35.274662,
+              "control_mae": 24.958705,
+              "v14_mae": 35.274662
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "team_training_rows": 5764,
+          "control_margin_mae": 14.622476,
+          "control_margin_rmse": 18.542706,
+          "v14_margin_mae": 16.246728,
+          "v14_margin_rmse": 20.732492,
+          "v14_team_score_mae": 11.582314,
+          "v14_total_mae": 16.811682,
+          "v14_total_rmse": 21.081679,
+          "component_accuracy": {
+            "drives_mae": 1.652166,
+            "drives_rmse": 2.137863,
+            "scoring_opportunity_rate_mae": 0.108981,
+            "scoring_opportunity_rate_rmse": 0.136266,
+            "points_per_scoring_opportunity_mae": 0.919649,
+            "points_per_scoring_opportunity_rmse": 1.151437
+          },
+          "tail": [
+            {
+              "range": "0-3",
+              "games": 114,
+              "control_bias": 0.78795,
+              "v14_bias": 0.230661,
+              "control_mae": 14.882419,
+              "v14_mae": 14.208069
+            },
+            {
+              "range": "3-7",
+              "games": 239,
+              "control_bias": -1.934761,
+              "v14_bias": -3.31219,
+              "control_mae": 11.665167,
+              "v14_mae": 11.886481
+            },
+            {
+              "range": "7-14",
+              "games": 216,
+              "control_bias": -5.21541,
+              "v14_bias": -8.17589,
+              "control_mae": 14.071149,
+              "v14_mae": 13.918964
+            },
+            {
+              "range": "14-21",
+              "games": 134,
+              "control_bias": -7.358648,
+              "v14_bias": -13.448274,
+              "control_mae": 14.671568,
+              "v14_mae": 16.81311
+            },
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.222978,
+              "v14_bias": -18.168299,
+              "control_mae": 17.487395,
+              "v14_mae": 20.490549
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.485076,
+              "v14_bias": -26.946597,
+              "control_mae": 21.631948,
+              "v14_mae": 28.254265
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.801312,
+              "v14_bias": -31.891872,
+              "control_mae": 16.78878,
+              "v14_mae": 31.891872
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "team_training_rows": 7544,
+          "control_margin_mae": 14.578893,
+          "control_margin_rmse": 18.678289,
+          "v14_margin_mae": 16.310917,
+          "v14_margin_rmse": 21.037958,
+          "v14_team_score_mae": 11.603956,
+          "v14_total_mae": 16.498583,
+          "v14_total_rmse": 21.195859,
+          "component_accuracy": {
+            "drives_mae": 1.857192,
+            "drives_rmse": 2.361254,
+            "scoring_opportunity_rate_mae": 0.112604,
+            "scoring_opportunity_rate_rmse": 0.138873,
+            "points_per_scoring_opportunity_mae": 0.920245,
+            "points_per_scoring_opportunity_rmse": 1.14998
+          },
+          "tail": [
+            {
+              "range": "0-3",
+              "games": 146,
+              "control_bias": 1.56594,
+              "v14_bias": 0.763551,
+              "control_mae": 14.253781,
+              "v14_mae": 13.032126
+            },
+            {
+              "range": "3-7",
+              "games": 210,
+              "control_bias": -0.710043,
+              "v14_bias": -2.961382,
+              "control_mae": 11.949836,
+              "v14_mae": 11.621988
+            },
+            {
+              "range": "7-14",
+              "games": 241,
+              "control_bias": -1.343244,
+              "v14_bias": -5.432536,
+              "control_mae": 14.125671,
+              "v14_mae": 14.400687
+            },
+            {
+              "range": "14-21",
+              "games": 132,
+              "control_bias": -9.358887,
+              "v14_bias": -14.73207,
+              "control_mae": 16.177885,
+              "v14_mae": 17.473046
+            },
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.144311,
+              "v14_bias": -15.802929,
+              "control_mae": 12.75349,
+              "v14_mae": 18.107823
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.862529,
+              "v14_bias": -28.410204,
+              "control_mae": 19.994129,
+              "v14_mae": 28.974996
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.027128,
+              "v14_bias": -39.639028,
+              "control_mae": 24.470439,
+              "v14_mae": 39.639028
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.728553,
+        "control_margin_rmse": 18.791229,
+        "v14_margin_mae": 16.224336,
+        "v14_margin_rmse": 20.853981,
+        "v14_team_score_mae": 11.613991,
+        "v14_total_mae": 16.693793,
+        "v14_total_rmse": 21.113856,
+        "component_accuracy": {
+          "drives_mae": 1.706655,
+          "drives_rmse": 2.195315,
+          "scoring_opportunity_rate_mae": 0.111596,
+          "scoring_opportunity_rate_rmse": 0.139206,
+          "points_per_scoring_opportunity_mae": 0.9312,
+          "points_per_scoring_opportunity_rmse": 1.18647
+        },
+        "tail": [
+          {
+            "range": "0-3",
+            "games": 356,
+            "control_bias": 0.636573,
+            "v14_bias": 0.016429,
+            "control_mae": 14.320753,
+            "v14_mae": 13.136622
+          },
+          {
+            "range": "3-7",
+            "games": 664,
+            "control_bias": -1.401208,
+            "v14_bias": -3.016703,
+            "control_mae": 12.146571,
+            "v14_mae": 12.066602
+          },
+          {
+            "range": "7-14",
+            "games": 678,
+            "control_bias": -3.895703,
+            "v14_bias": -7.118974,
+            "control_mae": 14.136984,
+            "v14_mae": 14.021025
+          },
+          {
+            "range": "14-21",
+            "games": 396,
+            "control_bias": -7.86271,
+            "v14_bias": -13.460688,
+            "control_mae": 15.274177,
+            "v14_mae": 16.883584
+          },
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.304468,
+            "v14_bias": -15.920923,
+            "control_mae": 15.163145,
+            "v14_mae": 18.718976
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.206461,
+            "v14_bias": -27.917985,
+            "control_mae": 20.815252,
+            "v14_mae": 28.87018
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.375109,
+            "v14_bias": -35.348003,
+            "control_mae": 21.984736,
+            "v14_mae": 35.348003
+          }
+        ]
+      }
+    },
+    {
+      "ridge_lambda": 4.0,
+      "folds": [
+        {
+          "n": 841,
+          "team_training_rows": 4082,
+          "control_margin_mae": 15.006665,
+          "control_margin_rmse": 19.179391,
+          "v14_margin_mae": 16.104181,
+          "v14_margin_rmse": 20.778448,
+          "v14_team_score_mae": 11.658514,
+          "v14_total_mae": 16.7852,
+          "v14_total_rmse": 21.056787,
+          "component_accuracy": {
+            "drives_mae": 1.597488,
+            "drives_rmse": 2.072205,
+            "scoring_opportunity_rate_mae": 0.113246,
+            "scoring_opportunity_rate_rmse": 0.142685,
+            "points_per_scoring_opportunity_mae": 0.95553,
+            "points_per_scoring_opportunity_rmse": 1.263932
+          },
+          "tail": [
+            {
+              "range": "0-3",
+              "games": 96,
+              "control_bias": -0.956599,
+              "v14_bias": -1.374476,
+              "control_mae": 13.755629,
+              "v14_mae": 12.024014
+            },
+            {
+              "range": "3-7",
+              "games": 215,
+              "control_bias": -1.483187,
+              "v14_bias": -2.742887,
+              "control_mae": 12.873872,
+              "v14_mae": 12.699393
+            },
+            {
+              "range": "7-14",
+              "games": 221,
+              "control_bias": -5.389305,
+              "v14_bias": -7.926478,
+              "control_mae": 14.213667,
+              "v14_mae": 13.70648
+            },
+            {
+              "range": "14-21",
+              "games": 130,
+              "control_bias": -6.863086,
+              "v14_bias": -12.182047,
+              "control_mae": 14.977717,
+              "v14_mae": 16.3566
+            },
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.476196,
+              "v14_bias": -13.556953,
+              "control_mae": 15.540178,
+              "v14_mae": 17.493762
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.427309,
+              "v14_bias": -28.373473,
+              "control_mae": 20.941262,
+              "v14_mae": 29.416908
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.798792,
+              "v14_bias": -35.27707,
+              "control_mae": 24.958705,
+              "v14_mae": 35.27707
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "team_training_rows": 5764,
+          "control_margin_mae": 14.622476,
+          "control_margin_rmse": 18.542706,
+          "v14_margin_mae": 16.246842,
+          "v14_margin_rmse": 20.732639,
+          "v14_team_score_mae": 11.582169,
+          "v14_total_mae": 16.81123,
+          "v14_total_rmse": 21.081077,
+          "component_accuracy": {
+            "drives_mae": 1.652156,
+            "drives_rmse": 2.137854,
+            "scoring_opportunity_rate_mae": 0.108981,
+            "scoring_opportunity_rate_rmse": 0.136266,
+            "points_per_scoring_opportunity_mae": 0.919637,
+            "points_per_scoring_opportunity_rmse": 1.151432
+          },
+          "tail": [
+            {
+              "range": "0-3",
+              "games": 114,
+              "control_bias": 0.78795,
+              "v14_bias": 0.23078,
+              "control_mae": 14.882419,
+              "v14_mae": 14.207729
+            },
+            {
+              "range": "3-7",
+              "games": 239,
+              "control_bias": -1.934761,
+              "v14_bias": -3.312291,
+              "control_mae": 11.665167,
+              "v14_mae": 11.886098
+            },
+            {
+              "range": "7-14",
+              "games": 216,
+              "control_bias": -5.21541,
+              "v14_bias": -8.176173,
+              "control_mae": 14.071149,
+              "v14_mae": 13.919477
+            },
+            {
+              "range": "14-21",
+              "games": 134,
+              "control_bias": -7.358648,
+              "v14_bias": -13.448478,
+              "control_mae": 14.671568,
+              "v14_mae": 16.813319
+            },
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.222978,
+              "v14_bias": -18.168871,
+              "control_mae": 17.487395,
+              "v14_mae": 20.490452
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.485076,
+              "v14_bias": -26.947481,
+              "control_mae": 21.631948,
+              "v14_mae": 28.254476
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.801312,
+              "v14_bias": -31.894433,
+              "control_mae": 16.78878,
+              "v14_mae": 31.894433
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "team_training_rows": 7544,
+          "control_margin_mae": 14.578893,
+          "control_margin_rmse": 18.678289,
+          "v14_margin_mae": 16.310872,
+          "v14_margin_rmse": 21.037975,
+          "v14_team_score_mae": 11.603868,
+          "v14_total_mae": 16.498312,
+          "v14_total_rmse": 21.195571,
+          "component_accuracy": {
+            "drives_mae": 1.857189,
+            "drives_rmse": 2.361245,
+            "scoring_opportunity_rate_mae": 0.112604,
+            "scoring_opportunity_rate_rmse": 0.138873,
+            "points_per_scoring_opportunity_mae": 0.920251,
+            "points_per_scoring_opportunity_rmse": 1.149984
+          },
+          "tail": [
+            {
+              "range": "0-3",
+              "games": 146,
+              "control_bias": 1.56594,
+              "v14_bias": 0.763519,
+              "control_mae": 14.253781,
+              "v14_mae": 13.031967
+            },
+            {
+              "range": "3-7",
+              "games": 210,
+              "control_bias": -0.710043,
+              "v14_bias": -2.961274,
+              "control_mae": 11.949836,
+              "v14_mae": 11.621709
+            },
+            {
+              "range": "7-14",
+              "games": 241,
+              "control_bias": -1.343244,
+              "v14_bias": -5.432812,
+              "control_mae": 14.125671,
+              "v14_mae": 14.400713
+            },
+            {
+              "range": "14-21",
+              "games": 132,
+              "control_bias": -9.358887,
+              "v14_bias": -14.73237,
+              "control_mae": 16.177885,
+              "v14_mae": 17.473016
+            },
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.144311,
+              "v14_bias": -15.803104,
+              "control_mae": 12.75349,
+              "v14_mae": 18.107681
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.862529,
+              "v14_bias": -28.410487,
+              "control_mae": 19.994129,
+              "v14_mae": 28.975164
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.027128,
+              "v14_bias": -39.640278,
+              "control_mae": 24.470439,
+              "v14_mae": 39.640278
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.728553,
+        "control_margin_rmse": 18.791229,
+        "v14_margin_mae": 16.224198,
+        "v14_margin_rmse": 20.853968,
+        "v14_team_score_mae": 11.613874,
+        "v14_total_mae": 16.693494,
+        "v14_total_rmse": 21.113476,
+        "component_accuracy": {
+          "drives_mae": 1.706649,
+          "drives_rmse": 2.195304,
+          "scoring_opportunity_rate_mae": 0.111596,
+          "scoring_opportunity_rate_rmse": 0.139206,
+          "points_per_scoring_opportunity_mae": 0.931187,
+          "points_per_scoring_opportunity_rmse": 1.186454
+        },
+        "tail": [
+          {
+            "range": "0-3",
+            "games": 356,
+            "control_bias": 0.636573,
+            "v14_bias": 0.016385,
+            "control_mae": 14.320753,
+            "v14_mae": 13.136667
+          },
+          {
+            "range": "3-7",
+            "games": 664,
+            "control_bias": -1.401208,
+            "v14_bias": -3.016906,
+            "control_mae": 12.146571,
+            "v14_mae": 12.065822
+          },
+          {
+            "range": "7-14",
+            "games": 678,
+            "control_bias": -3.895703,
+            "v14_bias": -7.119635,
+            "control_mae": 14.136984,
+            "v14_mae": 14.021107
+          },
+          {
+            "range": "14-21",
+            "games": 396,
+            "control_bias": -7.86271,
+            "v14_bias": -13.460694,
+            "control_mae": 15.274177,
+            "v14_mae": 16.883285
+          },
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.304468,
+            "v14_bias": -15.92133,
+            "control_mae": 15.163145,
+            "v14_mae": 18.718714
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.206461,
+            "v14_bias": -27.918922,
+            "control_mae": 20.815252,
+            "v14_mae": 28.870558
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.375109,
+            "v14_bias": -35.350133,
+            "control_mae": 21.984736,
+            "v14_mae": 35.350133
+          }
+        ]
+      }
+    },
+    {
+      "ridge_lambda": 8.0,
+      "folds": [
+        {
+          "n": 841,
+          "team_training_rows": 4082,
+          "control_margin_mae": 15.006665,
+          "control_margin_rmse": 19.179391,
+          "v14_margin_mae": 16.10319,
+          "v14_margin_rmse": 20.778033,
+          "v14_team_score_mae": 11.658273,
+          "v14_total_mae": 16.784852,
+          "v14_total_rmse": 21.056292,
+          "component_accuracy": {
+            "drives_mae": 1.597476,
+            "drives_rmse": 2.072179,
+            "scoring_opportunity_rate_mae": 0.113245,
+            "scoring_opportunity_rate_rmse": 0.142684,
+            "points_per_scoring_opportunity_mae": 0.95547,
+            "points_per_scoring_opportunity_rmse": 1.263833
+          },
+          "tail": [
+            {
+              "range": "0-3",
+              "games": 96,
+              "control_bias": -0.956599,
+              "v14_bias": -1.37494,
+              "control_mae": 13.755629,
+              "v14_mae": 12.025587
+            },
+            {
+              "range": "3-7",
+              "games": 215,
+              "control_bias": -1.483187,
+              "v14_bias": -2.744103,
+              "control_mae": 12.873872,
+              "v14_mae": 12.696057
+            },
+            {
+              "range": "7-14",
+              "games": 221,
+              "control_bias": -5.389305,
+              "v14_bias": -7.929309,
+              "control_mae": 14.213667,
+              "v14_mae": 13.705938
+            },
+            {
+              "range": "14-21",
+              "games": 130,
+              "control_bias": -6.863086,
+              "v14_bias": -12.181089,
+              "control_mae": 14.977717,
+              "v14_mae": 16.354457
+            },
+            {
+              "range": "21-28",
+              "games": 77,
+              "control_bias": -5.476196,
+              "v14_bias": -13.557978,
+              "control_mae": 15.540178,
+              "v14_mae": 17.492643
+            },
+            {
+              "range": "28-40",
+              "games": 61,
+              "control_bias": -17.427309,
+              "v14_bias": -28.376995,
+              "control_mae": 20.941262,
+              "v14_mae": 29.418507
+            },
+            {
+              "range": "40+",
+              "games": 36,
+              "control_bias": -21.798792,
+              "v14_bias": -35.281762,
+              "control_mae": 24.958705,
+              "v14_mae": 35.281762
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021
+          ],
+          "validation_year": 2022
+        },
+        {
+          "n": 890,
+          "team_training_rows": 5764,
+          "control_margin_mae": 14.622476,
+          "control_margin_rmse": 18.542706,
+          "v14_margin_mae": 16.247058,
+          "v14_margin_rmse": 20.732921,
+          "v14_team_score_mae": 11.581876,
+          "v14_total_mae": 16.81033,
+          "v14_total_rmse": 21.079881,
+          "component_accuracy": {
+            "drives_mae": 1.652136,
+            "drives_rmse": 2.137835,
+            "scoring_opportunity_rate_mae": 0.10898,
+            "scoring_opportunity_rate_rmse": 0.136265,
+            "points_per_scoring_opportunity_mae": 0.919614,
+            "points_per_scoring_opportunity_rmse": 1.151423
+          },
+          "tail": [
+            {
+              "range": "0-3",
+              "games": 114,
+              "control_bias": 0.78795,
+              "v14_bias": 0.231018,
+              "control_mae": 14.882419,
+              "v14_mae": 14.207052
+            },
+            {
+              "range": "3-7",
+              "games": 239,
+              "control_bias": -1.934761,
+              "v14_bias": -3.312486,
+              "control_mae": 11.665167,
+              "v14_mae": 11.885338
+            },
+            {
+              "range": "7-14",
+              "games": 216,
+              "control_bias": -5.21541,
+              "v14_bias": -8.176738,
+              "control_mae": 14.071149,
+              "v14_mae": 13.920479
+            },
+            {
+              "range": "14-21",
+              "games": 134,
+              "control_bias": -7.358648,
+              "v14_bias": -13.448878,
+              "control_mae": 14.671568,
+              "v14_mae": 16.81372
+            },
+            {
+              "range": "21-28",
+              "games": 86,
+              "control_bias": -10.222978,
+              "v14_bias": -18.169989,
+              "control_mae": 17.487395,
+              "v14_mae": 20.490253
+            },
+            {
+              "range": "28-40",
+              "games": 67,
+              "control_bias": -15.485076,
+              "v14_bias": -26.949215,
+              "control_mae": 21.631948,
+              "v14_mae": 28.254871
+            },
+            {
+              "range": "40+",
+              "games": 34,
+              "control_bias": -13.801312,
+              "v14_bias": -31.899456,
+              "control_mae": 16.78878,
+              "v14_mae": 31.899456
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "validation_year": 2023
+        },
+        {
+          "n": 932,
+          "team_training_rows": 7544,
+          "control_margin_mae": 14.578893,
+          "control_margin_rmse": 18.678289,
+          "v14_margin_mae": 16.310781,
+          "v14_margin_rmse": 21.038009,
+          "v14_team_score_mae": 11.603691,
+          "v14_total_mae": 16.497768,
+          "v14_total_rmse": 21.194993,
+          "component_accuracy": {
+            "drives_mae": 1.857183,
+            "drives_rmse": 2.361228,
+            "scoring_opportunity_rate_mae": 0.112605,
+            "scoring_opportunity_rate_rmse": 0.138872,
+            "points_per_scoring_opportunity_mae": 0.920262,
+            "points_per_scoring_opportunity_rmse": 1.149992
+          },
+          "tail": [
+            {
+              "range": "0-3",
+              "games": 146,
+              "control_bias": 1.56594,
+              "v14_bias": 0.763458,
+              "control_mae": 14.253781,
+              "v14_mae": 13.031647
+            },
+            {
+              "range": "3-7",
+              "games": 210,
+              "control_bias": -0.710043,
+              "v14_bias": -2.961064,
+              "control_mae": 11.949836,
+              "v14_mae": 11.621156
+            },
+            {
+              "range": "7-14",
+              "games": 241,
+              "control_bias": -1.343244,
+              "v14_bias": -5.433359,
+              "control_mae": 14.125671,
+              "v14_mae": 14.400763
+            },
+            {
+              "range": "14-21",
+              "games": 132,
+              "control_bias": -9.358887,
+              "v14_bias": -14.732957,
+              "control_mae": 16.177885,
+              "v14_mae": 17.472947
+            },
+            {
+              "range": "21-28",
+              "games": 95,
+              "control_bias": -6.144311,
+              "v14_bias": -15.803445,
+              "control_mae": 12.75349,
+              "v14_mae": 18.107392
+            },
+            {
+              "range": "28-40",
+              "games": 76,
+              "control_bias": -15.862529,
+              "v14_bias": -28.411071,
+              "control_mae": 19.994129,
+              "v14_mae": 28.975524
+            },
+            {
+              "range": "40+",
+              "games": 28,
+              "control_bias": -23.027128,
+              "v14_bias": -39.642749,
+              "control_mae": 24.470439,
+              "v14_mae": 39.642749
+            }
+          ],
+          "train_years": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "validation_year": 2024
+        }
+      ],
+      "aggregate": {
+        "n": 2663,
+        "control_margin_mae": 14.728553,
+        "control_margin_rmse": 18.791229,
+        "v14_margin_mae": 16.223925,
+        "v14_margin_rmse": 20.853943,
+        "v14_team_score_mae": 11.613638,
+        "v14_total_mae": 16.692893,
+        "v14_total_rmse": 21.112718,
+        "component_accuracy": {
+          "drives_mae": 1.706636,
+          "drives_rmse": 2.195284,
+          "scoring_opportunity_rate_mae": 0.111596,
+          "scoring_opportunity_rate_rmse": 0.139205,
+          "points_per_scoring_opportunity_mae": 0.931165,
+          "points_per_scoring_opportunity_rmse": 1.186422
+        },
+        "tail": [
+          {
+            "range": "0-3",
+            "games": 356,
+            "control_bias": 0.636573,
+            "v14_bias": 0.016311,
+            "control_mae": 14.320753,
+            "v14_mae": 13.136744
+          },
+          {
+            "range": "3-7",
+            "games": 664,
+            "control_bias": -1.401208,
+            "v14_bias": -3.017304,
+            "control_mae": 12.146571,
+            "v14_mae": 12.064294
+          },
+          {
+            "range": "7-14",
+            "games": 678,
+            "control_bias": -3.895703,
+            "v14_bias": -7.120932,
+            "control_mae": 14.136984,
+            "v14_mae": 14.021268
+          },
+          {
+            "range": "14-21",
+            "games": 396,
+            "control_bias": -7.86271,
+            "v14_bias": -13.460711,
+            "control_mae": 15.274177,
+            "v14_mae": 16.882694
+          },
+          {
+            "range": "21-28",
+            "games": 258,
+            "control_bias": -7.304468,
+            "v14_bias": -15.922134,
+            "control_mae": 15.163145,
+            "v14_mae": 18.718207
+          },
+          {
+            "range": "28-40",
+            "games": 204,
+            "control_bias": -16.206461,
+            "v14_bias": -27.920762,
+            "control_mae": 20.815252,
+            "v14_mae": 28.8713
+          },
+          {
+            "range": "40+",
+            "games": 98,
+            "control_bias": -19.375109,
+            "v14_bias": -35.354305,
+            "control_mae": 21.984736,
+            "v14_mae": 35.354305
+          }
+        ]
+      }
+    }
+  ],
+  "winner": {
+    "ridge_lambda": 8.0,
+    "folds": [
+      {
+        "n": 841,
+        "team_training_rows": 4082,
+        "control_margin_mae": 15.006665,
+        "control_margin_rmse": 19.179391,
+        "v14_margin_mae": 16.10319,
+        "v14_margin_rmse": 20.778033,
+        "v14_team_score_mae": 11.658273,
+        "v14_total_mae": 16.784852,
+        "v14_total_rmse": 21.056292,
+        "component_accuracy": {
+          "drives_mae": 1.597476,
+          "drives_rmse": 2.072179,
+          "scoring_opportunity_rate_mae": 0.113245,
+          "scoring_opportunity_rate_rmse": 0.142684,
+          "points_per_scoring_opportunity_mae": 0.95547,
+          "points_per_scoring_opportunity_rmse": 1.263833
+        },
+        "tail": [
+          {
+            "range": "0-3",
+            "games": 96,
+            "control_bias": -0.956599,
+            "v14_bias": -1.37494,
+            "control_mae": 13.755629,
+            "v14_mae": 12.025587
+          },
+          {
+            "range": "3-7",
+            "games": 215,
+            "control_bias": -1.483187,
+            "v14_bias": -2.744103,
+            "control_mae": 12.873872,
+            "v14_mae": 12.696057
+          },
+          {
+            "range": "7-14",
+            "games": 221,
+            "control_bias": -5.389305,
+            "v14_bias": -7.929309,
+            "control_mae": 14.213667,
+            "v14_mae": 13.705938
+          },
+          {
+            "range": "14-21",
+            "games": 130,
+            "control_bias": -6.863086,
+            "v14_bias": -12.181089,
+            "control_mae": 14.977717,
+            "v14_mae": 16.354457
+          },
+          {
+            "range": "21-28",
+            "games": 77,
+            "control_bias": -5.476196,
+            "v14_bias": -13.557978,
+            "control_mae": 15.540178,
+            "v14_mae": 17.492643
+          },
+          {
+            "range": "28-40",
+            "games": 61,
+            "control_bias": -17.427309,
+            "v14_bias": -28.376995,
+            "control_mae": 20.941262,
+            "v14_mae": 29.418507
+          },
+          {
+            "range": "40+",
+            "games": 36,
+            "control_bias": -21.798792,
+            "v14_bias": -35.281762,
+            "control_mae": 24.958705,
+            "v14_mae": 35.281762
+          }
+        ],
+        "train_years": [
+          2019,
+          2020,
+          2021
+        ],
+        "validation_year": 2022
+      },
+      {
+        "n": 890,
+        "team_training_rows": 5764,
+        "control_margin_mae": 14.622476,
+        "control_margin_rmse": 18.542706,
+        "v14_margin_mae": 16.247058,
+        "v14_margin_rmse": 20.732921,
+        "v14_team_score_mae": 11.581876,
+        "v14_total_mae": 16.81033,
+        "v14_total_rmse": 21.079881,
+        "component_accuracy": {
+          "drives_mae": 1.652136,
+          "drives_rmse": 2.137835,
+          "scoring_opportunity_rate_mae": 0.10898,
+          "scoring_opportunity_rate_rmse": 0.136265,
+          "points_per_scoring_opportunity_mae": 0.919614,
+          "points_per_scoring_opportunity_rmse": 1.151423
+        },
+        "tail": [
+          {
+            "range": "0-3",
+            "games": 114,
+            "control_bias": 0.78795,
+            "v14_bias": 0.231018,
+            "control_mae": 14.882419,
+            "v14_mae": 14.207052
+          },
+          {
+            "range": "3-7",
+            "games": 239,
+            "control_bias": -1.934761,
+            "v14_bias": -3.312486,
+            "control_mae": 11.665167,
+            "v14_mae": 11.885338
+          },
+          {
+            "range": "7-14",
+            "games": 216,
+            "control_bias": -5.21541,
+            "v14_bias": -8.176738,
+            "control_mae": 14.071149,
+            "v14_mae": 13.920479
+          },
+          {
+            "range": "14-21",
+            "games": 134,
+            "control_bias": -7.358648,
+            "v14_bias": -13.448878,
+            "control_mae": 14.671568,
+            "v14_mae": 16.81372
+          },
+          {
+            "range": "21-28",
+            "games": 86,
+            "control_bias": -10.222978,
+            "v14_bias": -18.169989,
+            "control_mae": 17.487395,
+            "v14_mae": 20.490253
+          },
+          {
+            "range": "28-40",
+            "games": 67,
+            "control_bias": -15.485076,
+            "v14_bias": -26.949215,
+            "control_mae": 21.631948,
+            "v14_mae": 28.254871
+          },
+          {
+            "range": "40+",
+            "games": 34,
+            "control_bias": -13.801312,
+            "v14_bias": -31.899456,
+            "control_mae": 16.78878,
+            "v14_mae": 31.899456
+          }
+        ],
+        "train_years": [
+          2019,
+          2020,
+          2021,
+          2022
+        ],
+        "validation_year": 2023
+      },
+      {
+        "n": 932,
+        "team_training_rows": 7544,
+        "control_margin_mae": 14.578893,
+        "control_margin_rmse": 18.678289,
+        "v14_margin_mae": 16.310781,
+        "v14_margin_rmse": 21.038009,
+        "v14_team_score_mae": 11.603691,
+        "v14_total_mae": 16.497768,
+        "v14_total_rmse": 21.194993,
+        "component_accuracy": {
+          "drives_mae": 1.857183,
+          "drives_rmse": 2.361228,
+          "scoring_opportunity_rate_mae": 0.112605,
+          "scoring_opportunity_rate_rmse": 0.138872,
+          "points_per_scoring_opportunity_mae": 0.920262,
+          "points_per_scoring_opportunity_rmse": 1.149992
+        },
+        "tail": [
+          {
+            "range": "0-3",
+            "games": 146,
+            "control_bias": 1.56594,
+            "v14_bias": 0.763458,
+            "control_mae": 14.253781,
+            "v14_mae": 13.031647
+          },
+          {
+            "range": "3-7",
+            "games": 210,
+            "control_bias": -0.710043,
+            "v14_bias": -2.961064,
+            "control_mae": 11.949836,
+            "v14_mae": 11.621156
+          },
+          {
+            "range": "7-14",
+            "games": 241,
+            "control_bias": -1.343244,
+            "v14_bias": -5.433359,
+            "control_mae": 14.125671,
+            "v14_mae": 14.400763
+          },
+          {
+            "range": "14-21",
+            "games": 132,
+            "control_bias": -9.358887,
+            "v14_bias": -14.732957,
+            "control_mae": 16.177885,
+            "v14_mae": 17.472947
+          },
+          {
+            "range": "21-28",
+            "games": 95,
+            "control_bias": -6.144311,
+            "v14_bias": -15.803445,
+            "control_mae": 12.75349,
+            "v14_mae": 18.107392
+          },
+          {
+            "range": "28-40",
+            "games": 76,
+            "control_bias": -15.862529,
+            "v14_bias": -28.411071,
+            "control_mae": 19.994129,
+            "v14_mae": 28.975524
+          },
+          {
+            "range": "40+",
+            "games": 28,
+            "control_bias": -23.027128,
+            "v14_bias": -39.642749,
+            "control_mae": 24.470439,
+            "v14_mae": 39.642749
+          }
+        ],
+        "train_years": [
+          2019,
+          2020,
+          2021,
+          2022,
+          2023
+        ],
+        "validation_year": 2024
+      }
+    ],
+    "aggregate": {
+      "n": 2663,
+      "control_margin_mae": 14.728553,
+      "control_margin_rmse": 18.791229,
+      "v14_margin_mae": 16.223925,
+      "v14_margin_rmse": 20.853943,
+      "v14_team_score_mae": 11.613638,
+      "v14_total_mae": 16.692893,
+      "v14_total_rmse": 21.112718,
+      "component_accuracy": {
+        "drives_mae": 1.706636,
+        "drives_rmse": 2.195284,
+        "scoring_opportunity_rate_mae": 0.111596,
+        "scoring_opportunity_rate_rmse": 0.139205,
+        "points_per_scoring_opportunity_mae": 0.931165,
+        "points_per_scoring_opportunity_rmse": 1.186422
+      },
+      "tail": [
+        {
+          "range": "0-3",
+          "games": 356,
+          "control_bias": 0.636573,
+          "v14_bias": 0.016311,
+          "control_mae": 14.320753,
+          "v14_mae": 13.136744
+        },
+        {
+          "range": "3-7",
+          "games": 664,
+          "control_bias": -1.401208,
+          "v14_bias": -3.017304,
+          "control_mae": 12.146571,
+          "v14_mae": 12.064294
+        },
+        {
+          "range": "7-14",
+          "games": 678,
+          "control_bias": -3.895703,
+          "v14_bias": -7.120932,
+          "control_mae": 14.136984,
+          "v14_mae": 14.021268
+        },
+        {
+          "range": "14-21",
+          "games": 396,
+          "control_bias": -7.86271,
+          "v14_bias": -13.460711,
+          "control_mae": 15.274177,
+          "v14_mae": 16.882694
+        },
+        {
+          "range": "21-28",
+          "games": 258,
+          "control_bias": -7.304468,
+          "v14_bias": -15.922134,
+          "control_mae": 15.163145,
+          "v14_mae": 18.718207
+        },
+        {
+          "range": "28-40",
+          "games": 204,
+          "control_bias": -16.206461,
+          "v14_bias": -27.920762,
+          "control_mae": 20.815252,
+          "v14_mae": 28.8713
+        },
+        {
+          "range": "40+",
+          "games": 98,
+          "control_bias": -19.375109,
+          "v14_bias": -35.354305,
+          "control_mae": 21.984736,
+          "v14_mae": 35.354305
+        }
+      ]
+    }
+  },
+  "decision": {
+    "v14_beats_control_margin_mae": false,
+    "v14_beats_control_margin_rmse": false,
+    "v14_improves_large_favorite_bias_all_available_21plus": false,
+    "status": "HOLD_V14"
+  }
+}
