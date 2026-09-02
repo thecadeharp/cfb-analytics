@@ -1,0 +1,68 @@
+name: Test Model B Input Expansion
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: test-model-b-input-expansion
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run isolated Model B challenger
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/test_model_b_input_expansion.py
+
+      - name: Prove production files were not modified
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! git diff --quiet -- \
+            data/projections.json \
+            data/frozen/2026_week1_modelA_frozen.json \
+            data/cfb_metrics.json \
+            data/hfa_2026.json \
+            app.js \
+            scripts/build_projections.py; then
+            echo "ERROR: challenger modified a protected production file."
+            exit 1
+          fi
+
+      - name: Commit challenger reports only
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add \
+            data/reports/model_b_input_expansion_challenger.json \
+            data/reports/model_b_input_expansion_challenger.txt
+
+          if git diff --cached --quiet; then
+            echo "No challenger report changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Test Model B input expansion challenger"
+          git pull --rebase origin main
+          git push origin HEAD:main
