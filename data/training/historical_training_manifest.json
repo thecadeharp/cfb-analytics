@@ -1,6 +1,6 @@
 {
-  "generated": "2026-09-02T13:27:21.607368+00:00",
-  "builder_version": "historical_training_v2_sportsdataverse_espn",
+  "generated": "2026-09-02T14:00:02.350311+00:00",
+  "builder_version": "historical_training_v3_sportsdataverse_espn",
   "source": "SportsDataverse espn_cfb_pbp GitHub release",
   "source_release_api": "https://api.github.com/repos/sportsdataverse/sportsdataverse-data/releases/tags/espn_cfb_pbp",
   "seasons": [
@@ -24,6 +24,8 @@
   "explosive_definition": "SportsDataverse EPA_explosive",
   "havoc_definition": "SportsDataverse havoc",
   "neutral_site_status": "Neutral-site metadata is not present in the inspected ESPN PBP schema and is therefore not inferred here. Venue enrichment must be added from a separate schedule source before venue effects are used in the new model.",
+  "team_name_mapping": "possession and defense teams are mapped to canonical homeTeamName/awayTeamName values using ESPN team IDs; no fuzzy team-name matching is used.",
+  "final_score_rule": "final scores use the last chronological end.homeScore/end.awayScore when available, otherwise the last homeScore/awayScore; max score is never used.",
   "important_note": "SportsDataverse EPA is a new canonical historical source for this training table and must not be described as numerically identical to CFBD PPA.",
   "source_assets": {
     "2019": {
