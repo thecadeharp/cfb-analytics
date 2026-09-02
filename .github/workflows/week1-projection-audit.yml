@@ -3,6 +3,9 @@ name: Week 1 Projection Audit
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   audit:
     runs-on: ubuntu-latest
