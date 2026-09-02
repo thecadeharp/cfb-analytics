@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import csv
 import json
 import math
 import statistics
+from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
 
 FROZEN = DATA / "frozen" / "2026_week1_modelA_frozen.json"
-COMPOSITE = DATA / "composite_backtest_report.json"
+HISTORICAL = DATA / "training" / "historical_games.csv"
 HFA = DATA / "hfa_2026.json"
 
 REPORT_DIR = DATA / "reports"
@@ -19,6 +21,16 @@ REPORT_TXT = REPORT_DIR / "model_a_compression_diagnostic.txt"
 
 PRODUCTION_SCALE = 10.4245
 INPUT_COMPRESSION_THRESHOLD = 0.85
+FIRST_TEST_YEAR = 2022
+
+WEIGHTS = {
+    "net_epa": 0.30,
+    "net_epa_pass": 0.15,
+    "net_epa_rush": 0.15,
+    "net_sr": 0.10,
+    "def_havoc_created": 0.20,
+    "off_havoc_allowed": 0.10,
+}
 
 FAVORITE_BUCKETS = [
     (0.0, 7.0, "0-7"),
@@ -82,6 +94,21 @@ def mae(errors):
 def rmse(errors):
     vals = [e * e for e in errors if e is not None]
     return math.sqrt(avg(vals)) if vals else None
+
+
+
+def z_scores(values_by_team):
+    clean = [v for v in values_by_team.values() if v is not None]
+    if len(clean) < 2:
+        return {team: 0.0 for team in values_by_team}
+    mean = statistics.fmean(clean)
+    std = statistics.pstdev(clean)
+    if std == 0:
+        return {team: 0.0 for team in values_by_team}
+    return {
+        team: ((value - mean) / std if value is not None else 0.0)
+        for team, value in values_by_team.items()
+    }
 
 
 def solve_3x3(A, b):
@@ -225,48 +252,210 @@ def current_projection_rows():
     return rows
 
 
-def historical_oos_rows():
-    obj = load_json(COMPOSITE)
-    games = obj.get("games", []) if isinstance(obj, dict) else []
-    rows = []
+def snapshot_from_csv_row(row, side):
+    off_epa = num(row.get(f"{side}_pregame_off_epa"))
+    def_epa = num(row.get(f"{side}_pregame_def_epa_allowed"))
+    off_pass = num(row.get(f"{side}_pregame_off_pass_epa"))
+    def_pass = num(row.get(f"{side}_pregame_def_pass_epa_allowed"))
+    off_rush = num(row.get(f"{side}_pregame_off_rush_epa"))
+    def_rush = num(row.get(f"{side}_pregame_def_rush_epa_allowed"))
+    off_sr = num(row.get(f"{side}_pregame_off_success_rate"))
+    def_sr = num(row.get(f"{side}_pregame_def_success_allowed"))
+    def_havoc = num(row.get(f"{side}_pregame_def_havoc_created_rate"))
+    off_havoc_allowed = num(row.get(f"{side}_pregame_havoc_allowed_rate"))
 
+    required = [
+        off_epa, def_epa, off_pass, def_pass, off_rush, def_rush,
+        off_sr, def_sr, def_havoc, off_havoc_allowed,
+    ]
+    if any(v is None for v in required):
+        return None
+
+    return {
+        "net_epa": off_epa - def_epa,
+        "net_epa_pass": off_pass - def_pass,
+        "net_epa_rush": off_rush - def_rush,
+        "net_sr": off_sr - def_sr,
+        "def_havoc_created": def_havoc,
+        "off_havoc_allowed": off_havoc_allowed,
+    }
+
+
+def load_historical_base():
+    games = []
+    snapshots_by_year_week = defaultdict(dict)
+
+    with HISTORICAL.open("r", encoding="utf-8", newline="") as f:
+        reader = csv.DictReader(f)
+        required_cols = {
+            "game_id", "season", "week", "home_team", "away_team",
+            "actual_home_margin", "market_home_spread",
+            "home_pregame_off_epa", "home_pregame_def_epa_allowed",
+            "away_pregame_off_epa", "away_pregame_def_epa_allowed",
+        }
+        missing = required_cols - set(reader.fieldnames or [])
+        if missing:
+            raise RuntimeError(
+                f"Historical CSV missing required columns: {sorted(missing)}"
+            )
+
+        for row in reader:
+            year = num(row.get("season"))
+            week = num(row.get("week"))
+            actual_margin = num(row.get("actual_home_margin"))
+            market_spread = num(row.get("market_home_spread"))
+            home = row.get("home_team")
+            away = row.get("away_team")
+
+            if None in (year, week, actual_margin) or not home or not away:
+                continue
+
+            year = int(year)
+            week = int(week)
+
+            home_snap = snapshot_from_csv_row(row, "home")
+            away_snap = snapshot_from_csv_row(row, "away")
+            if home_snap is not None:
+                snapshots_by_year_week[(year, week)][home] = home_snap
+            if away_snap is not None:
+                snapshots_by_year_week[(year, week)][away] = away_snap
+
+            games.append({
+                "game_id": row.get("game_id"),
+                "year": year,
+                "week": week,
+                "home": home,
+                "away": away,
+                "actual_home_margin": actual_margin,
+                "market_home_spread": market_spread,
+            })
+
+    return games, snapshots_by_year_week
+
+
+def build_week_ratings(snapshots):
+    if len(snapshots) < 20:
+        return {}
+
+    component_z = {}
+    for component in WEIGHTS:
+        component_z[component] = z_scores({
+            team: snap.get(component)
+            for team, snap in snapshots.items()
+        })
+
+    ratings = {}
+    for team in snapshots:
+        rating = 0.0
+        for component, weight in WEIGHTS.items():
+            z = component_z[component].get(team, 0.0)
+            if component == "off_havoc_allowed":
+                z *= -1.0
+            rating += z * weight
+        ratings[team] = rating
+    return ratings
+
+
+def build_historical_rating_records():
+    games, snapshots_by_year_week = load_historical_base()
+    ratings_by_year_week = {
+        key: build_week_ratings(snaps)
+        for key, snaps in snapshots_by_year_week.items()
+    }
+
+    records = []
     for g in games:
-        market_spread = num(g.get("market_home_spread"))
-        actual_home_margin = num(g.get("actual_home_margin"))
-        projected_home_margin = num(g.get("projected_home_margin"))
-        rating_diff = num(g.get("rating_diff"))
+        ratings = ratings_by_year_week.get((g["year"], g["week"]), {})
+        home_rating = ratings.get(g["home"])
+        away_rating = ratings.get(g["away"])
+        if home_rating is None or away_rating is None:
+            continue
+        records.append({
+            **g,
+            "rating_diff": home_rating - away_rating,
+        })
+    return records
 
-        if None in (market_spread, actual_home_margin, projected_home_margin, rating_diff) or market_spread == 0:
+
+def fit_scale_hfa(records):
+    if len(records) < 100:
+        raise RuntimeError("Insufficient training records for OOS calibration.")
+
+    sum_xx = sum_xh = sum_hh = sum_xy = sum_hy = 0.0
+    for r in records:
+        x = r["rating_diff"]
+        h = 1.0
+        y = r["actual_home_margin"]
+        sum_xx += x*x
+        sum_xh += x*h
+        sum_hh += h*h
+        sum_xy += x*y
+        sum_hy += h*y
+
+    determinant = sum_xx*sum_hh - sum_xh*sum_xh
+    if abs(determinant) < 1e-9:
+        raise RuntimeError("Historical calibration matrix is singular.")
+
+    scale = (sum_xy*sum_hh - sum_hy*sum_xh) / determinant
+    hfa = (sum_hy*sum_xx - sum_xy*sum_xh) / determinant
+    return scale, hfa
+
+
+def historical_oos_rows():
+    records = build_historical_rating_records()
+    years = sorted({r["year"] for r in records})
+    out = []
+
+    for test_year in years:
+        if test_year < FIRST_TEST_YEAR:
             continue
 
-        if market_spread < 0:
-            favorite = "home"
-            market_fav = -market_spread
-            actual_fav = actual_home_margin
-            model_fav = projected_home_margin
-            rating_fav = rating_diff
-        else:
-            favorite = "away"
-            market_fav = market_spread
-            actual_fav = -actual_home_margin
-            model_fav = -projected_home_margin
-            rating_fav = -rating_diff
+        training = [r for r in records if r["year"] < test_year]
+        testing = [r for r in records if r["year"] == test_year]
+        if len(training) < 100 or len(testing) < 25:
+            continue
 
-        rows.append({
-            "game_id": g.get("game_id"),
-            "year": g.get("year"),
-            "week": g.get("week"),
-            "home": g.get("home"),
-            "away": g.get("away"),
-            "favorite": favorite,
-            "market_favorite_margin": market_fav,
-            "actual_favorite_margin": actual_fav,
-            "model_favorite_margin": model_fav,
-            "rating_favorite_difference": rating_fav,
-            "signed_model_residual_actual_minus_model": actual_fav - model_fav,
-            "signed_market_residual_actual_minus_market": actual_fav - market_fav,
-        })
-    return rows
+        scale, hfa = fit_scale_hfa(training)
+
+        for r in testing:
+            market_spread = r["market_home_spread"]
+            if market_spread is None or market_spread == 0:
+                continue
+
+            projected_home_margin = scale * r["rating_diff"] + hfa
+            actual_home_margin = r["actual_home_margin"]
+
+            if market_spread < 0:
+                favorite = "home"
+                market_fav = -market_spread
+                actual_fav = actual_home_margin
+                model_fav = projected_home_margin
+                rating_fav = r["rating_diff"]
+            else:
+                favorite = "away"
+                market_fav = market_spread
+                actual_fav = -actual_home_margin
+                model_fav = -projected_home_margin
+                rating_fav = -r["rating_diff"]
+
+            out.append({
+                "game_id": r["game_id"],
+                "year": r["year"],
+                "week": r["week"],
+                "home": r["home"],
+                "away": r["away"],
+                "favorite": favorite,
+                "oos_scale": scale,
+                "oos_hfa": hfa,
+                "market_favorite_margin": market_fav,
+                "actual_favorite_margin": actual_fav,
+                "model_favorite_margin": model_fav,
+                "rating_favorite_difference": rating_fav,
+                "signed_model_residual_actual_minus_model": actual_fav - model_fav,
+                "signed_market_residual_actual_minus_market": actual_fav - market_fav,
+            })
+
+    return out
 
 
 def favorite_bucket_summary(rows, lo, hi):
@@ -321,8 +510,8 @@ def main():
     if len(historical) < 1500:
         raise RuntimeError(f"Historical OOS source parsed only {len(historical)} usable games; refusing to classify.")
 
-    current_model = [abs(r["model_home_spread"]) for r in current]
-    current_market = [abs(r["market_home_spread"]) for r in current]
+    current_model = [r["model_home_spread"] for r in current]
+    current_market = [r["market_home_spread"] for r in current]
     model_sd = sd(current_model)
     market_sd = sd(current_market)
     sd_ratio = model_sd / market_sd if market_sd else None
@@ -350,11 +539,12 @@ def main():
         if favorite_buckets[label].get("n", 0) >= 20
         and favorite_buckets[label].get("mean_signed_model_residual_actual_minus_model") is not None
     ]
-    tail_worsening = (
+    residual_shape_worsens = (
         len(large_residuals) >= 3
         and avg(large_residuals) > 0.0
         and large_residuals[-1] > large_residuals[0] + 2.0
     )
+    tail_worsening = residual_shape_worsens and quadratic_sig
 
     if input_compression and tail_worsening:
         classification = "Outcome 3: Dual-Systemic Compression"
@@ -381,16 +571,18 @@ def main():
     }
 
     report = {
-        "diagnostic_version": "model-a-compression-audit-v3-production-games-key",
+        "diagnostic_version": "model-a-compression-audit-v4-offline-oos-rebuild",
         "production_scale": PRODUCTION_SCALE,
         "production_untouched": True,
         "frozen_baseline": str(FROZEN.relative_to(ROOT)),
-        "historical_oos_source": str(COMPOSITE.relative_to(ROOT)),
+        "historical_oos_source": str(HISTORICAL.relative_to(ROOT)),
+        "historical_method": "Offline rebuild of the six-component time-safe composite from historical_training_v4 pregame_* fields; prior-season-only OOS scale fitting for 2022-2025.",
+        "historical_limitations": "Neutral-site status is not preserved in historical_training_v4, so the offline rebuild fits a single global home intercept. Use this for tail-shape diagnosis, not exact old-report reproduction.",
         "current_week1_variance": {
             "all_projection_rows_detected": len(current_all),
             "lined_games_detected": len(current),
-            "model_favorite_margin_sd": model_sd,
-            "market_favorite_margin_sd": market_sd,
+            "model_signed_home_spread_sd": model_sd,
+            "market_signed_home_spread_sd": market_sd,
             "sd_ratio_model_over_market": sd_ratio,
             "compression_threshold": INPUT_COMPRESSION_THRESHOLD,
             "input_compression_flag": input_compression,
@@ -401,6 +593,7 @@ def main():
             "rating_difference_buckets": rating_buckets,
             "quadratic_residual_test": quad,
             "quadratic_significant_flag": quadratic_sig,
+            "residual_shape_worsens_flag": residual_shape_worsens,
             "tail_worsening_flag": tail_worsening,
         },
         "hfa_sanity": hfa_sanity,
@@ -408,8 +601,8 @@ def main():
         "classification": classification,
         "classification_protocol": {
             "outcome_1": "Current model/market SD ratio < 0.85, without historical worsening large-favorite residual pattern.",
-            "outcome_2": "Current SD ratio healthy, historical signed residuals worsen materially in large-favorite buckets.",
-            "outcome_3": "Both current input compression and historical tail worsening are present.",
+            "outcome_2": "Current SD ratio healthy, historical signed residuals worsen materially in large-favorite buckets AND the quadratic term is significant.",
+            "outcome_3": "Both current input compression and statistically-supported historical tail worsening are present.",
             "outcome_4": "Neither condition is proven.",
             "quadratic_note": "Quadratic significance is supporting evidence of nonlinearity only; it does not automatically justify an exponential challenger.",
         },
@@ -418,15 +611,15 @@ def main():
     REPORT_JSON.write_text(json.dumps(report, indent=2), encoding="utf-8")
 
     lines = [
-        "MODEL A COMPRESSION DIAGNOSTIC — V2",
+        "MODEL A COMPRESSION DIAGNOSTIC — V4",
         "=" * 42,
         f"Classification: {classification}",
         "",
-        "CURRENT WEEK 1 VARIANCE AUDIT",
+        "CURRENT WEEK 1 GLOBAL SIGNED-SPREAD VARIANCE AUDIT",
         f"Projection rows detected: {len(current_all)}",
         f"Lined games detected: {len(current)}",
-        f"Model favorite-margin SD: {model_sd}",
-        f"Market favorite-margin SD: {market_sd}",
+        f"Model signed home-spread SD: {model_sd}",
+        f"Market signed home-spread SD: {market_sd}",
         f"SD ratio (model/market): {sd_ratio}",
         f"Input compression flag (<{INPUT_COMPRESSION_THRESHOLD}): {input_compression}",
         "",
@@ -444,7 +637,8 @@ def main():
         "",
         f"Quadratic residual test: {quad}",
         f"Quadratic significant: {quadratic_sig}",
-        f"Tail worsening flag: {tail_worsening}",
+        f"Residual shape worsens: {residual_shape_worsens}",
+        f"Tail worsening flag (shape + significant quadratic): {tail_worsening}",
         "",
         "HFA SANITY",
         str(hfa_sanity),
