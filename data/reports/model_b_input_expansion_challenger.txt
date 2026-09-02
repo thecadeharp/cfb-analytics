@@ -1,0 +1,47 @@
+MODEL B INPUT EXPANSION CHALLENGER — NESTED OOS
+========================================================
+Status: HOLD_MODEL_A
+
+AGGREGATE
+Model A: {'n': 2901, 'mae': 14.166588804172408, 'rmse': 17.992594305612176}
+Model B: {'n': 2901, 'mae': 14.175360512238562, 'rmse': 18.023346966724333}
+
+MARKET FAVORITE BUCKETS
+0-7 | A={'n': 1198, 'mae': 12.805295832329803, 'rmse': 16.205971121873993, 'mean_signed_error_model_minus_actual': 1.1600275609728468} | B={'n': 1198, 'mae': 12.752842730389647, 'rmse': 16.162665648351073, 'mean_signed_error_model_minus_actual': 1.2233578619314358}
+7-14 | A={'n': 793, 'mae': 13.637351865835402, 'rmse': 17.225882394857564, 'mean_signed_error_model_minus_actual': 1.4552441264206122} | B={'n': 793, 'mae': 13.646484245097982, 'rmse': 17.23578662826369, 'mean_signed_error_model_minus_actual': 1.4464809017749178}
+14-21 | A={'n': 446, 'mae': 14.337779136428525, 'rmse': 18.151275442578005, 'mean_signed_error_model_minus_actual': 0.2353948537554009} | B={'n': 446, 'mae': 14.432591862376766, 'rmse': 18.2952012768855, 'mean_signed_error_model_minus_actual': 0.16230697034332667}
+21-28 | A={'n': 264, 'mae': 15.477840649513112, 'rmse': 19.010491009846447, 'mean_signed_error_model_minus_actual': -2.9379109735753213} | B={'n': 264, 'mae': 15.540802881294184, 'rmse': 19.126857173224476, 'mean_signed_error_model_minus_actual': -3.0857560424706425}
+28-40 | A={'n': 148, 'mae': 21.419222597830473, 'rmse': 26.571180145149235, 'mean_signed_error_model_minus_actual': -15.851390837234527} | B={'n': 148, 'mae': 21.603061911872494, 'rmse': 26.7184472024909, 'mean_signed_error_model_minus_actual': -15.936767268752094}
+40+ | A={'n': 49, 'mae': 25.092845101377154, 'rmse': 28.762685025515204, 'mean_signed_error_model_minus_actual': -24.50432527394381} | B={'n': 49, 'mae': 24.942547891543036, 'rmse': 28.70014733087074, 'mean_signed_error_model_minus_actual': -24.33037211598748}
+
+NEAR-PK SANITY (market <= 3)
+A={'n': 591, 'mae': 12.915958124641842, 'rmse': 16.252726250959505}
+B={'n': 591, 'mae': 12.85059068234742, 'rmse': 16.18766146825654}
+
+FOLDS
+2022 | threshold=1.7154 (q=0.90) | gamma=0.10 | A MAE/RMSE=14.0963/17.8756 | B MAE/RMSE=14.0852/17.8636
+2023 | threshold=1.7323 (q=0.90) | gamma=1.00 | A MAE/RMSE=14.1818/17.7368 | B MAE/RMSE=14.1994/17.8258
+2024 | threshold=1.7131 (q=0.90) | gamma=0.10 | A MAE/RMSE=14.1998/18.2680 | B MAE/RMSE=14.2060/18.2871
+2025 | threshold=0.8699 (q=0.60) | gamma=0.10 | A MAE/RMSE=14.1808/18.0579 | B MAE/RMSE=14.2011/18.0835
+
+PROMOTION DECISION
+{
+  "passed_for_shadow_board": false,
+  "overall_mae_better": false,
+  "overall_rmse_better": false,
+  "small_spread_protection_pass": true,
+  "large_favorite_improvement_pass": false,
+  "near_pk_protection_pass": true,
+  "large_favorite_oos_n": 907,
+  "reasons": [
+    "Model B did not improve overall MAE.",
+    "Model B did not improve overall RMSE.",
+    "Model B failed to improve MAE in at least half of adequately-sampled 14+ buckets."
+  ]
+}
+
+PRODUCTION STATUS
+Model A untouched.
+No website files written.
+No current 2026 projections written.
+If PASS, next step is a separate shadow-board generator only.

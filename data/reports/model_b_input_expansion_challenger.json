@@ -1,0 +1,640 @@
+{
+  "challenger_version": "model-b-input-expansion-v1-nested-oos",
+  "status": "HOLD_MODEL_A",
+  "production_untouched": true,
+  "market_used_for_candidate_selection": false,
+  "candidate_selection": {
+    "method": "For each test year, use years before the prior season as training, the immediately prior season as validation, select threshold/gamma by validation RMSE with MAE tie-breaker, then refit on all prior years and evaluate the untouched test year.",
+    "thresholds": "Training-data abs(rating_diff) quantiles 60/70/80/90%",
+    "gammas": [
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.65,
+      0.8,
+      1.0
+    ],
+    "transform": "sign(x) * [threshold + (abs(x)-threshold)*(1+gamma)] only when abs(x)>threshold; otherwise x unchanged."
+  },
+  "historical_source": "data/training/historical_games.csv",
+  "historical_limitation": "Neutral-site status is unavailable in historical_training_v4, so both Model A and Model B use the same fitted global home intercept.",
+  "oos_folds": [
+    {
+      "test_year": 2022,
+      "train_years_for_selection": [
+        2019,
+        2020
+      ],
+      "validation_year": 2021,
+      "refit_years": [
+        2019,
+        2020,
+        2021
+      ],
+      "selected_threshold_quantile": 0.9,
+      "selected_threshold": 1.7154392792448334,
+      "selected_gamma": 0.1,
+      "model_a": {
+        "n": 666,
+        "mae": 14.096342860414502,
+        "rmse": 17.875588779694816,
+        "scale": 9.99262360456124,
+        "hfa": 3.76995625618041,
+        "market_buckets": {
+          "0-7": {
+            "n": 260,
+            "mae": 13.21874317706272,
+            "rmse": 16.647687844366125
+          },
+          "7-14": {
+            "n": 184,
+            "mae": 13.393033518562136,
+            "rmse": 16.89215101121811
+          },
+          "14-21": {
+            "n": 114,
+            "mae": 13.442291699817094,
+            "rmse": 17.242611952128794
+          },
+          "21-28": {
+            "n": 62,
+            "mae": 14.889253897479195,
+            "rmse": 18.65058768638042
+          },
+          "28-40": {
+            "n": 34,
+            "mae": 21.071078282383983,
+            "rmse": 25.012316045966532
+          },
+          "40+": {
+            "n": 11,
+            "mae": 28.177579330886772,
+            "rmse": 32.32548009013608
+          }
+        },
+        "near_pk": {
+          "n": 121,
+          "mae": 13.21606438308435,
+          "rmse": 16.701124482379576
+        }
+      },
+      "model_b": {
+        "n": 666,
+        "mae": 14.08521614147027,
+        "rmse": 17.86361386613151,
+        "scale": 9.858563287699795,
+        "hfa": 3.7693324135184896,
+        "market_buckets": {
+          "0-7": {
+            "n": 260,
+            "mae": 13.195843897781247,
+            "rmse": 16.619359065165042
+          },
+          "7-14": {
+            "n": 184,
+            "mae": 13.390498527948417,
+            "rmse": 16.88134508417338
+          },
+          "14-21": {
+            "n": 114,
+            "mae": 13.423406534908207,
+            "rmse": 17.233805495207147
+          },
+          "21-28": {
+            "n": 62,
+            "mae": 14.918572993442746,
+            "rmse": 18.66614790366607
+          },
+          "28-40": {
+            "n": 34,
+            "mae": 21.119244244658642,
+            "rmse": 25.03472969982403
+          },
+          "40+": {
+            "n": 11,
+            "mae": 27.96765706707614,
+            "rmse": 32.30783432990668
+          }
+        },
+        "near_pk": {
+          "n": 121,
+          "mae": 13.190186264191462,
+          "rmse": 16.67205476200915
+        }
+      },
+      "selection_validation": {
+        "baseline": {
+          "n": 663,
+          "mae": 14.541090180060573,
+          "rmse": 18.253629026462946
+        },
+        "winner": {
+          "quantile": 0.9,
+          "threshold": 1.7154392792448334,
+          "gamma": 0.1,
+          "validation_mae": 14.551478883752658,
+          "validation_rmse": 18.27330775814238,
+          "mae_improvement_vs_baseline": -0.010388703692084889,
+          "rmse_improvement_vs_baseline": -0.019678731679434236
+        }
+      }
+    },
+    {
+      "test_year": 2023,
+      "train_years_for_selection": [
+        2019,
+        2020,
+        2021
+      ],
+      "validation_year": 2022,
+      "refit_years": [
+        2019,
+        2020,
+        2021,
+        2022
+      ],
+      "selected_threshold_quantile": 0.9,
+      "selected_threshold": 1.7323031733954062,
+      "selected_gamma": 1.0,
+      "model_a": {
+        "n": 716,
+        "mae": 14.181787569391346,
+        "rmse": 17.73679789689217,
+        "scale": 9.726798002975041,
+        "hfa": 3.698883068557342,
+        "market_buckets": {
+          "0-7": {
+            "n": 308,
+            "mae": 12.859344146750177,
+            "rmse": 16.091939044849543
+          },
+          "7-14": {
+            "n": 191,
+            "mae": 14.318866664855602,
+            "rmse": 17.640665625084658
+          },
+          "14-21": {
+            "n": 109,
+            "mae": 14.06706757624315,
+            "rmse": 17.97480757505683
+          },
+          "21-28": {
+            "n": 65,
+            "mae": 15.418598707483834,
+            "rmse": 18.620749927780015
+          },
+          "28-40": {
+            "n": 33,
+            "mae": 22.129562877265318,
+            "rmse": 26.976426804358738
+          },
+          "40+": {
+            "n": 10,
+            "mae": 19.278351275102118,
+            "rmse": 20.69986413190063
+          }
+        },
+        "near_pk": {
+          "n": 151,
+          "mae": 13.545524535267724,
+          "rmse": 16.661602822896036
+        }
+      },
+      "model_b": {
+        "n": 716,
+        "mae": 14.199390316607138,
+        "rmse": 17.82577853136334,
+        "scale": 8.522545340743175,
+        "hfa": 3.6917754142547357,
+        "market_buckets": {
+          "0-7": {
+            "n": 308,
+            "mae": 12.694055700790804,
+            "rmse": 15.946613067462966
+          },
+          "7-14": {
+            "n": 191,
+            "mae": 14.331150573400686,
+            "rmse": 17.654191950644066
+          },
+          "14-21": {
+            "n": 109,
+            "mae": 14.362843200737887,
+            "rmse": 18.469791256485486
+          },
+          "21-28": {
+            "n": 65,
+            "mae": 15.516990315559173,
+            "rmse": 18.991023731764166
+          },
+          "28-40": {
+            "n": 33,
+            "mae": 22.838605110548357,
+            "rmse": 27.442560153409968
+          },
+          "40+": {
+            "n": 10,
+            "mae": 19.191630328774,
+            "rmse": 20.456741556460877
+          }
+        },
+        "near_pk": {
+          "n": 151,
+          "mae": 13.349012115246921,
+          "rmse": 16.470425994624964
+        }
+      },
+      "selection_validation": {
+        "baseline": {
+          "n": 666,
+          "mae": 14.096342860414502,
+          "rmse": 17.875588779694816
+        },
+        "winner": {
+          "quantile": 0.9,
+          "threshold": 1.7323031733954062,
+          "gamma": 1.0,
+          "validation_mae": 14.020132081983915,
+          "validation_rmse": 17.812050066405106,
+          "mae_improvement_vs_baseline": 0.07621077843058721,
+          "rmse_improvement_vs_baseline": 0.06353871328970939
+        }
+      }
+    },
+    {
+      "test_year": 2024,
+      "train_years_for_selection": [
+        2019,
+        2020,
+        2021,
+        2022
+      ],
+      "validation_year": 2023,
+      "refit_years": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023
+      ],
+      "selected_threshold_quantile": 0.9,
+      "selected_threshold": 1.7130587959487422,
+      "selected_gamma": 0.1,
+      "model_a": {
+        "n": 755,
+        "mae": 14.199781187586268,
+        "rmse": 18.26797318989289,
+        "scale": 9.660554235730448,
+        "hfa": 3.690401514935024,
+        "market_buckets": {
+          "0-7": {
+            "n": 316,
+            "mae": 12.680907507601466,
+            "rmse": 16.102257279208526
+          },
+          "7-14": {
+            "n": 209,
+            "mae": 13.99524289964502,
+            "rmse": 18.145617971569553
+          },
+          "14-21": {
+            "n": 114,
+            "mae": 15.531347976101209,
+            "rmse": 19.94743824087458
+          },
+          "21-28": {
+            "n": 75,
+            "mae": 12.963813997800367,
+            "rmse": 16.255668890951153
+          },
+          "28-40": {
+            "n": 30,
+            "mae": 23.39914777055774,
+            "rmse": 27.90785508059973
+          },
+          "40+": {
+            "n": 11,
+            "mae": 31.257100542951083,
+            "rmse": 33.93006698027565
+          }
+        },
+        "near_pk": {
+          "n": 171,
+          "mae": 13.360578904889362,
+          "rmse": 16.763754847217395
+        }
+      },
+      "model_b": {
+        "n": 755,
+        "mae": 14.205996040657261,
+        "rmse": 18.28706082067112,
+        "scale": 9.543563893612873,
+        "hfa": 3.6893652647063084,
+        "market_buckets": {
+          "0-7": {
+            "n": 316,
+            "mae": 12.67440081662651,
+            "rmse": 16.114091520431682
+          },
+          "7-14": {
+            "n": 209,
+            "mae": 13.989071045943152,
+            "rmse": 18.162138217411957
+          },
+          "14-21": {
+            "n": 114,
+            "mae": 15.580999109124965,
+            "rmse": 19.985390773337315
+          },
+          "21-28": {
+            "n": 75,
+            "mae": 13.023883197216847,
+            "rmse": 16.30906539951911
+          },
+          "28-40": {
+            "n": 30,
+            "mae": 23.352322327466077,
+            "rmse": 27.89790782650253
+          },
+          "40+": {
+            "n": 11,
+            "mae": 31.19142690769486,
+            "rmse": 33.92260417123957
+          }
+        },
+        "near_pk": {
+          "n": 171,
+          "mae": 13.34712633282923,
+          "rmse": 16.755830808042298
+        }
+      },
+      "selection_validation": {
+        "baseline": {
+          "n": 716,
+          "mae": 14.181787569391346,
+          "rmse": 17.73679789689217
+        },
+        "winner": {
+          "quantile": 0.9,
+          "threshold": 1.7130587959487422,
+          "gamma": 0.1,
+          "validation_mae": 14.18277086378027,
+          "validation_rmse": 17.743044253876565,
+          "mae_improvement_vs_baseline": -0.000983294388923639,
+          "rmse_improvement_vs_baseline": -0.006246356984394907
+        }
+      }
+    },
+    {
+      "test_year": 2025,
+      "train_years_for_selection": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023
+      ],
+      "validation_year": 2024,
+      "refit_years": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "selected_threshold_quantile": 0.6,
+      "selected_threshold": 0.8698608384022632,
+      "selected_gamma": 0.1,
+      "model_a": {
+        "n": 764,
+        "mae": 14.180778899942755,
+        "rmse": 18.057944897005637,
+        "scale": 9.574278521502135,
+        "hfa": 3.8433666705446696,
+        "market_buckets": {
+          "0-7": {
+            "n": 314,
+            "mae": 12.53511596017095,
+            "rmse": 16.049983202846583
+          },
+          "7-14": {
+            "n": 209,
+            "mae": 12.871734752051731,
+            "rmse": 16.155690627403335
+          },
+          "14-21": {
+            "n": 109,
+            "mae": 14.296735834696623,
+            "rmse": 17.26006246140745
+          },
+          "21-28": {
+            "n": 62,
+            "mae": 19.16969716139153,
+            "rmse": 22.535567450060245
+          },
+          "28-40": {
+            "n": 51,
+            "mae": 20.027024996301314,
+            "rmse": 26.50959216797784
+          },
+          "40+": {
+            "n": 17,
+            "mae": 22.528495212014292,
+            "rmse": 26.6727659094218
+          }
+        },
+        "near_pk": {
+          "n": 148,
+          "mae": 11.51455583613929,
+          "rmse": 14.793419127701686
+        }
+      },
+      "model_b": {
+        "n": 764,
+        "mae": 14.201147144499913,
+        "rmse": 18.08350041759692,
+        "scale": 9.167398438781436,
+        "hfa": 3.8360792946200095,
+        "market_buckets": {
+          "0-7": {
+            "n": 314,
+            "mae": 12.522631731484482,
+            "rmse": 16.03800637145467
+          },
+          "7-14": {
+            "n": 209,
+            "mae": 12.903563010040864,
+            "rmse": 16.173638282769712
+          },
+          "14-21": {
+            "n": 109,
+            "mae": 14.356732278163546,
+            "rmse": 17.32242330508654
+          },
+          "21-28": {
+            "n": 62,
+            "mae": 19.232658463961368,
+            "rmse": 22.571309906963446
+          },
+          "28-40": {
+            "n": 51,
+            "mae": 20.09716117973837,
+            "rmse": 26.62137479940924
+          },
+          "40+": {
+            "n": 17,
+            "mae": 22.324624686787526,
+            "rmse": 26.60883319885031
+          }
+        },
+        "near_pk": {
+          "n": 148,
+          "mae": 11.49072380394645,
+          "rmse": 14.764116087036108
+        }
+      },
+      "selection_validation": {
+        "baseline": {
+          "n": 755,
+          "mae": 14.199781187586268,
+          "rmse": 18.26797318989289
+        },
+        "winner": {
+          "quantile": 0.6,
+          "threshold": 0.8698608384022632,
+          "gamma": 0.1,
+          "validation_mae": 14.204806498890347,
+          "validation_rmse": 18.284755582548424,
+          "mae_improvement_vs_baseline": -0.0050253113040792385,
+          "rmse_improvement_vs_baseline": -0.016782392655535716
+        }
+      }
+    }
+  ],
+  "aggregate_model_a": {
+    "overall": {
+      "n": 2901,
+      "mae": 14.166588804172408,
+      "rmse": 17.992594305612176
+    },
+    "market_buckets": {
+      "0-7": {
+        "n": 1198,
+        "mae": 12.805295832329803,
+        "rmse": 16.205971121873993,
+        "mean_signed_error_model_minus_actual": 1.1600275609728468
+      },
+      "7-14": {
+        "n": 793,
+        "mae": 13.637351865835402,
+        "rmse": 17.225882394857564,
+        "mean_signed_error_model_minus_actual": 1.4552441264206122
+      },
+      "14-21": {
+        "n": 446,
+        "mae": 14.337779136428525,
+        "rmse": 18.151275442578005,
+        "mean_signed_error_model_minus_actual": 0.2353948537554009
+      },
+      "21-28": {
+        "n": 264,
+        "mae": 15.477840649513112,
+        "rmse": 19.010491009846447,
+        "mean_signed_error_model_minus_actual": -2.9379109735753213
+      },
+      "28-40": {
+        "n": 148,
+        "mae": 21.419222597830473,
+        "rmse": 26.571180145149235,
+        "mean_signed_error_model_minus_actual": -15.851390837234527
+      },
+      "40+": {
+        "n": 49,
+        "mae": 25.092845101377154,
+        "rmse": 28.762685025515204,
+        "mean_signed_error_model_minus_actual": -24.50432527394381
+      }
+    },
+    "near_pk_market_3_or_less": {
+      "n": 591,
+      "mae": 12.915958124641842,
+      "rmse": 16.252726250959505
+    }
+  },
+  "aggregate_model_b": {
+    "overall": {
+      "n": 2901,
+      "mae": 14.175360512238562,
+      "rmse": 18.023346966724333
+    },
+    "market_buckets": {
+      "0-7": {
+        "n": 1198,
+        "mae": 12.752842730389647,
+        "rmse": 16.162665648351073,
+        "mean_signed_error_model_minus_actual": 1.2233578619314358
+      },
+      "7-14": {
+        "n": 793,
+        "mae": 13.646484245097982,
+        "rmse": 17.23578662826369,
+        "mean_signed_error_model_minus_actual": 1.4464809017749178
+      },
+      "14-21": {
+        "n": 446,
+        "mae": 14.432591862376766,
+        "rmse": 18.2952012768855,
+        "mean_signed_error_model_minus_actual": 0.16230697034332667
+      },
+      "21-28": {
+        "n": 264,
+        "mae": 15.540802881294184,
+        "rmse": 19.126857173224476,
+        "mean_signed_error_model_minus_actual": -3.0857560424706425
+      },
+      "28-40": {
+        "n": 148,
+        "mae": 21.603061911872494,
+        "rmse": 26.7184472024909,
+        "mean_signed_error_model_minus_actual": -15.936767268752094
+      },
+      "40+": {
+        "n": 49,
+        "mae": 24.942547891543036,
+        "rmse": 28.70014733087074,
+        "mean_signed_error_model_minus_actual": -24.33037211598748
+      }
+    },
+    "near_pk_market_3_or_less": {
+      "n": 591,
+      "mae": 12.85059068234742,
+      "rmse": 16.18766146825654
+    }
+  },
+  "promotion_protocol": {
+    "requirements": [
+      "Model B overall OOS MAE < Model A.",
+      "Model B overall OOS RMSE < Model A.",
+      "0-7 and 7-14 MAE may not degrade by more than 0.25 points.",
+      "Near-PK market <=3 MAE may not degrade by more than 0.25 points.",
+      "Model B must improve MAE in at least half of adequately-sampled 14+ buckets."
+    ],
+    "decision": {
+      "passed_for_shadow_board": false,
+      "overall_mae_better": false,
+      "overall_rmse_better": false,
+      "small_spread_protection_pass": true,
+      "large_favorite_improvement_pass": false,
+      "near_pk_protection_pass": true,
+      "large_favorite_oos_n": 907,
+      "reasons": [
+        "Model B did not improve overall MAE.",
+        "Model B did not improve overall RMSE.",
+        "Model B failed to improve MAE in at least half of adequately-sampled 14+ buckets."
+      ]
+    }
+  }
+}
