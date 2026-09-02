@@ -169,8 +169,8 @@ def parse_hfa():
 
 def current_projection_rows():
     obj = load_json(FROZEN)
-    if isinstance(obj, dict) and isinstance(obj.get("projections"), list):
-        raw = obj["projections"]
+    if isinstance(obj, dict) and isinstance(obj.get("games"), list):
+        raw = obj["games"]
     elif isinstance(obj, list):
         raw = obj
     else:
@@ -381,7 +381,7 @@ def main():
     }
 
     report = {
-        "diagnostic_version": "model-a-compression-audit-v2-schema-corrected",
+        "diagnostic_version": "model-a-compression-audit-v3-production-games-key",
         "production_scale": PRODUCTION_SCALE,
         "production_untouched": True,
         "frozen_baseline": str(FROZEN.relative_to(ROOT)),
