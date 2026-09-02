@@ -157,6 +157,9 @@ def download_season(year, assets, target_dir):
 REQUIRED_COLUMNS = [
     "season",
     "game_id",
+    "game_play_number",
+    "pos_team_id",
+    "def_pos_team_id",
     "pos_team",
     "def_pos_team",
     "EPA",
@@ -194,6 +197,8 @@ OPTIONAL_COLUMNS = [
     "line_yards",
     "scoring_opp",
     "start.yardsToEndzone",
+    "end.homeScore",
+    "end.awayScore",
 ]
 
 
@@ -228,8 +233,33 @@ def normalize_season(df, year):
 
     work["home_team"] = work["homeTeamName"].astype(str)
     work["away_team"] = work["awayTeamName"].astype(str)
-    work["offense"] = work["pos_team"].astype(str)
-    work["defense"] = work["def_pos_team"].astype(str)
+
+    # IMPORTANT:
+    # SportsDataverse pos_team / def_pos_team are often full display names
+    # ("Miami Hurricanes") while homeTeamName / awayTeamName are short
+    # canonical names ("Miami"). Joining on those strings silently produced
+    # all-null team metrics in V2.
+    #
+    # Map offense and defense to the canonical home/away names by ESPN team ID
+    # instead. This makes the team-game metrics and schedule rows use the same
+    # naming system without fuzzy matching.
+    pos_id = work["pos_team_id"].astype(str)
+    def_id = work["def_pos_team_id"].astype(str)
+    home_id = work["homeTeamId"].astype(str)
+    away_id = work["awayTeamId"].astype(str)
+
+    work["offense"] = np.select(
+        [pos_id.eq(home_id), pos_id.eq(away_id)],
+        [work["home_team"], work["away_team"]],
+        default=np.nan,
+    )
+    work["defense"] = np.select(
+        [def_id.eq(home_id), def_id.eq(away_id)],
+        [work["home_team"], work["away_team"]],
+        default=np.nan,
+    )
+
+    work["play_order"] = num(work["game_play_number"])
 
     work["epa"] = num(work["EPA"])
     work["success"] = boolish(work["EPA_success"]).astype(float)
@@ -266,6 +296,17 @@ def normalize_season(df, year):
 
     work["home_score_play"] = num(work["homeScore"])
     work["away_score_play"] = num(work["awayScore"])
+
+    work["end_home_score_play"] = (
+        num(work["end.homeScore"])
+        if "end.homeScore" in work.columns
+        else np.nan
+    )
+    work["end_away_score_play"] = (
+        num(work["end.awayScore"])
+        if "end.awayScore" in work.columns
+        else np.nan
+    )
 
     work["game_spread"] = num(work["gameSpread"])
     work["home_favorite"] = boolish(work["homeFavorite"])
@@ -343,26 +384,38 @@ def build_game_metadata(plays):
         "game_id",
         sort=False,
     ):
-        home_scores = (
-            group["home_score_play"]
-            .dropna()
-        )
-        away_scores = (
-            group["away_score_play"]
-            .dropna()
+        # Put each game's plays in explicit chronological order. The earlier
+        # builder used max(homeScore/awayScore), but the ESPN-derived file has
+        # occasional malformed intermediate score values. The final observed
+        # end-of-play score is the correct game result target.
+        ordered = group.sort_values(
+            ["play_order"],
+            kind="stable",
+            na_position="last",
         )
 
-        # Scores should be non-decreasing in normal ESPN play data.
-        # Using max is safer than assuming row ordering after parquet read.
+        end_home_scores = ordered["end_home_score_play"].dropna()
+        end_away_scores = ordered["end_away_score_play"].dropna()
+        home_scores = ordered["home_score_play"].dropna()
+        away_scores = ordered["away_score_play"].dropna()
+
         home_score = (
-            float(home_scores.max())
-            if not home_scores.empty
-            else np.nan
+            float(end_home_scores.iloc[-1])
+            if not end_home_scores.empty
+            else (
+                float(home_scores.iloc[-1])
+                if not home_scores.empty
+                else np.nan
+            )
         )
         away_score = (
-            float(away_scores.max())
-            if not away_scores.empty
-            else np.nan
+            float(end_away_scores.iloc[-1])
+            if not end_away_scores.empty
+            else (
+                float(away_scores.iloc[-1])
+                if not away_scores.empty
+                else np.nan
+            )
         )
 
         market_home_spread = first_non_null(
@@ -919,6 +972,22 @@ def main():
         metrics,
     )
 
+    # Guard against the exact V2 failure mode: schedule team names existed,
+    # but the metrics join silently returned nulls because display-name formats
+    # differed. Stop here if canonical mapping ever breaks again.
+    populated_team_games = int(
+        team_games["off_epa"].notna().sum()
+    )
+    if populated_team_games == 0:
+        raise RuntimeError(
+            "Team-game efficiency join produced zero populated off_epa rows."
+        )
+
+    print(
+        f"Populated team-game EPA rows: {populated_team_games:,}",
+        flush=True,
+    )
+
     print("Adding previous-season priors...", flush=True)
     team_games = add_previous_season_features(
         team_games
@@ -950,7 +1019,7 @@ def main():
             timezone.utc
         ).isoformat(),
         "builder_version": (
-            "historical_training_v2_"
+            "historical_training_v3_"
             "sportsdataverse_espn"
         ),
         "source": (
@@ -1002,6 +1071,16 @@ def main():
             "Venue enrichment must be added from a "
             "separate schedule source before venue "
             "effects are used in the new model."
+        ),
+        "team_name_mapping": (
+            "possession and defense teams are mapped to canonical "
+            "homeTeamName/awayTeamName values using ESPN team IDs; "
+            "no fuzzy team-name matching is used."
+        ),
+        "final_score_rule": (
+            "final scores use the last chronological end.homeScore/"
+            "end.awayScore when available, otherwise the last homeScore/"
+            "awayScore; max score is never used."
         ),
         "important_note": (
             "SportsDataverse EPA is a new canonical "
