@@ -39,35 +39,20 @@ jobs:
         run: |
           python scripts/capture_closing_lines.py
 
-      - name: Build CLV report
-        run: |
-          python scripts/build_clv_report.py
-
-      - name: Commit closing-line captures and CLV report
+      - name: Commit closing-line captures
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add data/odds.json
           git add data/projections.json
+          git add data/snapshots/closing_lines.jsonl
           git add data/snapshots/latest_closing_capture.json
 
-          if [ -f data/snapshots/closing_lines.jsonl ]; then
-            git add data/snapshots/closing_lines.jsonl
-          fi
-
-          if [ -f data/reports/clv_report.json ]; then
-            git add data/reports/clv_report.json
-          fi
-
-          if [ -f data/reports/clv_snapshot_rows.csv ]; then
-            git add data/reports/clv_snapshot_rows.csv
-          fi
-
           if git diff --cached --quiet; then
-            echo "No closing-line or CLV report changes to commit."
+            echo "No closing-line changes to commit."
             exit 0
           fi
 
-          git commit -m "Capture closing lines and refresh CLV report"
+          git commit -m "Capture near-kickoff closing lines"
           git push
