@@ -46,8 +46,11 @@ jobs:
 
           git add data/odds.json
           git add data/projections.json
-          git add data/snapshots/closing_lines.jsonl
           git add data/snapshots/latest_closing_capture.json
+
+          if [ -f data/snapshots/closing_lines.jsonl ]; then
+            git add data/snapshots/closing_lines.jsonl
+          fi
 
           if git diff --cached --quiet; then
             echo "No closing-line changes to commit."
