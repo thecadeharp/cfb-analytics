@@ -1,108 +1,305 @@
 {
-  "diagnostic_version": "model-a-compression-audit-v1",
+  "diagnostic_version": "model-a-compression-audit-v4-offline-oos-rebuild",
+  "production_scale": 10.4245,
   "production_untouched": true,
   "frozen_baseline": "data/frozen/2026_week1_modelA_frozen.json",
-  "scale": 10.4245,
-  "current_week1": {
-    "lined_games_detected": 0,
-    "model_favorite_margin_sd": null,
-    "market_favorite_margin_sd": null,
-    "sd_ratio_model_over_market": null,
-    "input_compression_threshold": 0.85,
-    "input_compression_flag": false
+  "historical_oos_source": "data/training/historical_games.csv",
+  "historical_method": "Offline rebuild of the six-component time-safe composite from historical_training_v4 pregame_* fields; prior-season-only OOS scale fitting for 2022-2025.",
+  "historical_limitations": "Neutral-site status is not preserved in historical_training_v4, so the offline rebuild fits a single global home intercept. Use this for tail-shape diagnosis, not exact old-report reproduction.",
+  "current_week1_variance": {
+    "all_projection_rows_detected": 761,
+    "lined_games_detected": 96,
+    "model_signed_home_spread_sd": 11.128733719193228,
+    "market_signed_home_spread_sd": 13.786259600632858,
+    "sd_ratio_model_over_market": 0.8072337270279143,
+    "compression_threshold": 0.85,
+    "input_compression_flag": true
   },
-  "historical_schema": {
-    "historical_file": "data/training/historical_games.csv",
-    "headers_count": 156,
-    "matched_columns": {
-      "year": "season",
-      "week": "week",
-      "home_score": "home_score",
-      "away_score": "away_score"
+  "historical_oos": {
+    "usable_games": 2892,
+    "favorite_size_buckets": {
+      "0-7": {
+        "n": 1192,
+        "avg_market_favorite_margin": 3.6283557046979866,
+        "avg_model_favorite_margin": 2.430195731799848,
+        "avg_actual_favorite_margin": 3.38255033557047,
+        "mean_signed_model_residual_actual_minus_model": 0.9523546037706214,
+        "model_mae": 12.789811464933635,
+        "model_rmse": 16.20544165610271,
+        "mean_signed_market_residual_actual_minus_market": -0.24580536912751677,
+        "market_mae": 11.604446308724832,
+        "market_rmse": 14.950056676510377
+      },
+      "7-14": {
+        "n": 793,
+        "avg_market_favorite_margin": 9.73203026481715,
+        "avg_model_favorite_margin": 6.590119295353088,
+        "avg_actual_favorite_margin": 10.311475409836065,
+        "mean_signed_model_residual_actual_minus_model": 3.7213561144829774,
+        "model_mae": 13.637351865835402,
+        "model_rmse": 17.225882394857564,
+        "mean_signed_market_residual_actual_minus_market": 0.5794451450189155,
+        "market_mae": 12.335435056746531,
+        "market_rmse": 15.43798356962757
+      },
+      "14-21": {
+        "n": 446,
+        "avg_market_favorite_margin": 16.580156950672645,
+        "avg_model_favorite_margin": 10.70963525479429,
+        "avg_actual_favorite_margin": 16.34304932735426,
+        "mean_signed_model_residual_actual_minus_model": 5.6334140725599715,
+        "model_mae": 14.337779136428525,
+        "model_rmse": 18.151275442578005,
+        "mean_signed_market_residual_actual_minus_market": -0.23710762331838564,
+        "market_mae": 12.123878923766815,
+        "market_rmse": 15.073544482753304
+      },
+      "21-28": {
+        "n": 264,
+        "avg_market_favorite_margin": 23.675189393939394,
+        "avg_model_favorite_margin": 13.897327577094746,
+        "avg_actual_favorite_margin": 22.018939393939394,
+        "mean_signed_model_residual_actual_minus_model": 8.121611816844649,
+        "model_mae": 15.477840649513112,
+        "model_rmse": 19.010491009846447,
+        "mean_signed_market_residual_actual_minus_market": -1.65625,
+        "market_mae": 12.436553030303031,
+        "market_rmse": 15.63398983809238
+      },
+      "28-40": {
+        "n": 148,
+        "avg_market_favorite_margin": 32.601351351351354,
+        "avg_model_favorite_margin": 16.31277584878839,
+        "avg_actual_favorite_margin": 34.222972972972975,
+        "mean_signed_model_residual_actual_minus_model": 17.91019712418458,
+        "model_mae": 21.419222597830473,
+        "model_rmse": 26.571180145149235,
+        "mean_signed_market_residual_actual_minus_market": 1.6216216216216217,
+        "market_mae": 12.56418918918919,
+        "market_rmse": 15.767605989770566
+      },
+      "40+": {
+        "n": 49,
+        "avg_market_favorite_margin": 45.42857142857143,
+        "avg_model_favorite_margin": 19.740572685239865,
+        "avg_actual_favorite_margin": 44.244897959183675,
+        "mean_signed_model_residual_actual_minus_model": 24.50432527394381,
+        "model_mae": 25.092845101377154,
+        "model_rmse": 28.762685025515204,
+        "mean_signed_market_residual_actual_minus_market": -1.183673469387755,
+        "market_mae": 10.73469387755102,
+        "market_rmse": 13.442621828819446
+      }
     },
-    "usable_rows": 0,
-    "has_historical_model_spread": false,
-    "has_historical_rating_diff": false
+    "rating_difference_buckets": {
+      "0-1.0": {
+        "n": 1960,
+        "avg_abs_rating_difference": 0.4549595058584533,
+        "mean_signed_model_residual_actual_minus_model": 5.50530318642957,
+        "residual_mae": 13.904025256240772,
+        "residual_rmse": 17.713439309352733
+      },
+      "1.0-1.5": {
+        "n": 511,
+        "avg_abs_rating_difference": 1.2203913446518913,
+        "mean_signed_model_residual_actual_minus_model": 2.586930437924891,
+        "residual_mae": 13.970063873653944,
+        "residual_rmse": 17.52826796041071
+      },
+      "1.5-2.0": {
+        "n": 236,
+        "avg_abs_rating_difference": 1.7159625170745778,
+        "mean_signed_model_residual_actual_minus_model": 2.497113825954751,
+        "residual_mae": 15.576934832948266,
+        "residual_rmse": 19.859120778492215
+      },
+      "2.0-2.5": {
+        "n": 120,
+        "avg_abs_rating_difference": 2.221186836035101,
+        "mean_signed_model_residual_actual_minus_model": 0.589608370792204,
+        "residual_mae": 14.844169054687576,
+        "residual_rmse": 18.950400701985952
+      },
+      "2.5-3.0": {
+        "n": 38,
+        "avg_abs_rating_difference": 2.7304958925948206,
+        "mean_signed_model_residual_actual_minus_model": -1.9201780883249073,
+        "residual_mae": 15.246742687828675,
+        "residual_rmse": 19.619409902411874
+      },
+      "3.0+": {
+        "n": 27,
+        "avg_abs_rating_difference": 3.6358596659672457,
+        "mean_signed_model_residual_actual_minus_model": -3.8944223686939043,
+        "residual_mae": 18.994215023276734,
+        "residual_rmse": 21.90151709855618
+      }
+    },
+    "quadratic_residual_test": {
+      "n": 2892,
+      "quadratic_a": -0.29448847854691457,
+      "linear_b": -1.9097294107391432,
+      "intercept_c": 6.266544718197183,
+      "r2": 0.011057059195269003,
+      "se_a": 0.3522367410554226,
+      "t_a": -0.8360527004211022,
+      "quadratic_significant_approx_95": false
+    },
+    "quadratic_significant_flag": false,
+    "residual_shape_worsens_flag": true,
+    "tail_worsening_flag": false
   },
-  "historical_market_favorite_buckets": {
-    "0-7": {
-      "n": 0
-    },
-    "7-14": {
-      "n": 0
-    },
-    "14-21": {
-      "n": 0
-    },
-    "21-28": {
-      "n": 0
-    },
-    "28-40": {
-      "n": 0
-    },
-    "40+": {
-      "n": 0
-    }
-  },
-  "historical_rating_tail_buckets": {
-    "0-1.0": {
-      "n": 0,
-      "mean_abs_rating_diff": null,
-      "mean_signed_residual_actual_minus_linear": null,
-      "residual_mae": null,
-      "residual_rmse": null
-    },
-    "1.0-1.5": {
-      "n": 0,
-      "mean_abs_rating_diff": null,
-      "mean_signed_residual_actual_minus_linear": null,
-      "residual_mae": null,
-      "residual_rmse": null
-    },
-    "1.5-2.0": {
-      "n": 0,
-      "mean_abs_rating_diff": null,
-      "mean_signed_residual_actual_minus_linear": null,
-      "residual_mae": null,
-      "residual_rmse": null
-    },
-    "2.0-2.5": {
-      "n": 0,
-      "mean_abs_rating_diff": null,
-      "mean_signed_residual_actual_minus_linear": null,
-      "residual_mae": null,
-      "residual_rmse": null
-    },
-    "2.5-3.0": {
-      "n": 0,
-      "mean_abs_rating_diff": null,
-      "mean_signed_residual_actual_minus_linear": null,
-      "residual_mae": null,
-      "residual_rmse": null
-    },
-    "3.0+": {
-      "n": 0,
-      "mean_abs_rating_diff": null,
-      "mean_signed_residual_actual_minus_linear": null,
-      "residual_mae": null,
-      "residual_rmse": null
-    }
-  },
-  "quadratic_tail_test": null,
-  "tail_worsening_flag": false,
-  "quadratic_significant_flag": false,
   "hfa_sanity": {
-    "n_team_hfa": 138,
-    "min_hfa": 1.0,
-    "max_hfa": 3.5,
-    "mean_hfa": 2.129710144927536,
+    "teams": 138,
+    "min": 1.0,
+    "max": 3.5,
+    "mean": 2.129710144927536,
     "all_nonnegative": true
   },
-  "week1_focus_game_anatomy": [],
-  "classification": "Outcome 4: Structural Market Variance / Neither Proven",
-  "classification_notes": [
-    "Outcome classification is diagnostic only; it does not modify Model A.",
-    "A significant quadratic term indicates nonlinearity, not that an exponential form is automatically correct.",
-    "Any challenger must beat Model A out of sample before promotion."
-  ]
+  "week1_focus_game_anatomy": [
+    {
+      "game_id": 401856634,
+      "week": 1,
+      "home": "Alabama",
+      "away": "East Carolina",
+      "neutral_site": false,
+      "home_rating": 1.333,
+      "away_rating": -0.131,
+      "rating_difference_home_minus_away": 1.464,
+      "rating_points_home_edge": 15.26,
+      "home_field_advantage": 3.2,
+      "matchup_adjustment": 0.0,
+      "model_home_spread": -18.5,
+      "market_home_spread": -28.5,
+      "signal": "STRONG EDGE",
+      "disagreement": 10.0
+    },
+    {
+      "game_id": 401856664,
+      "week": 1,
+      "home": "Oklahoma",
+      "away": "UTEP",
+      "neutral_site": false,
+      "home_rating": 1.421,
+      "away_rating": -1.381,
+      "rating_difference_home_minus_away": 2.802,
+      "rating_points_home_edge": 29.21,
+      "home_field_advantage": 2.9,
+      "matchup_adjustment": 0.0,
+      "model_home_spread": -32.0,
+      "market_home_spread": -40.5,
+      "signal": "STRONG EDGE",
+      "disagreement": 8.5
+    },
+    {
+      "game_id": 401856667,
+      "week": 1,
+      "home": "Texas",
+      "away": "Texas State",
+      "neutral_site": false,
+      "home_rating": 1.715,
+      "away_rating": -0.116,
+      "rating_difference_home_minus_away": 1.831,
+      "rating_points_home_edge": 19.09,
+      "home_field_advantage": 3.0,
+      "matchup_adjustment": 0.0,
+      "model_home_spread": -22.0,
+      "market_home_spread": -29.5,
+      "signal": "STRONG EDGE",
+      "disagreement": 7.5
+    },
+    {
+      "game_id": 401858425,
+      "week": 1,
+      "home": "Indiana",
+      "away": "North Texas",
+      "neutral_site": false,
+      "home_rating": 1.936,
+      "away_rating": -0.814,
+      "rating_difference_home_minus_away": 2.75,
+      "rating_points_home_edge": 28.67,
+      "home_field_advantage": 2.7,
+      "matchup_adjustment": 0.0,
+      "model_home_spread": -31.5,
+      "market_home_spread": -40.5,
+      "signal": "STRONG EDGE",
+      "disagreement": 9.0
+    },
+    {
+      "game_id": 401858436,
+      "week": 1,
+      "home": "USC",
+      "away": "Fresno State",
+      "neutral_site": false,
+      "home_rating": 1.046,
+      "away_rating": -0.064,
+      "rating_difference_home_minus_away": 1.11,
+      "rating_points_home_edge": 11.57,
+      "home_field_advantage": 2.4,
+      "matchup_adjustment": 0.0,
+      "model_home_spread": -14.0,
+      "market_home_spread": -22.5,
+      "signal": "STRONG EDGE",
+      "disagreement": 8.5
+    },
+    {
+      "game_id": 401858206,
+      "week": 1,
+      "home": "Stanford",
+      "away": "Miami",
+      "neutral_site": false,
+      "home_rating": -0.003,
+      "away_rating": 1.656,
+      "rating_difference_home_minus_away": -1.659,
+      "rating_points_home_edge": -17.29,
+      "home_field_advantage": 2.3,
+      "matchup_adjustment": 0.0,
+      "model_home_spread": 15.0,
+      "market_home_spread": 24.5,
+      "signal": "STRONG EDGE",
+      "disagreement": 9.5
+    },
+    {
+      "game_id": 401856780,
+      "week": 1,
+      "home": "West Virginia",
+      "away": "Coastal Carolina",
+      "neutral_site": false,
+      "home_rating": -0.057,
+      "away_rating": -1.042,
+      "rating_difference_home_minus_away": 0.985,
+      "rating_points_home_edge": 10.27,
+      "home_field_advantage": 2.3,
+      "matchup_adjustment": 0.0,
+      "model_home_spread": -12.5,
+      "market_home_spread": -21.0,
+      "signal": "STRONG EDGE",
+      "disagreement": 8.5
+    },
+    {
+      "game_id": 401856778,
+      "week": 1,
+      "home": "Houston",
+      "away": "Oregon State",
+      "neutral_site": false,
+      "home_rating": 0.583,
+      "away_rating": -0.373,
+      "rating_difference_home_minus_away": 0.956,
+      "rating_points_home_edge": 9.97,
+      "home_field_advantage": 1.8,
+      "matchup_adjustment": 0.0,
+      "model_home_spread": -12.0,
+      "market_home_spread": -20.5,
+      "signal": "STRONG EDGE",
+      "disagreement": 8.5
+    }
+  ],
+  "classification": "Outcome 1: Input Compression Only",
+  "classification_protocol": {
+    "outcome_1": "Current model/market SD ratio < 0.85, without historical worsening large-favorite residual pattern.",
+    "outcome_2": "Current SD ratio healthy, historical signed residuals worsen materially in large-favorite buckets AND the quadratic term is significant.",
+    "outcome_3": "Both current input compression and statistically-supported historical tail worsening are present.",
+    "outcome_4": "Neither condition is proven.",
+    "quadratic_note": "Quadratic significance is supporting evidence of nonlinearity only; it does not automatically justify an exponential challenger."
+  }
 }
