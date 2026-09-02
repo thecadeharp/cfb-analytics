@@ -1,0 +1,1116 @@
+{
+  "status": "FAIL",
+  "builder_version": "historical_training_v2_sportsdataverse_espn",
+  "rows": 5963,
+  "columns": 96,
+  "sealed_season": 2025,
+  "hard_failures": [
+    "same_season_features_missing_after_week1"
+  ],
+  "integrity": {
+    "duplicate_game_ids": 0,
+    "seasons": [
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "season_counts": {
+      "2019": 890,
+      "2020": 565,
+      "2021": 842,
+      "2022": 861,
+      "2023": 903,
+      "2024": 946,
+      "2025": 956
+    },
+    "sealed_2025_rows": 956
+  },
+  "score_diagnostics": {
+    "negative_score_rows": 0,
+    "margin_mismatch_rows": 0,
+    "total_mismatch_rows": 0,
+    "extreme_score_rows_for_review": 2,
+    "negative_examples": [],
+    "margin_mismatch_examples": [],
+    "total_mismatch_examples": [],
+    "extreme_examples": [
+      {
+        "game_id": 401411095,
+        "season": 2022,
+        "week": 1,
+        "home_team": "Appalachian State",
+        "away_team": "North Carolina",
+        "home_score": 111.0,
+        "away_score": 127.0,
+        "actual_home_margin": -16.0,
+        "actual_total": 238.0
+      },
+      {
+        "game_id": 401403880,
+        "season": 2022,
+        "week": 3,
+        "home_team": "Alabama",
+        "away_team": "UL Monroe",
+        "home_score": 113.0,
+        "away_score": 15.0,
+        "actual_home_margin": 98.0,
+        "actual_total": 128.0
+      }
+    ]
+  },
+  "rolling_feature_diagnostics": {
+    "pregame_feature_columns": 38,
+    "week1_rows": 832,
+    "week1_non_null_pregame_cells": 0,
+    "later_week_rows": 5131,
+    "later_week_rows_with_any_pregame_feature": 0,
+    "later_week_non_null_pregame_cells": 0,
+    "feature_non_null_counts": {
+      "home_pregame_off_epa": 0,
+      "home_pregame_off_success_rate": 0,
+      "home_pregame_off_explosive_rate": 0,
+      "home_pregame_off_pass_epa": 0,
+      "home_pregame_off_rush_epa": 0,
+      "home_pregame_havoc_allowed_rate": 0,
+      "home_pregame_line_yards_per_rush": 0,
+      "home_pregame_scoring_opp_rate": 0,
+      "home_pregame_avg_start_yards_to_endzone": 0,
+      "home_pregame_drives": 0,
+      "home_pregame_plays_per_drive": 0,
+      "home_pregame_def_epa_allowed": 0,
+      "home_pregame_def_success_allowed": 0,
+      "home_pregame_def_explosive_allowed": 0,
+      "home_pregame_def_pass_epa_allowed": 0,
+      "home_pregame_def_rush_epa_allowed": 0,
+      "home_pregame_def_havoc_created_rate": 0,
+      "home_pregame_def_line_yards_allowed": 0,
+      "home_pregame_def_scoring_opp_allowed": 0,
+      "away_pregame_off_epa": 0,
+      "away_pregame_off_success_rate": 0,
+      "away_pregame_off_explosive_rate": 0,
+      "away_pregame_off_pass_epa": 0,
+      "away_pregame_off_rush_epa": 0,
+      "away_pregame_havoc_allowed_rate": 0,
+      "away_pregame_line_yards_per_rush": 0,
+      "away_pregame_scoring_opp_rate": 0,
+      "away_pregame_avg_start_yards_to_endzone": 0,
+      "away_pregame_drives": 0,
+      "away_pregame_plays_per_drive": 0,
+      "away_pregame_def_epa_allowed": 0,
+      "away_pregame_def_success_allowed": 0,
+      "away_pregame_def_explosive_allowed": 0,
+      "away_pregame_def_pass_epa_allowed": 0,
+      "away_pregame_def_rush_epa_allowed": 0,
+      "away_pregame_def_havoc_created_rate": 0,
+      "away_pregame_def_line_yards_allowed": 0,
+      "away_pregame_def_scoring_opp_allowed": 0
+    },
+    "prior_week_counter_distribution": {
+      "home": {
+        "0": 883,
+        "1": 578,
+        "2": 525,
+        "3": 505,
+        "4": 473,
+        "5": 434,
+        "6": 461,
+        "7": 438,
+        "8": 440,
+        "9": 434,
+        "10": 408,
+        "11": 330,
+        "12": 53,
+        "13": 1
+      },
+      "away": {
+        "0": 1182,
+        "1": 533,
+        "2": 422,
+        "3": 424,
+        "4": 445,
+        "5": 478,
+        "6": 434,
+        "7": 445,
+        "8": 430,
+        "9": 415,
+        "10": 390,
+        "11": 314,
+        "12": 50,
+        "13": 1
+      }
+    },
+    "by_season_week": {
+      "2019-W1": {
+        "games": 128,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 0,
+        "home_prior_weeks_max": 0,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 0
+      },
+      "2019-W2": {
+        "games": 74,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 1,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 1
+      },
+      "2019-W3": {
+        "games": 68,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 2,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 2
+      },
+      "2019-W4": {
+        "games": 57,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 2,
+        "home_prior_weeks_max": 3,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 3
+      },
+      "2019-W5": {
+        "games": 55,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 3,
+        "home_prior_weeks_max": 4,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 4
+      },
+      "2019-W6": {
+        "games": 48,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 3,
+        "home_prior_weeks_max": 5,
+        "away_prior_weeks_min": 4,
+        "away_prior_weeks_max": 5
+      },
+      "2019-W7": {
+        "games": 53,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 4,
+        "home_prior_weeks_max": 6,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 6
+      },
+      "2019-W8": {
+        "games": 62,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 5,
+        "home_prior_weeks_max": 7,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 7
+      },
+      "2019-W9": {
+        "games": 55,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 6,
+        "home_prior_weeks_max": 8,
+        "away_prior_weeks_min": 5,
+        "away_prior_weeks_max": 8
+      },
+      "2019-W10": {
+        "games": 48,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 7,
+        "home_prior_weeks_max": 9,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 8
+      },
+      "2019-W11": {
+        "games": 48,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 7,
+        "home_prior_weeks_max": 9,
+        "away_prior_weeks_min": 7,
+        "away_prior_weeks_max": 9
+      },
+      "2019-W12": {
+        "games": 55,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 8,
+        "home_prior_weeks_max": 10,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 10
+      },
+      "2019-W13": {
+        "games": 64,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 9,
+        "home_prior_weeks_max": 11,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 10
+      },
+      "2019-W14": {
+        "games": 64,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 11,
+        "home_prior_weeks_max": 12,
+        "away_prior_weeks_min": 10,
+        "away_prior_weeks_max": 11
+      },
+      "2019-W15": {
+        "games": 10,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 12,
+        "home_prior_weeks_max": 12,
+        "away_prior_weeks_min": 12,
+        "away_prior_weeks_max": 13
+      },
+      "2019-W16": {
+        "games": 1,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 11,
+        "home_prior_weeks_max": 11,
+        "away_prior_weeks_min": 12,
+        "away_prior_weeks_max": 12
+      },
+      "2020-W1": {
+        "games": 36,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 0,
+        "home_prior_weeks_max": 0,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 0
+      },
+      "2020-W2": {
+        "games": 20,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 0,
+        "home_prior_weeks_max": 1,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 1
+      },
+      "2020-W3": {
+        "games": 19,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 2,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 2
+      },
+      "2020-W4": {
+        "games": 30,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 0,
+        "home_prior_weeks_max": 3,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 3
+      },
+      "2020-W5": {
+        "games": 33,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 0,
+        "home_prior_weeks_max": 3,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 4
+      },
+      "2020-W6": {
+        "games": 28,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 4,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 5
+      },
+      "2020-W7": {
+        "games": 28,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 6,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 5
+      },
+      "2020-W8": {
+        "games": 47,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 0,
+        "home_prior_weeks_max": 7,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 6
+      },
+      "2020-W9": {
+        "games": 41,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 7,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 7
+      },
+      "2020-W10": {
+        "games": 48,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 0,
+        "home_prior_weeks_max": 8,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 8
+      },
+      "2020-W11": {
+        "games": 45,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 0,
+        "home_prior_weeks_max": 9,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 9
+      },
+      "2020-W12": {
+        "games": 44,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 0,
+        "home_prior_weeks_max": 10,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 10
+      },
+      "2020-W13": {
+        "games": 44,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 2,
+        "home_prior_weeks_max": 11,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 10
+      },
+      "2020-W14": {
+        "games": 46,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 11,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 11
+      },
+      "2020-W15": {
+        "games": 37,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 4,
+        "home_prior_weeks_max": 12,
+        "away_prior_weeks_min": 2,
+        "away_prior_weeks_max": 11
+      },
+      "2020-W16": {
+        "games": 19,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 4,
+        "home_prior_weeks_max": 11,
+        "away_prior_weeks_min": 3,
+        "away_prior_weeks_max": 11
+      },
+      "2021-W1": {
+        "games": 108,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 0,
+        "home_prior_weeks_max": 0,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 0
+      },
+      "2021-W2": {
+        "games": 78,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 0,
+        "home_prior_weeks_max": 1,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 1
+      },
+      "2021-W3": {
+        "games": 69,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 2,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 2
+      },
+      "2021-W4": {
+        "games": 64,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 3,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 3
+      },
+      "2021-W5": {
+        "games": 59,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 2,
+        "home_prior_weeks_max": 4,
+        "away_prior_weeks_min": 2,
+        "away_prior_weeks_max": 4
+      },
+      "2021-W6": {
+        "games": 48,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 3,
+        "home_prior_weeks_max": 5,
+        "away_prior_weeks_min": 3,
+        "away_prior_weeks_max": 5
+      },
+      "2021-W7": {
+        "games": 52,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 2,
+        "home_prior_weeks_max": 6,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 6
+      },
+      "2021-W8": {
+        "games": 52,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 4,
+        "home_prior_weeks_max": 7,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 7
+      },
+      "2021-W9": {
+        "games": 52,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 4,
+        "home_prior_weeks_max": 8,
+        "away_prior_weeks_min": 5,
+        "away_prior_weeks_max": 8
+      },
+      "2021-W10": {
+        "games": 61,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 6,
+        "home_prior_weeks_max": 9,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 9
+      },
+      "2021-W11": {
+        "games": 60,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 7,
+        "home_prior_weeks_max": 9,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 9
+      },
+      "2021-W12": {
+        "games": 62,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 7,
+        "home_prior_weeks_max": 10,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 10
+      },
+      "2021-W13": {
+        "games": 65,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 8,
+        "home_prior_weeks_max": 11,
+        "away_prior_weeks_min": 8,
+        "away_prior_weeks_max": 11
+      },
+      "2021-W14": {
+        "games": 11,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 11,
+        "home_prior_weeks_max": 12,
+        "away_prior_weeks_min": 10,
+        "away_prior_weeks_max": 12
+      },
+      "2021-W15": {
+        "games": 1,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 11,
+        "home_prior_weeks_max": 11,
+        "away_prior_weeks_min": 11,
+        "away_prior_weeks_max": 11
+      },
+      "2022-W1": {
+        "games": 134,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 0,
+        "home_prior_weeks_max": 0,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 0
+      },
+      "2022-W2": {
+        "games": 77,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 0,
+        "home_prior_weeks_max": 1,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 1
+      },
+      "2022-W3": {
+        "games": 65,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 2,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 2
+      },
+      "2022-W4": {
+        "games": 63,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 3,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 3
+      },
+      "2022-W5": {
+        "games": 61,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 2,
+        "home_prior_weeks_max": 4,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 4
+      },
+      "2022-W6": {
+        "games": 55,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 3,
+        "home_prior_weeks_max": 5,
+        "away_prior_weeks_min": 3,
+        "away_prior_weeks_max": 5
+      },
+      "2022-W7": {
+        "games": 50,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 4,
+        "home_prior_weeks_max": 6,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 6
+      },
+      "2022-W8": {
+        "games": 52,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 4,
+        "home_prior_weeks_max": 7,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 7
+      },
+      "2022-W9": {
+        "games": 43,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 6,
+        "home_prior_weeks_max": 8,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 8
+      },
+      "2022-W10": {
+        "games": 59,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 6,
+        "home_prior_weeks_max": 8,
+        "away_prior_weeks_min": 6,
+        "away_prior_weeks_max": 8
+      },
+      "2022-W11": {
+        "games": 63,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 6,
+        "home_prior_weeks_max": 9,
+        "away_prior_weeks_min": 6,
+        "away_prior_weeks_max": 9
+      },
+      "2022-W12": {
+        "games": 64,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 8,
+        "home_prior_weeks_max": 10,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 10
+      },
+      "2022-W13": {
+        "games": 62,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 8,
+        "home_prior_weeks_max": 11,
+        "away_prior_weeks_min": 8,
+        "away_prior_weeks_max": 11
+      },
+      "2022-W14": {
+        "games": 12,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 9,
+        "home_prior_weeks_max": 12,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 12
+      },
+      "2022-W15": {
+        "games": 1,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 11,
+        "home_prior_weeks_max": 11,
+        "away_prior_weeks_min": 9,
+        "away_prior_weeks_max": 9
+      },
+      "2023-W1": {
+        "games": 135,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 0,
+        "home_prior_weeks_max": 0,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 0
+      },
+      "2023-W2": {
+        "games": 83,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 1,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 1
+      },
+      "2023-W3": {
+        "games": 73,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 2,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 2
+      },
+      "2023-W4": {
+        "games": 67,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 2,
+        "home_prior_weeks_max": 3,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 3
+      },
+      "2023-W5": {
+        "games": 59,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 3,
+        "home_prior_weeks_max": 4,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 4
+      },
+      "2023-W6": {
+        "games": 51,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 4,
+        "home_prior_weeks_max": 5,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 5
+      },
+      "2023-W7": {
+        "games": 55,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 4,
+        "home_prior_weeks_max": 6,
+        "away_prior_weeks_min": 4,
+        "away_prior_weeks_max": 6
+      },
+      "2023-W8": {
+        "games": 54,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 5,
+        "home_prior_weeks_max": 7,
+        "away_prior_weeks_min": 5,
+        "away_prior_weeks_max": 7
+      },
+      "2023-W9": {
+        "games": 54,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 6,
+        "home_prior_weeks_max": 8,
+        "away_prior_weeks_min": 7,
+        "away_prior_weeks_max": 8
+      },
+      "2023-W10": {
+        "games": 65,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 7,
+        "home_prior_weeks_max": 8,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 8
+      },
+      "2023-W11": {
+        "games": 64,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 8,
+        "home_prior_weeks_max": 9,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 9
+      },
+      "2023-W12": {
+        "games": 68,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 9,
+        "home_prior_weeks_max": 10,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 10
+      },
+      "2023-W13": {
+        "games": 64,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 10,
+        "home_prior_weeks_max": 11,
+        "away_prior_weeks_min": 10,
+        "away_prior_weeks_max": 11
+      },
+      "2023-W14": {
+        "games": 10,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 12,
+        "home_prior_weeks_max": 12,
+        "away_prior_weeks_min": 12,
+        "away_prior_weeks_max": 12
+      },
+      "2023-W15": {
+        "games": 1,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 11,
+        "home_prior_weeks_max": 11,
+        "away_prior_weeks_min": 11,
+        "away_prior_weeks_max": 11
+      },
+      "2024-W1": {
+        "games": 148,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 0,
+        "home_prior_weeks_max": 0,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 0
+      },
+      "2024-W2": {
+        "games": 77,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 0,
+        "home_prior_weeks_max": 1,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 1
+      },
+      "2024-W3": {
+        "games": 65,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 2,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 2
+      },
+      "2024-W4": {
+        "games": 66,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 3,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 3
+      },
+      "2024-W5": {
+        "games": 57,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 4,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 4
+      },
+      "2024-W6": {
+        "games": 49,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 5,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 5
+      },
+      "2024-W7": {
+        "games": 54,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 6,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 6
+      },
+      "2024-W8": {
+        "games": 60,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 7,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 7
+      },
+      "2024-W9": {
+        "games": 61,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 7,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 8
+      },
+      "2024-W10": {
+        "games": 52,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 4,
+        "home_prior_weeks_max": 9,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 8
+      },
+      "2024-W11": {
+        "games": 53,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 9,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 9
+      },
+      "2024-W12": {
+        "games": 57,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 10,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 10
+      },
+      "2024-W13": {
+        "games": 69,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 11,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 11
+      },
+      "2024-W14": {
+        "games": 66,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 9,
+        "home_prior_weeks_max": 11,
+        "away_prior_weeks_min": 8,
+        "away_prior_weeks_max": 11
+      },
+      "2024-W15": {
+        "games": 10,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 11,
+        "home_prior_weeks_max": 12,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 12
+      },
+      "2024-W16": {
+        "games": 2,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 12,
+        "home_prior_weeks_max": 13,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 11
+      },
+      "2025-W1": {
+        "games": 143,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 0,
+        "home_prior_weeks_max": 0,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 0
+      },
+      "2025-W2": {
+        "games": 83,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 0,
+        "home_prior_weeks_max": 1,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 1
+      },
+      "2025-W3": {
+        "games": 72,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 2,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 2
+      },
+      "2025-W4": {
+        "games": 63,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 2,
+        "home_prior_weeks_max": 3,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 3
+      },
+      "2025-W5": {
+        "games": 55,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 3,
+        "home_prior_weeks_max": 4,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 4
+      },
+      "2025-W6": {
+        "games": 52,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 5,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 5
+      },
+      "2025-W7": {
+        "games": 58,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 2,
+        "home_prior_weeks_max": 6,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 6
+      },
+      "2025-W8": {
+        "games": 62,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 7,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 7
+      },
+      "2025-W9": {
+        "games": 55,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 8,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 8
+      },
+      "2025-W10": {
+        "games": 54,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 8,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 8
+      },
+      "2025-W11": {
+        "games": 54,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 9,
+        "away_prior_weeks_min": 1,
+        "away_prior_weeks_max": 9
+      },
+      "2025-W12": {
+        "games": 61,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 8,
+        "home_prior_weeks_max": 10,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 10
+      },
+      "2025-W13": {
+        "games": 66,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 1,
+        "home_prior_weeks_max": 11,
+        "away_prior_weeks_min": 0,
+        "away_prior_weeks_max": 11
+      },
+      "2025-W14": {
+        "games": 67,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 10,
+        "home_prior_weeks_max": 11,
+        "away_prior_weeks_min": 10,
+        "away_prior_weeks_max": 11
+      },
+      "2025-W15": {
+        "games": 10,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 12,
+        "home_prior_weeks_max": 12,
+        "away_prior_weeks_min": 2,
+        "away_prior_weeks_max": 12
+      },
+      "2025-W16": {
+        "games": 1,
+        "rows_with_any_pregame_feature": 0,
+        "home_prior_weeks_min": 11,
+        "home_prior_weeks_max": 11,
+        "away_prior_weeks_min": 11,
+        "away_prior_weeks_max": 11
+      }
+    }
+  },
+  "prior_diagnostics": {
+    "previous_season_feature_columns": 38,
+    "by_season": {
+      "2019": {
+        "games": 890,
+        "week1_games": 128,
+        "week1_rows_with_any_previous_season_feature": 0,
+        "all_rows_with_any_previous_season_feature": 0
+      },
+      "2020": {
+        "games": 565,
+        "week1_games": 36,
+        "week1_rows_with_any_previous_season_feature": 1,
+        "all_rows_with_any_previous_season_feature": 1
+      },
+      "2021": {
+        "games": 842,
+        "week1_games": 108,
+        "week1_rows_with_any_previous_season_feature": 2,
+        "all_rows_with_any_previous_season_feature": 2
+      },
+      "2022": {
+        "games": 861,
+        "week1_games": 134,
+        "week1_rows_with_any_previous_season_feature": 2,
+        "all_rows_with_any_previous_season_feature": 2
+      },
+      "2023": {
+        "games": 903,
+        "week1_games": 135,
+        "week1_rows_with_any_previous_season_feature": 0,
+        "all_rows_with_any_previous_season_feature": 0
+      },
+      "2024": {
+        "games": 946,
+        "week1_games": 148,
+        "week1_rows_with_any_previous_season_feature": 0,
+        "all_rows_with_any_previous_season_feature": 0
+      },
+      "2025": {
+        "games": 956,
+        "week1_games": 143,
+        "week1_rows_with_any_previous_season_feature": 0,
+        "all_rows_with_any_previous_season_feature": 0
+      }
+    },
+    "feature_non_null_counts": {
+      "home_prev_season_off_epa": 5,
+      "home_prev_season_off_success_rate": 5,
+      "home_prev_season_off_explosive_rate": 5,
+      "home_prev_season_off_pass_epa": 5,
+      "home_prev_season_off_rush_epa": 5,
+      "home_prev_season_havoc_allowed_rate": 5,
+      "home_prev_season_line_yards_per_rush": 5,
+      "home_prev_season_scoring_opp_rate": 5,
+      "home_prev_season_avg_start_yards_to_endzone": 5,
+      "home_prev_season_drives": 5,
+      "home_prev_season_plays_per_drive": 5,
+      "home_prev_season_def_epa_allowed": 5,
+      "home_prev_season_def_success_allowed": 5,
+      "home_prev_season_def_explosive_allowed": 5,
+      "home_prev_season_def_pass_epa_allowed": 5,
+      "home_prev_season_def_rush_epa_allowed": 5,
+      "home_prev_season_def_havoc_created_rate": 5,
+      "home_prev_season_def_line_yards_allowed": 5,
+      "home_prev_season_def_scoring_opp_allowed": 5,
+      "away_prev_season_off_epa": 5,
+      "away_prev_season_off_success_rate": 5,
+      "away_prev_season_off_explosive_rate": 5,
+      "away_prev_season_off_pass_epa": 5,
+      "away_prev_season_off_rush_epa": 5,
+      "away_prev_season_havoc_allowed_rate": 5,
+      "away_prev_season_line_yards_per_rush": 5,
+      "away_prev_season_scoring_opp_rate": 5,
+      "away_prev_season_avg_start_yards_to_endzone": 5,
+      "away_prev_season_drives": 5,
+      "away_prev_season_plays_per_drive": 5,
+      "away_prev_season_def_epa_allowed": 5,
+      "away_prev_season_def_success_allowed": 5,
+      "away_prev_season_def_explosive_allowed": 5,
+      "away_prev_season_def_pass_epa_allowed": 5,
+      "away_prev_season_def_rush_epa_allowed": 5,
+      "away_prev_season_def_havoc_created_rate": 5,
+      "away_prev_season_def_line_yards_allowed": 5,
+      "away_prev_season_def_scoring_opp_allowed": 5
+    }
+  },
+  "market_diagnostics": {
+    "lined_games": 5941,
+    "favorite_sign_mismatch_rows": 0,
+    "favorite_size_mismatch_rows": 0,
+    "spread_min": -58.0,
+    "spread_max": 52.0,
+    "favorite_size_max": 58.0
+  }
+}
