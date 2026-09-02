@@ -316,6 +316,11 @@ def normalize_result(row):
 
 
 def load_completed_results():
+    # Use the first existing source as authoritative, even when it currently
+    # contains zero finals. In production, data/results.json is intentionally
+    # written before settlement; falling through to schedule/projections when
+    # it is empty could mix stale or non-prospective completed games into the
+    # settlement report.
     for path in RESULT_SOURCES:
         data = load_json(path)
         if data is None:
@@ -340,8 +345,7 @@ def load_completed_results():
             seen.add(dedupe_key)
             results.append(normalized)
 
-        if results:
-            return path, results
+        return path, results
 
     return None, []
 
