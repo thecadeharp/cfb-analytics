@@ -1438,31 +1438,28 @@ def fcs_win_probability(
 # MARKET STATUS
 # =============================================================================
 
-def adjusted_status_threshold(market_spread):
-    if market_spread is None:
-        return {
-            "play": None,
-            "watch": None,
-        }
+def classify_market_status(disagreement):
+    """
+    V1 model-vs-market status ladder.
 
-    magnitude = abs(market_spread)
+    0.0-2.5   AGREE W/ MARKET
+    3.0-5.0   LEAN
+    5.5-7.0   EDGE
+    7.5-10.0  PLAY
+    10.5+     OUTLIER
 
-    if magnitude >= 35:
-        return {
-            "play": 10.0,
-            "watch": 6.0,
-        }
-
-    if magnitude >= 21:
-        return {
-            "play": 8.5,
-            "watch": 5.0,
-        }
-
-    return {
-        "play": 7.0,
-        "watch": 4.0,
-    }
+    Spreads and fair lines are rounded to half-points, so these buckets are
+    exhaustive without overlapping boundaries.
+    """
+    if disagreement <= 2.5:
+        return "AGREE W/ MARKET"
+    if disagreement <= 5.0:
+        return "LEAN"
+    if disagreement <= 7.0:
+        return "EDGE"
+    if disagreement <= 10.0:
+        return "PLAY"
+    return "OUTLIER"
 
 
 def compare_to_market(
@@ -1476,15 +1473,20 @@ def compare_to_market(
             "disagreement": None,
             "preferred_side": None,
             "status": "NO MARKET",
-            "play_threshold": None,
-            "watch_threshold": None,
+            "status_system": "v1_market_disagreement",
+            "status_thresholds": {
+                "agree_market_max": 2.5,
+                "lean_max": 5.0,
+                "edge_max": 7.0,
+                "play_max": 10.0,
+                "outlier_min": 10.5,
+            },
+            "play_threshold": 7.5,
+            "watch_threshold": 3.0,
         }
 
-    difference = (
-        model_spread
-        - market_spread
-    )
-    disagreement = abs(difference)
+    difference = model_spread - market_spread
+    disagreement = round(abs(difference) * 2) / 2
 
     if difference < 0:
         preferred = home_name
@@ -1493,26 +1495,24 @@ def compare_to_market(
     else:
         preferred = None
 
-    thresholds = adjusted_status_threshold(
-        market_spread
-    )
-
-    if disagreement >= thresholds["play"]:
-        status = "PLAY"
-    elif disagreement >= thresholds["watch"]:
-        status = "WATCH"
-    else:
-        status = "IN LINE"
+    status = classify_market_status(disagreement)
 
     return {
-        "disagreement": round(
-            disagreement,
-            1,
-        ),
+        "disagreement": round(disagreement, 1),
         "preferred_side": preferred,
         "status": status,
-        "play_threshold": thresholds["play"],
-        "watch_threshold": thresholds["watch"],
+        "status_system": "v1_market_disagreement",
+        "status_thresholds": {
+            "agree_market_max": 2.5,
+            "lean_max": 5.0,
+            "edge_max": 7.0,
+            "play_max": 10.0,
+            "outlier_min": 10.5,
+        },
+        # Legacy fields retained so the current frontend/data consumers do not
+        # break while the labels themselves use the new five-tier system.
+        "play_threshold": 7.5,
+        "watch_threshold": 3.0,
     }
 
 
