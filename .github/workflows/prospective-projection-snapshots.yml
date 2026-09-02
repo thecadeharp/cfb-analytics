@@ -1,4 +1,4 @@
-name: Prospective Projection Snapshots
+name: Prospective Projection Snapshots - No CFBD
 
 on:
   workflow_dispatch:
@@ -30,10 +30,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests pandas
 
-      - name: Refresh projections and current market
+      - name: Refresh projections and current market without CFBD
         env:
-          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          USE_CACHED_SCHEDULE: "1"
         run: |
           python scripts/build_projections.py
 
@@ -46,7 +46,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add data/schedule.json
           git add data/odds.json
           git add data/projections.json
           git add data/snapshots/projection_market_snapshots.jsonl
