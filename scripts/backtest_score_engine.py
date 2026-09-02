@@ -56,7 +56,7 @@ MIN_PASS_PLAYS = 30
 MIN_RUSH_PLAYS = 30
 
 DEFAULT_PLAYS_PER_POSSESSION = 6.1
-RIDGE_LAMBDA = 1.0
+RIDGE_LAMBDA = 2.0
 
 LEGACY_WEIGHTS = {
     "net_epa": 0.30,
@@ -75,7 +75,12 @@ SCORE_FEATURES = [
     "matchup_explosive_rate",
     "matchup_havoc",
     "expected_possessions",
-    "home_indicator",
+    "offense_strength",
+    "opponent_defense_strength",
+    "strength_advantage",
+    "strength_advantage_nonlinear",
+    "advantage_x_possessions",
+    "venue_indicator",
 ]
 
 FAVORITE_BUCKETS = [
@@ -635,13 +640,81 @@ def matchup_value(off_value, def_allowed_value, league_value):
     return fill(off_value, league_value) + fill(def_allowed_value, league_value) - league_value
 
 
-def side_features(team, opponent, snapshots, environment, home_indicator):
+def build_side_strengths(snapshots):
+    """
+    Context-free offense and defense strength scores.
+
+    These are built only from the pregame snapshot and contain no opponent,
+    venue, weather, travel, rest, or market information. Higher is better.
+    They give the scoring model a stable team-strength backbone while the
+    matchup features remain game-specific.
+    """
+    offense_components = {
+        "epa": z_scores({t: d["offense"]["epa"] for t, d in snapshots.items()}),
+        "pass_epa": z_scores({t: d["offense"]["pass_epa"] for t, d in snapshots.items()}),
+        "rush_epa": z_scores({t: d["offense"]["rush_epa"] for t, d in snapshots.items()}),
+        "success": z_scores({t: d["offense"]["success_rate"] for t, d in snapshots.items()}),
+        "explosive": z_scores({t: d["offense"]["explosive_rate"] for t, d in snapshots.items()}),
+        "havoc_allowed": z_scores({t: d["offense"]["havoc_rate"] for t, d in snapshots.items()}),
+    }
+    defense_components = {
+        "epa_allowed": z_scores({t: d["defense"]["epa"] for t, d in snapshots.items()}),
+        "pass_epa_allowed": z_scores({t: d["defense"]["pass_epa"] for t, d in snapshots.items()}),
+        "rush_epa_allowed": z_scores({t: d["defense"]["rush_epa"] for t, d in snapshots.items()}),
+        "success_allowed": z_scores({t: d["defense"]["success_rate"] for t, d in snapshots.items()}),
+        "explosive_allowed": z_scores({t: d["defense"]["explosive_rate"] for t, d in snapshots.items()}),
+        "havoc_created": z_scores({t: d["defense"]["havoc_rate"] for t, d in snapshots.items()}),
+    }
+
+    offense_strength = {}
+    defense_strength = {}
+
+    for team in snapshots:
+        offense_strength[team] = (
+            0.30 * offense_components["epa"][team]
+            + 0.15 * offense_components["pass_epa"][team]
+            + 0.10 * offense_components["rush_epa"][team]
+            + 0.20 * offense_components["success"][team]
+            + 0.15 * offense_components["explosive"][team]
+            - 0.10 * offense_components["havoc_allowed"][team]
+        )
+        defense_strength[team] = (
+            -0.30 * defense_components["epa_allowed"][team]
+            - 0.15 * defense_components["pass_epa_allowed"][team]
+            - 0.10 * defense_components["rush_epa_allowed"][team]
+            - 0.20 * defense_components["success_allowed"][team]
+            - 0.15 * defense_components["explosive_allowed"][team]
+            + 0.10 * defense_components["havoc_created"][team]
+        )
+
+    return offense_strength, defense_strength
+
+
+def side_features(
+    team,
+    opponent,
+    snapshots,
+    environment,
+    offense_strengths,
+    defense_strengths,
+    venue_indicator,
+):
     off = snapshots[team]["offense"]
     opp_def = snapshots[opponent]["defense"]
 
     expected_possessions = mean(
         [off["possessions_per_game"], snapshots[opponent]["offense"]["possessions_per_game"]]
     )
+    expected_possessions = fill(expected_possessions, environment["possessions"])
+
+    offense_strength = offense_strengths[team]
+    opponent_defense_strength = defense_strengths[opponent]
+    strength_advantage = offense_strength - opponent_defense_strength
+
+    # Signed square preserves direction while allowing historically fitted
+    # nonlinear separation in extreme strength mismatches. This is a football
+    # strength interaction, not a favorite-size or market-line adjustment.
+    nonlinear = math.copysign(strength_advantage ** 2, strength_advantage)
 
     return {
         "matchup_epa": matchup_value(off["epa"], opp_def["epa"], environment["epa"]),
@@ -652,25 +725,23 @@ def side_features(team, opponent, snapshots, environment, home_indicator):
             off["rush_epa"], opp_def["rush_epa"], environment["rush_epa"]
         ),
         "matchup_success_rate": matchup_value(
-            off["success_rate"],
-            opp_def["success_rate"],
-            environment["success_rate"],
+            off["success_rate"], opp_def["success_rate"], environment["success_rate"]
         ),
         "matchup_explosive_rate": matchup_value(
-            off["explosive_rate"],
-            opp_def["explosive_rate"],
-            environment["explosive_rate"],
+            off["explosive_rate"], opp_def["explosive_rate"], environment["explosive_rate"]
         ),
-        # Offensive havoc is "allowed"; defensive havoc is "created".
-        # Higher matchup_havoc should suppress scoring, so the fitted coefficient
-        # is expected to be negative.
         "matchup_havoc": (
             fill(off["havoc_rate"], environment["havoc_rate"])
             + fill(opp_def["havoc_rate"], environment["havoc_rate"])
             - environment["havoc_rate"]
         ),
-        "expected_possessions": fill(expected_possessions, environment["possessions"]),
-        "home_indicator": home_indicator,
+        "expected_possessions": expected_possessions,
+        "offense_strength": offense_strength,
+        "opponent_defense_strength": opponent_defense_strength,
+        "strength_advantage": strength_advantage,
+        "strength_advantage_nonlinear": nonlinear,
+        "advantage_x_possessions": strength_advantage * expected_possessions,
+        "venue_indicator": venue_indicator,
     }
 
 
@@ -762,6 +833,10 @@ def build_year_records(year, games, line_lookup):
         snapshots = build_snapshots(teams, offense_histories, defense_histories)
         environment = league_environment(snapshots)
         ratings = legacy_ratings(snapshots) if environment is not None else {}
+        if environment is not None:
+            offense_strengths, defense_strengths = build_side_strengths(snapshots)
+        else:
+            offense_strengths, defense_strengths = {}, {}
 
         usable = 0
 
@@ -772,22 +847,26 @@ def build_year_records(year, games, line_lookup):
                 if game["home"] not in ratings or game["away"] not in ratings:
                     continue
 
-                home_indicator = 0.0 if game["neutral"] else 1.0
-                away_indicator = 0.0
+                home_venue = 0.0 if game["neutral"] else 1.0
+                away_venue = 0.0 if game["neutral"] else -1.0
 
                 home_features = side_features(
                     game["home"],
                     game["away"],
                     snapshots,
                     environment,
-                    home_indicator,
+                    offense_strengths,
+                    defense_strengths,
+                    home_venue,
                 )
                 away_features = side_features(
                     game["away"],
                     game["home"],
                     snapshots,
                     environment,
-                    away_indicator,
+                    offense_strengths,
+                    defense_strengths,
+                    away_venue,
                 )
 
                 records.append(
@@ -994,6 +1073,44 @@ def side_cover_result(record, chosen_side):
     return 1 if home_cover_margin < 0 else 0
 
 
+def optimize_probability_scale(training_records, margin_predictor, base_std):
+    """
+    Fit a conservative uncertainty multiplier using only prior training games.
+    This calibrates probabilities, not projected margins. It never uses the
+    test season and never feeds market information back into team ratings.
+    """
+    market_games = [r for r in training_records if r.get("market_home_spread") is not None]
+    if len(market_games) < 100 or base_std <= 1e-9:
+        return 1.0
+
+    best_scale = 1.0
+    best_brier = None
+
+    for step in range(20, 81):
+        scale = step / 20.0  # 1.00 through 4.00
+        errors = []
+
+        for record in market_games:
+            projected = margin_predictor(record)
+            market_margin = market_expected_margin(record["market_home_spread"])
+            edge = projected - market_margin
+            home_prob = normal_cdf(edge / (base_std * scale))
+            actual_home_cover = 1.0 if (record["actual_home_margin"] + record["market_home_spread"]) > 0 else 0.0
+            if abs(record["actual_home_margin"] + record["market_home_spread"]) < 1e-9:
+                continue
+            errors.append((home_prob - actual_home_cover) ** 2)
+
+        if not errors:
+            continue
+
+        brier = statistics.mean(errors)
+        if best_brier is None or brier < best_brier:
+            best_brier = brier
+            best_scale = scale
+
+    return best_scale
+
+
 def score_test_year(test_year, training, testing):
     score_model = fit_ridge_score_model(training)
     legacy_model = fit_legacy_margin_model(training)
@@ -1008,6 +1125,25 @@ def score_test_year(test_year, training, testing):
         )
 
     modular_margin_std = statistics.pstdev(modular_training_margin_residuals)
+
+    def modular_training_predictor(record):
+        return (
+            predict_score(score_model, record["home_features"])
+            - predict_score(score_model, record["away_features"])
+        )
+
+    def legacy_training_predictor(record):
+        return (
+            legacy_model["rating_to_points"] * record["legacy_rating_diff"]
+            + (0.0 if record["neutral"] else legacy_model["home_field"])
+        )
+
+    modular_probability_scale = optimize_probability_scale(
+        training, modular_training_predictor, modular_margin_std
+    )
+    legacy_probability_scale = optimize_probability_scale(
+        training, legacy_training_predictor, legacy_model["margin_residual_std"]
+    )
 
     scored = []
 
@@ -1048,10 +1184,14 @@ def score_test_year(test_year, training, testing):
             market_margin = market_expected_margin(spread)
 
             mod_prob, mod_side = cover_probability(
-                modular_margin, market_margin, modular_margin_std
+                modular_margin,
+                market_margin,
+                modular_margin_std * modular_probability_scale,
             )
             leg_prob, leg_side = cover_probability(
-                legacy_margin, market_margin, legacy_model["margin_residual_std"]
+                legacy_margin,
+                market_margin,
+                legacy_model["margin_residual_std"] * legacy_probability_scale,
             )
 
             output.update(
@@ -1075,6 +1215,8 @@ def score_test_year(test_year, training, testing):
         "test_games": len(testing),
         "modular_margin_residual_std": modular_margin_std,
         "legacy_margin_residual_std": legacy_model["margin_residual_std"],
+        "modular_probability_scale": modular_probability_scale,
+        "legacy_probability_scale": legacy_probability_scale,
         "legacy_rating_to_points": legacy_model["rating_to_points"],
         "legacy_home_field": legacy_model["home_field"],
         "legacy_average_total": legacy_model["average_total"],
@@ -1400,7 +1542,7 @@ def main():
     output = round_values(
         {
             "meta": {
-                "type": "v2_scoring_promotion_backtest",
+                "type": "v2_scoring_promotion_backtest_v1_1",
                 "historical_years": f"{START_YEAR}-{END_YEAR}",
                 "test_years": f"{FIRST_TEST_YEAR}-{END_YEAR}",
                 "leakage_safe": True,
@@ -1408,6 +1550,7 @@ def main():
                 "deterministic": True,
                 "score_features": SCORE_FEATURES,
                 "ridge_lambda": RIDGE_LAMBDA,
+                "architecture": "context-free strength backbone + nonlinear matchup interaction + symmetric venue + probability shrinkage",
             },
             "promotion_matrix": promotion,
             "year_by_year": year_reports,
