@@ -1,0 +1,30 @@
+name: Score Engine Preflight
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "scripts/backtest_score_engine.py"
+      - "scripts/test_score_engine_v11.py"
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Run offline Score Engine preflight
+        run: |
+          python scripts/test_score_engine_v11.py
