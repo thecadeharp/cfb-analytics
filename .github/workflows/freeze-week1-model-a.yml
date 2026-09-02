@@ -1,0 +1,88 @@
+name: Freeze Week 1 Model A
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: freeze-week1-model-a
+  cancel-in-progress: false
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify exact production projection blob
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED_BLOB="2192cb95fb36440f6aaf0a0b3b5dc837785da469"
+          ACTUAL_BLOB="$(git hash-object data/projections.json)"
+
+          echo "Expected projections blob: $EXPECTED_BLOB"
+          echo "Actual projections blob:   $ACTUAL_BLOB"
+
+          if [ "$ACTUAL_BLOB" != "$EXPECTED_BLOB" ]; then
+            echo "ERROR: data/projections.json changed after the freeze target was identified."
+            echo "Refusing to freeze a different board."
+            exit 1
+          fi
+
+      - name: Create immutable Week 1 baseline copy
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p data/frozen
+
+          FROZEN="data/frozen/2026_week1_modelA_frozen.json"
+          CHECKSUM="data/frozen/2026_week1_modelA_frozen.sha256"
+          MANIFEST="data/frozen/2026_week1_modelA_frozen_manifest.txt"
+
+          if [ -e "$FROZEN" ] || [ -e "$CHECKSUM" ] || [ -e "$MANIFEST" ]; then
+            echo "ERROR: Week 1 Model A freeze already exists."
+            echo "This workflow will never overwrite it."
+            exit 1
+          fi
+
+          cp data/projections.json "$FROZEN"
+          sha256sum "$FROZEN" > "$CHECKSUM"
+
+          {
+            echo "CFB Analytics - 2026 Week 1 Model A Frozen Baseline"
+            echo ""
+            echo "Source file: data/projections.json"
+            echo "Source git blob: 2192cb95fb36440f6aaf0a0b3b5dc837785da469"
+            echo "Frozen file: $FROZEN"
+            echo "Created UTC: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            echo "Source commit: $(git rev-parse HEAD)"
+            echo ""
+            echo "Policy: This baseline is a prospective control artifact and must never be edited or overwritten."
+            echo "Future model changes must be stored separately as challenger outputs."
+          } > "$MANIFEST"
+
+          cmp --silent data/projections.json "$FROZEN"
+          echo "Verified byte-for-byte copy."
+          cat "$CHECKSUM"
+
+      - name: Commit frozen baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add             data/frozen/2026_week1_modelA_frozen.json             data/frozen/2026_week1_modelA_frozen.sha256             data/frozen/2026_week1_modelA_frozen_manifest.txt
+
+          git commit -m "Freeze 2026 Week 1 Model A baseline"
+          git pull --rebase origin main
+          git push origin HEAD:main
