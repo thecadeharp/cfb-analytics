@@ -1,0 +1,108 @@
+{
+  "diagnostic_version": "model-a-compression-audit-v1",
+  "production_untouched": true,
+  "frozen_baseline": "data/frozen/2026_week1_modelA_frozen.json",
+  "scale": 10.4245,
+  "current_week1": {
+    "lined_games_detected": 0,
+    "model_favorite_margin_sd": null,
+    "market_favorite_margin_sd": null,
+    "sd_ratio_model_over_market": null,
+    "input_compression_threshold": 0.85,
+    "input_compression_flag": false
+  },
+  "historical_schema": {
+    "historical_file": "data/training/historical_games.csv",
+    "headers_count": 156,
+    "matched_columns": {
+      "year": "season",
+      "week": "week",
+      "home_score": "home_score",
+      "away_score": "away_score"
+    },
+    "usable_rows": 0,
+    "has_historical_model_spread": false,
+    "has_historical_rating_diff": false
+  },
+  "historical_market_favorite_buckets": {
+    "0-7": {
+      "n": 0
+    },
+    "7-14": {
+      "n": 0
+    },
+    "14-21": {
+      "n": 0
+    },
+    "21-28": {
+      "n": 0
+    },
+    "28-40": {
+      "n": 0
+    },
+    "40+": {
+      "n": 0
+    }
+  },
+  "historical_rating_tail_buckets": {
+    "0-1.0": {
+      "n": 0,
+      "mean_abs_rating_diff": null,
+      "mean_signed_residual_actual_minus_linear": null,
+      "residual_mae": null,
+      "residual_rmse": null
+    },
+    "1.0-1.5": {
+      "n": 0,
+      "mean_abs_rating_diff": null,
+      "mean_signed_residual_actual_minus_linear": null,
+      "residual_mae": null,
+      "residual_rmse": null
+    },
+    "1.5-2.0": {
+      "n": 0,
+      "mean_abs_rating_diff": null,
+      "mean_signed_residual_actual_minus_linear": null,
+      "residual_mae": null,
+      "residual_rmse": null
+    },
+    "2.0-2.5": {
+      "n": 0,
+      "mean_abs_rating_diff": null,
+      "mean_signed_residual_actual_minus_linear": null,
+      "residual_mae": null,
+      "residual_rmse": null
+    },
+    "2.5-3.0": {
+      "n": 0,
+      "mean_abs_rating_diff": null,
+      "mean_signed_residual_actual_minus_linear": null,
+      "residual_mae": null,
+      "residual_rmse": null
+    },
+    "3.0+": {
+      "n": 0,
+      "mean_abs_rating_diff": null,
+      "mean_signed_residual_actual_minus_linear": null,
+      "residual_mae": null,
+      "residual_rmse": null
+    }
+  },
+  "quadratic_tail_test": null,
+  "tail_worsening_flag": false,
+  "quadratic_significant_flag": false,
+  "hfa_sanity": {
+    "n_team_hfa": 138,
+    "min_hfa": 1.0,
+    "max_hfa": 3.5,
+    "mean_hfa": 2.129710144927536,
+    "all_nonnegative": true
+  },
+  "week1_focus_game_anatomy": [],
+  "classification": "Outcome 4: Structural Market Variance / Neither Proven",
+  "classification_notes": [
+    "Outcome classification is diagnostic only; it does not modify Model A.",
+    "A significant quadratic term indicates nonlinearity, not that an exponential form is automatically correct.",
+    "Any challenger must beat Model A out of sample before promotion."
+  ]
+}

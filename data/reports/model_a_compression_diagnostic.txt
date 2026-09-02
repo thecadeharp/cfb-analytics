@@ -1,0 +1,40 @@
+MODEL A COMPRESSION DIAGNOSTIC
+==================================
+Classification: Outcome 4: Structural Market Variance / Neither Proven
+
+CURRENT WEEK 1 VARIANCE AUDIT
+Lined games detected: 0
+Model favorite-margin SD: None
+Market favorite-margin SD: None
+SD ratio (model/market): None
+Input compression flag (<0.85): False
+
+HISTORICAL FAVORITE-SIZE BUCKETS
+0-7: {'n': 0}
+7-14: {'n': 0}
+14-21: {'n': 0}
+21-28: {'n': 0}
+28-40: {'n': 0}
+40+: {'n': 0}
+
+RATING-DIFFERENCE TAIL BUCKETS
+0-1.0: {'n': 0, 'mean_abs_rating_diff': None, 'mean_signed_residual_actual_minus_linear': None, 'residual_mae': None, 'residual_rmse': None}
+1.0-1.5: {'n': 0, 'mean_abs_rating_diff': None, 'mean_signed_residual_actual_minus_linear': None, 'residual_mae': None, 'residual_rmse': None}
+1.5-2.0: {'n': 0, 'mean_abs_rating_diff': None, 'mean_signed_residual_actual_minus_linear': None, 'residual_mae': None, 'residual_rmse': None}
+2.0-2.5: {'n': 0, 'mean_abs_rating_diff': None, 'mean_signed_residual_actual_minus_linear': None, 'residual_mae': None, 'residual_rmse': None}
+2.5-3.0: {'n': 0, 'mean_abs_rating_diff': None, 'mean_signed_residual_actual_minus_linear': None, 'residual_mae': None, 'residual_rmse': None}
+3.0+: {'n': 0, 'mean_abs_rating_diff': None, 'mean_signed_residual_actual_minus_linear': None, 'residual_mae': None, 'residual_rmse': None}
+
+Quadratic tail test: None
+Tail worsening flag: False
+
+HFA SANITY
+{'n_team_hfa': 138, 'min_hfa': 1.0, 'max_hfa': 3.5, 'mean_hfa': 2.129710144927536, 'all_nonnegative': True}
+
+WEEK 1 FOCUS GAME ANATOMY
+
+SCHEMA
+{'historical_file': 'data/training/historical_games.csv', 'headers_count': 156, 'matched_columns': {'year': 'season', 'week': 'week', 'home_score': 'home_score', 'away_score': 'away_score'}, 'usable_rows': 0, 'has_historical_model_spread': False, 'has_historical_rating_diff': False}
+
+PRODUCTION STATUS
+Model A untouched. Frozen baseline untouched. No production files modified.
