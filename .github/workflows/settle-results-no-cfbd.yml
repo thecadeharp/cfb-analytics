@@ -3,12 +3,11 @@ name: Settle Results - No CFBD
 on:
   workflow_dispatch:
 
-  # College football is played every day of the week at some point in the
-  # season (midweek conference games, holiday games, bowls and CFP).
-  # Run hourly, seven days a week. The results collector only stores finals,
-  # and the settlement script only grades games that have prospective snapshots.
+  # Run hourly, seven days a week.
+  # GitHub Actions cron uses FIVE fields:
+  # minute hour day-of-month month day-of-week
   schedule:
-    - cron: "45 * * * * *"
+    - cron: "45 * * * *"
 
 permissions:
   contents: write
@@ -60,9 +59,5 @@ jobs:
           fi
 
           git commit -m "Settle completed games and refresh model report"
-
-          # Another analytics workflow may have committed while this job ran.
-          # Rebase once before pushing so independent scheduled jobs do not
-          # unnecessarily collide.
           git pull --rebase origin main
           git push origin main
