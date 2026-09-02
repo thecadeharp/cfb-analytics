@@ -2,28 +2,31 @@
 CFB ANALYTICS
 fetch_results_no_cfbd.py
 
-Fetch completed college-football results WITHOUT CFBD.
+Season-long completed-results collector WITHOUT CFBD.
 
 Source:
-    ESPN public scoreboard endpoint
+    ESPN public college-football scoreboard endpoint
 
-Purpose:
-    Give settle_results.py a clean completed-game file during the CFBD outage.
-
-Environment:
-    CFB_SEASON   default: 2026
-    CFB_WEEK     default: 1
-    CFB_SEASON_TYPE default: 2 (regular season)
+Coverage:
+    - Regular season
+    - Conference championship week
+    - Bowls
+    - College Football Playoff
+    - National championship
 
 Output:
     data/results.json
 
-This script:
-- does NOT touch projections
-- does NOT touch ratings
-- does NOT touch prospective snapshots
-- does NOT touch closing lines
-- writes completed game results only
+This script is evaluation-only. It does NOT modify:
+    - ratings
+    - projections
+    - prospective snapshots
+    - closing-line snapshots
+    - Model A
+
+It safely re-fetches the season and merges completed games into one
+persistent results file. Existing finals are preserved unless ESPN
+returns the same game ID with updated final information.
 """
 
 from __future__ import annotations
@@ -41,8 +44,18 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "data" / "results.json"
 
 SEASON = int(os.getenv("CFB_SEASON", "2026"))
-WEEK = int(os.getenv("CFB_WEEK", "1"))
-SEASON_TYPE = int(os.getenv("CFB_SEASON_TYPE", "2"))
+
+# ESPN season types:
+#   2 = regular season
+#   3 = postseason
+REGULAR_SEASON_TYPE = 2
+POSTSEASON_TYPE = 3
+
+# Deliberately wider than the normal CFB calendar.
+# Empty ESPN responses are harmless, and this avoids hard-coding the
+# exact final regular-season/postseason week structure.
+REGULAR_WEEKS = range(1, 18)
+POSTSEASON_WEEKS = range(1, 12)
 
 ESPN_URL = (
     "https://site.api.espn.com/apis/site/v2/sports/"
@@ -51,13 +64,14 @@ ESPN_URL = (
 
 TIMEOUT = 30
 MAX_ATTEMPTS = 3
+REQUEST_PAUSE_SECONDS = 0.20
 
 
-def fetch_scoreboard():
+def fetch_scoreboard(season_type: int, week: int):
     params = {
         "dates": str(SEASON),
-        "seasontype": str(SEASON_TYPE),
-        "week": str(WEEK),
+        "seasontype": str(season_type),
+        "week": str(week),
         "limit": "1000",
     }
 
@@ -89,13 +103,15 @@ def fetch_scoreboard():
             if attempt < MAX_ATTEMPTS:
                 wait = 2 ** attempt
                 print(
-                    f"ESPN attempt {attempt}/{MAX_ATTEMPTS} failed: {exc}"
+                    f"ESPN season_type={season_type} week={week} "
+                    f"attempt {attempt}/{MAX_ATTEMPTS} failed: {exc}"
                 )
                 print(f"Retrying in {wait}s...")
                 time.sleep(wait)
 
     raise RuntimeError(
-        f"Unable to fetch ESPN scoreboard after {MAX_ATTEMPTS} attempts."
+        f"Unable to fetch ESPN scoreboard for season_type={season_type}, "
+        f"week={week} after {MAX_ATTEMPTS} attempts."
     ) from last_error
 
 
@@ -123,7 +139,7 @@ def competitor_id(competitor):
     return str(value) if value is not None else None
 
 
-def parse_event(event):
+def parse_event(event, season_type: int, week: int):
     competitions = event.get("competitions") or []
     if not competitions:
         return None
@@ -178,8 +194,13 @@ def parse_event(event):
         "game_id": int(game_id) if str(game_id).isdigit() else str(game_id),
         "espn_game_id": str(game_id),
         "season": SEASON,
-        "week": WEEK,
-        "season_type": SEASON_TYPE,
+        "week": week,
+        "season_type": season_type,
+        "phase": (
+            "regular_season"
+            if season_type == REGULAR_SEASON_TYPE
+            else "postseason"
+        ),
         "start_date": event.get("date"),
         "home_team": competitor_name(home),
         "away_team": competitor_name(away),
@@ -222,58 +243,107 @@ def load_existing():
     return existing
 
 
+def collect_completed_games():
+    fetched = {}
+    scan_log = []
+
+    passes = [
+        ("regular_season", REGULAR_SEASON_TYPE, REGULAR_WEEKS),
+        ("postseason", POSTSEASON_TYPE, POSTSEASON_WEEKS),
+    ]
+
+    for phase, season_type, weeks in passes:
+        for week in weeks:
+            payload = fetch_scoreboard(season_type, week)
+            events = payload.get("events") or []
+
+            completed_count = 0
+
+            for event in events:
+                if not isinstance(event, dict):
+                    continue
+
+                game = parse_event(event, season_type, week)
+                if game is None:
+                    continue
+
+                fetched[str(game["game_id"])] = game
+                completed_count += 1
+
+            scan_log.append({
+                "phase": phase,
+                "season_type": season_type,
+                "week": week,
+                "events_returned": len(events),
+                "completed_games_found": completed_count,
+            })
+
+            print(
+                f"{phase} | week {week:>2} | "
+                f"events {len(events):>3} | finals {completed_count:>3}"
+            )
+
+            time.sleep(REQUEST_PAUSE_SECONDS)
+
+    return fetched, scan_log
+
+
 def main():
     print("=" * 72)
-    print("FETCH COMPLETED RESULTS — NO CFBD")
+    print("FETCH COMPLETED RESULTS — SEASON LONG — NO CFBD")
     print("=" * 72)
     print(f"Season: {SEASON}")
-    print(f"Week: {WEEK}")
-    print(f"Season type: {SEASON_TYPE}")
-
-    payload = fetch_scoreboard()
-    events = payload.get("events") or []
 
     existing = load_existing()
-    fetched = {}
+    fetched, scan_log = collect_completed_games()
 
-    for event in events:
-        if not isinstance(event, dict):
-            continue
-
-        game = parse_event(event)
-        if game is None:
-            continue
-
-        fetched[str(game["game_id"])] = game
-
-    # Preserve previously captured completed results and merge new finals.
+    # Keep all previously stored finals and replace only matching game IDs
+    # when the newest ESPN response contains updated final information.
     merged = dict(existing)
     merged.update(fetched)
 
     games = sorted(
         merged.values(),
         key=lambda g: (
+            int(g.get("season_type") or 0),
             int(g.get("week") or 0),
             str(g.get("start_date") or ""),
             str(g.get("game_id") or ""),
         ),
     )
 
+    regular_count = sum(
+        1 for game in games
+        if game.get("season_type") == REGULAR_SEASON_TYPE
+    )
+    postseason_count = sum(
+        1 for game in games
+        if game.get("season_type") == POSTSEASON_TYPE
+    )
+
     output = {
         "meta": {
             "generated_at_utc": datetime.now(timezone.utc).isoformat(),
             "source": "ESPN public scoreboard",
-            "source_type": "results_only_no_cfbd",
+            "source_type": "season_long_results_only_no_cfbd",
             "season": SEASON,
-            "requested_week": WEEK,
-            "season_type": SEASON_TYPE,
-            "completed_games_in_requested_week": len(fetched),
+            "completed_games_fetched_this_run": len(fetched),
             "completed_games_in_file": len(games),
+            "regular_season_completed_games": regular_count,
+            "postseason_completed_games": postseason_count,
+            "coverage": [
+                "regular season",
+                "conference championship week",
+                "bowls",
+                "College Football Playoff",
+                "national championship",
+            ],
             "note": (
-                "Completed results only. This file is evaluation input and "
-                "must never be used as a predictive feature for already-frozen "
+                "Completed results only. Evaluation input. Never use final "
+                "results as predictive features for previously frozen "
                 "prospective projections."
             ),
+            "scan_log": scan_log,
         },
         "games": games,
     }
@@ -284,9 +354,11 @@ def main():
         encoding="utf-8",
     )
 
-    print(f"ESPN events returned: {len(events)}")
-    print(f"Completed games found for Week {WEEK}: {len(fetched)}")
+    print("=" * 72)
+    print(f"Completed games fetched this run: {len(fetched)}")
     print(f"Completed games stored total: {len(games)}")
+    print(f"Regular-season finals: {regular_count}")
+    print(f"Postseason finals: {postseason_count}")
     print(f"Wrote: {OUTPUT.relative_to(ROOT)}")
 
 
