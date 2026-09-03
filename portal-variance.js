@@ -46,6 +46,12 @@
     return `${Number(v).toFixed(d)}%`;
   }
 
+  function pTeamLogo(teamName, size="table") {
+    return typeof window.teamLogoMarkup === "function"
+      ? window.teamLogoMarkup(teamName, size)
+      : "";
+  }
+
   function gradeClass(g) {
     if (!g) return "grade-na";
     const s = String(g).toUpperCase();
@@ -454,11 +460,13 @@
     const sorted = [...filtered].sort((a,b)=>(b.portal_index||0)-(a.portal_index||0));
 
     const rows = sorted.map(t => {
+      const netPlayers = Number(t.in_count||0) - Number(t.out_count||0);
       return `<tr>
         <td style="color:var(--muted);font-family:var(--mono);font-size:10px">${t.portal_rank??"—"}</td>
-        <td><div class="pv-team-name">${pEsc(t.team)}</div><div class="pv-conf">${pEsc(t.conference||"")}</div></td>
+        <td><span class="team-with-logo">${pTeamLogo(t.team)}<span><div class="pv-team-name">${pEsc(t.team)}</div><div class="pv-conf">${pEsc(t.conference||"")}</div></span></span></td>
         <td>${t.in_count??0}</td>
         <td>${t.out_count??0}</td>
+        <td class="${netClass(netPlayers)} r">${pSign(netPlayers,0)}</td>
         <td class="r">${pFmt(t.in_avg_rating,1)}</td>
         <td class="r">${pFmt(t.out_avg_rating,1)}</td>
         <td class="${netClass(t.portal_index)} r" style="font-weight:700">${pSign(t.portal_index,0)}</td>
@@ -487,11 +495,11 @@
       <div class="pv-table-wrap">
         <table class="pv-table">
           <thead><tr>
-            <th>#</th><th>Team</th><th>IN</th><th>OUT</th>
+            <th>#</th><th>Team</th><th>IN</th><th>OUT</th><th class="r">NET PLAYERS</th>
             <th class="r">IN AVG</th><th class="r">OUT AVG</th>
             <th class="r">PORTAL INDEX</th><th class="r">GRADE</th>
           </tr></thead>
-          <tbody>${rows||`<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">No teams match.</td></tr>`}</tbody>
+          <tbody>${rows||`<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted)">No teams match.</td></tr>`}</tbody>
         </table>
       </div>`;
   }
@@ -551,7 +559,7 @@
 
     const teamCards = teams.map(t => `
       <div class="pv-card">
-        <div style="font-weight:800;font-size:14px;margin-bottom:2px">${pEsc(t.team)}</div>
+        <div class="team-with-logo" style="font-weight:800;font-size:14px;margin-bottom:5px">${pTeamLogo(t.team)}<span>${pEsc(t.team)}</span></div>
         <div class="pv-conf" style="margin-bottom:8px">National portal rank #${t.portal_rank??"—"}</div>
         <div style="font-size:11px;color:var(--muted)">IN: ${t.in_count||0} · OUT: ${t.out_count||0}</div>
         <div style="font-size:11px;margin-top:5px">Portal Index: <strong>${pSign(t.portal_index,0)}</strong> · Grade ${pEsc(t.portal_grade||"—")}</div>
@@ -904,6 +912,10 @@
     renderVariance();
     loadPortalData();
     loadVarianceData();
+  });
+
+  document.addEventListener("hammer:data-ready", () => {
+    if (portalData) renderPortal();
   });
 
 })();
