@@ -189,9 +189,13 @@
       cursor: pointer;
     }
 
-    .tape-button:hover { opacity: 0.88; }
+    .tape-button:hover {
+      opacity: 0.88;
+    }
 
-    .tape-result { margin-top: 16px; }
+    .tape-result {
+      margin-top: 16px;
+    }
 
     .tape-scoreboard {
       display: grid;
@@ -204,10 +208,27 @@
       border-radius: var(--radius);
     }
 
-    .tape-team:last-child { text-align: right; }
-    .tape-team-name { font-size: 22px; font-weight: 800; }
-    .tape-team-meta { margin-top: 5px; color: var(--muted); font-size: 11px; }
-    .tape-score { font-family: var(--mono); font-size: 42px; font-weight: 700; white-space: nowrap; }
+    .tape-team:last-child {
+      text-align: right;
+    }
+
+    .tape-team-name {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .tape-team-meta {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .tape-score {
+      font-family: var(--mono);
+      font-size: 42px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
 
     .tape-summary-grid {
       display: grid;
@@ -231,7 +252,11 @@
       text-transform: uppercase;
     }
 
-    .tape-summary-value { margin-top: 8px; font-size: 20px; font-weight: 800; }
+    .tape-summary-value {
+      margin-top: 8px;
+      font-size: 20px;
+      font-weight: 800;
+    }
 
     .tape-breakdown {
       display: grid;
@@ -615,7 +640,9 @@
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     /* =========================
@@ -829,8 +856,13 @@
         scrollbar-width: none;
       }
 
-      .main-nav::-webkit-scrollbar { display: none; }
-      .nav-item { flex: 0 0 auto; }
+      .main-nav::-webkit-scrollbar {
+        display: none;
+      }
+
+      .nav-item {
+        flex: 0 0 auto;
+      }
 
       .header-status {
         display: none;
@@ -852,8 +884,13 @@
         grid-column: span 1;
       }
 
-      .tape-controls { grid-template-columns: 1fr 1fr; }
-      .tape-summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .tape-controls {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .tape-summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     @media (max-width: 600px) {
@@ -1121,20 +1158,45 @@
           </div>
 
           <div class="signal-legend-grid">
-            <div class="signal-legend-item"><div class="signal-legend-name" style="color:var(--muted);">ALIGNED</div><div class="signal-legend-range">0–2.5 pts</div></div>
-            <div class="signal-legend-item"><div class="signal-legend-name" style="color:#355f91;">SMALL EDGE</div><div class="signal-legend-range">3.0–5.0 pts</div></div>
-            <div class="signal-legend-item"><div class="signal-legend-name" style="color:var(--green);">PLAY</div><div class="signal-legend-range">5.5–7.0 pts</div></div>
-            <div class="signal-legend-item"><div class="signal-legend-name" style="color:#b86600;">MATERIAL DISAGREEMENT</div><div class="signal-legend-range">7.5–10.0 pts</div></div>
-            <div class="signal-legend-item"><div class="signal-legend-name" style="color:#9a4d00;">OUTLIER</div><div class="signal-legend-range">10.5+ pts</div></div>
+            <div class="signal-legend-item">
+              <div class="signal-legend-name" style="color:var(--muted);">ALIGNED</div>
+              <div class="signal-legend-range">0–2.5 pts</div>
+            </div>
+
+            <div class="signal-legend-item">
+              <div class="signal-legend-name" style="color:#355f91;">SMALL EDGE</div>
+              <div class="signal-legend-range">3.0–5.0 pts</div>
+            </div>
+
+            <div class="signal-legend-item">
+              <div class="signal-legend-name" style="color:var(--green);">PLAY</div>
+              <div class="signal-legend-range">5.5–7.0 pts</div>
+            </div>
+
+            <div class="signal-legend-item">
+              <div class="signal-legend-name" style="color:#b86600;">MATERIAL DISAGREEMENT</div>
+              <div class="signal-legend-range">7.5–10.0 pts</div>
+            </div>
+
+            <div class="signal-legend-item">
+              <div class="signal-legend-name" style="color:#9a4d00;">OUTLIER</div>
+              <div class="signal-legend-range">10.5+ pts</div>
+            </div>
           </div>
 
           <div class="confidence-legend">
             <span class="status confidence-developing">DEVELOPING</span>
             <span class="confidence-legend-note">Evidence accumulating.</span>
+
             <span class="status confidence-validated">VALIDATED</span>
-            <span class="confidence-legend-note">50+ decisions · ≥52.5% ATS · positive avg CLV · ≥52.5% beat close.</span>
+            <span class="confidence-legend-note">
+              50+ decisions · ≥52.5% ATS · positive avg CLV · ≥52.5% beat close.
+            </span>
+
             <span class="status confidence-established">ESTABLISHED</span>
-            <span class="confidence-legend-note">100+ decisions · ≥53.0% ATS · positive avg CLV · ≥55% beat close.</span>
+            <span class="confidence-legend-note">
+              100+ decisions · ≥53.0% ATS · positive avg CLV · ≥55% beat close.
+            </span>
           </div>
 
           <div class="signal-guide-copy" style="margin-top:14px;margin-bottom:0;">
@@ -1275,6 +1337,7 @@
           Historical base rates for coaching changes, quarterback transitions,
           coordinator turnover and full program resets.
         </p>
+
         <div class="coming-soon-mark">
           <span>Coming Soon</span>
           <span class="coming-soon-icon" aria-hidden="true">🔨</span>
@@ -1294,9 +1357,11 @@
 
       <div class="coming-soon">
         <h2>Transfer Portal</h2>
+
         <p>
           Arrivals, departures, net roster impact and projected unit strength.
         </p>
+
         <div class="coming-soon-mark">
           <span>Coming Soon</span>
           <span class="coming-soon-icon" aria-hidden="true">🔨</span>
@@ -1310,6 +1375,7 @@
   <script src="app.js"></script>
   <script src="ux-v2.js"></script>
   <script src="portal-variance.js"></script>
+  <script src="mobile.js"></script>
 
 </body>
 </html>
