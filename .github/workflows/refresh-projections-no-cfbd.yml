@@ -1,4 +1,4 @@
-name: Refresh Projections - No CFBD
+name: Refresh Schedule + Projections
 
 on:
   workflow_dispatch:
@@ -6,10 +6,14 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: refresh-schedule-projections
+  cancel-in-progress: false
+
 jobs:
   refresh-projections:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
@@ -25,25 +29,74 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests pandas
 
-      - name: Build projections from cached schedule
+      - name: Refresh official schedule and build projections
         env:
-          USE_CACHED_SCHEDULE: "1"
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
         run: |
           python scripts/build_projections.py
 
-      - name: Commit refreshed projections
+      - name: Show refreshed schedule summary
+        run: |
+          python - <<'PY'
+          import json
+
+          with open("data/schedule.json", "r", encoding="utf-8") as f:
+              schedule = json.load(f)
+
+          games = schedule.get("games", [])
+
+          print(f"Schedule games: {len(games)}")
+
+          checks = [
+              ("Memphis", "UNLV"),
+              ("Massachusetts", "Rutgers"),
+              ("Purdue", "Indiana"),
+              ("South Carolina", "Florida"),
+          ]
+
+          for away, home in checks:
+              matches = [
+                  game
+                  for game in games
+                  if game.get("away_team") == away
+                  and game.get("home_team") == home
+              ]
+
+              print("")
+              print(f"{away} @ {home}")
+
+              if not matches:
+                  print("  NOT FOUND")
+                  continue
+
+              for game in matches:
+                  print(
+                      " ",
+                      game.get("start_date"),
+                      "| week",
+                      game.get("week"),
+                      "| status",
+                      game.get("status"),
+                      "| id",
+                      game.get("id"),
+                  )
+          PY
+
+      - name: Commit refreshed schedule and projections
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+          git add data/schedule.json
           git add data/odds.json
           git add data/projections.json
 
           if git diff --cached --quiet; then
-            echo "No projection changes to commit."
+            echo "No schedule or projection changes to commit."
             exit 0
           fi
 
-          git commit -m "Refresh projections without CFBD"
-          git push
+          git commit -m "Refresh 2026 schedule and projections"
+          git pull --rebase origin main
+          git push origin main
