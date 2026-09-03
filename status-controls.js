@@ -5,34 +5,50 @@
   // THE HAMMER INDEX
   // status-controls.js
   //
-  // Presentation-only:
-  //   - Adds All Games / Upcoming / Live / Final filters
-  //   - Adds lifecycle counts to #projection-summary
-  //   - Adds ET to kickoff times
+  // Adds:
+  //   - All Games / Upcoming / Live / Final filters
+  //   - Upcoming / Live / Final counts to the existing projection summary
+  //   - ET to scheduled kickoff times
   //
-  // DOES NOT alter:
-  //   - projections
-  //   - odds
-  //   - Model A
-  //   - settlement
-  //   - live-score data
-  //   - existing conference / signal / confidence filters
+  // Presentation only.
+  // Does NOT modify projection/model/odds/settlement data.
   // ==========================================================================
 
-  const VIEW_SELECTOR = "#view-projections";
-  const CONTAINER_SELECTOR = "#projections-container";
+  const VIEW_SELECTOR =
+    "#view-projections";
+
+  const CONTAINER_SELECTOR =
+    "#projections-container";
+
   const ROW_SELECTOR =
     "#projections-container .projection-table tbody tr.game-row";
 
-  const SUMMARY_SELECTOR = "#projection-summary";
-  const FILTER_ID = "hammer-game-status-filters";
-  const STYLE_ID = "hammer-game-status-filter-styles";
-  const EMPTY_ID = "hammer-game-status-empty";
+  const SUMMARY_SELECTOR =
+    "#projection-summary";
 
-  let activeStatus = "all";
-  let updateTimer = null;
-  let observer = null;
-  let summaryBaseText = "";
+  const FILTER_ID =
+    "hammer-game-status-filters";
+
+  const STYLE_ID =
+    "hammer-game-status-filter-styles";
+
+  const EMPTY_ID =
+    "hammer-game-status-empty";
+
+  let activeStatus =
+    "all";
+
+  let updateQueued =
+    false;
+
+  let projectionObserver =
+    null;
+
+  let summaryObserver =
+    null;
+
+  let applyingSummary =
+    false;
 
 
   // ==========================================================================
@@ -40,12 +56,21 @@
   // ==========================================================================
 
   function installStyles() {
-    if (document.getElementById(STYLE_ID)) {
+    if (
+      document.getElementById(
+        STYLE_ID
+      )
+    ) {
       return;
     }
 
-    const style = document.createElement("style");
-    style.id = STYLE_ID;
+    const style =
+      document.createElement(
+        "style"
+      );
+
+    style.id =
+      STYLE_ID;
 
     style.textContent = `
       .hammer-status-filter-wrap {
@@ -71,6 +96,7 @@
         font-size: 9px;
         font-weight: 700;
         letter-spacing: 1px;
+
         text-transform: uppercase;
         white-space: nowrap;
       }
@@ -143,9 +169,11 @@
       .hammer-status-live-dot {
         width: 6px;
         height: 6px;
+
+        flex: 0 0 6px;
+
         border-radius: 50%;
         background: currentColor;
-        flex: 0 0 6px;
       }
 
       .hammer-status-count {
@@ -159,9 +187,10 @@
         padding: 28px 18px;
 
         text-align: center;
-        color: var(--muted);
 
+        color: var(--muted);
         background: var(--surface);
+
         border: 1px solid var(--border);
         border-radius: var(--radius);
 
@@ -172,6 +201,7 @@
         .hammer-status-filter-wrap {
           align-items: flex-start;
           flex-direction: column;
+
           padding: 11px;
         }
 
@@ -187,37 +217,53 @@
       }
     `;
 
-    document.head.appendChild(style);
-  }
-
-
-  // ==========================================================================
-  // ROW HELPERS
-  // ==========================================================================
-
-  function rows() {
-    return Array.from(
-      document.querySelectorAll(ROW_SELECTOR)
+    document.head.appendChild(
+      style
     );
   }
 
 
-  function rowStatus(row) {
+  // ==========================================================================
+  // GAME ROWS
+  // ==========================================================================
+
+  function projectionRows() {
+    return Array.from(
+      document.querySelectorAll(
+        ROW_SELECTOR
+      )
+    );
+  }
+
+
+  function rowStatus(
+    row
+  ) {
     if (!row) {
       return "upcoming";
     }
 
     if (
-      row.classList.contains("completed-row") ||
-      row.classList.contains("hammer-final-untracked-row") ||
-      row.dataset.hammerGameState === "final"
+      row.classList.contains(
+        "completed-row"
+      ) ||
+      row.classList.contains(
+        "hammer-final-untracked-row"
+      ) ||
+      row.dataset
+        .hammerGameState ===
+        "final"
     ) {
       return "final";
     }
 
     if (
-      row.classList.contains("hammer-live-row") ||
-      row.dataset.hammerGameState === "live"
+      row.classList.contains(
+        "hammer-live-row"
+      ) ||
+      row.dataset
+        .hammerGameState ===
+        "live"
     ) {
       return "live";
     }
@@ -226,32 +272,58 @@
   }
 
 
-  function counts() {
-    const result = {
+  function statusCounts() {
+    const counts = {
       all: 0,
       upcoming: 0,
       live: 0,
       final: 0
     };
 
-    rows().forEach(row => {
-      const status = rowStatus(row);
+    projectionRows()
+      .forEach(
+        row => {
+          const status =
+            rowStatus(
+              row
+            );
 
-      result.all += 1;
-      result[status] += 1;
-    });
+          counts.all += 1;
 
-    return result;
+          if (
+            Object.prototype
+              .hasOwnProperty
+              .call(
+                counts,
+                status
+              )
+          ) {
+            counts[
+              status
+            ] += 1;
+          }
+        }
+      );
+
+    return counts;
   }
 
 
   // ==========================================================================
-  // FILTER UI
+  // STATUS FILTER UI
   // ==========================================================================
 
-  function buttonMarkup(status, label, count) {
-    const isLive = status === "live";
-    const active = activeStatus === status;
+  function buttonMarkup(
+    status,
+    label,
+    count
+  ) {
+    const active =
+      activeStatus ===
+      status;
+
+    const live =
+      status === "live";
 
     return `
       <button
@@ -261,12 +333,14 @@
         aria-pressed="${active ? "true" : "false"}"
       >
         ${
-          isLive
+          live
             ? '<span class="hammer-status-live-dot" aria-hidden="true"></span>'
             : ""
         }
 
-        <span>${label}</span>
+        <span>
+          ${label}
+        </span>
 
         <span class="hammer-status-count">
           ${count}
@@ -277,34 +351,37 @@
 
 
   function ensureFilterUI() {
-    const projectionControls =
-      document.querySelector(
-        `${VIEW_SELECTOR} .projection-controls`
-      );
-
     const tableCard =
       document.querySelector(
         `${VIEW_SELECTOR} .table-card`
       );
 
-    if (!projectionControls || !tableCard) {
+    if (!tableCard) {
       return;
     }
 
     let wrapper =
-      document.getElementById(FILTER_ID);
+      document.getElementById(
+        FILTER_ID
+      );
 
     if (!wrapper) {
-      wrapper = document.createElement("div");
+      wrapper =
+        document.createElement(
+          "div"
+        );
 
-      wrapper.id = FILTER_ID;
+      wrapper.id =
+        FILTER_ID;
+
       wrapper.className =
         "hammer-status-filter-wrap";
 
-      tableCard.insertAdjacentElement(
-        "beforebegin",
-        wrapper
-      );
+      tableCard
+        .insertAdjacentElement(
+          "beforebegin",
+          wrapper
+        );
 
       wrapper.addEventListener(
         "click",
@@ -318,8 +395,9 @@
             return;
           }
 
-          const nextStatus =
-            button.dataset.status;
+          const status =
+            button.dataset
+              .status;
 
           if (
             ![
@@ -327,20 +405,23 @@
               "upcoming",
               "live",
               "final"
-            ].includes(nextStatus)
+            ].includes(
+              status
+            )
           ) {
             return;
           }
 
-          activeStatus = nextStatus;
+          activeStatus =
+            status;
 
-          renderStatusControls();
-          applyFilters();
+          updateEverything();
         }
       );
     }
 
-    const currentCounts = counts();
+    const counts =
+      statusCounts();
 
     wrapper.innerHTML = `
       <div class="hammer-status-filter-title">
@@ -348,84 +429,113 @@
       </div>
 
       <div class="hammer-status-filter-buttons">
+
         ${buttonMarkup(
           "all",
           "All Games",
-          currentCounts.all
+          counts.all
         )}
 
         ${buttonMarkup(
           "upcoming",
           "Upcoming",
-          currentCounts.upcoming
+          counts.upcoming
         )}
 
         ${buttonMarkup(
           "live",
           "Live",
-          currentCounts.live
+          counts.live
         )}
 
         ${buttonMarkup(
           "final",
           "Final",
-          currentCounts.final
+          counts.final
         )}
+
       </div>
     `;
   }
 
 
   // ==========================================================================
-  // DESKTOP FILTERING
+  // DESKTOP FILTER
   // ==========================================================================
 
   function applyDesktopFilter() {
-    rows().forEach(row => {
-      const status = rowStatus(row);
+    projectionRows()
+      .forEach(
+        row => {
+          const status =
+            rowStatus(
+              row
+            );
 
-      const show =
-        activeStatus === "all" ||
-        status === activeStatus;
+          const visible =
+            activeStatus ===
+              "all" ||
+            status ===
+              activeStatus;
 
-      row.style.display =
-        show ? "" : "none";
-    });
+          row.style.display =
+            visible
+              ? ""
+              : "none";
+        }
+      );
   }
 
 
   // ==========================================================================
-  // MOBILE FILTERING
+  // MOBILE FILTER
   // ==========================================================================
 
   function applyMobileFilter() {
-    const sourceRows = rows();
+    const sourceRows =
+      projectionRows();
 
-    const cards = Array.from(
-      document.querySelectorAll(
-        ".mobile-projection-card"
-      )
-    );
+    const cards =
+      Array.from(
+        document.querySelectorAll(
+          ".mobile-projection-card"
+        )
+      );
 
-    cards.forEach((card, index) => {
-      const sourceRow =
-        sourceRows[index];
+    cards.forEach(
+      (
+        card,
+        index
+      ) => {
+        const sourceRow =
+          sourceRows[
+            index
+          ];
 
-      if (!sourceRow) {
-        card.style.display = "";
-        return;
+        if (!sourceRow) {
+          card.style.display =
+            "";
+
+          return;
+        }
+
+        const status =
+          rowStatus(
+            sourceRow
+          );
+
+        const visible =
+          activeStatus ===
+            "all" ||
+          status ===
+            activeStatus;
+
+        card.style.display =
+          visible
+            ? ""
+            : "none";
       }
-
-      const status =
-        rowStatus(sourceRow);
-
-      const show =
-        activeStatus === "all" ||
-        status === activeStatus;
-
-      card.style.display =
-        show ? "" : "none";
-    });
+    );
   }
 
 
@@ -435,7 +545,9 @@
 
   function ensureEmptyState() {
     let empty =
-      document.getElementById(EMPTY_ID);
+      document.getElementById(
+        EMPTY_ID
+      );
 
     if (empty) {
       return empty;
@@ -450,16 +562,22 @@
       return null;
     }
 
-    empty = document.createElement("div");
+    empty =
+      document.createElement(
+        "div"
+      );
 
-    empty.id = EMPTY_ID;
+    empty.id =
+      EMPTY_ID;
+
     empty.className =
       "hammer-status-empty";
 
-    tableCard.insertAdjacentElement(
-      "beforebegin",
-      empty
-    );
+    tableCard
+      .insertAdjacentElement(
+        "beforebegin",
+        empty
+      );
 
     return empty;
   }
@@ -473,35 +591,59 @@
       return;
     }
 
-    const currentCounts = counts();
+    const counts =
+      statusCounts();
 
     if (
-      activeStatus === "all" ||
-      currentCounts[activeStatus] > 0
+      activeStatus ===
+        "all" ||
+      (
+        counts[
+          activeStatus
+        ] ?? 0
+      ) > 0
     ) {
-      empty.style.display = "none";
+      empty.style.display =
+        "none";
+
       return;
     }
 
     const labels = {
-      upcoming: "upcoming games",
-      live: "live games",
-      final: "final games"
+      upcoming:
+        "upcoming games",
+
+      live:
+        "live games",
+
+      final:
+        "final games"
     };
 
     empty.textContent =
-      `No ${labels[activeStatus] || "games"} are available in this week.`;
+      `No ${
+        labels[
+          activeStatus
+        ] ?? "games"
+      } are available in this week.`;
 
-    empty.style.display = "block";
+    empty.style.display =
+      "block";
   }
 
 
   // ==========================================================================
-  // PROJECTION SUMMARY
+  // SUMMARY
   //
   // IMPORTANT:
-  // We ONLY touch #projection-summary.
-  // We never search parent divs or overwrite existing controls.
+  //
+  // We modify ONLY #projection-summary.
+  //
+  // We preserve the original HTML after the leading:
+  //
+  //   51 games · 0 final ·
+  //
+  // so existing colored PLAY / SMALL EDGE / MATERIAL / TOTAL markup survives.
   // ==========================================================================
 
   function updateSummary() {
@@ -514,113 +656,347 @@
       return;
     }
 
-    const visibleText =
-      String(summary.textContent || "")
-        .replace(/\s+/g, " ")
-        .trim();
+    const counts =
+      statusCounts();
 
-    /*
-      app.js owns this element.
+    const lifecycle =
+      `${counts.all} games · ` +
+      `${counts.upcoming} upcoming · ` +
+      `${counts.live} live · ` +
+      `${counts.final} final · `;
 
-      Whenever app.js writes a fresh summary,
-      save that as the base text.
+    let html =
+      summary.innerHTML;
 
-      Never store our own lifecycle-enhanced version
-      as the base.
-    */
-
-    if (
-      visibleText &&
-      !summary.dataset.hammerStatusEnhanced
-    ) {
-      summaryBaseText = visibleText;
-    }
-
-    if (!summaryBaseText) {
-      summaryBaseText = visibleText;
-    }
-
-    if (!summaryBaseText) {
+    if (!html) {
       return;
     }
 
-    const currentCounts = counts();
-
-    let remainder = summaryBaseText;
-
     /*
-      Remove the original leading lifecycle section only.
+      CASE 1:
+      Already enhanced by this script.
 
-      Handles examples such as:
-
-      51 games · 0 final · 41 lined ...
-      51 games · 41 lined ...
+      Replace only the lifecycle prefix.
     */
 
-    remainder = remainder.replace(
-      /^\s*\d+\s+games\s*·\s*(?:\d+\s+final\s*·\s*)?/i,
-      ""
-    );
+    const enhancedPattern =
+      /^\s*\d+\s+games\s*·\s*\d+\s+upcoming\s*·\s*\d+\s+live\s*·\s*\d+\s+final\s*·\s*/i;
 
-    summary.textContent =
-      `${currentCounts.all} games · ` +
-      `${currentCounts.upcoming} upcoming · ` +
-      `${currentCounts.live} live · ` +
-      `${currentCounts.final} final · ` +
-      remainder;
+    if (
+      enhancedPattern.test(
+        html
+      )
+    ) {
+      const updated =
+        html.replace(
+          enhancedPattern,
+          lifecycle
+        );
 
-    summary.dataset.hammerStatusEnhanced =
-      "1";
+      if (
+        updated !== html
+      ) {
+        applyingSummary =
+          true;
+
+        summary.innerHTML =
+          updated;
+
+        applyingSummary =
+          false;
+      }
+
+      return;
+    }
+
+    /*
+      CASE 2:
+      Original app summary:
+
+        51 games · 0 final · 41 lined · ...
+
+      Replace ONLY:
+        51 games · 0 final ·
+
+      Everything from "41 lined" onward remains exactly as app.js rendered it.
+    */
+
+    const originalPattern =
+      /^\s*\d+\s+games\s*·\s*\d+\s+final\s*·\s*/i;
+
+    if (
+      originalPattern.test(
+        html
+      )
+    ) {
+      applyingSummary =
+        true;
+
+      summary.innerHTML =
+        html.replace(
+          originalPattern,
+          lifecycle
+        );
+
+      applyingSummary =
+        false;
+
+      return;
+    }
+
+    /*
+      CASE 3:
+      Defensive fallback if app.js ever drops "0 final":
+
+        51 games · 41 lined · ...
+
+      Replace only "51 games ·"
+    */
+
+    const gamesOnlyPattern =
+      /^\s*\d+\s+games\s*·\s*/i;
+
+    if (
+      gamesOnlyPattern.test(
+        html
+      )
+    ) {
+      applyingSummary =
+        true;
+
+      summary.innerHTML =
+        html.replace(
+          gamesOnlyPattern,
+          lifecycle
+        );
+
+      applyingSummary =
+        false;
+    }
   }
 
 
-  function watchSummaryForAppUpdates() {
+  // ==========================================================================
+  // EASTERN TIME LABELS
+  //
+  // Only changes scheduled kickoff strings containing AM/PM.
+  //
+  // Examples:
+  //
+  //   Sep 5, 7:30 PM
+  //       ->
+  //   Sep 5, 7:30 PM ET
+  //
+  // Live clock:
+  //
+  //   04:39
+  //
+  // is untouched because it does not contain AM or PM.
+  // ==========================================================================
+
+  function addEasternTimeLabels() {
+    const rows =
+      projectionRows();
+
+    rows.forEach(
+      row => {
+        /*
+          Search the matchup cell and team-meta elements.
+
+          Using both selectors protects us if app.js puts the
+          kickoff metadata one level outside .matchup-cell.
+        */
+
+        const targets =
+          row.querySelectorAll(
+            ".matchup-cell, .team-meta"
+          );
+
+        targets.forEach(
+          target => {
+            const walker =
+              document.createTreeWalker(
+                target,
+                NodeFilter.SHOW_TEXT
+              );
+
+            const nodes =
+              [];
+
+            while (
+              walker.nextNode()
+            ) {
+              nodes.push(
+                walker.currentNode
+              );
+            }
+
+            nodes.forEach(
+              node => {
+                const original =
+                  String(
+                    node.nodeValue ?? ""
+                  );
+
+                if (
+                  !/\b(?:AM|PM)\b/i
+                    .test(
+                      original
+                    )
+                ) {
+                  return;
+                }
+
+                const updated =
+                  original.replace(
+                    /(\b\d{1,2}:\d{2}\s*(?:AM|PM)\b)(?!\s*ET\b)/gi,
+                    "$1 ET"
+                  );
+
+                if (
+                  updated !==
+                  original
+                ) {
+                  node.nodeValue =
+                    updated;
+                }
+              }
+            );
+          }
+        );
+      }
+    );
+  }
+
+
+  // ==========================================================================
+  // MASTER UPDATE
+  // ==========================================================================
+
+  function updateEverything() {
+    installStyles();
+
+    ensureFilterUI();
+
+    updateSummary();
+
+    addEasternTimeLabels();
+
+    applyDesktopFilter();
+
+    applyMobileFilter();
+
+    updateEmptyState();
+  }
+
+
+  function scheduleUpdate() {
+    if (
+      updateQueued
+    ) {
+      return;
+    }
+
+    updateQueued =
+      true;
+
+    requestAnimationFrame(
+      () => {
+        updateQueued =
+          false;
+
+        updateEverything();
+      }
+    );
+  }
+
+
+  // ==========================================================================
+  // OBSERVERS
+  // ==========================================================================
+
+  function installProjectionObserver() {
+    const container =
+      document.querySelector(
+        CONTAINER_SELECTOR
+      );
+
+    if (!container) {
+      setTimeout(
+        installProjectionObserver,
+        100
+      );
+
+      return;
+    }
+
+    if (
+      projectionObserver
+    ) {
+      return;
+    }
+
+    projectionObserver =
+      new MutationObserver(
+        mutations => {
+          const meaningful =
+            mutations.some(
+              mutation =>
+                mutation.type ===
+                  "childList"
+            );
+
+          if (
+            meaningful
+          ) {
+            scheduleUpdate();
+          }
+        }
+      );
+
+    projectionObserver.observe(
+      container,
+      {
+        childList: true,
+        subtree: true
+      }
+    );
+  }
+
+
+  function installSummaryObserver() {
     const summary =
       document.querySelector(
         SUMMARY_SELECTOR
       );
 
     if (!summary) {
+      setTimeout(
+        installSummaryObserver,
+        100
+      );
+
       return;
     }
 
     if (
-      summary.dataset
-        .hammerSummaryObserverInstalled === "1"
+      summaryObserver
     ) {
       return;
     }
 
-    summary.dataset
-      .hammerSummaryObserverInstalled = "1";
-
-    const summaryObserver =
-      new MutationObserver(() => {
-        const text =
-          String(summary.textContent || "")
-            .replace(/\s+/g, " ")
-            .trim();
-
-        /*
-          If another script writes into the summary,
-          MutationObserver fires.
-
-          If it no longer contains our lifecycle format,
-          treat it as fresh app.js text.
-        */
-
-        if (
-          text &&
-          !/\bupcoming\b/i.test(text)
-        ) {
-          summaryBaseText = text;
-
-          delete summary.dataset
-            .hammerStatusEnhanced;
+    summaryObserver =
+      new MutationObserver(
+        () => {
+          if (
+            applyingSummary
+          ) {
+            return;
+          }
 
           scheduleUpdate();
         }
-      });
+      );
 
     summaryObserver.observe(
       summary,
@@ -634,160 +1010,48 @@
 
 
   // ==========================================================================
-  // EASTERN TIME LABELS
-  // ==========================================================================
-
-  function addEasternTimeLabels() {
-    const matchupCells =
-      document.querySelectorAll(
-        `${CONTAINER_SELECTOR} .matchup-cell`
-      );
-
-    matchupCells.forEach(cell => {
-      const walker =
-        document.createTreeWalker(
-          cell,
-          NodeFilter.SHOW_TEXT
-        );
-
-      const textNodes = [];
-
-      while (walker.nextNode()) {
-        textNodes.push(
-          walker.currentNode
-        );
-      }
-
-      textNodes.forEach(node => {
-        const original =
-          node.nodeValue || "";
-
-        const updated =
-          original.replace(
-            /(\b\d{1,2}:\d{2}\s*(?:AM|PM)\b)(?!\s*ET\b)/gi,
-            "$1 ET"
-          );
-
-        if (updated !== original) {
-          node.nodeValue = updated;
-        }
-      });
-    });
-  }
-
-
-  // ==========================================================================
-  // UPDATE CYCLE
-  // ==========================================================================
-
-  function renderStatusControls() {
-    ensureFilterUI();
-    updateSummary();
-  }
-
-
-  function applyFilters() {
-    applyDesktopFilter();
-    applyMobileFilter();
-    updateEmptyState();
-  }
-
-
-  function updateEverything() {
-    installStyles();
-
-    addEasternTimeLabels();
-
-    renderStatusControls();
-
-    applyFilters();
-
-    watchSummaryForAppUpdates();
-  }
-
-
-  function scheduleUpdate() {
-    if (updateTimer) {
-      clearTimeout(updateTimer);
-    }
-
-    updateTimer = setTimeout(() => {
-      updateTimer = null;
-      updateEverything();
-    }, 80);
-  }
-
-
-  // ==========================================================================
-  // OBSERVER
-  // ==========================================================================
-
-  function installObserver() {
-    const projectionContainer =
-      document.querySelector(
-        CONTAINER_SELECTOR
-      );
-
-    if (!projectionContainer) {
-      setTimeout(
-        installObserver,
-        150
-      );
-
-      return;
-    }
-
-    if (observer) {
-      return;
-    }
-
-    observer =
-      new MutationObserver(() => {
-        scheduleUpdate();
-      });
-
-    observer.observe(
-      projectionContainer,
-      {
-        childList: true,
-        subtree: true
-      }
-    );
-  }
-
-
-  // ==========================================================================
-  // START
+  // STARTUP
   // ==========================================================================
 
   function start() {
     installStyles();
 
-    installObserver();
+    installProjectionObserver();
+
+    installSummaryObserver();
 
     scheduleUpdate();
 
     /*
-      app.js / ux-v2 / sort-tables.js / mobile.js
-      do not all finish at exactly the same moment.
+      Other Hammer Index scripts render asynchronously.
 
-      These are harmless presentation refreshes
-      after their initial rendering settles.
+      These extra passes are intentional so this adapter runs
+      after app.js, ux-v2.js, sort-tables.js and mobile.js settle.
     */
 
     setTimeout(
       scheduleUpdate,
-      250
+      100
     );
 
     setTimeout(
       scheduleUpdate,
-      700
+      300
+    );
+
+    setTimeout(
+      scheduleUpdate,
+      750
     );
 
     setTimeout(
       scheduleUpdate,
       1500
+    );
+
+    setTimeout(
+      scheduleUpdate,
+      3000
     );
 
     window.addEventListener(
@@ -798,7 +1062,8 @@
 
 
   if (
-    document.readyState === "loading"
+    document.readyState ===
+      "loading"
   ) {
     document.addEventListener(
       "DOMContentLoaded",
