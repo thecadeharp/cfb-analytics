@@ -1,0 +1,80 @@
+name: Roster Foundation v1
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # Preseason roster data only needs a weekly refresh.
+    - cron: "15 15 * * 1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: roster-foundation-v1
+  cancel-in-progress: false
+
+jobs:
+  build-roster-foundation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pandas pyarrow
+
+      - name: Protect Model A files
+        run: |
+          sha256sum \
+            data/projections.json \
+            data/cfb_metrics.json \
+            data/hfa_2026.json \
+            scripts/build_projections.py \
+            > /tmp/model-a-before.sha256
+
+      - name: Build roster foundation
+        run: |
+          python scripts/build_roster_foundation.py
+
+      - name: Verify Model A remained unchanged
+        run: |
+          sha256sum --check /tmp/model-a-before.sha256
+
+      - name: Validate roster foundation output
+        run: |
+          python - <<'PY'
+          import json
+
+          with open("data/roster_foundation.json", encoding="utf-8") as file:
+              data = json.load(file)
+
+          assert data["meta"]["model_usage"] == "display_only_not_used_by_model_a"
+          assert data["meta"]["portal_data_included"] is False
+          assert len(data.get("teams", {})) >= 130
+          assert sum(
+              team.get("returning_production_pct") is not None
+              for team in data["teams"].values()
+          ) >= 130
+          assert sum(
+              team.get("talent_composite") is not None
+              for team in data["teams"].values()
+          ) >= 130
+          print("Roster foundation validation passed")
+          PY
+
+      - name: Commit roster foundation
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/roster_foundation.json
+          git diff --staged --quiet || git commit -m "Refresh roster foundation"
+          git push
