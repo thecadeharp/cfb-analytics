@@ -123,8 +123,23 @@
     }
 
     .coming-soon-mark {
-      margin-top: 18px;
-      font-size: 26px;
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .coming-soon-icon {
+      font-family: initial;
+      font-size: 16px;
       line-height: 1;
     }
 
@@ -977,7 +992,10 @@
           Historical base rates for coaching changes, quarterback transitions,
           coordinator turnover and full program resets.
         </p>
-        <div class="coming-soon-mark" aria-label="Coming soon">Coming Soon.<br>🔨</div>
+        <div class="coming-soon-mark">
+          <span>Coming Soon</span>
+          <span class="coming-soon-icon" aria-hidden="true">🔨</span>
+        </div>
       </div>
 
     </section>
@@ -996,7 +1014,10 @@
         <p>
           Arrivals, departures, net roster impact and projected unit strength.
         </p>
-        <div class="coming-soon-mark" aria-label="Coming soon">Coming Soon.<br>🔨</div>
+        <div class="coming-soon-mark">
+          <span>Coming Soon</span>
+          <span class="coming-soon-icon" aria-hidden="true">🔨</span>
+        </div>
       </div>
 
     </section>
