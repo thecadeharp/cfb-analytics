@@ -152,9 +152,12 @@
   }
 
   function totalSignalForGame(game) {
-    const modelTotal = Number(effectiveModelTotal(game));
-    const marketTotal = Number(game?.market?.total);
-    if (!Number.isFinite(modelTotal) || !Number.isFinite(marketTotal)) return null;
+    const rawModelTotal = effectiveModelTotal(game);
+    const rawMarketTotal = game?.market?.total;
+    if (!hasValue(rawModelTotal) || !hasValue(rawMarketTotal)) return null;
+    const modelTotal = Number(rawModelTotal);
+    const marketTotal = Number(rawMarketTotal);
+    if (!Number.isFinite(modelTotal) || !Number.isFinite(marketTotal) || marketTotal <= 0) return null;
     const difference = modelTotal - marketTotal;
     const edge = Math.abs(difference);
     if (edge < 4) return null;
