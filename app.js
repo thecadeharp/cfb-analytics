@@ -12,6 +12,7 @@ const DATA_URLS = {
   advancedMetrics: "./data/advanced_metrics.json",
   externalRatings: "./data/external_ratings.json",
   rosterFoundation: "./data/roster_foundation.json",
+  hfa: "./data/hfa_2026.json",
 };
 
 let metricsData = null;
@@ -22,6 +23,7 @@ let signalReportData = null;
 let advancedMetricsData = null;
 let externalRatingsData = null;
 let rosterFoundationData = null;
+let hfaData = null;
 
 let teams = {};
 let projections = [];
@@ -33,6 +35,9 @@ let currentRatingsMode = "teams";
 let currentTeamConference = "ALL";
 let currentAdvancedSample = "non_garbage";
 let currentDossierTeamName = null;
+let tapeTeamA = null;
+let tapeTeamB = null;
+let tapeVenue = "neutral";
 
 
 // ============================================================================
@@ -838,7 +843,7 @@ async function init() {
   try {
     ensureMatchupView();
 
-    [metricsData, scheduleData, oddsData, projectionsData, signalReportData, advancedMetricsData, externalRatingsData, rosterFoundationData] = await Promise.all([
+    [metricsData, scheduleData, oddsData, projectionsData, signalReportData, advancedMetricsData, externalRatingsData, rosterFoundationData, hfaData] = await Promise.all([
       loadJson(DATA_URLS.metrics),
       loadJson(DATA_URLS.schedule),
       loadJson(DATA_URLS.odds),
@@ -847,6 +852,7 @@ async function init() {
       loadJson(DATA_URLS.advancedMetrics).catch(() => null),
       loadJson(DATA_URLS.externalRatings).catch(() => null),
       loadJson(DATA_URLS.rosterFoundation).catch(() => null),
+      loadJson(DATA_URLS.hfa),
     ]);
 
     teams = metricsData?.teams ?? {};
@@ -858,6 +864,7 @@ async function init() {
     renderProjections();
     renderTeams();
     renderRatings();
+    initializeMatchupAnalysis();
     attachEvents();
   } catch (error) {
     console.error("Frontend initialization failed:", error);
@@ -1710,6 +1717,397 @@ function setTeamConference(conference) {
   currentTeamConference = conferenceNames().includes(conference) ? conference : "ALL";
   renderTeams();
   renderRatings();
+}
+
+
+// ============================================================================
+// MATCHUP ANALYSIS
+// ============================================================================
+
+function modelClamp(value, cap) {
+  return Math.max(-cap, Math.min(cap, value));
+}
+
+function modelRoundHalf(value) {
+  const scaled = Number(value) * 2;
+  const floor = Math.floor(scaled);
+  const fraction = scaled - floor;
+  if (Math.abs(fraction - 0.5) < 1e-10) {
+    return (floor % 2 === 0 ? floor : floor + 1) / 2;
+  }
+  return Math.round(scaled) / 2;
+}
+
+function modelErf(value) {
+  const sign = value < 0 ? -1 : 1;
+  const x = Math.abs(value);
+  const t = 1 / (1 + 0.3275911 * x);
+  const polynomial = (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t;
+  return sign * (1 - polynomial * Math.exp(-x * x));
+}
+
+function modelWinProbability(homeSpread) {
+  const homeMargin = -Number(homeSpread);
+  const probability = Math.max(
+    0.01,
+    Math.min(0.99, (1 + modelErf((homeMargin / 16) / Math.sqrt(2))) / 2)
+  );
+  return { home: probability * 100, away: (1 - probability) * 100 };
+}
+
+function modelLiveNumber(team, side, field) {
+  const value = team?.[side]?.live_2026?.[field];
+  return hasValue(value) ? Number(value) : null;
+}
+
+function matchupGeneralSample(team) {
+  return modelLiveNumber(team, "offense", "n_plays") >= 35 &&
+    modelLiveNumber(team, "defense", "n_plays") >= 35;
+}
+
+function matchupUnitSample(team, field, minimum) {
+  return modelLiveNumber(team, "offense", field) >= minimum &&
+    modelLiveNumber(team, "defense", field) >= minimum;
+}
+
+function calculateInteractiveMatchupAdjustment(home, away) {
+  const components = {
+    passing: 0,
+    rushing: 0,
+    success_rate: 0,
+    explosiveness: 0,
+    havoc: 0,
+  };
+  const available = Object.fromEntries(Object.keys(components).map(key => [key, false]));
+
+  if (matchupUnitSample(home, "pass_plays", 15) && matchupUnitSample(away, "pass_plays", 15)) {
+    const values = [
+      modelLiveNumber(home, "offense", "epa_pass"),
+      modelLiveNumber(away, "defense", "epa_pass"),
+      modelLiveNumber(away, "offense", "epa_pass"),
+      modelLiveNumber(home, "defense", "epa_pass"),
+    ];
+    if (values.every(hasValue)) {
+      const [homePass, awayPassDefense, awayPass, homePassDefense] = values;
+      components.passing = modelClamp(
+        ((homePass - awayPassDefense) - (awayPass - homePassDefense)) * 1.25,
+        1
+      );
+      available.passing = true;
+    }
+  }
+
+  if (matchupUnitSample(home, "rush_plays", 15) && matchupUnitSample(away, "rush_plays", 15)) {
+    const values = [
+      modelLiveNumber(home, "offense", "epa_rush"),
+      modelLiveNumber(away, "defense", "epa_rush"),
+      modelLiveNumber(away, "offense", "epa_rush"),
+      modelLiveNumber(home, "defense", "epa_rush"),
+    ];
+    if (values.every(hasValue)) {
+      const [homeRush, awayRushDefense, awayRush, homeRushDefense] = values;
+      components.rushing = modelClamp(
+        (homeRush - awayRushDefense) - (awayRush - homeRushDefense),
+        0.75
+      );
+      available.rushing = true;
+    }
+  }
+
+  if (matchupGeneralSample(home) && matchupGeneralSample(away)) {
+    const successValues = [
+      modelLiveNumber(home, "offense", "success_rate"),
+      modelLiveNumber(away, "defense", "success_rate"),
+      modelLiveNumber(away, "offense", "success_rate"),
+      modelLiveNumber(home, "defense", "success_rate"),
+    ];
+    if (successValues.every(hasValue)) {
+      const [homeSuccess, awaySuccessDefense, awaySuccess, homeSuccessDefense] = successValues;
+      components.success_rate = modelClamp(
+        ((homeSuccess - awaySuccessDefense) - (awaySuccess - homeSuccessDefense)) * 0.035,
+        0.75
+      );
+      available.success_rate = true;
+    }
+
+    const explosiveValues = [
+      modelLiveNumber(home, "offense", "explosive_rate"),
+      modelLiveNumber(away, "defense", "explosive_rate"),
+      modelLiveNumber(away, "offense", "explosive_rate"),
+      modelLiveNumber(home, "defense", "explosive_rate"),
+    ];
+    if (explosiveValues.every(hasValue)) {
+      const [homeExplosive, awayExplosiveDefense, awayExplosive, homeExplosiveDefense] = explosiveValues;
+      components.explosiveness = modelClamp(
+        ((homeExplosive - awayExplosiveDefense) - (awayExplosive - homeExplosiveDefense)) * 0.025,
+        0.5
+      );
+      available.explosiveness = true;
+    }
+
+    const havocValues = [
+      modelLiveNumber(home, "offense", "havoc_rate"),
+      modelLiveNumber(home, "defense", "havoc_rate"),
+      modelLiveNumber(away, "offense", "havoc_rate"),
+      modelLiveNumber(away, "defense", "havoc_rate"),
+    ];
+    if (havocValues.every(hasValue)) {
+      const [homeAllowed, homeCreated, awayAllowed, awayCreated] = havocValues;
+      components.havoc = modelClamp(
+        ((homeCreated - awayAllowed) - (awayCreated - homeAllowed)) * 0.025,
+        0.5
+      );
+      available.havoc = true;
+    }
+  }
+
+  const total = modelClamp(
+    Object.values(components).reduce((sum, value) => sum + value, 0),
+    Number(projectionsData?.meta?.max_matchup_adjustment ?? 3)
+  );
+  return {
+    components: Object.fromEntries(
+      Object.entries(components).map(([key, value]) => [key, Number(value.toFixed(2))])
+    ),
+    available,
+    total: Number(total.toFixed(2)),
+    comparable: Object.values(available).some(Boolean),
+  };
+}
+
+function calculateInteractiveTotal(home, away) {
+  const efficiency = Number(home?.offense?.epa_play ?? 0) +
+    Number(away?.offense?.epa_play ?? 0) -
+    Number(home?.defense?.epa_play ?? 0) -
+    Number(away?.defense?.epa_play ?? 0);
+  const success = Number(home?.offense?.success_rate ?? 0) +
+    Number(away?.offense?.success_rate ?? 0) - 85;
+  return modelRoundHalf(Math.max(35, Math.min(80, 52.5 + efficiency * 5 + success * 0.15)));
+}
+
+function resolveMatchupTeam(value) {
+  const target = String(value ?? "").trim().toLowerCase();
+  return Object.keys(teams).find(name => name.toLowerCase() === target) ?? null;
+}
+
+function matchupLocationText(teamA, teamB) {
+  if (tapeVenue === "team_a_home") return `${teamB} at ${teamA}`;
+  if (tapeVenue === "team_b_home") return `${teamA} at ${teamB}`;
+  return `${teamA} vs. ${teamB} · Neutral site`;
+}
+
+function buildInteractiveProjection(teamAName, teamBName, venue) {
+  const teamA = getTeam(teamAName);
+  const teamB = getTeam(teamBName);
+  const teamAHome = venue !== "team_b_home";
+  const neutral = venue === "neutral";
+  const home = teamAHome ? teamA : teamB;
+  const away = teamAHome ? teamB : teamA;
+  const homeName = home.team;
+  const awayName = away.team;
+  const slope = Number(projectionsData?.meta?.calibration?.slope ?? 10.4245);
+  const ratingDifference = Number(home.power_rating) - Number(away.power_rating);
+  const ratingPoints = ratingDifference * slope;
+  const ratingOnlySpread = -ratingPoints;
+  const hfa = neutral ? 0 : Number(hfaData?.teams?.[homeName] ?? hfaData?.meta?.default_hfa ?? 2);
+  const afterHfa = ratingOnlySpread - hfa;
+  const matchup = calculateInteractiveMatchupAdjustment(home, away);
+  const homeSpread = modelRoundHalf(afterHfa - matchup.total);
+  const total = calculateInteractiveTotal(home, away);
+  const winProbability = modelWinProbability(homeSpread);
+  const marginA = teamAHome ? -homeSpread : homeSpread;
+  let scoreA = Math.round((total + marginA) / 2);
+  let scoreB = Math.round((total - marginA) / 2);
+  if (scoreA === scoreB && marginA !== 0) {
+    if (marginA > 0) scoreA += 1;
+    else scoreB += 1;
+  }
+
+  return {
+    teamA,
+    teamB,
+    home,
+    away,
+    homeName,
+    awayName,
+    teamAHome,
+    neutral,
+    slope,
+    ratingPoints,
+    ratingOnlySpread: modelRoundHalf(ratingOnlySpread),
+    hfa,
+    afterHfa: modelRoundHalf(afterHfa),
+    matchup,
+    homeSpread,
+    total,
+    winProbability,
+    scoreA,
+    scoreB,
+    teamAWin: teamAHome ? winProbability.home : winProbability.away,
+    teamBWin: teamAHome ? winProbability.away : winProbability.home,
+  };
+}
+
+function matchupProfileRows(offense, defense) {
+  return `
+    ${renderMetricRow("Model EPA / Play", `${formatEPA(offense?.offense?.epa_play)} vs ${formatEPA(defense?.defense?.epa_play)} allowed`)}
+    ${renderMetricRow("Model Success Rate", `${formatRate(offense?.offense?.success_rate)} vs ${formatRate(defense?.defense?.success_rate)} allowed`)}
+    ${renderMetricRow("2026 EPA / Pass", `${formatEPA(modelLiveNumber(offense, "offense", "epa_pass"))} vs ${formatEPA(modelLiveNumber(defense, "defense", "epa_pass"))} allowed`)}
+    ${renderMetricRow("2026 EPA / Rush", `${formatEPA(modelLiveNumber(offense, "offense", "epa_rush"))} vs ${formatEPA(modelLiveNumber(defense, "defense", "epa_rush"))} allowed`)}
+    ${renderMetricRow("2026 Explosive Rate", `${formatRate(modelLiveNumber(offense, "offense", "explosive_rate"))} vs ${formatRate(modelLiveNumber(defense, "defense", "explosive_rate"))} allowed`)}
+    ${renderMetricRow("2026 Havoc", `${formatRate(modelLiveNumber(offense, "offense", "havoc_rate"))} allowed vs ${formatRate(modelLiveNumber(defense, "defense", "havoc_rate"))} created`)}
+  `;
+}
+
+function matchupComponentRows(projection) {
+  const labels = {
+    passing: "Passing matchup",
+    rushing: "Rushing matchup",
+    success_rate: "Success-rate matchup",
+    explosiveness: "Explosiveness matchup",
+    havoc: "Havoc matchup",
+  };
+  return Object.entries(labels).map(([field, label]) =>
+    renderMetricRow(
+      label,
+      projection.matchup.available[field]
+        ? formatSigned(projection.matchup.components[field], 2)
+        : "Withheld",
+      projection.matchup.available[field] ? "active" : "sample not met"
+    )
+  ).join("");
+}
+
+function renderMatchupAnalysis(errorMessage = "") {
+  const container = document.getElementById("tape-container");
+  if (!container) return;
+  const names = Object.keys(teams).sort((a, b) => a.localeCompare(b));
+  const options = names.map(name => `<option value="${escapeHtml(name)}"></option>`).join("");
+  const projection = tapeTeamA && tapeTeamB
+    ? buildInteractiveProjection(tapeTeamA, tapeTeamB, tapeVenue)
+    : null;
+
+  const result = projection ? `
+    <div class="tape-result">
+      <div class="tape-scoreboard">
+        <div class="tape-team">
+          <div class="tape-team-name">${escapeHtml(projection.teamA.team)}</div>
+          <div class="tape-team-meta">${powerRank(projection.teamA)} · ${formatPercent(projection.teamAWin)} win probability</div>
+        </div>
+        <div>
+          <div class="tape-score">${projection.scoreA}–${projection.scoreB}</div>
+          <div class="tape-team-meta" style="text-align:center;">Projected final</div>
+        </div>
+        <div class="tape-team">
+          <div class="tape-team-name">${escapeHtml(projection.teamB.team)}</div>
+          <div class="tape-team-meta">${powerRank(projection.teamB)} · ${formatPercent(projection.teamBWin)} win probability</div>
+        </div>
+      </div>
+
+      <div class="tape-summary-grid">
+        <div class="tape-summary-card">
+          <div class="tape-summary-label">Fair Line</div>
+          <div class="tape-summary-value">${escapeHtml(favoredLine(projection.homeName, projection.awayName, projection.homeSpread))}</div>
+        </div>
+        <div class="tape-summary-card">
+          <div class="tape-summary-label">Projected Total</div>
+          <div class="tape-summary-value">${formatNumber(projection.total, 1)}</div>
+        </div>
+        <div class="tape-summary-card">
+          <div class="tape-summary-label">Location</div>
+          <div class="tape-summary-value" style="font-size:15px;">${escapeHtml(matchupLocationText(tapeTeamA, tapeTeamB))}</div>
+        </div>
+        <div class="tape-summary-card">
+          <div class="tape-summary-label">Model Version</div>
+          <div class="tape-summary-value" style="font-size:15px;">${escapeHtml(projectionsData?.meta?.version ?? "Model A")}</div>
+        </div>
+      </div>
+
+      <div class="tape-breakdown">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Projection Build</div></div>
+          <div class="panel-body">
+            ${renderMetricRow("Rating-only line", favoredLine(projection.homeName, projection.awayName, projection.ratingOnlySpread))}
+            ${renderMetricRow("Home-field advantage", projection.neutral ? "0.0" : `${formatNumber(projection.hfa, 1)} pts`, projection.neutral ? "neutral" : projection.homeName)}
+            ${renderMetricRow("Line after venue", favoredLine(projection.homeName, projection.awayName, projection.afterHfa))}
+            ${renderMetricRow("Live matchup adjustment", formatSigned(projection.matchup.total, 2), projection.matchup.comparable ? "active" : "withheld")}
+            ${renderMetricRow("Final fair line", favoredLine(projection.homeName, projection.awayName, projection.homeSpread))}
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Live Matchup Components</div></div>
+          <div class="panel-body">${matchupComponentRows(projection)}</div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">${escapeHtml(projection.teamA.team)} Offense vs ${escapeHtml(projection.teamB.team)} Defense</div></div>
+          <div class="panel-body">${matchupProfileRows(projection.teamA, projection.teamB)}</div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">${escapeHtml(projection.teamB.team)} Offense vs ${escapeHtml(projection.teamA.team)} Defense</div></div>
+          <div class="panel-body">${matchupProfileRows(projection.teamB, projection.teamA)}</div>
+        </div>
+      </div>
+
+      <div class="ratings-note" style="margin-top:12px;">
+        Hypothetical matchup only. It uses the current Model A rating scale, total formula,
+        team-specific home-field table and sample-gated live matchup adjustments. It does not
+        create a tracked projection, betting signal or official model result.
+      </div>
+    </div>
+  ` : `
+    <div class="empty-state" style="margin-top:16px;">
+      Search for two teams and run the matchup analysis.
+    </div>
+  `;
+
+  container.innerHTML = `
+    <div class="tape-controls">
+      <div class="tape-field">
+        <label for="matchup-team-a">Team A</label>
+        <input id="matchup-team-a" list="matchup-team-options" type="search" placeholder="Search teams..." value="${escapeHtml(tapeTeamA ?? "")}">
+      </div>
+      <div class="tape-field">
+        <label for="matchup-team-b">Team B</label>
+        <input id="matchup-team-b" list="matchup-team-options" type="search" placeholder="Search teams..." value="${escapeHtml(tapeTeamB ?? "")}">
+      </div>
+      <datalist id="matchup-team-options">${options}</datalist>
+      <div class="tape-field">
+        <label for="matchup-venue">Location</label>
+        <select id="matchup-venue">
+          <option value="neutral" ${tapeVenue === "neutral" ? "selected" : ""}>Neutral site</option>
+          <option value="team_a_home" ${tapeVenue === "team_a_home" ? "selected" : ""}>Team A home</option>
+          <option value="team_b_home" ${tapeVenue === "team_b_home" ? "selected" : ""}>Team B home</option>
+        </select>
+      </div>
+      <button class="tape-button" type="button" onclick="runMatchupAnalysis()">Run Analysis</button>
+    </div>
+    ${errorMessage ? `<div class="ratings-note" style="margin-top:10px;color:#9a4d00;">${escapeHtml(errorMessage)}</div>` : ""}
+    ${result}
+  `;
+}
+
+function initializeMatchupAnalysis() {
+  renderMatchupAnalysis();
+}
+
+function runMatchupAnalysis() {
+  const teamA = resolveMatchupTeam(document.getElementById("matchup-team-a")?.value);
+  const teamB = resolveMatchupTeam(document.getElementById("matchup-team-b")?.value);
+  const venue = document.getElementById("matchup-venue")?.value ?? "neutral";
+
+  if (!teamA || !teamB) {
+    renderMatchupAnalysis("Select two valid FBS teams from the search suggestions.");
+    return;
+  }
+  if (teamA === teamB) {
+    renderMatchupAnalysis("Choose two different teams.");
+    return;
+  }
+
+  tapeTeamA = teamA;
+  tapeTeamB = teamB;
+  tapeVenue = ["neutral", "team_a_home", "team_b_home"].includes(venue) ? venue : "neutral";
+  renderMatchupAnalysis();
 }
 
 
