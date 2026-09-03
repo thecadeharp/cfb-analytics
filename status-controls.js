@@ -5,50 +5,31 @@
   // THE HAMMER INDEX
   // status-controls.js
   //
-  // Adds:
-  //   - All Games / Upcoming / Live / Final filters
-  //   - Upcoming / Live / Final counts to the existing projection summary
-  //   - ET to scheduled kickoff times
+  // Presentation-only game lifecycle controls:
+  //   - All Games
+  //   - Upcoming
+  //   - Live
+  //   - Final
+  //   - ET kickoff labels
   //
-  // Presentation only.
-  // Does NOT modify projection/model/odds/settlement data.
+  // The old projection-summary line is intentionally hidden.
   // ==========================================================================
 
-  const VIEW_SELECTOR =
-    "#view-projections";
-
-  const CONTAINER_SELECTOR =
-    "#projections-container";
+  const VIEW_SELECTOR = "#view-projections";
+  const CONTAINER_SELECTOR = "#projections-container";
 
   const ROW_SELECTOR =
     "#projections-container .projection-table tbody tr.game-row";
 
-  const SUMMARY_SELECTOR =
-    "#projection-summary";
+  const SUMMARY_SELECTOR = "#projection-summary";
 
-  const FILTER_ID =
-    "hammer-game-status-filters";
+  const FILTER_ID = "hammer-game-status-filters";
+  const STYLE_ID = "hammer-game-status-filter-styles";
+  const EMPTY_ID = "hammer-game-status-empty";
 
-  const STYLE_ID =
-    "hammer-game-status-filter-styles";
-
-  const EMPTY_ID =
-    "hammer-game-status-empty";
-
-  let activeStatus =
-    "all";
-
-  let updateQueued =
-    false;
-
-  let projectionObserver =
-    null;
-
-  let summaryObserver =
-    null;
-
-  let applyingSummary =
-    false;
+  let activeStatus = "all";
+  let updateQueued = false;
+  let projectionObserver = null;
 
 
   // ==========================================================================
@@ -56,31 +37,30 @@
   // ==========================================================================
 
   function installStyles() {
-    if (
-      document.getElementById(
-        STYLE_ID
-      )
-    ) {
+    if (document.getElementById(STYLE_ID)) {
       return;
     }
 
-    const style =
-      document.createElement(
-        "style"
-      );
+    const style = document.createElement("style");
 
-    style.id =
-      STYLE_ID;
+    style.id = STYLE_ID;
 
     style.textContent = `
+      /* Hide the old:
+         51 games · 46 upcoming · 1 live · ...
+      */
+      #projection-summary {
+        display: none !important;
+      }
+
       .hammer-status-filter-wrap {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 14px;
+        gap: 20px;
 
-        margin: 0 0 14px;
-        padding: 11px 13px;
+        margin: 4px 0 16px;
+        padding: 15px 17px;
 
         background: var(--surface);
         border: 1px solid var(--border);
@@ -93,20 +73,20 @@
         color: var(--muted);
 
         font-family: var(--mono);
-        font-size: 9px;
+        font-size: 10px;
         font-weight: 700;
-        letter-spacing: 1px;
+        letter-spacing: 1.2px;
 
         text-transform: uppercase;
         white-space: nowrap;
       }
 
       .hammer-status-filter-buttons {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        flex-wrap: wrap;
-        gap: 7px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(110px, 1fr));
+        gap: 9px;
+
+        width: min(100%, 620px);
       }
 
       .hammer-status-filter-button {
@@ -115,10 +95,10 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 6px;
+        gap: 8px;
 
-        min-height: 30px;
-        padding: 6px 10px;
+        min-height: 40px;
+        padding: 9px 15px;
 
         border: 1px solid var(--border);
         border-radius: 999px;
@@ -127,21 +107,24 @@
         color: var(--muted);
 
         font-family: var(--mono);
-        font-size: 9px;
+        font-size: 10px;
         font-weight: 700;
-        letter-spacing: 0.25px;
+        letter-spacing: 0.3px;
 
+        white-space: nowrap;
         cursor: pointer;
 
         transition:
           background 0.15s ease,
           border-color 0.15s ease,
-          color 0.15s ease;
+          color 0.15s ease,
+          transform 0.15s ease;
       }
 
       .hammer-status-filter-button:hover {
         color: var(--text);
         border-color: var(--border-dark);
+        transform: translateY(-1px);
       }
 
       .hammer-status-filter-button.is-active {
@@ -167,17 +150,42 @@
       }
 
       .hammer-status-live-dot {
-        width: 6px;
-        height: 6px;
+        width: 7px;
+        height: 7px;
 
-        flex: 0 0 6px;
+        flex: 0 0 7px;
 
         border-radius: 50%;
         background: currentColor;
       }
 
       .hammer-status-count {
-        opacity: 0.72;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        min-width: 20px;
+        height: 20px;
+        padding: 0 5px;
+
+        border-radius: 999px;
+
+        background: rgba(0, 0, 0, 0.055);
+
+        font-size: 9px;
+        line-height: 1;
+      }
+
+      .hammer-status-filter-button.is-active .hammer-status-count {
+        background: rgba(255, 255, 255, 0.16);
+      }
+
+      .hammer-status-filter-button[data-status="live"] .hammer-status-count {
+        background: rgba(180, 35, 24, 0.07);
+      }
+
+      .hammer-status-filter-button[data-status="live"].is-active .hammer-status-count {
+        background: rgba(255, 255, 255, 0.17);
       }
 
       .hammer-status-empty {
@@ -197,29 +205,52 @@
         font-size: 12px;
       }
 
-      @media (max-width: 600px) {
+
+      /* ==============================================================
+         TABLET
+      ============================================================== */
+
+      @media (max-width: 900px) {
         .hammer-status-filter-wrap {
           align-items: flex-start;
           flex-direction: column;
-
-          padding: 11px;
         }
 
         .hammer-status-filter-buttons {
-          justify-content: flex-start;
           width: 100%;
+        }
+      }
+
+
+      /* ==============================================================
+         MOBILE
+      ============================================================== */
+
+      @media (max-width: 600px) {
+        .hammer-status-filter-wrap {
+          gap: 10px;
+
+          margin-bottom: 14px;
+          padding: 12px;
+        }
+
+        .hammer-status-filter-buttons {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
         }
 
         .hammer-status-filter-button {
-          min-height: 34px;
-          padding: 7px 10px;
+          width: 100%;
+          min-height: 42px;
+
+          padding: 9px 10px;
+
+          font-size: 10px;
         }
       }
     `;
 
-    document.head.appendChild(
-      style
-    );
+    document.head.appendChild(style);
   }
 
 
@@ -229,41 +260,27 @@
 
   function projectionRows() {
     return Array.from(
-      document.querySelectorAll(
-        ROW_SELECTOR
-      )
+      document.querySelectorAll(ROW_SELECTOR)
     );
   }
 
 
-  function rowStatus(
-    row
-  ) {
+  function rowStatus(row) {
     if (!row) {
       return "upcoming";
     }
 
     if (
-      row.classList.contains(
-        "completed-row"
-      ) ||
-      row.classList.contains(
-        "hammer-final-untracked-row"
-      ) ||
-      row.dataset
-        .hammerGameState ===
-        "final"
+      row.classList.contains("completed-row") ||
+      row.classList.contains("hammer-final-untracked-row") ||
+      row.dataset.hammerGameState === "final"
     ) {
       return "final";
     }
 
     if (
-      row.classList.contains(
-        "hammer-live-row"
-      ) ||
-      row.dataset
-        .hammerGameState ===
-        "live"
+      row.classList.contains("hammer-live-row") ||
+      row.dataset.hammerGameState === "live"
     ) {
       return "live";
     }
@@ -280,47 +297,32 @@
       final: 0
     };
 
-    projectionRows()
-      .forEach(
-        row => {
-          const status =
-            rowStatus(
-              row
-            );
+    projectionRows().forEach(row => {
+      const status = rowStatus(row);
 
-          counts.all += 1;
+      counts.all += 1;
 
-          if (
-            Object.prototype
-              .hasOwnProperty
-              .call(
-                counts,
-                status
-              )
-          ) {
-            counts[
-              status
-            ] += 1;
-          }
-        }
-      );
+      if (
+        Object.prototype.hasOwnProperty.call(
+          counts,
+          status
+        )
+      ) {
+        counts[status] += 1;
+      }
+    });
 
     return counts;
   }
 
 
   // ==========================================================================
-  // STATUS FILTER UI
+  // STATUS BUTTONS
   // ==========================================================================
 
-  function buttonMarkup(
-    status,
-    label,
-    count
-  ) {
+  function buttonMarkup(status, label, count) {
     const active =
-      activeStatus ===
-      status;
+      activeStatus === status;
 
     const live =
       status === "live";
@@ -338,9 +340,7 @@
             : ""
         }
 
-        <span>
-          ${label}
-        </span>
+        <span>${label}</span>
 
         <span class="hammer-status-count">
           ${count}
@@ -361,15 +361,11 @@
     }
 
     let wrapper =
-      document.getElementById(
-        FILTER_ID
-      );
+      document.getElementById(FILTER_ID);
 
     if (!wrapper) {
       wrapper =
-        document.createElement(
-          "div"
-        );
+        document.createElement("div");
 
       wrapper.id =
         FILTER_ID;
@@ -377,11 +373,10 @@
       wrapper.className =
         "hammer-status-filter-wrap";
 
-      tableCard
-        .insertAdjacentElement(
-          "beforebegin",
-          wrapper
-        );
+      tableCard.insertAdjacentElement(
+        "beforebegin",
+        wrapper
+      );
 
       wrapper.addEventListener(
         "click",
@@ -396,8 +391,7 @@
           }
 
           const status =
-            button.dataset
-              .status;
+            button.dataset.status;
 
           if (
             ![
@@ -405,15 +399,12 @@
               "upcoming",
               "live",
               "final"
-            ].includes(
-              status
-            )
+            ].includes(status)
           ) {
             return;
           }
 
-          activeStatus =
-            status;
+          activeStatus = status;
 
           updateEverything();
         }
@@ -460,35 +451,26 @@
 
 
   // ==========================================================================
-  // DESKTOP FILTER
+  // DESKTOP FILTERING
   // ==========================================================================
 
   function applyDesktopFilter() {
-    projectionRows()
-      .forEach(
-        row => {
-          const status =
-            rowStatus(
-              row
-            );
+    projectionRows().forEach(row => {
+      const status =
+        rowStatus(row);
 
-          const visible =
-            activeStatus ===
-              "all" ||
-            status ===
-              activeStatus;
+      const visible =
+        activeStatus === "all" ||
+        status === activeStatus;
 
-          row.style.display =
-            visible
-              ? ""
-              : "none";
-        }
-      );
+      row.style.display =
+        visible ? "" : "none";
+    });
   }
 
 
   // ==========================================================================
-  // MOBILE FILTER
+  // MOBILE FILTERING
   // ==========================================================================
 
   function applyMobileFilter() {
@@ -502,40 +484,25 @@
         )
       );
 
-    cards.forEach(
-      (
-        card,
-        index
-      ) => {
-        const sourceRow =
-          sourceRows[
-            index
-          ];
+    cards.forEach((card, index) => {
+      const sourceRow =
+        sourceRows[index];
 
-        if (!sourceRow) {
-          card.style.display =
-            "";
-
-          return;
-        }
-
-        const status =
-          rowStatus(
-            sourceRow
-          );
-
-        const visible =
-          activeStatus ===
-            "all" ||
-          status ===
-            activeStatus;
-
-        card.style.display =
-          visible
-            ? ""
-            : "none";
+      if (!sourceRow) {
+        card.style.display = "";
+        return;
       }
-    );
+
+      const status =
+        rowStatus(sourceRow);
+
+      const visible =
+        activeStatus === "all" ||
+        status === activeStatus;
+
+      card.style.display =
+        visible ? "" : "none";
+    });
   }
 
 
@@ -563,9 +530,7 @@
     }
 
     empty =
-      document.createElement(
-        "div"
-      );
+      document.createElement("div");
 
     empty.id =
       EMPTY_ID;
@@ -573,11 +538,10 @@
     empty.className =
       "hammer-status-empty";
 
-    tableCard
-      .insertAdjacentElement(
-        "beforebegin",
-        empty
-      );
+    tableCard.insertAdjacentElement(
+      "beforebegin",
+      empty
+    );
 
     return empty;
   }
@@ -595,37 +559,21 @@
       statusCounts();
 
     if (
-      activeStatus ===
-        "all" ||
-      (
-        counts[
-          activeStatus
-        ] ?? 0
-      ) > 0
+      activeStatus === "all" ||
+      (counts[activeStatus] ?? 0) > 0
     ) {
-      empty.style.display =
-        "none";
-
+      empty.style.display = "none";
       return;
     }
 
     const labels = {
-      upcoming:
-        "upcoming games",
-
-      live:
-        "live games",
-
-      final:
-        "final games"
+      upcoming: "upcoming games",
+      live: "live games",
+      final: "final games"
     };
 
     empty.textContent =
-      `No ${
-        labels[
-          activeStatus
-        ] ?? "games"
-      } are available in this week.`;
+      `No ${labels[activeStatus] ?? "games"} are available in this week.`;
 
     empty.style.display =
       "block";
@@ -633,20 +581,10 @@
 
 
   // ==========================================================================
-  // SUMMARY
-  //
-  // IMPORTANT:
-  //
-  // We modify ONLY #projection-summary.
-  //
-  // We preserve the original HTML after the leading:
-  //
-  //   51 games · 0 final ·
-  //
-  // so existing colored PLAY / SMALL EDGE / MATERIAL / TOTAL markup survives.
+  // HIDE OLD SUMMARY
   // ==========================================================================
 
-  function updateSummary() {
+  function hideOldSummary() {
     const summary =
       document.querySelector(
         SUMMARY_SELECTOR
@@ -656,229 +594,79 @@
       return;
     }
 
-    const counts =
-      statusCounts();
-
-    const lifecycle =
-      `${counts.all} games · ` +
-      `${counts.upcoming} upcoming · ` +
-      `${counts.live} live · ` +
-      `${counts.final} final · `;
-
-    let html =
-      summary.innerHTML;
-
-    if (!html) {
-      return;
-    }
-
-    /*
-      CASE 1:
-      Already enhanced by this script.
-
-      Replace only the lifecycle prefix.
-    */
-
-    const enhancedPattern =
-      /^\s*\d+\s+games\s*·\s*\d+\s+upcoming\s*·\s*\d+\s+live\s*·\s*\d+\s+final\s*·\s*/i;
-
-    if (
-      enhancedPattern.test(
-        html
-      )
-    ) {
-      const updated =
-        html.replace(
-          enhancedPattern,
-          lifecycle
-        );
-
-      if (
-        updated !== html
-      ) {
-        applyingSummary =
-          true;
-
-        summary.innerHTML =
-          updated;
-
-        applyingSummary =
-          false;
-      }
-
-      return;
-    }
-
-    /*
-      CASE 2:
-      Original app summary:
-
-        51 games · 0 final · 41 lined · ...
-
-      Replace ONLY:
-        51 games · 0 final ·
-
-      Everything from "41 lined" onward remains exactly as app.js rendered it.
-    */
-
-    const originalPattern =
-      /^\s*\d+\s+games\s*·\s*\d+\s+final\s*·\s*/i;
-
-    if (
-      originalPattern.test(
-        html
-      )
-    ) {
-      applyingSummary =
-        true;
-
-      summary.innerHTML =
-        html.replace(
-          originalPattern,
-          lifecycle
-        );
-
-      applyingSummary =
-        false;
-
-      return;
-    }
-
-    /*
-      CASE 3:
-      Defensive fallback if app.js ever drops "0 final":
-
-        51 games · 41 lined · ...
-
-      Replace only "51 games ·"
-    */
-
-    const gamesOnlyPattern =
-      /^\s*\d+\s+games\s*·\s*/i;
-
-    if (
-      gamesOnlyPattern.test(
-        html
-      )
-    ) {
-      applyingSummary =
-        true;
-
-      summary.innerHTML =
-        html.replace(
-          gamesOnlyPattern,
-          lifecycle
-        );
-
-      applyingSummary =
-        false;
-    }
+    summary.style.display =
+      "none";
   }
 
 
   // ==========================================================================
-  // EASTERN TIME LABELS
-  //
-  // Only changes scheduled kickoff strings containing AM/PM.
-  //
-  // Examples:
-  //
-  //   Sep 5, 7:30 PM
-  //       ->
-  //   Sep 5, 7:30 PM ET
-  //
-  // Live clock:
-  //
-  //   04:39
-  //
-  // is untouched because it does not contain AM or PM.
+  // EASTERN TIME LABEL
   // ==========================================================================
 
   function addEasternTimeLabels() {
-    const rows =
-      projectionRows();
+    projectionRows().forEach(row => {
+      const targets =
+        row.querySelectorAll(
+          ".matchup-cell, .team-meta"
+        );
 
-    rows.forEach(
-      row => {
-        /*
-          Search the matchup cell and team-meta elements.
-
-          Using both selectors protects us if app.js puts the
-          kickoff metadata one level outside .matchup-cell.
-        */
-
-        const targets =
-          row.querySelectorAll(
-            ".matchup-cell, .team-meta"
+      targets.forEach(target => {
+        const walker =
+          document.createTreeWalker(
+            target,
+            NodeFilter.SHOW_TEXT
           );
 
-        targets.forEach(
-          target => {
-            const walker =
-              document.createTreeWalker(
-                target,
-                NodeFilter.SHOW_TEXT
-              );
+        const nodes = [];
 
-            const nodes =
-              [];
+        while (walker.nextNode()) {
+          nodes.push(
+            walker.currentNode
+          );
+        }
 
-            while (
-              walker.nextNode()
-            ) {
-              nodes.push(
-                walker.currentNode
-              );
-            }
-
-            nodes.forEach(
-              node => {
-                const original =
-                  String(
-                    node.nodeValue ?? ""
-                  );
-
-                if (
-                  !/\b(?:AM|PM)\b/i
-                    .test(
-                      original
-                    )
-                ) {
-                  return;
-                }
-
-                const updated =
-                  original.replace(
-                    /(\b\d{1,2}:\d{2}\s*(?:AM|PM)\b)(?!\s*ET\b)/gi,
-                    "$1 ET"
-                  );
-
-                if (
-                  updated !==
-                  original
-                ) {
-                  node.nodeValue =
-                    updated;
-                }
-              }
+        nodes.forEach(node => {
+          const original =
+            String(
+              node.nodeValue ?? ""
             );
+
+          if (
+            !/\b(?:AM|PM)\b/i.test(
+              original
+            )
+          ) {
+            return;
           }
-        );
-      }
-    );
+
+          const updated =
+            original.replace(
+              /(\b\d{1,2}:\d{2}\s*(?:AM|PM)\b)(?!\s*ET\b)/gi,
+              "$1 ET"
+            );
+
+          if (
+            updated !== original
+          ) {
+            node.nodeValue =
+              updated;
+          }
+        });
+      });
+    });
   }
 
 
   // ==========================================================================
-  // MASTER UPDATE
+  // UPDATE
   // ==========================================================================
 
   function updateEverything() {
     installStyles();
 
-    ensureFilterUI();
+    hideOldSummary();
 
-    updateSummary();
+    ensureFilterUI();
 
     addEasternTimeLabels();
 
@@ -891,28 +679,22 @@
 
 
   function scheduleUpdate() {
-    if (
-      updateQueued
-    ) {
+    if (updateQueued) {
       return;
     }
 
-    updateQueued =
-      true;
+    updateQueued = true;
 
-    requestAnimationFrame(
-      () => {
-        updateQueued =
-          false;
+    requestAnimationFrame(() => {
+      updateQueued = false;
 
-        updateEverything();
-      }
-    );
+      updateEverything();
+    });
   }
 
 
   // ==========================================================================
-  // OBSERVERS
+  // OBSERVER
   // ==========================================================================
 
   function installProjectionObserver() {
@@ -930,9 +712,7 @@
       return;
     }
 
-    if (
-      projectionObserver
-    ) {
+    if (projectionObserver) {
       return;
     }
 
@@ -943,12 +723,10 @@
             mutations.some(
               mutation =>
                 mutation.type ===
-                  "childList"
+                "childList"
             );
 
-          if (
-            meaningful
-          ) {
+          if (meaningful) {
             scheduleUpdate();
           }
         }
@@ -964,70 +742,18 @@
   }
 
 
-  function installSummaryObserver() {
-    const summary =
-      document.querySelector(
-        SUMMARY_SELECTOR
-      );
-
-    if (!summary) {
-      setTimeout(
-        installSummaryObserver,
-        100
-      );
-
-      return;
-    }
-
-    if (
-      summaryObserver
-    ) {
-      return;
-    }
-
-    summaryObserver =
-      new MutationObserver(
-        () => {
-          if (
-            applyingSummary
-          ) {
-            return;
-          }
-
-          scheduleUpdate();
-        }
-      );
-
-    summaryObserver.observe(
-      summary,
-      {
-        childList: true,
-        characterData: true,
-        subtree: true
-      }
-    );
-  }
-
-
   // ==========================================================================
-  // STARTUP
+  // START
   // ==========================================================================
 
   function start() {
     installStyles();
 
+    hideOldSummary();
+
     installProjectionObserver();
 
-    installSummaryObserver();
-
     scheduleUpdate();
-
-    /*
-      Other Hammer Index scripts render asynchronously.
-
-      These extra passes are intentional so this adapter runs
-      after app.js, ux-v2.js, sort-tables.js and mobile.js settle.
-    */
 
     setTimeout(
       scheduleUpdate,
@@ -1062,8 +788,7 @@
 
 
   if (
-    document.readyState ===
-      "loading"
+    document.readyState === "loading"
   ) {
     document.addEventListener(
       "DOMContentLoaded",
