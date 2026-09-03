@@ -773,9 +773,47 @@
       <h1 class="page-title">Game Projections</h1>
 
       <div class="page-subtitle">
-        Every FBS matchup, sorted by how far the model sits from the market.
-        A game is only flagged when the disagreement clears the threshold.
+        Every FBS matchup, sorted by model edge versus the current market.
+        Model Signal measures the size of that separation. Signal Confidence
+        separately measures how much prospective evidence supports each tier.
       </div>
+
+      <details class="signal-guide">
+        <summary>
+          <span>How Signals Work</span>
+          <span style="font-family:var(--mono);font-size:9px;color:var(--muted);font-weight:500;">
+            METHODOLOGY + CONFIDENCE KEY
+          </span>
+        </summary>
+
+        <div class="signal-guide-body">
+          <div class="signal-guide-copy">
+            <strong>Model Signal</strong> classifies the absolute difference between
+            our fair line and the current market. A larger signal means the model
+            and market are farther apart; it does not automatically mean the bet is
+            more historically reliable. <strong>Signal Confidence</strong> is a
+            separate evidence grade earned prospectively from sample size, ATS
+            performance, closing-line value and beat-close rate.
+          </div>
+
+          <div class="signal-legend-grid">
+            <div class="signal-legend-item"><div class="signal-legend-name" style="color:var(--muted);">ALIGNED</div><div class="signal-legend-range">0–2.5 pts</div></div>
+            <div class="signal-legend-item"><div class="signal-legend-name" style="color:#355f91;">SMALL EDGE</div><div class="signal-legend-range">3.0–5.0 pts</div></div>
+            <div class="signal-legend-item"><div class="signal-legend-name" style="color:var(--green);">PLAY</div><div class="signal-legend-range">5.5–7.0 pts</div></div>
+            <div class="signal-legend-item"><div class="signal-legend-name" style="color:#0f5c49;">MATERIAL DISAGREEMENT</div><div class="signal-legend-range">7.5–10.0 pts</div></div>
+            <div class="signal-legend-item"><div class="signal-legend-name" style="color:#9a4d00;">OUTLIER</div><div class="signal-legend-range">10.5+ pts</div></div>
+          </div>
+
+          <div class="confidence-legend">
+            <span class="status confidence-developing">DEVELOPING</span>
+            <span class="confidence-legend-note">Evidence accumulating.</span>
+            <span class="status confidence-validated">VALIDATED</span>
+            <span class="confidence-legend-note">50+ decisions · ≥52.5% ATS · positive avg CLV · ≥52.5% beat close.</span>
+            <span class="status confidence-established">ESTABLISHED</span>
+            <span class="confidence-legend-note">100+ decisions · ≥53.0% ATS · positive avg CLV · ≥55% beat close.</span>
+          </div>
+        </div>
+      </details>
 
       <div class="week-tabs" id="week-tabs">
         <!-- Built by app.js -->

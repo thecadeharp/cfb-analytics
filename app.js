@@ -1,6 +1,6 @@
 // ============================================================================
 // CFB ANALYTICS — FRONTEND
-// The Signal UI v3: ALIGNED / SLIGHT EDGE / EDGE / STRONG EDGE / OUTLIER
+// Signal System v1: ALIGNED / SMALL EDGE / PLAY / MATERIAL DISAGREEMENT / OUTLIER
 // ============================================================================
 
 const DATA_URLS = {
@@ -8,12 +8,14 @@ const DATA_URLS = {
   schedule: "./data/schedule.json",
   odds: "./data/odds.json",
   projections: "./data/projections.json",
+  signalReport: "./data/reports/signal_report.json",
 };
 
 let metricsData = null;
 let scheduleData = null;
 let oddsData = null;
 let projectionsData = null;
+let signalReportData = null;
 
 let teams = {};
 let projections = [];
@@ -81,47 +83,93 @@ function recordText(team) {
   return `${record.wins ?? 0}-${record.losses ?? 0}`;
 }
 
-function statusClass(status) {
+function canonicalSignal(status) {
+  if (!status || status === "NO MARKET") return "NO LINE";
+
   switch (status) {
-    case "STRONG EDGE":
-    case "PLAY":
-      return "play";
-    case "EDGE":
-      return "edge";
-    case "SLIGHT EDGE":
-    case "LEAN":
-      return "lean";
-    case "OUTLIER":
-      return "outlier";
-    case "ALIGNED":
     case "AGREE W/ MARKET":
-      return "agree";
+    case "ALIGNED":
+      return "ALIGNED";
+    case "LEAN":
+    case "SLIGHT EDGE":
+    case "SMALL EDGE":
+      return "SMALL EDGE";
+    case "EDGE":
+    case "PLAY":
+      return "PLAY";
+    case "STRONG EDGE":
+    case "MATERIAL DISAGREEMENT":
+      return "MATERIAL DISAGREEMENT";
+    case "OUTLIER":
+      return "OUTLIER";
     default:
-      return "inline";
+      return status;
+  }
+}
+
+function statusClass(status) {
+  switch (canonicalSignal(status)) {
+    case "MATERIAL DISAGREEMENT": return "material";
+    case "PLAY": return "play";
+    case "SMALL EDGE": return "small-edge";
+    case "OUTLIER": return "outlier";
+    case "ALIGNED": return "agree";
+    default: return "inline";
   }
 }
 
 function displayStatus(status) {
-  if (!status || status === "NO MARKET") return "NO LINE";
-  if (status === "PLAY") return "STRONG EDGE";
-  if (status === "LEAN") return "SLIGHT EDGE";
-  if (status === "AGREE W/ MARKET") return "ALIGNED";
-  return status;
+  return canonicalSignal(status);
 }
 
-function displayBetStatus(status) {
-  if (!status) return "—";
-  return String(status)
-    .toLowerCase()
-    .replace(/(^|\s)\S/g, letter => letter.toUpperCase());
+function signalStats(status) {
+  const signal = canonicalSignal(status);
+  return signalReportData?.signals?.[signal] ?? null;
+}
+
+function signalConfidence(status) {
+  if (canonicalSignal(status) === "NO LINE") return "—";
+  return signalStats(status)?.confidence ?? "DEVELOPING";
+}
+
+function confidenceClass(confidence) {
+  switch (String(confidence || "").toUpperCase()) {
+    case "ESTABLISHED": return "confidence-established";
+    case "VALIDATED": return "confidence-validated";
+    case "DEVELOPING": return "confidence-developing";
+    default: return "agree";
+  }
+}
+
+function signalRecordText(status) {
+  if (canonicalSignal(status) === "NO LINE") return "—";
+  return signalStats(status)?.record?.record_text ?? "0-0";
+}
+
+function signalAtsText(status) {
+  if (canonicalSignal(status) === "NO LINE") return "No market";
+  const pct = signalStats(status)?.record?.ats_win_pct_ex_pushes;
+  return hasValue(pct) ? `${formatNumber(pct, 1)}% ATS` : "ATS tracking";
+}
+
+function signalClvText(status) {
+  const clv = signalStats(status)?.clv?.average_clv_points;
+  return hasValue(clv) ? `${formatSigned(clv, 2)} avg CLV` : "CLV tracking";
+}
+
+function signalBeatCloseText(status) {
+  const pct = signalStats(status)?.clv?.beat_close_pct_ex_pushes;
+  return hasValue(pct) ? `${formatNumber(pct, 1)}% beat close` : "Beat-close tracking";
 }
 
 function statusEdgeClass(status) {
-  if (status === "STRONG EDGE" || status === "PLAY") return "edge-play";
-  if (status === "EDGE") return "edge-edge";
-  if (status === "SLIGHT EDGE" || status === "LEAN") return "edge-lean";
-  if (status === "OUTLIER") return "edge-outlier";
-  return "";
+  switch (canonicalSignal(status)) {
+    case "MATERIAL DISAGREEMENT": return "edge-material";
+    case "PLAY": return "edge-play";
+    case "SMALL EDGE": return "edge-small";
+    case "OUTLIER": return "edge-outlier";
+    default: return "";
+  }
 }
 
 function shortSpread(spread) {
@@ -293,30 +341,55 @@ function ensureMatchupView() {
     }
   }
 
-  if (document.getElementById("cfb-status-ui-v2")) return;
+  if (document.getElementById("cfb-signal-system-v1")) return;
 
   const style = document.createElement("style");
-  style.id = "cfb-status-ui-v2";
+  style.id = "cfb-signal-system-v1";
   style.textContent = `
     .projection-table tbody tr.game-row { cursor:pointer; }
     .projection-table tbody tr.game-row:hover { background:#fafaf8; }
 
-    .status.edge {
-      background: var(--green-light);
-      color: var(--green);
-      border: 1px solid #bfd9d0;
+    .status.small-edge {
+      background:#edf3fb;
+      color:#355f91;
+      border:1px solid #c9d7e8;
     }
 
-    .status.lean {
-      background: var(--amber-light);
-      color: var(--amber);
-      border: 1px solid #efd9b8;
+    .status.play {
+      background:var(--green);
+      color:#ffffff;
+      border:1px solid var(--green);
+    }
+
+    .status.material {
+      background:#0f5c49;
+      color:#ffffff;
+      border:1px solid #0f5c49;
     }
 
     .status.outlier {
-      background: var(--red-light);
-      color: var(--red);
-      border: 1px solid #e9c2bd;
+      background:#fff0df;
+      color:#9a4d00;
+      border:1px solid #e6b77d;
+    }
+
+    .confidence-developing {
+      background:#f8e7a1 !important;
+      color:#4e3b00 !important;
+      border:1px solid #d9bd53 !important;
+    }
+
+    .confidence-validated {
+      background:var(--green) !important;
+      color:#ffffff !important;
+      border:1px solid var(--green) !important;
+    }
+
+    .confidence-established {
+      background:#5b4bc4 !important;
+      color:#ffffff !important;
+      border:1px solid #4a3cab !important;
+      box-shadow:0 0 0 1px rgba(91,75,196,.08);
     }
 
     .status.agree {
@@ -326,15 +399,49 @@ function ensureMatchupView() {
       min-width: 116px;
     }
 
-    .disagreement-number.edge { color: var(--green); }
-    .disagreement-number.lean { color: var(--amber); }
-    .disagreement-number.outlier { color: var(--red); }
-    .disagreement-number.agree { color: var(--muted); }
+    .disagreement-number.material { color:#0f5c49; }
+    .disagreement-number.play { color:var(--green); }
+    .disagreement-number.small-edge { color:#355f91; }
+    .disagreement-number.outlier { color:#9a4d00; }
+    .disagreement-number.agree { color:var(--muted); }
 
-    .summary-play { color:var(--green); font-weight:500; }
-    .summary-edge { color:var(--green); font-weight:500; }
-    .summary-lean { color:var(--amber); font-weight:500; }
-    .summary-outlier { color:var(--red); font-weight:500; }
+    .summary-material { color:#0f5c49; font-weight:600; }
+    .summary-play { color:var(--green); font-weight:600; }
+    .summary-small { color:#355f91; font-weight:600; }
+    .summary-outlier { color:#9a4d00; font-weight:600; }
+
+    .signal-guide {
+      margin:16px 0 18px;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:12px;
+      overflow:hidden;
+    }
+
+    .signal-guide summary {
+      list-style:none;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      padding:14px 16px;
+      font-weight:700;
+      font-size:12px;
+    }
+
+    .signal-guide summary::-webkit-details-marker { display:none; }
+    .signal-guide summary::after { content:"+"; font-family:var(--mono); color:var(--muted); font-size:16px; }
+    .signal-guide[open] summary::after { content:"−"; }
+    .signal-guide-body { border-top:1px solid var(--border); padding:16px; }
+    .signal-guide-copy { color:var(--muted); font-size:11px; line-height:1.6; margin-bottom:14px; max-width:960px; }
+    .signal-legend-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; margin-bottom:14px; }
+    .signal-legend-item { border:1px solid var(--border); border-radius:9px; padding:11px; min-width:0; }
+    .signal-legend-name { font-family:var(--mono); font-size:9px; font-weight:700; letter-spacing:.5px; }
+    .signal-legend-range { margin-top:5px; color:var(--muted); font-size:10px; }
+    .confidence-legend { display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; }
+    .confidence-legend-note { color:var(--muted); font-size:10px; line-height:1.5; }
+    .signal-record { color:var(--muted); font-size:9px; margin-top:5px; font-family:var(--mono); white-space:nowrap; }
 
     .matchup-header {
       display:flex; justify-content:space-between; align-items:flex-start;
@@ -372,9 +479,10 @@ function ensureMatchupView() {
       color:var(--muted); font-size:11px; margin-top:6px; line-height:1.4;
     }
 
-    .edge-play, .edge-edge { color:var(--green); }
-    .edge-lean { color:var(--amber); }
-    .edge-outlier { color:var(--red); }
+    .edge-material { color:#0f5c49; }
+    .edge-play { color:var(--green); }
+    .edge-small { color:#355f91; }
+    .edge-outlier { color:#9a4d00; }
 
     .analysis-grid {
       display:grid; grid-template-columns:repeat(4,minmax(0,1fr));
@@ -502,6 +610,7 @@ function ensureMatchupView() {
     }
 
     @media (max-width:900px) {
+      .signal-legend-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
       .analysis-grid, .season-summary-grid {
         grid-template-columns:repeat(2,minmax(0,1fr));
       }
@@ -513,6 +622,7 @@ function ensureMatchupView() {
     }
 
     @media (max-width:520px) {
+      .signal-legend-grid { grid-template-columns:1fr; }
       .analysis-grid, .season-summary-grid { grid-template-columns:1fr; }
       .matchup-title { font-size:27px; }
       .model-edge-side { font-size:23px; }
@@ -537,11 +647,12 @@ async function init() {
   try {
     ensureMatchupView();
 
-    [metricsData, scheduleData, oddsData, projectionsData] = await Promise.all([
+    [metricsData, scheduleData, oddsData, projectionsData, signalReportData] = await Promise.all([
       loadJson(DATA_URLS.metrics),
       loadJson(DATA_URLS.schedule),
       loadJson(DATA_URLS.odds),
       loadJson(DATA_URLS.projections),
+      loadJson(DATA_URLS.signalReport).catch(() => null),
     ]);
 
     teams = metricsData?.teams ?? {};
@@ -697,18 +808,18 @@ function renderProjections() {
   const games = projectionGamesForCurrentView();
   const marketGames = games.filter(game => hasValue(game?.market?.home_spread));
 
-  const strongEdges = statusCount(games, "STRONG EDGE", "PLAY");
-  const edges = statusCount(games, "EDGE");
-  const slightEdges = statusCount(games, "SLIGHT EDGE", "LEAN");
+  const material = statusCount(games, "STRONG EDGE", "MATERIAL DISAGREEMENT");
+  const plays = statusCount(games, "EDGE", "PLAY");
+  const smallEdges = statusCount(games, "SLIGHT EDGE", "LEAN", "SMALL EDGE");
   const outliers = statusCount(games, "OUTLIER");
 
   if (summary) {
     summary.innerHTML = `
       ${games.length} games
       · ${marketGames.length} lined
-      · <span class="summary-play">${strongEdges} strong edges</span>
-      · <span class="summary-edge">${edges} edges</span>
-      · <span class="summary-lean">${slightEdges} slight edges</span>
+      · <span class="summary-material">${material} material disagreements</span>
+      · <span class="summary-play">${plays} plays</span>
+      · <span class="summary-small">${smallEdges} small edges</span>
       ${outliers ? `· <span class="summary-outlier">${outliers} outliers</span>` : ""}
     `;
   }
@@ -730,9 +841,9 @@ function renderProjections() {
           <th>Our Line</th>
           <th>Market</th>
           <th>Total</th>
-          <th class="align-right">Disagreement</th>
-          <th class="align-right">The Signal</th>
-          <th class="align-right">Bet Status</th>
+          <th class="align-right">Model Edge</th>
+          <th class="align-right">Model Signal</th>
+          <th class="align-right">Signal Confidence</th>
         </tr>
       </thead>
       <tbody>
@@ -759,10 +870,9 @@ function renderProjectionRow(game) {
   const disagreement = game?.comparison?.disagreement;
   const preferred = game?.comparison?.preferred_side;
   const status = game?.comparison?.signal ?? game?.comparison?.status;
-  const betStatus =
-    game?.comparison?.bet_status ??
-    (hasValue(marketSpread) ? "TRACKING" : null);
+  const confidence = signalConfidence(status);
   const cssStatus = statusClass(status);
+  const confidenceCss = confidenceClass(confidence);
 
   const disagreementNote = hasValue(disagreement)
     ? (preferred ? `Model favors ${preferred}` : "Model agrees with market")
@@ -837,9 +947,12 @@ function renderProjectionRow(game) {
       </td>
 
       <td class="status-cell">
-        <span class="status agree">
-          ${escapeHtml(displayBetStatus(betStatus))}
+        <span class="status ${confidenceCss}">
+          ${escapeHtml(confidence)}
         </span>
+        <div class="signal-record">
+          ${escapeHtml(signalRecordText(status))} · ${escapeHtml(signalAtsText(status))}
+        </div>
       </td>
     </tr>
   `;
@@ -930,10 +1043,9 @@ function renderMatchup(game) {
 
   const comparison = game?.comparison ?? {};
   const status = comparison?.signal ?? comparison?.status;
-  const betStatus =
-    comparison?.bet_status ??
-    (hasValue(marketSpread) ? "TRACKING" : null);
+  const confidence = signalConfidence(status);
   const statusCss = statusClass(status);
+  const confidenceCss = confidenceClass(confidence);
   const edgeClass = statusEdgeClass(status);
 
   const winProb = projection?.win_probability ?? {};
@@ -989,21 +1101,21 @@ function renderMatchup(game) {
         <span class="status ${statusCss}">
           ${escapeHtml(displayStatus(status))}
         </span>
-        <span class="status agree">
-          Bet Status: ${escapeHtml(displayBetStatus(betStatus))}
+        <span class="status ${confidenceCss}">
+          Signal Confidence: ${escapeHtml(confidence)}
         </span>
       </div>
     </div>
 
     <div class="model-edge-banner">
       <div>
-        <div class="model-edge-title">The Signal</div>
+        <div class="model-edge-title">Model Signal</div>
         <div class="model-edge-side ${edgeClass}">
           ${escapeHtml(modelEdgeSide)}
         </div>
         <div class="model-edge-context">
           ${hasValue(edgeSize)
-            ? `${formatNumber(edgeSize, 1)}-point difference between the model fair line and current market.`
+            ? `${formatNumber(edgeSize, 1)}-point model edge versus the current market. Signal tier measures separation; confidence measures evidence.`
             : "No current market line is available."}
         </div>
       </div>
@@ -1012,8 +1124,8 @@ function renderMatchup(game) {
         <span class="status ${statusCss}">
           ${escapeHtml(displayStatus(status))}
         </span>
-        <span class="status agree">
-          ${escapeHtml(displayBetStatus(betStatus))}
+        <span class="status ${confidenceCss}">
+          ${escapeHtml(confidence)}
         </span>
       </div>
     </div>
@@ -1052,6 +1164,9 @@ function renderMatchup(game) {
           ${preferred
             ? `Market side: ${escapeHtml(modelEdgeSide)}`
             : "No current directional signal"}
+          <br>
+          ${escapeHtml(signalRecordText(status))} · ${escapeHtml(signalAtsText(status))} ·
+          ${escapeHtml(signalClvText(status))} · ${escapeHtml(signalBeatCloseText(status))}
         </div>
       </div>
     </div>

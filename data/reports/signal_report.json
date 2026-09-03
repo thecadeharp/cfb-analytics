@@ -1,0 +1,217 @@
+{
+  "report_version": "signal-system-v1",
+  "generated_at_utc": "2026-09-03T00:24:03.721176+00:00",
+  "model_scope": "Prospective Model A accountability layer",
+  "signal_system": {
+    "order": [
+      "ALIGNED",
+      "SMALL EDGE",
+      "PLAY",
+      "MATERIAL DISAGREEMENT",
+      "OUTLIER"
+    ],
+    "thresholds": {
+      "ALIGNED": {
+        "min": 0.0,
+        "max": 2.5
+      },
+      "SMALL EDGE": {
+        "min": 3.0,
+        "max": 5.0
+      },
+      "PLAY": {
+        "min": 5.5,
+        "max": 7.0
+      },
+      "MATERIAL DISAGREEMENT": {
+        "min": 7.5,
+        "max": 10.0
+      },
+      "OUTLIER": {
+        "min": 10.5,
+        "max": null
+      }
+    },
+    "legacy_label_translation": {
+      "ALIGNED": "ALIGNED",
+      "AGREE W/ MARKET": "ALIGNED",
+      "SLIGHT EDGE": "SMALL EDGE",
+      "LEAN": "SMALL EDGE",
+      "SMALL EDGE": "SMALL EDGE",
+      "EDGE": "PLAY",
+      "PLAY": "PLAY",
+      "STRONG EDGE": "MATERIAL DISAGREEMENT",
+      "MATERIAL DISAGREEMENT": "MATERIAL DISAGREEMENT",
+      "OUTLIER": "OUTLIER"
+    },
+    "meaning": "Signal tier measures the magnitude of separation between the model fair line and the market. A larger tier does not by itself imply greater validated betting confidence."
+  },
+  "confidence_system": {
+    "order": [
+      "DEVELOPING",
+      "VALIDATED",
+      "ESTABLISHED"
+    ],
+    "rules": {
+      "DEVELOPING": {
+        "description": "Prospective evidence is still accumulating."
+      },
+      "VALIDATED": {
+        "minimum_decisions": 50,
+        "minimum_ats_win_pct": 52.5,
+        "minimum_average_clv": 0.0,
+        "average_clv_must_be_strictly_positive": true,
+        "minimum_beat_close_pct": 52.5
+      },
+      "ESTABLISHED": {
+        "minimum_decisions": 100,
+        "minimum_ats_win_pct": 53.0,
+        "minimum_average_clv": 0.0,
+        "average_clv_must_be_strictly_positive": true,
+        "minimum_beat_close_pct": 55.0
+      }
+    },
+    "meaning": "Signal Confidence measures the prospective evidence supporting each signal tier using sample size, ATS performance, CLV and beat-close rate."
+  },
+  "signals": {
+    "ALIGNED": {
+      "signal": "ALIGNED",
+      "threshold": {
+        "min": 0.0,
+        "max": 2.5
+      },
+      "sample": {
+        "settled_games": 0,
+        "ats_decisions": 0
+      },
+      "record": {
+        "wins": 0,
+        "losses": 0,
+        "pushes": 0,
+        "record_text": "0-0",
+        "ats_win_pct_ex_pushes": null
+      },
+      "clv": {
+        "rows_with_clv": 0,
+        "average_clv_points": null,
+        "beat_close_wins": 0,
+        "worse_than_close": 0,
+        "same_as_close": 0,
+        "beat_close_pct_ex_pushes": null
+      },
+      "confidence": "DEVELOPING"
+    },
+    "SMALL EDGE": {
+      "signal": "SMALL EDGE",
+      "threshold": {
+        "min": 3.0,
+        "max": 5.0
+      },
+      "sample": {
+        "settled_games": 0,
+        "ats_decisions": 0
+      },
+      "record": {
+        "wins": 0,
+        "losses": 0,
+        "pushes": 0,
+        "record_text": "0-0",
+        "ats_win_pct_ex_pushes": null
+      },
+      "clv": {
+        "rows_with_clv": 0,
+        "average_clv_points": null,
+        "beat_close_wins": 0,
+        "worse_than_close": 0,
+        "same_as_close": 0,
+        "beat_close_pct_ex_pushes": null
+      },
+      "confidence": "DEVELOPING"
+    },
+    "PLAY": {
+      "signal": "PLAY",
+      "threshold": {
+        "min": 5.5,
+        "max": 7.0
+      },
+      "sample": {
+        "settled_games": 0,
+        "ats_decisions": 0
+      },
+      "record": {
+        "wins": 0,
+        "losses": 0,
+        "pushes": 0,
+        "record_text": "0-0",
+        "ats_win_pct_ex_pushes": null
+      },
+      "clv": {
+        "rows_with_clv": 0,
+        "average_clv_points": null,
+        "beat_close_wins": 0,
+        "worse_than_close": 0,
+        "same_as_close": 0,
+        "beat_close_pct_ex_pushes": null
+      },
+      "confidence": "DEVELOPING"
+    },
+    "MATERIAL DISAGREEMENT": {
+      "signal": "MATERIAL DISAGREEMENT",
+      "threshold": {
+        "min": 7.5,
+        "max": 10.0
+      },
+      "sample": {
+        "settled_games": 0,
+        "ats_decisions": 0
+      },
+      "record": {
+        "wins": 0,
+        "losses": 0,
+        "pushes": 0,
+        "record_text": "0-0",
+        "ats_win_pct_ex_pushes": null
+      },
+      "clv": {
+        "rows_with_clv": 0,
+        "average_clv_points": null,
+        "beat_close_wins": 0,
+        "worse_than_close": 0,
+        "same_as_close": 0,
+        "beat_close_pct_ex_pushes": null
+      },
+      "confidence": "DEVELOPING"
+    },
+    "OUTLIER": {
+      "signal": "OUTLIER",
+      "threshold": {
+        "min": 10.5,
+        "max": null
+      },
+      "sample": {
+        "settled_games": 0,
+        "ats_decisions": 0
+      },
+      "record": {
+        "wins": 0,
+        "losses": 0,
+        "pushes": 0,
+        "record_text": "0-0",
+        "ats_win_pct_ex_pushes": null
+      },
+      "clv": {
+        "rows_with_clv": 0,
+        "average_clv_points": null,
+        "beat_close_wins": 0,
+        "worse_than_close": 0,
+        "same_as_close": 0,
+        "beat_close_pct_ex_pushes": null
+      },
+      "confidence": "DEVELOPING"
+    }
+  },
+  "source_status": {
+    "settled_report_found": true,
+    "clv_report_found": true
+  }
+}
