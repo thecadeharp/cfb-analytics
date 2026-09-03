@@ -915,12 +915,8 @@
           Projections
         </button>
 
-        <button class="nav-item" data-view="teams" onclick="switchView('teams')">
-          Teams
-        </button>
-
         <button class="nav-item" data-view="ratings" onclick="switchView('ratings')">
-          Ratings
+          Team Ratings
         </button>
 
         <button class="nav-item" data-view="tape" onclick="switchView('tape')">
@@ -995,6 +991,11 @@
             <span class="confidence-legend-note">50+ decisions · ≥52.5% ATS · positive avg CLV · ≥52.5% beat close.</span>
             <span class="status confidence-established">ESTABLISHED</span>
             <span class="confidence-legend-note">100+ decisions · ≥53.0% ATS · positive avg CLV · ≥55% beat close.</span>
+          </div>
+          <div class="signal-guide-copy" style="margin-top:14px;margin-bottom:0;">
+            <strong>Totals are tracked separately:</strong> a 4.0–6.9 point difference is a
+            <strong>Total Lean</strong>; 7.0+ is a <strong>Total Watch</strong>. These are
+            prospective testing flags—not validated plays—and do not affect spread signals.
           </div>
         </div>
       </details>
@@ -1079,43 +1080,17 @@
 
 
     <!-- =====================
-         TEAMS
-    ====================== -->
-
-    <section id="view-teams" class="view">
-
-      <div class="eyebrow">Team database</div>
-      <h1 class="page-title">Teams</h1>
-
-      <div class="page-subtitle">
-        Browse every FBS program and open its full model dossier.
-      </div>
-
-      <div class="table-card" style="margin-top:24px;">
-        <div id="teams-container">
-          <div class="loading-state">
-            <div class="spinner"></div>
-            Loading teams...
-          </div>
-        </div>
-      </div>
-
-    </section>
-
-
-    <!-- =====================
          RATINGS
     ====================== -->
 
     <section id="view-ratings" class="view">
 
-      <div class="eyebrow">Model foundation</div>
-      <h1 class="page-title">Power Ratings</h1>
+      <div class="eyebrow">Team database + model foundation</div>
+      <h1 class="page-title">Team Ratings</h1>
 
       <div class="page-subtitle">
-        Model ratings are separated from raw 2026 performance so projected team
-        strength is never confused with current-season results. Offensive and
-        defensive live metrics are shown with their tracked sample sizes.
+        Browse every FBS program, compare projected strength and current-season
+        performance, or open a complete Team Dossier.
       </div>
 
       <div class="table-card" style="margin-top:24px;">
