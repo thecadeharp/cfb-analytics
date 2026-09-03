@@ -96,6 +96,29 @@
         background:var(--text); border-color:var(--text); color:#fff;
       }
 
+      .vl-coming-soon {
+        min-height:190px;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        gap:8px;
+        border:1px solid var(--border);
+        border-radius:12px;
+        background:var(--surface);
+        text-align:center;
+      }
+      .vl-coming-soon-title {
+        color:var(--text);
+        font-size:20px;
+        font-weight:750;
+        letter-spacing:-.25px;
+      }
+      .vl-coming-soon-mark {
+        font-size:20px;
+        line-height:1;
+      }
+
       /* Section header */
       .pv-section-header {
         margin-bottom:18px;
@@ -860,6 +883,18 @@
       return;
     }
 
+    const hasPublishedVariance = ["full_reset", "qb_swap", "coordinator"]
+      .some(key => Number(varianceData?.cohorts?.[key]?.aggregate?.n || 0) > 0);
+
+    if (!hasPublishedVariance) {
+      container.innerHTML = `
+        <div class="vl-coming-soon">
+          <div class="vl-coming-soon-title">Coming Soon.</div>
+          <div class="vl-coming-soon-mark" aria-hidden="true">🔨</div>
+        </div>`;
+      return;
+    }
+
     let body = "";
     if (varianceSubTab === "full_reset")
       body = renderCohort("full_reset","Full Reset Cohort","New head coach + new offensive coordinator + new starting quarterback");
@@ -918,7 +953,7 @@
         <h1 class="page-title">Variance Lab</h1>
         <div class="page-subtitle" style="margin-bottom:24px">
           Historical base rates for coaching changes, quarterback transitions,
-          coordinator turnover and full program resets. 2013–2025 sample.
+          coordinator turnover and full program resets. Coming soon 🔨.
         </div>
         <div id="variance-content">
           <div class="loading-state"><div class="spinner"></div>Loading Variance Lab data...</div>
