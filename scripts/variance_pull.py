@@ -36,26 +36,33 @@ fbs_teams = {t["school"] for t in teams_data}
 team_confs = {t["school"]: t.get("conference", "Independent") for t in teams_data}
 print(f"   {len(fbs_teams)} FBS teams")
 
-# ── FETCH COACHES — one call per year ─────────────────────────────────────────
-print("\n🏈 Fetching head coaches by year...")
-# hc[team][year] = "Coach Name"
+# ── FETCH COACHES ─────────────────────────────────────────────────────────────
+print("\n🏈 Fetching head coaches...")
 hc = {}
 
-for year in YEARS:
-    yr = cfbd("/coaches", {"year": year, "minGames": 1})
-    for coach in yr:
-        first = (coach.get("first_name") or "").strip()
-        last  = (coach.get("last_name") or "").strip()
-        name  = f"{first} {last}".strip()
-        if not name:
+all_coaches = cfbd("/coaches")
+print(f"   {len(all_coaches)} total coach records")
+
+for coach in all_coaches:
+    first = (coach.get("first_name") or "").strip()
+    last  = (coach.get("last_name") or "").strip()
+    name  = f"{first} {last}".strip()
+    if not name:
+        continue
+    for s in (coach.get("seasons") or []):
+        year   = s.get("year")
+        school = s.get("school")
+        games  = int(s.get("games") or 0)
+        if not year or not school:
             continue
-        for s in (coach.get("seasons") or []):
-            if int(s.get("year", 0)) == year and s.get("school") and s.get("games", 0) >= 6:
-                school = s["school"]
-                if school not in hc:
-                    hc[school] = {}
-                hc[school][year] = name
-    time.sleep(0.3)
+        year = int(year)
+        if year not in YEARS:
+            continue
+        if games < 6:
+            continue
+        if school not in hc:
+            hc[school] = {}
+        hc[school][year] = name
 
 # Verify — print a team with known HC change
 print(f"   Alabama coaches: {hc.get('Alabama', {})}")
