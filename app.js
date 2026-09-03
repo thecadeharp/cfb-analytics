@@ -1368,38 +1368,66 @@ function renderRatings() {
   if (!container) return;
 
   const data = sortedTeams();
+  const throughWeek = Number(metricsData?.meta?.through_week);
+  const liveWeight = Number(metricsData?.meta?.blend_weight);
+
+  const weekLabel = Number.isFinite(throughWeek) && throughWeek > 0
+    ? `Data through Week ${throughWeek}.`
+    : "Preseason data; no 2026 games incorporated yet.";
+
+  const weightLabel = Number.isFinite(liveWeight)
+    ? `Live 2026 weight: ${formatPercent(liveWeight * 100, 0)}.`
+    : "Live 2026 weight unavailable.";
 
   container.innerHTML = `
+    <div class="ratings-note">
+      <strong>How to read these ratings:</strong>
+      Model Rating blends the frozen preseason baseline with current-season
+      performance. The 2026 columns contain current-season results only.
+      ${weightLabel} ${weekLabel}
+      Special-teams efficiency is not displayed until a validated data source
+      is added.
+    </div>
     <div class="table-scroll">
       <table class="projection-table">
         <thead>
           <tr>
-            <th>Rank</th>
+            <th>Power Rank</th>
             <th>Team</th>
-            <th>Power Rating</th>
-            <th>SP+</th>
-            <th>Net EPA</th>
-            <th>Off EPA/Play</th>
-            <th>Def EPA/Play</th>
-            <th>Def Havoc</th>
+            <th>Model Rating</th>
+            <th>Preseason SP+</th>
+            <th>2026 Net EPA</th>
+            <th>2026 Net Success</th>
+            <th>2026 Off Explosive</th>
+            <th>2026 Def Havoc</th>
+            <th>Plays Tracked</th>
           </tr>
         </thead>
         <tbody>
-          ${data.map(team => `
-            <tr
-              style="cursor:pointer;"
-              onclick="openDossier('${escapeJsString(team.team)}')"
-            >
-              <td class="team-meta">${powerRank(team)}</td>
-              <td><strong>${escapeHtml(team.team)}</strong></td>
-              <td class="line-primary">${formatSigned(team.power_rating, 3)}</td>
-              <td class="team-meta">${formatSigned(team?.sp_plus?.overall, 1)}</td>
-              <td class="team-meta">${formatEPA(team?.net?.epa)}</td>
-              <td class="team-meta">${formatEPA(team?.offense?.epa_play)}</td>
-              <td class="team-meta">${formatEPA(team?.defense?.epa_play)}</td>
-              <td class="team-meta">${formatRate(team?.defense?.havoc_created)}</td>
-            </tr>
-          `).join("")}
+          ${data.map(team => {
+            const offPlays = livePlays(team, "offense");
+            const defPlays = livePlays(team, "defense");
+            const playsTracked = offPlays > 0 && defPlays > 0
+              ? `${formatNumber(offPlays, 0)} O / ${formatNumber(defPlays, 0)} D`
+              : "—";
+
+            return `
+              <tr
+                style="cursor:pointer;"
+                onclick="openDossier('${escapeJsString(team.team)}')"
+              >
+                <td class="team-meta">${powerRank(team)}</td>
+                <td><strong>${escapeHtml(team.team)}</strong></td>
+                <td class="line-primary">${formatSigned(team.power_rating, 3)}</td>
+                <td class="team-meta">${formatSigned(team?.sp_plus?.overall, 1)}</td>
+                <td class="team-meta">${formatEPA(liveNet(team, "epa_play"))}</td>
+                <td class="team-meta">${formatPercent(liveNet(team, "success_rate"))}</td>
+                <td class="team-meta">${formatRate(liveValue(team, "offense", "explosive_rate"))}</td>
+                <td class="team-meta">${formatRate(liveValue(team, "defense", "havoc_rate"))}</td>
+                <td class="team-meta">${playsTracked}</td>
+              </tr>
+            `;
+          }).join("")}
         </tbody>
       </table>
     </div>
