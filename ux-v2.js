@@ -66,6 +66,12 @@
     return text;
   }
 
+  function uTeamLogo(teamName, size="projection") {
+    return typeof window.teamLogoMarkup === "function"
+      ? window.teamLogoMarkup(teamName, size)
+      : "";
+  }
+
   function conditionsForGame(game) {
     return gameConditionsData?.games?.[String(game?.game_id ?? "")] ?? null;
   }
@@ -145,6 +151,28 @@
     return game?.projection?.total;
   }
 
+  function totalSignalForGame(game) {
+    const modelTotal = Number(effectiveModelTotal(game));
+    const marketTotal = Number(game?.market?.total);
+    if (!Number.isFinite(modelTotal) || !Number.isFinite(marketTotal)) return null;
+    const difference = modelTotal - marketTotal;
+    const edge = Math.abs(difference);
+    if (edge < 4) return null;
+    return {
+      direction: difference > 0 ? "OVER" : "UNDER",
+      edge,
+      marketTotal,
+      tier: edge >= 7 ? "TOTAL WATCH" : "TOTAL LEAN",
+      css: edge >= 7 ? "total-watch" : "total-lean",
+    };
+  }
+
+  function totalSignalMarkup(game) {
+    const signal = totalSignalForGame(game);
+    if (!signal) return "";
+    return `<div class="total-signal ${signal.css}">${signal.direction} ${formatNumber(signal.marketTotal,1)} · ${signal.tier} BY ${formatNumber(signal.edge,1)}</div>`;
+  }
+
   function effectiveComparison(game) {
     const frozen = resultComparison(game);
     if (frozen) return frozen;
@@ -198,6 +226,13 @@
     if (value === "L") return "ATS LOSS";
     if (value === "P") return "ATS PUSH";
     return "NOT GRADED";
+  }
+
+  function totalResultLabel(value) {
+    if (value === "W") return "TOTAL WIN";
+    if (value === "L") return "TOTAL LOSS";
+    if (value === "P") return "TOTAL PUSH";
+    return "";
   }
 
   function atsResultClass(value) {
@@ -405,6 +440,18 @@
         background:#355f91;
         margin-left:5px;
         vertical-align:1px;
+      }
+
+      .total-signal {
+        display:inline-flex; margin-top:5px; border-radius:999px;
+        padding:3px 7px; font-family:var(--mono); font-size:8px;
+        font-weight:700; letter-spacing:.25px; white-space:nowrap;
+      }
+      .total-signal.total-lean {
+        color:#355f91; background:#eef3f8; border:1px solid #b8c9dc;
+      }
+      .total-signal.total-watch {
+        color:#176b55; background:#e8f3ef; border:1px solid #9fcbbb;
       }
 
       .projected-score-card {
@@ -1215,12 +1262,12 @@
       <tr class="game-row completed-row" onclick="openMatchup('${escapeJsString(gameId)}')">
         <td class="matchup-cell">
           <div class="team-line">
-            <span class="team-name">${escapeHtml(awayName)}</span>
+            ${uTeamLogo(awayName)}<span class="team-name">${escapeHtml(awayName)}</span>
             <span class="final-score">${Number.isFinite(awayPoints) ? awayPoints : "—"}</span>
           </div>
           <div class="team-line">
             <span class="at-symbol">@</span>
-            <span class="team-name">${escapeHtml(homeName)}</span>
+            ${uTeamLogo(homeName)}<span class="team-name">${escapeHtml(homeName)}</span>
             <span class="final-score">${Number.isFinite(homePoints) ? homePoints : "—"}</span>
           </div>
           <span class="final-label">FINAL</span>
@@ -1236,6 +1283,7 @@
         <td>
           <div class="line-primary">${frozenScore ? `${frozenScore.away}–${frozenScore.home}` : "—"}</div>
           <div class="line-secondary">Frozen projected score</div>
+          ${result.total_result ? `<span class="result-badge ${atsResultClass(result.total_result)}" style="margin-top:5px">${escapeHtml(totalResultLabel(result.total_result))}</span>` : ""}
         </td>
         <td class="disagreement">
           <span class="result-badge ${atsResultClass(result.ats_result)}">${escapeHtml(atsResultLabel(result.ats_result))}</span>
@@ -1293,6 +1341,7 @@
       <tr class="game-row" onclick="openMatchup('${escapeJsString(gameId)}')">
         <td class="matchup-cell">
           <div class="team-line">
+            ${uTeamLogo(awayName)}
             <span class="team-name" onclick="event.stopPropagation(); openDossier('${escapeJsString(awayName)}');">
               ${escapeHtml(awayName)}
             </span>
@@ -1301,6 +1350,7 @@
 
           <div class="team-line">
             <span class="at-symbol">@</span>
+            ${uTeamLogo(homeName)}
             <span class="team-name" onclick="event.stopPropagation(); openDossier('${escapeJsString(homeName)}');">
               ${escapeHtml(homeName)}
             </span>
@@ -1336,6 +1386,7 @@
               ? `Market ${formatNumber(marketTotal, 1)}`
               : "Adjusted projected total"}
           </div>
+          ${totalSignalMarkup(game)}
         </td>
 
         <td class="disagreement">
@@ -1375,6 +1426,8 @@
     const plays = countCanonical("PLAY");
     const smallEdges = countCanonical("SMALL EDGE");
     const outliers = countCanonical("OUTLIER");
+    const totalWatches = games.filter(game => totalSignalForGame(game)?.tier === "TOTAL WATCH").length;
+    const totalLeans = games.filter(game => totalSignalForGame(game)?.tier === "TOTAL LEAN").length;
 
     if (summary) {
       summary.innerHTML = `
@@ -1385,6 +1438,8 @@
         · <button class="summary-filter summary-small" onclick="setSignalFilter('SMALL EDGE')">${smallEdges} small edges</button>
         · <button class="summary-filter summary-material" onclick="setSignalFilter('MATERIAL DISAGREEMENT')">${material} material disagreements</button>
         ${outliers ? `· <button class="summary-filter summary-outlier" onclick="setSignalFilter('OUTLIER')">${outliers} outliers</button>` : ""}
+        · <span class="summary-small">${totalWatches} total watches</span>
+        · <span>${totalLeans} total leans</span>
       `;
     }
 
@@ -1431,6 +1486,13 @@
     const totalCard = container.querySelector(".analysis-grid .analysis-card:nth-child(3) .analysis-value");
     if (totalCard && hasValue(adjustedTotal)) {
       totalCard.textContent = formatNumber(adjustedTotal, 1);
+      const totalSignal = totalSignalForGame(game);
+      if (totalSignal) {
+        totalCard.insertAdjacentHTML(
+          "afterend",
+          `<div class="total-signal ${totalSignal.css}">${totalSignal.direction} ${formatNumber(totalSignal.marketTotal,1)} · ${totalSignal.tier} BY ${formatNumber(totalSignal.edge,1)}</div>`,
+        );
+      }
     }
 
     // If a directional spread weather adjustment is active, update the headline
