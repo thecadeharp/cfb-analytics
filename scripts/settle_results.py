@@ -638,7 +638,10 @@ def main():
             "preferred_side": preferred_side(snapshot),
             "signal": comparison.get("signal") or comparison.get("market_disagreement_status"),
             "model_home_spread": model.get("home_spread"),
+            "model_total": model.get("total"),
+            "model_home_win_probability": model.get("home_win_probability"),
             "snapshot_home_spread": market.get("home_spread"),
+            "snapshot_total": market.get("total"),
             "snapshot_bookmaker": market.get("bookmaker"),
             "closing_home_spread": (
                 (closing.get("closing_market") or {}).get("home_spread") if closing else None
@@ -731,7 +734,8 @@ def main():
         "snapshot_id", "game_key", "result_game_id", "result_match_method",
         "captured_at_utc", "model_version", "week", "start_date",
         "away_team", "home_team", "preferred_side", "signal",
-        "model_home_spread", "snapshot_home_spread", "snapshot_bookmaker",
+        "model_home_spread", "model_total", "model_home_win_probability",
+        "snapshot_home_spread", "snapshot_total", "snapshot_bookmaker",
         "closing_home_spread", "clv_points", "home_points", "away_points",
         "actual_home_margin", "ats_result", "model_margin_error",
         "model_abs_error", "market_margin_error", "market_abs_error",
