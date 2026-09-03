@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>CFB Analytics | 2026</title>
+  <title>The Hammer Index | CFB Analytics</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -85,9 +85,28 @@
 
     .brand {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       gap: 10px;
       cursor: pointer;
+    }
+
+    .brand-mark {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 30px;
+      border-radius: 8px;
+      background: var(--ink);
+      color: #fff;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .brand-copy {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
     }
 
     .brand-name {
@@ -100,6 +119,13 @@
       font-family: var(--mono);
       font-size: 10px;
       color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    .coming-soon-mark {
+      margin-top: 18px;
+      font-size: 26px;
+      line-height: 1;
     }
 
     .main-nav {
@@ -726,8 +752,11 @@
     <div class="header-inner">
 
       <div class="brand" onclick="switchView('projections')">
-        <div class="brand-name">CFB Analytics</div>
-        <div class="brand-year">2026</div>
+        <div class="brand-mark" aria-hidden="true">🔨</div>
+        <div class="brand-copy">
+          <div class="brand-name">The Hammer Index</div>
+          <div class="brand-year">BY CADE HARPER</div>
+        </div>
       </div>
 
       <nav class="main-nav">
@@ -934,6 +963,7 @@
           Historical base rates for coaching changes, quarterback transitions,
           coordinator turnover and full program resets.
         </p>
+        <div class="coming-soon-mark" aria-label="Coming soon">Coming Soon.<br>🔨</div>
       </div>
 
     </section>
@@ -952,6 +982,7 @@
         <p>
           Arrivals, departures, net roster impact and projected unit strength.
         </p>
+        <div class="coming-soon-mark" aria-label="Coming soon">Coming Soon.<br>🔨</div>
       </div>
 
     </section>
