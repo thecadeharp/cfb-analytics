@@ -16,7 +16,7 @@
   let varianceData  = null;
 
   // ── Sub-tab state ───────────────────────────────────────────────────────────
-  let portalSubTab    = "class";      // class | defensive | conference | juco | impact
+  let portalSubTab    = "class";      // class | offensive | defensive | conference | juco | impact
   let varianceSubTab  = "full_reset"; // full_reset | qb_swap | coordinator
   let portalPosFilter = "ALL";
   let portalStarFilter = "ANY";
@@ -425,6 +425,7 @@
   function renderPortalSubNav() {
     const tabs = [
       ["class","Class Rankings"],
+      ["offensive","Off. Portal"],
       ["defensive","Def. Portal"],
       ["conference","Conf. Summary"],
       ["juco","JUCO"],
@@ -450,21 +451,17 @@
       return true;
     });
 
-    // Top/bottom overall grade for summary
-    const sorted = [...filtered].sort((a,b)=>(b.avg_ptr||0)-(a.avg_ptr||0));
+    const sorted = [...filtered].sort((a,b)=>(b.portal_index||0)-(a.portal_index||0));
 
     const rows = sorted.map(t => {
-      const net = (t.in_count||0) - (t.out_count||0);
-      const netStr = net > 0 ? `+${net}` : String(net);
-      const tagLabel = t.portal_grade_tag || "";
-      const tagCss = tagLabel.includes("Upgrade") ? "tag-upgrade" : tagLabel.includes("Downgrade") ? "tag-downgrade" : "tag-neutral";
       return `<tr>
+        <td style="color:var(--muted);font-family:var(--mono);font-size:10px">${t.portal_rank??"—"}</td>
         <td><div class="pv-team-name">${pEsc(t.team)}</div><div class="pv-conf">${pEsc(t.conference||"")}</div></td>
         <td>${t.in_count??0}</td>
         <td>${t.out_count??0}</td>
-        <td class="${netClass(net)} r">${netStr}</td>
-        <td class="r" style="font-weight:700">${pFmt(t.avg_ptr,1)}</td>
-        <td class="r" style="color:var(--muted)">${pFmt(t.top_ptr,1)}</td>
+        <td class="r">${pFmt(t.in_avg_rating,1)}</td>
+        <td class="r">${pFmt(t.out_avg_rating,1)}</td>
+        <td class="${netClass(t.portal_index)} r" style="font-weight:700">${pSign(t.portal_index,0)}</td>
         <td class="r"><span class="grade-badge ${gradeClass(t.portal_grade)}">${pEsc(t.portal_grade||"—")}</span></td>
       </tr>`;
     }).join("");
@@ -472,7 +469,7 @@
     return `
       <div class="pv-section-header">
         <div class="pv-section-title">2026 Transfer Portal — Class Rankings</div>
-        <div class="pv-section-sub">Team portal classes ranked by average PTR. PTR = Predictive Transfer Rating derived from recruiting rank, position leverage, and prior production. ${filtered.length} of ${teams.length} FBS teams shown.</div>
+        <div class="pv-section-sub">Incoming and outgoing roster movement ranked by the published On3 Portal Index. Ratings are portal evaluations—not Hammer Index model inputs. Source: On3, snapshot ${pEsc(portalData?.updated_label||"2026")}. ${filtered.length} of ${teams.length} ranked teams shown.</div>
       </div>
       <div class="pv-filters">
         <div class="pv-filter">
@@ -490,74 +487,49 @@
       <div class="pv-table-wrap">
         <table class="pv-table">
           <thead><tr>
-            <th>Team</th><th>IN</th><th>OUT</th>
-            <th class="r">NET ★</th><th class="r">AVG PTR</th>
-            <th class="r">TOP PTR</th><th class="r">GRADE</th>
+            <th>#</th><th>Team</th><th>IN</th><th>OUT</th>
+            <th class="r">IN AVG</th><th class="r">OUT AVG</th>
+            <th class="r">PORTAL INDEX</th><th class="r">GRADE</th>
           </tr></thead>
-          <tbody>${rows||`<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No teams match.</td></tr>`}</tbody>
+          <tbody>${rows||`<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">No teams match.</td></tr>`}</tbody>
         </table>
       </div>`;
+  }
+
+  function renderPortalOffensive() {
+    return `
+      <div class="pv-section-header">
+        <div class="pv-section-title">Offensive Portal Impact</div>
+        <div class="pv-section-sub">PTR weighted by projected role and positional leverage. OL = offensive line, RB = running backs, QB = quarterbacks, and WR = wide receivers.</div>
+      </div>
+      ${renderPortalComingSoon("Player-level position and production data is required before these ratings can be published responsibly.")}`;
   }
 
   function renderPortalDefensive() {
-    const teams = portalData?.teams ?? [];
-    const sorted = [...teams].sort((a,b)=>(b.def_net_ptr||0)-(a.def_net_ptr||0));
-    const winners = sorted.slice(0,5);
-    const losers  = [...teams].sort((a,b)=>(a.def_net_ptr||0)-(b.def_net_ptr||0)).slice(0,5);
-
-    const splitRow = (t,i,isWinner) => `
-      <div class="pv-split-row">
-        <span class="pv-split-rank">${i+1}</span>
-        <div>
-          <div class="pv-split-team">${pEsc(t.team)}</div>
-          <div class="pv-conf">${pEsc(t.conference||"")}</div>
-        </div>
-        <span class="pv-split-val ${isWinner?"net-pos":"net-neg"}">
-          ${isWinner?"+":""}${pFmt(t.def_net_ptr,1)}
-        </span>
-      </div>`;
-
-    const rows = sorted.map(t => {
-      const tagLabel = t.def_tag || "";
-      const tagCss = tagLabel.includes("Major") ? "tag-upgrade" : tagLabel.includes("Loss") ? "tag-downgrade" : "tag-neutral";
-      return `<tr>
-        <td><div class="pv-team-name">${pEsc(t.team)}</div><div class="pv-conf">${pEsc(t.conference||"")}</div></td>
-        <td class="${netClass(t.dl_net)}">${pSign(t.dl_net,1)}</td>
-        <td class="${netClass(t.lb_net)}">${pSign(t.lb_net,1)}</td>
-        <td class="${netClass(t.db_net)}">${pSign(t.db_net,1)}</td>
-        <td class="${netClass(t.def_net_ptr)} r" style="font-weight:700">${pSign(t.def_net_ptr,1)}</td>
-        <td><span class="pv-tag ${tagCss}">${pEsc(tagLabel||"—")}</span></td>
-      </tr>`;
-    }).join("");
-
     return `
       <div class="pv-section-header">
         <div class="pv-section-title">Defensive Portal Impact</div>
-        <div class="pv-section-sub">PTR weighted by projected role and positional leverage. DL = defensive line, LB = linebackers, DB = defensive backs.</div>
+        <div class="pv-section-sub">Position-group movement and defensive roster impact.</div>
       </div>
-      <div class="pv-split">
-        <div class="pv-split-card">
-          <div class="pv-split-title">Biggest Winners</div>
-          ${winners.map((t,i)=>splitRow(t,i,true)).join("")}
-        </div>
-        <div class="pv-split-card">
-          <div class="pv-split-title">Biggest Losers</div>
-          ${losers.map((t,i)=>splitRow(t,i,false)).join("")}
-        </div>
-      </div>
-      <div class="pv-table-wrap">
-        <table class="pv-table">
-          <thead><tr>
-            <th>Team</th><th>DL NET</th><th>LB NET</th>
-            <th>DB NET</th><th class="r">OVERALL</th><th>TAG</th>
-          </tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>`;
+      ${renderPortalComingSoon("Player-level position data is required before these ratings can be published responsibly.")}`;
   }
 
   function renderPortalConference() {
-    const conferences = portalData?.conference_summary ?? [];
+    const sourceTeams = portalData?.teams ?? [];
+    const grouped = sourceTeams.reduce((acc, team) => {
+      const name = team.conference || "Independent";
+      (acc[name] ||= []).push(team);
+      return acc;
+    }, {});
+    const conferences = Object.entries(grouped).map(([conference, teams]) => {
+      const ordered = [...teams].sort((a,b)=>(b.portal_index||0)-(a.portal_index||0));
+      const avg = ordered.length ? ordered.reduce((sum,t)=>sum+(Number(t.portal_index)||0),0)/ordered.length : 0;
+      return {
+        conference,
+        verdict: `${ordered[0]?.team||"—"} leads the conference. Average published Portal Index: ${avg.toFixed(1)}.`,
+        teams: ordered,
+      };
+    }).sort((a,b)=>a.conference.localeCompare(b.conference));
     const confNames = conferences.map(c=>c.conference).filter(Boolean);
     const active = confNames[0] || "";
 
@@ -580,18 +552,16 @@
     const teamCards = teams.map(t => `
       <div class="pv-card">
         <div style="font-weight:800;font-size:14px;margin-bottom:2px">${pEsc(t.team)}</div>
-        <div class="pv-conf" style="margin-bottom:8px">${pEsc(t.grade_label||"")}</div>
+        <div class="pv-conf" style="margin-bottom:8px">National portal rank #${t.portal_rank??"—"}</div>
         <div style="font-size:11px;color:var(--muted)">IN: ${t.in_count||0} · OUT: ${t.out_count||0}</div>
-        ${t.qb_note?`<div style="font-size:11px;margin-top:5px;color:var(--muted)">${pEsc(t.qb_note)}</div>`:""}
-        ${t.top_arrival?`<div style="font-size:11px;margin-top:5px"><strong>▲</strong> ${pEsc(t.top_arrival)}</div>`:""}
-        ${t.top_departure?`<div style="font-size:11px"><strong>▼</strong> ${pEsc(t.top_departure)}</div>`:""}
+        <div style="font-size:11px;margin-top:5px">Portal Index: <strong>${pSign(t.portal_index,0)}</strong> · Grade ${pEsc(t.portal_grade||"—")}</div>
       </div>
     `).join("");
 
     return `
       <div class="pv-section-header">
         <div class="pv-section-title">Conference Portal Summary</div>
-        <div class="pv-section-sub">Portal verdict by conference. Click a conference to view its teams.</div>
+        <div class="pv-section-sub">Published portal rankings grouped by conference. Click a conference to view its teams.</div>
       </div>
       <div class="pv-subnav" style="margin-bottom:14px">${confTabs}</div>
       ${conf.verdict?`<div class="vl-analysis"><strong>${pEsc(conf.conference)} — Portal Verdict:</strong> ${pEsc(conf.verdict)}</div>`:""}
@@ -601,91 +571,29 @@
   }
 
   function renderPortalJuco() {
-    const players = portalData?.juco ?? [];
-    const onRoster = players.filter(p=>p.status === "On roster");
-    const allSignees = players;
-
-    const active = ["on_roster","all","everyone"].includes(portalSearch) ? portalSearch : "on_roster";
-
-    const list = portalSearch === "all" ? allSignees : onRoster;
-
-    const rows = list.map((p,i) => `
-      <tr>
-        <td><strong>#${i+1}</strong> <span style="font-size:9px;background:#ecece8;padding:2px 5px;border-radius:3px;margin-left:4px;font-family:var(--mono)">JC</span></td>
-        <td><div style="font-weight:700">${pEsc(p.player)}</div><div class="pv-conf">${pEsc(p.hometown||"")}</div></td>
-        <td>${pEsc(p.position||"—")}</td>
-        <td>${pEsc(p.juco_school||"—")}</td>
-        <td>${pEsc(p.signed_with||"—")}</td>
-        <td><span class="juco-status">${pEsc(p.status||"—")}</span></td>
-        <td>${starDots(p.stars)}</td>
-        <td class="r">${pFmt(p.rating,4)}</td>
-        <td class="r" style="font-weight:700">${pFmt(p.talent,1)}</td>
-      </tr>`).join("");
-
     return `
       <div class="pv-section-header">
         <div class="pv-section-title">JUCO Signees</div>
-        <div class="pv-section-sub">Junior college transfers signing with FBS programs. Sorted by talent score.</div>
+        <div class="pv-section-sub">Junior college transfers signing with FBS programs.</div>
       </div>
-      <div class="pv-filters" style="margin-bottom:12px">
-        <button class="pv-subtab ${portalSearch!=="all"?"active":""}" onclick="pvPortalSearch('on_roster')">On 2026 Roster (${onRoster.length})</button>
-        <button class="pv-subtab ${portalSearch==="all"?"active":""}" onclick="pvPortalSearch('all')">All FBS Signees (${allSignees.length})</button>
-      </div>
-      <div class="pv-table-wrap">
-        <table class="pv-table">
-          <thead><tr>
-            <th>Rank</th><th>Player</th><th>Pos</th><th>JUCO School</th>
-            <th>Signed With</th><th>Status</th><th>Stars</th><th class="r">Rating</th><th class="r">Talent</th>
-          </tr></thead>
-          <tbody>${rows||`<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted)">No JUCO data available yet.</td></tr>`}</tbody>
-        </table>
-      </div>`;
+      ${renderPortalComingSoon("JUCO classification requires verified player-level origin-school data.")}`;
   }
 
   function renderPortalImpact() {
-    const teams = portalData?.teams ?? [];
-    const sorted = [...teams].sort((a,b)=>(b.wins_impact||0)-(a.wins_impact||0));
-    const best  = sorted[0];
-    const worst = sorted[sorted.length-1];
-
-    const rows = sorted.map((t,i) => `
-      <tr>
-        <td style="color:var(--muted);font-family:var(--mono);font-size:10px">${i+1}</td>
-        <td><div class="pv-team-name">${pEsc(t.team)}</div><div class="pv-conf">${pEsc(t.conference||"")}</div></td>
-        <td style="color:var(--muted)">${t.in_count||0} / ${t.out_count||0}</td>
-        <td class="${netClass(t.rating_delta)}">${pSign(t.rating_delta,2)}</td>
-        <td>${pSign(t.pts_per_game_impact,1)}</td>
-        <td class="${netClass(t.wins_impact)}" style="font-weight:700">${pSign(t.wins_impact,2)}w</td>
-        <td style="font-size:11px;color:var(--muted);max-width:180px">${pEsc(t.top_addition||"—")}</td>
-        <td style="font-size:11px;color:var(--muted);max-width:180px">${pEsc(t.top_departure||"—")}</td>
-      </tr>`).join("");
-
     return `
       <div class="pv-section-header">
         <div class="pv-section-title">Portal Impact on 2026 Projections</div>
-        <div class="pv-section-sub">Net PTR flow → rating delta → schedule re-run. Wins impact = projected 2026 wins with the class minus without it.</div>
+        <div class="pv-section-sub">Player-level production translated into projected team impact.</div>
       </div>
-      <div class="pv-split" style="margin-bottom:20px">
-        <div class="pv-split-card">
-          <div class="pv-split-title">Biggest Portal Winner</div>
-          <div style="font-size:20px;font-weight:800;margin:8px 0 2px">${pEsc(best?.team||"—")}</div>
-          <div class="net-pos" style="font-size:14px;font-weight:700">${pSign(best?.wins_impact,2)} projected wins</div>
-        </div>
-        <div class="pv-split-card">
-          <div class="pv-split-title">Biggest Portal Loser</div>
-          <div style="font-size:20px;font-weight:800;margin:8px 0 2px">${pEsc(worst?.team||"—")}</div>
-          <div class="net-neg" style="font-size:14px;font-weight:700">${pSign(worst?.wins_impact,2)} projected wins</div>
-        </div>
-      </div>
-      <div class="pv-table-wrap">
-        <table class="pv-table">
-          <thead><tr>
-            <th>#</th><th>Team</th><th>IN/OUT</th><th>Rating Δ</th>
-            <th>PTS/Game</th><th>Wins Impact</th><th>Top Addition</th><th>Top Departure</th>
-          </tr></thead>
-          <tbody>${rows||`<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">Impact data not yet available.</td></tr>`}</tbody>
-        </table>
-      </div>`;
+      ${renderPortalComingSoon("This will remain separate from Model A until production-based transfer values are validated.")}`;
+  }
+
+  function renderPortalComingSoon(note) {
+    return `<div class="vl-coming-soon">
+      <div class="vl-coming-soon-title">Coming Soon.</div>
+      <div class="pv-section-sub" style="max-width:560px;margin:0 18px">${pEsc(note)}</div>
+      <div class="vl-coming-soon-mark">🔨</div>
+    </div>`;
   }
 
   function renderPortal() {
@@ -703,6 +611,7 @@
 
     let body = "";
     if (portalSubTab === "class")       body = renderPortalClassRankings();
+    else if (portalSubTab === "offensive") body = renderPortalOffensive();
     else if (portalSubTab === "defensive") body = renderPortalDefensive();
     else if (portalSubTab === "conference") body = renderPortalConference();
     else if (portalSubTab === "juco")    body = renderPortalJuco();
