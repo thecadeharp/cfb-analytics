@@ -44,7 +44,11 @@ hc = {}
 for year in YEARS:
     yr = cfbd("/coaches", {"year": year, "minGames": 1})
     for coach in yr:
-        name = f"{coach.get('first_name','')} {coach.get('last_name','')}".strip()
+        first = (coach.get("first_name") or "").strip()
+        last  = (coach.get("last_name") or "").strip()
+        name  = f"{first} {last}".strip()
+        if not name:
+            continue
         for s in (coach.get("seasons") or []):
             if int(s.get("year", 0)) == year and s.get("school") and s.get("games", 0) >= 6:
                 school = s["school"]
