@@ -9,6 +9,7 @@ const DATA_URLS = {
   odds: "./data/odds.json",
   projections: "./data/projections.json",
   signalReport: "./data/reports/signal_report.json",
+  advancedMetrics: "./data/advanced_metrics.json",
 };
 
 let metricsData = null;
@@ -16,6 +17,7 @@ let scheduleData = null;
 let oddsData = null;
 let projectionsData = null;
 let signalReportData = null;
+let advancedMetricsData = null;
 
 let teams = {};
 let projections = [];
@@ -25,6 +27,8 @@ let currentWeek = null;
 let currentSearch = "";
 let currentRatingsMode = "teams";
 let currentTeamConference = "ALL";
+let currentAdvancedSample = "non_garbage";
+let currentDossierTeamName = null;
 
 
 // ============================================================================
@@ -830,12 +834,13 @@ async function init() {
   try {
     ensureMatchupView();
 
-    [metricsData, scheduleData, oddsData, projectionsData, signalReportData] = await Promise.all([
+    [metricsData, scheduleData, oddsData, projectionsData, signalReportData, advancedMetricsData] = await Promise.all([
       loadJson(DATA_URLS.metrics),
       loadJson(DATA_URLS.schedule),
       loadJson(DATA_URLS.odds),
       loadJson(DATA_URLS.projections),
       loadJson(DATA_URLS.signalReport).catch(() => null),
+      loadJson(DATA_URLS.advancedMetrics).catch(() => null),
     ]);
 
     teams = metricsData?.teams ?? {};
@@ -1692,8 +1697,79 @@ function setTeamConference(conference) {
 function openDossier(teamName) {
   const team = getTeam(teamName);
   if (!team) return;
+  currentDossierTeamName = teamName;
   renderDossier(team);
   switchView("dossier");
+}
+
+function advancedSide(teamName, side) {
+  return advancedMetricsData?.teams?.[teamName]?.[currentAdvancedSample]?.[side] ?? null;
+}
+
+function advancedRank(teamName, side, field, lowerIsBetter = false) {
+  const target = advancedSide(teamName, side)?.[field];
+  if (!hasValue(target)) return "";
+  const targetNumber = Number(target);
+  const values = Object.keys(teams)
+    .map(name => advancedSide(name, side)?.[field])
+    .filter(hasValue)
+    .map(Number);
+  const better = values.filter(value =>
+    lowerIsBetter ? value < targetNumber : value > targetNumber
+  ).length;
+  return `#${better + 1}`;
+}
+
+function advancedContext(teamName, side, field, sampleText = "", lowerIsBetter = false) {
+  const rank = advancedRank(teamName, side, field, lowerIsBetter);
+  return [rank, sampleText].filter(Boolean).join(" · ");
+}
+
+function advancedMetricRows(teamName, side) {
+  const data = advancedSide(teamName, side);
+  if (!data || !data.n_plays) {
+    return `<div class="empty-state" style="padding:24px 0;">No current-season sample yet.</div>`;
+  }
+
+  const offense = side === "offense";
+  return `
+    ${renderMetricRow("Early-Down EPA" + (offense ? "" : " Allowed"), formatEPA(data.early_down_epa), advancedContext(teamName, side, "early_down_epa", `${data.early_down_plays ?? 0} plays`, !offense))}
+    ${renderMetricRow("Late-Down EPA" + (offense ? "" : " Allowed"), formatEPA(data.late_down_epa), advancedContext(teamName, side, "late_down_epa", `${data.late_down_plays ?? 0} plays`, !offense))}
+    ${renderMetricRow("Standard-Down Success" + (offense ? "" : " Allowed"), formatRate(data.standard_down_success_rate), advancedContext(teamName, side, "standard_down_success_rate", `${data.standard_down_plays ?? 0} plays`, !offense))}
+    ${renderMetricRow("Passing-Down Success" + (offense ? "" : " Allowed"), formatRate(data.passing_down_success_rate), advancedContext(teamName, side, "passing_down_success_rate", `${data.passing_down_plays ?? 0} plays`, !offense))}
+    ${renderMetricRow(offense ? "Stuff Rate Allowed" : "Stuff Rate Created", formatRate(data.stuff_rate), advancedContext(teamName, side, "stuff_rate", `${data.rush_attempts ?? 0} rushes`, offense))}
+    ${renderMetricRow(offense ? "Sack Rate Allowed" : "Sack Rate Created", formatRate(data.sack_rate), advancedContext(teamName, side, "sack_rate", `${data.pass_plays ?? 0} pass plays`, offense))}
+    ${renderMetricRow(offense ? "TFL Rate Allowed" : "TFL Rate Created", formatRate(data.tfl_rate), advancedContext(teamName, side, "tfl_rate", "", offense))}
+    ${renderMetricRow("Power Success Rate" + (offense ? "" : " Allowed"), formatRate(data.power_success_rate), advancedContext(teamName, side, "power_success_rate", `${data.power_attempts ?? 0} attempts`, !offense))}
+    ${renderMetricRow(offense ? "Turnovers Lost" : "Turnovers Forced", formatNumber(data.turnovers, 0), advancedContext(teamName, side, "turnover_rate", "", offense))}
+  `;
+}
+
+function advancedSplitRows(teamName, side) {
+  const data = advancedSide(teamName, side);
+  if (!data || !data.n_plays) {
+    return `<div class="empty-state" style="padding:24px 0;">No current-season sample yet.</div>`;
+  }
+
+  const allowed = side === "defense" ? " Allowed" : "";
+  const lowerIsBetter = side === "defense";
+  return `
+    ${renderMetricRow("First-Half EPA" + allowed, formatEPA(data.first_half_epa), advancedContext(teamName, side, "first_half_epa", `${data.first_half_plays ?? 0} plays`, lowerIsBetter))}
+    ${renderMetricRow("Second-Half EPA" + allowed, formatEPA(data.second_half_epa), advancedContext(teamName, side, "second_half_epa", `${data.second_half_plays ?? 0} plays`, lowerIsBetter))}
+    ${renderMetricRow("Home EPA" + allowed, formatEPA(data.home_epa), advancedContext(teamName, side, "home_epa", `${data.home_plays ?? 0} plays`, lowerIsBetter))}
+    ${renderMetricRow("Away EPA" + allowed, formatEPA(data.away_epa), advancedContext(teamName, side, "away_epa", `${data.away_plays ?? 0} plays`, lowerIsBetter))}
+    ${renderMetricRow("Red-Zone EPA" + allowed, formatEPA(data.red_zone_epa), advancedContext(teamName, side, "red_zone_epa", `${data.red_zone_plays ?? 0} plays`, lowerIsBetter))}
+    ${renderMetricRow("Red-Zone Success" + allowed, formatRate(data.red_zone_success_rate), advancedContext(teamName, side, "red_zone_success_rate", "", lowerIsBetter))}
+    ${renderMetricRow(side === "offense" ? "Line Yards / Rush" : "Line Yards / Rush Allowed", formatNumber(data.line_yards_per_rush, 2), advancedContext(teamName, side, "line_yards_per_rush", "", lowerIsBetter))}
+    ${renderMetricRow(side === "offense" ? "Second-Level Yards / Rush" : "Second-Level Yards / Rush Allowed", formatNumber(data.second_level_yards_per_rush, 2), advancedContext(teamName, side, "second_level_yards_per_rush", "", lowerIsBetter))}
+    ${renderMetricRow(side === "offense" ? "Open-Field Yards / Rush" : "Open-Field Yards / Rush Allowed", formatNumber(data.open_field_yards_per_rush, 2), advancedContext(teamName, side, "open_field_yards_per_rush", "", lowerIsBetter))}
+  `;
+}
+
+function setAdvancedSample(sample) {
+  currentAdvancedSample = sample === "all_plays" ? "all_plays" : "non_garbage";
+  const team = getTeam(currentDossierTeamName);
+  if (team) renderDossier(team);
 }
 
 function renderMetricRow(name, value, rank = "") {
@@ -2034,6 +2110,49 @@ function renderDossier(team) {
               : "—"
           )}
           ${renderMetricRow("Sample Status", escapeHtml(liveSampleLabel(team)))}
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:12px;">
+      <div class="panel-header" style="align-items:center; gap:12px; flex-wrap:wrap;">
+        <div>
+          <div class="panel-title">Advanced 2026 Performance</div>
+          <div class="team-meta" style="margin-top:5px;">Display-only statistics · not used by Model A</div>
+        </div>
+        <div class="ratings-toggle" style="padding:0; border:0; margin-left:auto;">
+          <button
+            type="button"
+            class="ratings-toggle-button ${currentAdvancedSample === "non_garbage" ? "active" : ""}"
+            onclick="setAdvancedSample('non_garbage')"
+          >Garbage Time Excluded</button>
+          <button
+            type="button"
+            class="ratings-toggle-button ${currentAdvancedSample === "all_plays" ? "active" : ""}"
+            onclick="setAdvancedSample('all_plays')"
+          >All Plays</button>
+        </div>
+      </div>
+      <div class="sample-warning" style="margin:12px 16px 0;">
+        Current-season samples are descriptive and can move sharply early in the season.
+        A dash means the minimum four-play sample has not been reached.
+      </div>
+      <div class="dossier-layout" style="padding:12px 16px 16px;">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Offense · Downs & Disruption</div></div>
+          <div class="panel-body">${advancedMetricRows(team.team, "offense")}</div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Defense · Downs & Disruption</div></div>
+          <div class="panel-body">${advancedMetricRows(team.team, "defense")}</div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Offense · Situational Splits</div></div>
+          <div class="panel-body">${advancedSplitRows(team.team, "offense")}</div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Defense · Situational Splits</div></div>
+          <div class="panel-body">${advancedSplitRows(team.team, "defense")}</div>
         </div>
       </div>
     </div>
