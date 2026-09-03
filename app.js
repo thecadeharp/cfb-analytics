@@ -11,6 +11,7 @@ const DATA_URLS = {
   signalReport: "./data/reports/signal_report.json",
   advancedMetrics: "./data/advanced_metrics.json",
   externalRatings: "./data/external_ratings.json",
+  rosterFoundation: "./data/roster_foundation.json",
 };
 
 let metricsData = null;
@@ -20,6 +21,7 @@ let projectionsData = null;
 let signalReportData = null;
 let advancedMetricsData = null;
 let externalRatingsData = null;
+let rosterFoundationData = null;
 
 let teams = {};
 let projections = [];
@@ -836,7 +838,7 @@ async function init() {
   try {
     ensureMatchupView();
 
-    [metricsData, scheduleData, oddsData, projectionsData, signalReportData, advancedMetricsData, externalRatingsData] = await Promise.all([
+    [metricsData, scheduleData, oddsData, projectionsData, signalReportData, advancedMetricsData, externalRatingsData, rosterFoundationData] = await Promise.all([
       loadJson(DATA_URLS.metrics),
       loadJson(DATA_URLS.schedule),
       loadJson(DATA_URLS.odds),
@@ -844,6 +846,7 @@ async function init() {
       loadJson(DATA_URLS.signalReport).catch(() => null),
       loadJson(DATA_URLS.advancedMetrics).catch(() => null),
       loadJson(DATA_URLS.externalRatings).catch(() => null),
+      loadJson(DATA_URLS.rosterFoundation).catch(() => null),
     ]);
 
     teams = metricsData?.teams ?? {};
@@ -1588,6 +1591,8 @@ function renderRatings() {
             <th>Model Rating</th>
             <th>Preseason SP+</th>
             <th>ESPN FPI</th>
+            <th>Team Talent</th>
+            <th>Returning Production</th>
             <th>SOR Rank</th>
             <th>SOS Rank</th>
             <th>2026 Net EPA</th>
@@ -1600,6 +1605,7 @@ function renderRatings() {
         <tbody>
           ${data.map((team, index) => {
             const external = externalRatingsData?.teams?.[team.team] ?? {};
+            const roster = rosterFoundationData?.teams?.[team.team] ?? {};
             const offPlays = livePlays(team, "offense");
             const defPlays = livePlays(team, "defense");
             const playsTracked = offPlays > 0 && defPlays > 0
@@ -1616,6 +1622,8 @@ function renderRatings() {
                 <td class="line-primary">${formatSigned(team.power_rating, 3)}</td>
                 <td class="team-meta">${formatSigned(team?.sp_plus?.overall, 1)}</td>
                 <td class="team-meta">${hasValue(external.fpi) ? `${formatSigned(external.fpi, 1)} (#${external.fpi_rank})` : "—"}</td>
+                <td class="team-meta">${hasValue(roster.talent_rank) ? `#${roster.talent_rank}` : "—"}</td>
+                <td class="team-meta">${hasValue(roster.returning_production_pct) ? `${formatPercent(roster.returning_production_pct)} (#${roster.returning_production_rank})` : "—"}</td>
                 <td class="team-meta">${hasValue(external.sor_rank) ? `#${external.sor_rank}` : "—"}</td>
                 <td class="team-meta">${hasValue(external.sos_rank) ? `#${external.sos_rank}` : "—"}</td>
                 <td class="team-meta">${formatEPA(liveNet(team, "epa_play"))}</td>
@@ -1723,6 +1731,10 @@ function advancedSide(teamName, side) {
 
 function externalRating(teamName) {
   return externalRatingsData?.teams?.[teamName] ?? null;
+}
+
+function rosterFoundation(teamName) {
+  return rosterFoundationData?.teams?.[teamName] ?? null;
 }
 
 function externalRank(value) {
@@ -1991,6 +2003,7 @@ function renderDossier(team) {
   const offPlays = livePlays(team, "offense");
   const defPlays = livePlays(team, "defense");
   const external = externalRating(team.team);
+  const roster = rosterFoundation(team.team);
 
   container.innerHTML = `
     <div class="dossier-header">
@@ -2141,6 +2154,36 @@ function renderDossier(team) {
               : "—"
           )}
           ${renderMetricRow("Sample Status", escapeHtml(liveSampleLabel(team)))}
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:12px;">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Roster Foundation</div>
+          <div class="team-meta" style="margin-top:5px;">
+            2026 preseason roster snapshot · display-only · not used by Model A
+          </div>
+        </div>
+      </div>
+      <div class="dossier-layout" style="padding:12px 16px 16px;">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Returning Production</div></div>
+          <div class="panel-body">
+            ${renderMetricRow("Combined", formatPercent(roster?.returning_production_pct), externalRank(roster?.returning_production_rank))}
+            ${renderMetricRow("Offense", formatPercent(roster?.returning_offense_pct), externalRank(roster?.returning_offense_rank))}
+            ${renderMetricRow("Defense", formatPercent(roster?.returning_defense_pct), externalRank(roster?.returning_defense_rank))}
+            ${renderMetricRow("Returning Players", formatNumber(roster?.returning_players, 0))}
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Team Talent</div></div>
+          <div class="panel-body">
+            ${renderMetricRow("Talent Composite", formatNumber(roster?.talent_composite, 2), externalRank(roster?.talent_rank))}
+            ${renderMetricRow("Blue-Chip Ratio", formatPercent(roster?.blue_chip_ratio_pct))}
+            ${renderMetricRow("Rated Recruits", formatNumber(roster?.rated_recruits, 0))}
+          </div>
         </div>
       </div>
     </div>
