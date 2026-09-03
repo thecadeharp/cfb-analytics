@@ -46,6 +46,13 @@ def value(raw, digits=None, positive=False):
     return round(number, digits)
 
 
+def text_value(raw):
+    if raw is None or pd.isna(raw):
+        return None
+    text = str(raw).strip()
+    return text or None
+
+
 def download_parquet(url):
     response = requests.get(url, timeout=90)
     response.raise_for_status()
@@ -95,7 +102,7 @@ def main():
 
     names = (
         team_reference[team_reference["is_fbs"].fillna(False).astype(bool)]
-        [["team_id", "school"]]
+        [["team_id", "school", "team_logo", "team_logo_dark", "color", "alternate_color"]]
         .drop_duplicates("team_id", keep="last")
     )
     snapshot = snapshot.merge(names, on="team_id", how="left")
@@ -123,6 +130,11 @@ def main():
         if team not in model_teams:
             continue
         output["teams"][team] = {
+            "team_id": value(row.get("team_id"), positive=True),
+            "logo": text_value(row.get("team_logo")),
+            "logo_dark": text_value(row.get("team_logo_dark")),
+            "color": text_value(row.get("color")),
+            "alternate_color": text_value(row.get("alternate_color")),
             "fpi": value(row.get("fpi"), 3),
             "fpi_rank": value(row.get("fpirank"), positive=True),
             "sor_rank": value(row.get("accomplishmentrank"), positive=True),
@@ -157,4 +169,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
