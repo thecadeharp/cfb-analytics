@@ -16,10 +16,13 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -95,7 +98,7 @@ jobs:
           print(f"Approved generated changes: {sorted(changed | untracked)}")
           PY
 
-      - name: Commit refreshed weather output / one-time script install
+      - name: Commit and safely push refreshed weather output
         run: |
           if git diff --quiet -- index.html data/game_conditions.json && \
              [ -z "$(git ls-files --others --exclude-standard data/game_conditions.json)" ]; then
@@ -108,4 +111,30 @@ jobs:
 
           git add index.html data/game_conditions.json
           git commit -m "Refresh Weather Engine v1"
-          git push
+
+          # Other scheduled workflows also write to main. Rebase onto the
+          # newest main before each push attempt so a harmless concurrent bot
+          # commit cannot cause this workflow to fail with "fetch first".
+          for attempt in 1 2 3 4; do
+            echo "Push attempt ${attempt}/4"
+
+            git fetch origin main
+
+            if ! git rebase origin/main; then
+              echo "Rebase conflict detected; refusing to overwrite remote changes."
+              git rebase --abort || true
+              exit 1
+            fi
+
+            if git push origin HEAD:main; then
+              echo "Weather Engine v1 pushed successfully."
+              exit 0
+            fi
+
+            if [ "$attempt" -lt 4 ]; then
+              sleep $((attempt * 3))
+            fi
+          done
+
+          echo "Push failed after 4 safe retry attempts."
+          exit 1
