@@ -616,6 +616,8 @@ def main():
         comparison = snapshot.get("comparison_at_snapshot") or {}
         market = snapshot.get("market_at_snapshot") or {}
         model = snapshot.get("model") or {}
+        public_projection = snapshot.get("public_projection") or {}
+        weather_snapshot = snapshot.get("weather_at_snapshot") or {}
 
         match_method_counts[match_method] += 1
 
@@ -623,6 +625,12 @@ def main():
         market_error = market_margin_error(snapshot, result) if result else None
         close_error = closing_margin_error(closing, result) if result else None
         clv = calc_clv(snapshot, closing)
+        public_spread = as_number(public_projection.get("home_spread"))
+        public_error = (
+            result["actual_home_margin"] - (-public_spread)
+            if result and public_spread is not None
+            else None
+        )
 
         rows.append({
             "snapshot_id": snapshot.get("snapshot_id"),
@@ -640,6 +648,16 @@ def main():
             "model_home_spread": model.get("home_spread"),
             "model_total": model.get("total"),
             "model_home_win_probability": model.get("home_win_probability"),
+            "public_home_spread": public_projection.get("home_spread"),
+            "public_total": public_projection.get("total"),
+            "weather_applied": public_projection.get("weather_applied"),
+            "weather_conditions_line": weather_snapshot.get("conditions_line"),
+            "weather_impact": weather_snapshot.get("impact"),
+            "weather_total_adjustment": weather_snapshot.get("total_adjustment"),
+            "weather_spread_adjustment": weather_snapshot.get("spread_adjustment"),
+            "weather_spread_status": weather_snapshot.get("spread_status"),
+            "public_margin_error": round_or_none(public_error),
+            "public_abs_error": round_or_none(abs(public_error)) if public_error is not None else None,
             "snapshot_home_spread": market.get("home_spread"),
             "snapshot_total": market.get("total"),
             "snapshot_bookmaker": market.get("bookmaker"),
@@ -735,6 +753,10 @@ def main():
         "captured_at_utc", "model_version", "week", "start_date",
         "away_team", "home_team", "preferred_side", "signal",
         "model_home_spread", "model_total", "model_home_win_probability",
+        "public_home_spread", "public_total", "weather_applied",
+        "weather_conditions_line", "weather_impact", "weather_total_adjustment",
+        "weather_spread_adjustment", "weather_spread_status",
+        "public_margin_error", "public_abs_error",
         "snapshot_home_spread", "snapshot_total", "snapshot_bookmaker",
         "closing_home_spread", "clv_points", "home_points", "away_points",
         "actual_home_margin", "ats_result", "model_margin_error",
