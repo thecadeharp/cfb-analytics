@@ -23,6 +23,7 @@ let seasonProjections = {};
 
 let currentWeek = null;
 let currentSearch = "";
+let currentRatingsMode = "teams";
 
 
 // ============================================================================
@@ -203,6 +204,61 @@ function powerRank(team) {
   return rank ? `#${rank}` : "—";
 }
 
+function spPlusRank(team, field) {
+  const target = team?.sp_plus?.[field];
+  if (!hasValue(target)) return "";
+
+  const ascending = field === "defense";
+  const values = Object.values(teams)
+    .filter(item => hasValue(item?.sp_plus?.[field]))
+    .map(item => Number(item.sp_plus[field]));
+
+  const targetNumber = Number(target);
+  const better = values.filter(value =>
+    ascending ? value < targetNumber : value > targetNumber
+  ).length;
+
+  return `#${better + 1} Overall`;
+}
+
+function average(values) {
+  const valid = values.filter(hasValue).map(Number);
+  if (!valid.length) return null;
+  return valid.reduce((sum, value) => sum + value, 0) / valid.length;
+}
+
+function conferenceStandings() {
+  const grouped = new Map();
+
+  Object.values(teams).forEach(team => {
+    const conference = team.conference || "Independent";
+    if (!grouped.has(conference)) grouped.set(conference, []);
+    grouped.get(conference).push(team);
+  });
+
+  return Array.from(grouped, ([conference, members]) => {
+    const liveMembers = members.filter(team =>
+      livePlays(team, "offense") > 0 && livePlays(team, "defense") > 0
+    );
+    const topTeam = [...members].sort(
+      (a, b) => Number(b.power_rating ?? -999) - Number(a.power_rating ?? -999)
+    )[0];
+
+    return {
+      conference,
+      teamCount: members.length,
+      liveCount: liveMembers.length,
+      topTeam: topTeam?.team || "—",
+      modelRating: average(members.map(team => team.power_rating)),
+      spPlus: average(members.map(team => team?.sp_plus?.overall)),
+      netEpa: average(liveMembers.map(team => liveNet(team, "epa_play"))),
+      netSuccess: average(liveMembers.map(team => liveNet(team, "success_rate"))),
+      offExplosive: average(liveMembers.map(team => liveValue(team, "offense", "explosive_rate"))),
+      defHavoc: average(liveMembers.map(team => liveValue(team, "defense", "havoc_rate"))),
+    };
+  }).sort((a, b) => Number(b.modelRating ?? -999) - Number(a.modelRating ?? -999));
+}
+
 function getTeam(name) {
   return teams?.[name] ?? null;
 }
@@ -362,9 +418,9 @@ function ensureMatchupView() {
     }
 
     .status.material {
-      background:#0f5c49;
+      background:#c77700;
       color:#ffffff;
-      border:1px solid #0f5c49;
+      border:1px solid #ad6500;
     }
 
     .status.outlier {
@@ -399,13 +455,13 @@ function ensureMatchupView() {
       min-width: 116px;
     }
 
-    .disagreement-number.material { color:#0f5c49; }
+    .disagreement-number.material { color:#b86600; }
     .disagreement-number.play { color:var(--green); }
     .disagreement-number.small-edge { color:#355f91; }
     .disagreement-number.outlier { color:#9a4d00; }
     .disagreement-number.agree { color:var(--muted); }
 
-    .summary-material { color:#0f5c49; font-weight:600; }
+    .summary-material { color:#b86600; font-weight:600; }
     .summary-play { color:var(--green); font-weight:600; }
     .summary-small { color:#355f91; font-weight:600; }
     .summary-outlier { color:#9a4d00; font-weight:600; }
@@ -479,7 +535,7 @@ function ensureMatchupView() {
       color:var(--muted); font-size:11px; margin-top:6px; line-height:1.4;
     }
 
-    .edge-material { color:#0f5c49; }
+    .edge-material { color:#b86600; }
     .edge-play { color:var(--green); }
     .edge-small { color:#355f91; }
     .edge-outlier { color:#9a4d00; }
@@ -492,6 +548,44 @@ function ensureMatchupView() {
     .analysis-card, .season-summary-card {
       background:var(--surface); border:1px solid var(--border);
       border-radius:12px; padding:18px;
+    }
+
+    .dossier-rank-inline {
+      color:var(--muted);
+      font-family:var(--mono);
+      font-size:10px;
+      font-weight:500;
+      letter-spacing:0;
+      white-space:nowrap;
+    }
+
+    .ratings-toggle {
+      display:flex;
+      gap:6px;
+      padding:12px 16px;
+      border-bottom:1px solid var(--border);
+      background:var(--surface);
+    }
+
+    .ratings-toggle-button {
+      appearance:none;
+      border:1px solid var(--border);
+      border-radius:999px;
+      background:#ffffff;
+      color:var(--muted);
+      cursor:pointer;
+      font-family:var(--mono);
+      font-size:9px;
+      font-weight:700;
+      letter-spacing:.5px;
+      padding:8px 12px;
+      text-transform:uppercase;
+    }
+
+    .ratings-toggle-button.active {
+      background:var(--ink);
+      border-color:var(--ink);
+      color:#ffffff;
     }
 
     .analysis-value {
@@ -1379,15 +1473,7 @@ function renderRatings() {
     ? `Live 2026 weight: ${formatPercent(liveWeight * 100, 0)}.`
     : "Live 2026 weight unavailable.";
 
-  container.innerHTML = `
-    <div class="ratings-note">
-      <strong>How to read these ratings:</strong>
-      Model Rating blends the frozen preseason baseline with current-season
-      performance. The 2026 columns contain current-season results only.
-      ${weightLabel} ${weekLabel}
-      Special-teams efficiency is not displayed until a validated data source
-      is added.
-    </div>
+  const teamTable = `
     <div class="table-scroll">
       <table class="projection-table">
         <thead>
@@ -1432,6 +1518,72 @@ function renderRatings() {
       </table>
     </div>
   `;
+
+  const conferenceTable = `
+    <div class="table-scroll">
+      <table class="projection-table">
+        <thead>
+          <tr>
+            <th>Conference Rank</th>
+            <th>Conference</th>
+            <th>Avg Model Rating</th>
+            <th>Avg SP+</th>
+            <th>2026 Net EPA</th>
+            <th>2026 Net Success</th>
+            <th>2026 Off Explosive</th>
+            <th>2026 Def Havoc</th>
+            <th>Live Samples</th>
+            <th>Top-Rated Team</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${conferenceStandings().map((conference, index) => `
+            <tr>
+              <td class="team-meta">#${index + 1}</td>
+              <td><strong>${escapeHtml(conference.conference)}</strong></td>
+              <td class="line-primary">${formatSigned(conference.modelRating, 3)}</td>
+              <td class="team-meta">${formatSigned(conference.spPlus, 1)}</td>
+              <td class="team-meta">${formatEPA(conference.netEpa)}</td>
+              <td class="team-meta">${formatPercent(conference.netSuccess)}</td>
+              <td class="team-meta">${formatRate(conference.offExplosive)}</td>
+              <td class="team-meta">${formatRate(conference.defHavoc)}</td>
+              <td class="team-meta">${conference.liveCount}/${conference.teamCount} teams</td>
+              <td class="team-meta">${escapeHtml(conference.topTeam)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  container.innerHTML = `
+    <div class="ratings-note">
+      <strong>How to read these ratings:</strong>
+      Model Rating blends the frozen preseason baseline with current-season
+      performance. The 2026 columns contain current-season results only.
+      ${weightLabel} ${weekLabel}
+      Special-teams efficiency is not displayed until a validated data source
+      is added.
+    </div>
+    <div class="ratings-toggle" role="group" aria-label="Ratings view">
+      <button
+        class="ratings-toggle-button ${currentRatingsMode === "teams" ? "active" : ""}"
+        type="button"
+        onclick="setRatingsMode('teams')"
+      >Team Ratings</button>
+      <button
+        class="ratings-toggle-button ${currentRatingsMode === "conferences" ? "active" : ""}"
+        type="button"
+        onclick="setRatingsMode('conferences')"
+      >Conference Standings</button>
+    </div>
+    ${currentRatingsMode === "conferences" ? conferenceTable : teamTable}
+  `;
+}
+
+function setRatingsMode(mode) {
+  currentRatingsMode = mode === "conferences" ? "conferences" : "teams";
+  renderRatings();
 }
 
 
@@ -1665,19 +1817,31 @@ function renderDossier(team) {
     <div class="dossier-stat-grid">
       <div class="dossier-stat">
         <div class="dossier-label">Power Rating</div>
-        <div class="dossier-value">${formatSigned(team.power_rating, 3)}</div>
+        <div class="dossier-value">
+          ${formatSigned(team.power_rating, 3)}
+          <span class="dossier-rank-inline">(${powerRank(team)} Overall)</span>
+        </div>
       </div>
       <div class="dossier-stat">
         <div class="dossier-label">SP+ Overall</div>
-        <div class="dossier-value">${formatSigned(team?.sp_plus?.overall, 1)}</div>
+        <div class="dossier-value">
+          ${formatSigned(team?.sp_plus?.overall, 1)}
+          <span class="dossier-rank-inline">(${spPlusRank(team, "overall")})</span>
+        </div>
       </div>
       <div class="dossier-stat">
         <div class="dossier-label">SP+ Offense</div>
-        <div class="dossier-value">${formatSigned(team?.sp_plus?.offense, 1)}</div>
+        <div class="dossier-value">
+          ${formatSigned(team?.sp_plus?.offense, 1)}
+          <span class="dossier-rank-inline">(${spPlusRank(team, "offense")})</span>
+        </div>
       </div>
       <div class="dossier-stat">
         <div class="dossier-label">SP+ Defense</div>
-        <div class="dossier-value">${formatSigned(team?.sp_plus?.defense, 1)}</div>
+        <div class="dossier-value">
+          ${formatSigned(team?.sp_plus?.defense, 1)}
+          <span class="dossier-rank-inline">(${spPlusRank(team, "defense")})</span>
+        </div>
       </div>
       <div class="dossier-stat">
         <div class="dossier-label">Record</div>
