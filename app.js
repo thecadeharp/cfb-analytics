@@ -31,7 +31,7 @@ let seasonProjections = {};
 
 let currentWeek = null;
 let currentSearch = "";
-let currentRatingsMode = "teams";
+let currentRatingsMode = "overview";
 let currentTeamConference = "ALL";
 let currentAdvancedSample = "non_garbage";
 let currentDossierTeamName = null;
@@ -235,6 +235,25 @@ function spPlusRank(team, field) {
   return `#${better + 1} Overall`;
 }
 
+function teamLogoInitials(teamName) {
+  const words = String(teamName || "?").trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return "?";
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return words.slice(0, 2).map(word => word[0]).join("").toUpperCase();
+}
+
+function teamLogoMarkup(teamName, size = "table") {
+  const external = externalRatingsData?.teams?.[teamName] ?? {};
+  const logo = external.logo || external.logo_dark || "";
+  const color = String(external.color || "18212b").replace(/^#/, "");
+  return `<span class="team-logo team-logo-${escapeHtml(size)}" style="--team-color:#${escapeHtml(color)}" aria-hidden="true">
+    <span class="team-logo-fallback">${escapeHtml(teamLogoInitials(teamName))}</span>
+    ${logo ? `<img src="${escapeHtml(logo)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
+  </span>`;
+}
+
+window.teamLogoMarkup = teamLogoMarkup;
+
 function average(values) {
   const valid = values.filter(hasValue).map(Number);
   if (!valid.length) return null;
@@ -429,6 +448,7 @@ function projectionSourceLabel(source) {
 // ============================================================================
 
 function switchView(viewName) {
+  if (viewName === "teams") viewName = "ratings";
   document.querySelectorAll(".view").forEach(view => view.classList.remove("active"));
 
   const requested = document.getElementById(`view-${viewName}`);
@@ -619,6 +639,29 @@ function ensureMatchupView() {
       letter-spacing:0;
       white-space:nowrap;
     }
+
+    .team-with-logo {
+      display:inline-flex; align-items:center; gap:9px; min-width:0;
+    }
+    .team-logo {
+      position:relative; display:inline-grid; place-items:center; flex:0 0 auto;
+      overflow:hidden; border-radius:50%; background:#f2f2ef;
+      border:1px solid rgba(24,33,43,.08);
+    }
+    .team-logo-table { width:25px; height:25px; }
+    .team-logo-projection { width:22px; height:22px; }
+    .team-logo-matchup { width:44px; height:44px; }
+    .team-logo-dossier { width:58px; height:58px; }
+    .team-logo img {
+      position:absolute; inset:2px; width:calc(100% - 4px); height:calc(100% - 4px);
+      object-fit:contain; z-index:2;
+    }
+    .team-logo-fallback {
+      color:var(--team-color); font-family:var(--mono); font-size:8px;
+      font-weight:800; letter-spacing:-.3px;
+    }
+    .team-logo-dossier .team-logo-fallback { font-size:13px; }
+    .dossier-team-heading { display:flex; align-items:center; gap:14px; }
 
     .ratings-toggle {
       display:flex;
@@ -869,6 +912,7 @@ async function init() {
     renderRatings();
     initializeMatchupAnalysis();
     attachEvents();
+    document.dispatchEvent(new CustomEvent("hammer:data-ready"));
   } catch (error) {
     console.error("Frontend initialization failed:", error);
 
@@ -1591,6 +1635,31 @@ function renderRatings() {
     ? `ESPN FPI snapshot: Week ${externalWeek ?? "—"}.`
     : "External ratings are awaiting their first refresh.";
 
+  const overviewTable = `
+    ${conferenceFilterMarkup("ratings-overview")}
+    <div class="table-scroll">
+      <table class="projection-table">
+        <thead><tr>
+          <th>${isConferenceView ? "Conference Rank" : "Power Rank"}</th>
+          <th>Team</th><th>Conference</th><th>Record</th>
+          <th>Model Rating</th><th>SP+</th><th>ESPN FPI</th><th>Special Teams</th>
+        </tr></thead>
+        <tbody>${data.map((team,index) => {
+          const external = externalRatingsData?.teams?.[team.team] ?? {};
+          return `<tr style="cursor:pointer" onclick="openDossier('${escapeJsString(team.team)}')">
+            <td class="team-meta">${isConferenceView ? `#${index + 1}` : powerRank(team)}</td>
+            <td><span class="team-with-logo">${teamLogoMarkup(team.team)}<strong>${escapeHtml(team.team)}</strong></span></td>
+            <td class="team-meta">${escapeHtml(team.conference ?? "—")}</td>
+            <td class="team-meta">${recordText(team)}</td>
+            <td class="line-primary">${formatSigned(team.power_rating,3)}</td>
+            <td class="team-meta">${formatSigned(team?.sp_plus?.overall,1)}</td>
+            <td class="team-meta">${hasValue(external.fpi) ? `${formatSigned(external.fpi,1)} (${externalRank(external.fpi_rank)})` : "—"}</td>
+            <td class="team-meta">${hasValue(external.fpi_special_teams) ? `${formatSigned(external.fpi_special_teams,3)} (${externalMetricRank("fpi_special_teams",external.fpi_special_teams)})` : "—"}</td>
+          </tr>`;
+        }).join("")}</tbody>
+      </table>
+    </div>`;
+
   const teamTable = `
     <div class="table-scroll">
       <table class="projection-table">
@@ -1629,7 +1698,7 @@ function renderRatings() {
                 onclick="openDossier('${escapeJsString(team.team)}')"
               >
                 <td class="team-meta">${isConferenceView ? `#${index + 1}` : powerRank(team)}</td>
-                <td><strong>${escapeHtml(team.team)}</strong></td>
+                <td><span class="team-with-logo">${teamLogoMarkup(team.team)}<strong>${escapeHtml(team.team)}</strong></span></td>
                 <td class="line-primary">${formatSigned(team.power_rating, 3)}</td>
                 <td class="team-meta">${formatSigned(team?.sp_plus?.overall, 1)}</td>
                 <td class="team-meta">${hasValue(external.fpi) ? `${formatSigned(external.fpi, 1)} (#${external.fpi_rank})` : "—"}</td>
@@ -1682,7 +1751,7 @@ function renderRatings() {
               <td class="team-meta">${formatRate(conference.offExplosive)}</td>
               <td class="team-meta">${formatRate(conference.defHavoc)}</td>
               <td class="team-meta">${conference.liveCount}/${conference.teamCount} teams</td>
-              <td class="team-meta">${escapeHtml(conference.topTeam)}</td>
+              <td class="team-meta"><span class="team-with-logo">${teamLogoMarkup(conference.topTeam)}<span>${escapeHtml(conference.topTeam)}</span></span></td>
             </tr>
           `).join("")}
         </tbody>
@@ -1701,22 +1770,27 @@ function renderRatings() {
     </div>
     <div class="ratings-toggle" role="group" aria-label="Ratings view">
       <button
-        class="ratings-toggle-button ${currentRatingsMode === "teams" ? "active" : ""}"
+        class="ratings-toggle-button ${currentRatingsMode === "overview" ? "active" : ""}"
         type="button"
-        onclick="setRatingsMode('teams')"
-      >Team Ratings</button>
+        onclick="setRatingsMode('overview')"
+      >Overview</button>
+      <button
+        class="ratings-toggle-button ${currentRatingsMode === "advanced" ? "active" : ""}"
+        type="button"
+        onclick="setRatingsMode('advanced')"
+      >Advanced Ratings</button>
       <button
         class="ratings-toggle-button ${currentRatingsMode === "conferences" ? "active" : ""}"
         type="button"
         onclick="setRatingsMode('conferences')"
       >Conference Standings</button>
     </div>
-    ${currentRatingsMode === "conferences" ? conferenceTable : `${conferenceFilterMarkup("ratings")}${teamTable}`}
+    ${currentRatingsMode === "conferences" ? conferenceTable : currentRatingsMode === "advanced" ? `${conferenceFilterMarkup("ratings")}${teamTable}` : overviewTable}
   `;
 }
 
 function setRatingsMode(mode) {
-  currentRatingsMode = mode === "conferences" ? "conferences" : "teams";
+  currentRatingsMode = ["overview", "advanced", "conferences"].includes(mode) ? mode : "overview";
   renderRatings();
 }
 
@@ -1998,7 +2072,7 @@ function renderMatchupAnalysis(errorMessage = "") {
     <div class="tape-result">
       <div class="tape-scoreboard">
         <div class="tape-team">
-          <div class="tape-team-name">${escapeHtml(projection.teamA.team)}</div>
+          <div class="team-with-logo">${teamLogoMarkup(projection.teamA.team, "matchup")}<div class="tape-team-name">${escapeHtml(projection.teamA.team)}</div></div>
           <div class="tape-team-meta">${powerRank(projection.teamA)} · ${formatPercent(projection.teamAWin)} win probability</div>
         </div>
         <div>
@@ -2006,7 +2080,7 @@ function renderMatchupAnalysis(errorMessage = "") {
           <div class="tape-team-meta" style="text-align:center;">Projected final</div>
         </div>
         <div class="tape-team">
-          <div class="tape-team-name">${escapeHtml(projection.teamB.team)}</div>
+          <div class="team-with-logo">${teamLogoMarkup(projection.teamB.team, "matchup")}<div class="tape-team-name">${escapeHtml(projection.teamB.team)}</div></div>
           <div class="tape-team-meta">${powerRank(projection.teamB)} · ${formatPercent(projection.teamBWin)} win probability</div>
         </div>
       </div>
@@ -2425,7 +2499,8 @@ function renderDossier(team) {
     <div class="dossier-header">
       <div>
         <div class="eyebrow">Team dossier</div>
-        <div class="team-title-row">
+        <div class="team-title-row dossier-team-heading">
+          ${teamLogoMarkup(team.team, "dossier")}
           <div class="team-title">${escapeHtml(team.team)}</div>
         </div>
         <div class="team-dossier-sub">
