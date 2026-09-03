@@ -10,6 +10,7 @@ const DATA_URLS = {
   projections: "./data/projections.json",
   signalReport: "./data/reports/signal_report.json",
   advancedMetrics: "./data/advanced_metrics.json",
+  externalRatings: "./data/external_ratings.json",
 };
 
 let metricsData = null;
@@ -18,6 +19,7 @@ let oddsData = null;
 let projectionsData = null;
 let signalReportData = null;
 let advancedMetricsData = null;
+let externalRatingsData = null;
 
 let teams = {};
 let projections = [];
@@ -834,13 +836,14 @@ async function init() {
   try {
     ensureMatchupView();
 
-    [metricsData, scheduleData, oddsData, projectionsData, signalReportData, advancedMetricsData] = await Promise.all([
+    [metricsData, scheduleData, oddsData, projectionsData, signalReportData, advancedMetricsData, externalRatingsData] = await Promise.all([
       loadJson(DATA_URLS.metrics),
       loadJson(DATA_URLS.schedule),
       loadJson(DATA_URLS.odds),
       loadJson(DATA_URLS.projections),
       loadJson(DATA_URLS.signalReport).catch(() => null),
       loadJson(DATA_URLS.advancedMetrics).catch(() => null),
+      loadJson(DATA_URLS.externalRatings).catch(() => null),
     ]);
 
     teams = metricsData?.teams ?? {};
@@ -1570,6 +1573,11 @@ function renderRatings() {
     ? `Live 2026 weight: ${formatPercent(liveWeight * 100, 0)}.`
     : "Live 2026 weight unavailable.";
 
+  const externalWeek = externalRatingsData?.meta?.week;
+  const externalLabel = externalRatingsData
+    ? `ESPN FPI snapshot: Week ${externalWeek ?? "—"}.`
+    : "External ratings are awaiting their first refresh.";
+
   const teamTable = `
     <div class="table-scroll">
       <table class="projection-table">
@@ -1579,6 +1587,9 @@ function renderRatings() {
             <th>Team</th>
             <th>Model Rating</th>
             <th>Preseason SP+</th>
+            <th>ESPN FPI</th>
+            <th>SOR Rank</th>
+            <th>SOS Rank</th>
             <th>2026 Net EPA</th>
             <th>2026 Net Success</th>
             <th>2026 Off Explosive</th>
@@ -1588,6 +1599,7 @@ function renderRatings() {
         </thead>
         <tbody>
           ${data.map((team, index) => {
+            const external = externalRatingsData?.teams?.[team.team] ?? {};
             const offPlays = livePlays(team, "offense");
             const defPlays = livePlays(team, "defense");
             const playsTracked = offPlays > 0 && defPlays > 0
@@ -1603,6 +1615,9 @@ function renderRatings() {
                 <td><strong>${escapeHtml(team.team)}</strong></td>
                 <td class="line-primary">${formatSigned(team.power_rating, 3)}</td>
                 <td class="team-meta">${formatSigned(team?.sp_plus?.overall, 1)}</td>
+                <td class="team-meta">${hasValue(external.fpi) ? `${formatSigned(external.fpi, 1)} (#${external.fpi_rank})` : "—"}</td>
+                <td class="team-meta">${hasValue(external.sor_rank) ? `#${external.sor_rank}` : "—"}</td>
+                <td class="team-meta">${hasValue(external.sos_rank) ? `#${external.sos_rank}` : "—"}</td>
                 <td class="team-meta">${formatEPA(liveNet(team, "epa_play"))}</td>
                 <td class="team-meta">${formatPercent(liveNet(team, "success_rate"))}</td>
                 <td class="team-meta">${formatRate(liveValue(team, "offense", "explosive_rate"))}</td>
@@ -1658,7 +1673,7 @@ function renderRatings() {
       <strong>How to read these ratings:</strong>
       Model Rating blends the frozen preseason baseline with current-season
       performance. The 2026 columns contain current-season results only.
-      ${weightLabel} ${weekLabel}
+      ${weightLabel} ${weekLabel} ${externalLabel}
       Special-teams efficiency is not displayed until a validated data source
       is added.
     </div>
@@ -1704,6 +1719,14 @@ function openDossier(teamName) {
 
 function advancedSide(teamName, side) {
   return advancedMetricsData?.teams?.[teamName]?.[currentAdvancedSample]?.[side] ?? null;
+}
+
+function externalRating(teamName) {
+  return externalRatingsData?.teams?.[teamName] ?? null;
+}
+
+function externalRank(value) {
+  return hasValue(value) && Number(value) > 0 ? `#${Number(value)}` : "—";
 }
 
 function advancedRank(teamName, side, field, lowerIsBetter = false) {
@@ -1967,6 +1990,7 @@ function renderDossier(team) {
 
   const offPlays = livePlays(team, "offense");
   const defPlays = livePlays(team, "defense");
+  const external = externalRating(team.team);
 
   container.innerHTML = `
     <div class="dossier-header">
@@ -2020,6 +2044,13 @@ function renderDossier(team) {
       <div class="dossier-stat">
         <div class="dossier-label">Record</div>
         <div class="dossier-value">${recordText(team)}</div>
+      </div>
+      <div class="dossier-stat">
+        <div class="dossier-label">ESPN FPI</div>
+        <div class="dossier-value">
+          ${formatSigned(external?.fpi, 1)}
+          <span class="dossier-rank-inline">(${externalRank(external?.fpi_rank)} Overall)</span>
+        </div>
       </div>
     </div>
 
@@ -2110,6 +2141,48 @@ function renderDossier(team) {
               : "—"
           )}
           ${renderMetricRow("Sample Status", escapeHtml(liveSampleLabel(team)))}
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:12px;">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">External Ratings & Resume</div>
+          <div class="team-meta" style="margin-top:5px;">
+            ESPN FPI Week ${externalRatingsData?.meta?.week ?? "—"} · display-only · not used by Model A
+          </div>
+        </div>
+      </div>
+      <div class="dossier-layout" style="padding:12px 16px 16px;">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Strength & Resume</div></div>
+          <div class="panel-body">
+            ${renderMetricRow("FPI", formatSigned(external?.fpi, 1), externalRank(external?.fpi_rank))}
+            ${renderMetricRow("Strength of Record", externalRank(external?.sor_rank))}
+            ${renderMetricRow("Strength of Schedule", externalRank(external?.sos_rank))}
+            ${renderMetricRow("Remaining SOS", externalRank(external?.remaining_sos_rank))}
+            ${renderMetricRow("Game Control", externalRank(external?.game_control_rank))}
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">FPI Components</div></div>
+          <div class="panel-body">
+            ${renderMetricRow("Offensive Component", formatSigned(external?.fpi_offense, 3))}
+            ${renderMetricRow("Defensive Component", formatSigned(external?.fpi_defense, 3))}
+            ${renderMetricRow("Special Teams Component", formatSigned(external?.fpi_special_teams, 3))}
+            ${renderMetricRow("Projected Record", hasValue(external?.projected_wins) ? `${formatNumber(external.projected_wins, 1)}–${formatNumber(external.projected_losses, 1)}` : "—")}
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Season Probabilities</div></div>
+          <div class="panel-body">
+            ${renderMetricRow("Win Conference", formatPercent(external?.win_conference_pct))}
+            ${renderMetricRow("Make Playoff", formatPercent(external?.make_playoff_pct))}
+            ${renderMetricRow("Make Title Game", formatPercent(external?.make_title_game_pct))}
+            ${renderMetricRow("Win National Title", formatPercent(external?.win_title_pct))}
+            ${renderMetricRow("Win Out", formatPercent(external?.win_out_pct))}
+          </div>
         </div>
       </div>
     </div>
