@@ -42,6 +42,9 @@ hc = {}
 
 all_coaches = cfbd("/coaches")
 print(f"   {len(all_coaches)} total coach records")
+if all_coaches:
+    import json
+    print(f"   First coach raw: {json.dumps(all_coaches[0], default=str)[:500]}")
 
 for coach in all_coaches:
     first = (coach.get("first_name") or "").strip()
@@ -67,6 +70,9 @@ for coach in all_coaches:
 # Verify — print a team with known HC change
 print(f"   Alabama coaches: {hc.get('Alabama', {})}")
 print(f"   LSU coaches: {hc.get('LSU', {})}")
+# Debug — show what keys exist for schools starting with A
+sample_schools = sorted([s for s in hc.keys()])[:20]
+print(f"   Sample schools in hc: {sample_schools}")
 
 # ── FETCH RECORDS ─────────────────────────────────────────────────────────────
 print("\n📊 Fetching season records...")
