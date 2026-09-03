@@ -246,10 +246,37 @@ function teamLogoMarkup(teamName, size = "table") {
   const external = externalRatingsData?.teams?.[teamName] ?? {};
   const logo = external.logo || external.logo_dark || "";
   const color = String(external.color || "18212b").replace(/^#/, "");
-  return `<span class="team-logo team-logo-${escapeHtml(size)}" style="--team-color:#${escapeHtml(color)}" aria-hidden="true">
-    <span class="team-logo-fallback">${escapeHtml(teamLogoInitials(teamName))}</span>
-    ${logo ? `<img src="${escapeHtml(logo)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
-  </span>`;
+  const initials = escapeHtml(teamLogoInitials(teamName));
+
+  return `
+    <span
+      class="team-logo team-logo-${escapeHtml(size)}"
+      style="--team-color:#${escapeHtml(color)}"
+      aria-hidden="true"
+    >
+      ${
+        logo
+          ? `
+            <img
+              src="${escapeHtml(logo)}"
+              alt=""
+              loading="lazy"
+              onerror="
+                this.style.display='none';
+                this.nextElementSibling.style.display='grid';
+              "
+            >
+            <span
+              class="team-logo-fallback"
+              style="display:none;"
+            >${initials}</span>
+          `
+          : `
+            <span class="team-logo-fallback">${initials}</span>
+          `
+      }
+    </span>
+  `;
 }
 
 window.teamLogoMarkup = teamLogoMarkup;
@@ -643,23 +670,28 @@ function ensureMatchupView() {
     .team-with-logo {
       display:inline-flex; align-items:center; gap:9px; min-width:0;
     }
+
     .team-logo {
       position:relative; display:inline-grid; place-items:center; flex:0 0 auto;
       overflow:hidden; border-radius:50%; background:#f2f2ef;
       border:1px solid rgba(24,33,43,.08);
     }
+
     .team-logo-table { width:25px; height:25px; }
     .team-logo-projection { width:22px; height:22px; }
     .team-logo-matchup { width:44px; height:44px; }
     .team-logo-dossier { width:58px; height:58px; }
+
     .team-logo img {
       position:absolute; inset:2px; width:calc(100% - 4px); height:calc(100% - 4px);
       object-fit:contain; z-index:2;
     }
+
     .team-logo-fallback {
       color:var(--team-color); font-family:var(--mono); font-size:8px;
       font-weight:800; letter-spacing:-.3px;
     }
+
     .team-logo-dossier .team-logo-fallback { font-size:13px; }
     .dossier-team-heading { display:flex; align-items:center; gap:14px; }
 
@@ -775,10 +807,12 @@ function ensureMatchupView() {
 
     .insight-card { padding:15px 0; border-bottom:1px solid #eeeeeb; }
     .insight-card:last-child { border-bottom:none; }
+
     .insight-title {
       font-family:var(--mono); color:var(--muted); font-size:9px;
       letter-spacing:1.1px; text-transform:uppercase; margin-bottom:5px;
     }
+
     .insight-text { font-size:12px; line-height:1.55; }
 
     .sample-warning {
@@ -792,39 +826,51 @@ function ensureMatchupView() {
     .adjustment-neutral { color:var(--muted); }
 
     .win-prob-wrap { margin-top:12px; }
+
     .win-prob-bar {
       height:7px; border-radius:999px; overflow:hidden; background:#ecece8;
     }
+
     .win-prob-fill { height:100%; background:var(--green); }
+
     .win-prob-labels {
       display:flex; justify-content:space-between; margin-top:7px;
       font-family:var(--mono); font-size:10px; color:var(--muted);
     }
 
     .season-outlook { margin-top:12px; }
+
     .season-summary-grid {
       display:grid; grid-template-columns:repeat(4,minmax(0,1fr));
       gap:10px; margin-bottom:12px;
     }
+
     .season-summary-value {
       font-size:23px; font-weight:800; letter-spacing:-0.7px; margin-top:8px;
     }
+
     .season-two-column {
       display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,.7fr);
       gap:12px; margin-bottom:12px;
     }
+
     .distribution-wrap { padding:18px 16px; }
+
     .distribution-row {
       display:grid; grid-template-columns:30px minmax(0,1fr) 50px;
       gap:10px; align-items:center; margin-bottom:10px;
     }
+
     .distribution-wins, .distribution-prob {
       font-family:var(--mono); font-size:11px; font-weight:500;
     }
+
     .distribution-prob { text-align:right; }
+
     .distribution-track {
       height:8px; border-radius:999px; background:#ecece8; overflow:hidden;
     }
+
     .distribution-fill {
       height:100%; background:var(--green); border-radius:999px;
     }
@@ -832,32 +878,40 @@ function ensureMatchupView() {
     .alt-table, .season-schedule-table {
       width:100%; border-collapse:collapse; font-size:11px;
     }
+
     .alt-table th, .alt-table td, .season-schedule-table th,
     .season-schedule-table td {
       padding:11px 10px; border-bottom:1px solid #eeeeeb;
     }
+
     .alt-table th, .season-schedule-table th {
       color:var(--muted); font-family:var(--mono); font-size:8px;
       letter-spacing:1px; text-transform:uppercase; text-align:left;
     }
+
     .alt-table td:nth-child(2), .alt-table td:nth-child(3),
     .alt-table th:nth-child(2), .alt-table th:nth-child(3),
     .season-schedule-table th:nth-child(4), .season-schedule-table td:nth-child(4),
     .season-schedule-table th:nth-child(5), .season-schedule-table td:nth-child(5) {
       text-align:right;
     }
+
     .alt-strong { font-weight:800; }
+
     .fcs-tag {
       font-family:var(--mono); font-size:8px; color:var(--muted); margin-left:5px;
     }
 
     @media (max-width:900px) {
       .signal-legend-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+
       .analysis-grid, .season-summary-grid {
         grid-template-columns:repeat(2,minmax(0,1fr));
       }
+
       .analysis-layout, .season-two-column { grid-template-columns:1fr; }
       .analysis-panel.wide { grid-column:auto; }
+
       .matchup-header, .model-edge-banner {
         flex-direction:column; align-items:flex-start;
       }
@@ -889,7 +943,17 @@ async function init() {
   try {
     ensureMatchupView();
 
-    [metricsData, scheduleData, oddsData, projectionsData, signalReportData, advancedMetricsData, externalRatingsData, rosterFoundationData, hfaData] = await Promise.all([
+    [
+      metricsData,
+      scheduleData,
+      oddsData,
+      projectionsData,
+      signalReportData,
+      advancedMetricsData,
+      externalRatingsData,
+      rosterFoundationData,
+      hfaData
+    ] = await Promise.all([
       loadJson(DATA_URLS.metrics),
       loadJson(DATA_URLS.schedule),
       loadJson(DATA_URLS.odds),
@@ -912,6 +976,7 @@ async function init() {
     renderRatings();
     initializeMatchupAnalysis();
     attachEvents();
+
     document.dispatchEvent(new CustomEvent("hammer:data-ready"));
   } catch (error) {
     console.error("Frontend initialization failed:", error);
@@ -948,6 +1013,7 @@ function updateHeader() {
   }
 
   const date = new Date(generated);
+
   if (Number.isNaN(date.getTime())) {
     header.textContent = "2026 model";
     return;
@@ -985,6 +1051,7 @@ function buildWeekTabs() {
   if (!container) return;
 
   const weeks = availableWeeks();
+
   if (!weeks.length) {
     container.innerHTML = "";
     return;
@@ -1304,6 +1371,7 @@ function renderMatchup(game) {
   const edgeSize = comparison?.disagreement;
 
   const sampleComparable = Boolean(matchup?.comparable_live_sample);
+
   const matchupNote =
     matchup?.note ??
     (sampleComparable
@@ -1464,10 +1532,12 @@ function renderMatchup(game) {
             <div class="analysis-row-label">${escapeHtml(awayName)} power rating</div>
             <div class="analysis-row-value">${formatSigned(awayRating, 3)}</div>
           </div>
+
           <div class="analysis-row">
             <div class="analysis-row-label">${escapeHtml(homeName)} power rating</div>
             <div class="analysis-row-value">${formatSigned(homeRating, 3)}</div>
           </div>
+
           <div class="analysis-row">
             <div class="analysis-row-label">Rating-only fair line</div>
             <div class="analysis-row-value">
@@ -1481,6 +1551,7 @@ function renderMatchup(game) {
         <div class="analysis-panel-header">
           <div class="analysis-panel-title">Projection build</div>
         </div>
+
         <div class="analysis-panel-body">
           <div class="analysis-row">
             <div class="analysis-row-label">Rating-only line</div>
@@ -1488,24 +1559,28 @@ function renderMatchup(game) {
               ${escapeHtml(favoredLine(homeName, awayName, ratingOnly))}
             </div>
           </div>
+
           <div class="analysis-row">
             <div class="analysis-row-label">Home-field adjustment</div>
             <div class="analysis-row-value">
               ${hasValue(hfa) ? `${formatNumber(hfa, 1)} pts` : "—"}
             </div>
           </div>
+
           <div class="analysis-row">
             <div class="analysis-row-label">Line after home field</div>
             <div class="analysis-row-value">
               ${escapeHtml(favoredLine(homeName, awayName, afterHfa))}
             </div>
           </div>
+
           <div class="analysis-row">
             <div class="analysis-row-label">Live matchup adjustment</div>
             <div class="analysis-row-value ${adjustmentClass(matchupTotal)}">
               ${adjustmentText(matchupTotal)}
             </div>
           </div>
+
           <div class="analysis-row">
             <div class="analysis-row-label">Final fair line</div>
             <div class="analysis-row-value">${escapeHtml(fairLine)}</div>
@@ -1518,6 +1593,7 @@ function renderMatchup(game) {
           <div class="analysis-panel-title">Live matchup layer</div>
           <div class="team-meta">${sampleComparable ? "ACTIVE" : "WITHHELD"}</div>
         </div>
+
         <div class="analysis-panel-body" style="padding-top:12px;padding-bottom:12px;">
           <div class="sample-warning">${escapeHtml(matchupNote)}</div>
 
@@ -1526,21 +1602,25 @@ function renderMatchup(game) {
             matchupComponents?.passing,
             Boolean(available?.passing)
           )}
+
           ${matchupComponentRow(
             "Rushing",
             matchupComponents?.rushing,
             Boolean(available?.rushing)
           )}
+
           ${matchupComponentRow(
             "Success rate",
             matchupComponents?.success_rate,
             Boolean(available?.success_rate)
           )}
+
           ${matchupComponentRow(
             "Explosiveness",
             matchupComponents?.explosiveness,
             Boolean(available?.explosiveness)
           )}
+
           ${matchupComponentRow(
             "Havoc",
             matchupComponents?.havoc,
@@ -1581,6 +1661,7 @@ function renderTeams() {
 
   container.innerHTML = `
     ${conferenceFilterMarkup("teams")}
+
     <div class="table-scroll">
       <table class="projection-table">
         <thead>
@@ -1593,6 +1674,7 @@ function renderTeams() {
             <th>SP+</th>
           </tr>
         </thead>
+
         <tbody>
           ${data.map((team, index) => `
             <tr
@@ -1631,34 +1713,75 @@ function renderRatings() {
     : "Live 2026 weight unavailable.";
 
   const externalWeek = externalRatingsData?.meta?.week;
+
   const externalLabel = externalRatingsData
     ? `ESPN FPI snapshot: Week ${externalWeek ?? "—"}.`
     : "External ratings are awaiting their first refresh.";
 
   const overviewTable = `
     ${conferenceFilterMarkup("ratings-overview")}
+
     <div class="table-scroll">
       <table class="projection-table">
-        <thead><tr>
-          <th>${isConferenceView ? "Conference Rank" : "Power Rank"}</th>
-          <th>Team</th><th>Conference</th><th>Record</th>
-          <th>Model Rating</th><th>SP+</th><th>ESPN FPI</th><th>Special Teams</th>
-        </tr></thead>
-        <tbody>${data.map((team,index) => {
-          const external = externalRatingsData?.teams?.[team.team] ?? {};
-          return `<tr style="cursor:pointer" onclick="openDossier('${escapeJsString(team.team)}')">
-            <td class="team-meta">${isConferenceView ? `#${index + 1}` : powerRank(team)}</td>
-            <td><span class="team-with-logo">${teamLogoMarkup(team.team)}<strong>${escapeHtml(team.team)}</strong></span></td>
-            <td class="team-meta">${escapeHtml(team.conference ?? "—")}</td>
-            <td class="team-meta">${recordText(team)}</td>
-            <td class="line-primary">${formatSigned(team.power_rating,3)}</td>
-            <td class="team-meta">${formatSigned(team?.sp_plus?.overall,1)}</td>
-            <td class="team-meta">${hasValue(external.fpi) ? `${formatSigned(external.fpi,1)} (${externalRank(external.fpi_rank)})` : "—"}</td>
-            <td class="team-meta">${hasValue(external.fpi_special_teams) ? `${formatSigned(external.fpi_special_teams,3)} (${externalMetricRank("fpi_special_teams",external.fpi_special_teams)})` : "—"}</td>
-          </tr>`;
-        }).join("")}</tbody>
+        <thead>
+          <tr>
+            <th>${isConferenceView ? "Conference Rank" : "Power Rank"}</th>
+            <th>Team</th>
+            <th>Conference</th>
+            <th>Record</th>
+            <th>Model Rating</th>
+            <th>SP+</th>
+            <th>ESPN FPI</th>
+            <th>Special Teams</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${data.map((team, index) => {
+            const external = externalRatingsData?.teams?.[team.team] ?? {};
+
+            return `
+              <tr
+                style="cursor:pointer"
+                onclick="openDossier('${escapeJsString(team.team)}')"
+              >
+                <td class="team-meta">
+                  ${isConferenceView ? `#${index + 1}` : powerRank(team)}
+                </td>
+
+                <td>
+                  <span class="team-with-logo">
+                    ${teamLogoMarkup(team.team)}
+                    <strong>${escapeHtml(team.team)}</strong>
+                  </span>
+                </td>
+
+                <td class="team-meta">${escapeHtml(team.conference ?? "—")}</td>
+                <td class="team-meta">${recordText(team)}</td>
+                <td class="line-primary">${formatSigned(team.power_rating, 3)}</td>
+                <td class="team-meta">${formatSigned(team?.sp_plus?.overall, 1)}</td>
+
+                <td class="team-meta">
+                  ${hasValue(external.fpi)
+                    ? `${formatSigned(external.fpi, 1)} (${externalRank(external.fpi_rank)})`
+                    : "—"}
+                </td>
+
+                <td class="team-meta">
+                  ${hasValue(external.fpi_special_teams)
+                    ? `${formatSigned(external.fpi_special_teams, 3)} (${externalMetricRank(
+                        "fpi_special_teams",
+                        external.fpi_special_teams
+                      )})`
+                    : "—"}
+                </td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
       </table>
-    </div>`;
+    </div>
+  `;
 
   const teamTable = `
     <div class="table-scroll">
@@ -1682,12 +1805,15 @@ function renderRatings() {
             <th>Plays Tracked</th>
           </tr>
         </thead>
+
         <tbody>
           ${data.map((team, index) => {
             const external = externalRatingsData?.teams?.[team.team] ?? {};
             const roster = rosterFoundationData?.teams?.[team.team] ?? {};
+
             const offPlays = livePlays(team, "offense");
             const defPlays = livePlays(team, "defense");
+
             const playsTracked = offPlays > 0 && defPlays > 0
               ? `${formatNumber(offPlays, 0)} O / ${formatNumber(defPlays, 0)} D`
               : "—";
@@ -1697,16 +1823,53 @@ function renderRatings() {
                 style="cursor:pointer;"
                 onclick="openDossier('${escapeJsString(team.team)}')"
               >
-                <td class="team-meta">${isConferenceView ? `#${index + 1}` : powerRank(team)}</td>
-                <td><span class="team-with-logo">${teamLogoMarkup(team.team)}<strong>${escapeHtml(team.team)}</strong></span></td>
+                <td class="team-meta">
+                  ${isConferenceView ? `#${index + 1}` : powerRank(team)}
+                </td>
+
+                <td>
+                  <span class="team-with-logo">
+                    ${teamLogoMarkup(team.team)}
+                    <strong>${escapeHtml(team.team)}</strong>
+                  </span>
+                </td>
+
                 <td class="line-primary">${formatSigned(team.power_rating, 3)}</td>
                 <td class="team-meta">${formatSigned(team?.sp_plus?.overall, 1)}</td>
-                <td class="team-meta">${hasValue(external.fpi) ? `${formatSigned(external.fpi, 1)} (#${external.fpi_rank})` : "—"}</td>
-                <td class="team-meta">${hasValue(external.fpi_special_teams) ? `${formatSigned(external.fpi_special_teams, 3)} (${externalMetricRank("fpi_special_teams", external.fpi_special_teams)})` : "—"}</td>
-                <td class="team-meta">${hasValue(roster.talent_rank) ? `#${roster.talent_rank}` : "—"}</td>
-                <td class="team-meta">${hasValue(roster.returning_production_pct) ? `${formatPercent(roster.returning_production_pct)} (#${roster.returning_production_rank})` : "—"}</td>
-                <td class="team-meta">${hasValue(external.sor_rank) ? `#${external.sor_rank}` : "—"}</td>
-                <td class="team-meta">${hasValue(external.sos_rank) ? `#${external.sos_rank}` : "—"}</td>
+
+                <td class="team-meta">
+                  ${hasValue(external.fpi)
+                    ? `${formatSigned(external.fpi, 1)} (#${external.fpi_rank})`
+                    : "—"}
+                </td>
+
+                <td class="team-meta">
+                  ${hasValue(external.fpi_special_teams)
+                    ? `${formatSigned(external.fpi_special_teams, 3)} (${externalMetricRank(
+                        "fpi_special_teams",
+                        external.fpi_special_teams
+                      )})`
+                    : "—"}
+                </td>
+
+                <td class="team-meta">
+                  ${hasValue(roster.talent_rank) ? `#${roster.talent_rank}` : "—"}
+                </td>
+
+                <td class="team-meta">
+                  ${hasValue(roster.returning_production_pct)
+                    ? `${formatPercent(roster.returning_production_pct)} (#${roster.returning_production_rank})`
+                    : "—"}
+                </td>
+
+                <td class="team-meta">
+                  ${hasValue(external.sor_rank) ? `#${external.sor_rank}` : "—"}
+                </td>
+
+                <td class="team-meta">
+                  ${hasValue(external.sos_rank) ? `#${external.sos_rank}` : "—"}
+                </td>
+
                 <td class="team-meta">${formatEPA(liveNet(team, "epa_play"))}</td>
                 <td class="team-meta">${formatPercent(liveNet(team, "success_rate"))}</td>
                 <td class="team-meta">${formatRate(liveValue(team, "offense", "explosive_rate"))}</td>
@@ -1738,6 +1901,7 @@ function renderRatings() {
             <th>Top-Rated Team</th>
           </tr>
         </thead>
+
         <tbody>
           ${conferenceStandings().map((conference, index) => `
             <tr>
@@ -1751,7 +1915,13 @@ function renderRatings() {
               <td class="team-meta">${formatRate(conference.offExplosive)}</td>
               <td class="team-meta">${formatRate(conference.defHavoc)}</td>
               <td class="team-meta">${conference.liveCount}/${conference.teamCount} teams</td>
-              <td class="team-meta"><span class="team-with-logo">${teamLogoMarkup(conference.topTeam)}<span>${escapeHtml(conference.topTeam)}</span></span></td>
+
+              <td class="team-meta">
+                <span class="team-with-logo">
+                  ${teamLogoMarkup(conference.topTeam)}
+                  <span>${escapeHtml(conference.topTeam)}</span>
+                </span>
+              </td>
             </tr>
           `).join("")}
         </tbody>
@@ -1768,34 +1938,50 @@ function renderRatings() {
       Special Teams is ESPN's FPI component and is display-only; it is not used
       by Model A.
     </div>
+
     <div class="ratings-toggle" role="group" aria-label="Ratings view">
       <button
         class="ratings-toggle-button ${currentRatingsMode === "overview" ? "active" : ""}"
         type="button"
         onclick="setRatingsMode('overview')"
       >Overview</button>
+
       <button
         class="ratings-toggle-button ${currentRatingsMode === "advanced" ? "active" : ""}"
         type="button"
         onclick="setRatingsMode('advanced')"
       >Advanced Ratings</button>
+
       <button
         class="ratings-toggle-button ${currentRatingsMode === "conferences" ? "active" : ""}"
         type="button"
         onclick="setRatingsMode('conferences')"
       >Conference Standings</button>
     </div>
-    ${currentRatingsMode === "conferences" ? conferenceTable : currentRatingsMode === "advanced" ? `${conferenceFilterMarkup("ratings")}${teamTable}` : overviewTable}
+
+    ${
+      currentRatingsMode === "conferences"
+        ? conferenceTable
+        : currentRatingsMode === "advanced"
+          ? `${conferenceFilterMarkup("ratings")}${teamTable}`
+          : overviewTable
+    }
   `;
 }
 
 function setRatingsMode(mode) {
-  currentRatingsMode = ["overview", "advanced", "conferences"].includes(mode) ? mode : "overview";
+  currentRatingsMode = ["overview", "advanced", "conferences"].includes(mode)
+    ? mode
+    : "overview";
+
   renderRatings();
 }
 
 function setTeamConference(conference) {
-  currentTeamConference = conferenceNames().includes(conference) ? conference : "ALL";
+  currentTeamConference = conferenceNames().includes(conference)
+    ? conference
+    : "ALL";
+
   renderTeams();
   renderRatings();
 }
@@ -1813,9 +1999,11 @@ function modelRoundHalf(value) {
   const scaled = Number(value) * 2;
   const floor = Math.floor(scaled);
   const fraction = scaled - floor;
+
   if (Math.abs(fraction - 0.5) < 1e-10) {
     return (floor % 2 === 0 ? floor : floor + 1) / 2;
   }
+
   return Math.round(scaled) / 2;
 }
 
@@ -1823,17 +2011,28 @@ function modelErf(value) {
   const sign = value < 0 ? -1 : 1;
   const x = Math.abs(value);
   const t = 1 / (1 + 0.3275911 * x);
-  const polynomial = (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t;
+
+  const polynomial =
+    (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t;
+
   return sign * (1 - polynomial * Math.exp(-x * x));
 }
 
 function modelWinProbability(homeSpread) {
   const homeMargin = -Number(homeSpread);
+
   const probability = Math.max(
     0.01,
-    Math.min(0.99, (1 + modelErf((homeMargin / 16) / Math.sqrt(2))) / 2)
+    Math.min(
+      0.99,
+      (1 + modelErf((homeMargin / 16) / Math.sqrt(2))) / 2
+    )
   );
-  return { home: probability * 100, away: (1 - probability) * 100 };
+
+  return {
+    home: probability * 100,
+    away: (1 - probability) * 100
+  };
 }
 
 function modelLiveNumber(team, side, field) {
@@ -1842,13 +2041,17 @@ function modelLiveNumber(team, side, field) {
 }
 
 function matchupGeneralSample(team) {
-  return modelLiveNumber(team, "offense", "n_plays") >= 35 &&
-    modelLiveNumber(team, "defense", "n_plays") >= 35;
+  return (
+    modelLiveNumber(team, "offense", "n_plays") >= 35 &&
+    modelLiveNumber(team, "defense", "n_plays") >= 35
+  );
 }
 
 function matchupUnitSample(team, field, minimum) {
-  return modelLiveNumber(team, "offense", field) >= minimum &&
-    modelLiveNumber(team, "defense", field) >= minimum;
+  return (
+    modelLiveNumber(team, "offense", field) >= minimum &&
+    modelLiveNumber(team, "defense", field) >= minimum
+  );
 }
 
 function calculateInteractiveMatchupAdjustment(home, away) {
@@ -1859,38 +2062,63 @@ function calculateInteractiveMatchupAdjustment(home, away) {
     explosiveness: 0,
     havoc: 0,
   };
-  const available = Object.fromEntries(Object.keys(components).map(key => [key, false]));
 
-  if (matchupUnitSample(home, "pass_plays", 15) && matchupUnitSample(away, "pass_plays", 15)) {
+  const available = Object.fromEntries(
+    Object.keys(components).map(key => [key, false])
+  );
+
+  if (
+    matchupUnitSample(home, "pass_plays", 15) &&
+    matchupUnitSample(away, "pass_plays", 15)
+  ) {
     const values = [
       modelLiveNumber(home, "offense", "epa_pass"),
       modelLiveNumber(away, "defense", "epa_pass"),
       modelLiveNumber(away, "offense", "epa_pass"),
       modelLiveNumber(home, "defense", "epa_pass"),
     ];
+
     if (values.every(hasValue)) {
-      const [homePass, awayPassDefense, awayPass, homePassDefense] = values;
+      const [
+        homePass,
+        awayPassDefense,
+        awayPass,
+        homePassDefense
+      ] = values;
+
       components.passing = modelClamp(
         ((homePass - awayPassDefense) - (awayPass - homePassDefense)) * 1.25,
         1
       );
+
       available.passing = true;
     }
   }
 
-  if (matchupUnitSample(home, "rush_plays", 15) && matchupUnitSample(away, "rush_plays", 15)) {
+  if (
+    matchupUnitSample(home, "rush_plays", 15) &&
+    matchupUnitSample(away, "rush_plays", 15)
+  ) {
     const values = [
       modelLiveNumber(home, "offense", "epa_rush"),
       modelLiveNumber(away, "defense", "epa_rush"),
       modelLiveNumber(away, "offense", "epa_rush"),
       modelLiveNumber(home, "defense", "epa_rush"),
     ];
+
     if (values.every(hasValue)) {
-      const [homeRush, awayRushDefense, awayRush, homeRushDefense] = values;
+      const [
+        homeRush,
+        awayRushDefense,
+        awayRush,
+        homeRushDefense
+      ] = values;
+
       components.rushing = modelClamp(
         (homeRush - awayRushDefense) - (awayRush - homeRushDefense),
         0.75
       );
+
       available.rushing = true;
     }
   }
@@ -1902,12 +2130,20 @@ function calculateInteractiveMatchupAdjustment(home, away) {
       modelLiveNumber(away, "offense", "success_rate"),
       modelLiveNumber(home, "defense", "success_rate"),
     ];
+
     if (successValues.every(hasValue)) {
-      const [homeSuccess, awaySuccessDefense, awaySuccess, homeSuccessDefense] = successValues;
+      const [
+        homeSuccess,
+        awaySuccessDefense,
+        awaySuccess,
+        homeSuccessDefense
+      ] = successValues;
+
       components.success_rate = modelClamp(
         ((homeSuccess - awaySuccessDefense) - (awaySuccess - homeSuccessDefense)) * 0.035,
         0.75
       );
+
       available.success_rate = true;
     }
 
@@ -1917,12 +2153,20 @@ function calculateInteractiveMatchupAdjustment(home, away) {
       modelLiveNumber(away, "offense", "explosive_rate"),
       modelLiveNumber(home, "defense", "explosive_rate"),
     ];
+
     if (explosiveValues.every(hasValue)) {
-      const [homeExplosive, awayExplosiveDefense, awayExplosive, homeExplosiveDefense] = explosiveValues;
+      const [
+        homeExplosive,
+        awayExplosiveDefense,
+        awayExplosive,
+        homeExplosiveDefense
+      ] = explosiveValues;
+
       components.explosiveness = modelClamp(
         ((homeExplosive - awayExplosiveDefense) - (awayExplosive - homeExplosiveDefense)) * 0.025,
         0.5
       );
+
       available.explosiveness = true;
     }
 
@@ -1932,12 +2176,20 @@ function calculateInteractiveMatchupAdjustment(home, away) {
       modelLiveNumber(away, "offense", "havoc_rate"),
       modelLiveNumber(away, "defense", "havoc_rate"),
     ];
+
     if (havocValues.every(hasValue)) {
-      const [homeAllowed, homeCreated, awayAllowed, awayCreated] = havocValues;
+      const [
+        homeAllowed,
+        homeCreated,
+        awayAllowed,
+        awayCreated
+      ] = havocValues;
+
       components.havoc = modelClamp(
         ((homeCreated - awayAllowed) - (awayCreated - homeAllowed)) * 0.025,
         0.5
       );
+
       available.havoc = true;
     }
   }
@@ -1946,9 +2198,13 @@ function calculateInteractiveMatchupAdjustment(home, away) {
     Object.values(components).reduce((sum, value) => sum + value, 0),
     Number(projectionsData?.meta?.max_matchup_adjustment ?? 3)
   );
+
   return {
     components: Object.fromEntries(
-      Object.entries(components).map(([key, value]) => [key, Number(value.toFixed(2))])
+      Object.entries(components).map(([key, value]) => [
+        key,
+        Number(value.toFixed(2))
+      ])
     ),
     available,
     total: Number(total.toFixed(2)),
@@ -1957,18 +2213,34 @@ function calculateInteractiveMatchupAdjustment(home, away) {
 }
 
 function calculateInteractiveTotal(home, away) {
-  const efficiency = Number(home?.offense?.epa_play ?? 0) +
+  const efficiency =
+    Number(home?.offense?.epa_play ?? 0) +
     Number(away?.offense?.epa_play ?? 0) -
     Number(home?.defense?.epa_play ?? 0) -
     Number(away?.defense?.epa_play ?? 0);
-  const success = Number(home?.offense?.success_rate ?? 0) +
-    Number(away?.offense?.success_rate ?? 0) - 85;
-  return modelRoundHalf(Math.max(35, Math.min(80, 52.5 + efficiency * 5 + success * 0.15)));
+
+  const success =
+    Number(home?.offense?.success_rate ?? 0) +
+    Number(away?.offense?.success_rate ?? 0) -
+    85;
+
+  return modelRoundHalf(
+    Math.max(
+      35,
+      Math.min(
+        80,
+        52.5 + efficiency * 5 + success * 0.15
+      )
+    )
+  );
 }
 
 function resolveMatchupTeam(value) {
   const target = String(value ?? "").trim().toLowerCase();
-  return Object.keys(teams).find(name => name.toLowerCase() === target) ?? null;
+
+  return Object.keys(teams).find(
+    name => name.toLowerCase() === target
+  ) ?? null;
 }
 
 function matchupLocationText(teamA, teamB) {
@@ -1980,25 +2252,53 @@ function matchupLocationText(teamA, teamB) {
 function buildInteractiveProjection(teamAName, teamBName, venue) {
   const teamA = getTeam(teamAName);
   const teamB = getTeam(teamBName);
+
   const teamAHome = venue !== "team_b_home";
   const neutral = venue === "neutral";
+
   const home = teamAHome ? teamA : teamB;
   const away = teamAHome ? teamB : teamA;
+
   const homeName = home.team;
   const awayName = away.team;
-  const slope = Number(projectionsData?.meta?.calibration?.slope ?? 10.4245);
-  const ratingDifference = Number(home.power_rating) - Number(away.power_rating);
+
+  const slope = Number(
+    projectionsData?.meta?.calibration?.slope ?? 10.4245
+  );
+
+  const ratingDifference =
+    Number(home.power_rating) -
+    Number(away.power_rating);
+
   const ratingPoints = ratingDifference * slope;
   const ratingOnlySpread = -ratingPoints;
-  const hfa = neutral ? 0 : Number(hfaData?.teams?.[homeName] ?? hfaData?.meta?.default_hfa ?? 2);
+
+  const hfa = neutral
+    ? 0
+    : Number(
+        hfaData?.teams?.[homeName] ??
+        hfaData?.meta?.default_hfa ??
+        2
+      );
+
   const afterHfa = ratingOnlySpread - hfa;
+
   const matchup = calculateInteractiveMatchupAdjustment(home, away);
-  const homeSpread = modelRoundHalf(afterHfa - matchup.total);
+
+  const homeSpread = modelRoundHalf(
+    afterHfa - matchup.total
+  );
+
   const total = calculateInteractiveTotal(home, away);
   const winProbability = modelWinProbability(homeSpread);
-  const marginA = teamAHome ? -homeSpread : homeSpread;
+
+  const marginA = teamAHome
+    ? -homeSpread
+    : homeSpread;
+
   let scoreA = Math.round((total + marginA) / 2);
   let scoreB = Math.round((total - marginA) / 2);
+
   if (scoreA === scoreB && marginA !== 0) {
     if (marginA > 0) scoreA += 1;
     else scoreB += 1;
@@ -2024,19 +2324,46 @@ function buildInteractiveProjection(teamAName, teamBName, venue) {
     winProbability,
     scoreA,
     scoreB,
-    teamAWin: teamAHome ? winProbability.home : winProbability.away,
-    teamBWin: teamAHome ? winProbability.away : winProbability.home,
+    teamAWin: teamAHome
+      ? winProbability.home
+      : winProbability.away,
+    teamBWin: teamAHome
+      ? winProbability.away
+      : winProbability.home,
   };
 }
 
 function matchupProfileRows(offense, defense) {
   return `
-    ${renderMetricRow("Model EPA / Play", `${formatEPA(offense?.offense?.epa_play)} vs ${formatEPA(defense?.defense?.epa_play)} allowed`)}
-    ${renderMetricRow("Model Success Rate", `${formatRate(offense?.offense?.success_rate)} vs ${formatRate(defense?.defense?.success_rate)} allowed`)}
-    ${renderMetricRow("2026 EPA / Pass", `${formatEPA(modelLiveNumber(offense, "offense", "epa_pass"))} vs ${formatEPA(modelLiveNumber(defense, "defense", "epa_pass"))} allowed`)}
-    ${renderMetricRow("2026 EPA / Rush", `${formatEPA(modelLiveNumber(offense, "offense", "epa_rush"))} vs ${formatEPA(modelLiveNumber(defense, "defense", "epa_rush"))} allowed`)}
-    ${renderMetricRow("2026 Explosive Rate", `${formatRate(modelLiveNumber(offense, "offense", "explosive_rate"))} vs ${formatRate(modelLiveNumber(defense, "defense", "explosive_rate"))} allowed`)}
-    ${renderMetricRow("2026 Havoc", `${formatRate(modelLiveNumber(offense, "offense", "havoc_rate"))} allowed vs ${formatRate(modelLiveNumber(defense, "defense", "havoc_rate"))} created`)}
+    ${renderMetricRow(
+      "Model EPA / Play",
+      `${formatEPA(offense?.offense?.epa_play)} vs ${formatEPA(defense?.defense?.epa_play)} allowed`
+    )}
+
+    ${renderMetricRow(
+      "Model Success Rate",
+      `${formatRate(offense?.offense?.success_rate)} vs ${formatRate(defense?.defense?.success_rate)} allowed`
+    )}
+
+    ${renderMetricRow(
+      "2026 EPA / Pass",
+      `${formatEPA(modelLiveNumber(offense, "offense", "epa_pass"))} vs ${formatEPA(modelLiveNumber(defense, "defense", "epa_pass"))} allowed`
+    )}
+
+    ${renderMetricRow(
+      "2026 EPA / Rush",
+      `${formatEPA(modelLiveNumber(offense, "offense", "epa_rush"))} vs ${formatEPA(modelLiveNumber(defense, "defense", "epa_rush"))} allowed`
+    )}
+
+    ${renderMetricRow(
+      "2026 Explosive Rate",
+      `${formatRate(modelLiveNumber(offense, "offense", "explosive_rate"))} vs ${formatRate(modelLiveNumber(defense, "defense", "explosive_rate"))} allowed`
+    )}
+
+    ${renderMetricRow(
+      "2026 Havoc",
+      `${formatRate(modelLiveNumber(offense, "offense", "havoc_rate"))} allowed vs ${formatRate(modelLiveNumber(defense, "defense", "havoc_rate"))} created`
+    )}
   `;
 }
 
@@ -2048,13 +2375,16 @@ function matchupComponentRows(projection) {
     explosiveness: "Explosiveness matchup",
     havoc: "Havoc matchup",
   };
+
   return Object.entries(labels).map(([field, label]) =>
     renderMetricRow(
       label,
       projection.matchup.available[field]
         ? formatSigned(projection.matchup.components[field], 2)
         : "Withheld",
-      projection.matchup.available[field] ? "active" : "sample not met"
+      projection.matchup.available[field]
+        ? "active"
+        : "sample not met"
     )
   ).join("");
 }
@@ -2062,107 +2392,339 @@ function matchupComponentRows(projection) {
 function renderMatchupAnalysis(errorMessage = "") {
   const container = document.getElementById("tape-container");
   if (!container) return;
-  const names = Object.keys(teams).sort((a, b) => a.localeCompare(b));
-  const options = names.map(name => `<option value="${escapeHtml(name)}"></option>`).join("");
-  const projection = tapeTeamA && tapeTeamB
-    ? buildInteractiveProjection(tapeTeamA, tapeTeamB, tapeVenue)
-    : null;
+
+  const names = Object.keys(teams)
+    .sort((a, b) => a.localeCompare(b));
+
+  const options = names.map(
+    name => `<option value="${escapeHtml(name)}"></option>`
+  ).join("");
+
+  const projection =
+    tapeTeamA && tapeTeamB
+      ? buildInteractiveProjection(
+          tapeTeamA,
+          tapeTeamB,
+          tapeVenue
+        )
+      : null;
 
   const result = projection ? `
     <div class="tape-result">
+
       <div class="tape-scoreboard">
         <div class="tape-team">
-          <div class="team-with-logo">${teamLogoMarkup(projection.teamA.team, "matchup")}<div class="tape-team-name">${escapeHtml(projection.teamA.team)}</div></div>
-          <div class="tape-team-meta">${powerRank(projection.teamA)} · ${formatPercent(projection.teamAWin)} win probability</div>
+          <div class="team-with-logo">
+            ${teamLogoMarkup(projection.teamA.team, "matchup")}
+            <div class="tape-team-name">
+              ${escapeHtml(projection.teamA.team)}
+            </div>
+          </div>
+
+          <div class="tape-team-meta">
+            ${powerRank(projection.teamA)}
+            · ${formatPercent(projection.teamAWin)} win probability
+          </div>
         </div>
+
         <div>
-          <div class="tape-score">${projection.scoreA}–${projection.scoreB}</div>
-          <div class="tape-team-meta" style="text-align:center;">Projected final</div>
+          <div class="tape-score">
+            ${projection.scoreA}–${projection.scoreB}
+          </div>
+
+          <div
+            class="tape-team-meta"
+            style="text-align:center;"
+          >
+            Projected final
+          </div>
         </div>
+
         <div class="tape-team">
-          <div class="team-with-logo">${teamLogoMarkup(projection.teamB.team, "matchup")}<div class="tape-team-name">${escapeHtml(projection.teamB.team)}</div></div>
-          <div class="tape-team-meta">${powerRank(projection.teamB)} · ${formatPercent(projection.teamBWin)} win probability</div>
+          <div class="team-with-logo">
+            ${teamLogoMarkup(projection.teamB.team, "matchup")}
+            <div class="tape-team-name">
+              ${escapeHtml(projection.teamB.team)}
+            </div>
+          </div>
+
+          <div class="tape-team-meta">
+            ${powerRank(projection.teamB)}
+            · ${formatPercent(projection.teamBWin)} win probability
+          </div>
         </div>
       </div>
 
       <div class="tape-summary-grid">
+
         <div class="tape-summary-card">
           <div class="tape-summary-label">Fair Line</div>
-          <div class="tape-summary-value">${escapeHtml(favoredLine(projection.homeName, projection.awayName, projection.homeSpread))}</div>
+          <div class="tape-summary-value">
+            ${escapeHtml(
+              favoredLine(
+                projection.homeName,
+                projection.awayName,
+                projection.homeSpread
+              )
+            )}
+          </div>
         </div>
+
         <div class="tape-summary-card">
-          <div class="tape-summary-label">Projected Total</div>
-          <div class="tape-summary-value">${formatNumber(projection.total, 1)}</div>
+          <div class="tape-summary-label">
+            Projected Total
+          </div>
+          <div class="tape-summary-value">
+            ${formatNumber(projection.total, 1)}
+          </div>
         </div>
+
         <div class="tape-summary-card">
           <div class="tape-summary-label">Location</div>
-          <div class="tape-summary-value" style="font-size:15px;">${escapeHtml(matchupLocationText(tapeTeamA, tapeTeamB))}</div>
+          <div
+            class="tape-summary-value"
+            style="font-size:15px;"
+          >
+            ${escapeHtml(
+              matchupLocationText(
+                tapeTeamA,
+                tapeTeamB
+              )
+            )}
+          </div>
         </div>
+
         <div class="tape-summary-card">
-          <div class="tape-summary-label">Model Version</div>
-          <div class="tape-summary-value" style="font-size:15px;">${escapeHtml(projectionsData?.meta?.version ?? "Model A")}</div>
+          <div class="tape-summary-label">
+            Model Version
+          </div>
+          <div
+            class="tape-summary-value"
+            style="font-size:15px;"
+          >
+            ${escapeHtml(
+              projectionsData?.meta?.version ??
+              "Model A"
+            )}
+          </div>
         </div>
       </div>
 
       <div class="tape-breakdown">
+
         <div class="panel">
-          <div class="panel-header"><div class="panel-title">Projection Build</div></div>
+          <div class="panel-header">
+            <div class="panel-title">
+              Projection Build
+            </div>
+          </div>
+
           <div class="panel-body">
-            ${renderMetricRow("Rating-only line", favoredLine(projection.homeName, projection.awayName, projection.ratingOnlySpread))}
-            ${renderMetricRow("Home-field advantage", projection.neutral ? "0.0" : `${formatNumber(projection.hfa, 1)} pts`, projection.neutral ? "neutral" : projection.homeName)}
-            ${renderMetricRow("Line after venue", favoredLine(projection.homeName, projection.awayName, projection.afterHfa))}
-            ${renderMetricRow("Live matchup adjustment", formatSigned(projection.matchup.total, 2), projection.matchup.comparable ? "active" : "withheld")}
-            ${renderMetricRow("Final fair line", favoredLine(projection.homeName, projection.awayName, projection.homeSpread))}
+            ${renderMetricRow(
+              "Rating-only line",
+              favoredLine(
+                projection.homeName,
+                projection.awayName,
+                projection.ratingOnlySpread
+              )
+            )}
+
+            ${renderMetricRow(
+              "Home-field advantage",
+              projection.neutral
+                ? "0.0"
+                : `${formatNumber(projection.hfa, 1)} pts`,
+              projection.neutral
+                ? "neutral"
+                : projection.homeName
+            )}
+
+            ${renderMetricRow(
+              "Line after venue",
+              favoredLine(
+                projection.homeName,
+                projection.awayName,
+                projection.afterHfa
+              )
+            )}
+
+            ${renderMetricRow(
+              "Live matchup adjustment",
+              formatSigned(
+                projection.matchup.total,
+                2
+              ),
+              projection.matchup.comparable
+                ? "active"
+                : "withheld"
+            )}
+
+            ${renderMetricRow(
+              "Final fair line",
+              favoredLine(
+                projection.homeName,
+                projection.awayName,
+                projection.homeSpread
+              )
+            )}
           </div>
         </div>
+
         <div class="panel">
-          <div class="panel-header"><div class="panel-title">Live Matchup Components</div></div>
-          <div class="panel-body">${matchupComponentRows(projection)}</div>
+          <div class="panel-header">
+            <div class="panel-title">
+              Live Matchup Components
+            </div>
+          </div>
+
+          <div class="panel-body">
+            ${matchupComponentRows(projection)}
+          </div>
         </div>
+
         <div class="panel">
-          <div class="panel-header"><div class="panel-title">${escapeHtml(projection.teamA.team)} Offense vs ${escapeHtml(projection.teamB.team)} Defense</div></div>
-          <div class="panel-body">${matchupProfileRows(projection.teamA, projection.teamB)}</div>
+          <div class="panel-header">
+            <div class="panel-title">
+              ${escapeHtml(projection.teamA.team)}
+              Offense vs
+              ${escapeHtml(projection.teamB.team)}
+              Defense
+            </div>
+          </div>
+
+          <div class="panel-body">
+            ${matchupProfileRows(
+              projection.teamA,
+              projection.teamB
+            )}
+          </div>
         </div>
+
         <div class="panel">
-          <div class="panel-header"><div class="panel-title">${escapeHtml(projection.teamB.team)} Offense vs ${escapeHtml(projection.teamA.team)} Defense</div></div>
-          <div class="panel-body">${matchupProfileRows(projection.teamB, projection.teamA)}</div>
+          <div class="panel-header">
+            <div class="panel-title">
+              ${escapeHtml(projection.teamB.team)}
+              Offense vs
+              ${escapeHtml(projection.teamA.team)}
+              Defense
+            </div>
+          </div>
+
+          <div class="panel-body">
+            ${matchupProfileRows(
+              projection.teamB,
+              projection.teamA
+            )}
+          </div>
         </div>
       </div>
 
-      <div class="ratings-note" style="margin-top:12px;">
-        Hypothetical matchup only. It uses the current Model A rating scale, total formula,
-        team-specific home-field table and sample-gated live matchup adjustments. It does not
-        create a tracked projection, betting signal or official model result.
+      <div
+        class="ratings-note"
+        style="margin-top:12px;"
+      >
+        Hypothetical matchup only. It uses the current
+        Model A rating scale, total formula, team-specific
+        home-field table and sample-gated live matchup
+        adjustments. It does not create a tracked projection,
+        betting signal or official model result.
       </div>
     </div>
   ` : `
-    <div class="empty-state" style="margin-top:16px;">
+    <div
+      class="empty-state"
+      style="margin-top:16px;"
+    >
       Search for two teams and run the matchup analysis.
     </div>
   `;
 
   container.innerHTML = `
     <div class="tape-controls">
+
       <div class="tape-field">
-        <label for="matchup-team-a">Team A</label>
-        <input id="matchup-team-a" list="matchup-team-options" type="search" placeholder="Search teams..." value="${escapeHtml(tapeTeamA ?? "")}">
+        <label for="matchup-team-a">
+          Team A
+        </label>
+
+        <input
+          id="matchup-team-a"
+          list="matchup-team-options"
+          type="search"
+          placeholder="Search teams..."
+          value="${escapeHtml(tapeTeamA ?? "")}"
+        >
       </div>
+
       <div class="tape-field">
-        <label for="matchup-team-b">Team B</label>
-        <input id="matchup-team-b" list="matchup-team-options" type="search" placeholder="Search teams..." value="${escapeHtml(tapeTeamB ?? "")}">
+        <label for="matchup-team-b">
+          Team B
+        </label>
+
+        <input
+          id="matchup-team-b"
+          list="matchup-team-options"
+          type="search"
+          placeholder="Search teams..."
+          value="${escapeHtml(tapeTeamB ?? "")}"
+        >
       </div>
-      <datalist id="matchup-team-options">${options}</datalist>
+
+      <datalist id="matchup-team-options">
+        ${options}
+      </datalist>
+
       <div class="tape-field">
-        <label for="matchup-venue">Location</label>
+        <label for="matchup-venue">
+          Location
+        </label>
+
         <select id="matchup-venue">
-          <option value="neutral" ${tapeVenue === "neutral" ? "selected" : ""}>Neutral site</option>
-          <option value="team_a_home" ${tapeVenue === "team_a_home" ? "selected" : ""}>Team A home</option>
-          <option value="team_b_home" ${tapeVenue === "team_b_home" ? "selected" : ""}>Team B home</option>
+          <option
+            value="neutral"
+            ${tapeVenue === "neutral" ? "selected" : ""}
+          >
+            Neutral site
+          </option>
+
+          <option
+            value="team_a_home"
+            ${tapeVenue === "team_a_home" ? "selected" : ""}
+          >
+            Team A home
+          </option>
+
+          <option
+            value="team_b_home"
+            ${tapeVenue === "team_b_home" ? "selected" : ""}
+          >
+            Team B home
+          </option>
         </select>
       </div>
-      <button class="tape-button" type="button" onclick="runMatchupAnalysis()">Run Analysis</button>
+
+      <button
+        class="tape-button"
+        type="button"
+        onclick="runMatchupAnalysis()"
+      >
+        Run Analysis
+      </button>
     </div>
-    ${errorMessage ? `<div class="ratings-note" style="margin-top:10px;color:#9a4d00;">${escapeHtml(errorMessage)}</div>` : ""}
+
+    ${
+      errorMessage
+        ? `
+          <div
+            class="ratings-note"
+            style="margin-top:10px;color:#9a4d00;"
+          >
+            ${escapeHtml(errorMessage)}
+          </div>
+        `
+        : ""
+    }
+
     ${result}
   `;
 }
@@ -2172,22 +2734,43 @@ function initializeMatchupAnalysis() {
 }
 
 function runMatchupAnalysis() {
-  const teamA = resolveMatchupTeam(document.getElementById("matchup-team-a")?.value);
-  const teamB = resolveMatchupTeam(document.getElementById("matchup-team-b")?.value);
-  const venue = document.getElementById("matchup-venue")?.value ?? "neutral";
+  const teamA = resolveMatchupTeam(
+    document.getElementById("matchup-team-a")?.value
+  );
+
+  const teamB = resolveMatchupTeam(
+    document.getElementById("matchup-team-b")?.value
+  );
+
+  const venue =
+    document.getElementById("matchup-venue")?.value ??
+    "neutral";
 
   if (!teamA || !teamB) {
-    renderMatchupAnalysis("Select two valid FBS teams from the search suggestions.");
+    renderMatchupAnalysis(
+      "Select two valid FBS teams from the search suggestions."
+    );
     return;
   }
+
   if (teamA === teamB) {
-    renderMatchupAnalysis("Choose two different teams.");
+    renderMatchupAnalysis(
+      "Choose two different teams."
+    );
     return;
   }
 
   tapeTeamA = teamA;
   tapeTeamB = teamB;
-  tapeVenue = ["neutral", "team_a_home", "team_b_home"].includes(venue) ? venue : "neutral";
+
+  tapeVenue = [
+    "neutral",
+    "team_a_home",
+    "team_b_home"
+  ].includes(venue)
+    ? venue
+    : "neutral";
+
   renderMatchupAnalysis();
 }
 
@@ -2199,244 +2782,727 @@ function runMatchupAnalysis() {
 function openDossier(teamName) {
   const team = getTeam(teamName);
   if (!team) return;
+
   currentDossierTeamName = teamName;
+
   renderDossier(team);
   switchView("dossier");
 }
 
 function advancedSide(teamName, side) {
-  return advancedMetricsData?.teams?.[teamName]?.[currentAdvancedSample]?.[side] ?? null;
+  return (
+    advancedMetricsData
+      ?.teams
+      ?.[teamName]
+      ?.[currentAdvancedSample]
+      ?.[side] ??
+    null
+  );
 }
 
 function externalRating(teamName) {
-  return externalRatingsData?.teams?.[teamName] ?? null;
+  return (
+    externalRatingsData
+      ?.teams
+      ?.[teamName] ??
+    null
+  );
 }
 
 function rosterFoundation(teamName) {
-  return rosterFoundationData?.teams?.[teamName] ?? null;
+  return (
+    rosterFoundationData
+      ?.teams
+      ?.[teamName] ??
+    null
+  );
 }
 
 function externalRank(value) {
-  return hasValue(value) && Number(value) > 0 ? `#${Number(value)}` : "—";
+  return hasValue(value) && Number(value) > 0
+    ? `#${Number(value)}`
+    : "—";
 }
 
 function externalMetricRank(field, value) {
   if (!hasValue(value)) return "—";
+
   const target = Number(value);
-  const values = Object.values(externalRatingsData?.teams ?? {})
+
+  const values = Object.values(
+    externalRatingsData?.teams ?? {}
+  )
     .map(team => team?.[field])
     .filter(hasValue)
     .map(Number);
-  const better = values.filter(item => item > target).length;
+
+  const better = values.filter(
+    item => item > target
+  ).length;
+
   return `#${better + 1} Overall`;
 }
 
-function advancedRank(teamName, side, field, lowerIsBetter = false) {
-  const target = advancedSide(teamName, side)?.[field];
+function advancedRank(
+  teamName,
+  side,
+  field,
+  lowerIsBetter = false
+) {
+  const target =
+    advancedSide(teamName, side)?.[field];
+
   if (!hasValue(target)) return "";
+
   const targetNumber = Number(target);
+
   const values = Object.keys(teams)
-    .map(name => advancedSide(name, side)?.[field])
+    .map(
+      name =>
+        advancedSide(name, side)?.[field]
+    )
     .filter(hasValue)
     .map(Number);
+
   const better = values.filter(value =>
-    lowerIsBetter ? value < targetNumber : value > targetNumber
+    lowerIsBetter
+      ? value < targetNumber
+      : value > targetNumber
   ).length;
+
   return `#${better + 1}`;
 }
 
-function advancedContext(teamName, side, field, sampleText = "", lowerIsBetter = false) {
-  const rank = advancedRank(teamName, side, field, lowerIsBetter);
-  return [rank, sampleText].filter(Boolean).join(" · ");
+function advancedContext(
+  teamName,
+  side,
+  field,
+  sampleText = "",
+  lowerIsBetter = false
+) {
+  const rank = advancedRank(
+    teamName,
+    side,
+    field,
+    lowerIsBetter
+  );
+
+  return [rank, sampleText]
+    .filter(Boolean)
+    .join(" · ");
 }
 
 function advancedMetricRows(teamName, side) {
   const data = advancedSide(teamName, side);
+
   if (!data || !data.n_plays) {
-    return `<div class="empty-state" style="padding:24px 0;">No current-season sample yet.</div>`;
+    return `
+      <div
+        class="empty-state"
+        style="padding:24px 0;"
+      >
+        No current-season sample yet.
+      </div>
+    `;
   }
 
   const offense = side === "offense";
+
   return `
-    ${renderMetricRow("Early-Down EPA" + (offense ? "" : " Allowed"), formatEPA(data.early_down_epa), advancedContext(teamName, side, "early_down_epa", `${data.early_down_plays ?? 0} plays`, !offense))}
-    ${renderMetricRow("Late-Down EPA" + (offense ? "" : " Allowed"), formatEPA(data.late_down_epa), advancedContext(teamName, side, "late_down_epa", `${data.late_down_plays ?? 0} plays`, !offense))}
-    ${renderMetricRow("Standard-Down Success" + (offense ? "" : " Allowed"), formatRate(data.standard_down_success_rate), advancedContext(teamName, side, "standard_down_success_rate", `${data.standard_down_plays ?? 0} plays`, !offense))}
-    ${renderMetricRow("Passing-Down Success" + (offense ? "" : " Allowed"), formatRate(data.passing_down_success_rate), advancedContext(teamName, side, "passing_down_success_rate", `${data.passing_down_plays ?? 0} plays`, !offense))}
-    ${renderMetricRow(offense ? "Stuff Rate Allowed" : "Stuff Rate Created", formatRate(data.stuff_rate), advancedContext(teamName, side, "stuff_rate", `${data.rush_attempts ?? 0} rushes`, offense))}
-    ${renderMetricRow(offense ? "Sack Rate Allowed" : "Sack Rate Created", formatRate(data.sack_rate), advancedContext(teamName, side, "sack_rate", `${data.pass_plays ?? 0} pass plays`, offense))}
-    ${renderMetricRow(offense ? "TFL Rate Allowed" : "TFL Rate Created", formatRate(data.tfl_rate), advancedContext(teamName, side, "tfl_rate", "", offense))}
-    ${renderMetricRow("Power Success Rate" + (offense ? "" : " Allowed"), formatRate(data.power_success_rate), advancedContext(teamName, side, "power_success_rate", `${data.power_attempts ?? 0} attempts`, !offense))}
-    ${renderMetricRow(offense ? "Turnovers Lost" : "Turnovers Forced", formatNumber(data.turnovers, 0), advancedContext(teamName, side, "turnover_rate", "", offense))}
+    ${renderMetricRow(
+      "Early-Down EPA" + (offense ? "" : " Allowed"),
+      formatEPA(data.early_down_epa),
+      advancedContext(
+        teamName,
+        side,
+        "early_down_epa",
+        `${data.early_down_plays ?? 0} plays`,
+        !offense
+      )
+    )}
+
+    ${renderMetricRow(
+      "Late-Down EPA" + (offense ? "" : " Allowed"),
+      formatEPA(data.late_down_epa),
+      advancedContext(
+        teamName,
+        side,
+        "late_down_epa",
+        `${data.late_down_plays ?? 0} plays`,
+        !offense
+      )
+    )}
+
+    ${renderMetricRow(
+      "Standard-Down Success" + (offense ? "" : " Allowed"),
+      formatRate(data.standard_down_success_rate),
+      advancedContext(
+        teamName,
+        side,
+        "standard_down_success_rate",
+        `${data.standard_down_plays ?? 0} plays`,
+        !offense
+      )
+    )}
+
+    ${renderMetricRow(
+      "Passing-Down Success" + (offense ? "" : " Allowed"),
+      formatRate(data.passing_down_success_rate),
+      advancedContext(
+        teamName,
+        side,
+        "passing_down_success_rate",
+        `${data.passing_down_plays ?? 0} plays`,
+        !offense
+      )
+    )}
+
+    ${renderMetricRow(
+      offense
+        ? "Stuff Rate Allowed"
+        : "Stuff Rate Created",
+      formatRate(data.stuff_rate),
+      advancedContext(
+        teamName,
+        side,
+        "stuff_rate",
+        `${data.rush_attempts ?? 0} rushes`,
+        offense
+      )
+    )}
+
+    ${renderMetricRow(
+      offense
+        ? "Sack Rate Allowed"
+        : "Sack Rate Created",
+      formatRate(data.sack_rate),
+      advancedContext(
+        teamName,
+        side,
+        "sack_rate",
+        `${data.pass_plays ?? 0} pass plays`,
+        offense
+      )
+    )}
+
+    ${renderMetricRow(
+      offense
+        ? "TFL Rate Allowed"
+        : "TFL Rate Created",
+      formatRate(data.tfl_rate),
+      advancedContext(
+        teamName,
+        side,
+        "tfl_rate",
+        "",
+        offense
+      )
+    )}
+
+    ${renderMetricRow(
+      "Power Success Rate" +
+        (offense ? "" : " Allowed"),
+      formatRate(data.power_success_rate),
+      advancedContext(
+        teamName,
+        side,
+        "power_success_rate",
+        `${data.power_attempts ?? 0} attempts`,
+        !offense
+      )
+    )}
+
+    ${renderMetricRow(
+      offense
+        ? "Turnovers Lost"
+        : "Turnovers Forced",
+      formatNumber(data.turnovers, 0),
+      advancedContext(
+        teamName,
+        side,
+        "turnover_rate",
+        "",
+        offense
+      )
+    )}
   `;
 }
 
 function advancedSplitRows(teamName, side) {
   const data = advancedSide(teamName, side);
+
   if (!data || !data.n_plays) {
-    return `<div class="empty-state" style="padding:24px 0;">No current-season sample yet.</div>`;
+    return `
+      <div
+        class="empty-state"
+        style="padding:24px 0;"
+      >
+        No current-season sample yet.
+      </div>
+    `;
   }
 
-  const allowed = side === "defense" ? " Allowed" : "";
-  const lowerIsBetter = side === "defense";
+  const allowed =
+    side === "defense"
+      ? " Allowed"
+      : "";
+
+  const lowerIsBetter =
+    side === "defense";
+
   return `
-    ${renderMetricRow("First-Half EPA" + allowed, formatEPA(data.first_half_epa), advancedContext(teamName, side, "first_half_epa", `${data.first_half_plays ?? 0} plays`, lowerIsBetter))}
-    ${renderMetricRow("Second-Half EPA" + allowed, formatEPA(data.second_half_epa), advancedContext(teamName, side, "second_half_epa", `${data.second_half_plays ?? 0} plays`, lowerIsBetter))}
-    ${renderMetricRow("Home EPA" + allowed, formatEPA(data.home_epa), advancedContext(teamName, side, "home_epa", `${data.home_plays ?? 0} plays`, lowerIsBetter))}
-    ${renderMetricRow("Away EPA" + allowed, formatEPA(data.away_epa), advancedContext(teamName, side, "away_epa", `${data.away_plays ?? 0} plays`, lowerIsBetter))}
-    ${renderMetricRow("Red-Zone EPA" + allowed, formatEPA(data.red_zone_epa), advancedContext(teamName, side, "red_zone_epa", `${data.red_zone_plays ?? 0} plays`, lowerIsBetter))}
-    ${renderMetricRow("Red-Zone Success" + allowed, formatRate(data.red_zone_success_rate), advancedContext(teamName, side, "red_zone_success_rate", "", lowerIsBetter))}
-    ${renderMetricRow(side === "offense" ? "Line Yards / Rush" : "Line Yards / Rush Allowed", formatNumber(data.line_yards_per_rush, 2), advancedContext(teamName, side, "line_yards_per_rush", "", lowerIsBetter))}
-    ${renderMetricRow(side === "offense" ? "Second-Level Yards / Rush" : "Second-Level Yards / Rush Allowed", formatNumber(data.second_level_yards_per_rush, 2), advancedContext(teamName, side, "second_level_yards_per_rush", "", lowerIsBetter))}
-    ${renderMetricRow(side === "offense" ? "Open-Field Yards / Rush" : "Open-Field Yards / Rush Allowed", formatNumber(data.open_field_yards_per_rush, 2), advancedContext(teamName, side, "open_field_yards_per_rush", "", lowerIsBetter))}
+    ${renderMetricRow(
+      "First-Half EPA" + allowed,
+      formatEPA(data.first_half_epa),
+      advancedContext(
+        teamName,
+        side,
+        "first_half_epa",
+        `${data.first_half_plays ?? 0} plays`,
+        lowerIsBetter
+      )
+    )}
+
+    ${renderMetricRow(
+      "Second-Half EPA" + allowed,
+      formatEPA(data.second_half_epa),
+      advancedContext(
+        teamName,
+        side,
+        "second_half_epa",
+        `${data.second_half_plays ?? 0} plays`,
+        lowerIsBetter
+      )
+    )}
+
+    ${renderMetricRow(
+      "Home EPA" + allowed,
+      formatEPA(data.home_epa),
+      advancedContext(
+        teamName,
+        side,
+        "home_epa",
+        `${data.home_plays ?? 0} plays`,
+        lowerIsBetter
+      )
+    )}
+
+    ${renderMetricRow(
+      "Away EPA" + allowed,
+      formatEPA(data.away_epa),
+      advancedContext(
+        teamName,
+        side,
+        "away_epa",
+        `${data.away_plays ?? 0} plays`,
+        lowerIsBetter
+      )
+    )}
+
+    ${renderMetricRow(
+      "Red-Zone EPA" + allowed,
+      formatEPA(data.red_zone_epa),
+      advancedContext(
+        teamName,
+        side,
+        "red_zone_epa",
+        `${data.red_zone_plays ?? 0} plays`,
+        lowerIsBetter
+      )
+    )}
+
+    ${renderMetricRow(
+      "Red-Zone Success" + allowed,
+      formatRate(data.red_zone_success_rate),
+      advancedContext(
+        teamName,
+        side,
+        "red_zone_success_rate",
+        "",
+        lowerIsBetter
+      )
+    )}
+
+    ${renderMetricRow(
+      side === "offense"
+        ? "Line Yards / Rush"
+        : "Line Yards / Rush Allowed",
+      formatNumber(
+        data.line_yards_per_rush,
+        2
+      ),
+      advancedContext(
+        teamName,
+        side,
+        "line_yards_per_rush",
+        "",
+        lowerIsBetter
+      )
+    )}
+
+    ${renderMetricRow(
+      side === "offense"
+        ? "Second-Level Yards / Rush"
+        : "Second-Level Yards / Rush Allowed",
+      formatNumber(
+        data.second_level_yards_per_rush,
+        2
+      ),
+      advancedContext(
+        teamName,
+        side,
+        "second_level_yards_per_rush",
+        "",
+        lowerIsBetter
+      )
+    )}
+
+    ${renderMetricRow(
+      side === "offense"
+        ? "Open-Field Yards / Rush"
+        : "Open-Field Yards / Rush Allowed",
+      formatNumber(
+        data.open_field_yards_per_rush,
+        2
+      ),
+      advancedContext(
+        teamName,
+        side,
+        "open_field_yards_per_rush",
+        "",
+        lowerIsBetter
+      )
+    )}
   `;
 }
 
 function setAdvancedSample(sample) {
-  currentAdvancedSample = sample === "all_plays" ? "all_plays" : "non_garbage";
-  const team = getTeam(currentDossierTeamName);
-  if (team) renderDossier(team);
+  currentAdvancedSample =
+    sample === "all_plays"
+      ? "all_plays"
+      : "non_garbage";
+
+  const team =
+    getTeam(currentDossierTeamName);
+
+  if (team) {
+    renderDossier(team);
+  }
 }
 
-function renderMetricRow(name, value, rank = "") {
+function renderMetricRow(
+  name,
+  value,
+  rank = ""
+) {
   return `
     <div class="metric-row">
-      <div class="metric-name">${escapeHtml(name)}</div>
-      <div class="metric-value">${value}</div>
-      <div class="metric-rank">${rank || ""}</div>
+      <div class="metric-name">
+        ${escapeHtml(name)}
+      </div>
+
+      <div class="metric-value">
+        ${value}
+      </div>
+
+      <div class="metric-rank">
+        ${rank || ""}
+      </div>
     </div>
   `;
 }
 
 function renderSeasonOutlook(team) {
-  const season = getSeasonProjection(team.team);
+  const season =
+    getSeasonProjection(team.team);
+
   if (!season) return "";
 
-  const distribution = usefulWinDistribution(season.exact_win_distribution);
+  const distribution =
+    usefulWinDistribution(
+      season.exact_win_distribution
+    );
+
   const maxProbability = Math.max(
     1,
-    ...distribution.map(item => item.probability)
+    ...distribution.map(
+      item => item.probability
+    )
   );
 
-  const distributionHtml = distribution.map(item => `
-    <div class="distribution-row">
-      <div class="distribution-wins">${item.wins}</div>
-      <div class="distribution-track">
-        <div
-          class="distribution-fill"
-          style="width:${Math.max(2, (item.probability / maxProbability) * 100)}%;"
-        ></div>
+  const distributionHtml =
+    distribution.map(item => `
+      <div class="distribution-row">
+        <div class="distribution-wins">
+          ${item.wins}
+        </div>
+
+        <div class="distribution-track">
+          <div
+            class="distribution-fill"
+            style="width:${Math.max(
+              2,
+              (
+                item.probability /
+                maxProbability
+              ) * 100
+            )}%;"
+          ></div>
+        </div>
+
+        <div class="distribution-prob">
+          ${formatPercent(
+            item.probability
+          )}
+        </div>
       </div>
-      <div class="distribution-prob">${formatPercent(item.probability)}</div>
-    </div>
-  `).join("");
+    `).join("");
 
-  const altTotals = Object.entries(season.alt_win_totals ?? {})
-    .filter(([line]) => {
-      const value = Number(line);
-      return value >= 5.5 && value <= 11.5;
-    })
-    .sort((a, b) => Number(a[0]) - Number(b[0]));
+  const altTotals =
+    Object.entries(
+      season.alt_win_totals ?? {}
+    )
+      .filter(([line]) => {
+        const value = Number(line);
 
-  const altRows = altTotals.map(([line, probabilities]) => {
-    const over = Number(probabilities?.over ?? 0);
-    const under = Number(probabilities?.under ?? 0);
+        return (
+          value >= 5.5 &&
+          value <= 11.5
+        );
+      })
+      .sort(
+        (a, b) =>
+          Number(a[0]) -
+          Number(b[0])
+      );
 
-    return `
-      <tr>
-        <td>${escapeHtml(line)}</td>
-        <td class="${over >= under ? "alt-strong" : ""}">
-          ${formatPercent(over)}
-        </td>
-        <td class="${under > over ? "alt-strong" : ""}">
-          ${formatPercent(under)}
-        </td>
-      </tr>
-    `;
-  }).join("");
+  const altRows =
+    altTotals.map(
+      ([line, probabilities]) => {
+        const over =
+          Number(
+            probabilities?.over ??
+            0
+          );
 
-  const scheduleRows = (season.schedule ?? []).map(game => {
-    const source = game.probability_source;
-    const completed = source === "completed_result";
-    const fcs = game.opponent_type === "FCS";
+        const under =
+          Number(
+            probabilities?.under ??
+            0
+          );
 
-    let probabilityText = formatPercent(game.win_probability);
+        return `
+          <tr>
+            <td>
+              ${escapeHtml(line)}
+            </td>
 
-    if (completed) {
-      probabilityText =
-        Number(game.win_probability) >= 99
-          ? "WIN"
-          : "LOSS";
-    }
+            <td
+              class="${
+                over >= under
+                  ? "alt-strong"
+                  : ""
+              }"
+            >
+              ${formatPercent(over)}
+            </td>
 
-    return `
-      <tr>
-        <td>${game.week ?? "—"}</td>
-        <td>
-          ${seasonLocationLabel(game.location)}
-          ${escapeHtml(game.opponent)}
-          ${fcs ? `<span class="fcs-tag">FCS</span>` : ""}
-        </td>
-        <td>${projectionSourceLabel(source)}</td>
-        <td>${hasValue(game.team_line) ? shortSpread(game.team_line) : "—"}</td>
-        <td><strong>${probabilityText}</strong></td>
-      </tr>
-    `;
-  }).join("");
+            <td
+              class="${
+                under > over
+                  ? "alt-strong"
+                  : ""
+              }"
+            >
+              ${formatPercent(under)}
+            </td>
+          </tr>
+        `;
+      }
+    ).join("");
+
+  const scheduleRows =
+    (season.schedule ?? []).map(
+      game => {
+        const source =
+          game.probability_source;
+
+        const completed =
+          source ===
+          "completed_result";
+
+        const fcs =
+          game.opponent_type ===
+          "FCS";
+
+        let probabilityText =
+          formatPercent(
+            game.win_probability
+          );
+
+        if (completed) {
+          probabilityText =
+            Number(
+              game.win_probability
+            ) >= 99
+              ? "WIN"
+              : "LOSS";
+        }
+
+        return `
+          <tr>
+            <td>
+              ${game.week ?? "—"}
+            </td>
+
+            <td>
+              ${seasonLocationLabel(
+                game.location
+              )}
+              ${escapeHtml(
+                game.opponent
+              )}
+
+              ${
+                fcs
+                  ? `<span class="fcs-tag">FCS</span>`
+                  : ""
+              }
+            </td>
+
+            <td>
+              ${projectionSourceLabel(
+                source
+              )}
+            </td>
+
+            <td>
+              ${
+                hasValue(
+                  game.team_line
+                )
+                  ? shortSpread(
+                      game.team_line
+                    )
+                  : "—"
+              }
+            </td>
+
+            <td>
+              <strong>
+                ${probabilityText}
+              </strong>
+            </td>
+          </tr>
+        `;
+      }
+    ).join("");
 
   return `
     <div class="season-outlook">
-      <div class="eyebrow">Season outlook</div>
+      <div class="eyebrow">
+        Season outlook
+      </div>
 
       <div class="season-summary-grid">
         <div class="season-summary-card">
-          <div class="season-summary-label">Projected Wins</div>
-          <div class="season-summary-value">${formatNumber(season.expected_wins, 2)}</div>
+          <div class="season-summary-label">
+            Projected Wins
+          </div>
+
+          <div class="season-summary-value">
+            ${formatNumber(
+              season.expected_wins,
+              2
+            )}
+          </div>
+
           <div class="season-summary-note">
-            ${formatNumber(season.expected_losses, 2)} projected losses
+            ${formatNumber(
+              season.expected_losses,
+              2
+            )}
+            projected losses
           </div>
         </div>
 
         <div class="season-summary-card">
-          <div class="season-summary-label">Most Likely Record</div>
-          <div class="season-summary-value">
-            ${escapeHtml(season.most_likely_record ?? "—")}
+          <div class="season-summary-label">
+            Most Likely Record
           </div>
+
+          <div class="season-summary-value">
+            ${escapeHtml(
+              season.most_likely_record ??
+              "—"
+            )}
+          </div>
+
           <div class="season-summary-note">
-            ${formatPercent(season.most_likely_probability)} exact outcome
+            ${formatPercent(
+              season.most_likely_probability
+            )}
+            exact outcome
           </div>
         </div>
 
         <div class="season-summary-card">
-          <div class="season-summary-label">Bowl Eligible</div>
-          <div class="season-summary-value">
-            ${formatPercent(season.bowl_eligible_probability)}
+          <div class="season-summary-label">
+            Bowl Eligible
           </div>
-          <div class="season-summary-note">Probability of 6+ wins</div>
+
+          <div class="season-summary-value">
+            ${formatPercent(
+              season.bowl_eligible_probability
+            )}
+          </div>
+
+          <div class="season-summary-note">
+            Probability of 6+ wins
+          </div>
         </div>
 
         <div class="season-summary-card">
-          <div class="season-summary-label">10+ Wins</div>
-          <div class="season-summary-value">
-            ${formatPercent(season?.at_least?.["10_wins"])}
+          <div class="season-summary-label">
+            10+ Wins
           </div>
+
+          <div class="season-summary-value">
+            ${formatPercent(
+              season?.at_least?.["10_wins"]
+            )}
+          </div>
+
           <div class="season-summary-note">
-            ${formatPercent(season?.at_least?.["11_wins"])} for 11+
+            ${formatPercent(
+              season?.at_least?.["11_wins"]
+            )}
+            for 11+
           </div>
         </div>
       </div>
 
       <div class="season-two-column">
+
         <div class="analysis-panel">
           <div class="analysis-panel-header">
-            <div class="analysis-panel-title">Win Distribution</div>
+            <div class="analysis-panel-title">
+              Win Distribution
+            </div>
           </div>
-          <div class="distribution-wrap">${distributionHtml}</div>
+
+          <div class="distribution-wrap">
+            ${distributionHtml}
+          </div>
         </div>
 
         <div class="analysis-panel">
           <div class="analysis-panel-header">
-            <div class="analysis-panel-title">Alt Win Totals</div>
+            <div class="analysis-panel-title">
+              Alt Win Totals
+            </div>
           </div>
+
           <div style="padding:4px 10px 10px;">
             <table class="alt-table">
               <thead>
@@ -2446,7 +3512,10 @@ function renderSeasonOutlook(team) {
                   <th>Under</th>
                 </tr>
               </thead>
-              <tbody>${altRows}</tbody>
+
+              <tbody>
+                ${altRows}
+              </tbody>
             </table>
           </div>
         </div>
@@ -2454,8 +3523,14 @@ function renderSeasonOutlook(team) {
 
       <div class="analysis-panel">
         <div class="analysis-panel-header">
-          <div class="analysis-panel-title">Full Season Schedule</div>
-          <div class="team-meta">${season.games ?? "—"} games</div>
+          <div class="analysis-panel-title">
+            Full Season Schedule
+          </div>
+
+          <div class="team-meta">
+            ${season.games ?? "—"}
+            games
+          </div>
         </div>
 
         <div style="overflow-x:auto;">
@@ -2469,7 +3544,10 @@ function renderSeasonOutlook(team) {
                 <th>Win Probability</th>
               </tr>
             </thead>
-            <tbody>${scheduleRows}</tbody>
+
+            <tbody>
+              ${scheduleRows}
+            </tbody>
           </table>
         </div>
       </div>
@@ -2478,295 +3556,905 @@ function renderSeasonOutlook(team) {
 }
 
 function renderDossier(team) {
-  const container = document.getElementById("dossier-container");
+  const container =
+    document.getElementById(
+      "dossier-container"
+    );
+
   if (!container) return;
 
-  const offLive = liveSection(team, "offense");
-  const defLive = liveSection(team, "defense");
+  const offLive =
+    liveSection(
+      team,
+      "offense"
+    );
 
-  const offModelEPA = team?.offense?.epa_play;
-  const defModelEPA = team?.defense?.epa_play;
+  const defLive =
+    liveSection(
+      team,
+      "defense"
+    );
 
-  const offModelSR = team?.offense?.success_rate;
-  const defModelSR = team?.defense?.success_rate;
+  const offModelEPA =
+    team?.offense?.epa_play;
 
-  const offPlays = livePlays(team, "offense");
-  const defPlays = livePlays(team, "defense");
-  const external = externalRating(team.team);
-  const roster = rosterFoundation(team.team);
+  const defModelEPA =
+    team?.defense?.epa_play;
+
+  const offModelSR =
+    team?.offense?.success_rate;
+
+  const defModelSR =
+    team?.defense?.success_rate;
+
+  const offPlays =
+    livePlays(
+      team,
+      "offense"
+    );
+
+  const defPlays =
+    livePlays(
+      team,
+      "defense"
+    );
+
+  const external =
+    externalRating(
+      team.team
+    );
+
+  const roster =
+    rosterFoundation(
+      team.team
+    );
 
   container.innerHTML = `
     <div class="dossier-header">
       <div>
-        <div class="eyebrow">Team dossier</div>
-        <div class="team-title-row dossier-team-heading">
-          ${teamLogoMarkup(team.team, "dossier")}
-          <div class="team-title">${escapeHtml(team.team)}</div>
+        <div class="eyebrow">
+          Team dossier
         </div>
+
+        <div class="team-title-row dossier-team-heading">
+          ${teamLogoMarkup(
+            team.team,
+            "dossier"
+          )}
+
+          <div class="team-title">
+            ${escapeHtml(
+              team.team
+            )}
+          </div>
+        </div>
+
         <div class="team-dossier-sub">
-          ${escapeHtml(team.conference ?? "Independent")}
+          ${escapeHtml(
+            team.conference ??
+            "Independent"
+          )}
           · ${recordText(team)}
-          · ${escapeHtml(liveSampleLabel(team))}
+          · ${escapeHtml(
+            liveSampleLabel(team)
+          )}
         </div>
       </div>
 
       <div class="sim-wins">
-        <div class="sim-wins-label">Power rank</div>
-        <div class="sim-wins-number">${powerRank(team)}</div>
+        <div class="sim-wins-label">
+          Power rank
+        </div>
+
+        <div class="sim-wins-number">
+          ${powerRank(team)}
+        </div>
       </div>
     </div>
 
     <div class="dossier-stat-grid">
+
       <div class="dossier-stat">
-        <div class="dossier-label">Power Rating</div>
+        <div class="dossier-label">
+          Power Rating
+        </div>
+
         <div class="dossier-value">
-          ${formatSigned(team.power_rating, 3)}
-          <span class="dossier-rank-inline">(${powerRank(team)} Overall)</span>
+          ${formatSigned(
+            team.power_rating,
+            3
+          )}
+
+          <span class="dossier-rank-inline">
+            (${powerRank(team)} Overall)
+          </span>
         </div>
       </div>
+
       <div class="dossier-stat">
-        <div class="dossier-label">SP+ Overall</div>
+        <div class="dossier-label">
+          SP+ Overall
+        </div>
+
         <div class="dossier-value">
-          ${formatSigned(team?.sp_plus?.overall, 1)}
-          <span class="dossier-rank-inline">(${spPlusRank(team, "overall")})</span>
+          ${formatSigned(
+            team?.sp_plus?.overall,
+            1
+          )}
+
+          <span class="dossier-rank-inline">
+            (${spPlusRank(
+              team,
+              "overall"
+            )})
+          </span>
         </div>
       </div>
+
       <div class="dossier-stat">
-        <div class="dossier-label">SP+ Offense</div>
+        <div class="dossier-label">
+          SP+ Offense
+        </div>
+
         <div class="dossier-value">
-          ${formatSigned(team?.sp_plus?.offense, 1)}
-          <span class="dossier-rank-inline">(${spPlusRank(team, "offense")})</span>
+          ${formatSigned(
+            team?.sp_plus?.offense,
+            1
+          )}
+
+          <span class="dossier-rank-inline">
+            (${spPlusRank(
+              team,
+              "offense"
+            )})
+          </span>
         </div>
       </div>
+
       <div class="dossier-stat">
-        <div class="dossier-label">SP+ Defense</div>
+        <div class="dossier-label">
+          SP+ Defense
+        </div>
+
         <div class="dossier-value">
-          ${formatSigned(team?.sp_plus?.defense, 1)}
-          <span class="dossier-rank-inline">(${spPlusRank(team, "defense")})</span>
+          ${formatSigned(
+            team?.sp_plus?.defense,
+            1
+          )}
+
+          <span class="dossier-rank-inline">
+            (${spPlusRank(
+              team,
+              "defense"
+            )})
+          </span>
         </div>
       </div>
+
       <div class="dossier-stat">
-        <div class="dossier-label">Record</div>
-        <div class="dossier-value">${recordText(team)}</div>
-      </div>
-      <div class="dossier-stat">
-        <div class="dossier-label">ESPN FPI</div>
+        <div class="dossier-label">
+          Record
+        </div>
+
         <div class="dossier-value">
-          ${formatSigned(external?.fpi, 1)}
-          <span class="dossier-rank-inline">(${externalRank(external?.fpi_rank)} Overall)</span>
+          ${recordText(team)}
         </div>
       </div>
+
       <div class="dossier-stat">
-        <div class="dossier-label">ESPN Special Teams</div>
+        <div class="dossier-label">
+          ESPN FPI
+        </div>
+
         <div class="dossier-value">
-          ${formatSigned(external?.fpi_special_teams, 3)}
-          <span class="dossier-rank-inline">(${externalMetricRank("fpi_special_teams", external?.fpi_special_teams)})</span>
+          ${formatSigned(
+            external?.fpi,
+            1
+          )}
+
+          <span class="dossier-rank-inline">
+            (${externalRank(
+              external?.fpi_rank
+            )} Overall)
+          </span>
+        </div>
+      </div>
+
+      <div class="dossier-stat">
+        <div class="dossier-label">
+          ESPN Special Teams
+        </div>
+
+        <div class="dossier-value">
+          ${formatSigned(
+            external?.fpi_special_teams,
+            3
+          )}
+
+          <span class="dossier-rank-inline">
+            (${externalMetricRank(
+              "fpi_special_teams",
+              external?.fpi_special_teams
+            )})
+          </span>
         </div>
       </div>
     </div>
 
     ${renderSeasonOutlook(team)}
 
-    <div class="dossier-layout" style="margin-top:12px;">
+    <div
+      class="dossier-layout"
+      style="margin-top:12px;"
+    >
+
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-title">Offensive Profile</div>
+          <div class="panel-title">
+            Offensive Profile
+          </div>
         </div>
+
         <div class="panel-body">
           ${renderMetricRow(
             "Model EPA / Play",
             formatEPA(offModelEPA),
-            metricRank(team, "offense", "epa_play_rank", offModelEPA)
+            metricRank(
+              team,
+              "offense",
+              "epa_play_rank",
+              offModelEPA
+            )
           )}
+
           ${renderMetricRow(
             "Model Success Rate",
             formatRate(offModelSR),
-            metricRank(team, "offense", "sr_rank", offModelSR)
+            metricRank(
+              team,
+              "offense",
+              "sr_rank",
+              offModelSR
+            )
           )}
-          ${renderMetricRow("2026 EPA / Pass", formatEPA(offLive?.epa_pass))}
-          ${renderMetricRow("2026 EPA / Rush", formatEPA(offLive?.epa_rush))}
-          ${renderMetricRow("2026 Success Rate", formatRate(offLive?.success_rate))}
-          ${renderMetricRow("2026 Explosive Rate", formatRate(offLive?.explosive_rate))}
-          ${renderMetricRow("2026 Havoc Allowed", formatRate(offLive?.havoc_rate))}
+
+          ${renderMetricRow(
+            "2026 EPA / Pass",
+            formatEPA(
+              offLive?.epa_pass
+            )
+          )}
+
+          ${renderMetricRow(
+            "2026 EPA / Rush",
+            formatEPA(
+              offLive?.epa_rush
+            )
+          )}
+
+          ${renderMetricRow(
+            "2026 Success Rate",
+            formatRate(
+              offLive?.success_rate
+            )
+          )}
+
+          ${renderMetricRow(
+            "2026 Explosive Rate",
+            formatRate(
+              offLive?.explosive_rate
+            )
+          )}
+
+          ${renderMetricRow(
+            "2026 Havoc Allowed",
+            formatRate(
+              offLive?.havoc_rate
+            )
+          )}
         </div>
       </div>
 
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-title">Defensive Profile</div>
+          <div class="panel-title">
+            Defensive Profile
+          </div>
         </div>
+
         <div class="panel-body">
           ${renderMetricRow(
             "Model EPA / Play",
             formatEPA(defModelEPA),
-            metricRank(team, "defense", "epa_play_rank", defModelEPA)
+            metricRank(
+              team,
+              "defense",
+              "epa_play_rank",
+              defModelEPA
+            )
           )}
+
           ${renderMetricRow(
             "Model Success Rate Allowed",
             formatRate(defModelSR),
-            metricRank(team, "defense", "sr_rank", defModelSR)
+            metricRank(
+              team,
+              "defense",
+              "sr_rank",
+              defModelSR
+            )
           )}
-          ${renderMetricRow("2026 EPA / Pass Allowed", formatEPA(defLive?.epa_pass))}
-          ${renderMetricRow("2026 EPA / Rush Allowed", formatEPA(defLive?.epa_rush))}
-          ${renderMetricRow("2026 Success Rate Allowed", formatRate(defLive?.success_rate))}
-          ${renderMetricRow("2026 Explosive Rate Allowed", formatRate(defLive?.explosive_rate))}
-          ${renderMetricRow("2026 Havoc Created", formatRate(defLive?.havoc_rate))}
+
+          ${renderMetricRow(
+            "2026 EPA / Pass Allowed",
+            formatEPA(
+              defLive?.epa_pass
+            )
+          )}
+
+          ${renderMetricRow(
+            "2026 EPA / Rush Allowed",
+            formatEPA(
+              defLive?.epa_rush
+            )
+          )}
+
+          ${renderMetricRow(
+            "2026 Success Rate Allowed",
+            formatRate(
+              defLive?.success_rate
+            )
+          )}
+
+          ${renderMetricRow(
+            "2026 Explosive Rate Allowed",
+            formatRate(
+              defLive?.explosive_rate
+            )
+          )}
+
+          ${renderMetricRow(
+            "2026 Havoc Created",
+            formatRate(
+              defLive?.havoc_rate
+            )
+          )}
         </div>
       </div>
 
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-title">Net Efficiency</div>
+          <div class="panel-title">
+            Net Efficiency
+          </div>
         </div>
+
         <div class="panel-body">
-          ${renderMetricRow("Model Net EPA / Play", formatEPA(team?.net?.epa))}
-          ${renderMetricRow("Model Net Success Rate", formatPercent(team?.net?.sr))}
-          ${renderMetricRow("2026 Net EPA / Pass", formatEPA(liveNet(team, "epa_pass")))}
-          ${renderMetricRow("2026 Net EPA / Rush", formatEPA(liveNet(team, "epa_rush")))}
+          ${renderMetricRow(
+            "Model Net EPA / Play",
+            formatEPA(
+              team?.net?.epa
+            )
+          )}
+
+          ${renderMetricRow(
+            "Model Net Success Rate",
+            formatPercent(
+              team?.net?.sr
+            )
+          )}
+
+          ${renderMetricRow(
+            "2026 Net EPA / Pass",
+            formatEPA(
+              liveNet(
+                team,
+                "epa_pass"
+              )
+            )
+          )}
+
+          ${renderMetricRow(
+            "2026 Net EPA / Rush",
+            formatEPA(
+              liveNet(
+                team,
+                "epa_rush"
+              )
+            )
+          )}
+
           ${renderMetricRow(
             "2026 Net Success Rate",
-            formatPercent(liveNet(team, "success_rate"))
+            formatPercent(
+              liveNet(
+                team,
+                "success_rate"
+              )
+            )
           )}
         </div>
       </div>
 
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-title">Model Context</div>
+          <div class="panel-title">
+            Model Context
+          </div>
         </div>
+
         <div class="panel-body">
-          ${renderMetricRow("Power Rank", powerRank(team))}
-          ${renderMetricRow("Conference", escapeHtml(team.conference ?? "—"))}
+          ${renderMetricRow(
+            "Power Rank",
+            powerRank(team)
+          )}
+
+          ${renderMetricRow(
+            "Conference",
+            escapeHtml(
+              team.conference ??
+              "—"
+            )
+          )}
+
           ${renderMetricRow(
             "2026 Offensive Plays",
-            offPlays > 0 ? formatNumber(offPlays, 0) : "—"
-          )}
-          ${renderMetricRow(
-            "2026 Defensive Plays",
-            defPlays > 0 ? formatNumber(defPlays, 0) : "—"
-          )}
-          ${renderMetricRow(
-            "Live Data Weight",
-            metricsData?.meta?.blend_weight !== undefined
-              ? formatPercent(Number(metricsData.meta.blend_weight) * 100, 0)
+            offPlays > 0
+              ? formatNumber(
+                  offPlays,
+                  0
+                )
               : "—"
           )}
-          ${renderMetricRow("Sample Status", escapeHtml(liveSampleLabel(team)))}
+
+          ${renderMetricRow(
+            "2026 Defensive Plays",
+            defPlays > 0
+              ? formatNumber(
+                  defPlays,
+                  0
+                )
+              : "—"
+          )}
+
+          ${renderMetricRow(
+            "Live Data Weight",
+            metricsData
+              ?.meta
+              ?.blend_weight !== undefined
+                ? formatPercent(
+                    Number(
+                      metricsData
+                        .meta
+                        .blend_weight
+                    ) * 100,
+                    0
+                  )
+                : "—"
+          )}
+
+          ${renderMetricRow(
+            "Sample Status",
+            escapeHtml(
+              liveSampleLabel(team)
+            )
+          )}
         </div>
       </div>
     </div>
 
-    <div class="panel" style="margin-top:12px;">
+    <div
+      class="panel"
+      style="margin-top:12px;"
+    >
       <div class="panel-header">
         <div>
-          <div class="panel-title">Roster Foundation</div>
-          <div class="team-meta" style="margin-top:5px;">
-            2026 preseason roster snapshot · display-only · not used by Model A
+          <div class="panel-title">
+            Roster Foundation
+          </div>
+
+          <div
+            class="team-meta"
+            style="margin-top:5px;"
+          >
+            2026 preseason roster snapshot
+            · display-only
+            · not used by Model A
           </div>
         </div>
       </div>
-      <div class="dossier-layout" style="padding:12px 16px 16px;">
+
+      <div
+        class="dossier-layout"
+        style="padding:12px 16px 16px;"
+      >
         <div class="panel">
-          <div class="panel-header"><div class="panel-title">Returning Production</div></div>
+          <div class="panel-header">
+            <div class="panel-title">
+              Returning Production
+            </div>
+          </div>
+
           <div class="panel-body">
-            ${renderMetricRow("Combined", formatPercent(roster?.returning_production_pct), externalRank(roster?.returning_production_rank))}
-            ${renderMetricRow("Offense", formatPercent(roster?.returning_offense_pct), externalRank(roster?.returning_offense_rank))}
-            ${renderMetricRow("Defense", formatPercent(roster?.returning_defense_pct), externalRank(roster?.returning_defense_rank))}
-            ${renderMetricRow("Returning Players", formatNumber(roster?.returning_players, 0))}
+            ${renderMetricRow(
+              "Combined",
+              formatPercent(
+                roster?.returning_production_pct
+              ),
+              externalRank(
+                roster?.returning_production_rank
+              )
+            )}
+
+            ${renderMetricRow(
+              "Offense",
+              formatPercent(
+                roster?.returning_offense_pct
+              ),
+              externalRank(
+                roster?.returning_offense_rank
+              )
+            )}
+
+            ${renderMetricRow(
+              "Defense",
+              formatPercent(
+                roster?.returning_defense_pct
+              ),
+              externalRank(
+                roster?.returning_defense_rank
+              )
+            )}
+
+            ${renderMetricRow(
+              "Returning Players",
+              formatNumber(
+                roster?.returning_players,
+                0
+              )
+            )}
           </div>
         </div>
+
         <div class="panel">
-          <div class="panel-header"><div class="panel-title">Team Talent</div></div>
+          <div class="panel-header">
+            <div class="panel-title">
+              Team Talent
+            </div>
+          </div>
+
           <div class="panel-body">
-            ${renderMetricRow("Talent Composite", formatNumber(roster?.talent_composite, 2), externalRank(roster?.talent_rank))}
-            ${renderMetricRow("Blue-Chip Ratio", formatPercent(roster?.blue_chip_ratio_pct))}
-            ${renderMetricRow("Rated Recruits", formatNumber(roster?.rated_recruits, 0))}
+            ${renderMetricRow(
+              "Talent Composite",
+              formatNumber(
+                roster?.talent_composite,
+                2
+              ),
+              externalRank(
+                roster?.talent_rank
+              )
+            )}
+
+            ${renderMetricRow(
+              "Blue-Chip Ratio",
+              formatPercent(
+                roster?.blue_chip_ratio_pct
+              )
+            )}
+
+            ${renderMetricRow(
+              "Rated Recruits",
+              formatNumber(
+                roster?.rated_recruits,
+                0
+              )
+            )}
           </div>
         </div>
       </div>
     </div>
 
-    <div class="panel" style="margin-top:12px;">
+    <div
+      class="panel"
+      style="margin-top:12px;"
+    >
       <div class="panel-header">
         <div>
-          <div class="panel-title">External Ratings & Resume</div>
-          <div class="team-meta" style="margin-top:5px;">
-            ESPN FPI Week ${externalRatingsData?.meta?.week ?? "—"} · display-only · not used by Model A
+          <div class="panel-title">
+            External Ratings & Resume
+          </div>
+
+          <div
+            class="team-meta"
+            style="margin-top:5px;"
+          >
+            ESPN FPI Week
+            ${externalRatingsData?.meta?.week ?? "—"}
+            · display-only
+            · not used by Model A
           </div>
         </div>
       </div>
-      <div class="dossier-layout" style="padding:12px 16px 16px;">
+
+      <div
+        class="dossier-layout"
+        style="padding:12px 16px 16px;"
+      >
         <div class="panel">
-          <div class="panel-header"><div class="panel-title">Strength & Resume</div></div>
+          <div class="panel-header">
+            <div class="panel-title">
+              Strength & Resume
+            </div>
+          </div>
+
           <div class="panel-body">
-            ${renderMetricRow("FPI", formatSigned(external?.fpi, 1), externalRank(external?.fpi_rank))}
-            ${renderMetricRow("Strength of Record", externalRank(external?.sor_rank))}
-            ${renderMetricRow("Strength of Schedule", externalRank(external?.sos_rank))}
-            ${renderMetricRow("Remaining SOS", externalRank(external?.remaining_sos_rank))}
-            ${renderMetricRow("Game Control", externalRank(external?.game_control_rank))}
+            ${renderMetricRow(
+              "FPI",
+              formatSigned(
+                external?.fpi,
+                1
+              ),
+              externalRank(
+                external?.fpi_rank
+              )
+            )}
+
+            ${renderMetricRow(
+              "Strength of Record",
+              externalRank(
+                external?.sor_rank
+              )
+            )}
+
+            ${renderMetricRow(
+              "Strength of Schedule",
+              externalRank(
+                external?.sos_rank
+              )
+            )}
+
+            ${renderMetricRow(
+              "Remaining SOS",
+              externalRank(
+                external?.remaining_sos_rank
+              )
+            )}
+
+            ${renderMetricRow(
+              "Game Control",
+              externalRank(
+                external?.game_control_rank
+              )
+            )}
           </div>
         </div>
+
         <div class="panel">
-          <div class="panel-header"><div class="panel-title">FPI Components</div></div>
+          <div class="panel-header">
+            <div class="panel-title">
+              FPI Components
+            </div>
+          </div>
+
           <div class="panel-body">
-            ${renderMetricRow("Offensive Component", formatSigned(external?.fpi_offense, 3))}
-            ${renderMetricRow("Defensive Component", formatSigned(external?.fpi_defense, 3))}
-            ${renderMetricRow("Special Teams Component", formatSigned(external?.fpi_special_teams, 3), externalMetricRank("fpi_special_teams", external?.fpi_special_teams))}
-            ${renderMetricRow("Projected Record", hasValue(external?.projected_wins) ? `${formatNumber(external.projected_wins, 1)}–${formatNumber(external.projected_losses, 1)}` : "—")}
+            ${renderMetricRow(
+              "Offensive Component",
+              formatSigned(
+                external?.fpi_offense,
+                3
+              )
+            )}
+
+            ${renderMetricRow(
+              "Defensive Component",
+              formatSigned(
+                external?.fpi_defense,
+                3
+              )
+            )}
+
+            ${renderMetricRow(
+              "Special Teams Component",
+              formatSigned(
+                external?.fpi_special_teams,
+                3
+              ),
+              externalMetricRank(
+                "fpi_special_teams",
+                external?.fpi_special_teams
+              )
+            )}
+
+            ${renderMetricRow(
+              "Projected Record",
+              hasValue(
+                external?.projected_wins
+              )
+                ? `${formatNumber(
+                    external.projected_wins,
+                    1
+                  )}–${formatNumber(
+                    external.projected_losses,
+                    1
+                  )}`
+                : "—"
+            )}
           </div>
         </div>
+
         <div class="panel">
-          <div class="panel-header"><div class="panel-title">Season Probabilities</div></div>
+          <div class="panel-header">
+            <div class="panel-title">
+              Season Probabilities
+            </div>
+          </div>
+
           <div class="panel-body">
-            ${renderMetricRow("Win Conference", formatPercent(external?.win_conference_pct))}
-            ${renderMetricRow("Make Playoff", formatPercent(external?.make_playoff_pct))}
-            ${renderMetricRow("Make Title Game", formatPercent(external?.make_title_game_pct))}
-            ${renderMetricRow("Win National Title", formatPercent(external?.win_title_pct))}
-            ${renderMetricRow("Win Out", formatPercent(external?.win_out_pct))}
+            ${renderMetricRow(
+              "Win Conference",
+              formatPercent(
+                external?.win_conference_pct
+              )
+            )}
+
+            ${renderMetricRow(
+              "Make Playoff",
+              formatPercent(
+                external?.make_playoff_pct
+              )
+            )}
+
+            ${renderMetricRow(
+              "Make Title Game",
+              formatPercent(
+                external?.make_title_game_pct
+              )
+            )}
+
+            ${renderMetricRow(
+              "Win National Title",
+              formatPercent(
+                external?.win_title_pct
+              )
+            )}
+
+            ${renderMetricRow(
+              "Win Out",
+              formatPercent(
+                external?.win_out_pct
+              )
+            )}
           </div>
         </div>
       </div>
     </div>
 
-    <div class="panel" style="margin-top:12px;">
-      <div class="panel-header" style="align-items:center; gap:12px; flex-wrap:wrap;">
+    <div
+      class="panel"
+      style="margin-top:12px;"
+    >
+      <div
+        class="panel-header"
+        style="align-items:center; gap:12px; flex-wrap:wrap;"
+      >
         <div>
-          <div class="panel-title">Advanced 2026 Performance</div>
-          <div class="team-meta" style="margin-top:5px;">Display-only statistics · not used by Model A</div>
+          <div class="panel-title">
+            Advanced 2026 Performance
+          </div>
+
+          <div
+            class="team-meta"
+            style="margin-top:5px;"
+          >
+            Display-only statistics
+            · not used by Model A
+          </div>
         </div>
-        <div class="ratings-toggle" style="padding:0; border:0; margin-left:auto;">
+
+        <div
+          class="ratings-toggle"
+          style="padding:0; border:0; margin-left:auto;"
+        >
           <button
             type="button"
-            class="ratings-toggle-button ${currentAdvancedSample === "non_garbage" ? "active" : ""}"
+            class="ratings-toggle-button ${
+              currentAdvancedSample ===
+              "non_garbage"
+                ? "active"
+                : ""
+            }"
             onclick="setAdvancedSample('non_garbage')"
-          >Garbage Time Excluded</button>
+          >
+            Garbage Time Excluded
+          </button>
+
           <button
             type="button"
-            class="ratings-toggle-button ${currentAdvancedSample === "all_plays" ? "active" : ""}"
+            class="ratings-toggle-button ${
+              currentAdvancedSample ===
+              "all_plays"
+                ? "active"
+                : ""
+            }"
             onclick="setAdvancedSample('all_plays')"
-          >All Plays</button>
+          >
+            All Plays
+          </button>
         </div>
       </div>
-      <div class="sample-warning" style="margin:12px 16px 0;">
-        Current-season samples are descriptive and can move sharply early in the season.
-        A dash means the minimum four-play sample has not been reached.
+
+      <div
+        class="sample-warning"
+        style="margin:12px 16px 0;"
+      >
+        Current-season samples are descriptive
+        and can move sharply early in the season.
+        A dash means the minimum four-play sample
+        has not been reached.
       </div>
-      <div class="dossier-layout" style="padding:12px 16px 16px;">
+
+      <div
+        class="dossier-layout"
+        style="padding:12px 16px 16px;"
+      >
         <div class="panel">
-          <div class="panel-header"><div class="panel-title">Offense · Downs & Disruption</div></div>
-          <div class="panel-body">${advancedMetricRows(team.team, "offense")}</div>
+          <div class="panel-header">
+            <div class="panel-title">
+              Offense · Downs & Disruption
+            </div>
+          </div>
+
+          <div class="panel-body">
+            ${advancedMetricRows(
+              team.team,
+              "offense"
+            )}
+          </div>
         </div>
+
         <div class="panel">
-          <div class="panel-header"><div class="panel-title">Defense · Downs & Disruption</div></div>
-          <div class="panel-body">${advancedMetricRows(team.team, "defense")}</div>
+          <div class="panel-header">
+            <div class="panel-title">
+              Defense · Downs & Disruption
+            </div>
+          </div>
+
+          <div class="panel-body">
+            ${advancedMetricRows(
+              team.team,
+              "defense"
+            )}
+          </div>
         </div>
+
         <div class="panel">
-          <div class="panel-header"><div class="panel-title">Offense · Situational Splits</div></div>
-          <div class="panel-body">${advancedSplitRows(team.team, "offense")}</div>
+          <div class="panel-header">
+            <div class="panel-title">
+              Offense · Situational Splits
+            </div>
+          </div>
+
+          <div class="panel-body">
+            ${advancedSplitRows(
+              team.team,
+              "offense"
+            )}
+          </div>
         </div>
+
         <div class="panel">
-          <div class="panel-header"><div class="panel-title">Defense · Situational Splits</div></div>
-          <div class="panel-body">${advancedSplitRows(team.team, "defense")}</div>
+          <div class="panel-header">
+            <div class="panel-title">
+              Defense · Situational Splits
+            </div>
+          </div>
+
+          <div class="panel-body">
+            ${advancedSplitRows(
+              team.team,
+              "defense"
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -2779,13 +4467,25 @@ function renderDossier(team) {
 // ============================================================================
 
 function attachEvents() {
-  const search = document.getElementById("team-search");
+  const search =
+    document.getElementById(
+      "team-search"
+    );
+
   if (!search) return;
 
-  search.addEventListener("input", event => {
-    currentSearch = event.target.value.trim();
-    renderProjections();
-  });
+  search.addEventListener(
+    "input",
+    event => {
+      currentSearch =
+        event.target.value.trim();
+
+      renderProjections();
+    }
+  );
 }
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener(
+  "DOMContentLoaded",
+  init
+);
