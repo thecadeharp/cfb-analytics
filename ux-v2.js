@@ -673,6 +673,89 @@
       }
       .final-result-item span:last-child { margin-top:5px; font-size:12px; font-weight:700; }
 
+      .testing-notice-bar {
+        display:flex;
+        align-items:flex-start;
+        gap:10px;
+        margin:18px 0;
+        padding:12px 14px;
+        border:1px solid #d9bd53;
+        border-radius:10px;
+        background:#fff9df;
+        color:#4e3b00;
+        font-size:11px;
+        line-height:1.5;
+      }
+      .testing-notice-bar strong {
+        font-family:var(--mono);
+        font-size:9px;
+        letter-spacing:.7px;
+        text-transform:uppercase;
+        white-space:nowrap;
+      }
+      .testing-modal-backdrop {
+        position:fixed;
+        inset:0;
+        z-index:9999;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:20px;
+        background:rgba(10,18,15,.72);
+        backdrop-filter:blur(5px);
+      }
+      .testing-modal {
+        width:min(520px,100%);
+        padding:26px;
+        border:1px solid rgba(255,255,255,.18);
+        border-radius:16px;
+        background:var(--surface);
+        box-shadow:0 24px 80px rgba(0,0,0,.32);
+      }
+      .testing-modal-kicker {
+        color:var(--green);
+        font-family:var(--mono);
+        font-size:10px;
+        font-weight:800;
+        letter-spacing:1.2px;
+        text-transform:uppercase;
+      }
+      .testing-modal h2 {
+        margin:8px 0 10px;
+        font-size:26px;
+        letter-spacing:-.5px;
+      }
+      .testing-modal p {
+        margin:0;
+        color:var(--muted);
+        font-size:13px;
+        line-height:1.65;
+      }
+      .testing-modal-points {
+        margin:16px 0 20px;
+        padding:13px 14px;
+        border:1px solid var(--border);
+        border-radius:10px;
+        background:#fafaf8;
+        font-size:11px;
+        line-height:1.7;
+      }
+      .testing-modal-button {
+        width:100%;
+        border:0;
+        border-radius:9px;
+        padding:12px 16px;
+        background:var(--green);
+        color:#fff;
+        cursor:pointer;
+        font-family:var(--mono);
+        font-size:10px;
+        font-weight:800;
+        letter-spacing:.7px;
+        text-transform:uppercase;
+      }
+      .testing-modal-button:hover { filter:brightness(.94); }
+
       @media (max-width:900px) {
         #view-projections .projection-controls {
           grid-template-columns:1fr;
@@ -711,6 +794,67 @@
     if (impact === "significant") return "significant";
     if (impact === "moderate") return "moderate";
     return "minimal";
+  }
+
+  function installTestingNotice() {
+    const projectionsView = document.getElementById("view-projections");
+    const controls = projectionsView?.querySelector(".projection-controls");
+    if (controls && !document.getElementById("testing-notice-bar")) {
+      controls.insertAdjacentHTML(
+        "beforebegin",
+        `<div class="testing-notice-bar" id="testing-notice-bar">
+          <strong>Projections: Live Testing</strong>
+          <span>Week 1 begins prospective validation. Model lines, projected scores and signals are experimental—not betting recommendations. Team data, advanced metrics and power ratings remain available for research.</span>
+        </div>`,
+      );
+    }
+
+    const storageKey = "cfb-model-testing-notice-v1";
+    try {
+      if (window.localStorage.getItem(storageKey) === "accepted") return;
+    } catch (_) {
+      // Storage can be unavailable in strict/private browser modes.
+    }
+
+    const backdrop = document.createElement("div");
+    backdrop.className = "testing-modal-backdrop";
+    backdrop.setAttribute("role", "dialog");
+    backdrop.setAttribute("aria-modal", "true");
+    backdrop.setAttribute("aria-labelledby", "testing-modal-title");
+    backdrop.innerHTML = `
+      <div class="testing-modal">
+        <div class="testing-modal-kicker">2026 Model · Public Testing</div>
+        <h2 id="testing-modal-title">Welcome to CFB Analytics</h2>
+        <p>
+          The data platform is open for research. Model spreads, projected scores
+          and signals are beginning prospective Week 1 validation and should not
+          be treated as established betting recommendations.
+        </p>
+        <div class="testing-modal-points">
+          <strong>Available now:</strong> team data, advanced metrics, power ratings,
+          matchup projections, weather context and transparently tracked results.
+        </div>
+        <button class="testing-modal-button" type="button">Enter Site</button>
+      </div>
+    `;
+
+    const close = () => {
+      try { window.localStorage.setItem(storageKey, "accepted"); } catch (_) {}
+      backdrop.remove();
+      document.body.style.overflow = "";
+    };
+
+    backdrop.querySelector("button").addEventListener("click", close);
+    backdrop.addEventListener("click", event => {
+      if (event.target === backdrop) close();
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && document.body.contains(backdrop)) close();
+    });
+
+    document.body.appendChild(backdrop);
+    document.body.style.overflow = "hidden";
+    backdrop.querySelector("button").focus();
   }
 
   function projectedScore(game) {
@@ -1341,6 +1485,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     installFilterControls();
+    installTestingNotice();
     loadConditions();
     loadSettledResults();
   });
