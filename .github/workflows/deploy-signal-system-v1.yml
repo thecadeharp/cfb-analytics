@@ -1,0 +1,90 @@
+name: Deploy Signal System v1
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-signal-system-v1
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Capture protected-file checksums
+        run: |
+          sha256sum             data/projections.json             data/frozen/2026_week1_modelA_frozen.json             data/cfb_metrics.json             data/hfa_2026.json             scripts/build_projections.py             > /tmp/protected-before.sha256
+
+      - name: Build initial Signal report
+        run: |
+          python scripts/build_signal_report.py
+
+      - name: Apply Signal System v1 frontend
+        run: |
+          python scripts/apply_signal_system_v1.py
+
+      - name: Verify protected files are unchanged
+        run: |
+          sha256sum -c /tmp/protected-before.sha256
+
+      - name: Verify only approved files changed
+        run: |
+          python - <<'PY'
+          import subprocess
+
+          allowed = {
+              "app.js",
+              "index.html",
+              "data/reports/signal_report.json",
+          }
+
+          changed = set(
+              line.strip()
+              for line in subprocess.check_output(
+                  ["git", "diff", "--name-only"],
+                  text=True,
+              ).splitlines()
+              if line.strip()
+          )
+
+          unexpected = changed - allowed
+          if unexpected:
+              raise SystemExit(
+                  "Unexpected files changed: " + ", ".join(sorted(unexpected))
+              )
+
+          required = {"app.js", "index.html"}
+          missing = required - changed
+          if missing:
+              raise SystemExit(
+                  "Expected frontend files did not change: "
+                  + ", ".join(sorted(missing))
+              )
+
+          print("Approved changed files:", sorted(changed))
+          PY
+
+      - name: Commit Signal System v1
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add app.js
+          git add index.html
+          git add data/reports/signal_report.json
+
+          git commit -m "Deploy Signal System v1"
+          git pull --rebase origin main
+          git push origin main
