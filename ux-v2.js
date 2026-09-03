@@ -824,9 +824,9 @@
     backdrop.innerHTML = `
       <div class="testing-modal">
         <div class="testing-modal-kicker">2026 Model · Public Testing</div>
-        <h2 id="testing-modal-title">Welcome to CFB Analytics</h2>
+        <h2 id="testing-modal-title">Welcome to The Hammer Index</h2>
         <p>
-          The data platform is open for research. Model spreads, projected scores
+          Cade Harper's college football data platform is open for research. Model spreads, projected scores
           and signals are beginning prospective Week 1 validation and should not
           be treated as established betting recommendations.
         </p>
