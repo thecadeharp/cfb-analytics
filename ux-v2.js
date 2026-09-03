@@ -674,24 +674,34 @@
       .final-result-item span:last-child { margin-top:5px; font-size:12px; font-weight:700; }
 
       .testing-notice-bar {
-        display:flex;
-        align-items:flex-start;
-        gap:10px;
+        display:grid;
+        grid-template-columns:auto minmax(0,1fr);
+        align-items:center;
+        gap:16px;
         margin:18px 0;
-        padding:12px 14px;
+        padding:13px 18px;
         border:1px solid #d9bd53;
         border-radius:10px;
         background:#fff9df;
         color:#4e3b00;
-        font-size:11px;
-        line-height:1.5;
+        font-size:12px;
+        line-height:1.45;
       }
       .testing-notice-bar strong {
+        display:flex;
+        align-items:center;
+        align-self:stretch;
+        padding-right:16px;
+        border-right:1px solid rgba(126,94,0,.25);
         font-family:var(--mono);
-        font-size:9px;
-        letter-spacing:.7px;
+        font-size:10px;
+        letter-spacing:.75px;
         text-transform:uppercase;
         white-space:nowrap;
+      }
+      .testing-notice-bar span {
+        display:block;
+        text-align:left;
       }
       .testing-modal-backdrop {
         position:fixed;
@@ -771,6 +781,17 @@
       }
 
       @media (max-width:600px) {
+        .testing-notice-bar {
+          grid-template-columns:1fr;
+          gap:7px;
+          padding:13px 14px;
+        }
+        .testing-notice-bar strong {
+          padding:0 0 7px;
+          border-right:0;
+          border-bottom:1px solid rgba(126,94,0,.25);
+        }
+
         .projection-filter-bar {
           display:grid;
           grid-template-columns:1fr 1fr;
@@ -1123,6 +1144,18 @@
     renderProjections();
   }
 
+  function signalBoardPriority(game) {
+    const signal = canonicalSignal(effectiveComparison(game).signal);
+    return {
+      "PLAY": 5,
+      "SMALL EDGE": 4,
+      "ALIGNED": 3,
+      "MATERIAL DISAGREEMENT": 2,
+      "OUTLIER": 1,
+      "NO MARKET": 0,
+    }[signal] ?? 0;
+  }
+
   projectionGamesForCurrentView = function projectionGamesForCurrentViewWeatherV1() {
     return projections
       .filter(game => {
@@ -1145,6 +1178,10 @@
         const aFinal = settledResultForGame(a) ? 1 : 0;
         const bFinal = settledResultForGame(b) ? 1 : 0;
         if (aFinal !== bFinal) return aFinal - bFinal;
+
+        const aPriority = signalBoardPriority(a);
+        const bPriority = signalBoardPriority(b);
+        if (bPriority !== aPriority) return bPriority - aPriority;
 
         const aDisagreement = effectiveComparison(a).disagreement ?? -1;
         const bDisagreement = effectiveComparison(b).disagreement ?? -1;
@@ -1344,9 +1381,9 @@
         ${games.length} games
         · ${completedGames.length} final
         · ${marketGames.length} lined
-        · <button class="summary-filter summary-material" onclick="setSignalFilter('MATERIAL DISAGREEMENT')">${material} material disagreements</button>
         · <button class="summary-filter summary-play" onclick="setSignalFilter('PLAY')">${plays} plays</button>
         · <button class="summary-filter summary-small" onclick="setSignalFilter('SMALL EDGE')">${smallEdges} small edges</button>
+        · <button class="summary-filter summary-material" onclick="setSignalFilter('MATERIAL DISAGREEMENT')">${material} material disagreements</button>
         ${outliers ? `· <button class="summary-filter summary-outlier" onclick="setSignalFilter('OUTLIER')">${outliers} outliers</button>` : ""}
       `;
     }
