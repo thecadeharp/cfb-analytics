@@ -1,0 +1,35 @@
+name: Build Variance Historical Data
+
+on:
+  workflow_dispatch:  # Manual trigger only — run once
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests pandas numpy
+
+      - name: Run variance pull
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+        run: python scripts/variance_pull.py
+
+      - name: Commit variance_historical.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/variance_historical.json
+          git diff --cached --quiet || git commit -m "Build variance historical data [$(date -u +%Y-%m-%d)]"
+          git push
