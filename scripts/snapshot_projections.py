@@ -32,6 +32,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PROJECTIONS_PATH = ROOT / "data" / "projections.json"
+CONDITIONS_PATH = ROOT / "data" / "game_conditions.json"
 LEDGER_PATH = ROOT / "data" / "snapshots" / "projection_market_snapshots.jsonl"
 LATEST_PATH = ROOT / "data" / "snapshots" / "latest_snapshot.json"
 
@@ -45,6 +46,27 @@ def utc_now():
 def load_json(path):
     with path.open("r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def number(value):
+    try:
+        return float(value) if value is not None else None
+    except (TypeError, ValueError):
+        return None
+
+
+def kickoff_has_passed(game, captured_at):
+    raw = game.get("start_date")
+    if not raw:
+        return False
+    try:
+        kickoff = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+        if kickoff.tzinfo is None:
+            kickoff = kickoff.replace(tzinfo=timezone.utc)
+        captured = datetime.fromisoformat(captured_at)
+        return kickoff <= captured
+    except ValueError:
+        return False
 
 
 def load_existing_ids():
@@ -109,19 +131,33 @@ def main():
 
     captured_at = utc_now()
     existing_ids = load_existing_ids()
+    conditions_payload = load_json(CONDITIONS_PATH) if CONDITIONS_PATH.exists() else {}
+    conditions_by_game = conditions_payload.get("games") or {}
 
     rows = []
 
     for game in games:
         if game.get("status") == "completed":
             continue
+        if kickoff_has_passed(game, captured_at):
+            continue
 
         projection = game.get("projection") or {}
         market = game.get("market") or {}
         comparison = game.get("comparison") or {}
+        conditions = conditions_by_game.get(str(game.get("game_id"))) or {}
+        adjusted = conditions.get("adjusted") or {}
+        adjustments = conditions.get("adjustments") or {}
+        spread_logic = conditions.get("spread_logic") or {}
 
         model_spread = projection.get("home_spread")
         market_spread = market.get("home_spread")
+        public_spread = number(adjusted.get("home_spread"))
+        if public_spread is None:
+            public_spread = number(model_spread)
+        public_total = number(adjusted.get("total"))
+        if public_total is None:
+            public_total = number(projection.get("total"))
 
         # CLV requires a real market reference at prediction time.
         if model_spread is None or market_spread is None:
@@ -152,6 +188,18 @@ def main():
                     (projection.get("win_probability") or {}).get("home")
                 ),
             },
+            "public_projection": {
+                "home_spread": public_spread,
+                "total": public_total,
+                "weather_applied": bool(conditions),
+            },
+            "weather_at_snapshot": {
+                "conditions_line": conditions.get("conditions_line"),
+                "impact": conditions.get("impact"),
+                "total_adjustment": adjustments.get("total_points"),
+                "spread_adjustment": adjustments.get("home_spread_points"),
+                "spread_status": spread_logic.get("status"),
+            } if conditions else None,
             "market_at_snapshot": {
                 "home_spread": market_spread,
                 "total": market.get("total"),
