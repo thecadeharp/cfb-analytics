@@ -889,10 +889,154 @@
 
       .tape-controls,
       .tape-summary-grid,
-      .tape-breakdown { grid-template-columns: 1fr; }
+      .tape-breakdown {
+        grid-template-columns: 1fr;
+      }
 
-      .tape-scoreboard { grid-template-columns: 1fr; text-align: center; }
-      .tape-team:last-child { text-align: center; }
+      .tape-scoreboard {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .tape-team:last-child {
+        text-align: center;
+      }
+
+      /* =========================
+         MOBILE PROJECTION CARDS
+      ========================== */
+
+      #view-projections .table-card {
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        overflow: visible;
+      }
+
+      #view-projections .table-scroll {
+        overflow: visible;
+      }
+
+      #view-projections .projection-table {
+        display: block;
+        width: 100%;
+        min-width: 0;
+      }
+
+      #view-projections .projection-table thead {
+        display: none;
+      }
+
+      #view-projections .projection-table tbody {
+        display: grid;
+        gap: 12px;
+      }
+
+      #view-projections .projection-table .game-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+
+      #view-projections .projection-table .game-row:hover {
+        background: var(--surface);
+      }
+
+      #view-projections .projection-table .game-row td {
+        display: block;
+        min-width: 0;
+        padding: 13px 14px;
+        text-align: left;
+        border-bottom: 1px solid #e9e9e5;
+      }
+
+      #view-projections .projection-table .matchup-cell {
+        grid-column: 1 / -1;
+        padding: 16px;
+        cursor: pointer;
+      }
+
+      #view-projections .projection-table .matchup-cell .team-name {
+        font-size: 15px;
+      }
+
+      #view-projections .projection-table .game-row td:nth-child(2)::before {
+        content: "OUR LINE";
+      }
+
+      #view-projections .projection-table .game-row td:nth-child(3)::before {
+        content: "MARKET";
+      }
+
+      #view-projections .projection-table .game-row td:nth-child(4)::before {
+        content: "PROJECTED TOTAL";
+      }
+
+      #view-projections .projection-table .game-row td:nth-child(5)::before {
+        content: "MODEL EDGE";
+      }
+
+      #view-projections .projection-table .game-row td:nth-child(2)::before,
+      #view-projections .projection-table .game-row td:nth-child(3)::before,
+      #view-projections .projection-table .game-row td:nth-child(4)::before,
+      #view-projections .projection-table .game-row td:nth-child(5)::before,
+      #view-projections .projection-table .game-row td:nth-child(6)::before,
+      #view-projections .projection-table .game-row td:nth-child(7)::before {
+        display: block;
+        margin-bottom: 7px;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+
+      #view-projections .projection-table .game-row td:nth-child(6),
+      #view-projections .projection-table .game-row td:nth-child(7) {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 10px;
+        text-align: left;
+      }
+
+      #view-projections .projection-table .game-row td:nth-child(6)::before {
+        content: "MODEL SIGNAL";
+        margin-bottom: 0;
+      }
+
+      #view-projections .projection-table .game-row td:nth-child(7)::before {
+        content: "SIGNAL CONFIDENCE";
+        margin-bottom: 0;
+      }
+
+      #view-projections .projection-table .game-row td:nth-child(7) {
+        border-bottom: none;
+      }
+
+      #view-projections .projection-table .game-row .status {
+        justify-self: end;
+      }
+
+      #view-projections .projection-table .game-row .signal-record {
+        grid-column: 1 / -1;
+        justify-self: end;
+        text-align: right;
+        margin-top: 2px;
+      }
+
+      #view-projections .projection-table .disagreement {
+        text-align: left;
+      }
+
+      #view-projections .projection-table .disagreement-note {
+        white-space: normal;
+      }
     }
   </style>
 </head>
@@ -992,6 +1136,7 @@
             <span class="status confidence-established">ESTABLISHED</span>
             <span class="confidence-legend-note">100+ decisions · ≥53.0% ATS · positive avg CLV · ≥55% beat close.</span>
           </div>
+
           <div class="signal-guide-copy" style="margin-top:14px;margin-bottom:0;">
             <strong>How the projected total works:</strong> the total begins with the
             model's national scoring baseline, then adjusts for both teams' offensive
@@ -1000,6 +1145,7 @@
             Weather Engine scoring adjustment. The displayed Over/Under direction is
             the difference between that adjusted projection and the available market total.
           </div>
+
           <div class="signal-guide-copy" style="margin-top:10px;margin-bottom:0;">
             <strong>Totals testing key:</strong> a 4.0–6.9 point difference is a
             <strong>Total Lean</strong>; 7.0+ is a <strong>Total Watch</strong>. No totals
