@@ -72,21 +72,36 @@
 
   function indexSettledResults(payload) {
     const rows = Array.isArray(payload?.rows) ? payload.rows : [];
-    const firstByGame = new Map();
+    const grouped = new Map();
+    const indexed = new Map();
 
     rows
       .filter(row => row?.result_settled)
       .sort((a, b) => String(a?.captured_at_utc || "").localeCompare(String(b?.captured_at_utc || "")))
       .forEach(row => {
-        const keys = [row?.game_key, row?.result_game_id]
-          .filter(value => value !== null && value !== undefined)
-          .map(String);
-        keys.forEach(key => {
-          if (!firstByGame.has(key)) firstByGame.set(key, row);
-        });
+        const key = String(row?.game_key ?? row?.result_game_id ?? "");
+        if (!key) return;
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key).push(row);
       });
 
-    settledResultsByGame = firstByGame;
+    grouped.forEach(gameRows => {
+      const official = { ...gameRows[0] };
+      const weather = [...gameRows].reverse().find(row => row?.weather_applied);
+      if (weather) {
+        [
+          "public_home_spread", "public_total", "weather_applied",
+          "weather_conditions_line", "weather_impact", "weather_total_adjustment",
+          "weather_spread_adjustment", "weather_spread_status", "public_margin_error",
+          "public_abs_error",
+        ].forEach(field => { official[field] = weather[field]; });
+      }
+      [official.game_key, official.result_game_id]
+        .filter(value => value !== null && value !== undefined)
+        .forEach(key => indexed.set(String(key), official));
+    });
+
+    settledResultsByGame = indexed;
   }
 
   function settledResultForGame(game) {
@@ -110,6 +125,7 @@
 
   function effectiveModelSpread(game) {
     const result = settledResultForGame(game);
+    if (hasValue(result?.public_home_spread)) return Number(result.public_home_spread);
     if (hasValue(result?.model_home_spread)) return Number(result.model_home_spread);
     const conditions = conditionsForGame(game);
     if (hasValue(conditions?.adjusted?.home_spread)) {
@@ -120,6 +136,7 @@
 
   function effectiveModelTotal(game) {
     const result = settledResultForGame(game);
+    if (hasValue(result?.public_total)) return Number(result.public_total);
     if (hasValue(result?.model_total)) return Number(result.model_total);
     const conditions = conditionsForGame(game);
     if (hasValue(conditions?.adjusted?.total)) {
@@ -167,8 +184,8 @@
   }
 
   function frozenProjectedScore(result) {
-    const total = Number(result?.model_total);
-    const homeSpread = Number(result?.model_home_spread);
+    const total = Number(hasValue(result?.public_total) ? result.public_total : result?.model_total);
+    const homeSpread = Number(hasValue(result?.public_home_spread) ? result.public_home_spread : result?.model_home_spread);
     if (!Number.isFinite(total) || !Number.isFinite(homeSpread)) return null;
     return {
       home: Math.max(0, Math.round((total - homeSpread) / 2)),
@@ -364,9 +381,9 @@
       }
 
       .projection-table thead th {
-        position:sticky;
-        top:62px;
-        z-index:4;
+        position:static;
+        top:auto;
+        z-index:auto;
         background:#f7f7f5;
         box-shadow:0 1px 0 var(--border);
       }
@@ -666,7 +683,6 @@
           text-align:left;
         }
 
-        .projection-table thead th { top:0; }
         .weather-output-grid { grid-template-columns:1fr; }
         .final-result-grid { grid-template-columns:1fr 1fr; }
       }
@@ -777,7 +793,7 @@
         </div>
         <div class="final-result-grid">
           <div class="final-result-item">
-            <span>Frozen model score</span>
+            <span>Frozen public score</span>
             <span>${frozenScore ? `${escapeHtml(awayName)} ${frozenScore.away}–${frozenScore.home} ${escapeHtml(homeName)}` : "Not captured"}</span>
           </div>
           <div class="final-result-item">
@@ -794,7 +810,7 @@
           </div>
           <div class="final-result-item">
             <span>Margin error</span>
-            <span>${hasValue(result.model_abs_error) ? `${formatNumber(result.model_abs_error, 1)} pts` : "—"}</span>
+            <span>${hasValue(result.public_abs_error ?? result.model_abs_error) ? `${formatNumber(result.public_abs_error ?? result.model_abs_error, 1)} pts` : "—"}</span>
           </div>
           <div class="final-result-item">
             <span>Pregame signal</span>
@@ -805,8 +821,8 @@
             <span>${escapeHtml(favoredLine(homeName, awayName, result.snapshot_home_spread))}</span>
           </div>
           <div class="final-result-item">
-            <span>CLV</span>
-            <span>${hasValue(result.clv_points) ? `${formatSigned(result.clv_points, 1)} pts` : "—"}</span>
+            <span>Weather snapshot</span>
+            <span>${result.weather_applied ? escapeHtml(result.weather_conditions_line || "Applied") : "No adjustment captured"}</span>
           </div>
         </div>
       </div>
@@ -1029,8 +1045,8 @@
           <span class="final-label">FINAL</span>
         </td>
         <td>
-          <div class="line-primary">${escapeHtml(shortSpread(result.model_home_spread))}</div>
-          <div class="line-secondary">Frozen model line</div>
+          <div class="line-primary">${escapeHtml(shortSpread(result.public_home_spread ?? result.model_home_spread))}</div>
+          <div class="line-secondary">Frozen public line</div>
         </td>
         <td>
           <div class="line-primary">${escapeHtml(close)}</div>
@@ -1049,7 +1065,7 @@
         </td>
         <td class="status-cell">
           <span class="status ${confidenceClass(confidence)}">${escapeHtml(confidence)}</span>
-          <div class="signal-record">Winner ${winnerCorrect === null ? "—" : winnerCorrect ? "correct" : "incorrect"} · ${hasValue(result.model_abs_error) ? `${formatNumber(result.model_abs_error, 1)} pt margin error` : "error pending"}</div>
+          <div class="signal-record">Winner ${winnerCorrect === null ? "—" : winnerCorrect ? "correct" : "incorrect"} · ${hasValue(result.public_abs_error ?? result.model_abs_error) ? `${formatNumber(result.public_abs_error ?? result.model_abs_error, 1)} pt margin error` : "error pending"}</div>
         </td>
       </tr>
     `;
