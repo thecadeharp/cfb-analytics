@@ -24,6 +24,7 @@ let seasonProjections = {};
 let currentWeek = null;
 let currentSearch = "";
 let currentRatingsMode = "teams";
+let currentTeamConference = "ALL";
 
 
 // ============================================================================
@@ -257,6 +258,50 @@ function conferenceStandings() {
       defHavoc: average(liveMembers.map(team => liveValue(team, "defense", "havoc_rate"))),
     };
   }).sort((a, b) => Number(b.modelRating ?? -999) - Number(a.modelRating ?? -999));
+}
+
+function conferenceNames() {
+  return [...new Set(
+    Object.values(teams).map(team => team.conference || "FBS Independents")
+  )].sort((a, b) => a.localeCompare(b));
+}
+
+function filteredTeamsByConference() {
+  const data = sortedTeams();
+  if (currentTeamConference === "ALL") return data;
+  return data.filter(
+    team => (team.conference || "FBS Independents") === currentTeamConference
+  );
+}
+
+function conferenceFilterMarkup(idSuffix, label = "Filter teams by conference") {
+  const selectId = `conference-team-filter-${idSuffix}`;
+  return `
+    <div class="conference-filter-bar">
+      <label class="conference-filter-label" for="${selectId}">
+        Conference
+      </label>
+      <select
+        id="${selectId}"
+        class="conference-filter-select"
+        aria-label="${escapeHtml(label)}"
+        onchange="setTeamConference(this.value)"
+      >
+        <option value="ALL" ${currentTeamConference === "ALL" ? "selected" : ""}>
+          All Conferences
+        </option>
+        ${conferenceNames().map(conference => `
+          <option
+            value="${escapeHtml(conference)}"
+            ${currentTeamConference === conference ? "selected" : ""}
+          >${escapeHtml(conference)}</option>
+        `).join("")}
+      </select>
+      <span class="conference-filter-count">
+        ${filteredTeamsByConference().length} teams
+      </span>
+    </div>
+  `;
 }
 
 function getTeam(name) {
@@ -586,6 +631,50 @@ function ensureMatchupView() {
       background:var(--ink);
       border-color:var(--ink);
       color:#ffffff;
+    }
+
+    .conference-filter-bar {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:12px 16px;
+      border-bottom:1px solid var(--border);
+      background:var(--surface);
+    }
+
+    .conference-filter-label {
+      color:var(--muted);
+      font-family:var(--mono);
+      font-size:9px;
+      font-weight:700;
+      letter-spacing:.7px;
+      text-transform:uppercase;
+    }
+
+    .conference-filter-select {
+      appearance:none;
+      min-width:190px;
+      border:1px solid var(--border);
+      border-radius:8px;
+      background:#ffffff;
+      color:var(--ink);
+      cursor:pointer;
+      font-family:var(--sans);
+      font-size:11px;
+      font-weight:600;
+      padding:9px 32px 9px 11px;
+      background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+      background-position:calc(100% - 15px) 50%,calc(100% - 11px) 50%;
+      background-size:4px 4px,4px 4px;
+      background-repeat:no-repeat;
+    }
+
+    .conference-filter-count {
+      color:var(--muted);
+      font-family:var(--mono);
+      font-size:9px;
+      margin-left:auto;
+      white-space:nowrap;
     }
 
     .analysis-value {
@@ -1422,9 +1511,11 @@ function renderTeams() {
   const container = document.getElementById("teams-container");
   if (!container) return;
 
-  const data = sortedTeams();
+  const data = filteredTeamsByConference();
+  const isConferenceView = currentTeamConference !== "ALL";
 
   container.innerHTML = `
+    ${conferenceFilterMarkup("teams")}
     <div class="table-scroll">
       <table class="projection-table">
         <thead>
@@ -1438,12 +1529,12 @@ function renderTeams() {
           </tr>
         </thead>
         <tbody>
-          ${data.map(team => `
+          ${data.map((team, index) => `
             <tr
               style="cursor:pointer;"
               onclick="openDossier('${escapeJsString(team.team)}')"
             >
-              <td class="team-meta">${powerRank(team)}</td>
+              <td class="team-meta">${isConferenceView ? `#${index + 1}` : powerRank(team)}</td>
               <td><strong>${escapeHtml(team.team)}</strong></td>
               <td class="team-meta">${escapeHtml(team.conference ?? "—")}</td>
               <td class="team-meta">${recordText(team)}</td>
@@ -1461,7 +1552,8 @@ function renderRatings() {
   const container = document.getElementById("ratings-container");
   if (!container) return;
 
-  const data = sortedTeams();
+  const data = filteredTeamsByConference();
+  const isConferenceView = currentTeamConference !== "ALL";
   const throughWeek = Number(metricsData?.meta?.through_week);
   const liveWeight = Number(metricsData?.meta?.blend_weight);
 
@@ -1478,7 +1570,7 @@ function renderRatings() {
       <table class="projection-table">
         <thead>
           <tr>
-            <th>Power Rank</th>
+            <th>${isConferenceView ? "Conference Rank" : "Power Rank"}</th>
             <th>Team</th>
             <th>Model Rating</th>
             <th>Preseason SP+</th>
@@ -1490,7 +1582,7 @@ function renderRatings() {
           </tr>
         </thead>
         <tbody>
-          ${data.map(team => {
+          ${data.map((team, index) => {
             const offPlays = livePlays(team, "offense");
             const defPlays = livePlays(team, "defense");
             const playsTracked = offPlays > 0 && defPlays > 0
@@ -1502,7 +1594,7 @@ function renderRatings() {
                 style="cursor:pointer;"
                 onclick="openDossier('${escapeJsString(team.team)}')"
               >
-                <td class="team-meta">${powerRank(team)}</td>
+                <td class="team-meta">${isConferenceView ? `#${index + 1}` : powerRank(team)}</td>
                 <td><strong>${escapeHtml(team.team)}</strong></td>
                 <td class="line-primary">${formatSigned(team.power_rating, 3)}</td>
                 <td class="team-meta">${formatSigned(team?.sp_plus?.overall, 1)}</td>
@@ -1577,12 +1669,18 @@ function renderRatings() {
         onclick="setRatingsMode('conferences')"
       >Conference Standings</button>
     </div>
-    ${currentRatingsMode === "conferences" ? conferenceTable : teamTable}
+    ${currentRatingsMode === "conferences" ? conferenceTable : `${conferenceFilterMarkup("ratings")}${teamTable}`}
   `;
 }
 
 function setRatingsMode(mode) {
   currentRatingsMode = mode === "conferences" ? "conferences" : "teams";
+  renderRatings();
+}
+
+function setTeamConference(conference) {
+  currentTeamConference = conferenceNames().includes(conference) ? conference : "ALL";
+  renderTeams();
   renderRatings();
 }
 
