@@ -265,6 +265,9 @@ function conferenceStandings() {
       topTeam: topTeam?.team || "—",
       modelRating: average(members.map(team => team.power_rating)),
       spPlus: average(members.map(team => team?.sp_plus?.overall)),
+      specialTeams: average(members.map(team =>
+        externalRatingsData?.teams?.[team.team]?.fpi_special_teams
+      )),
       netEpa: average(liveMembers.map(team => liveNet(team, "epa_play"))),
       netSuccess: average(liveMembers.map(team => liveNet(team, "success_rate"))),
       offExplosive: average(liveMembers.map(team => liveValue(team, "offense", "explosive_rate"))),
@@ -1598,6 +1601,7 @@ function renderRatings() {
             <th>Model Rating</th>
             <th>Preseason SP+</th>
             <th>ESPN FPI</th>
+            <th>Special Teams</th>
             <th>Team Talent</th>
             <th>Returning Production</th>
             <th>SOR Rank</th>
@@ -1629,6 +1633,7 @@ function renderRatings() {
                 <td class="line-primary">${formatSigned(team.power_rating, 3)}</td>
                 <td class="team-meta">${formatSigned(team?.sp_plus?.overall, 1)}</td>
                 <td class="team-meta">${hasValue(external.fpi) ? `${formatSigned(external.fpi, 1)} (#${external.fpi_rank})` : "—"}</td>
+                <td class="team-meta">${hasValue(external.fpi_special_teams) ? `${formatSigned(external.fpi_special_teams, 3)} (${externalMetricRank("fpi_special_teams", external.fpi_special_teams)})` : "—"}</td>
                 <td class="team-meta">${hasValue(roster.talent_rank) ? `#${roster.talent_rank}` : "—"}</td>
                 <td class="team-meta">${hasValue(roster.returning_production_pct) ? `${formatPercent(roster.returning_production_pct)} (#${roster.returning_production_rank})` : "—"}</td>
                 <td class="team-meta">${hasValue(external.sor_rank) ? `#${external.sor_rank}` : "—"}</td>
@@ -1655,6 +1660,7 @@ function renderRatings() {
             <th>Conference</th>
             <th>Avg Model Rating</th>
             <th>Avg SP+</th>
+            <th>Avg Special Teams</th>
             <th>2026 Net EPA</th>
             <th>2026 Net Success</th>
             <th>2026 Off Explosive</th>
@@ -1670,6 +1676,7 @@ function renderRatings() {
               <td><strong>${escapeHtml(conference.conference)}</strong></td>
               <td class="line-primary">${formatSigned(conference.modelRating, 3)}</td>
               <td class="team-meta">${formatSigned(conference.spPlus, 1)}</td>
+              <td class="team-meta">${formatSigned(conference.specialTeams, 3)}</td>
               <td class="team-meta">${formatEPA(conference.netEpa)}</td>
               <td class="team-meta">${formatPercent(conference.netSuccess)}</td>
               <td class="team-meta">${formatRate(conference.offExplosive)}</td>
@@ -1689,8 +1696,8 @@ function renderRatings() {
       Model Rating blends the frozen preseason baseline with current-season
       performance. The 2026 columns contain current-season results only.
       ${weightLabel} ${weekLabel} ${externalLabel}
-      Special-teams efficiency is not displayed until a validated data source
-      is added.
+      Special Teams is ESPN's FPI component and is display-only; it is not used
+      by Model A.
     </div>
     <div class="ratings-toggle" role="group" aria-label="Ratings view">
       <button
@@ -2139,6 +2146,17 @@ function externalRank(value) {
   return hasValue(value) && Number(value) > 0 ? `#${Number(value)}` : "—";
 }
 
+function externalMetricRank(field, value) {
+  if (!hasValue(value)) return "—";
+  const target = Number(value);
+  const values = Object.values(externalRatingsData?.teams ?? {})
+    .map(team => team?.[field])
+    .filter(hasValue)
+    .map(Number);
+  const better = values.filter(item => item > target).length;
+  return `#${better + 1} Overall`;
+}
+
 function advancedRank(teamName, side, field, lowerIsBetter = false) {
   const target = advancedSide(teamName, side)?.[field];
   if (!hasValue(target)) return "";
@@ -2463,6 +2481,13 @@ function renderDossier(team) {
           <span class="dossier-rank-inline">(${externalRank(external?.fpi_rank)} Overall)</span>
         </div>
       </div>
+      <div class="dossier-stat">
+        <div class="dossier-label">ESPN Special Teams</div>
+        <div class="dossier-value">
+          ${formatSigned(external?.fpi_special_teams, 3)}
+          <span class="dossier-rank-inline">(${externalMetricRank("fpi_special_teams", external?.fpi_special_teams)})</span>
+        </div>
+      </div>
     </div>
 
     ${renderSeasonOutlook(team)}
@@ -2611,7 +2636,7 @@ function renderDossier(team) {
           <div class="panel-body">
             ${renderMetricRow("Offensive Component", formatSigned(external?.fpi_offense, 3))}
             ${renderMetricRow("Defensive Component", formatSigned(external?.fpi_defense, 3))}
-            ${renderMetricRow("Special Teams Component", formatSigned(external?.fpi_special_teams, 3))}
+            ${renderMetricRow("Special Teams Component", formatSigned(external?.fpi_special_teams, 3), externalMetricRank("fpi_special_teams", external?.fpi_special_teams))}
             ${renderMetricRow("Projected Record", hasValue(external?.projected_wins) ? `${formatNumber(external.projected_wins, 1)}–${formatNumber(external.projected_losses, 1)}` : "—")}
           </div>
         </div>
