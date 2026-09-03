@@ -456,6 +456,26 @@ def ats_result(snapshot, result):
     return "P"
 
 
+def total_result(snapshot, result):
+    public_total = as_number((snapshot.get("public_projection") or {}).get("total"))
+    market_total = as_number((snapshot.get("market_at_snapshot") or {}).get("total"))
+    if public_total is None or market_total is None:
+        return {"direction": None, "edge": None, "tier": None, "result": None}
+
+    difference = public_total - market_total
+    edge = abs(difference)
+    direction = "OVER" if difference > 0 else "UNDER" if difference < 0 else None
+    tier = "TOTAL WATCH" if edge >= 7 else "TOTAL LEAN" if edge >= 4 else None
+    if not direction or not tier:
+        return {"direction": direction, "edge": edge, "tier": tier, "result": None}
+
+    actual_total = result["home_points"] + result["away_points"]
+    market_margin = actual_total - market_total
+    graded_margin = market_margin if direction == "OVER" else -market_margin
+    grade = "W" if graded_margin > 0 else "L" if graded_margin < 0 else "P"
+    return {"direction": direction, "edge": edge, "tier": tier, "result": grade}
+
+
 def model_margin_error(snapshot, result):
     model_home_spread = as_number((snapshot.get("model") or {}).get("home_spread"))
     if model_home_spread is None:
@@ -517,6 +537,7 @@ def summarize(rows):
     market_errors = [r["market_margin_error"] for r in settled if r.get("market_margin_error") is not None]
     closing_errors = [r["closing_margin_error"] for r in settled if r.get("closing_margin_error") is not None]
     ats = [r["ats_result"] for r in settled if r.get("ats_result")]
+    total_grades = [r["total_result"] for r in settled if r.get("total_result")]
 
     wins = ats.count("W")
     losses = ats.count("L")
@@ -554,6 +575,13 @@ def summarize(rows):
         "ats_losses": losses,
         "ats_pushes": pushes,
         "ats_win_pct_ex_pushes": round_or_none(100.0 * wins / decisions, 1) if decisions else None,
+        "total_wins": total_grades.count("W"),
+        "total_losses": total_grades.count("L"),
+        "total_pushes": total_grades.count("P"),
+        "total_win_pct_ex_pushes": round_or_none(
+            100.0 * total_grades.count("W") /
+            (total_grades.count("W") + total_grades.count("L")), 1
+        ) if total_grades.count("W") + total_grades.count("L") else None,
     }
 
 
@@ -631,6 +659,13 @@ def main():
             if result and public_spread is not None
             else None
         )
+        total_grade = total_result(snapshot, result) if result else {
+            "direction": None, "edge": None, "tier": None, "result": None
+        }
+        actual_total = (
+            result["home_points"] + result["away_points"] if result else None
+        )
+        public_total = as_number(public_projection.get("total"))
 
         rows.append({
             "snapshot_id": snapshot.get("snapshot_id"),
@@ -661,6 +696,13 @@ def main():
             "snapshot_home_spread": market.get("home_spread"),
             "snapshot_total": market.get("total"),
             "snapshot_bookmaker": market.get("bookmaker"),
+            "total_direction": total_grade["direction"],
+            "total_edge": round_or_none(total_grade["edge"]),
+            "total_tier": total_grade["tier"],
+            "total_result": total_grade["result"],
+            "actual_total": actual_total,
+            "total_projection_error": round_or_none(actual_total - public_total)
+            if actual_total is not None and public_total is not None else None,
             "closing_home_spread": (
                 (closing.get("closing_market") or {}).get("home_spread") if closing else None
             ),
@@ -726,6 +768,10 @@ def main():
                 "Result for the model-preferred side using the market spread "
                 "captured in that prospective snapshot."
             ),
+            "totals_result": (
+                "Result for weather-adjusted projected-total direction when the "
+                "prospective edge was at least four points. Total Watch begins at seven."
+            ),
             "closing_line": "Near-kickoff closing proxy, not asserted to be the canonical close.",
             "no_retroactive_model_changes": True,
         },
@@ -758,6 +804,8 @@ def main():
         "weather_spread_adjustment", "weather_spread_status",
         "public_margin_error", "public_abs_error",
         "snapshot_home_spread", "snapshot_total", "snapshot_bookmaker",
+        "total_direction", "total_edge", "total_tier", "total_result",
+        "actual_total", "total_projection_error",
         "closing_home_spread", "clv_points", "home_points", "away_points",
         "actual_home_margin", "ats_result", "model_margin_error",
         "model_abs_error", "market_margin_error", "market_abs_error",
