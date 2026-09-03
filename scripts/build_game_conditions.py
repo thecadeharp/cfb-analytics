@@ -476,9 +476,18 @@ def conditions_line(indoor: bool, weather: dict | None, precip_label: str) -> st
 # ---------------------------------------------------------------------------
 
 def team_live_offense(metrics: dict, team_name: str) -> dict:
-    team = (metrics.get("teams") or {}).get(team_name) or {}
+    # Production cfb_metrics.json stores model teams under top-level ``teams``.
+    # Some metric-builder versions nest the raw current-season sample inside
+    # offense.live_2026; the current production file exposes those offensive
+    # fields directly on offense. Support both shapes so the maturity gate is
+    # stable across refresh versions without touching Model A.
+    teams = metrics.get("teams") or {}
+    team = teams.get(team_name) or {}
     offense = team.get("offense") or {}
-    return offense.get("live_2026") or {}
+    live = offense.get("live_2026")
+    if isinstance(live, dict) and live:
+        return live
+    return offense if isinstance(offense, dict) else {}
 
 
 def tendency_snapshot(metrics: dict, team_name: str) -> dict:
