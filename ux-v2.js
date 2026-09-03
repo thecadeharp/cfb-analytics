@@ -8,8 +8,11 @@
   "use strict";
 
   const CONDITIONS_URL = "./data/game_conditions.json";
+  const RESULTS_URL = "./data/reports/settled_results.json";
 
   let gameConditionsData = { games: {} };
+  let settledResultsData = { rows: [] };
+  let settledResultsByGame = new Map();
   let currentConferenceFilter = "";
   let currentSignalFilter = "";
   let currentConfidenceFilter = "";
@@ -67,7 +70,47 @@
     return gameConditionsData?.games?.[String(game?.game_id ?? "")] ?? null;
   }
 
+  function indexSettledResults(payload) {
+    const rows = Array.isArray(payload?.rows) ? payload.rows : [];
+    const firstByGame = new Map();
+
+    rows
+      .filter(row => row?.result_settled)
+      .sort((a, b) => String(a?.captured_at_utc || "").localeCompare(String(b?.captured_at_utc || "")))
+      .forEach(row => {
+        const keys = [row?.game_key, row?.result_game_id]
+          .filter(value => value !== null && value !== undefined)
+          .map(String);
+        keys.forEach(key => {
+          if (!firstByGame.has(key)) firstByGame.set(key, row);
+        });
+      });
+
+    settledResultsByGame = firstByGame;
+  }
+
+  function settledResultForGame(game) {
+    return settledResultsByGame.get(String(game?.game_id ?? "")) ?? null;
+  }
+
+  function resultComparison(game) {
+    const result = settledResultForGame(game);
+    if (!result) return null;
+    const modelSpread = Number(result.model_home_spread);
+    const marketSpread = Number(result.snapshot_home_spread);
+    return {
+      disagreement:
+        Number.isFinite(modelSpread) && Number.isFinite(marketSpread)
+          ? Math.abs(modelSpread - marketSpread)
+          : null,
+      preferred_side: result.preferred_side ?? null,
+      signal: result.signal ?? "NO MARKET",
+    };
+  }
+
   function effectiveModelSpread(game) {
+    const result = settledResultForGame(game);
+    if (hasValue(result?.model_home_spread)) return Number(result.model_home_spread);
     const conditions = conditionsForGame(game);
     if (hasValue(conditions?.adjusted?.home_spread)) {
       return Number(conditions.adjusted.home_spread);
@@ -76,6 +119,8 @@
   }
 
   function effectiveModelTotal(game) {
+    const result = settledResultForGame(game);
+    if (hasValue(result?.model_total)) return Number(result.model_total);
     const conditions = conditionsForGame(game);
     if (hasValue(conditions?.adjusted?.total)) {
       return Number(conditions.adjusted.total);
@@ -84,6 +129,9 @@
   }
 
   function effectiveComparison(game) {
+    const frozen = resultComparison(game);
+    if (frozen) return frozen;
+
     const marketSpread = game?.market?.home_spread;
     const adjustedSpread = effectiveModelSpread(game);
 
@@ -116,6 +164,38 @@
       preferred_side: preferredSide,
       signal,
     };
+  }
+
+  function frozenProjectedScore(result) {
+    const total = Number(result?.model_total);
+    const homeSpread = Number(result?.model_home_spread);
+    if (!Number.isFinite(total) || !Number.isFinite(homeSpread)) return null;
+    return {
+      home: Math.max(0, Math.round((total - homeSpread) / 2)),
+      away: Math.max(0, Math.round((total + homeSpread) / 2)),
+    };
+  }
+
+  function atsResultLabel(value) {
+    if (value === "W") return "ATS WIN";
+    if (value === "L") return "ATS LOSS";
+    if (value === "P") return "ATS PUSH";
+    return "NOT GRADED";
+  }
+
+  function atsResultClass(value) {
+    if (value === "W") return "result-win";
+    if (value === "L") return "result-loss";
+    if (value === "P") return "result-push";
+    return "result-pending";
+  }
+
+  function predictedWinnerCorrect(result) {
+    const probability = Number(result?.model_home_win_probability);
+    const homePoints = Number(result?.home_points);
+    const awayPoints = Number(result?.away_points);
+    if (![probability, homePoints, awayPoints].every(Number.isFinite) || homePoints === awayPoints) return null;
+    return (probability >= 50) === (homePoints > awayPoints);
   }
 
   function gameMatchesConference(game) {
@@ -500,6 +580,82 @@
         text-underline-offset:2px;
       }
 
+      .completed-row { background:#fafaf8; }
+      .completed-row .team-line { align-items:center; }
+      .final-score {
+        margin-left:auto;
+        font-family:var(--mono);
+        font-size:15px;
+        font-weight:800;
+        color:var(--ink);
+      }
+      .final-label {
+        display:inline-flex;
+        margin-top:6px;
+        font-family:var(--mono);
+        font-size:9px;
+        font-weight:800;
+        letter-spacing:1px;
+        color:var(--muted);
+      }
+      .result-badge {
+        display:inline-flex;
+        justify-content:center;
+        border-radius:999px;
+        padding:5px 8px;
+        font-family:var(--mono);
+        font-size:9px;
+        font-weight:800;
+        letter-spacing:.5px;
+        white-space:nowrap;
+      }
+      .result-win { background:#dff3e5; color:#146b32; border:1px solid #9fd1ad; }
+      .result-loss { background:#fde5e2; color:#a22b20; border:1px solid #e9aaa4; }
+      .result-push { background:#f2eee2; color:#6b5a25; border:1px solid #d8cda9; }
+      .result-pending { background:#f4f4f2; color:var(--muted); border:1px solid var(--border); }
+      .final-result-panel {
+        margin-bottom:18px;
+        padding:18px;
+        border:1px solid var(--border);
+        border-radius:12px;
+        background:var(--surface);
+        box-shadow:inset 4px 0 0 var(--ink);
+      }
+      .final-result-title {
+        font-family:var(--mono);
+        color:var(--muted);
+        font-size:9px;
+        letter-spacing:1.2px;
+        text-transform:uppercase;
+      }
+      .final-result-score {
+        margin-top:8px;
+        font-size:24px;
+        font-weight:800;
+        letter-spacing:-.5px;
+      }
+      .final-result-grid {
+        display:grid;
+        grid-template-columns:repeat(4,minmax(0,1fr));
+        gap:9px;
+        margin-top:14px;
+      }
+      .final-result-item {
+        padding:10px;
+        border:1px solid var(--border);
+        border-radius:9px;
+        background:#fafaf8;
+      }
+      .final-result-item span { display:block; }
+      .final-result-item span:first-child {
+        color:var(--muted);
+        font-family:var(--mono);
+        font-size:8px;
+        letter-spacing:.7px;
+        text-transform:uppercase;
+      }
+      .final-result-item span:last-child { margin-top:5px; font-size:12px; font-weight:700; }
+
       @media (max-width:900px) {
         #view-projections .projection-controls {
           grid-template-columns:1fr;
@@ -512,6 +668,7 @@
 
         .projection-table thead th { top:0; }
         .weather-output-grid { grid-template-columns:1fr; }
+        .final-result-grid { grid-template-columns:1fr 1fr; }
       }
 
       @media (max-width:600px) {
@@ -586,6 +743,71 @@
           <span>Adjusted fair spread ${escapeHtml(favoredLine(homeName, awayName, score.homeSpread))}</span>
           <span>Adjusted projected total ${formatNumber(score.total, 1)}</span>
           <span>${weatherAdjusted ? "Weather Engine v1 applied" : "No total weather adjustment"}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function finalResultMarkup(game) {
+    const result = settledResultForGame(game);
+    if (!result) return "";
+
+    const awayName = result.away_team || game?.away?.team || "Away";
+    const homeName = result.home_team || game?.home?.team || "Home";
+    const awayPoints = Number(result.away_points);
+    const homePoints = Number(result.home_points);
+    const frozenScore = frozenProjectedScore(result);
+    const winnerCorrect = predictedWinnerCorrect(result);
+    const snapshotSide = result.preferred_side && hasValue(result.snapshot_home_spread)
+      ? marketSideForTeam(result.preferred_side, homeName, awayName, result.snapshot_home_spread)
+      : "No graded side";
+    const close = hasValue(result.closing_home_spread)
+      ? favoredLine(homeName, awayName, result.closing_home_spread)
+      : "Not captured";
+
+    return `
+      <div class="final-result-panel">
+        <div class="final-result-title">Official Result · Frozen Pregame Audit</div>
+        <div class="final-result-score">
+          FINAL — ${escapeHtml(awayName)} ${Number.isFinite(awayPoints) ? awayPoints : "—"},
+          ${escapeHtml(homeName)} ${Number.isFinite(homePoints) ? homePoints : "—"}
+        </div>
+        <div style="margin-top:10px;">
+          <span class="result-badge ${atsResultClass(result.ats_result)}">${escapeHtml(atsResultLabel(result.ats_result))}</span>
+        </div>
+        <div class="final-result-grid">
+          <div class="final-result-item">
+            <span>Frozen model score</span>
+            <span>${frozenScore ? `${escapeHtml(awayName)} ${frozenScore.away}–${frozenScore.home} ${escapeHtml(homeName)}` : "Not captured"}</span>
+          </div>
+          <div class="final-result-item">
+            <span>Model side</span>
+            <span>${escapeHtml(snapshotSide)}</span>
+          </div>
+          <div class="final-result-item">
+            <span>Closing line</span>
+            <span>${escapeHtml(close)}</span>
+          </div>
+          <div class="final-result-item">
+            <span>Predicted winner</span>
+            <span>${winnerCorrect === null ? "Not captured" : winnerCorrect ? "Correct" : "Incorrect"}</span>
+          </div>
+          <div class="final-result-item">
+            <span>Margin error</span>
+            <span>${hasValue(result.model_abs_error) ? `${formatNumber(result.model_abs_error, 1)} pts` : "—"}</span>
+          </div>
+          <div class="final-result-item">
+            <span>Pregame signal</span>
+            <span>${escapeHtml(displayStatus(result.signal))}</span>
+          </div>
+          <div class="final-result-item">
+            <span>Snapshot line</span>
+            <span>${escapeHtml(favoredLine(homeName, awayName, result.snapshot_home_spread))}</span>
+          </div>
+          <div class="final-result-item">
+            <span>CLV</span>
+            <span>${hasValue(result.clv_points) ? `${formatSigned(result.clv_points, 1)} pts` : "—"}</span>
+          </div>
         </div>
       </div>
     `;
@@ -760,6 +982,10 @@
         return true;
       })
       .sort((a, b) => {
+        const aFinal = settledResultForGame(a) ? 1 : 0;
+        const bFinal = settledResultForGame(b) ? 1 : 0;
+        if (aFinal !== bFinal) return aFinal - bFinal;
+
         const aDisagreement = effectiveComparison(a).disagreement ?? -1;
         const bDisagreement = effectiveComparison(b).disagreement ?? -1;
 
@@ -772,7 +998,67 @@
       });
   };
 
+  function renderCompletedProjectionRow(game, result) {
+    const homeName = result.home_team || game?.home?.team || "Unknown";
+    const awayName = result.away_team || game?.away?.team || "Unknown";
+    const homePoints = Number(result.home_points);
+    const awayPoints = Number(result.away_points);
+    const frozenScore = frozenProjectedScore(result);
+    const confidence = signalConfidence(result.signal);
+    const preferredLine = result.preferred_side && hasValue(result.snapshot_home_spread)
+      ? marketSideForTeam(result.preferred_side, homeName, awayName, result.snapshot_home_spread)
+      : "No graded side";
+    const close = hasValue(result.closing_home_spread)
+      ? shortSpread(result.closing_home_spread)
+      : "—";
+    const winnerCorrect = predictedWinnerCorrect(result);
+    const gameId = String(game.game_id ?? "");
+
+    return `
+      <tr class="game-row completed-row" onclick="openMatchup('${escapeJsString(gameId)}')">
+        <td class="matchup-cell">
+          <div class="team-line">
+            <span class="team-name">${escapeHtml(awayName)}</span>
+            <span class="final-score">${Number.isFinite(awayPoints) ? awayPoints : "—"}</span>
+          </div>
+          <div class="team-line">
+            <span class="at-symbol">@</span>
+            <span class="team-name">${escapeHtml(homeName)}</span>
+            <span class="final-score">${Number.isFinite(homePoints) ? homePoints : "—"}</span>
+          </div>
+          <span class="final-label">FINAL</span>
+        </td>
+        <td>
+          <div class="line-primary">${escapeHtml(shortSpread(result.model_home_spread))}</div>
+          <div class="line-secondary">Frozen model line</div>
+        </td>
+        <td>
+          <div class="line-primary">${escapeHtml(close)}</div>
+          <div class="line-secondary">${hasValue(result.closing_home_spread) ? "Closing line" : `Snapshot ${escapeHtml(shortSpread(result.snapshot_home_spread))}`}</div>
+        </td>
+        <td>
+          <div class="line-primary">${frozenScore ? `${frozenScore.away}–${frozenScore.home}` : "—"}</div>
+          <div class="line-secondary">Frozen projected score</div>
+        </td>
+        <td class="disagreement">
+          <span class="result-badge ${atsResultClass(result.ats_result)}">${escapeHtml(atsResultLabel(result.ats_result))}</span>
+          <div class="disagreement-note">${escapeHtml(preferredLine)}</div>
+        </td>
+        <td class="status-cell">
+          <span class="status ${statusClass(result.signal)}">${escapeHtml(displayStatus(result.signal))}</span>
+        </td>
+        <td class="status-cell">
+          <span class="status ${confidenceClass(confidence)}">${escapeHtml(confidence)}</span>
+          <div class="signal-record">Winner ${winnerCorrect === null ? "—" : winnerCorrect ? "correct" : "incorrect"} · ${hasValue(result.model_abs_error) ? `${formatNumber(result.model_abs_error, 1)} pt margin error` : "error pending"}</div>
+        </td>
+      </tr>
+    `;
+  }
+
   renderProjectionRow = function renderProjectionRowWeatherV1(game) {
+    const settled = settledResultForGame(game);
+    if (settled) return renderCompletedProjectionRow(game, settled);
+
     const homeName = game?.home?.team ?? "Unknown";
     const awayName = game?.away?.team ?? "Unknown";
 
@@ -883,6 +1169,7 @@
 
     const games = projectionGamesForCurrentView();
     const marketGames = games.filter(game => hasValue(game?.market?.home_spread));
+    const completedGames = games.filter(game => settledResultForGame(game));
 
     const countCanonical = signal =>
       games.filter(game => canonicalSignal(effectiveComparison(game).signal) === signal).length;
@@ -895,6 +1182,7 @@
     if (summary) {
       summary.innerHTML = `
         ${games.length} games
+        · ${completedGames.length} final
         · ${marketGames.length} lined
         · <button class="summary-filter summary-material" onclick="setSignalFilter('MATERIAL DISAGREEMENT')">${material} material disagreements</button>
         · <button class="summary-filter summary-play" onclick="setSignalFilter('PLAY')">${plays} plays</button>
@@ -936,6 +1224,7 @@
     if (!container) return;
 
     const conditions = conditionsForGame(game);
+    const settled = settledResultForGame(game);
     const comparison = effectiveComparison(game);
     const adjustedSpread = effectiveModelSpread(game);
     const adjustedTotal = effectiveModelTotal(game);
@@ -996,7 +1285,10 @@
     if (grid) grid.insertAdjacentHTML("afterbegin", scoreCardMarkup(game));
 
     const layout = container.querySelector(".analysis-layout");
-    if (layout) layout.insertAdjacentHTML("beforebegin", conditionsMarkup(game));
+    if (layout) {
+      if (!settled || conditions) layout.insertAdjacentHTML("beforebegin", conditionsMarkup(game));
+      if (settled) layout.insertAdjacentHTML("beforebegin", finalResultMarkup(game));
+    }
   };
 
   window.setSignalFilter = setSignalFilter;
@@ -1016,10 +1308,24 @@
     }
   }
 
+  async function loadSettledResults() {
+    try {
+      const response = await fetch(`${RESULTS_URL}?v=${Date.now()}`);
+      if (!response.ok) return;
+      settledResultsData = await response.json();
+      indexSettledResults(settledResultsData);
+
+      if (Array.isArray(projections) && projections.length) renderProjections();
+    } catch (error) {
+      console.warn("Historical results unavailable:", error);
+    }
+  }
+
   installStyles();
 
   document.addEventListener("DOMContentLoaded", () => {
     installFilterControls();
     loadConditions();
+    loadSettledResults();
   });
 })();
