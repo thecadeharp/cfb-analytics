@@ -940,6 +940,13 @@
     const adjustedSpread = effectiveModelSpread(game);
     const adjustedTotal = effectiveModelTotal(game);
 
+    // Total weather adjustments are independent of the directional spread gate.
+    // Keep the headline total in sync whenever Weather Engine data is available.
+    const totalCard = container.querySelector(".analysis-grid .analysis-card:nth-child(3) .analysis-value");
+    if (totalCard && hasValue(adjustedTotal)) {
+      totalCard.textContent = formatNumber(adjustedTotal, 1);
+    }
+
     // If a directional spread weather adjustment is active, update the headline
     // fair-line/signal display while leaving the deeper Model A projection build intact.
     if (
@@ -959,9 +966,6 @@
 
       const fairLineCard = container.querySelector(".analysis-grid .analysis-card:nth-child(1) .analysis-value");
       if (fairLineCard) fairLineCard.textContent = favoredLine(homeName, awayName, adjustedSpread);
-
-      const totalCard = container.querySelector(".analysis-grid .analysis-card:nth-child(3) .analysis-value");
-      if (totalCard) totalCard.textContent = formatNumber(adjustedTotal, 1);
 
       const signalCard = container.querySelector(".analysis-grid .analysis-card:nth-child(4) .analysis-value");
       if (signalCard) {
