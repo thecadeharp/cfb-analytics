@@ -123,6 +123,16 @@
     return settledByGame.get(String(gameId)) || null;
   }
 
+  function settledByRenderedTeams() {
+    const names = Array.from(
+      document.querySelectorAll("#matchup-container .projected-team-name")
+    ).map(node => canonical(node.textContent));
+    if (names.length < 2) return null;
+    return Array.from(settledByGame.values()).find(row =>
+      canonical(row.away_team) === names[0] && canonical(row.home_team) === names[1]
+    ) || null;
+  }
+
   function favoredLine(home, away, homeSpread) {
     if (!hasValue(homeSpread)) return "—";
     const spread = Number(homeSpread);
@@ -163,14 +173,7 @@
   function applyPregameAudit() {
     const panel = document.querySelector("#matchup-container .final-result-panel");
     if (!panel || panel.dataset.hammerPregameExpanded === "true") return;
-    const game = settledData(selectedGameId) || (() => {
-      const analysis = activeGame();
-      if (!analysis) return null;
-      return Array.from(settledByGame.values()).find(row =>
-        canonical(row.away_team) === canonical(analysis.away_team) &&
-        canonical(row.home_team) === canonical(analysis.home_team)
-      ) || null;
-    })();
+    const game = settledData(selectedGameId) || settledByRenderedTeams();
     if (!game) return;
     panel.dataset.hammerPregameExpanded = "true";
     const title = panel.querySelector(".final-result-title");
