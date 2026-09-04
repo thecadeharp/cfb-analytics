@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
   # Refresh scoreboard state every 5 minutes.
-  # This powers LIVE rows and catches finals quickly.
+  # This powers LIVE rows, catches finals quickly, and refreshes public signal records.
   schedule:
     - cron: "*/5 * * * *"
 
@@ -43,7 +43,11 @@ jobs:
         run: |
           python scripts/settle_results.py
 
-      - name: Commit scoreboard and settlement outputs
+      - name: Refresh Signal System accountability report
+        run: |
+          python scripts/build_signal_report.py
+
+      - name: Commit scoreboard, settlement, and signal outputs
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -52,12 +56,13 @@ jobs:
           git add data/live_scores.json
           git add data/reports/settled_results.json
           git add data/reports/settled_snapshot_rows.csv
+          git add data/reports/signal_report.json
 
           if git diff --cached --quiet; then
-            echo "No scoreboard or settlement changes to commit."
+            echo "No scoreboard, settlement, or signal changes to commit."
             exit 0
           fi
 
-          git commit -m "Refresh live scores and settle completed games"
+          git commit -m "Refresh live scores, settlements, and signal records"
           git pull --rebase origin main
           git push origin main
