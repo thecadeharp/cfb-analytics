@@ -1,7 +1,7 @@
 {
   "meta": {
     "year": 2026,
-    "generated": "2026-09-04T02:49:33.754592",
+    "generated": "2026-09-04T03:28:10.111324",
     "games": 888,
     "fbs_fbs_games": 761,
     "fbs_fcs_fallback_games": 127,
@@ -1760,17 +1760,22 @@
         }
       },
       "market": {
-        "home_spread": -55.5,
-        "total": 61.5,
-        "bookmaker": "Consensus (4 books)",
+        "home_spread": -47.5,
+        "total": 47.5,
+        "bookmaker": "Consensus (3 books)",
         "method": "cross_book_median_consensus",
-        "spread_books": 4,
-        "total_books": 4,
+        "spread_books": 3,
+        "total_books": 2,
         "spread_outliers_removed": [],
-        "total_outliers_removed": []
+        "total_outliers_removed": [
+          {
+            "bookmaker": "MyBookie.ag",
+            "value": 53.5
+          }
+        ]
       },
       "comparison": {
-        "disagreement": 36.0,
+        "disagreement": 28.0,
         "preferred_side": "West Georgia",
         "status": "OUTLIER",
         "signal": "OUTLIER",
@@ -1799,7 +1804,7 @@
         },
         {
           "title": "MARKET VS FCS FALLBACK",
-          "text": "The fallback line differs from the current market by 36.0 points toward West Georgia.",
+          "text": "The fallback line differs from the current market by 28.0 points toward West Georgia.",
           "source": "market"
         }
       ]
@@ -1901,25 +1906,20 @@
         }
       },
       "market": {
-        "home_spread": -42.5,
-        "total": 57.5,
-        "bookmaker": "Consensus (3 books)",
+        "home_spread": -40.5,
+        "total": 68.5,
+        "bookmaker": "Consensus (2 books)",
         "method": "cross_book_median_consensus",
         "spread_books": 2,
-        "total_books": 3,
-        "spread_outliers_removed": [
-          {
-            "bookmaker": "BetMGM",
-            "value": -46.5
-          }
-        ],
+        "total_books": 1,
+        "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 9.0,
+        "disagreement": 7.0,
         "preferred_side": "Arkansas-Pine Bluff",
-        "status": "STRONG EDGE",
-        "signal": "STRONG EDGE",
+        "status": "EDGE",
+        "signal": "EDGE",
         "bet_status": "UNTRACKED",
         "status_system": "v2_the_signal",
         "status_thresholds": {
@@ -1945,7 +1945,7 @@
         },
         {
           "title": "MARKET VS FCS FALLBACK",
-          "text": "The fallback line differs from the current market by 9.0 points toward Arkansas-Pine Bluff.",
+          "text": "The fallback line differs from the current market by 7.0 points toward Arkansas-Pine Bluff.",
           "source": "market"
         }
       ]
@@ -2036,17 +2036,17 @@
         }
       },
       "market": {
-        "home_spread": -3.5,
-        "total": 30.5,
+        "home_spread": -5.5,
+        "total": 20.5,
         "bookmaker": "Consensus (5 books)",
         "method": "cross_book_median_consensus",
         "spread_books": 5,
-        "total_books": 4,
+        "total_books": 3,
         "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 2.5,
+        "disagreement": 0.5,
         "preferred_side": "Georgia Tech",
         "status": "ALIGNED",
         "signal": "ALIGNED",
@@ -2070,11 +2070,6 @@
           "title": "LIVE MATCHUP DATA",
           "text": "No live matchup adjustment is being applied because both teams do not yet have comparable 2026 samples.",
           "source": "sample_guard"
-        },
-        {
-          "title": "MARKET VS MODEL",
-          "text": "The model is 2.5 points more favorable to Georgia Tech than the current market.",
-          "source": "market"
         }
       ]
     },
@@ -2175,17 +2170,17 @@
         }
       },
       "market": {
-        "home_spread": -51.5,
-        "total": 65.5,
-        "bookmaker": "Consensus (3 books)",
+        "home_spread": -48.5,
+        "total": null,
+        "bookmaker": "Consensus (2 books)",
         "method": "cross_book_median_consensus",
-        "spread_books": 3,
-        "total_books": 3,
+        "spread_books": 2,
+        "total_books": 0,
         "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 22.0,
+        "disagreement": 19.0,
         "preferred_side": "Eastern Illinois",
         "status": "OUTLIER",
         "signal": "OUTLIER",
@@ -2214,7 +2209,7 @@
         },
         {
           "title": "MARKET VS FCS FALLBACK",
-          "text": "The fallback line differs from the current market by 22.0 points toward Eastern Illinois.",
+          "text": "The fallback line differs from the current market by 19.0 points toward Eastern Illinois.",
           "source": "market"
         }
       ]
@@ -2316,7 +2311,7 @@
         }
       },
       "market": {
-        "home_spread": -40.0,
+        "home_spread": -44.5,
         "total": 65.5,
         "bookmaker": "Consensus (4 books)",
         "method": "cross_book_median_consensus",
@@ -2326,10 +2321,10 @@
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 8.5,
+        "disagreement": 13.0,
         "preferred_side": "Idaho",
-        "status": "STRONG EDGE",
-        "signal": "STRONG EDGE",
+        "status": "OUTLIER",
+        "signal": "OUTLIER",
         "bet_status": "UNTRACKED",
         "status_system": "v2_the_signal",
         "status_thresholds": {
@@ -2355,7 +2350,7 @@
         },
         {
           "title": "MARKET VS FCS FALLBACK",
-          "text": "The fallback line differs from the current market by 8.5 points toward Idaho.",
+          "text": "The fallback line differs from the current market by 13.0 points toward Idaho.",
           "source": "market"
         }
       ]
@@ -2446,17 +2441,17 @@
         }
       },
       "market": {
-        "home_spread": -18.5,
-        "total": 59.5,
+        "home_spread": -20.5,
+        "total": 58.5,
         "bookmaker": "Consensus (5 books)",
         "method": "cross_book_median_consensus",
         "spread_books": 5,
-        "total_books": 4,
+        "total_books": 5,
         "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 5.0,
+        "disagreement": 3.0,
         "preferred_side": "Illinois",
         "status": "SLIGHT EDGE",
         "signal": "SLIGHT EDGE",
@@ -2483,7 +2478,7 @@
         },
         {
           "title": "MARKET VS MODEL",
-          "text": "The model is 5.0 points more favorable to Illinois than the current market.",
+          "text": "The model is 3.0 points more favorable to Illinois than the current market.",
           "source": "market"
         }
       ]
