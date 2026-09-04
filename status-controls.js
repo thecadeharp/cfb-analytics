@@ -46,9 +46,6 @@
     style.id = STYLE_ID;
 
     style.textContent = `
-      /* Hide the old:
-         51 games · 46 upcoming · 1 live · ...
-      */
       #projection-summary {
         display: none !important;
       }
@@ -114,6 +111,10 @@
         white-space: nowrap;
         cursor: pointer;
 
+        pointer-events: auto;
+        position: relative;
+        z-index: 2;
+
         transition:
           background 0.15s ease,
           border-color 0.15s ease,
@@ -174,6 +175,8 @@
 
         font-size: 9px;
         line-height: 1;
+
+        pointer-events: none;
       }
 
       .hammer-status-filter-button.is-active .hammer-status-count {
@@ -186,6 +189,10 @@
 
       .hammer-status-filter-button[data-status="live"].is-active .hammer-status-count {
         background: rgba(255, 255, 255, 0.17);
+      }
+
+      .hammer-status-live-dot {
+        pointer-events: none;
       }
 
       .hammer-status-empty {
@@ -350,65 +357,76 @@
   }
 
 
-  function ensureFilterUI() {
-    const tableCard =
-      document.querySelector(
-        `${VIEW_SELECTOR} .table-card`
-      );
-
-    if (!tableCard) {
+  function selectStatus(status) {
+    if (
+      ![
+        "all",
+        "upcoming",
+        "live",
+        "final"
+      ].includes(status)
+    ) {
       return;
     }
 
-    let wrapper =
+    activeStatus = status;
+
+    renderFilterUI();
+
+    applyDesktopFilter();
+
+    applyMobileFilter();
+
+    updateEmptyState();
+  }
+
+
+  function bindFilterButtons(wrapper) {
+    wrapper
+      .querySelectorAll(
+        ".hammer-status-filter-button"
+      )
+      .forEach(button => {
+        button.addEventListener(
+          "click",
+          event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            selectStatus(
+              button.dataset.status
+            );
+          }
+        );
+
+        button.addEventListener(
+          "keydown",
+          event => {
+            if (
+              event.key !== "Enter" &&
+              event.key !== " "
+            ) {
+              return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            selectStatus(
+              button.dataset.status
+            );
+          }
+        );
+      });
+  }
+
+
+  function renderFilterUI() {
+    const wrapper =
       document.getElementById(FILTER_ID);
 
     if (!wrapper) {
-      wrapper =
-        document.createElement("div");
-
-      wrapper.id =
-        FILTER_ID;
-
-      wrapper.className =
-        "hammer-status-filter-wrap";
-
-      tableCard.insertAdjacentElement(
-        "beforebegin",
-        wrapper
-      );
-
-      wrapper.addEventListener(
-        "click",
-        event => {
-          const button =
-            event.target.closest(
-              ".hammer-status-filter-button"
-            );
-
-          if (!button) {
-            return;
-          }
-
-          const status =
-            button.dataset.status;
-
-          if (
-            ![
-              "all",
-              "upcoming",
-              "live",
-              "final"
-            ].includes(status)
-          ) {
-            return;
-          }
-
-          activeStatus = status;
-
-          updateEverything();
-        }
-      );
+      return;
     }
 
     const counts =
@@ -447,6 +465,45 @@
 
       </div>
     `;
+
+    bindFilterButtons(wrapper);
+  }
+
+
+  function ensureFilterUI() {
+    const tableCard =
+      document.querySelector(
+        `${VIEW_SELECTOR} .table-card`
+      );
+
+    if (!tableCard) {
+      return;
+    }
+
+    let wrapper =
+      document.getElementById(
+        FILTER_ID
+      );
+
+    if (!wrapper) {
+      wrapper =
+        document.createElement(
+          "div"
+        );
+
+      wrapper.id =
+        FILTER_ID;
+
+      wrapper.className =
+        "hammer-status-filter-wrap";
+
+      tableCard.insertAdjacentElement(
+        "beforebegin",
+        wrapper
+      );
+    }
+
+    renderFilterUI();
   }
 
 
@@ -464,7 +521,9 @@
         status === activeStatus;
 
       row.style.display =
-        visible ? "" : "none";
+        visible
+          ? ""
+          : "none";
     });
   }
 
@@ -484,25 +543,31 @@
         )
       );
 
-    cards.forEach((card, index) => {
-      const sourceRow =
-        sourceRows[index];
+    cards.forEach(
+      (card, index) => {
+        const sourceRow =
+          sourceRows[index];
 
-      if (!sourceRow) {
-        card.style.display = "";
-        return;
+        if (!sourceRow) {
+          card.style.display = "";
+          return;
+        }
+
+        const status =
+          rowStatus(
+            sourceRow
+          );
+
+        const visible =
+          activeStatus === "all" ||
+          status === activeStatus;
+
+        card.style.display =
+          visible
+            ? ""
+            : "none";
       }
-
-      const status =
-        rowStatus(sourceRow);
-
-      const visible =
-        activeStatus === "all" ||
-        status === activeStatus;
-
-      card.style.display =
-        visible ? "" : "none";
-    });
+    );
   }
 
 
@@ -530,7 +595,9 @@
     }
 
     empty =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
     empty.id =
       EMPTY_ID;
@@ -562,7 +629,9 @@
       activeStatus === "all" ||
       (counts[activeStatus] ?? 0) > 0
     ) {
-      empty.style.display = "none";
+      empty.style.display =
+        "none";
+
       return;
     }
 
@@ -573,7 +642,10 @@
     };
 
     empty.textContent =
-      `No ${labels[activeStatus] ?? "games"} are available in this week.`;
+      `No ${
+        labels[activeStatus] ??
+        "games"
+      } are available in this week.`;
 
     empty.style.display =
       "block";
@@ -619,7 +691,9 @@
 
         const nodes = [];
 
-        while (walker.nextNode()) {
+        while (
+          walker.nextNode()
+        ) {
           nodes.push(
             walker.currentNode
           );
@@ -685,11 +759,13 @@
 
     updateQueued = true;
 
-    requestAnimationFrame(() => {
-      updateQueued = false;
+    requestAnimationFrame(
+      () => {
+        updateQueued = false;
 
-      updateEverything();
-    });
+        updateEverything();
+      }
+    );
   }
 
 
@@ -788,7 +864,8 @@
 
 
   if (
-    document.readyState === "loading"
+    document.readyState ===
+    "loading"
   ) {
     document.addEventListener(
       "DOMContentLoaded",
