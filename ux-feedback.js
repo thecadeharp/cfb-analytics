@@ -645,52 +645,64 @@
       /* -------------------------
          TEAM RATINGS
       -------------------------- */
-      #view-ratings .table-card {
-        overflow: hidden;
-      }
 
+      /* Overview/conference tables keep their normal responsive behavior. */
       #view-ratings .table-scroll {
         width: 100%;
         max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* Only the 15-column Advanced Ratings table becomes a true wide table. */
+      #view-ratings .table-scroll.hammer-advanced-ratings-scroll {
         overflow-x: auto !important;
         overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
         overscroll-behavior-x: contain;
         scrollbar-gutter: stable;
       }
 
-      #view-ratings .table-scroll .projection-table {
-        width: max-content;
-        min-width: 100%;
+      #view-ratings .table-scroll.hammer-advanced-ratings-scroll .projection-table {
+        width: 1780px !important;
+        min-width: 1780px !important;
       }
 
-      /* Advanced Ratings: preserve every metric as a readable column. */
-      #view-ratings .ratings-toggle + .conference-filter-bar + .table-scroll .projection-table,
-      #view-ratings .conference-filter-bar + .table-scroll .projection-table {
-        min-width: 1780px;
-      }
-
-      #view-ratings .projection-table th,
-      #view-ratings .projection-table td {
+      #view-ratings .table-scroll.hammer-advanced-ratings-scroll th,
+      #view-ratings .table-scroll.hammer-advanced-ratings-scroll td {
         white-space: nowrap;
       }
 
-      #view-ratings .projection-table th {
-        overflow: visible;
-        text-overflow: clip;
+      /* Always-visible scrollbar above Advanced Ratings. */
+      #view-ratings .hammer-ratings-top-scroll {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        height: 16px;
+        background: #f7f7f5;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        scrollbar-gutter: stable;
       }
 
-      /* Make the scrollbar easier to discover on desktop. */
-      #view-ratings .table-scroll::-webkit-scrollbar {
-        height: 10px;
+      #view-ratings .hammer-ratings-top-scroll-inner {
+        height: 1px;
+        width: 1780px;
       }
 
-      #view-ratings .table-scroll::-webkit-scrollbar-track {
+      #view-ratings .hammer-ratings-top-scroll::-webkit-scrollbar,
+      #view-ratings .table-scroll.hammer-advanced-ratings-scroll::-webkit-scrollbar {
+        height: 12px;
+      }
+
+      #view-ratings .hammer-ratings-top-scroll::-webkit-scrollbar-track,
+      #view-ratings .table-scroll.hammer-advanced-ratings-scroll::-webkit-scrollbar-track {
         background: #f1f1ee;
       }
 
-      #view-ratings .table-scroll::-webkit-scrollbar-thumb {
-        background: #c9c9c3;
+      #view-ratings .hammer-ratings-top-scroll::-webkit-scrollbar-thumb,
+      #view-ratings .table-scroll.hammer-advanced-ratings-scroll::-webkit-scrollbar-thumb {
+        background: #aaa9a3;
         border-radius: 999px;
         border: 2px solid #f1f1ee;
       }
@@ -788,8 +800,13 @@
       }
 
       @media (max-width: 600px) {
-        #view-ratings .table-scroll .projection-table {
-          min-width: 1600px;
+        #view-ratings .table-scroll.hammer-advanced-ratings-scroll .projection-table {
+          width: 1600px !important;
+          min-width: 1600px !important;
+        }
+
+        #view-ratings .hammer-ratings-top-scroll-inner {
+          width: 1600px;
         }
 
         #view-portal .pv-table {
@@ -799,8 +816,108 @@
     `;
 
     document.head.appendChild(style);
-  }
 
+    const ratingsContainer = document.getElementById("ratings-container");
+    if (!ratingsContainer) return;
+
+    let syncingRatingsScroll = false;
+
+    function wireAdvancedRatingsScroll() {
+      const scrolls = Array.from(
+        ratingsContainer.querySelectorAll(".table-scroll")
+      );
+
+      // app.js renders Advanced Ratings with 15 headers. Overview has 8 and
+      // Conference Standings has 11, so this targets Advanced only.
+      const advancedScroll = scrolls.find(scroll => {
+        const table = scroll.querySelector(".projection-table");
+        return (table?.querySelectorAll("thead th").length || 0) >= 15;
+      });
+
+      // Remove a stale top bar when the user switches away from Advanced.
+      ratingsContainer
+        .querySelectorAll(".hammer-ratings-top-scroll")
+        .forEach(bar => {
+          if (!advancedScroll || bar.nextElementSibling !== advancedScroll) {
+            bar.remove();
+          }
+        });
+
+      scrolls.forEach(scroll => {
+        scroll.classList.toggle(
+          "hammer-advanced-ratings-scroll",
+          scroll === advancedScroll
+        );
+      });
+
+      if (!advancedScroll) return;
+
+      let topBar = advancedScroll.previousElementSibling;
+      if (!topBar?.classList.contains("hammer-ratings-top-scroll")) {
+        topBar = document.createElement("div");
+        topBar.className = "hammer-ratings-top-scroll";
+        topBar.setAttribute(
+          "aria-label",
+          "Scroll Advanced Ratings horizontally"
+        );
+
+        const inner = document.createElement("div");
+        inner.className = "hammer-ratings-top-scroll-inner";
+        topBar.appendChild(inner);
+
+        advancedScroll.parentNode.insertBefore(topBar, advancedScroll);
+      }
+
+      const table = advancedScroll.querySelector(".projection-table");
+      const inner = topBar.querySelector(".hammer-ratings-top-scroll-inner");
+
+      function syncWidth() {
+        if (!table || !inner) return;
+        const width = Math.max(
+          table.scrollWidth,
+          table.getBoundingClientRect().width
+        );
+        inner.style.width = `${width}px`;
+      }
+
+      syncWidth();
+
+      if (topBar.dataset.hammerScrollWired !== "1") {
+        topBar.dataset.hammerScrollWired = "1";
+
+        topBar.addEventListener("scroll", () => {
+          if (syncingRatingsScroll) return;
+          syncingRatingsScroll = true;
+          advancedScroll.scrollLeft = topBar.scrollLeft;
+          syncingRatingsScroll = false;
+        });
+
+        advancedScroll.addEventListener("scroll", () => {
+          if (syncingRatingsScroll) return;
+          syncingRatingsScroll = true;
+          topBar.scrollLeft = advancedScroll.scrollLeft;
+          syncingRatingsScroll = false;
+        });
+      }
+
+      topBar.scrollLeft = advancedScroll.scrollLeft;
+    }
+
+    const ratingsObserver = new MutationObserver(() => {
+      window.requestAnimationFrame(wireAdvancedRatingsScroll);
+    });
+
+    ratingsObserver.observe(ratingsContainer, {
+      childList: true,
+      subtree: true
+    });
+
+    window.addEventListener("resize", () => {
+      window.requestAnimationFrame(wireAdvancedRatingsScroll);
+    }, { passive: true });
+
+    wireAdvancedRatingsScroll();
+  }
 
   function start() {
     installMatchupUx();
