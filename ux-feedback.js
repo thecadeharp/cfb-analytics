@@ -362,6 +362,100 @@
   }
 
 
+
+  // ==========================================================================
+  // PUBLIC TERMINOLOGY — THI NAMING
+  //
+  // Keep the public product vocabulary consistent:
+  //   THI Spread = our projected/fair spread
+  //   THI Total  = our projected total
+  //
+  // Backend/model field names are intentionally untouched.
+  // ==========================================================================
+
+  const TERMINOLOGY_MAP = new Map([
+    ["Our Line", "THI Spread"],
+    ["Fair Line", "THI Spread"],
+    ["Model Line", "THI Spread"],
+    ["Model Total", "THI Total"],
+    ["Projected Total", "THI Total"],
+    ["Final fair line", "THI Spread"],
+    ["Model-implied spread", "THI projected spread"],
+    ["Pregame Hammer fair line", "Pregame THI spread"],
+    ["Pregame model fair line", "Pregame THI spread"],
+    ["Historical model fair line", "Historical THI spread"],
+    ["Frozen public line", "Frozen THI spread"],
+    ["Model total", "THI Total"],
+    ["Pregame projected total", "Pregame THI total"],
+    ["Historical projected total", "Historical THI total"]
+  ]);
+
+  function applyThiTerminology(root = document) {
+    const selectors = [
+      "#view-projections th",
+      "#view-projections .line-secondary",
+      "#view-projections .mobile-card-label",
+      "#view-matchup .analysis-label",
+      "#view-matchup .analysis-row-label",
+      "#view-matchup .line-secondary",
+      "#view-tape .tape-summary-label",
+      "#view-tape .metric-name",
+      "#view-tape .analysis-label",
+      "#view-tape .analysis-row-label"
+    ].join(", ");
+
+    root.querySelectorAll(selectors).forEach(element => {
+      const current = String(element.textContent || "").trim();
+      const replacement = TERMINOLOGY_MAP.get(current);
+
+      if (replacement && replacement !== current) {
+        element.textContent = replacement;
+      }
+    });
+  }
+
+  function installTerminologyObserver() {
+    applyThiTerminology();
+
+    const targets = [
+      document.getElementById("projections-container"),
+      document.getElementById("matchup-container"),
+      document.getElementById("tape-container"),
+      document.getElementById("mobile-projection-cards")
+    ].filter(Boolean);
+
+    targets.forEach(target => {
+      const observer = new MutationObserver(() => {
+        applyThiTerminology(target);
+        queueStickyHeaderUpdate();
+      });
+
+      observer.observe(target, {
+        childList: true,
+        subtree: true,
+        characterData: true
+      });
+    });
+
+    document.addEventListener("hammer:data-ready", () => {
+      window.requestAnimationFrame(() => {
+        applyThiTerminology();
+        queueStickyHeaderUpdate();
+      });
+    });
+
+    window.setTimeout(() => {
+      applyThiTerminology();
+      queueStickyHeaderUpdate();
+    }, 250);
+
+    window.setTimeout(() => {
+      applyThiTerminology();
+      queueStickyHeaderUpdate();
+    }, 1000);
+  }
+
+
   // ==========================================================================
   // STARTUP
   // ==========================================================================
@@ -369,6 +463,7 @@
   function start() {
     installMatchupUx();
     installStickyProjectionHeader();
+    installTerminologyObserver();
   }
 
   if (document.readyState === "loading") {
