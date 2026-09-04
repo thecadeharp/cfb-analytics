@@ -135,8 +135,12 @@ def main():
     parser=argparse.ArgumentParser(); parser.add_argument("--refresh",action="store_true"); args=parser.parse_args()
     eligible=settled_rows(load(SETTLED_PATH,{}))
     if not eligible: raise RuntimeError("No settled games are eligible")
-    existing=load(OUTPUT_PATH,{"games":{}}); games={} if args.refresh else dict(existing.get("games") or {})
+    existing=load(OUTPUT_PATH,{"games":{}}); games=dict(existing.get("games") or {})
     wanted=set(eligible) if args.refresh else set(eligible)-set(games)
+    built_count=0
+    if not wanted:
+        print("All settled games already have postgame analytics; no download is needed.")
+        return
     if wanted:
         frame=download_dataset()
         if "status_type_completed" in frame.columns: frame=frame[frame["status_type_completed"].map(boolean)]
@@ -148,8 +152,11 @@ def main():
         stamp=datetime.now(timezone.utc).isoformat()
         for gid in sorted(wanted):
             game=build(eligible[gid],grouped.get(gid,[]),stamp)
-            if game: games[gid]=game; print(f"Built {gid}: {game['away_team']} at {game['home_team']}")
+            if game: games[gid]=game; built_count+=1; print(f"Built {gid}: {game['away_team']} at {game['home_team']}")
             else: print(f"WARNING: public play-by-play is not available yet for {gid}")
+    if wanted and built_count == 0:
+        print("No new public play-by-play is available yet; leaving the existing output unchanged.")
+        return
     output={"meta":{"version":"postgame-analytics-v2-no-cfbd","uses_cfbd":False,"model_a_affected":False,
                     "source":"SportsDataverse cfbfastR ESPN-derived play-by-play","generated_at_utc":datetime.now(timezone.utc).isoformat(),
                     "eligible_games":len(eligible),"games_available":len(games)},"games":games}
