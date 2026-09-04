@@ -456,6 +456,119 @@
   }
 
 
+
+  // ==========================================================================
+  // FIRST-VISIT WELCOME
+  // ==========================================================================
+
+  const WELCOME_STORAGE_KEY = "thi-welcome-v1-seen";
+  const WELCOME_ID = "thi-welcome-overlay";
+
+  function welcomeAlreadySeen() {
+    try {
+      return window.localStorage.getItem(WELCOME_STORAGE_KEY) === "1";
+    } catch {
+      return false;
+    }
+  }
+
+  function markWelcomeSeen() {
+    try {
+      window.localStorage.setItem(WELCOME_STORAGE_KEY, "1");
+    } catch {
+      // If storage is unavailable, simply allow the site to continue normally.
+    }
+  }
+
+  function closeWelcome() {
+    const overlay = document.getElementById(WELCOME_ID);
+    if (!overlay) return;
+
+    markWelcomeSeen();
+    overlay.remove();
+    document.body.style.overflow = "";
+  }
+
+  function installWelcomeModal() {
+    if (welcomeAlreadySeen() || document.getElementById(WELCOME_ID)) return;
+
+    const overlay = document.createElement("div");
+    overlay.id = WELCOME_ID;
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-labelledby", "thi-welcome-title");
+
+    Object.assign(overlay.style, {
+      position: "fixed",
+      inset: "0",
+      zIndex: "10000",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "20px",
+      background: "rgba(15, 23, 32, 0.72)",
+      backdropFilter: "blur(5px)"
+    });
+
+    const modal = document.createElement("div");
+    Object.assign(modal.style, {
+      width: "min(520px, 100%)",
+      maxHeight: "calc(100vh - 40px)",
+      overflowY: "auto",
+      background: "#fff",
+      border: "1px solid var(--border, #d8d8d4)",
+      borderRadius: "16px",
+      boxShadow: "0 24px 70px rgba(0, 0, 0, 0.28)",
+      padding: "28px"
+    });
+
+    modal.innerHTML = `
+      <div style="font-size:32px; line-height:1; margin-bottom:14px;">🔨</div>
+      <div style="font-family:var(--mono, monospace); font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#8a6a00; margin-bottom:8px;">
+        Welcome to
+      </div>
+      <h2 id="thi-welcome-title" style="margin:0 0 12px; font-size:28px; line-height:1.08;">
+        The Hammer Index
+      </h2>
+      <p style="margin:0 0 16px; line-height:1.6; color:#4b5563;">
+        A college football analytics and projection platform built to create an independent view of every matchup.
+      </p>
+      <p style="margin:0 0 20px; line-height:1.6; color:#4b5563;">
+        Explore <strong>THI Spreads</strong>, <strong>THI Totals</strong>, projected scores, win probabilities, team ratings, matchup analysis and how the model compares with the live betting market.
+      </p>
+      <div style="padding:13px 14px; margin-bottom:12px; border-radius:10px; background:#fff8dc; border:1px solid #e7c967; font-size:13px; line-height:1.5;">
+        <strong>THI is independent of the sportsbook line.</strong> Market odds are used for comparison — not to create the model's projection.
+      </div>
+      <div style="padding:13px 14px; margin-bottom:22px; border-radius:10px; background:#f3f4f6; border:1px solid #d1d5db; font-size:13px; line-height:1.5; color:#4b5563;">
+        <strong>Beta / Testing:</strong> The Hammer Index is actively being tested and refined. The site is available to use for analysis, research and entertainment, but projections and features may change as feedback and new data are incorporated. Nothing on THI should be considered financial or betting advice.
+      </div>
+      <button id="thi-welcome-enter" type="button" style="width:100%; border:0; border-radius:10px; padding:13px 16px; cursor:pointer; font:inherit; font-weight:800; background:#1f2937; color:#fff;">
+        Explore The Hammer Index →
+      </button>
+    `;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    document.body.style.overflow = "hidden";
+
+    const button = modal.querySelector("#thi-welcome-enter");
+    button?.addEventListener("click", closeWelcome);
+
+    overlay.addEventListener("click", event => {
+      if (event.target === overlay) closeWelcome();
+    });
+
+    document.addEventListener("keydown", function escapeWelcome(event) {
+      if (event.key !== "Escape") return;
+      if (!document.getElementById(WELCOME_ID)) return;
+      closeWelcome();
+      document.removeEventListener("keydown", escapeWelcome);
+    });
+
+    window.requestAnimationFrame(() => button?.focus());
+  }
+
+
   // ==========================================================================
   // STARTUP
   // ==========================================================================
@@ -464,6 +577,7 @@
     installMatchupUx();
     installStickyProjectionHeader();
     installTerminologyObserver();
+    installWelcomeModal();
   }
 
   if (document.readyState === "loading") {
