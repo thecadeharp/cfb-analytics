@@ -39,15 +39,37 @@
   let decorationQueued = false;
   let decorating = false;
 
+  // ==========================================================================
+  // TEAM NAME NORMALIZATION
+  //
+  // NCAA scoreboard names are often abbreviated:
+  //
+  //   Jacksonville St.
+  //   North Dakota St.
+  //   Florida St.
+  //   San Jose St.
+  //   Eastern Mich.
+  //
+  // Projection data generally uses full names:
+  //
+  //   Jacksonville State
+  //   North Dakota State
+  //   Florida State
+  //   San Jose State
+  //   Eastern Michigan
+  //
+  // These aliases make both sources resolve to the same matchup key.
+  // ==========================================================================
+
   const TEAM_ALIASES =
     new Map([
       ["miamifla", "miamifl"],
       ["miamiflorida", "miamifl"],
+
       ["olemiss", "mississippi"],
-      [
-        "southernmiss",
-        "southernmississippi"
-      ],
+
+      ["southernmiss", "southernmississippi"],
+
       ["utsa", "texassanantonio"],
       ["utep", "texaselpaso"],
       ["ucf", "centralflorida"],
@@ -55,7 +77,41 @@
       ["lsu", "louisianastate"],
       ["smu", "southernmethodist"],
       ["tcu", "texaschristian"],
-      ["usc", "southerncalifornia"]
+      ["usc", "southerncalifornia"],
+
+      // NCAA "St." / "State" variants
+      ["appalachianst", "appalachianstate"],
+      ["arizonast", "arizonastate"],
+      ["arkansasst", "arkansasstate"],
+      ["ballst", "ballstate"],
+      ["boisest", "boisestate"],
+      ["coloradost", "coloradostate"],
+      ["floridast", "floridastate"],
+      ["fresnost", "fresnostate"],
+      ["georgiast", "georgiastate"],
+      ["iowast", "iowastate"],
+      ["jacksonvillest", "jacksonvillestate"],
+      ["kansasst", "kansasstate"],
+      ["kennesawst", "kennesawstate"],
+      ["kentst", "kentstate"],
+      ["mississippist", "mississippistate"],
+      ["missourist", "missouristate"],
+      ["newmexicost", "newmexicostate"],
+      ["northdakotast", "northdakotastate"],
+      ["oklahomast", "oklahomastate"],
+      ["oregonst", "oregonstate"],
+      ["pennst", "pennstate"],
+      ["sacramentost", "sacramentostate"],
+      ["sandiegost", "sandiegostate"],
+      ["sanjosest", "sanjosestate"],
+      ["texasst", "texasstate"],
+      ["utahst", "utahstate"],
+      ["washingtonst", "washingtonstate"],
+
+      // NCAA Michigan abbreviations
+      ["centralmich", "centralmichigan"],
+      ["easternmich", "easternmichigan"],
+      ["westernmich", "westernmichigan"]
     ]);
 
   function installStyles() {
@@ -900,6 +956,17 @@
       )
         .trim()
         .toLowerCase()
+
+        // Normalize common NCAA abbreviations before punctuation is removed.
+        .replace(
+          /\bst\.?\b/g,
+          "state"
+        )
+        .replace(
+          /\bmich\.?\b/g,
+          "michigan"
+        )
+
         .replace(
           /&/g,
           "and"
@@ -1063,16 +1130,14 @@
     const period =
       periodText(
         game?.period
-          ?? game
-            ?.currentPeriod
+          ?? game?.currentPeriod
           ?? game?.quarter
       );
 
     const clock =
       cleanText(
         game?.clock
-          ?? game
-            ?.contestClock
+          ?? game?.contestClock
           ?? ""
       );
 
