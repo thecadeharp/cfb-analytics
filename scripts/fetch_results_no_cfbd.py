@@ -22,6 +22,14 @@ Important:
     - no model rebuild
     - live games NEVER enter data/results.json
     - only explicit NCAA "final" games can be settled
+
+2026-09-04 hardening:
+    - normalize several NCAA abbreviated FCS school names to the names used
+      by the projection board
+    - treat delayed / suspended / interrupted games as live presentation state
+    - recognize halftime / quarter / OT status text as live
+    - infer live state from period/clock only when the scoreboard supplies
+      actual scores and no explicit final state exists
 """
 
 from __future__ import annotations
@@ -49,9 +57,20 @@ SESSION = requests.Session()
 SESSION.headers.update(
     {
         "Accept": "application/json",
-        "User-Agent": "the-hammer-index-scoreboard/3.0",
+        "User-Agent": "the-hammer-index-scoreboard/3.1",
     }
 )
+
+# Exact provider-name cleanup. Keep this conservative: only names we know the
+# NCAA scoreboard abbreviates differently from the public projection board.
+TEAM_NAME_ALIASES = {
+    "Ark.-Pine Bluff": "Arkansas Pine Bluff",
+    "Ark.-Pine Bluff.": "Arkansas Pine Bluff",
+    "Ark. Pine Bluff": "Arkansas Pine Bluff",
+    "Eastern Ill.": "Eastern Illinois",
+    "West Ga.": "West Georgia",
+    "UAlbany": "Albany",
+}
 
 
 def utc_now() -> datetime:
@@ -126,11 +145,7 @@ def unwrap_games(payload: Any) -> list[dict[str, Any]]:
     if not isinstance(payload, dict):
         return []
 
-    for key in (
-        "games",
-        "contests",
-        "events",
-    ):
+    for key in ("games", "contests", "events"):
         value = payload.get(key)
 
         if isinstance(value, list):
@@ -143,11 +158,7 @@ def unwrap_games(payload: Any) -> list[dict[str, Any]]:
     data = payload.get("data")
 
     if isinstance(data, dict):
-        for key in (
-            "games",
-            "contests",
-            "events",
-        ):
+        for key in ("games", "contests", "events"):
             value = data.get(key)
 
             if isinstance(value, list):
@@ -170,6 +181,18 @@ def unwrap_game(entry: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+def clean_team_name(value: Any) -> str | None:
+    if value is None:
+        return None
+
+    text = str(value).strip()
+
+    if not text:
+        return None
+
+    return TEAM_NAME_ALIASES.get(text, text)
+
+
 def team_name(team: Any) -> str | None:
     if not isinstance(team, dict):
         return None
@@ -177,8 +200,7 @@ def team_name(team: Any) -> str | None:
     names = team.get("names")
 
     if isinstance(names, dict):
-        # The current NCAA scoreboard conversion often populates
-        # names.short while names.full remains blank.
+        # The NCAA conversion frequently has names.short even when full is blank.
         value = first_nonempty(
             names.get("full"),
             names.get("short"),
@@ -186,8 +208,9 @@ def team_name(team: Any) -> str | None:
             names.get("seo"),
         )
 
-        if value:
-            return str(value).strip()
+        cleaned = clean_team_name(value)
+        if cleaned:
+            return cleaned
 
     value = first_nonempty(
         team.get("name"),
@@ -197,11 +220,7 @@ def team_name(team: Any) -> str | None:
         team.get("seo"),
     )
 
-    return (
-        str(value).strip()
-        if value
-        else None
-    )
+    return clean_team_name(value)
 
 
 def team_id(team: Any) -> str | None:
@@ -289,7 +308,6 @@ def home_away(
 
             if designation == "home":
                 home = team
-
             elif designation == "away":
                 away = team
 
@@ -302,56 +320,7 @@ def home_away(
     return None, None
 
 
-def normalized_state(
-    game: dict[str, Any],
-) -> str:
-    raw = first_nonempty(
-        game.get("gameState"),
-        game.get("game_state"),
-        game.get("state"),
-    )
-
-    if isinstance(raw, dict):
-        raw = first_nonempty(
-            raw.get("state"),
-            raw.get("type"),
-            raw.get("name"),
-            raw.get("description"),
-            raw.get("detail"),
-        )
-
-    text = str(
-        raw or ""
-    ).strip().lower()
-
-    if text in {
-        "f",
-        "final",
-        "post",
-        "completed",
-        "complete",
-        "closed",
-    }:
-        return "final"
-
-    if text in {
-        "i",
-        "in",
-        "live",
-        "inprogress",
-        "in_progress",
-        "in progress",
-    }:
-        return "live"
-
-    if text in {
-        "p",
-        "pre",
-        "pregame",
-        "scheduled",
-    }:
-        return "pre"
-
+def status_value(game: dict[str, Any]) -> Any:
     status = first_nonempty(
         game.get("status"),
         game.get("statusText"),
@@ -367,9 +336,103 @@ def normalized_state(
             status.get("detail"),
         )
 
-    status_text = str(
-        status or ""
-    ).strip().lower()
+    return status
+
+
+def period_value(game: dict[str, Any]) -> Any:
+    return first_nonempty(
+        game.get("currentPeriod"),
+        game.get("period"),
+        game.get("quarter"),
+    )
+
+
+def clock_value(game: dict[str, Any]) -> Any:
+    return first_nonempty(
+        game.get("contestClock"),
+        game.get("clock"),
+        game.get("displayClock"),
+    )
+
+
+def normalized_state(
+    game: dict[str, Any],
+) -> str:
+    """
+    Return one of: final, live, pre.
+
+    Settlement remains conservative: FINAL is still only accepted from explicit
+    provider final/completed state.
+
+    Presentation is intentionally more tolerant. NCAA has used delayed and
+    suspended states during active games, and some entries expose quarter /
+    halftime information even when gameState is not the normal "I".
+    """
+    raw = first_nonempty(
+        game.get("gameState"),
+        game.get("game_state"),
+        game.get("state"),
+    )
+
+    if isinstance(raw, dict):
+        raw = first_nonempty(
+            raw.get("state"),
+            raw.get("type"),
+            raw.get("name"),
+            raw.get("description"),
+            raw.get("detail"),
+        )
+
+    text = str(raw or "").strip().lower()
+    compact = re.sub(r"[^a-z0-9]+", "", text)
+
+    # Explicit final states only.
+    if compact in {
+        "f",
+        "final",
+        "post",
+        "completed",
+        "complete",
+        "closed",
+        "finalot",
+        "final2ot",
+        "final3ot",
+    } or compact.startswith("final"):
+        return "final"
+
+    # Standard in-progress plus active interruption states.
+    if compact in {
+        "i",
+        "in",
+        "live",
+        "inprogress",
+        "d",
+        "delay",
+        "delayed",
+        "weatherdelay",
+        "suspended",
+        "suspend",
+        "interrupted",
+        "halftime",
+        "half",
+        "ot",
+        "overtime",
+    }:
+        return "live"
+
+    if compact in {
+        "p",
+        "pre",
+        "pregame",
+        "scheduled",
+    }:
+        explicit_pre = True
+    else:
+        explicit_pre = False
+
+    status = status_value(game)
+    status_text = str(status or "").strip().lower()
+    status_compact = re.sub(r"[^a-z0-9]+", "", status_text)
 
     if any(
         word in status_text
@@ -387,9 +450,71 @@ def normalized_state(
             "live",
             "in progress",
             "in-progress",
+            "delay",
+            "suspend",
+            "interrupted",
+            "halftime",
+            "half time",
+            "overtime",
         )
     ):
         return "live"
+
+    # Some NCAA scoreboard records use short quarter/OT detail rather than a
+    # stable live state token.
+    if re.search(
+        r"\b(?:1st|2nd|3rd|4th)\b",
+        status_text,
+    ) or re.search(
+        r"\bq[1-4]\b",
+        status_text,
+    ) or status_compact in {
+        "1st",
+        "2nd",
+        "3rd",
+        "4th",
+        "1q",
+        "2q",
+        "3q",
+        "4q",
+        "ot",
+        "2ot",
+        "3ot",
+        "4ot",
+    }:
+        return "live"
+
+    # Final fallback for presentation only: if the provider gives actual scores
+    # plus period/clock information, the contest has clearly started.
+    #
+    # Do not use this to infer FINAL; only explicit final state can settle.
+    home, away = home_away(game)
+    home_points = team_score(home)
+    away_points = team_score(away)
+
+    has_scores = (
+        home_points is not None
+        and away_points is not None
+    )
+
+    period = period_value(game)
+    clock = clock_value(game)
+
+    has_period = (
+        period is not None
+        and str(period).strip() not in {"", "0"}
+    )
+
+    has_clock = (
+        clock is not None
+        and str(clock).strip() not in {"", "0", "0:00", "00:00"}
+    )
+
+    if has_scores and (has_period or has_clock):
+        return "live"
+
+    if explicit_pre:
+        return "pre"
 
     return "pre"
 
@@ -405,10 +530,7 @@ def clean_period(
     if not text:
         return None
 
-    if not re.fullmatch(
-        r"\d+",
-        text,
-    ):
+    if not re.fullmatch(r"\d+", text):
         return text.upper()
 
     return text
@@ -489,8 +611,7 @@ def normalize_entry(
     home_points = team_score(home)
     away_points = team_score(away)
 
-    # A LIVE or FINAL game should have a scoreboard value.
-    # Zero is valid.
+    # A LIVE or FINAL game should have a scoreboard value. Zero is valid.
     if (
         home_points is None
         or away_points is None
@@ -540,6 +661,7 @@ def normalize_entry(
             "game_state": "final",
             "final_message": str(
                 game.get("finalMessage")
+                or status_value(game)
                 or "Final"
             ),
         }
@@ -548,23 +670,16 @@ def normalize_entry(
         **base,
         "status": "live",
         "game_state": "live",
-        "period": clean_period(
-            first_nonempty(
-                game.get("currentPeriod"),
-                game.get("period"),
-                game.get("quarter"),
-            )
-        ),
-        "clock": clean_clock(
-            first_nonempty(
-                game.get("contestClock"),
-                game.get("clock"),
-                game.get("displayClock"),
-            )
-        ),
+        "period": clean_period(period_value(game)),
+        "clock": clean_clock(clock_value(game)),
         "network": first_nonempty(
             game.get("network"),
             game.get("broadcasterName"),
+        ),
+        "provider_status": (
+            str(status_value(game)).strip()
+            if status_value(game) is not None
+            else None
         ),
     }
 
@@ -573,10 +688,7 @@ def merge_completed(
     existing: list[dict[str, Any]],
     fetched: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
-    merged: dict[
-        str,
-        dict[str, Any],
-    ] = {}
+    merged: dict[str, dict[str, Any]] = {}
 
     for game in existing + fetched:
         if not isinstance(game, dict):
@@ -604,25 +716,9 @@ def merge_completed(
     return sorted(
         merged.values(),
         key=lambda game: (
-            int(
-                game.get(
-                    "week",
-                    0,
-                )
-                or 0
-            ),
-            str(
-                game.get(
-                    "away_team",
-                    "",
-                )
-            ),
-            str(
-                game.get(
-                    "home_team",
-                    "",
-                )
-            ),
+            int(game.get("week", 0) or 0),
+            str(game.get("away_team", "")),
+            str(game.get("home_team", "")),
         ),
     )
 
@@ -631,83 +727,45 @@ def infer_active_week(
     existing_payload: dict[str, Any],
 ) -> int:
     completed_weeks = [
-        as_int(
-            game.get("week")
-        )
+        as_int(game.get("week"))
         for game
-        in existing_payload.get(
-            "games",
-            [],
-        )
+        in existing_payload.get("games", [])
         if (
             isinstance(game, dict)
-            and as_int(
-                game.get("week")
-            )
-            is not None
+            and as_int(game.get("week")) is not None
         )
     ]
 
     if completed_weeks:
-        return max(
-            completed_weeks
-        )
+        return max(completed_weeks)
 
-    scan_log = existing_payload.get(
-        "scan_log",
-        [],
-    )
-
+    scan_log = existing_payload.get("scan_log", [])
     candidates: list[int] = []
 
-    if isinstance(
-        scan_log,
-        list,
-    ):
+    if isinstance(scan_log, list):
         for row in scan_log:
-            if not isinstance(
-                row,
-                dict,
-            ):
+            if not isinstance(row, dict):
                 continue
 
-            if (
-                row.get("status")
-                != "ok"
-            ):
+            if row.get("status") != "ok":
                 continue
 
             if int(
-                row.get(
-                    "scoreboard_games",
-                    0,
-                )
-                or 0
+                row.get("scoreboard_games", 0) or 0
             ) <= 0:
                 continue
 
-            week = as_int(
-                row.get("week")
-            )
+            week = as_int(row.get("week"))
 
             if week is not None:
-                candidates.append(
-                    week
-                )
+                candidates.append(week)
 
-    return (
-        min(candidates)
-        if candidates
-        else 1
-    )
+    return min(candidates) if candidates else 1
 
 
 def choose_weeks(
     existing_payload: dict[str, Any],
-) -> tuple[
-    list[int],
-    str,
-]:
+) -> tuple[list[int], str]:
     now = utc_now()
 
     # Once each UTC morning, reconcile every NCAA week.
@@ -720,9 +778,7 @@ def choose_weeks(
             "daily_full_reconciliation",
         )
 
-    active = infer_active_week(
-        existing_payload
-    )
+    active = infer_active_week(existing_payload)
 
     weeks = sorted(
         {
@@ -748,39 +804,23 @@ def main() -> None:
         {"games": []},
     )
 
-    existing_games = (
-        existing_payload.get(
-            "games",
-            [],
-        )
+    existing_games = existing_payload.get(
+        "games",
+        [],
     )
 
-    if not isinstance(
-        existing_games,
-        list,
-    ):
+    if not isinstance(existing_games, list):
         existing_games = []
 
     weeks, scan_mode = choose_weeks(
         existing_payload
     )
 
-    fetched_completed: list[
-        dict[str, Any]
-    ] = []
+    fetched_completed: list[dict[str, Any]] = []
+    fetched_live: list[dict[str, Any]] = []
+    scan_log: list[dict[str, Any]] = []
 
-    fetched_live: list[
-        dict[str, Any]
-    ] = []
-
-    scan_log: list[
-        dict[str, Any]
-    ] = []
-
-    print(
-        f"Season: {SEASON}"
-    )
-
+    print(f"Season: {SEASON}")
     print(
         "NCAA scoreboard "
         f"mode={scan_mode} "
@@ -789,65 +829,40 @@ def main() -> None:
 
     for week in weeks:
         try:
-            payload = fetch_week(
-                week
-            )
-
-            entries = unwrap_games(
-                payload
-            )
+            payload = fetch_week(week)
+            entries = unwrap_games(payload)
 
             completed_count = 0
             live_count = 0
 
             for entry in entries:
-                normalized = (
-                    normalize_entry(
-                        entry,
-                        week,
-                    )
+                normalized = normalize_entry(
+                    entry,
+                    week,
                 )
 
                 if normalized is None:
                     continue
 
-                if (
-                    normalized[
-                        "game_state"
-                    ]
-                    == "final"
-                ):
+                if normalized["game_state"] == "final":
                     fetched_completed.append(
                         normalized
                     )
-
                     completed_count += 1
 
-                elif (
-                    normalized[
-                        "game_state"
-                    ]
-                    == "live"
-                ):
+                elif normalized["game_state"] == "live":
                     fetched_live.append(
                         normalized
                     )
-
                     live_count += 1
 
             scan_log.append(
                 {
                     "week": week,
                     "status": "ok",
-                    "scoreboard_games": len(
-                        entries
-                    ),
-                    "completed_games": (
-                        completed_count
-                    ),
-                    "live_games": (
-                        live_count
-                    ),
+                    "scoreboard_games": len(entries),
+                    "completed_games": completed_count,
+                    "live_games": live_count,
                 }
             )
 
@@ -875,11 +890,9 @@ def main() -> None:
         # Public API is rate limited.
         time.sleep(0.3)
 
-    merged_completed = (
-        merge_completed(
-            existing_games,
-            fetched_completed,
-        )
+    merged_completed = merge_completed(
+        existing_games,
+        fetched_completed,
     )
 
     results_output = {
@@ -887,9 +900,7 @@ def main() -> None:
             "season": SEASON,
             "generated_at": iso_now(),
             "source": "NCAA via ncaa-api",
-            "source_type": (
-                "public_scoreboard_no_auth"
-            ),
+            "source_type": "public_scoreboard_no_auth",
             "scan_mode": scan_mode,
             "weeks_scanned": weeks,
             "completed_games": len(
@@ -911,9 +922,7 @@ def main() -> None:
             "season": SEASON,
             "generated_at": iso_now(),
             "source": "NCAA via ncaa-api",
-            "source_type": (
-                "public_scoreboard_no_auth"
-            ),
+            "source_type": "public_scoreboard_no_auth",
             "scan_mode": scan_mode,
             "weeks_scanned": weeks,
             "live_games": len(
@@ -922,6 +931,7 @@ def main() -> None:
             "notes": [
                 "Live games only.",
                 "Rebuilt on every refresh.",
+                "Delayed/suspended/interrupted active games are included.",
                 "Never used by settlement.",
                 "Pregame Hammer Index projections remain frozen while games are live.",
             ],
@@ -929,25 +939,9 @@ def main() -> None:
         "games": sorted(
             fetched_live,
             key=lambda game: (
-                int(
-                    game.get(
-                        "week",
-                        0,
-                    )
-                    or 0
-                ),
-                str(
-                    game.get(
-                        "away_team",
-                        "",
-                    )
-                ),
-                str(
-                    game.get(
-                        "home_team",
-                        "",
-                    )
-                ),
+                int(game.get("week", 0) or 0),
+                str(game.get("away_team", "")),
+                str(game.get("home_team", "")),
             ),
         ),
     }
