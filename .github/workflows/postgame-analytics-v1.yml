@@ -1,0 +1,90 @@
+name: Postgame Analytics v1
+
+on:
+  workflow_dispatch:
+    inputs:
+      refresh_existing:
+        description: "Rebuild games already present in the postgame file"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: postgame-analytics-v1
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependency
+        run: python -m pip install --disable-pip-version-check requests
+
+      - name: Protect Model A
+        run: |
+          sha256sum \
+            scripts/build_projections.py \
+            scripts/weekly_update.py \
+            data/projections.json \
+            data/cfb_metrics.json \
+            data/hfa_2026.json \
+            data/game_conditions.json \
+            > /tmp/postgame-model-a-before.sha256
+
+      - name: Build isolated postgame analytics
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+          REFRESH_EXISTING: ${{ inputs.refresh_existing }}
+        run: |
+          if [ "$REFRESH_EXISTING" = "true" ]; then
+            python scripts/build_postgame_analytics.py --refresh
+          else
+            python scripts/build_postgame_analytics.py
+          fi
+
+      - name: Validate postgame output
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("data/postgame_analytics.json")
+          payload = json.loads(path.read_text(encoding="utf-8"))
+          assert isinstance(payload.get("meta"), dict)
+          assert isinstance(payload.get("games"), dict)
+          for game_id, game in payload["games"].items():
+              assert str(game.get("game_id")) == str(game_id)
+              assert game.get("availability") in {"available", "partial"}
+              assert game.get("away_team") and game.get("home_team")
+          print(f"Validated {len(payload['games'])} postgame game(s).")
+          PY
+
+      - name: Verify Model A remained unchanged
+        run: sha256sum --check /tmp/postgame-model-a-before.sha256
+
+      - name: Commit postgame analytics only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/postgame_analytics.json
+
+          if git diff --cached --quiet; then
+            echo "No new completed-game analytics were available."
+            exit 0
+          fi
+
+          git commit -m "Refresh isolated postgame analytics"
+          git pull --rebase origin main
+          git push origin HEAD:main
