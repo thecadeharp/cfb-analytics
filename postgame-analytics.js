@@ -269,20 +269,53 @@
             </div>
           </div>
           <div class="pg-section">
-            <div class="pg-section-title">Efficiency and game shape</div>
+            <div class="pg-section-title">Core efficiency and game shape</div>
             <div class="pg-metrics">
               ${metric("EPA Margin", hasValue(c.epa_margin_home) ? `${escapeHtml(game.home_team)} ${formatSigned(c.epa_margin_home)}` : "—")}
+              ${metric("EPA per Play", pair(game, "epa_per_play", 3, " EPA/play"))}
+              ${metric("Total EPA", pair(game, "total_epa", 2, " EPA"))}
               ${metric("Success Rate Dominance", pair(game, "success_rate", 1, "%"))}
+              ${metric("Explosive Play Rate", pair(game, "explosive_play_rate", 1, "%"))}
               ${metric("Explosive Play Dependence", pair(game, "explosive_epa_dependency_pct", 1, "%"))}
               ${metric("Turnover Impact", hasValue(c.turnover_epa_swing_home) ? `${escapeHtml(game.home_team)} ${formatSigned(c.turnover_epa_swing_home)} EPA swing` : "—")}
+              ${metric("Game Variance", pair(game, "play_epa_volatility", 3, " EPA σ"))}
+              ${metric("Garbage-Time Impact", pair(game, "garbage_time_play_share_pct", 1, "% of plays"))}
+            </div>
+          </div>
+          <div class="pg-section">
+            <div class="pg-section-title">Play type and down-state splits</div>
+            <div class="pg-metrics">
+              ${metric("Pass EPA", pair(game, "pass_epa", 3, " EPA/play"))}
+              ${metric("Pass Success Rate", pair(game, "pass_success_rate", 1, "%"))}
+              ${metric("Rush EPA", pair(game, "rush_epa", 3, " EPA/play"))}
+              ${metric("Rush Success Rate", pair(game, "rush_success_rate", 1, "%"))}
+              ${metric("Standard-Down EPA", pair(game, "standard_down_epa", 3, " EPA/play"))}
+              ${metric("Standard-Down Success", pair(game, "standard_down_success_rate", 1, "%"))}
+              ${metric("Passing-Down EPA", pair(game, "passing_down_epa", 3, " EPA/play"))}
+              ${metric("Passing-Down Success", pair(game, "passing_down_success_rate", 1, "%"))}
+              ${metric("Early-Down Performance", pair(game, "early_down_epa", 3, " EPA/play"))}
+              ${metric("3rd/4th Down EPA", pair(game, "late_down_epa", 3, " EPA/play"))}
+              ${metric("3rd/4th Down Success", pair(game, "third_fourth_down_success_rate", 1, "%"))}
+              ${metric("Fourth-Down Attempts", pair(game, "fourth_down_attempts", 0, " attempts"))}
+              ${metric("Fourth-Down Success", pair(game, "fourth_down_success_rate", 1, "%"))}
+              ${metric("Fourth-Down EPA", pair(game, "fourth_down_epa", 3, " EPA/play"))}
+              ${metric("Sack Rate Allowed", pair(game, "sack_rate_allowed", 1, "% of dropbacks"))}
+              ${metric("Stuff Rate Allowed", pair(game, "stuff_rate_allowed", 1, "% of rushes"))}
+              ${metric("TFL Rate Allowed", pair(game, "tfl_rate_allowed", 1, "% of plays"))}
+            </div>
+          </div>
+          <div class="pg-section">
+            <div class="pg-section-title">Drive and field-position profile</div>
+            <div class="pg-metrics">
               ${metric("Finishing Drives", pair(game, "points_per_opportunity", 2, " pts/opportunity"))}
               ${metric("Drive Efficiency", pair(game, "points_per_drive", 2, " pts/drive"))}
+              ${metric("Drive Success Rate", pair(game, "drive_success_rate", 1, "%"))}
+              ${metric("Three-and-Out Rate", pair(game, "three_and_out_rate", 1, "%"))}
+              ${metric("Drives Tracked", pair(game, "drives_tracked", 0, " drives"))}
               ${metric("Field Position / Hidden Yardage", pair(game, "average_drive_start_yardline", 1, " avg start"))}
-              ${metric("Early-Down Performance", pair(game, "early_down_epa", 3, " EPA/play"))}
-              ${metric("3rd/4th Down Variance", pair(game, "late_down_epa", 3, " EPA/play"))}
+              ${metric("Red-Zone Trips", pair(game, "red_zone_trips", 0, " trips"))}
+              ${metric("Red-Zone Points per Trip", pair(game, "red_zone_points_per_trip", 2, " pts/trip"))}
               ${metric("Red-Zone Overperformance", pair(game, "red_zone_overperformance", 2, " pts/trip vs baseline"))}
-              ${metric("Garbage-Time Impact", pair(game, "garbage_time_play_share_pct", 1, "% of plays"))}
-              ${metric("Game Variance", pair(game, "play_epa_volatility", 3, " EPA σ"))}
             </div>
           </div>
           <div class="pg-method">Postgame Win Expectancy uses non-garbage-time cfbfastR EPA margin. Adjusted Score splits the frozen THI total by that retrospective EPA margin. This display-only layer makes no CFBD calls and never changes Model A.</div>
