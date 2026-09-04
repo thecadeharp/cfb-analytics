@@ -1,20 +1,6 @@
 (() => {
   "use strict";
 
-  // ==========================================================================
-  // THE HAMMER INDEX
-  // status-controls.js
-  //
-  // Presentation-only game lifecycle controls:
-  //   - All Games
-  //   - Upcoming
-  //   - Live
-  //   - Final
-  //   - ET kickoff labels
-  //
-  // The old projection-summary line is intentionally hidden.
-  // ==========================================================================
-
   const VIEW_SELECTOR = "#view-projections";
   const CONTAINER_SELECTOR = "#projections-container";
 
@@ -42,7 +28,6 @@
     }
 
     const style = document.createElement("style");
-
     style.id = STYLE_ID;
 
     style.textContent = `
@@ -62,6 +47,10 @@
         background: var(--surface);
         border: 1px solid var(--border);
         border-radius: var(--radius);
+
+        position: relative;
+        z-index: 50;
+        pointer-events: auto;
       }
 
       .hammer-status-filter-title {
@@ -84,6 +73,10 @@
         gap: 9px;
 
         width: min(100%, 620px);
+
+        position: relative;
+        z-index: 51;
+        pointer-events: auto;
       }
 
       .hammer-status-filter-button {
@@ -111,9 +104,9 @@
         white-space: nowrap;
         cursor: pointer;
 
-        pointer-events: auto;
         position: relative;
-        z-index: 2;
+        z-index: 52;
+        pointer-events: auto;
 
         transition:
           background 0.15s ease,
@@ -158,6 +151,8 @@
 
         border-radius: 50%;
         background: currentColor;
+
+        pointer-events: none;
       }
 
       .hammer-status-count {
@@ -191,10 +186,6 @@
         background: rgba(255, 255, 255, 0.17);
       }
 
-      .hammer-status-live-dot {
-        pointer-events: none;
-      }
-
       .hammer-status-empty {
         display: none;
 
@@ -212,11 +203,6 @@
         font-size: 12px;
       }
 
-
-      /* ==============================================================
-         TABLET
-      ============================================================== */
-
       @media (max-width: 900px) {
         .hammer-status-filter-wrap {
           align-items: flex-start;
@@ -227,11 +213,6 @@
           width: 100%;
         }
       }
-
-
-      /* ==============================================================
-         MOBILE
-      ============================================================== */
 
       @media (max-width: 600px) {
         .hammer-status-filter-wrap {
@@ -262,7 +243,7 @@
 
 
   // ==========================================================================
-  // GAME ROWS
+  // ROW STATUS
   // ==========================================================================
 
   function projectionRows() {
@@ -308,15 +289,7 @@
       const status = rowStatus(row);
 
       counts.all += 1;
-
-      if (
-        Object.prototype.hasOwnProperty.call(
-          counts,
-          status
-        )
-      ) {
-        counts[status] += 1;
-      }
+      counts[status] += 1;
     });
 
     return counts;
@@ -324,36 +297,177 @@
 
 
   // ==========================================================================
-  // STATUS BUTTONS
+  // FILTER UI
   // ==========================================================================
 
-  function buttonMarkup(status, label, count) {
-    const active =
-      activeStatus === status;
+  function ensureFilterUI() {
+    const tableCard =
+      document.querySelector(
+        `${VIEW_SELECTOR} .table-card`
+      );
 
-    const live =
-      status === "live";
+    if (!tableCard) {
+      return null;
+    }
 
-    return `
-      <button
-        type="button"
-        class="hammer-status-filter-button${active ? " is-active" : ""}"
-        data-status="${status}"
-        aria-pressed="${active ? "true" : "false"}"
-      >
-        ${
-          live
-            ? '<span class="hammer-status-live-dot" aria-hidden="true"></span>'
-            : ""
+    let wrapper =
+      document.getElementById(FILTER_ID);
+
+    if (wrapper) {
+      return wrapper;
+    }
+
+    wrapper = document.createElement("div");
+
+    wrapper.id = FILTER_ID;
+    wrapper.className =
+      "hammer-status-filter-wrap";
+
+    wrapper.innerHTML = `
+      <div class="hammer-status-filter-title">
+        Game Status
+      </div>
+
+      <div class="hammer-status-filter-buttons">
+
+        <button
+          type="button"
+          class="hammer-status-filter-button is-active"
+          data-status="all"
+          aria-pressed="true"
+        >
+          <span>All Games</span>
+          <span
+            class="hammer-status-count"
+            data-count-for="all"
+          >0</span>
+        </button>
+
+        <button
+          type="button"
+          class="hammer-status-filter-button"
+          data-status="upcoming"
+          aria-pressed="false"
+        >
+          <span>Upcoming</span>
+          <span
+            class="hammer-status-count"
+            data-count-for="upcoming"
+          >0</span>
+        </button>
+
+        <button
+          type="button"
+          class="hammer-status-filter-button"
+          data-status="live"
+          aria-pressed="false"
+        >
+          <span
+            class="hammer-status-live-dot"
+            aria-hidden="true"
+          ></span>
+
+          <span>Live</span>
+
+          <span
+            class="hammer-status-count"
+            data-count-for="live"
+          >0</span>
+        </button>
+
+        <button
+          type="button"
+          class="hammer-status-filter-button"
+          data-status="final"
+          aria-pressed="false"
+        >
+          <span>Final</span>
+          <span
+            class="hammer-status-count"
+            data-count-for="final"
+          >0</span>
+        </button>
+
+      </div>
+    `;
+
+    tableCard.insertAdjacentElement(
+      "beforebegin",
+      wrapper
+    );
+
+    /*
+      ONE permanent handler.
+      Buttons are never destroyed/rebuilt after this.
+    */
+    wrapper.addEventListener(
+      "click",
+      event => {
+        const button =
+          event.target.closest(
+            ".hammer-status-filter-button"
+          );
+
+        if (!button) {
+          return;
         }
 
-        <span>${label}</span>
+        event.preventDefault();
 
-        <span class="hammer-status-count">
-          ${count}
-        </span>
-      </button>
-    `;
+        const status =
+          button.dataset.status;
+
+        selectStatus(status);
+      }
+    );
+
+    return wrapper;
+  }
+
+
+  function updateFilterUI() {
+    const wrapper =
+      ensureFilterUI();
+
+    if (!wrapper) {
+      return;
+    }
+
+    const counts =
+      statusCounts();
+
+    ["all", "upcoming", "live", "final"]
+      .forEach(status => {
+        const button =
+          wrapper.querySelector(
+            `.hammer-status-filter-button[data-status="${status}"]`
+          );
+
+        const count =
+          wrapper.querySelector(
+            `[data-count-for="${status}"]`
+          );
+
+        if (count) {
+          count.textContent =
+            String(counts[status]);
+        }
+
+        if (button) {
+          const active =
+            activeStatus === status;
+
+          button.classList.toggle(
+            "is-active",
+            active
+          );
+
+          button.setAttribute(
+            "aria-pressed",
+            active ? "true" : "false"
+          );
+        }
+      });
   }
 
 
@@ -371,144 +485,15 @@
 
     activeStatus = status;
 
-    renderFilterUI();
-
+    updateFilterUI();
     applyDesktopFilter();
-
     applyMobileFilter();
-
     updateEmptyState();
   }
 
 
-  function bindFilterButtons(wrapper) {
-    wrapper
-      .querySelectorAll(
-        ".hammer-status-filter-button"
-      )
-      .forEach(button => {
-        button.addEventListener(
-          "click",
-          event => {
-            event.preventDefault();
-            event.stopPropagation();
-
-            selectStatus(
-              button.dataset.status
-            );
-          }
-        );
-
-        button.addEventListener(
-          "keydown",
-          event => {
-            if (
-              event.key !== "Enter" &&
-              event.key !== " "
-            ) {
-              return;
-            }
-
-            event.preventDefault();
-            event.stopPropagation();
-
-            selectStatus(
-              button.dataset.status
-            );
-          }
-        );
-      });
-  }
-
-
-  function renderFilterUI() {
-    const wrapper =
-      document.getElementById(FILTER_ID);
-
-    if (!wrapper) {
-      return;
-    }
-
-    const counts =
-      statusCounts();
-
-    wrapper.innerHTML = `
-      <div class="hammer-status-filter-title">
-        Game Status
-      </div>
-
-      <div class="hammer-status-filter-buttons">
-
-        ${buttonMarkup(
-          "all",
-          "All Games",
-          counts.all
-        )}
-
-        ${buttonMarkup(
-          "upcoming",
-          "Upcoming",
-          counts.upcoming
-        )}
-
-        ${buttonMarkup(
-          "live",
-          "Live",
-          counts.live
-        )}
-
-        ${buttonMarkup(
-          "final",
-          "Final",
-          counts.final
-        )}
-
-      </div>
-    `;
-
-    bindFilterButtons(wrapper);
-  }
-
-
-  function ensureFilterUI() {
-    const tableCard =
-      document.querySelector(
-        `${VIEW_SELECTOR} .table-card`
-      );
-
-    if (!tableCard) {
-      return;
-    }
-
-    let wrapper =
-      document.getElementById(
-        FILTER_ID
-      );
-
-    if (!wrapper) {
-      wrapper =
-        document.createElement(
-          "div"
-        );
-
-      wrapper.id =
-        FILTER_ID;
-
-      wrapper.className =
-        "hammer-status-filter-wrap";
-
-      tableCard.insertAdjacentElement(
-        "beforebegin",
-        wrapper
-      );
-    }
-
-    renderFilterUI();
-  }
-
-
   // ==========================================================================
-  // DESKTOP FILTERING
+  // FILTER ROWS
   // ==========================================================================
 
   function applyDesktopFilter() {
@@ -520,6 +505,8 @@
         activeStatus === "all" ||
         status === activeStatus;
 
+      row.hidden = !visible;
+
       row.style.display =
         visible
           ? ""
@@ -527,10 +514,6 @@
     });
   }
 
-
-  // ==========================================================================
-  // MOBILE FILTERING
-  // ==========================================================================
 
   function applyMobileFilter() {
     const sourceRows =
@@ -543,31 +526,28 @@
         )
       );
 
-    cards.forEach(
-      (card, index) => {
-        const sourceRow =
-          sourceRows[index];
+    cards.forEach((card, index) => {
+      const sourceRow =
+        sourceRows[index];
 
-        if (!sourceRow) {
-          card.style.display = "";
-          return;
-        }
-
-        const status =
-          rowStatus(
-            sourceRow
-          );
-
-        const visible =
-          activeStatus === "all" ||
-          status === activeStatus;
-
-        card.style.display =
-          visible
-            ? ""
-            : "none";
+      if (!sourceRow) {
+        return;
       }
-    );
+
+      const status =
+        rowStatus(sourceRow);
+
+      const visible =
+        activeStatus === "all" ||
+        status === activeStatus;
+
+      card.hidden = !visible;
+
+      card.style.display =
+        visible
+          ? ""
+          : "none";
+    });
   }
 
 
@@ -595,13 +575,9 @@
     }
 
     empty =
-      document.createElement(
-        "div"
-      );
+      document.createElement("div");
 
-    empty.id =
-      EMPTY_ID;
-
+    empty.id = EMPTY_ID;
     empty.className =
       "hammer-status-empty";
 
@@ -627,11 +603,9 @@
 
     if (
       activeStatus === "all" ||
-      (counts[activeStatus] ?? 0) > 0
+      counts[activeStatus] > 0
     ) {
-      empty.style.display =
-        "none";
-
+      empty.style.display = "none";
       return;
     }
 
@@ -642,10 +616,7 @@
     };
 
     empty.textContent =
-      `No ${
-        labels[activeStatus] ??
-        "games"
-      } are available in this week.`;
+      `No ${labels[activeStatus]} are available in this week.`;
 
     empty.style.display =
       "block";
@@ -653,7 +624,7 @@
 
 
   // ==========================================================================
-  // HIDE OLD SUMMARY
+  // OLD SUMMARY
   // ==========================================================================
 
   function hideOldSummary() {
@@ -662,17 +633,15 @@
         SUMMARY_SELECTOR
       );
 
-    if (!summary) {
-      return;
+    if (summary) {
+      summary.style.display =
+        "none";
     }
-
-    summary.style.display =
-      "none";
   }
 
 
   // ==========================================================================
-  // EASTERN TIME LABEL
+  // ET LABELS
   // ==========================================================================
 
   function addEasternTimeLabels() {
@@ -705,14 +674,6 @@
               node.nodeValue ?? ""
             );
 
-          if (
-            !/\b(?:AM|PM)\b/i.test(
-              original
-            )
-          ) {
-            return;
-          }
-
           const updated =
             original.replace(
               /(\b\d{1,2}:\d{2}\s*(?:AM|PM)\b)(?!\s*ET\b)/gi,
@@ -737,15 +698,14 @@
 
   function updateEverything() {
     installStyles();
-
     hideOldSummary();
 
     ensureFilterUI();
+    updateFilterUI();
 
     addEasternTimeLabels();
 
     applyDesktopFilter();
-
     applyMobileFilter();
 
     updateEmptyState();
@@ -759,13 +719,11 @@
 
     updateQueued = true;
 
-    requestAnimationFrame(
-      () => {
-        updateQueued = false;
+    requestAnimationFrame(() => {
+      updateQueued = false;
 
-        updateEverything();
-      }
-    );
+      updateEverything();
+    });
   }
 
 
@@ -793,20 +751,9 @@
     }
 
     projectionObserver =
-      new MutationObserver(
-        mutations => {
-          const meaningful =
-            mutations.some(
-              mutation =>
-                mutation.type ===
-                "childList"
-            );
-
-          if (meaningful) {
-            scheduleUpdate();
-          }
-        }
-      );
+      new MutationObserver(() => {
+        scheduleUpdate();
+      });
 
     projectionObserver.observe(
       container,
@@ -824,21 +771,17 @@
 
   function start() {
     installStyles();
-
     hideOldSummary();
+
+    ensureFilterUI();
 
     installProjectionObserver();
 
-    scheduleUpdate();
+    updateEverything();
 
     setTimeout(
       scheduleUpdate,
-      100
-    );
-
-    setTimeout(
-      scheduleUpdate,
-      300
+      250
     );
 
     setTimeout(
