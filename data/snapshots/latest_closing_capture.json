@@ -1,12 +1,46 @@
 {
-  "captured_at_utc": "2026-09-04T20:27:48.769926+00:00",
+  "captured_at_utc": "2026-09-04T21:27:00.644609+00:00",
   "window": {
     "pre_kickoff_minutes": 90,
     "post_kickoff_grace_minutes": 10
   },
-  "closing_lines_added": 0,
+  "closing_lines_added": 1,
   "excluded_untracked_games": 127,
   "ledger_path": "data/snapshots/closing_lines.jsonl",
   "note": "Official Model A closing-line capture. tracking_eligible=false and FCS fallback games are excluded.",
-  "captures": []
+  "captures": [
+    {
+      "closing_id": "59fbfc73e27c2c034ab035aa",
+      "game_key": "401864495",
+      "captured_at_utc": "2026-09-04T21:27:00.644609+00:00",
+      "scheduled_kickoff_utc": "2026-09-04T22:30:00+00:00",
+      "minutes_to_kickoff": 63.0,
+      "capture_type": "near_kickoff_closing_proxy",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-09-04T21:27:00.353974",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401864495,
+      "week": 1,
+      "home_team": "Eastern Michigan",
+      "away_team": "San Jose State",
+      "neutral_site": false,
+      "model_reference": {
+        "home_spread": -5.0,
+        "total": 52.5
+      },
+      "closing_market": {
+        "home_spread": -1.5,
+        "total": 55.0,
+        "bookmaker": "Consensus (9 books)"
+      },
+      "signal_at_close": {
+        "disagreement": 3.5,
+        "preferred_side": "Eastern Michigan",
+        "signal": "SLIGHT EDGE",
+        "bet_status": "TRACKING",
+        "status_system": "v2_the_signal"
+      }
+    }
+  ]
 }
