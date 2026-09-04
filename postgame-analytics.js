@@ -274,18 +274,18 @@
               ${metric("EPA Margin", hasValue(c.epa_margin_home) ? `${escapeHtml(game.home_team)} ${formatSigned(c.epa_margin_home)}` : "—")}
               ${metric("Success Rate Dominance", pair(game, "success_rate", 1, "%"))}
               ${metric("Explosive Play Dependence", pair(game, "explosive_epa_dependency_pct", 1, "%"))}
-              ${metric("Turnover Luck", "— · held until turnover value is verified")}
+              ${metric("Turnover Impact", hasValue(c.turnover_epa_swing_home) ? `${escapeHtml(game.home_team)} ${formatSigned(c.turnover_epa_swing_home)} EPA swing` : "—")}
               ${metric("Finishing Drives", pair(game, "points_per_opportunity", 2, " pts/opportunity"))}
-              ${metric("Drive Efficiency", "— · pending verified drive possessions")}
-              ${metric("Field Position / Hidden Yardage", pair(game, "average_start_ep", 2, " start EP"))}
+              ${metric("Drive Efficiency", pair(game, "points_per_drive", 2, " pts/drive"))}
+              ${metric("Field Position / Hidden Yardage", pair(game, "average_drive_start_yardline", 1, " avg start"))}
               ${metric("Early-Down Performance", pair(game, "early_down_epa", 3, " EPA/play"))}
               ${metric("3rd/4th Down Variance", pair(game, "late_down_epa", 3, " EPA/play"))}
-              ${metric("Red-Zone Overperformance", "— · pending verified drive possessions")}
+              ${metric("Red-Zone Overperformance", pair(game, "red_zone_overperformance", 2, " pts/trip vs baseline"))}
               ${metric("Garbage-Time Impact", pair(game, "garbage_time_play_share_pct", 1, "% of plays"))}
               ${metric("Game Variance", pair(game, "play_epa_volatility", 3, " EPA σ"))}
             </div>
           </div>
-          <div class="pg-method">Adjusted Score is derived from CFBD postgame win expectancy and the frozen THI total. Missing components remain unavailable; the final score alone is never used to fabricate efficiency metrics.</div>
+          <div class="pg-method">Postgame Win Expectancy uses non-garbage-time cfbfastR EPA margin. Adjusted Score splits the frozen THI total by that retrospective EPA margin. This display-only layer makes no CFBD calls and never changes Model A.</div>
         </div>
       </section>
     `;
