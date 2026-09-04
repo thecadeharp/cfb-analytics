@@ -6,6 +6,7 @@
   const SIGNAL_URL = "./data/reports/signal_report.json";
   const STYLE_ID = "hammer-postgame-analytics-styles";
   const PANEL_ID = "hammer-postgame-analysis";
+  const SCORECARD_ID = "hammer-performance-scorecard";
 
   let payload = { meta: {}, games: {} };
   let settledByGame = new Map();
@@ -58,6 +59,26 @@
         background:#f7f1f6; color:#76526f; font-family:var(--mono);
         font-size:7px; font-weight:800; letter-spacing:.55px; text-transform:uppercase;
       }
+      #${SCORECARD_ID} { margin:14px 0; }
+      #${SCORECARD_ID} .perf-shell { border:1px solid var(--border); border-radius:13px; background:var(--surface); overflow:hidden; }
+      #${SCORECARD_ID} .perf-header { display:flex; justify-content:space-between; gap:14px; align-items:flex-start; padding:15px 17px; border-bottom:1px solid var(--border); }
+      #${SCORECARD_ID} .perf-kicker { color:#76526f; font-family:var(--mono); font-size:8px; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
+      #${SCORECARD_ID} .perf-title { margin-top:4px; font-size:18px; font-weight:850; }
+      #${SCORECARD_ID} .perf-note { max-width:560px; color:var(--muted); font-size:9px; line-height:1.5; text-align:right; }
+      #${SCORECARD_ID} .perf-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; padding:12px; }
+      #${SCORECARD_ID} .perf-stat { padding:11px 12px; border:1px solid var(--border); border-radius:9px; background:#fbfbfa; }
+      #${SCORECARD_ID} .perf-label { color:var(--muted); font-family:var(--mono); font-size:7px; font-weight:800; letter-spacing:.65px; text-transform:uppercase; }
+      #${SCORECARD_ID} .perf-value { margin-top:5px; font-size:17px; font-weight:850; }
+      #${SCORECARD_ID} .perf-sub { margin-top:3px; color:var(--muted); font-size:8px; }
+      #${SCORECARD_ID} .perf-ytd { padding:0 12px 13px; }
+      #${SCORECARD_ID} .perf-ytd-title { padding:10px 1px 8px; color:var(--muted); font-family:var(--mono); font-size:8px; font-weight:800; letter-spacing:.9px; text-transform:uppercase; }
+      #${SCORECARD_ID} .perf-table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:9px; }
+      #${SCORECARD_ID} table { width:100%; border-collapse:collapse; min-width:720px; }
+      #${SCORECARD_ID} th, #${SCORECARD_ID} td { padding:8px 10px; border-bottom:1px solid var(--border); text-align:right; font-size:8px; white-space:nowrap; }
+      #${SCORECARD_ID} th { color:var(--muted); font-family:var(--mono); font-size:7px; letter-spacing:.6px; text-transform:uppercase; background:#fafaf8; }
+      #${SCORECARD_ID} th:first-child, #${SCORECARD_ID} td:first-child { text-align:left; }
+      #${SCORECARD_ID} tr:last-child td { border-bottom:0; }
+      #${SCORECARD_ID} .perf-confidence { display:inline-flex; padding:3px 6px; border:1px solid var(--border); border-radius:999px; font-family:var(--mono); font-size:7px; }
       #${PANEL_ID} { margin-top:18px; }
       #${PANEL_ID} .pg-shell {
         border:1px solid var(--border); border-radius:13px; background:var(--surface);
@@ -105,6 +126,10 @@
       }
       #${PANEL_ID} .pg-pending { padding:24px; color:var(--muted); text-align:center; font-size:10px; }
       @media (max-width:760px) {
+        #${SCORECARD_ID} .perf-header { display:block; }
+        #${SCORECARD_ID} .perf-note { margin-top:6px; text-align:left; }
+        #${SCORECARD_ID} .perf-grid { grid-template-columns:repeat(2,minmax(0,1fr)); padding:9px; }
+        #${SCORECARD_ID} .perf-ytd { padding:0 9px 10px; }
         #${PANEL_ID} .pg-headlines, #${PANEL_ID} .pg-metrics { grid-template-columns:1fr; }
         #${PANEL_ID} .pg-header { padding:16px; }
         #${PANEL_ID} .pg-headlines, #${PANEL_ID} .pg-section { padding-left:10px; padding-right:10px; }
@@ -117,6 +142,122 @@
 
   function gameData(gameId) {
     return payload?.games?.[String(gameId)] || null;
+  }
+
+  function canonicalSignalName(value) {
+    const raw = String(value || "").toUpperCase();
+    const translations = signalReport?.signal_system?.legacy_label_translation || {};
+    if (translations[raw]) return translations[raw];
+    const wanted = canonical(raw);
+    const match = Object.entries(translations).find(([key]) => canonical(key) === wanted);
+    return match?.[1] || raw || "UNCLASSIFIED";
+  }
+
+  function activeProjectionWeek() {
+    const label = document.querySelector("#week-tabs .week-tab.active")?.textContent || "";
+    const match = label.match(/(?:Week\s*)?(\d+)/i);
+    return match ? Number(match[1]) : null;
+  }
+
+  function record(rows, field = "ats_result") {
+    const values = rows.map(row => String(row?.[field] || "").toUpperCase()).filter(value => ["W", "L", "P"].includes(value));
+    const wins = values.filter(value => value === "W").length;
+    const losses = values.filter(value => value === "L").length;
+    const pushes = values.filter(value => value === "P").length;
+    const decisions = wins + losses;
+    return { wins, losses, pushes, decisions, pct: decisions ? 100 * wins / decisions : null };
+  }
+
+  function mean(rows, field) {
+    const values = rows.map(row => Number(row?.[field])).filter(Number.isFinite);
+    return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+  }
+
+  function recordText(value) {
+    if (!value.decisions && !value.pushes) return "0-0";
+    return `${value.wins}-${value.losses}${value.pushes ? `-${value.pushes}` : ""}`;
+  }
+
+  function performanceStats(rows) {
+    const ats = record(rows);
+    const playRows = rows.filter(row => canonicalSignalName(row.signal) === "PLAY");
+    const play = record(playRows);
+    const totalRows = rows.filter(row => row.total_tier && ["W", "L", "P"].includes(String(row.total_result || "").toUpperCase()));
+    const totals = record(totalRows, "total_result");
+    const winnerRows = rows.filter(row => hasValue(row.actual_home_margin) && hasValue(row.public_home_spread ?? row.model_home_spread) && Math.abs(Number(row.public_home_spread ?? row.model_home_spread)) > 0.001);
+    let winnerCorrect = 0;
+    winnerRows.forEach(row => {
+      const line = Number(row.public_home_spread ?? row.model_home_spread);
+      const margin = Number(row.actual_home_margin);
+      if ((line < 0 && margin > 0) || (line > 0 && margin < 0)) winnerCorrect += 1;
+    });
+    const postgame = rows.filter(row => gameData(row.game_key)).length;
+    return { rows, ats, play, totals, totalRows, winnerCorrect, winnerDecisions:winnerRows.length, postgame,
+      error:mean(rows, "public_abs_error") ?? mean(rows, "model_abs_error"), clv:mean(rows, "clv_points") };
+  }
+
+  function perfStat(label, value, sub = "") {
+    return `<div class="perf-stat"><div class="perf-label">${escapeHtml(label)}</div><div class="perf-value">${escapeHtml(value)}</div><div class="perf-sub">${escapeHtml(sub)}</div></div>`;
+  }
+
+  function signalRows(rows) {
+    const order = signalReport?.signal_system?.order || ["ALIGNED", "SMALL EDGE", "PLAY", "MATERIAL DISAGREEMENT", "OUTLIER"];
+    const spreadRows = order.map(signal => {
+      const subset = rows.filter(row => canonicalSignalName(row.signal) === signal);
+      const rec = record(subset);
+      const clv = mean(subset, "clv_points");
+      const beat = subset.filter(row => hasValue(row.clv_points) && Number(row.clv_points) > 0).length;
+      const clvDecisions = subset.filter(row => hasValue(row.clv_points) && Number(row.clv_points) !== 0).length;
+      const confidence = signalReport?.signals?.[signal]?.confidence || "DEVELOPING";
+      return { label:signal, sample:subset.length, rec, clv, beatPct:clvDecisions ? 100*beat/clvDecisions : null, confidence };
+    });
+    const totalRows = ["TOTAL WATCH", "TOTAL LEAN"].map(tier => {
+      const subset = rows.filter(row => String(row.total_tier || "").toUpperCase() === tier);
+      return { label:tier, sample:subset.length, rec:record(subset,"total_result"), clv:null, beatPct:null, confidence:"TESTING" };
+    });
+    return [...spreadRows, ...totalRows];
+  }
+
+  function scorecardMarkup(week, weeklyRows, ytdRows) {
+    const weekly = performanceStats(weeklyRows);
+    const ytd = performanceStats(ytdRows);
+    const body = signalRows(ytdRows).map(item => `<tr>
+      <td>${escapeHtml(item.label)}</td><td>${item.sample}</td><td>${escapeHtml(recordText(item.rec))}</td>
+      <td>${hasValue(item.rec.pct) ? `${Number(item.rec.pct).toFixed(1)}%` : "—"}</td>
+      <td>${hasValue(item.clv) ? formatSigned(item.clv,1," pts") : "—"}</td>
+      <td>${hasValue(item.beatPct) ? `${Number(item.beatPct).toFixed(1)}%` : "—"}</td>
+      <td><span class="perf-confidence">${escapeHtml(item.confidence)}</span></td></tr>`).join("");
+    const weekLabel = week === null ? "Selected Week" : `Week ${week}`;
+    return `<div class="perf-shell">
+      <div class="perf-header"><div><div class="perf-kicker">🔨 Transparent Model Tracking</div><div class="perf-title">${weekLabel} Performance</div></div>
+      <div class="perf-note">Live prospective results. Small samples are descriptive—not proof of future performance. Pushes are excluded from win percentages.</div></div>
+      <div class="perf-grid">
+        ${perfStat("Games Final",weekly.rows.length,`${weekly.postgame} postgame analyses available`)}
+        ${perfStat("Predicted Winners",`${weekly.winnerCorrect}-${Math.max(0,weekly.winnerDecisions-weekly.winnerCorrect)}`,hasValue(weekly.winnerDecisions) && weekly.winnerDecisions ? `${(100*weekly.winnerCorrect/weekly.winnerDecisions).toFixed(1)}% correct` : "No decisions")}
+        ${perfStat("Overall ATS",recordText(weekly.ats),hasValue(weekly.ats.pct) ? `${weekly.ats.pct.toFixed(1)}%` : "No decisions")}
+        ${perfStat("Play Tier ATS",recordText(weekly.play),hasValue(weekly.play.pct) ? `${weekly.play.pct.toFixed(1)}%` : "No decisions")}
+        ${perfStat("Flagged Totals",recordText(weekly.totals),hasValue(weekly.totals.pct) ? `${weekly.totals.pct.toFixed(1)}%` : "No decisions")}
+        ${perfStat("Average Margin Error",hasValue(weekly.error) ? `${weekly.error.toFixed(1)} pts` : "—","Absolute THI projection error")}
+        ${perfStat("Average CLV",hasValue(weekly.clv) ? formatSigned(weekly.clv,1," pts") : "—","Preferred-side closing value")}
+        ${perfStat("Season ATS",recordText(ytd.ats),hasValue(ytd.ats.pct) ? `${ytd.ats.pct.toFixed(1)}% YTD` : "No decisions")}
+      </div>
+      <div class="perf-ytd"><div class="perf-ytd-title">Season-to-Date · Every Signal and Testing Key</div>
+        <div class="perf-table-wrap"><table><thead><tr><th>Signal / Key</th><th>Games</th><th>Record</th><th>Win %</th><th>Avg CLV</th><th>Beat Close</th><th>Confidence</th></tr></thead><tbody>${body}</tbody></table></div>
+      </div></div>`;
+  }
+
+  function applyPerformanceScorecard() {
+    const tabs = document.getElementById("week-tabs");
+    if (!tabs || !settledByGame.size) return;
+    const week = activeProjectionWeek();
+    const ytdRows = Array.from(settledByGame.values()).filter(row => row.result_settled);
+    const weeklyRows = ytdRows.filter(row => week === null || Number(row.week) === Number(week));
+    const signature = `${week}|${weeklyRows.length}|${ytdRows.length}|${payload?.meta?.generated_at_utc || ""}|${signalReport?.generated_at_utc || ""}`;
+    let card = document.getElementById(SCORECARD_ID);
+    if (!card) { card = document.createElement("section"); card.id = SCORECARD_ID; tabs.insertAdjacentElement("afterend",card); }
+    if (card.dataset.signature === signature) return;
+    card.dataset.signature = signature;
+    card.innerHTML = scorecardMarkup(week,weeklyRows,ytdRows);
   }
 
   function settledData(gameId) {
@@ -369,6 +510,7 @@
       requestAnimationFrame(() => {
         addAvailabilityIndicators();
         applyPanel();
+        applyPerformanceScorecard();
       });
     });
     observer.observe(document.body, { childList: true, subtree: true });
@@ -405,6 +547,7 @@
     wrapOpenMatchup();
     addAvailabilityIndicators();
     applyPanel();
+    applyPerformanceScorecard();
   }
 
   async function start() {
