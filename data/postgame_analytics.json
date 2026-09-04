@@ -1,13 +1,235 @@
 {
-  "meta": {
-    "version": "postgame-analytics-v1",
-    "generated_at_utc": "2026-09-04T18:34:15.840978+00:00",
-    "scope": "Retrospective display-only analysis; never a Model A input.",
-    "source": "CollegeFootballData completed-game advanced box score and plays endpoints",
-    "games_available": 0,
-    "built_this_run": 0,
-    "preserved_this_run": 0,
-    "failed_this_run": 3
+  "games": {
+    "401856776": {
+      "availability": "available",
+      "away_team": "Colorado",
+      "comparisons": {
+        "epa_margin_home": 3.37,
+        "turnover_epa_swing_home": -2.753
+      },
+      "game_id": "401856776",
+      "generated_at_utc": "2026-09-04T19:11:27.308957+00:00",
+      "headline": {
+        "adjusted_score": {
+          "away_points": 24.6,
+          "home_points": 27.9
+        },
+        "away_win_expectancy_pct": 38.2,
+        "home_win_expectancy_pct": 61.8,
+        "reality_check": "MISLEADING FINAL"
+      },
+      "home_team": "Georgia Tech",
+      "methodology": {
+        "adjusted_score": "Frozen pregame THI total split by postgame EPA margin.",
+        "win_expectancy": "Logistic transform of non-garbage-time total EPA margin."
+      },
+      "source": "SportsDataverse cfbfastR ESPN-derived play-by-play",
+      "teams": {
+        "away": {
+          "average_drive_start_yardline": 36.5,
+          "competitive_plays": 92,
+          "drives_tracked": 12,
+          "early_down_epa": -0.111,
+          "epa_per_play": -0.085,
+          "explosive_epa_dependency_pct": 42.1,
+          "explosive_play_count": 9,
+          "garbage_time_play_share_pct": 0.0,
+          "late_down_epa": -0.06,
+          "play_epa_volatility": 1.102,
+          "plays": 92,
+          "points_per_drive": 1.17,
+          "points_per_opportunity": 2.0,
+          "red_zone_overperformance": -1.9,
+          "red_zone_points_per_trip": 2.8,
+          "red_zone_trips": 5,
+          "scoring_opportunities": 7,
+          "success_rate": 37.0,
+          "total_epa": -7.785,
+          "turnover_epa_cost": 2.045,
+          "turnovers": 1
+        },
+        "home": {
+          "average_drive_start_yardline": 35.1,
+          "competitive_plays": 74,
+          "drives_tracked": 12,
+          "early_down_epa": 0.071,
+          "epa_per_play": -0.06,
+          "explosive_epa_dependency_pct": 52.3,
+          "explosive_play_count": 11,
+          "garbage_time_play_share_pct": 0.0,
+          "late_down_epa": -0.276,
+          "play_epa_volatility": 1.584,
+          "plays": 74,
+          "points_per_drive": 1.08,
+          "points_per_opportunity": 1.0,
+          "red_zone_overperformance": -3.2,
+          "red_zone_points_per_trip": 1.5,
+          "red_zone_trips": 4,
+          "scoring_opportunities": 6,
+          "success_rate": 41.9,
+          "total_epa": -4.415,
+          "turnover_epa_cost": 4.798,
+          "turnovers": 1
+        }
+      },
+      "week": 1
+    },
+    "401858204": {
+      "availability": "available",
+      "away_team": "Akron",
+      "comparisons": {
+        "epa_margin_home": 30.245,
+        "turnover_epa_swing_home": 7.173
+      },
+      "game_id": "401858204",
+      "generated_at_utc": "2026-09-04T19:11:27.308957+00:00",
+      "headline": {
+        "adjusted_score": {
+          "away_points": 10.6,
+          "home_points": 40.9
+        },
+        "away_win_expectancy_pct": 1.3,
+        "home_win_expectancy_pct": 98.7,
+        "reality_check": "SCORE UNDERSTATED THE GAP"
+      },
+      "home_team": "Wake Forest",
+      "methodology": {
+        "adjusted_score": "Frozen pregame THI total split by postgame EPA margin.",
+        "win_expectancy": "Logistic transform of non-garbage-time total EPA margin."
+      },
+      "source": "SportsDataverse cfbfastR ESPN-derived play-by-play",
+      "teams": {
+        "away": {
+          "average_drive_start_yardline": 30.0,
+          "competitive_plays": 66,
+          "drives_tracked": 11,
+          "early_down_epa": -0.102,
+          "epa_per_play": -0.181,
+          "explosive_epa_dependency_pct": 29.0,
+          "explosive_play_count": 3,
+          "garbage_time_play_share_pct": 27.5,
+          "late_down_epa": -0.339,
+          "play_epa_volatility": 1.088,
+          "plays": 91,
+          "points_per_drive": 1.45,
+          "points_per_opportunity": 5.33,
+          "red_zone_overperformance": 0.63,
+          "red_zone_points_per_trip": 5.33,
+          "red_zone_trips": 3,
+          "scoring_opportunities": 3,
+          "success_rate": 39.4,
+          "total_epa": -11.927,
+          "turnover_epa_cost": 7.173,
+          "turnovers": 2
+        },
+        "home": {
+          "average_drive_start_yardline": 32.3,
+          "competitive_plays": 81,
+          "drives_tracked": 12,
+          "early_down_epa": 0.106,
+          "epa_per_play": 0.226,
+          "explosive_epa_dependency_pct": 79.0,
+          "explosive_play_count": 13,
+          "garbage_time_play_share_pct": 15.6,
+          "late_down_epa": 0.503,
+          "play_epa_volatility": 1.398,
+          "plays": 96,
+          "points_per_drive": 3.17,
+          "points_per_opportunity": 4.29,
+          "red_zone_overperformance": -0.41,
+          "red_zone_points_per_trip": 4.29,
+          "red_zone_trips": 7,
+          "scoring_opportunities": 7,
+          "success_rate": 38.3,
+          "total_epa": 18.318,
+          "turnover_epa_cost": 0.0,
+          "turnovers": 0
+        }
+      },
+      "week": 1
+    },
+    "401858424": {
+      "availability": "available",
+      "away_team": "UAB",
+      "comparisons": {
+        "epa_margin_home": 17.204,
+        "turnover_epa_swing_home": 4.794
+      },
+      "game_id": "401858424",
+      "generated_at_utc": "2026-09-04T19:11:27.308957+00:00",
+      "headline": {
+        "adjusted_score": {
+          "away_points": 17.6,
+          "home_points": 34.9
+        },
+        "away_win_expectancy_pct": 7.9,
+        "home_win_expectancy_pct": 92.1,
+        "reality_check": "FINAL MATCHED THE PERFORMANCE"
+      },
+      "home_team": "Illinois",
+      "methodology": {
+        "adjusted_score": "Frozen pregame THI total split by postgame EPA margin.",
+        "win_expectancy": "Logistic transform of non-garbage-time total EPA margin."
+      },
+      "source": "SportsDataverse cfbfastR ESPN-derived play-by-play",
+      "teams": {
+        "away": {
+          "average_drive_start_yardline": 42.6,
+          "competitive_plays": 105,
+          "drives_tracked": 9,
+          "early_down_epa": -0.045,
+          "epa_per_play": 0.058,
+          "explosive_epa_dependency_pct": 35.0,
+          "explosive_play_count": 9,
+          "garbage_time_play_share_pct": 0.0,
+          "late_down_epa": 0.255,
+          "play_epa_volatility": 1.423,
+          "plays": 105,
+          "points_per_drive": 2.67,
+          "points_per_opportunity": 3.43,
+          "red_zone_overperformance": 0.1,
+          "red_zone_points_per_trip": 4.8,
+          "red_zone_trips": 5,
+          "scoring_opportunities": 7,
+          "success_rate": 39.0,
+          "total_epa": 6.056,
+          "turnover_epa_cost": 7.482,
+          "turnovers": 1
+        },
+        "home": {
+          "average_drive_start_yardline": 35.2,
+          "competitive_plays": 56,
+          "drives_tracked": 8,
+          "early_down_epa": 0.469,
+          "epa_per_play": 0.415,
+          "explosive_epa_dependency_pct": 51.0,
+          "explosive_play_count": 7,
+          "garbage_time_play_share_pct": 0.0,
+          "late_down_epa": 0.259,
+          "play_epa_volatility": 1.378,
+          "plays": 56,
+          "points_per_drive": 5.25,
+          "points_per_opportunity": 9.33,
+          "red_zone_overperformance": 4.63,
+          "red_zone_points_per_trip": 9.33,
+          "red_zone_trips": 3,
+          "scoring_opportunities": 3,
+          "success_rate": 50.0,
+          "total_epa": 23.26,
+          "turnover_epa_cost": 2.688,
+          "turnovers": 1
+        }
+      },
+      "week": 1
+    }
   },
-  "games": {}
+  "meta": {
+    "eligible_games": 3,
+    "games_available": 3,
+    "generated_at_utc": "2026-09-04T19:11:27.313391+00:00",
+    "model_a_affected": false,
+    "source": "SportsDataverse cfbfastR ESPN-derived play-by-play",
+    "uses_cfbd": false,
+    "version": "postgame-analytics-v2-no-cfbd"
+  }
 }
