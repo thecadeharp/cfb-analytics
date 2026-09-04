@@ -498,6 +498,11 @@
           display: none;
           content: "";
         }
+        #view-projections details.signal-guide > summary::before,
+        #view-projections details.signal-guide > summary::after {
+          display: none !important;
+          content: none !important;
+        }
       `;
       document.head.appendChild(style);
     }
