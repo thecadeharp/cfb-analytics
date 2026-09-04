@@ -1,6 +1,10 @@
 name: Postgame Analytics v1 — No CFBD
 
 on:
+  workflow_run:
+    workflows: ["Settle Results + Live Scores - No CFBD"]
+    types: [completed]
+
   workflow_dispatch:
     inputs:
       refresh_existing:
@@ -18,11 +22,16 @@ concurrency:
 
 jobs:
   build:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -75,12 +84,13 @@ jobs:
               assert str(game.get("game_id")) == str(game_id)
               assert game.get("availability") in {"available", "partial"}
               assert game.get("away_team") and game.get("home_team")
-          if eligible_ids and not payload["games"]:
-              raise AssertionError(
-                  f"Postgame build produced zero games despite {len(eligible_ids)} "
-                  "eligible settled game(s). The public cfbfastR file may not be updated yet."
-              )
+          pending = eligible_ids.difference(payload["games"])
           print(f"Validated {len(payload['games'])} postgame game(s).")
+          if pending:
+              print(
+                  f"{len(pending)} settled game(s) are waiting for the public "
+                  "cfbfastR file; a later settlement run will retry automatically."
+              )
           PY
 
       - name: Verify Model A remained unchanged
