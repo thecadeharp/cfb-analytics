@@ -1,4 +1,4 @@
-name: Postgame Analytics v1
+name: Postgame Analytics v1 — No CFBD
 
 on:
   workflow_dispatch:
@@ -29,8 +29,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dependency
-        run: python -m pip install --disable-pip-version-check requests
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check requests pandas pyarrow
 
       - name: Protect Model A
         run: |
@@ -45,7 +45,6 @@ jobs:
 
       - name: Build isolated postgame analytics
         env:
-          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
           REFRESH_EXISTING: ${{ inputs.refresh_existing }}
         run: |
           if [ "$REFRESH_EXISTING" = "true" ]; then
@@ -79,7 +78,7 @@ jobs:
           if eligible_ids and not payload["games"]:
               raise AssertionError(
                   f"Postgame build produced zero games despite {len(eligible_ids)} "
-                  "eligible settled game(s). Open the build step for the CFBD error."
+                  "eligible settled game(s). The public cfbfastR file may not be updated yet."
               )
           print(f"Validated {len(payload['games'])} postgame game(s).")
           PY
