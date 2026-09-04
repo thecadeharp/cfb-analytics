@@ -624,11 +624,190 @@
   // STARTUP
   // ==========================================================================
 
+
+  // ==========================================================================
+  // RATINGS + TRANSFER PORTAL TABLE READABILITY
+  //
+  // Ratings Advanced mode has many columns. Give it a real horizontal-scroll
+  // surface and enough intrinsic width so headers/values do not get crushed.
+  //
+  // Transfer Portal class rankings had mixed header/cell alignment, which made
+  // values look like they belonged to the wrong columns. Normalize widths and
+  // numeric alignment without changing any data or sorting.
+  // ==========================================================================
+
+  function installWideTableFixes() {
+    if (document.getElementById("hammer-wide-table-fixes")) return;
+
+    const style = document.createElement("style");
+    style.id = "hammer-wide-table-fixes";
+    style.textContent = `
+      /* -------------------------
+         TEAM RATINGS
+      -------------------------- */
+      #view-ratings .table-card {
+        overflow: hidden;
+      }
+
+      #view-ratings .table-scroll {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto !important;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
+        scrollbar-gutter: stable;
+      }
+
+      #view-ratings .table-scroll .projection-table {
+        width: max-content;
+        min-width: 100%;
+      }
+
+      /* Advanced Ratings: preserve every metric as a readable column. */
+      #view-ratings .ratings-toggle + .conference-filter-bar + .table-scroll .projection-table,
+      #view-ratings .conference-filter-bar + .table-scroll .projection-table {
+        min-width: 1780px;
+      }
+
+      #view-ratings .projection-table th,
+      #view-ratings .projection-table td {
+        white-space: nowrap;
+      }
+
+      #view-ratings .projection-table th {
+        overflow: visible;
+        text-overflow: clip;
+      }
+
+      /* Make the scrollbar easier to discover on desktop. */
+      #view-ratings .table-scroll::-webkit-scrollbar {
+        height: 10px;
+      }
+
+      #view-ratings .table-scroll::-webkit-scrollbar-track {
+        background: #f1f1ee;
+      }
+
+      #view-ratings .table-scroll::-webkit-scrollbar-thumb {
+        background: #c9c9c3;
+        border-radius: 999px;
+        border: 2px solid #f1f1ee;
+      }
+
+      /* -------------------------
+         TRANSFER PORTAL
+      -------------------------- */
+      #view-portal .pv-table-wrap {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
+        scrollbar-gutter: stable;
+      }
+
+      #view-portal .pv-table {
+        width: 100%;
+        min-width: 1040px;
+        table-layout: fixed;
+      }
+
+      #view-portal .pv-table th,
+      #view-portal .pv-table td {
+        box-sizing: border-box;
+        vertical-align: middle;
+      }
+
+      #view-portal .pv-table th:nth-child(1),
+      #view-portal .pv-table td:nth-child(1) {
+        width: 6%;
+        text-align: left;
+      }
+
+      #view-portal .pv-table th:nth-child(2),
+      #view-portal .pv-table td:nth-child(2) {
+        width: 20%;
+        text-align: left;
+      }
+
+      #view-portal .pv-table th:nth-child(3),
+      #view-portal .pv-table td:nth-child(3),
+      #view-portal .pv-table th:nth-child(4),
+      #view-portal .pv-table td:nth-child(4) {
+        width: 7%;
+        text-align: right;
+      }
+
+      #view-portal .pv-table th:nth-child(5),
+      #view-portal .pv-table td:nth-child(5) {
+        width: 10%;
+        text-align: right;
+      }
+
+      #view-portal .pv-table th:nth-child(6),
+      #view-portal .pv-table td:nth-child(6),
+      #view-portal .pv-table th:nth-child(7),
+      #view-portal .pv-table td:nth-child(7) {
+        width: 10%;
+        text-align: right;
+      }
+
+      #view-portal .pv-table th:nth-child(8),
+      #view-portal .pv-table td:nth-child(8) {
+        width: 12%;
+        text-align: right;
+      }
+
+      #view-portal .pv-table th:nth-child(9),
+      #view-portal .pv-table td:nth-child(9) {
+        width: 8%;
+        text-align: right;
+      }
+
+      #view-portal .pv-table td:nth-child(n+3) {
+        font-variant-numeric: tabular-nums;
+      }
+
+      #view-portal .pv-table th:nth-child(n+3) {
+        text-align: right !important;
+      }
+
+      #view-portal .pv-table-wrap::-webkit-scrollbar {
+        height: 10px;
+      }
+
+      #view-portal .pv-table-wrap::-webkit-scrollbar-track {
+        background: #f1f1ee;
+      }
+
+      #view-portal .pv-table-wrap::-webkit-scrollbar-thumb {
+        background: #c9c9c3;
+        border-radius: 999px;
+        border: 2px solid #f1f1ee;
+      }
+
+      @media (max-width: 600px) {
+        #view-ratings .table-scroll .projection-table {
+          min-width: 1600px;
+        }
+
+        #view-portal .pv-table {
+          min-width: 900px;
+        }
+      }
+    `;
+
+    document.head.appendChild(style);
+  }
+
+
   function start() {
     installMatchupUx();
     installStickyProjectionHeader();
     installTerminologyObserver();
     makeSignalGuidePersistent();
+    installWideTableFixes();
     installWelcomeModal();
   }
 
