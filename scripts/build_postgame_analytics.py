@@ -43,12 +43,14 @@ def enrich(row):
     p = normalize_row(row)
     text = f"{p.get('play_type','')} {p.get('play_text','')}".lower()
     p.update({
+        "scrimmage": bool(p.get("is_pass") or p.get("is_rush")),
         "drive_id": str(row_value(row, "drive_id", "drive.id", default="")),
         "play_id": str(row_value(row, "id", "play_id", default="")),
         "start_score": raw_num(row, "start.pos_team_score", "pos_team_score"),
         "end_score": raw_num(row, "end.pos_team_score", "end_pos_team_score"),
         "turnover": boolean(row_value(row, "turnover", "is_turnover", default=False)) or
             any(x in text for x in ("intercepted", "fumble lost", "turnover on downs")),
+        "sack": boolean(row_value(row, "sack", default=False)) or "sacked" in text,
     })
     return p
 
@@ -60,9 +62,10 @@ def sd(a):
 
 def drives(plays, team):
     groups = {}
-    for i, p in enumerate(plays):
-        if canon(p.get("offense")) == canon(team):
-            groups.setdefault(p.get("drive_id") or f"missing-{i}", []).append(p)
+    for p in plays:
+        drive_id = str(p.get("drive_id") or "").strip()
+        if canon(p.get("offense")) == canon(team) and drive_id:
+            groups.setdefault(drive_id, []).append(p)
     out = []
     for rows in groups.values():
         starts = [num(p.get("start_score")) for p in rows]; starts = [x for x in starts if x is not None]
@@ -70,19 +73,25 @@ def drives(plays, team):
         ytg = [num(p.get("yards_to_goal")) for p in rows]; ytg = [x for x in ytg if x is not None]
         first = num(rows[0].get("yards_to_goal"))
         pts = max(0, max(ends)-min(starts)) if starts and ends else None
-        out.append({"pts":pts, "opp":bool(ytg and min(ytg)<=40), "rz":bool(ytg and min(ytg)<=20),
-                    "start":100-first if first is not None else None})
+        opportunity=bool(ytg and min(ytg)<=40)
+        last=rows[-1]
+        three_out=(len(rows)==3 and int(num(last.get("down")) or 0)==3 and not last.get("success") and not opportunity)
+        out.append({"pts":pts, "opp":opportunity, "rz":bool(ytg and min(ytg)<=20),
+                    "start":100-first if first is not None else None, "three_out":three_out,
+                    "successful":opportunity or bool(pts and pts>0)})
     def vals(key, subset=out): return [x[key] for x in subset if x[key] is not None]
     opp = [x for x in out if x["opp"]]; rz = [x for x in out if x["rz"]]
     rzpp = avg(vals("pts", rz))
     return {"drives_tracked":len(out), "points_per_drive":rnd(avg(vals("pts")),2),
+            "drive_success_rate":rnd(100*sum(x["successful"] for x in out)/len(out),1) if out else None,
+            "three_and_out_rate":rnd(100*sum(x["three_out"] for x in out)/len(out),1) if out else None,
             "scoring_opportunities":len(opp), "points_per_opportunity":rnd(avg(vals("pts",opp)),2),
             "red_zone_trips":len(rz), "red_zone_points_per_trip":rnd(rzpp,2),
             "red_zone_overperformance":rnd(rzpp-4.7,2) if rzpp is not None else None,
             "average_drive_start_yardline":rnd(avg(vals("start")),1)}
 
 def team_metrics(plays, team):
-    rows = [p for p in plays if canon(p.get("offense")) == canon(team)]
+    rows = [p for p in plays if canon(p.get("offense")) == canon(team) and p.get("scrimmage")]
     comp = [p for p in rows if not p.get("garbage_time")]
     ep = [p for p in comp if num(p.get("epa")) is not None]; ev = [num(p["epa"]) for p in ep]
     early = [num(p["epa"]) for p in ep if p.get("down") in (1,2)]
@@ -90,13 +99,37 @@ def team_metrics(plays, team):
     explosive = [p for p in ep if p.get("explosive")]
     pos = sum(max(x,0) for x in ev); exp_pos = sum(max(num(p["epa"]),0) for p in explosive)
     tos = [p for p in ep if p.get("turnover")]
+    passes=[p for p in ep if p.get("is_pass")]; rushes=[p for p in ep if p.get("is_rush")]
+    standard=[p for p in ep if int(num(p.get("down")) or 0)==1 or
+              (int(num(p.get("down")) or 0)==2 and (num(p.get("distance")) or 99)<8) or
+              (int(num(p.get("down")) or 0) in (3,4) and (num(p.get("distance")) or 99)<5)]
+    passing_down=[p for p in ep if p not in standard]
+    fourth=[p for p in ep if int(num(p.get("down")) or 0)==4]
+    third_fourth=[p for p in ep if int(num(p.get("down")) or 0) in (3,4)]
+    sacks=[p for p in passes if p.get("sack")]
+    stuffs=[p for p in rushes if (num(p.get("yards_gained")) or 0)<=0]
+    tfl=[p for p in ep if (num(p.get("yards_gained")) or 0)<0]
+    def split(prefix, subset):
+        values=[num(p["epa"]) for p in subset]
+        return {f"{prefix}_plays":len(subset), f"{prefix}_epa":rnd(avg(values)),
+                f"{prefix}_success_rate":rnd(100*sum(bool(p.get("success")) for p in subset)/len(subset),1) if subset else None}
     result = {"plays":len(rows), "competitive_plays":len(comp), "epa_per_play":rnd(avg(ev)),
               "total_epa":rnd(sum(ev)), "success_rate":rnd(100*sum(bool(p.get("success")) for p in comp)/len(comp),1) if comp else None,
               "early_down_epa":rnd(avg(early)), "late_down_epa":rnd(avg(late)),
               "explosive_play_count":len(explosive), "explosive_epa_dependency_pct":rnd(100*exp_pos/pos,1) if pos else None,
+              "explosive_play_rate":rnd(100*len(explosive)/len(ep),1) if ep else None,
               "turnovers":len(tos), "turnover_epa_cost":rnd(sum(abs(min(num(p["epa"]),0)) for p in tos)),
+              "third_fourth_down_success_rate":rnd(100*sum(bool(p.get("success")) for p in third_fourth)/len(third_fourth),1) if third_fourth else None,
+              "fourth_down_attempts":len(fourth),
+              "fourth_down_success_rate":rnd(100*sum(bool(p.get("success")) for p in fourth)/len(fourth),1) if fourth else None,
+              "fourth_down_epa":rnd(avg([num(p["epa"]) for p in fourth])),
+              "sack_rate_allowed":rnd(100*len(sacks)/len(passes),1) if passes else None,
+              "stuff_rate_allowed":rnd(100*len(stuffs)/len(rushes),1) if rushes else None,
+              "tfl_rate_allowed":rnd(100*len(tfl)/len(ep),1) if ep else None,
               "garbage_time_play_share_pct":rnd(100*(len(rows)-len(comp))/len(rows),1) if rows else None,
               "play_epa_volatility":rnd(sd(ev))}
+    for prefix,subset in (("pass",passes),("rush",rushes),("standard_down",standard),("passing_down",passing_down)):
+        result.update(split(prefix,subset))
     result.update(drives(plays, team)); return result
 
 def frozen_total(row):
