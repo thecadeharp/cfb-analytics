@@ -19,6 +19,8 @@ Production rules:
 - Live matchup adjustments require comparable samples on both teams
 - Completed results are locked in season-win distributions
 - Full schedules include FCS opponents through a transparent fallback
+- Betting markets use multi-book consensus instead of a single sportsbook
+- Obvious cross-book spread/total outliers are rejected before signal creation
 """
 
 import json
@@ -57,6 +59,11 @@ MIN_LIVE_RUSH_PLAYS = 15
 
 WIN_PROB_STD_DEV = 16.0
 
+# Market consensus guardrails.
+MARKET_SPREAD_OUTLIER_DISTANCE = 3.0
+MARKET_TOTAL_OUTLIER_DISTANCE = 4.0
+MARKET_MIN_BOOKS_FOR_FILTERING = 3
+
 # Leakage-safe historical yearly rating-to-points slopes from the composite
 # backtest. Production uses their simple mean.
 HISTORICAL_SCALE_BY_YEAR = {
@@ -65,6 +72,7 @@ HISTORICAL_SCALE_BY_YEAR = {
     "2024": 10.162,
     "2025": 9.950,
 }
+
 HISTORICAL_RATING_SCALE = (
     sum(HISTORICAL_SCALE_BY_YEAR.values())
     / len(HISTORICAL_SCALE_BY_YEAR)
@@ -87,7 +95,11 @@ def clean_api_key(raw):
 
     key = str(raw).strip()
 
-    if len(key) >= 2 and key[0] == key[-1] and key[0] in ("'", '"'):
+    if (
+        len(key) >= 2
+        and key[0] == key[-1]
+        and key[0] in ("'", '"')
+    ):
         key = key[1:-1].strip()
 
     if key.lower().startswith("bearer "):
@@ -101,8 +113,19 @@ def clean_api_key(raw):
     )
 
 
-CFBD_API_KEY = clean_api_key(os.environ.get("CFBD_API_KEY", ""))
-ODDS_API_KEY = clean_api_key(os.environ.get("ODDS_API_KEY", ""))
+CFBD_API_KEY = clean_api_key(
+    os.environ.get(
+        "CFBD_API_KEY",
+        "",
+    )
+)
+
+ODDS_API_KEY = clean_api_key(
+    os.environ.get(
+        "ODDS_API_KEY",
+        "",
+    )
+)
 
 
 # =============================================================================
@@ -113,7 +136,9 @@ def safe_number(value, default=0.0):
     try:
         if value is None:
             return default
+
         return float(value)
+
     except (TypeError, ValueError):
         return default
 
@@ -122,7 +147,9 @@ def optional_number(value):
     try:
         if value is None:
             return None
+
         return float(value)
+
     except (TypeError, ValueError):
         return None
 
@@ -131,10 +158,18 @@ def round_half(value):
     return round(value * 2) / 2
 
 
-def first_value(data, *keys, default=None):
+def first_value(
+    data,
+    *keys,
+    default=None,
+):
     for key in keys:
-        if key in data and data.get(key) is not None:
+        if (
+            key in data
+            and data.get(key) is not None
+        ):
             return data.get(key)
+
     return default
 
 
@@ -142,12 +177,19 @@ def canonical_name(value):
     if not value:
         return ""
 
-    text = unicodedata.normalize("NFKD", str(value))
+    text = unicodedata.normalize(
+        "NFKD",
+        str(value),
+    )
+
     text = "".join(
         character
         for character in text
-        if not unicodedata.combining(character)
+        if not unicodedata.combining(
+            character
+        )
     )
+
     text = text.lower().strip()
 
     replacements = {
@@ -163,9 +205,14 @@ def canonical_name(value):
     }
 
     for old, new in replacements.items():
-        text = text.replace(old, new)
+        text = text.replace(
+            old,
+            new,
+        )
 
-    return " ".join(text.split())
+    return " ".join(
+        text.split()
+    )
 
 
 # =============================================================================
@@ -245,65 +292,120 @@ SCHOOL_STRUCTURE_WORDS = {
 # =============================================================================
 
 def build_team_lookup(teams):
-    return {canonical_name(team): team for team in teams}
+    return {
+        canonical_name(team): team
+        for team in teams
+    }
 
 
-def resolve_cfbd_team(provider_name, valid_teams, lookup):
-    """Strict school matching. No prefix matching."""
+def resolve_cfbd_team(
+    provider_name,
+    valid_teams,
+    lookup,
+):
+    """
+    Strict school matching.
+    No prefix matching.
+    """
     if not provider_name:
         return None
 
-    canon = canonical_name(provider_name)
+    canon = canonical_name(
+        provider_name
+    )
 
     if canon in lookup:
         return lookup[canon]
 
-    alias = ALIASES.get(canon)
+    alias = ALIASES.get(
+        canon
+    )
+
     if alias in valid_teams:
         return alias
 
     return None
 
 
-def resolve_odds_team(provider_name, valid_teams, lookup):
+def resolve_odds_team(
+    provider_name,
+    valid_teams,
+    lookup,
+):
     """
-    Sportsbooks can append mascots. Exact names/aliases are preferred.
-    A guarded prefix fallback is allowed only for sportsbook labels.
+    Sportsbooks can append mascots.
+
+    Exact names/aliases are preferred.
+    A guarded prefix fallback is allowed
+    only for sportsbook labels.
     """
     if not provider_name:
         return None
 
-    canon = canonical_name(provider_name)
+    canon = canonical_name(
+        provider_name
+    )
 
     if canon in lookup:
         return lookup[canon]
 
-    alias = ALIASES.get(canon)
+    alias = ALIASES.get(
+        canon
+    )
+
     if alias in valid_teams:
         return alias
 
     candidates = []
 
-    for model_canon, model_name in lookup.items():
-        prefix = model_canon + " "
+    for (
+        model_canon,
+        model_name,
+    ) in lookup.items():
 
-        if not canon.startswith(prefix):
+        prefix = (
+            model_canon
+            + " "
+        )
+
+        if not canon.startswith(
+            prefix
+        ):
             continue
 
-        remainder = canon[len(prefix):].strip()
+        remainder = canon[
+            len(prefix):
+        ].strip()
+
         if not remainder:
             continue
 
-        first_word = remainder.split()[0]
-        if first_word in SCHOOL_STRUCTURE_WORDS:
+        first_word = (
+            remainder
+            .split()[0]
+        )
+
+        if (
+            first_word
+            in SCHOOL_STRUCTURE_WORDS
+        ):
             continue
 
-        candidates.append((len(model_canon), model_name))
+        candidates.append(
+            (
+                len(model_canon),
+                model_name,
+            )
+        )
 
     if not candidates:
         return None
 
-    candidates.sort(key=lambda item: item[0], reverse=True)
+    candidates.sort(
+        key=lambda item: item[0],
+        reverse=True,
+    )
+
     return candidates[0][1]
 
 
@@ -311,67 +413,111 @@ def resolve_odds_team(provider_name, valid_teams, lookup):
 # REQUESTS
 # =============================================================================
 
-def cfbd_get(endpoint, params=None, required=True):
+def cfbd_get(
+    endpoint,
+    params=None,
+    required=True,
+):
     if not CFBD_API_KEY:
-        print("❌ CFBD_API_KEY missing.")
+        print(
+            "❌ CFBD_API_KEY missing."
+        )
         sys.exit(1)
 
     max_attempts = 5
 
-    for attempt in range(1, max_attempts + 1):
+    for attempt in range(
+        1,
+        max_attempts + 1,
+    ):
         try:
             response = requests.get(
                 f"{CFBD_BASE}{endpoint}",
                 headers={
-                    "Authorization": f"Bearer {CFBD_API_KEY}",
-                    "Accept": "application/json",
+                    "Authorization":
+                        f"Bearer {CFBD_API_KEY}",
+                    "Accept":
+                        "application/json",
                 },
                 params=params,
                 timeout=75,
             )
+
         except requests.RequestException as error:
             print(
-                f"⚠ CFBD request error {endpoint} "
-                f"({attempt}/{max_attempts}): {error}"
+                f"⚠ CFBD request error "
+                f"{endpoint} "
+                f"({attempt}/{max_attempts}): "
+                f"{error}"
             )
 
             if attempt < max_attempts:
-                time.sleep(min(2 ** attempt, 20))
+                time.sleep(
+                    min(
+                        2 ** attempt,
+                        20,
+                    )
+                )
                 continue
 
             if required:
                 sys.exit(1)
+
             return []
 
-        if response.status_code in (401, 403):
-            print("❌ CFBD authentication failed.")
+        if response.status_code in (
+            401,
+            403,
+        ):
+            print(
+                "❌ CFBD authentication "
+                "failed."
+            )
             sys.exit(1)
 
         if not response.ok:
             print(
-                f"⚠ CFBD {endpoint}: HTTP {response.status_code} "
+                f"⚠ CFBD {endpoint}: "
+                f"HTTP "
+                f"{response.status_code} "
                 f"({attempt}/{max_attempts})"
             )
 
             if attempt < max_attempts:
-                time.sleep(min(2 ** attempt, 20))
+                time.sleep(
+                    min(
+                        2 ** attempt,
+                        20,
+                    )
+                )
                 continue
 
             if required:
                 sys.exit(1)
+
             return []
 
         try:
             return response.json()
+
         except ValueError:
-            print(f"⚠ Invalid JSON from CFBD {endpoint}")
+            print(
+                f"⚠ Invalid JSON from "
+                f"CFBD {endpoint}"
+            )
 
             if attempt < max_attempts:
-                time.sleep(min(2 ** attempt, 20))
+                time.sleep(
+                    min(
+                        2 ** attempt,
+                        20,
+                    )
+                )
                 continue
 
             if required:
                 sys.exit(1)
+
             return []
 
     return []
@@ -379,32 +525,56 @@ def cfbd_get(endpoint, params=None, required=True):
 
 def odds_get():
     if not ODDS_API_KEY:
-        print("⚠ ODDS_API_KEY missing.")
+        print(
+            "⚠ ODDS_API_KEY missing."
+        )
         return []
 
     try:
         response = requests.get(
-            f"{ODDS_BASE}/sports/americanfootball_ncaaf/odds",
+            (
+                f"{ODDS_BASE}/sports/"
+                "americanfootball_ncaaf/"
+                "odds"
+            ),
             params={
-                "apiKey": ODDS_API_KEY,
-                "regions": "us",
-                "markets": "spreads,totals",
-                "oddsFormat": "american",
-                "dateFormat": "iso",
+                "apiKey":
+                    ODDS_API_KEY,
+                "regions":
+                    "us",
+                "markets":
+                    "spreads,totals",
+                "oddsFormat":
+                    "american",
+                "dateFormat":
+                    "iso",
             },
             timeout=45,
         )
+
     except requests.RequestException as error:
-        print(f"⚠ Odds API request failed: {error}")
+        print(
+            f"⚠ Odds API request "
+            f"failed: {error}"
+        )
         return []
 
     if not response.ok:
-        print(f"⚠ Odds API HTTP {response.status_code}")
+        print(
+            f"⚠ Odds API HTTP "
+            f"{response.status_code}"
+        )
         return []
 
-    remaining = response.headers.get("x-requests-remaining")
+    remaining = response.headers.get(
+        "x-requests-remaining"
+    )
+
     if remaining is not None:
-        print(f"   Odds requests remaining: {remaining}")
+        print(
+            f"   Odds requests "
+            f"remaining: {remaining}"
+        )
 
     return response.json()
 
@@ -414,328 +584,1026 @@ def odds_get():
 # =============================================================================
 
 def load_metrics():
-    if not os.path.exists(METRICS_PATH):
-        print(f"❌ Missing {METRICS_PATH}")
+    if not os.path.exists(
+        METRICS_PATH
+    ):
+        print(
+            f"❌ Missing "
+            f"{METRICS_PATH}"
+        )
         sys.exit(1)
 
-    with open(METRICS_PATH, "r", encoding="utf-8") as file:
-        data = json.load(file)
+    with open(
+        METRICS_PATH,
+        "r",
+        encoding="utf-8",
+    ) as file:
+        data = json.load(
+            file
+        )
 
-    teams = data.get("teams", {})
+    teams = data.get(
+        "teams",
+        {},
+    )
 
     if len(teams) < 100:
-        print("❌ Metrics file contains too few teams.")
+        print(
+            "❌ Metrics file contains "
+            "too few teams."
+        )
         sys.exit(1)
 
-    print(f"✅ Loaded ratings for {len(teams)} teams")
-    return data, teams
+    print(
+        f"✅ Loaded ratings for "
+        f"{len(teams)} teams"
+    )
+
+    return (
+        data,
+        teams,
+    )
 
 
 def load_hfa(valid_teams):
-    if not os.path.exists(HFA_PATH):
-        print(f"❌ Missing {HFA_PATH}")
+    if not os.path.exists(
+        HFA_PATH
+    ):
+        print(
+            f"❌ Missing "
+            f"{HFA_PATH}"
+        )
         sys.exit(1)
 
-    with open(HFA_PATH, "r", encoding="utf-8") as file:
-        data = json.load(file)
+    with open(
+        HFA_PATH,
+        "r",
+        encoding="utf-8",
+    ) as file:
+        data = json.load(
+            file
+        )
 
-    meta = data.get("meta", {}) or {}
-    ratings = data.get("teams", {}) or {}
+    meta = (
+        data.get(
+            "meta",
+            {},
+        )
+        or {}
+    )
 
-    missing = sorted(set(valid_teams) - set(ratings))
-    extra = sorted(set(ratings) - set(valid_teams))
+    ratings = (
+        data.get(
+            "teams",
+            {},
+        )
+        or {}
+    )
+
+    missing = sorted(
+        set(valid_teams)
+        - set(ratings)
+    )
+
+    extra = sorted(
+        set(ratings)
+        - set(valid_teams)
+    )
 
     if missing:
-        print("❌ Production HFA table is missing model teams:")
+        print(
+            "❌ Production HFA table "
+            "is missing model teams:"
+        )
+
         for team in missing:
-            print(f"   - {team}")
+            print(
+                f"   - {team}"
+            )
+
         sys.exit(1)
 
-    minimum = safe_number(meta.get("minimum_hfa"), 1.0)
-    maximum = safe_number(meta.get("maximum_hfa"), 3.5)
+    minimum = safe_number(
+        meta.get(
+            "minimum_hfa"
+        ),
+        1.0,
+    )
+
+    maximum = safe_number(
+        meta.get(
+            "maximum_hfa"
+        ),
+        3.5,
+    )
 
     invalid = []
 
     for team in valid_teams:
-        value = optional_number(ratings.get(team))
-        if value is None or value < minimum or value > maximum:
-            invalid.append((team, ratings.get(team)))
+        value = optional_number(
+            ratings.get(
+                team
+            )
+        )
+
+        if (
+            value is None
+            or value < minimum
+            or value > maximum
+        ):
+            invalid.append(
+                (
+                    team,
+                    ratings.get(team),
+                )
+            )
 
     if invalid:
-        print("❌ Production HFA table contains invalid values:")
-        for team, value in invalid:
-            print(f"   - {team}: {value}")
+        print(
+            "❌ Production HFA table "
+            "contains invalid values:"
+        )
+
+        for (
+            team,
+            value,
+        ) in invalid:
+            print(
+                f"   - {team}: {value}"
+            )
+
         sys.exit(1)
 
-    print(f"✅ Loaded production HFA for {len(valid_teams)} model teams")
     print(
-        f"   Range: {minimum:.1f} to {maximum:.1f} | "
-        f"Neutral: {safe_number(meta.get('neutral_site_hfa'), 0.0):.1f}"
+        f"✅ Loaded production HFA "
+        f"for {len(valid_teams)} "
+        f"model teams"
+    )
+
+    print(
+        f"   Range: "
+        f"{minimum:.1f} "
+        f"to {maximum:.1f} | "
+        f"Neutral: "
+        f"{safe_number(meta.get('neutral_site_hfa'), 0.0):.1f}"
     )
 
     if extra:
         print(
-            f"⚠ HFA file contains {len(extra)} extra team(s) "
-            "not in the current model"
+            f"⚠ HFA file contains "
+            f"{len(extra)} extra "
+            "team(s) not in the "
+            "current model"
         )
 
     return data
 
 
 def load_cached_schedule():
-    """Load the last committed schedule without making any CFBD request."""
-    if not os.path.exists(SCHEDULE_PATH):
-        print(f"❌ Missing cached {SCHEDULE_PATH}")
+    """
+    Load the last committed schedule
+    without making any CFBD request.
+    """
+    if not os.path.exists(
+        SCHEDULE_PATH
+    ):
+        print(
+            f"❌ Missing cached "
+            f"{SCHEDULE_PATH}"
+        )
         sys.exit(1)
 
-    with open(SCHEDULE_PATH, "r", encoding="utf-8") as file:
-        schedule = json.load(file)
+    with open(
+        SCHEDULE_PATH,
+        "r",
+        encoding="utf-8",
+    ) as file:
+        schedule = json.load(
+            file
+        )
 
-    games = schedule.get("games", [])
-    team_schedules = schedule.get("team_schedules", {})
+    games = schedule.get(
+        "games",
+        [],
+    )
 
-    if len(games) < 400 or len(team_schedules) < 100:
-        print("❌ Cached schedule looks incomplete.")
+    team_schedules = schedule.get(
+        "team_schedules",
+        {},
+    )
+
+    if (
+        len(games) < 400
+        or len(team_schedules) < 100
+    ):
+        print(
+            "❌ Cached schedule "
+            "looks incomplete."
+        )
         sys.exit(1)
 
     print("")
-    print(f"📦 Using cached schedule from {SCHEDULE_PATH}")
-    print(f"✅ Cached FBS-vs-FBS games: {len(games)}")
+    print(
+        f"📦 Using cached schedule "
+        f"from {SCHEDULE_PATH}"
+    )
+    print(
+        f"✅ Cached FBS-vs-FBS games: "
+        f"{len(games)}"
+    )
+
     return schedule
 
 
-def get_team_hfa(team_name, hfa_data, neutral=False):
-    meta = hfa_data.get("meta", {}) or {}
+def get_team_hfa(
+    team_name,
+    hfa_data,
+    neutral=False,
+):
+    meta = (
+        hfa_data.get(
+            "meta",
+            {},
+        )
+        or {}
+    )
 
     if neutral:
-        return safe_number(meta.get("neutral_site_hfa"), 0.0)
+        return safe_number(
+            meta.get(
+                "neutral_site_hfa"
+            ),
+            0.0,
+        )
 
-    ratings = hfa_data.get("teams", {}) or {}
-    default = safe_number(meta.get("default_hfa"), 2.0)
-    return safe_number(ratings.get(team_name), default)
+    ratings = (
+        hfa_data.get(
+            "teams",
+            {},
+        )
+        or {}
+    )
+
+    default = safe_number(
+        meta.get(
+            "default_hfa"
+        ),
+        2.0,
+    )
+
+    return safe_number(
+        ratings.get(
+            team_name
+        ),
+        default,
+    )
 
 
 # =============================================================================
 # RATING SCALE
 # =============================================================================
 
-def current_sp_diagnostic_scale(teams):
+def current_sp_diagnostic_scale(
+    teams,
+):
     """
-    Cross-sectional 2026 power-rating -> SP+ slope.
+    Cross-sectional 2026
+    power-rating -> SP+ slope.
 
-    This is diagnostic only. It is intentionally NOT used as the production
-    point conversion because it is same-season and can over-expand extremes.
+    Diagnostic only.
     """
     x_values = []
     y_values = []
 
     for team in teams.values():
-        power = optional_number(team.get("power_rating"))
-        sp = optional_number((team.get("sp_plus", {}) or {}).get("overall"))
+        power = optional_number(
+            team.get(
+                "power_rating"
+            )
+        )
 
-        if power is None or sp is None:
+        sp = optional_number(
+            (
+                team.get(
+                    "sp_plus",
+                    {},
+                )
+                or {}
+            ).get(
+                "overall"
+            )
+        )
+
+        if (
+            power is None
+            or sp is None
+        ):
             continue
 
-        x_values.append(power)
-        y_values.append(sp)
+        x_values.append(
+            power
+        )
+
+        y_values.append(
+            sp
+        )
 
     if len(x_values) < 10:
         return {
             "slope": None,
             "intercept": None,
-            "sample": len(x_values),
+            "sample":
+                len(x_values),
         }
 
-    x_mean = statistics.mean(x_values)
-    y_mean = statistics.mean(y_values)
+    x_mean = statistics.mean(
+        x_values
+    )
+
+    y_mean = statistics.mean(
+        y_values
+    )
 
     numerator = sum(
-        (x - x_mean) * (y - y_mean)
-        for x, y in zip(x_values, y_values)
+        (x - x_mean)
+        * (y - y_mean)
+        for (
+            x,
+            y,
+        ) in zip(
+            x_values,
+            y_values,
+        )
     )
-    denominator = sum((x - x_mean) ** 2 for x in x_values)
 
-    slope = numerator / denominator if denominator else None
+    denominator = sum(
+        (x - x_mean) ** 2
+        for x in x_values
+    )
+
+    slope = (
+        numerator
+        / denominator
+        if denominator
+        else None
+    )
+
     intercept = (
-        y_mean - slope * x_mean
+        y_mean
+        - slope * x_mean
         if slope is not None
         else None
     )
 
     return {
-        "slope": slope,
-        "intercept": intercept,
-        "sample": len(x_values),
+        "slope":
+            slope,
+        "intercept":
+            intercept,
+        "sample":
+            len(x_values),
     }
 
 
-def calculate_rating_scale(teams):
+def calculate_rating_scale(
+    teams,
+):
     """
     Production point conversion.
 
-    Historical yearly scales came from the leakage-safe composite backtest:
-        2022  11.194
-        2023  10.392
-        2024  10.162
-        2025   9.950
+    Historical:
+        2022 11.194
+        2023 10.392
+        2024 10.162
+        2025  9.950
 
-    Their mean (10.4245) is the 2026 production conversion.
+    Mean = 10.4245.
 
-    The live 2026 SP+ regression is still calculated and published as a
-    diagnostic, but it no longer determines fair lines.
+    Live 2026 SP+ regression
+    remains diagnostic only.
     """
-    diagnostic = current_sp_diagnostic_scale(teams)
-    slope = HISTORICAL_RATING_SCALE
-
-    print("")
-    print("📐 Power rating calibration")
-    print(
-        f"   Production historical scale: "
-        f"{slope:.3f} points per rating unit"
+    diagnostic = (
+        current_sp_diagnostic_scale(
+            teams
+        )
     )
 
-    if diagnostic["slope"] is not None:
+    slope = (
+        HISTORICAL_RATING_SCALE
+    )
+
+    print("")
+    print(
+        "📐 Power rating calibration"
+    )
+
+    print(
+        f"   Production historical "
+        f"scale: {slope:.3f} "
+        "points per rating unit"
+    )
+
+    if (
+        diagnostic["slope"]
+        is not None
+    ):
         print(
-            f"   Current SP+ diagnostic scale: "
+            f"   Current SP+ diagnostic "
+            f"scale: "
             f"{diagnostic['slope']:.3f}"
         )
+
         print(
-            f"   Compression vs SP+ diagnostic: "
-            f"{diagnostic['slope'] - slope:.3f} points/unit"
+            f"   Compression vs SP+ "
+            f"diagnostic: "
+            f"{diagnostic['slope'] - slope:.3f} "
+            "points/unit"
         )
 
     return {
-        "slope": slope,
-        "intercept": 0.0,
-        "method": "historical_leakage_safe_composite_mean",
-        "historical_yearly_slopes": HISTORICAL_SCALE_BY_YEAR,
-        "historical_mean": round(HISTORICAL_RATING_SCALE, 6),
+        "slope":
+            slope,
+        "intercept":
+            0.0,
+        "method":
+            "historical_leakage_safe_composite_mean",
+        "historical_yearly_slopes":
+            HISTORICAL_SCALE_BY_YEAR,
+        "historical_mean":
+            round(
+                HISTORICAL_RATING_SCALE,
+                6,
+            ),
         "current_sp_plus_diagnostic": {
             "slope": (
-                round(diagnostic["slope"], 6)
-                if diagnostic["slope"] is not None
+                round(
+                    diagnostic["slope"],
+                    6,
+                )
+                if (
+                    diagnostic["slope"]
+                    is not None
+                )
                 else None
             ),
             "intercept": (
-                round(diagnostic["intercept"], 6)
-                if diagnostic["intercept"] is not None
+                round(
+                    diagnostic["intercept"],
+                    6,
+                )
+                if (
+                    diagnostic["intercept"]
+                    is not None
+                )
                 else None
             ),
-            "sample": diagnostic["sample"],
-            "used_for_production_lines": False,
+            "sample":
+                diagnostic["sample"],
+            "used_for_production_lines":
+                False,
         },
     }
 
 
 # =============================================================================
-# ODDS
+# ODDS — CONSENSUS MARKET
 # =============================================================================
 
-def extract_market(raw_game):
-    preferred_books = [
-        "draftkings",
-        "fanduel",
-        "betmgm",
-        "caesars",
-        "betonlineag",
-    ]
+def market_consensus(
+    quotes,
+    outlier_distance,
+):
+    """
+    Create a robust market consensus.
 
-    bookmakers = raw_game.get("bookmakers", [])
-    selected = None
+    With fewer than 3 books,
+    no quote is rejected because
+    there is not enough cross-book
+    information to identify a rogue
+    number responsibly.
 
-    for key in preferred_books:
-        for book in bookmakers:
-            if book.get("key") == key:
-                selected = book
-                break
-        if selected:
-            break
-
-    if selected is None and bookmakers:
-        selected = bookmakers[0]
-
-    if selected is None:
+    With 3+ books:
+    1. Calculate initial median.
+    2. Remove quotes farther than
+       the configured distance.
+    3. Recalculate median.
+    """
+    if not quotes:
         return {
-            "spread": None,
-            "total": None,
-            "bookmaker": None,
+            "value":
+                None,
+            "books":
+                0,
+            "raw_books":
+                0,
+            "excluded":
+                [],
+            "quotes":
+                [],
         }
 
-    raw_home = canonical_name(raw_game.get("home_team"))
-    spread = None
-    total = None
+    values = [
+        quote["value"]
+        for quote in quotes
+    ]
 
-    for market in selected.get("markets", []):
-        if market.get("key") == "spreads":
-            for outcome in market.get("outcomes", []):
-                if canonical_name(outcome.get("name")) == raw_home:
-                    spread = optional_number(outcome.get("point"))
+    initial_median = (
+        statistics.median(
+            values
+        )
+    )
 
-        elif market.get("key") == "totals":
-            for outcome in market.get("outcomes", []):
-                if str(outcome.get("name", "")).lower() == "over":
-                    total = optional_number(outcome.get("point"))
+    filtered = list(
+        quotes
+    )
+
+    excluded = []
+
+    if (
+        len(quotes)
+        >= MARKET_MIN_BOOKS_FOR_FILTERING
+    ):
+        filtered = [
+            quote
+            for quote in quotes
+            if abs(
+                quote["value"]
+                - initial_median
+            )
+            <= outlier_distance
+        ]
+
+        excluded = [
+            quote
+            for quote in quotes
+            if abs(
+                quote["value"]
+                - initial_median
+            )
+            > outlier_distance
+        ]
+
+        # Safety fallback.
+        # Never let filtering reduce
+        # the market below two books.
+        if len(filtered) < 2:
+            filtered = list(
+                quotes
+            )
+
+            excluded = []
+
+    final_value = (
+        statistics.median(
+            [
+                quote["value"]
+                for quote in filtered
+            ]
+        )
+    )
 
     return {
-        "spread": spread,
-        "total": total,
-        "bookmaker": selected.get("title"),
+        "value":
+            round_half(
+                final_value
+            ),
+        "books":
+            len(filtered),
+        "raw_books":
+            len(quotes),
+        "excluded":
+            excluded,
+        "quotes":
+            filtered,
     }
 
 
-def fetch_odds(valid_teams, lookup):
+def extract_market(
+    raw_game,
+):
+    """
+    Build spread and total consensus
+    from every sportsbook returned by
+    The Odds API.
+
+    This prevents one stale/incorrect
+    book from manufacturing a fake
+    Hammer Index signal.
+    """
+    bookmakers = (
+        raw_game.get(
+            "bookmakers",
+            [],
+        )
+        or []
+    )
+
+    raw_home = canonical_name(
+        raw_game.get(
+            "home_team"
+        )
+    )
+
+    spread_quotes = []
+    total_quotes = []
+
+    for book in bookmakers:
+        book_key = book.get(
+            "key"
+        )
+
+        book_title = (
+            book.get(
+                "title"
+            )
+            or book_key
+            or "Unknown"
+        )
+
+        spread = None
+        total = None
+
+        for market in (
+            book.get(
+                "markets",
+                [],
+            )
+            or []
+        ):
+            market_key = market.get(
+                "key"
+            )
+
+            if (
+                market_key
+                == "spreads"
+            ):
+                for outcome in (
+                    market.get(
+                        "outcomes",
+                        [],
+                    )
+                    or []
+                ):
+                    if (
+                        canonical_name(
+                            outcome.get(
+                                "name"
+                            )
+                        )
+                        == raw_home
+                    ):
+                        spread = (
+                            optional_number(
+                                outcome.get(
+                                    "point"
+                                )
+                            )
+                        )
+                        break
+
+            elif (
+                market_key
+                == "totals"
+            ):
+                for outcome in (
+                    market.get(
+                        "outcomes",
+                        [],
+                    )
+                    or []
+                ):
+                    if (
+                        str(
+                            outcome.get(
+                                "name",
+                                "",
+                            )
+                        ).lower()
+                        == "over"
+                    ):
+                        total = (
+                            optional_number(
+                                outcome.get(
+                                    "point"
+                                )
+                            )
+                        )
+                        break
+
+        if spread is not None:
+            spread_quotes.append({
+                "bookmaker":
+                    book_title,
+                "bookmaker_key":
+                    book_key,
+                "value":
+                    spread,
+            })
+
+        if total is not None:
+            total_quotes.append({
+                "bookmaker":
+                    book_title,
+                "bookmaker_key":
+                    book_key,
+                "value":
+                    total,
+            })
+
+    spread_consensus = (
+        market_consensus(
+            spread_quotes,
+            MARKET_SPREAD_OUTLIER_DISTANCE,
+        )
+    )
+
+    total_consensus = (
+        market_consensus(
+            total_quotes,
+            MARKET_TOTAL_OUTLIER_DISTANCE,
+        )
+    )
+
+    if (
+        spread_consensus[
+            "excluded"
+        ]
+    ):
+        print(
+            "⚠ Spread outlier(s) "
+            "removed: "
+            + ", ".join(
+                (
+                    f"{quote['bookmaker']} "
+                    f"{quote['value']:+.1f}"
+                )
+                for quote in (
+                    spread_consensus[
+                        "excluded"
+                    ]
+                )
+            )
+        )
+
+    if (
+        total_consensus[
+            "excluded"
+        ]
+    ):
+        print(
+            "⚠ Total outlier(s) "
+            "removed: "
+            + ", ".join(
+                (
+                    f"{quote['bookmaker']} "
+                    f"{quote['value']:.1f}"
+                )
+                for quote in (
+                    total_consensus[
+                        "excluded"
+                    ]
+                )
+            )
+        )
+
+    spread_books = (
+        spread_consensus[
+            "books"
+        ]
+    )
+
+    total_books = (
+        total_consensus[
+            "books"
+        ]
+    )
+
+    market_books = max(
+        spread_books,
+        total_books,
+    )
+
+    bookmaker = (
+        (
+            f"Consensus "
+            f"({market_books} books)"
+        )
+        if market_books > 0
+        else None
+    )
+
+    return {
+        "spread":
+            spread_consensus[
+                "value"
+            ],
+        "total":
+            total_consensus[
+                "value"
+            ],
+        "bookmaker":
+            bookmaker,
+
+        "spread_books":
+            spread_books,
+        "total_books":
+            total_books,
+
+        "spread_raw_books":
+            spread_consensus[
+                "raw_books"
+            ],
+        "total_raw_books":
+            total_consensus[
+                "raw_books"
+            ],
+
+        "spread_outliers_removed": [
+            {
+                "bookmaker":
+                    quote[
+                        "bookmaker"
+                    ],
+                "value":
+                    quote[
+                        "value"
+                    ],
+            }
+            for quote in (
+                spread_consensus[
+                    "excluded"
+                ]
+            )
+        ],
+
+        "total_outliers_removed": [
+            {
+                "bookmaker":
+                    quote[
+                        "bookmaker"
+                    ],
+                "value":
+                    quote[
+                        "value"
+                    ],
+            }
+            for quote in (
+                total_consensus[
+                    "excluded"
+                ]
+            )
+        ],
+    }
+
+
+def fetch_odds(
+    valid_teams,
+    lookup,
+):
     print("")
-    print("💰 Fetching current NCAAF odds...")
+    print(
+        "💰 Fetching current "
+        "NCAAF odds..."
+    )
 
     raw_games = odds_get()
+
     games = []
 
     for raw in raw_games:
-        raw_home = raw.get("home_team")
-        raw_away = raw.get("away_team")
+        raw_home = raw.get(
+            "home_team"
+        )
+
+        raw_away = raw.get(
+            "away_team"
+        )
 
         home = resolve_odds_team(
             raw_home,
             valid_teams,
             lookup,
         )
+
         away = resolve_odds_team(
             raw_away,
             valid_teams,
             lookup,
         )
-        market = extract_market(raw)
+
+        market = extract_market(
+            raw
+        )
 
         games.append({
-            "id": raw.get("id"),
-            "commence_time": raw.get("commence_time"),
-            "home_team": home,
-            "away_team": away,
-            "provider_home_team": raw_home,
-            "provider_away_team": raw_away,
-            "spread_home": market["spread"],
-            "total": market["total"],
-            "bookmaker": market["bookmaker"],
+            "id":
+                raw.get(
+                    "id"
+                ),
+            "commence_time":
+                raw.get(
+                    "commence_time"
+                ),
+
+            "home_team":
+                home,
+            "away_team":
+                away,
+
+            "provider_home_team":
+                raw_home,
+            "provider_away_team":
+                raw_away,
+
+            "spread_home":
+                market[
+                    "spread"
+                ],
+            "total":
+                market[
+                    "total"
+                ],
+            "bookmaker":
+                market[
+                    "bookmaker"
+                ],
+
+            "spread_books":
+                market[
+                    "spread_books"
+                ],
+            "total_books":
+                market[
+                    "total_books"
+                ],
+
+            "spread_raw_books":
+                market[
+                    "spread_raw_books"
+                ],
+            "total_raw_books":
+                market[
+                    "total_raw_books"
+                ],
+
+            "spread_outliers_removed":
+                market[
+                    "spread_outliers_removed"
+                ],
+
+            "total_outliers_removed":
+                market[
+                    "total_outliers_removed"
+                ],
         })
 
     matched = sum(
         1
         for game in games
-        if game["home_team"] and game["away_team"]
+        if (
+            game[
+                "home_team"
+            ]
+            and game[
+                "away_team"
+            ]
+        )
     )
 
-    print(f"✅ Market games found: {len(games)}")
-    print(f"✅ Market games matched: {matched}")
+    print(
+        f"✅ Market games found: "
+        f"{len(games)}"
+    )
+
+    print(
+        f"✅ Market games matched: "
+        f"{matched}"
+    )
 
     return {
         "meta": {
-            "year": YEAR,
-            "generated": datetime.now().isoformat(),
-            "games": len(games),
-            "matched_games": matched,
-            "source": "The Odds API",
+            "year":
+                YEAR,
+            "generated":
+                datetime.now().isoformat(),
+            "games":
+                len(games),
+            "matched_games":
+                matched,
+            "source":
+                "The Odds API",
+            "market_method":
+                "cross_book_median_consensus",
+            "spread_outlier_distance":
+                MARKET_SPREAD_OUTLIER_DISTANCE,
+            "total_outlier_distance":
+                MARKET_TOTAL_OUTLIER_DISTANCE,
+            "minimum_books_for_filtering":
+                MARKET_MIN_BOOKS_FOR_FILTERING,
         },
-        "games": games,
+        "games":
+            games,
     }
 
 
@@ -743,22 +1611,36 @@ def fetch_odds(valid_teams, lookup):
 # SCHEDULE
 # =============================================================================
 
-def fetch_schedule(valid_teams, lookup):
+def fetch_schedule(
+    valid_teams,
+    lookup,
+):
     print("")
-    print(f"📅 Fetching {YEAR} schedule...")
+    print(
+        f"📅 Fetching "
+        f"{YEAR} schedule..."
+    )
 
     raw_games = cfbd_get(
         "/games",
         {
-            "year": YEAR,
-            "seasonType": "regular",
-            "classification": "fbs",
+            "year":
+                YEAR,
+            "seasonType":
+                "regular",
+            "classification":
+                "fbs",
         },
     )
 
-    print(f"   Raw CFBD games returned: {len(raw_games)}")
+    print(
+        f"   Raw CFBD games "
+        f"returned: "
+        f"{len(raw_games)}"
+    )
 
     fbs_fbs_games = []
+
     full_team_schedule = {
         team: []
         for team in valid_teams
@@ -773,30 +1655,44 @@ def fetch_schedule(valid_teams, lookup):
             "homeTeam",
             "home_team",
         )
+
         raw_away = first_value(
             raw,
             "awayTeam",
             "away_team",
         )
 
-        home_fbs = resolve_cfbd_team(
-            raw_home,
-            valid_teams,
-            lookup,
-        )
-        away_fbs = resolve_cfbd_team(
-            raw_away,
-            valid_teams,
-            lookup,
+        home_fbs = (
+            resolve_cfbd_team(
+                raw_home,
+                valid_teams,
+                lookup,
+            )
         )
 
-        game_id = first_value(raw, "id")
+        away_fbs = (
+            resolve_cfbd_team(
+                raw_away,
+                valid_teams,
+                lookup,
+            )
+        )
+
+        game_id = first_value(
+            raw,
+            "id",
+        )
+
         start_date = first_value(
             raw,
             "startDate",
             "start_date",
         )
-        week = first_value(raw, "week")
+
+        week = first_value(
+            raw,
+            "week",
+        )
 
         neutral_site = bool(
             first_value(
@@ -807,27 +1703,36 @@ def fetch_schedule(valid_teams, lookup):
             )
         )
 
-        venue = first_value(raw, "venue")
+        venue = first_value(
+            raw,
+            "venue",
+        )
+
         home_points = first_value(
             raw,
             "homePoints",
             "home_points",
         )
+
         away_points = first_value(
             raw,
             "awayPoints",
             "away_points",
         )
+
         completed = first_value(
             raw,
             "completed",
             default=False,
         )
 
-        # IMPORTANT:
-        # Future CFBD games can carry 0-0 score fields. Only the explicit
-        # completed flag determines game status.
-        is_completed = completed is True
+        # Future CFBD games can carry
+        # 0-0 score fields.
+        # Only explicit completed flag
+        # determines game status.
+        is_completed = (
+            completed is True
+        )
 
         unique_key = (
             str(game_id)
@@ -842,45 +1747,79 @@ def fetch_schedule(valid_teams, lookup):
         if unique_key in seen:
             continue
 
-        seen.add(unique_key)
+        seen.add(
+            unique_key
+        )
 
-        if home_fbs and away_fbs:
+        if (
+            home_fbs
+            and away_fbs
+        ):
             game = {
-                "id": game_id,
-                "week": week,
-                "start_date": start_date,
-                "home_team": home_fbs,
-                "away_team": away_fbs,
-                "raw_home_team": raw_home,
-                "raw_away_team": raw_away,
-                "home_conference": first_value(
-                    raw,
-                    "homeConference",
-                    "home_conference",
-                ),
-                "away_conference": first_value(
-                    raw,
-                    "awayConference",
-                    "away_conference",
-                ),
-                "venue": venue,
-                "neutral_site": neutral_site,
-                "home_points": home_points,
-                "away_points": away_points,
+                "id":
+                    game_id,
+                "week":
+                    week,
+                "start_date":
+                    start_date,
+
+                "home_team":
+                    home_fbs,
+                "away_team":
+                    away_fbs,
+
+                "raw_home_team":
+                    raw_home,
+                "raw_away_team":
+                    raw_away,
+
+                "home_conference":
+                    first_value(
+                        raw,
+                        "homeConference",
+                        "home_conference",
+                    ),
+
+                "away_conference":
+                    first_value(
+                        raw,
+                        "awayConference",
+                        "away_conference",
+                    ),
+
+                "venue":
+                    venue,
+
+                "neutral_site":
+                    neutral_site,
+
+                "home_points":
+                    home_points,
+                "away_points":
+                    away_points,
+
                 "status": (
                     "completed"
                     if is_completed
                     else "scheduled"
                 ),
-                "opponent_type": "FBS",
+
+                "opponent_type":
+                    "FBS",
             }
 
-            fbs_fbs_games.append(game)
+            fbs_fbs_games.append(
+                game
+            )
 
-            full_team_schedule[home_fbs].append({
+            full_team_schedule[
+                home_fbs
+            ].append({
                 **game,
-                "team": home_fbs,
-                "opponent": away_fbs,
+                "team":
+                    home_fbs,
+                "opponent":
+                    away_fbs,
                 "location": (
                     "neutral"
                     if neutral_site
@@ -888,10 +1827,14 @@ def fetch_schedule(valid_teams, lookup):
                 ),
             })
 
-            full_team_schedule[away_fbs].append({
+            full_team_schedule[
+                away_fbs
+            ].append({
                 **game,
-                "team": away_fbs,
-                "opponent": home_fbs,
+                "team":
+                    away_fbs,
+                "opponent":
+                    home_fbs,
                 "location": (
                     "neutral"
                     if neutral_site
@@ -901,58 +1844,94 @@ def fetch_schedule(valid_teams, lookup):
 
             continue
 
-        if home_fbs and not away_fbs:
-            full_team_schedule[home_fbs].append({
-                "id": game_id,
-                "week": week,
-                "start_date": start_date,
-                "team": home_fbs,
-                "opponent": raw_away,
-                "home_team": home_fbs,
-                "away_team": raw_away,
+        if (
+            home_fbs
+            and not away_fbs
+        ):
+            full_team_schedule[
+                home_fbs
+            ].append({
+                "id":
+                    game_id,
+                "week":
+                    week,
+                "start_date":
+                    start_date,
+                "team":
+                    home_fbs,
+                "opponent":
+                    raw_away,
+                "home_team":
+                    home_fbs,
+                "away_team":
+                    raw_away,
                 "location": (
                     "neutral"
                     if neutral_site
                     else "home"
                 ),
-                "venue": venue,
-                "neutral_site": neutral_site,
-                "home_points": home_points,
-                "away_points": away_points,
+                "venue":
+                    venue,
+                "neutral_site":
+                    neutral_site,
+                "home_points":
+                    home_points,
+                "away_points":
+                    away_points,
                 "status": (
                     "completed"
                     if is_completed
                     else "scheduled"
                 ),
-                "opponent_type": "FCS",
+                "opponent_type":
+                    "FCS",
             })
+
             continue
 
-        if away_fbs and not home_fbs:
-            full_team_schedule[away_fbs].append({
-                "id": game_id,
-                "week": week,
-                "start_date": start_date,
-                "team": away_fbs,
-                "opponent": raw_home,
-                "home_team": raw_home,
-                "away_team": away_fbs,
+        if (
+            away_fbs
+            and not home_fbs
+        ):
+            full_team_schedule[
+                away_fbs
+            ].append({
+                "id":
+                    game_id,
+                "week":
+                    week,
+                "start_date":
+                    start_date,
+                "team":
+                    away_fbs,
+                "opponent":
+                    raw_home,
+                "home_team":
+                    raw_home,
+                "away_team":
+                    away_fbs,
                 "location": (
                     "neutral"
                     if neutral_site
                     else "away"
                 ),
-                "venue": venue,
-                "neutral_site": neutral_site,
-                "home_points": home_points,
-                "away_points": away_points,
+                "venue":
+                    venue,
+                "neutral_site":
+                    neutral_site,
+                "home_points":
+                    home_points,
+                "away_points":
+                    away_points,
                 "status": (
                     "completed"
                     if is_completed
                     else "scheduled"
                 ),
-                "opponent_type": "FCS",
+                "opponent_type":
+                    "FCS",
             })
+
             continue
 
         rejected_non_fbs += 1
@@ -960,68 +1939,126 @@ def fetch_schedule(valid_teams, lookup):
     fbs_fbs_games.sort(
         key=lambda game: (
             (
-                game.get("week")
-                if game.get("week") is not None
+                game.get(
+                    "week"
+                )
+                if (
+                    game.get(
+                        "week"
+                    )
+                    is not None
+                )
                 else 99
             ),
-            game.get("start_date") or "",
+            (
+                game.get(
+                    "start_date"
+                )
+                or ""
+            ),
         )
     )
 
     for team in full_team_schedule:
-        full_team_schedule[team].sort(
+        full_team_schedule[
+            team
+        ].sort(
             key=lambda game: (
                 (
-                    game.get("week")
-                    if game.get("week") is not None
+                    game.get(
+                        "week"
+                    )
+                    if (
+                        game.get(
+                            "week"
+                        )
+                        is not None
+                    )
                     else 99
                 ),
-                game.get("start_date") or "",
+                (
+                    game.get(
+                        "start_date"
+                    )
+                    or ""
+                ),
             )
         )
 
     full_entries = sum(
         len(games)
-        for games in full_team_schedule.values()
+        for games in (
+            full_team_schedule
+            .values()
+        )
     )
 
     fcs_entries = sum(
         1
-        for games in full_team_schedule.values()
+        for games in (
+            full_team_schedule
+            .values()
+        )
         for game in games
-        if game.get("opponent_type") == "FCS"
+        if (
+            game.get(
+                "opponent_type"
+            )
+            == "FCS"
+        )
     )
 
     print(
-        f"✅ TRUE FBS-vs-FBS games: "
+        f"✅ TRUE FBS-vs-FBS "
+        f"games: "
         f"{len(fbs_fbs_games)}"
     )
+
     print(
         f"✅ Team schedule entries: "
         f"{full_entries}"
     )
+
     print(
-        f"✅ FBS-vs-FCS team entries: "
+        f"✅ FBS-vs-FCS "
+        f"team entries: "
         f"{fcs_entries}"
     )
 
-    if len(fbs_fbs_games) < 400:
-        print("❌ Too few FBS-vs-FBS games.")
+    if len(
+        fbs_fbs_games
+    ) < 400:
+        print(
+            "❌ Too few "
+            "FBS-vs-FBS games."
+        )
         sys.exit(1)
 
     return {
         "meta": {
-            "year": YEAR,
-            "generated": datetime.now().isoformat(),
-            "fbs_fbs_games": len(fbs_fbs_games),
-            "team_schedule_entries": full_entries,
-            "fbs_fcs_entries": fcs_entries,
-            "rejected_non_fbs": rejected_non_fbs,
-            "source": "CollegeFootballData",
-            "matching": "strict_fbs_school_names",
+            "year":
+                YEAR,
+            "generated":
+                datetime.now().isoformat(),
+            "fbs_fbs_games":
+                len(
+                    fbs_fbs_games
+                ),
+            "team_schedule_entries":
+                full_entries,
+            "fbs_fcs_entries":
+                fcs_entries,
+            "rejected_non_fbs":
+                rejected_non_fbs,
+            "source":
+                "CollegeFootballData",
+            "matching":
+                "strict_fbs_school_names",
         },
-        "games": fbs_fbs_games,
-        "team_schedules": full_team_schedule,
+        "games":
+            fbs_fbs_games,
+        "team_schedules":
+            full_team_schedule,
     }
 
 
@@ -1029,74 +2066,185 @@ def fetch_schedule(valid_teams, lookup):
 # KNOWN SCHEDULE GUARDS
 # =============================================================================
 
-def verify_known_schedule_errors(schedule):
+def verify_known_schedule_errors(
+    schedule,
+):
     bad = []
 
-    for game in schedule.get("games", []):
-        home = game.get("home_team")
-        away = game.get("away_team")
-        date = str(game.get("start_date", ""))
+    for game in schedule.get(
+        "games",
+        [],
+    ):
+        home = game.get(
+            "home_team"
+        )
 
-        if {home, away} == {"Indiana", "Purdue"}:
-            if not date.startswith("2026-11-28"):
-                bad.append(("Indiana/Purdue", date))
+        away = game.get(
+            "away_team"
+        )
 
-        if {home, away} == {"Florida", "South Carolina"}:
-            if not date.startswith("2026-10-10"):
-                bad.append(("Florida/South Carolina", date))
+        date = str(
+            game.get(
+                "start_date",
+                "",
+            )
+        )
+
+        if (
+            {home, away}
+            == {
+                "Indiana",
+                "Purdue",
+            }
+        ):
+            if not date.startswith(
+                "2026-11-28"
+            ):
+                bad.append(
+                    (
+                        "Indiana/Purdue",
+                        date,
+                    )
+                )
+
+        if (
+            {home, away}
+            == {
+                "Florida",
+                "South Carolina",
+            }
+        ):
+            if not date.startswith(
+                "2026-10-10"
+            ):
+                bad.append(
+                    (
+                        "Florida/South Carolina",
+                        date,
+                    )
+                )
 
     if bad:
-        print("❌ Known schedule sanity check failed.")
-        print(bad[:10])
+        print(
+            "❌ Known schedule sanity "
+            "check failed."
+        )
+
+        print(
+            bad[:10]
+        )
+
         sys.exit(1)
 
-    print("✅ Known schedule sanity checks passed")
+    print(
+        "✅ Known schedule sanity "
+        "checks passed"
+    )
 
 
 # =============================================================================
 # LIVE SAMPLE HELPERS
 # =============================================================================
 
-def live_section(team, side):
+def live_section(
+    team,
+    side,
+):
     return (
-        (team.get(side, {}) or {})
-        .get("live_2026", {})
+        (
+            team.get(
+                side,
+                {},
+            )
+            or {}
+        )
+        .get(
+            "live_2026",
+            {},
+        )
         or {}
     )
 
 
-def live_has_general_sample(team):
-    offense = live_section(team, "offense")
-    defense = live_section(team, "defense")
+def live_has_general_sample(
+    team,
+):
+    offense = live_section(
+        team,
+        "offense",
+    )
+
+    defense = live_section(
+        team,
+        "defense",
+    )
 
     return (
-        safe_number(offense.get("n_plays"))
+        safe_number(
+            offense.get(
+                "n_plays"
+            )
+        )
         >= MIN_LIVE_PLAYS
-        and safe_number(defense.get("n_plays"))
+        and
+        safe_number(
+            defense.get(
+                "n_plays"
+            )
+        )
         >= MIN_LIVE_PLAYS
     )
 
 
-def both_have_general_sample(home, away):
+def both_have_general_sample(
+    home,
+    away,
+):
     return (
-        live_has_general_sample(home)
-        and live_has_general_sample(away)
+        live_has_general_sample(
+            home
+        )
+        and
+        live_has_general_sample(
+            away
+        )
     )
 
 
-def both_have_pass_sample(home, away):
-    for team in (home, away):
-        offense = live_section(team, "offense")
-        defense = live_section(team, "defense")
+def both_have_pass_sample(
+    home,
+    away,
+):
+    for team in (
+        home,
+        away,
+    ):
+        offense = live_section(
+            team,
+            "offense",
+        )
+
+        defense = live_section(
+            team,
+            "defense",
+        )
 
         if (
-            safe_number(offense.get("pass_plays"))
+            safe_number(
+                offense.get(
+                    "pass_plays"
+                )
+            )
             < MIN_LIVE_PASS_PLAYS
         ):
             return False
 
         if (
-            safe_number(defense.get("pass_plays"))
+            safe_number(
+                defense.get(
+                    "pass_plays"
+                )
+            )
             < MIN_LIVE_PASS_PLAYS
         ):
             return False
@@ -1104,19 +2252,40 @@ def both_have_pass_sample(home, away):
     return True
 
 
-def both_have_rush_sample(home, away):
-    for team in (home, away):
-        offense = live_section(team, "offense")
-        defense = live_section(team, "defense")
+def both_have_rush_sample(
+    home,
+    away,
+):
+    for team in (
+        home,
+        away,
+    ):
+        offense = live_section(
+            team,
+            "offense",
+        )
+
+        defense = live_section(
+            team,
+            "defense",
+        )
 
         if (
-            safe_number(offense.get("rush_plays"))
+            safe_number(
+                offense.get(
+                    "rush_plays"
+                )
+            )
             < MIN_LIVE_RUSH_PLAYS
         ):
             return False
 
         if (
-            safe_number(defense.get("rush_plays"))
+            safe_number(
+                defense.get(
+                    "rush_plays"
+                )
+            )
             < MIN_LIVE_RUSH_PLAYS
         ):
             return False
@@ -1128,17 +2297,34 @@ def both_have_rush_sample(home, away):
 # MATCHUP ADJUSTMENT
 # =============================================================================
 
-def bounded(value, cap):
-    return max(-cap, min(cap, value))
+def bounded(
+    value,
+    cap,
+):
+    return max(
+        -cap,
+        min(
+            cap,
+            value,
+        ),
+    )
 
 
-def calculate_matchup_adjustment(home, away):
+def calculate_matchup_adjustment(
+    home,
+    away,
+):
     components = {
-        "passing": 0.0,
-        "rushing": 0.0,
-        "success_rate": 0.0,
-        "explosiveness": 0.0,
-        "havoc": 0.0,
+        "passing":
+            0.0,
+        "rushing":
+            0.0,
+        "success_rate":
+            0.0,
+        "explosiveness":
+            0.0,
+        "havoc":
+            0.0,
     }
 
     availability = {
@@ -1146,20 +2332,57 @@ def calculate_matchup_adjustment(home, away):
         for key in components
     }
 
-    home_off = live_section(home, "offense")
-    home_def = live_section(home, "defense")
-    away_off = live_section(away, "offense")
-    away_def = live_section(away, "defense")
+    home_off = live_section(
+        home,
+        "offense",
+    )
 
-    if both_have_pass_sample(home, away):
+    home_def = live_section(
+        home,
+        "defense",
+    )
+
+    away_off = live_section(
+        away,
+        "offense",
+    )
+
+    away_def = live_section(
+        away,
+        "defense",
+    )
+
+    if both_have_pass_sample(
+        home,
+        away,
+    ):
         values = [
-            optional_number(home_off.get("epa_pass")),
-            optional_number(away_def.get("epa_pass")),
-            optional_number(away_off.get("epa_pass")),
-            optional_number(home_def.get("epa_pass")),
+            optional_number(
+                home_off.get(
+                    "epa_pass"
+                )
+            ),
+            optional_number(
+                away_def.get(
+                    "epa_pass"
+                )
+            ),
+            optional_number(
+                away_off.get(
+                    "epa_pass"
+                )
+            ),
+            optional_number(
+                home_def.get(
+                    "epa_pass"
+                )
+            ),
         ]
 
-        if all(value is not None for value in values):
+        if all(
+            value is not None
+            for value in values
+        ):
             (
                 home_pass,
                 away_pass_def,
@@ -1167,24 +2390,62 @@ def calculate_matchup_adjustment(home, away):
                 home_pass_def,
             ) = values
 
-            home_edge = home_pass - away_pass_def
-            away_edge = away_pass - home_pass_def
+            home_edge = (
+                home_pass
+                - away_pass_def
+            )
 
-            components["passing"] = bounded(
-                (home_edge - away_edge) * 1.25,
+            away_edge = (
+                away_pass
+                - home_pass_def
+            )
+
+            components[
+                "passing"
+            ] = bounded(
+                (
+                    home_edge
+                    - away_edge
+                )
+                * 1.25,
                 1.0,
             )
-            availability["passing"] = True
 
-    if both_have_rush_sample(home, away):
+            availability[
+                "passing"
+            ] = True
+
+    if both_have_rush_sample(
+        home,
+        away,
+    ):
         values = [
-            optional_number(home_off.get("epa_rush")),
-            optional_number(away_def.get("epa_rush")),
-            optional_number(away_off.get("epa_rush")),
-            optional_number(home_def.get("epa_rush")),
+            optional_number(
+                home_off.get(
+                    "epa_rush"
+                )
+            ),
+            optional_number(
+                away_def.get(
+                    "epa_rush"
+                )
+            ),
+            optional_number(
+                away_off.get(
+                    "epa_rush"
+                )
+            ),
+            optional_number(
+                home_def.get(
+                    "epa_rush"
+                )
+            ),
         ]
 
-        if all(value is not None for value in values):
+        if all(
+            value is not None
+            for value in values
+        ):
             (
                 home_rush,
                 away_rush_def,
@@ -1192,26 +2453,58 @@ def calculate_matchup_adjustment(home, away):
                 home_rush_def,
             ) = values
 
-            components["rushing"] = bounded(
+            components[
+                "rushing"
+            ] = bounded(
                 (
-                    (home_rush - away_rush_def)
-                    - (away_rush - home_rush_def)
+                    (
+                        home_rush
+                        - away_rush_def
+                    )
+                    -
+                    (
+                        away_rush
+                        - home_rush_def
+                    )
                 ),
                 0.75,
             )
-            availability["rushing"] = True
 
-    if both_have_general_sample(home, away):
+            availability[
+                "rushing"
+            ] = True
+
+    if both_have_general_sample(
+        home,
+        away,
+    ):
         success_values = [
-            optional_number(home_off.get("success_rate")),
-            optional_number(away_def.get("success_rate")),
-            optional_number(away_off.get("success_rate")),
-            optional_number(home_def.get("success_rate")),
+            optional_number(
+                home_off.get(
+                    "success_rate"
+                )
+            ),
+            optional_number(
+                away_def.get(
+                    "success_rate"
+                )
+            ),
+            optional_number(
+                away_off.get(
+                    "success_rate"
+                )
+            ),
+            optional_number(
+                home_def.get(
+                    "success_rate"
+                )
+            ),
         ]
 
         if all(
             value is not None
-            for value in success_values
+            for value
+            in success_values
         ):
             (
                 home_sr,
@@ -1220,34 +2513,55 @@ def calculate_matchup_adjustment(home, away):
                 home_def_sr,
             ) = success_values
 
-            components["success_rate"] = bounded(
+            components[
+                "success_rate"
+            ] = bounded(
                 (
-                    (home_sr - away_def_sr)
-                    - (away_sr - home_def_sr)
+                    (
+                        home_sr
+                        - away_def_sr
+                    )
+                    -
+                    (
+                        away_sr
+                        - home_def_sr
+                    )
                 )
                 * 0.035,
                 0.75,
             )
-            availability["success_rate"] = True
+
+            availability[
+                "success_rate"
+            ] = True
 
         explosive_values = [
             optional_number(
-                home_off.get("explosive_rate")
+                home_off.get(
+                    "explosive_rate"
+                )
             ),
             optional_number(
-                away_def.get("explosive_rate")
+                away_def.get(
+                    "explosive_rate"
+                )
             ),
             optional_number(
-                away_off.get("explosive_rate")
+                away_off.get(
+                    "explosive_rate"
+                )
             ),
             optional_number(
-                home_def.get("explosive_rate")
+                home_def.get(
+                    "explosive_rate"
+                )
             ),
         ]
 
         if all(
             value is not None
-            for value in explosive_values
+            for value
+            in explosive_values
         ):
             (
                 home_explosive,
@@ -1256,13 +2570,16 @@ def calculate_matchup_adjustment(home, away):
                 home_def_explosive,
             ) = explosive_values
 
-            components["explosiveness"] = bounded(
+            components[
+                "explosiveness"
+            ] = bounded(
                 (
                     (
                         home_explosive
                         - away_def_explosive
                     )
-                    - (
+                    -
+                    (
                         away_explosive
                         - home_def_explosive
                     )
@@ -1270,19 +2587,38 @@ def calculate_matchup_adjustment(home, away):
                 * 0.025,
                 0.50,
             )
-            availability["explosiveness"] = True
 
-        # live_2026 stores "havoc_rate"
+            availability[
+                "explosiveness"
+            ] = True
+
         havoc_values = [
-            optional_number(home_off.get("havoc_rate")),
-            optional_number(home_def.get("havoc_rate")),
-            optional_number(away_off.get("havoc_rate")),
-            optional_number(away_def.get("havoc_rate")),
+            optional_number(
+                home_off.get(
+                    "havoc_rate"
+                )
+            ),
+            optional_number(
+                home_def.get(
+                    "havoc_rate"
+                )
+            ),
+            optional_number(
+                away_off.get(
+                    "havoc_rate"
+                )
+            ),
+            optional_number(
+                away_def.get(
+                    "havoc_rate"
+                )
+            ),
         ]
 
         if all(
             value is not None
-            for value in havoc_values
+            for value
+            in havoc_values
         ):
             (
                 home_allowed,
@@ -1291,18 +2627,32 @@ def calculate_matchup_adjustment(home, away):
                 away_created,
             ) = havoc_values
 
-            components["havoc"] = bounded(
+            components[
+                "havoc"
+            ] = bounded(
                 (
-                    (home_created - away_allowed)
-                    - (away_created - home_allowed)
+                    (
+                        home_created
+                        - away_allowed
+                    )
+                    -
+                    (
+                        away_created
+                        - home_allowed
+                    )
                 )
                 * 0.025,
                 0.50,
             )
-            availability["havoc"] = True
+
+            availability[
+                "havoc"
+            ] = True
 
     total = bounded(
-        sum(components.values()),
+        sum(
+            components.values()
+        ),
         MAX_MATCHUP_ADJUSTMENT,
     )
 
@@ -1311,19 +2661,40 @@ def calculate_matchup_adjustment(home, away):
     )
 
     return {
-        "total": round(total, 2),
+        "total":
+            round(
+                total,
+                2,
+            ),
+
         "components": {
-            key: round(value, 2)
-            for key, value in components.items()
+            key:
+                round(
+                    value,
+                    2,
+                )
+            for (
+                key,
+                value,
+            ) in (
+                components.items()
+            )
         },
-        "available": availability,
-        "comparable_live_sample": comparable,
+
+        "available":
+            availability,
+
+        "comparable_live_sample":
+            comparable,
+
         "note": (
-            "Live matchup adjustments active."
+            "Live matchup adjustments "
+            "active."
             if comparable
             else (
-                "No comparable 2026 live sample; "
-                "matchup adjustment held at zero."
+                "No comparable 2026 "
+                "live sample; matchup "
+                "adjustment held at zero."
             )
         ),
     }
@@ -1333,22 +2704,80 @@ def calculate_matchup_adjustment(home, away):
 # TOTAL MODEL
 # =============================================================================
 
-def calculate_total(home, away):
-    ho = home.get("offense", {}) or {}
-    hd = home.get("defense", {}) or {}
-    ao = away.get("offense", {}) or {}
-    ad = away.get("defense", {}) or {}
+def calculate_total(
+    home,
+    away,
+):
+    ho = (
+        home.get(
+            "offense",
+            {},
+        )
+        or {}
+    )
+
+    hd = (
+        home.get(
+            "defense",
+            {},
+        )
+        or {}
+    )
+
+    ao = (
+        away.get(
+            "offense",
+            {},
+        )
+        or {}
+    )
+
+    ad = (
+        away.get(
+            "defense",
+            {},
+        )
+        or {}
+    )
 
     efficiency = (
-        safe_number(ho.get("epa_play"))
-        + safe_number(ao.get("epa_play"))
-        - safe_number(hd.get("epa_play"))
-        - safe_number(ad.get("epa_play"))
+        safe_number(
+            ho.get(
+                "epa_play"
+            )
+        )
+        +
+        safe_number(
+            ao.get(
+                "epa_play"
+            )
+        )
+        -
+        safe_number(
+            hd.get(
+                "epa_play"
+            )
+        )
+        -
+        safe_number(
+            ad.get(
+                "epa_play"
+            )
+        )
     )
 
     success = (
-        safe_number(ho.get("success_rate"))
-        + safe_number(ao.get("success_rate"))
+        safe_number(
+            ho.get(
+                "success_rate"
+            )
+        )
+        +
+        safe_number(
+            ao.get(
+                "success_rate"
+            )
+        )
         - 85
     )
 
@@ -1358,8 +2787,17 @@ def calculate_total(home, away):
         + success * 0.15
     )
 
-    total = max(35, min(80, total))
-    return round_half(total)
+    total = max(
+        35,
+        min(
+            80,
+            total,
+        ),
+    )
+
+    return round_half(
+        total
+    )
 
 
 # =============================================================================
@@ -1369,36 +2807,57 @@ def calculate_total(home, away):
 def normal_cdf(value):
     return (
         1.0
-        + math.erf(
-            value / math.sqrt(2.0)
+        +
+        math.erf(
+            value
+            / math.sqrt(2.0)
         )
     ) / 2.0
 
 
-def calculate_win_probability(home_spread):
-    home_margin = -safe_number(home_spread)
+def calculate_win_probability(
+    home_spread,
+):
+    home_margin = -safe_number(
+        home_spread
+    )
 
     probability = normal_cdf(
-        home_margin / WIN_PROB_STD_DEV
+        home_margin
+        / WIN_PROB_STD_DEV
     )
 
     probability = max(
         0.01,
-        min(0.99, probability),
+        min(
+            0.99,
+            probability,
+        ),
     )
 
     return {
-        "home": round(
-            probability * 100,
-            1,
-        ),
-        "away": round(
-            (1.0 - probability) * 100,
-            1,
-        ),
+        "home":
+            round(
+                probability
+                * 100,
+                1,
+            ),
+
+        "away":
+            round(
+                (
+                    1.0
+                    - probability
+                )
+                * 100,
+                1,
+            ),
+
         "method": (
-            "Normal margin distribution, "
-            f"sigma={WIN_PROB_STD_DEV:.1f}"
+            "Normal margin "
+            "distribution, "
+            f"sigma="
+            f"{WIN_PROB_STD_DEV:.1f}"
         ),
     }
 
@@ -1410,13 +2869,11 @@ def fcs_win_probability(
 ):
     """
     Transparent FCS fallback.
-
-    This is not an FCS team rating. A generic 24-point FBS advantage is
-    adjusted by FBS team strength. If the FBS team is the true home team,
-    its production HFA is added. Neutral/away FBS games receive 0.0.
     """
     power_points = (
-        safe_number(team_power_rating)
+        safe_number(
+            team_power_rating
+        )
         * rating_slope
         * FCS_POWER_MULTIPLIER
     )
@@ -1424,11 +2881,14 @@ def fcs_win_probability(
     expected_margin = (
         FCS_BASE_MARGIN
         + power_points
-        + safe_number(hfa_points)
+        + safe_number(
+            hfa_points
+        )
     )
 
     probability = normal_cdf(
-        expected_margin / WIN_PROB_STD_DEV
+        expected_margin
+        / WIN_PROB_STD_DEV
     )
 
     probability = max(
@@ -1440,19 +2900,29 @@ def fcs_win_probability(
     )
 
     return {
-        "probability": round(
-            probability * 100,
-            1,
-        ),
-        "expected_margin": round(
-            expected_margin,
-            1,
-        ),
-        "home_field_advantage": round(
-            safe_number(hfa_points),
-            1,
-        ),
-        "method": "generic_fcs_fallback",
+        "probability":
+            round(
+                probability
+                * 100,
+                1,
+            ),
+
+        "expected_margin":
+            round(
+                expected_margin,
+                1,
+            ),
+
+        "home_field_advantage":
+            round(
+                safe_number(
+                    hfa_points
+                ),
+                1,
+            ),
+
+        "method":
+            "generic_fcs_fallback",
     }
 
 
@@ -1460,29 +2930,28 @@ def fcs_win_probability(
 # THE SIGNAL — MODEL VS MARKET
 # =============================================================================
 
-def classify_market_status(disagreement):
+def classify_market_status(
+    disagreement,
+):
     """
-    The Signal: model-vs-market divergence ladder.
-
     0.0-2.5   ALIGNED
     3.0-5.0   SLIGHT EDGE
     5.5-7.0   EDGE
     7.5-10.0  STRONG EDGE
     10.5+     OUTLIER
-
-    These labels describe the size of the model's disagreement with the market.
-    They are not betting-confidence labels. Spreads and fair lines are rounded
-    to half-points, so these buckets are exhaustive without overlapping
-    boundaries.
     """
     if disagreement <= 2.5:
         return "ALIGNED"
+
     if disagreement <= 5.0:
         return "SLIGHT EDGE"
+
     if disagreement <= 7.0:
         return "EDGE"
+
     if disagreement <= 10.0:
         return "STRONG EDGE"
+
     return "OUTLIER"
 
 
@@ -1494,50 +2963,99 @@ def compare_to_market(
 ):
     if market_spread is None:
         return {
-            "disagreement": None,
-            "preferred_side": None,
-            "status": "NO MARKET",
-            "signal": "NO MARKET",
-            "bet_status": None,
-            "status_system": "v2_the_signal",
+            "disagreement":
+                None,
+            "preferred_side":
+                None,
+            "status":
+                "NO MARKET",
+            "signal":
+                "NO MARKET",
+            "bet_status":
+                None,
+            "status_system":
+                "v2_the_signal",
             "status_thresholds": {
-                "aligned_max": 2.5,
-                "slight_edge_max": 5.0,
-                "edge_max": 7.0,
-                "strong_edge_max": 10.0,
-                "outlier_min": 10.5,
+                "aligned_max":
+                    2.5,
+                "slight_edge_max":
+                    5.0,
+                "edge_max":
+                    7.0,
+                "strong_edge_max":
+                    10.0,
+                "outlier_min":
+                    10.5,
             },
         }
 
-    difference = model_spread - market_spread
-    disagreement = round(abs(difference) * 2) / 2
+    difference = (
+        model_spread
+        - market_spread
+    )
+
+    disagreement = (
+        round(
+            abs(
+                difference
+            )
+            * 2
+        )
+        / 2
+    )
 
     if difference < 0:
-        preferred = home_name
+        preferred = (
+            home_name
+        )
+
     elif difference > 0:
-        preferred = away_name
+        preferred = (
+            away_name
+        )
+
     else:
         preferred = None
 
-    status = classify_market_status(disagreement)
+    status = (
+        classify_market_status(
+            disagreement
+        )
+    )
 
     return {
-        "disagreement": round(disagreement, 1),
-        "preferred_side": preferred,
-        # Keep "status" as the canonical field for existing data consumers.
-        # "signal" makes the product meaning explicit for newer consumers.
-        "status": status,
-        "signal": status,
-        # Prospective 2026 evidence must earn promotion to EMERGING/CONFIRMED.
-        # Model-vs-market disagreement alone never upgrades Bet Status.
-        "bet_status": "TRACKING",
-        "status_system": "v2_the_signal",
+        "disagreement":
+            round(
+                disagreement,
+                1,
+            ),
+
+        "preferred_side":
+            preferred,
+
+        "status":
+            status,
+
+        "signal":
+            status,
+
+        "bet_status":
+            "TRACKING",
+
+        "status_system":
+            "v2_the_signal",
+
         "status_thresholds": {
-            "aligned_max": 2.5,
-            "slight_edge_max": 5.0,
-            "edge_max": 7.0,
-            "strong_edge_max": 10.0,
-            "outlier_min": 10.5,
+            "aligned_max":
+                2.5,
+            "slight_edge_max":
+                5.0,
+            "edge_max":
+                7.0,
+            "strong_edge_max":
+                10.0,
+            "outlier_min":
+                10.5,
         },
     }
 
@@ -1557,8 +3075,13 @@ def generate_insights(
 ):
     insights = []
 
-    home_rank = home.get("power_rating_rank")
-    away_rank = away.get("power_rating_rank")
+    home_rank = home.get(
+        "power_rating_rank"
+    )
+
+    away_rank = away.get(
+        "power_rating_rank"
+    )
 
     if (
         home_rank
@@ -1572,49 +3095,96 @@ def generate_insights(
         )
 
         insights.append({
-            "title": "OVERALL TEAM STRENGTH",
+            "title":
+                "OVERALL TEAM STRENGTH",
+
             "text": (
-                f"{stronger} owns the stronger "
-                "overall blended power rating."
+                f"{stronger} owns "
+                "the stronger overall "
+                "blended power rating."
             ),
-            "source": "power_rating",
+
+            "source":
+                "power_rating",
         })
 
-    if not matchup["comparable_live_sample"]:
+    if not matchup[
+        "comparable_live_sample"
+    ]:
         insights.append({
-            "title": "LIVE MATCHUP DATA",
+            "title":
+                "LIVE MATCHUP DATA",
+
             "text": (
-                "No live matchup adjustment is being applied "
-                "because both teams do not yet have comparable "
-                "2026 samples."
+                "No live matchup "
+                "adjustment is being "
+                "applied because both "
+                "teams do not yet have "
+                "comparable 2026 samples."
             ),
-            "source": "sample_guard",
+
+            "source":
+                "sample_guard",
         })
+
     else:
         usable = [
-            (key, value)
-            for key, value
-            in matchup["components"].items()
+            (
+                key,
+                value,
+            )
+            for (
+                key,
+                value,
+            ) in (
+                matchup[
+                    "components"
+                ].items()
+            )
             if (
-                matchup["available"].get(key)
-                and abs(value) >= 0.15
+                matchup[
+                    "available"
+                ].get(
+                    key
+                )
+                and
+                abs(
+                    value
+                )
+                >= 0.15
             )
         ]
 
         usable.sort(
-            key=lambda item: abs(item[1]),
+            key=lambda item:
+                abs(
+                    item[1]
+                ),
             reverse=True,
         )
 
         labels = {
-            "passing": "PASSING MATCHUP",
-            "rushing": "RUSHING MATCHUP",
-            "success_rate": "EFFICIENCY MATCHUP",
-            "explosiveness": "EXPLOSIVENESS",
-            "havoc": "HAVOC MATCHUP",
+            "passing":
+                "PASSING MATCHUP",
+
+            "rushing":
+                "RUSHING MATCHUP",
+
+            "success_rate":
+                "EFFICIENCY MATCHUP",
+
+            "explosiveness":
+                "EXPLOSIVENESS",
+
+            "havoc":
+                "HAVOC MATCHUP",
         }
 
-        for key, value in usable[:2]:
+        for (
+            key,
+            value,
+        ) in usable[:2]:
+
             favored = (
                 home_name
                 if value > 0
@@ -1622,15 +3192,20 @@ def generate_insights(
             )
 
             insights.append({
-                "title": labels.get(
-                    key,
-                    key.upper(),
-                ),
+                "title":
+                    labels.get(
+                        key,
+                        key.upper(),
+                    ),
+
                 "text": (
-                    "The comparable 2026 sample "
-                    f"leans toward {favored}."
+                    "The comparable "
+                    "2026 sample leans "
+                    f"toward {favored}."
                 ),
-                "source": key,
+
+                "source":
+                    key,
             })
 
     if market_spread is not None:
@@ -1639,7 +3214,10 @@ def generate_insights(
             - market_spread
         )
 
-        if abs(difference) >= 1.5:
+        if abs(
+            difference
+        ) >= 1.5:
+
             favored = (
                 home_name
                 if difference < 0
@@ -1647,13 +3225,19 @@ def generate_insights(
             )
 
             insights.append({
-                "title": "MARKET VS MODEL",
+                "title":
+                    "MARKET VS MODEL",
+
                 "text": (
-                    f"The model is {abs(difference):.1f} "
-                    f"points more favorable to {favored} "
-                    "than the current market."
+                    f"The model is "
+                    f"{abs(difference):.1f} "
+                    "points more favorable "
+                    f"to {favored} than "
+                    "the current market."
                 ),
-                "source": "market",
+
+                "source":
+                    "market",
             })
 
     return insights[:4]
@@ -1663,16 +3247,32 @@ def generate_insights(
 # BUILD FBS PROJECTIONS
 # =============================================================================
 
-def build_odds_lookup(odds):
+def build_odds_lookup(
+    odds,
+):
     lookup = {}
 
-    for game in odds.get("games", []):
-        home = game.get("home_team")
-        away = game.get("away_team")
+    for game in odds.get(
+        "games",
+        [],
+    ):
+        home = game.get(
+            "home_team"
+        )
 
-        if home and away:
+        away = game.get(
+            "away_team"
+        )
+
+        if (
+            home
+            and away
+        ):
             lookup[
-                (home, away)
+                (
+                    home,
+                    away,
+                )
             ] = game
 
     return lookup
@@ -1686,28 +3286,55 @@ def build_projections(
     hfa_data,
 ):
     print("")
-    print("🧮 Building game projections...")
+    print(
+        "🧮 Building game "
+        "projections..."
+    )
 
     projections = []
-    odds_lookup = build_odds_lookup(odds)
+
+    odds_lookup = (
+        build_odds_lookup(
+            odds
+        )
+    )
 
     market_matches = 0
     comparable_matchups = 0
 
-    slope = calibration["slope"]
+    slope = calibration[
+        "slope"
+    ]
 
-    for game in schedule["games"]:
-        home_name = game["home_team"]
-        away_name = game["away_team"]
+    for game in schedule[
+        "games"
+    ]:
+        home_name = game[
+            "home_team"
+        ]
 
-        home = teams[home_name]
-        away = teams[away_name]
+        away_name = game[
+            "away_team"
+        ]
+
+        home = teams[
+            home_name
+        ]
+
+        away = teams[
+            away_name
+        ]
 
         home_rating = safe_number(
-            home.get("power_rating")
+            home.get(
+                "power_rating"
+            )
         )
+
         away_rating = safe_number(
-            away.get("power_rating")
+            away.get(
+                "power_rating"
+            )
         )
 
         rating_difference = (
@@ -1742,22 +3369,30 @@ def build_projections(
             - hfa
         )
 
-        matchup = calculate_matchup_adjustment(
-            home,
-            away,
+        matchup = (
+            calculate_matchup_adjustment(
+                home,
+                away,
+            )
         )
 
-        if matchup["comparable_live_sample"]:
+        if matchup[
+            "comparable_live_sample"
+        ]:
             comparable_matchups += 1
 
         model_spread = round_half(
             spread_after_hfa
-            - matchup["total"]
+            - matchup[
+                "total"
+            ]
         )
 
-        model_total = calculate_total(
-            home,
-            away,
+        model_total = (
+            calculate_total(
+                home,
+                away,
+            )
         )
 
         win_probability = (
@@ -1767,152 +3402,282 @@ def build_projections(
         )
 
         market = odds_lookup.get(
-            (home_name, away_name)
+            (
+                home_name,
+                away_name,
+            )
         )
 
         market_spread = None
         market_total = None
         bookmaker = None
 
+        market_spread_books = 0
+        market_total_books = 0
+
+        spread_outliers_removed = []
+        total_outliers_removed = []
+
         if market:
             market_matches += 1
+
             market_spread = market.get(
                 "spread_home"
             )
+
             market_total = market.get(
                 "total"
             )
+
             bookmaker = market.get(
                 "bookmaker"
             )
 
-        comparison = compare_to_market(
-            model_spread,
-            market_spread,
-            home_name,
-            away_name,
+            market_spread_books = (
+                market.get(
+                    "spread_books",
+                    0,
+                )
+            )
+
+            market_total_books = (
+                market.get(
+                    "total_books",
+                    0,
+                )
+            )
+
+            spread_outliers_removed = (
+                market.get(
+                    "spread_outliers_removed",
+                    [],
+                )
+                or []
+            )
+
+            total_outliers_removed = (
+                market.get(
+                    "total_outliers_removed",
+                    [],
+                )
+                or []
+            )
+
+        comparison = (
+            compare_to_market(
+                model_spread,
+                market_spread,
+                home_name,
+                away_name,
+            )
         )
 
         projections.append({
-            "game_id": game.get("id"),
-            "week": game.get("week"),
-            "start_date": game.get("start_date"),
-            "neutral_site": neutral,
-            "venue": game.get("venue"),
-            "status": game.get("status"),
+            "game_id":
+                game.get(
+                    "id"
+                ),
+
+            "week":
+                game.get(
+                    "week"
+                ),
+
+            "start_date":
+                game.get(
+                    "start_date"
+                ),
+
+            "neutral_site":
+                neutral,
+
+            "venue":
+                game.get(
+                    "venue"
+                ),
+
+            "status":
+                game.get(
+                    "status"
+                ),
 
             "home": {
-                "team": home_name,
-                "conference": home.get("conference"),
-                "power_rating": home_rating,
-                "power_rating_rank": (
-                    home.get("power_rating_rank")
-                ),
+                "team":
+                    home_name,
+
+                "conference":
+                    home.get(
+                        "conference"
+                    ),
+
+                "power_rating":
+                    home_rating,
+
+                "power_rating_rank":
+                    home.get(
+                        "power_rating_rank"
+                    ),
             },
 
             "away": {
-                "team": away_name,
-                "conference": away.get("conference"),
-                "power_rating": away_rating,
-                "power_rating_rank": (
-                    away.get("power_rating_rank")
-                ),
+                "team":
+                    away_name,
+
+                "conference":
+                    away.get(
+                        "conference"
+                    ),
+
+                "power_rating":
+                    away_rating,
+
+                "power_rating_rank":
+                    away.get(
+                        "power_rating_rank"
+                    ),
             },
 
             "projection": {
-                "home_spread": model_spread,
-                "total": model_total,
-                "win_probability": win_probability,
+                "home_spread":
+                    model_spread,
+
+                "total":
+                    model_total,
+
+                "win_probability":
+                    win_probability,
 
                 "components": {
-                    "home_power_rating": round(
-                        home_rating,
-                        3,
-                    ),
-                    "away_power_rating": round(
-                        away_rating,
-                        3,
-                    ),
-                    "rating_difference": round(
-                        rating_difference,
-                        3,
-                    ),
-                    "rating_points_home_edge": round(
-                        rating_points,
-                        2,
-                    ),
-                    "rating_only_home_spread": (
+                    "home_power_rating":
+                        round(
+                            home_rating,
+                            3,
+                        ),
+
+                    "away_power_rating":
+                        round(
+                            away_rating,
+                            3,
+                        ),
+
+                    "rating_difference":
+                        round(
+                            rating_difference,
+                            3,
+                        ),
+
+                    "rating_points_home_edge":
+                        round(
+                            rating_points,
+                            2,
+                        ),
+
+                    "rating_only_home_spread":
                         round_half(
                             rating_home_spread
-                        )
-                    ),
-                    "home_field_advantage": round(
-                        hfa,
-                        1,
-                    ),
+                        ),
+
+                    "home_field_advantage":
+                        round(
+                            hfa,
+                            1,
+                        ),
+
                     "home_field_source": (
                         "neutral_site"
                         if neutral
                         else "team_specific_2026"
                     ),
-                    "spread_after_home_field": (
+
+                    "spread_after_home_field":
                         round_half(
                             spread_after_hfa
-                        )
-                    ),
-                    "matchup_adjustment": matchup,
-                    "final_home_spread": (
-                        model_spread
-                    ),
+                        ),
+
+                    "matchup_adjustment":
+                        matchup,
+
+                    "final_home_spread":
+                        model_spread,
                 },
 
-                "base_home_spread": (
+                "base_home_spread":
                     round_half(
                         spread_after_hfa
-                    )
-                ),
-                "home_field_advantage": round(
-                    hfa,
-                    1,
-                ),
+                    ),
+
+                "home_field_advantage":
+                    round(
+                        hfa,
+                        1,
+                    ),
+
                 "home_field_source": (
                     "neutral_site"
                     if neutral
                     else "team_specific_2026"
                 ),
-                "matchup_adjustment": matchup,
+
+                "matchup_adjustment":
+                    matchup,
             },
 
             "market": {
-                "home_spread": market_spread,
-                "total": market_total,
-                "bookmaker": bookmaker,
+                "home_spread":
+                    market_spread,
+
+                "total":
+                    market_total,
+
+                "bookmaker":
+                    bookmaker,
+
+                "method":
+                    "cross_book_median_consensus",
+
+                "spread_books":
+                    market_spread_books,
+
+                "total_books":
+                    market_total_books,
+
+                "spread_outliers_removed":
+                    spread_outliers_removed,
+
+                "total_outliers_removed":
+                    total_outliers_removed,
             },
 
-            "comparison": comparison,
+            "comparison":
+                comparison,
 
-            "insights": generate_insights(
-                home_name,
-                away_name,
-                home,
-                away,
-                matchup,
-                model_spread,
-                market_spread,
-            ),
+            "insights":
+                generate_insights(
+                    home_name,
+                    away_name,
+                    home,
+                    away,
+                    matchup,
+                    model_spread,
+                    market_spread,
+                ),
         })
 
     print(
         f"✅ Projections built: "
         f"{len(projections)}"
     )
+
     print(
-        f"✅ Projections with market match: "
+        f"✅ Projections with "
+        f"market match: "
         f"{market_matches}"
     )
+
     print(
-        "✅ Games with comparable live "
-        f"matchup samples: {comparable_matchups}"
+        "✅ Games with comparable "
+        f"live matchup samples: "
+        f"{comparable_matchups}"
     )
 
     return projections
@@ -1922,18 +3687,40 @@ def build_projections(
 # SEASON PROJECTIONS
 # =============================================================================
 
-def completed_team_result(team, game):
-    if game.get("status") != "completed":
+def completed_team_result(
+    team,
+    game,
+):
+    if (
+        game.get(
+            "status"
+        )
+        != "completed"
+    ):
         return None
 
-    home = game.get("home_team")
-    away = game.get("away_team")
-
-    home_points = optional_number(
-        game.get("home_points")
+    home = game.get(
+        "home_team"
     )
-    away_points = optional_number(
-        game.get("away_points")
+
+    away = game.get(
+        "away_team"
+    )
+
+    home_points = (
+        optional_number(
+            game.get(
+                "home_points"
+            )
+        )
+    )
+
+    away_points = (
+        optional_number(
+            game.get(
+                "away_points"
+            )
+        )
     )
 
     if (
@@ -1942,12 +3729,18 @@ def completed_team_result(team, game):
     ):
         return None
 
-    if home_points == away_points:
+    if (
+        home_points
+        == away_points
+    ):
         return None
 
     winner = (
         home
-        if home_points > away_points
+        if (
+            home_points
+            > away_points
+        )
         else away
     )
 
@@ -1958,8 +3751,12 @@ def completed_team_result(team, game):
     )
 
 
-def probability_distribution(probabilities):
-    distribution = [1.0]
+def probability_distribution(
+    probabilities,
+):
+    distribution = [
+        1.0
+    ]
 
     for probability in probabilities:
         p = max(
@@ -1973,24 +3770,39 @@ def probability_distribution(probabilities):
         next_distribution = [
             0.0
             for _ in range(
-                len(distribution) + 1
+                len(
+                    distribution
+                )
+                + 1
             )
         ]
 
-        for wins, current_probability in enumerate(
+        for (
+            wins,
+            current_probability,
+        ) in enumerate(
             distribution
         ):
-            next_distribution[wins] += (
+            next_distribution[
+                wins
+            ] += (
                 current_probability
-                * (1.0 - p)
+                * (
+                    1.0
+                    - p
+                )
             )
 
-            next_distribution[wins + 1] += (
+            next_distribution[
+                wins + 1
+            ] += (
                 current_probability
                 * p
             )
 
-        distribution = next_distribution
+        distribution = (
+            next_distribution
+        )
 
     return distribution
 
@@ -2002,52 +3814,81 @@ def probability_at_least(
     if wins <= 0:
         return 1.0
 
-    if wins >= len(distribution):
+    if wins >= len(
+        distribution
+    ):
         return 0.0
 
     return sum(
-        distribution[wins:]
+        distribution[
+            wins:
+        ]
     )
 
 
-def alt_total_probabilities(distribution):
+def alt_total_probabilities(
+    distribution,
+):
     output = {}
-    max_wins = len(distribution) - 1
+
+    max_wins = (
+        len(distribution)
+        - 1
+    )
 
     for wins in range(
         4,
         max_wins + 1,
     ):
-        line = wins + 0.5
+        line = (
+            wins
+            + 0.5
+        )
 
         over_probability = sum(
             distribution[
                 wins + 1:
             ]
         )
+
         under_probability = (
             1.0
             - over_probability
         )
 
-        output[f"{line:.1f}"] = {
-            "over": round(
-                over_probability * 100,
-                1,
-            ),
-            "under": round(
-                under_probability * 100,
-                1,
-            ),
+        output[
+            f"{line:.1f}"
+        ] = {
+            "over":
+                round(
+                    over_probability
+                    * 100,
+                    1,
+                ),
+
+            "under":
+                round(
+                    under_probability
+                    * 100,
+                    1,
+                ),
         }
 
     return output
 
 
-def build_projection_lookup(projections):
+def build_projection_lookup(
+    projections,
+):
     return {
-        str(game.get("game_id")): game
-        for game in projections
+        str(
+            game.get(
+                "game_id"
+            )
+        ): game
+
+        for game
+        in projections
     }
 
 
@@ -2059,19 +3900,29 @@ def build_season_projections(
     hfa_data,
 ):
     print("")
+
     print(
         "📈 Building season win "
         "distributions..."
     )
 
-    game_lookup = build_projection_lookup(
-        projections
+    game_lookup = (
+        build_projection_lookup(
+            projections
+        )
     )
 
-    slope = calibration["slope"]
+    slope = calibration[
+        "slope"
+    ]
+
     season_output = {}
 
-    for team_name, team in teams.items():
+    for (
+        team_name,
+        team,
+    ) in teams.items():
+
         games = (
             schedule
             .get(
@@ -2103,9 +3954,17 @@ def build_season_projections(
 
             hfa_used = None
 
-            if completed_result is not None:
-                probability = completed_result
-                source = "completed_result"
+            if (
+                completed_result
+                is not None
+            ):
+                probability = (
+                    completed_result
+                )
+
+                source = (
+                    "completed_result"
+                )
 
                 if probability == 1.0:
                     actual_wins += 1
@@ -2115,18 +3974,30 @@ def build_season_projections(
                 model_line = None
 
             elif (
-                game.get("opponent_type")
+                game.get(
+                    "opponent_type"
+                )
                 == "FBS"
             ):
-                projection = game_lookup.get(
-                    str(game.get("id"))
+                projection = (
+                    game_lookup.get(
+                        str(
+                            game.get(
+                                "id"
+                            )
+                        )
+                    )
                 )
 
                 if projection is None:
                     continue
 
                 if (
-                    projection["home"]["team"]
+                    projection[
+                        "home"
+                    ][
+                        "team"
+                    ]
                     == team_name
                 ):
                     probability = (
@@ -2147,6 +4018,7 @@ def build_season_projections(
                             "home_spread"
                         ]
                     )
+
                 else:
                     probability = (
                         projection[
@@ -2175,7 +4047,9 @@ def build_season_projections(
                     )
                 )
 
-                source = "fbs_model"
+                source = (
+                    "fbs_model"
+                )
 
             else:
                 neutral = bool(
@@ -2186,7 +4060,9 @@ def build_season_projections(
                 )
 
                 is_true_home = (
-                    game.get("location")
+                    game.get(
+                        "location"
+                    )
                     == "home"
                     and not neutral
                 )
@@ -2207,7 +4083,8 @@ def build_season_projections(
                             "power_rating"
                         ),
                         slope,
-                        hfa_points=hfa_used,
+                        hfa_points=
+                            hfa_used,
                     )
                 )
 
@@ -2218,7 +4095,9 @@ def build_season_projections(
                     / 100.0
                 )
 
-                source = "fcs_fallback"
+                source = (
+                    "fcs_fallback"
+                )
 
                 model_line = -(
                     fallback[
@@ -2231,41 +4110,64 @@ def build_season_projections(
             )
 
             schedule_projection.append({
-                "game_id": game.get("id"),
-                "week": game.get("week"),
-                "start_date": (
-                    game.get("start_date")
-                ),
-                "opponent": (
-                    game.get("opponent")
-                ),
-                "opponent_type": (
+                "game_id":
+                    game.get(
+                        "id"
+                    ),
+
+                "week":
+                    game.get(
+                        "week"
+                    ),
+
+                "start_date":
+                    game.get(
+                        "start_date"
+                    ),
+
+                "opponent":
+                    game.get(
+                        "opponent"
+                    ),
+
+                "opponent_type":
                     game.get(
                         "opponent_type"
-                    )
-                ),
-                "location": (
-                    game.get("location")
-                ),
-                "status": (
-                    game.get("status")
-                ),
-                "win_probability": round(
-                    probability * 100,
-                    1,
-                ),
+                    ),
+
+                "location":
+                    game.get(
+                        "location"
+                    ),
+
+                "status":
+                    game.get(
+                        "status"
+                    ),
+
+                "win_probability":
+                    round(
+                        probability
+                        * 100,
+                        1,
+                    ),
+
                 "team_line": (
                     round_half(
                         model_line
                     )
-                    if model_line
-                    is not None
+                    if (
+                        model_line
+                        is not None
+                    )
                     else None
                 ),
-                "home_field_advantage_used": (
-                    hfa_used
-                ),
-                "probability_source": source,
+
+                "home_field_advantage_used":
+                    hfa_used,
+
+                "probability_source":
+                    source,
             })
 
         if not game_probabilities:
@@ -2278,12 +4180,19 @@ def build_season_projections(
         )
 
         exact_wins = {
-            str(wins): round(
-                probability * 100,
-                1,
+            str(wins):
+                round(
+                    probability
+                    * 100,
+                    1,
+                )
+
+            for (
+                wins,
+                probability,
+            ) in enumerate(
+                distribution
             )
-            for wins, probability
-            in enumerate(distribution)
         }
 
         expected_wins = sum(
@@ -2292,11 +4201,14 @@ def build_season_projections(
 
         most_likely_wins = max(
             range(
-                len(distribution)
+                len(
+                    distribution
+                )
             ),
-            key=lambda wins: (
-                distribution[wins]
-            ),
+            key=lambda wins:
+                distribution[
+                    wins
+                ],
         )
 
         games_count = len(
@@ -2329,60 +4241,98 @@ def build_season_projections(
                 1,
             )
 
-        season_output[team_name] = {
-            "team": team_name,
-            "games": games_count,
-            "actual_wins": actual_wins,
-            "actual_losses": actual_losses,
-            "expected_wins": round(
-                expected_wins,
-                2,
-            ),
-            "expected_losses": round(
-                games_count
-                - expected_wins,
-                2,
-            ),
+        season_output[
+            team_name
+        ] = {
+            "team":
+                team_name,
+
+            "games":
+                games_count,
+
+            "actual_wins":
+                actual_wins,
+
+            "actual_losses":
+                actual_losses,
+
+            "expected_wins":
+                round(
+                    expected_wins,
+                    2,
+                ),
+
+            "expected_losses":
+                round(
+                    games_count
+                    - expected_wins,
+                    2,
+                ),
+
             "most_likely_record": (
                 f"{most_likely_wins}-"
                 f"{most_likely_losses}"
             ),
-            "most_likely_wins": (
-                most_likely_wins
-            ),
-            "most_likely_probability": round(
-                distribution[
-                    most_likely_wins
-                ]
-                * 100,
-                1,
-            ),
-            "exact_win_distribution": (
-                exact_wins
-            ),
+
+            "most_likely_wins":
+                most_likely_wins,
+
+            "most_likely_probability":
+                round(
+                    distribution[
+                        most_likely_wins
+                    ]
+                    * 100,
+                    1,
+                ),
+
+            "exact_win_distribution":
+                exact_wins,
+
             "at_least": {
-                "6_wins": at_least["6"],
-                "8_wins": at_least["8"],
-                "9_wins": at_least["9"],
-                "10_wins": at_least["10"],
-                "11_wins": at_least["11"],
-                "12_wins": at_least["12"],
+                "6_wins":
+                    at_least[
+                        "6"
+                    ],
+                "8_wins":
+                    at_least[
+                        "8"
+                    ],
+                "9_wins":
+                    at_least[
+                        "9"
+                    ],
+                "10_wins":
+                    at_least[
+                        "10"
+                    ],
+                "11_wins":
+                    at_least[
+                        "11"
+                    ],
+                "12_wins":
+                    at_least[
+                        "12"
+                    ],
             },
-            "bowl_eligible_probability": (
-                at_least["6"]
-            ),
-            "alt_win_totals": (
+
+            "bowl_eligible_probability":
+                at_least[
+                    "6"
+                ],
+
+            "alt_win_totals":
                 alt_total_probabilities(
                     distribution
-                )
-            ),
-            "schedule": (
-                schedule_projection
-            ),
+                ),
+
+            "schedule":
+                schedule_projection,
         }
 
     print(
-        f"✅ Season projections built: "
+        f"✅ Season projections "
+        f"built: "
         f"{len(season_output)} teams"
     )
 
@@ -2397,22 +4347,34 @@ def validate_projection_output(
     projections,
     season_projections,
 ):
-    if len(projections) < 400:
+    if len(
+        projections
+    ) < 400:
         print(
-            "❌ Too few game projections."
+            "❌ Too few game "
+            "projections."
         )
+
         sys.exit(1)
 
-    if len(season_projections) < 100:
+    if len(
+        season_projections
+    ) < 100:
         print(
-            "❌ Too few season projections."
+            "❌ Too few season "
+            "projections."
         )
+
         sys.exit(1)
 
     bad_distributions = []
 
-    for team, data in (
-        season_projections.items()
+    for (
+        team,
+        data,
+    ) in (
+        season_projections
+        .items()
     ):
         distribution = (
             data.get(
@@ -2422,12 +4384,18 @@ def validate_projection_output(
         )
 
         total = sum(
-            safe_number(value)
-            for value
-            in distribution.values()
+            safe_number(
+                value
+            )
+            for value in (
+                distribution.values()
+            )
         )
 
-        if abs(total - 100) > 0.5:
+        if abs(
+            total
+            - 100
+        ) > 0.5:
             bad_distributions.append(
                 (
                     team,
@@ -2437,16 +4405,21 @@ def validate_projection_output(
 
     if bad_distributions:
         print(
-            "❌ Win distribution sanity "
-            "check failed."
+            "❌ Win distribution "
+            "sanity check failed."
         )
+
         print(
-            bad_distributions[:10]
+            bad_distributions[
+                :10
+            ]
         )
+
         sys.exit(1)
 
     print(
-        "✅ Projection sanity checks passed"
+        "✅ Projection sanity "
+        "checks passed"
     )
 
 
@@ -2454,13 +4427,21 @@ def validate_projection_output(
 # SAVE
 # =============================================================================
 
-def save_json(path, data):
+def save_json(
+    path,
+    data,
+):
     os.makedirs(
-        os.path.dirname(path),
+        os.path.dirname(
+            path
+        ),
         exist_ok=True,
     )
 
-    temp = path + ".tmp"
+    temp = (
+        path
+        + ".tmp"
+    )
 
     with open(
         temp,
@@ -2474,12 +4455,16 @@ def save_json(path, data):
             ensure_ascii=False,
         )
 
+    # Verify serialized output
+    # before replacing production.
     with open(
         temp,
         "r",
         encoding="utf-8",
     ) as file:
-        json.load(file)
+        json.load(
+            file
+        )
 
     os.replace(
         temp,
@@ -2488,7 +4473,9 @@ def save_json(path, data):
 
     print(
         f"💾 Saved {path} "
-        f"({os.path.getsize(path) / 1024:.1f} KB)"
+        f"("
+        f"{os.path.getsize(path) / 1024:.1f} KB"
+        f")"
     )
 
 
@@ -2497,28 +4484,42 @@ def save_json(path, data):
 # =============================================================================
 
 def main():
-    print("=" * 70)
+    print(
+        "=" * 70
+    )
+
     print(
         "🏈 CFB ANALYTICS — "
         "PROJECTION ENGINE"
     )
-    print("=" * 70)
-    print(f"Season: {YEAR}")
 
-    metrics_data, teams = (
-        load_metrics()
+    print(
+        "=" * 70
     )
+
+    print(
+        f"Season: {YEAR}"
+    )
+
+    (
+        metrics_data,
+        teams,
+    ) = load_metrics()
 
     valid_teams = set(
         teams.keys()
     )
 
-    lookup = build_team_lookup(
-        valid_teams
+    lookup = (
+        build_team_lookup(
+            valid_teams
+        )
     )
 
-    hfa_data = load_hfa(
-        valid_teams
+    hfa_data = (
+        load_hfa(
+            valid_teams
+        )
     )
 
     calibration = (
@@ -2538,16 +4539,33 @@ def main():
     )
 
     use_cached_schedule = (
-        str(os.environ.get("USE_CACHED_SCHEDULE", "")).strip().lower()
-        in {"1", "true", "yes", "on"}
+        str(
+            os.environ.get(
+                "USE_CACHED_SCHEDULE",
+                "",
+            )
+        )
+        .strip()
+        .lower()
+        in {
+            "1",
+            "true",
+            "yes",
+            "on",
+        }
     )
 
     if use_cached_schedule:
-        schedule = load_cached_schedule()
+        schedule = (
+            load_cached_schedule()
+        )
+
     else:
-        schedule = fetch_schedule(
-            valid_teams,
-            lookup,
+        schedule = (
+            fetch_schedule(
+                valid_teams,
+                lookup,
+            )
         )
 
     verify_known_schedule_errors(
@@ -2560,12 +4578,14 @@ def main():
             schedule,
         )
 
-    projections = build_projections(
-        teams,
-        schedule,
-        odds,
-        calibration,
-        hfa_data,
+    projections = (
+        build_projections(
+            teams,
+            schedule,
+            odds,
+            calibration,
+            hfa_data,
+        )
     )
 
     season_projections = (
@@ -2593,101 +4613,140 @@ def main():
 
     output = {
         "meta": {
-            "year": YEAR,
-            "generated": (
-                datetime.now().isoformat()
-            ),
-            "games": len(
-                projections
-            ),
-            "teams_with_season_projection": (
-                len(season_projections)
-            ),
-            "version": (
-                "3.2-historical-rating-scale"
-            ),
-            "calibration": (
-                calibration
-            ),
+            "year":
+                YEAR,
+
+            "generated":
+                datetime.now().isoformat(),
+
+            "games":
+                len(
+                    projections
+                ),
+
+            "teams_with_season_projection":
+                len(
+                    season_projections
+                ),
+
+            "version":
+                "3.3-consensus-market",
+
+            "calibration":
+                calibration,
+
+            "market": {
+                "method":
+                    "cross_book_median_consensus",
+
+                "spread_outlier_distance":
+                    MARKET_SPREAD_OUTLIER_DISTANCE,
+
+                "total_outlier_distance":
+                    MARKET_TOTAL_OUTLIER_DISTANCE,
+
+                "minimum_books_for_filtering":
+                    MARKET_MIN_BOOKS_FOR_FILTERING,
+            },
+
             "home_field_advantage": {
-                "type": "team_specific",
-                "source": HFA_PATH,
-                "version": (
+                "type":
+                    "team_specific",
+
+                "source":
+                    HFA_PATH,
+
+                "version":
                     hfa_meta.get(
                         "version"
-                    )
-                ),
-                "default": safe_number(
-                    hfa_meta.get(
-                        "default_hfa"
                     ),
-                    2.0,
-                ),
-                "minimum": safe_number(
-                    hfa_meta.get(
-                        "minimum_hfa"
+
+                "default":
+                    safe_number(
+                        hfa_meta.get(
+                            "default_hfa"
+                        ),
+                        2.0,
                     ),
-                    1.0,
-                ),
-                "maximum": safe_number(
-                    hfa_meta.get(
-                        "maximum_hfa"
+
+                "minimum":
+                    safe_number(
+                        hfa_meta.get(
+                            "minimum_hfa"
+                        ),
+                        1.0,
                     ),
-                    3.5,
-                ),
-                "neutral_site": safe_number(
-                    hfa_meta.get(
-                        "neutral_site_hfa"
+
+                "maximum":
+                    safe_number(
+                        hfa_meta.get(
+                            "maximum_hfa"
+                        ),
+                        3.5,
                     ),
-                    0.0,
-                ),
-                "situational_modifiers_included": (
-                    False
-                ),
+
+                "neutral_site":
+                    safe_number(
+                        hfa_meta.get(
+                            "neutral_site_hfa"
+                        ),
+                        0.0,
+                    ),
+
+                "situational_modifiers_included":
+                    False,
             },
-            "max_matchup_adjustment": (
-                MAX_MATCHUP_ADJUSTMENT
-            ),
-            "win_probability_std_dev": (
-                WIN_PROB_STD_DEV
-            ),
+
+            "max_matchup_adjustment":
+                MAX_MATCHUP_ADJUSTMENT,
+
+            "win_probability_std_dev":
+                WIN_PROB_STD_DEV,
+
             "fcs_model": {
-                "base_margin": (
-                    FCS_BASE_MARGIN
-                ),
-                "power_multiplier": (
-                    FCS_POWER_MULTIPLIER
-                ),
-                "minimum_win_probability": (
+                "base_margin":
+                    FCS_BASE_MARGIN,
+
+                "power_multiplier":
+                    FCS_POWER_MULTIPLIER,
+
+                "minimum_win_probability":
                     FCS_MIN_WIN_PROB
-                    * 100
-                ),
-                "maximum_win_probability": (
+                    * 100,
+
+                "maximum_win_probability":
                     FCS_MAX_WIN_PROB
-                    * 100
-                ),
+                    * 100,
+
                 "home_hfa_rule": (
-                    "FBS team-specific HFA added only "
-                    "when the FBS team is the true home "
-                    "team; neutral/away receives 0.0."
+                    "FBS team-specific HFA "
+                    "added only when the FBS "
+                    "team is the true home "
+                    "team; neutral/away "
+                    "receives 0.0."
                 ),
+
                 "note": (
-                    "Generic fallback used only for "
-                    "season-win projections."
+                    "Generic fallback used "
+                    "only for season-win "
+                    "projections."
                 ),
             },
+
             "live_matchup_rules": {
-                "minimum_plays": (
-                    MIN_LIVE_PLAYS
-                ),
-                "minimum_pass_plays": (
-                    MIN_LIVE_PASS_PLAYS
-                ),
-                "minimum_rush_plays": (
-                    MIN_LIVE_RUSH_PLAYS
-                ),
-                "requires_both_teams": True,
+                "minimum_plays":
+                    MIN_LIVE_PLAYS,
+
+                "minimum_pass_plays":
+                    MIN_LIVE_PASS_PLAYS,
+
+                "minimum_rush_plays":
+                    MIN_LIVE_RUSH_PLAYS,
+
+                "requires_both_teams":
+                    True,
             },
+
             "metrics_through_week": (
                 metrics_data
                 .get(
@@ -2699,10 +4758,12 @@ def main():
                 )
             ),
         },
-        "games": projections,
-        "season_projections": (
-            season_projections
-        ),
+
+        "games":
+            projections,
+
+        "season_projections":
+            season_projections,
     }
 
     save_json(
@@ -2711,18 +4772,27 @@ def main():
     )
 
     print("")
-    print("=" * 70)
+    print(
+        "=" * 70
+    )
+
     print(
         "🎉 PROJECTION BUILD COMPLETE"
     )
-    print("=" * 70)
+
+    print(
+        "=" * 70
+    )
+
     print(
         f"FBS-vs-FBS games: "
         f"{len(projections)}"
     )
+
     print(
         f"Season projections: "
-        f"{len(season_projections)} teams"
+        f"{len(season_projections)} "
+        f"teams"
     )
 
 
