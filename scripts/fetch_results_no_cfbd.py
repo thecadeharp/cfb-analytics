@@ -46,6 +46,7 @@ ROOT = Path(__file__).resolve().parents[1]
 RESULTS_PATH = ROOT / "data" / "results.json"
 LIVE_PATH = ROOT / "data" / "live_scores.json"
 PROJECTIONS_PATH = ROOT / "data" / "projections.json"
+MANUAL_RESULTS_PATH = ROOT / "data" / "manual_results.json"
 
 SEASON = int(os.getenv("CFB_SEASON", "2026"))
 NCAA_BASE_URL = "https://ncaa-api.henrygd.me/scoreboard/football/fbs"
@@ -249,6 +250,78 @@ def align_to_projection_names(
         "away_team": away,
         "home_team": home,
     }
+
+
+def load_manual_result_overrides(
+    known_matchups: dict[str, tuple[str, str]],
+) -> list[dict[str, Any]]:
+    """
+    Optional emergency ledger for provider misses.
+
+    Only explicit FINAL rows from data/manual_results.json are accepted.
+    These rows seed the final-results ledger only; they do not change the model.
+    """
+    payload = load_json(MANUAL_RESULTS_PATH, {"games": []})
+    games = payload.get("games", []) if isinstance(payload, dict) else []
+
+    out: list[dict[str, Any]] = []
+
+    for raw in games:
+        if not isinstance(raw, dict):
+            continue
+
+        state = str(
+            raw.get("game_state") or raw.get("status") or ""
+        ).strip().lower()
+
+        if state not in {"final", "completed", "post"}:
+            continue
+
+        away = str(raw.get("away_team") or "").strip()
+        home = str(raw.get("home_team") or "").strip()
+        if not away or not home:
+            continue
+
+        try:
+            away_points = int(raw.get("away_points"))
+            home_points = int(raw.get("home_points"))
+        except (TypeError, ValueError):
+            continue
+
+        game = {
+            "game_id": str(
+                raw.get("game_id")
+                or f"manual:{canonical_team(away)}@{canonical_team(home)}"
+            ),
+            "season": int(raw.get("season") or SEASON),
+            "week": int(raw.get("week") or 0),
+            "home_team": home,
+            "away_team": away,
+            "home_team_id": raw.get("home_team_id"),
+            "away_team_id": raw.get("away_team_id"),
+            "home_points": home_points,
+            "away_points": away_points,
+            "start_date": raw.get("start_date"),
+            "neutral_site": bool(raw.get("neutral_site", False)),
+            "source": str(
+                raw.get("source") or "Manual verified override"
+            ),
+            "source_updated_at": str(
+                raw.get("source_updated_at") or iso_now()
+            ),
+            "status": "completed",
+            "game_state": "final",
+            "final_message": "FINAL",
+        }
+
+        out.append(
+            align_to_projection_names(
+                game,
+                known_matchups,
+            )
+        )
+
+    return out
 
 
 # ============================================================================
@@ -1231,6 +1304,14 @@ def main() -> None:
         ncaa_completed,
         espn_completed,
     )
+
+    manual_completed = load_manual_result_overrides(
+        known_projection_matchups
+    )
+    fetched_completed = combine_provider_rows(
+        fetched_completed,
+        manual_completed,
+    )
     fetched_live = combine_provider_rows(
         ncaa_live,
         espn_live,
@@ -1257,7 +1338,7 @@ def main() -> None:
         "meta": {
             "season": SEASON,
             "generated_at": iso_now(),
-            "source": "NCAA primary + ESPN public fallback",
+            "source": "NCAA primary + ESPN public fallback + verified manual overrides",
             "source_type": "public_scoreboard_no_auth",
             "scan_mode": scan_mode,
             "weeks_scanned": weeks,
@@ -1269,6 +1350,7 @@ def main() -> None:
                 "Previously collected finals are preserved.",
                 "NCAA is the primary scoreboard provider.",
                 "ESPN public scoreboard fills matchups absent from NCAA.",
+                "Verified manual overrides fill rare provider omissions.",
                 "Only explicit provider final/completed states enter results.",
                 "Evaluation only; Model A is untouched.",
             ],
@@ -1281,7 +1363,7 @@ def main() -> None:
         "meta": {
             "season": SEASON,
             "generated_at": iso_now(),
-            "source": "NCAA primary + ESPN public fallback",
+            "source": "NCAA primary + ESPN public fallback + verified manual overrides",
             "source_type": "public_scoreboard_no_auth",
             "scan_mode": scan_mode,
             "weeks_scanned": weeks,
