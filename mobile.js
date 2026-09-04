@@ -55,10 +55,6 @@
         }
 
 
-        /* ==============================================================
-           MOBILE VIEWING NOTE
-        ============================================================== */
-
         .mobile-viewing-tip {
           display: block;
           margin: 16px 0 18px;
@@ -90,18 +86,10 @@
         }
 
 
-        /* ==============================================================
-           DESKTOP PROJECTION TABLE
-        ============================================================== */
-
         #view-projections > .table-card {
           display: none !important;
         }
 
-
-        /* ==============================================================
-           MOBILE PROJECTION BOARD
-        ============================================================== */
 
         #mobile-projection-cards {
           display: grid;
@@ -141,10 +129,6 @@
         }
 
 
-        /* ==============================================================
-           MATCHUP
-        ============================================================== */
-
         .mobile-card-matchup {
           padding: 16px;
 
@@ -182,10 +166,6 @@
           max-height: 100%;
         }
 
-
-        /* ==============================================================
-           MAIN STAT GRID
-        ============================================================== */
 
         .mobile-card-grid {
           display: grid;
@@ -253,10 +233,6 @@
         }
 
 
-        /* ==============================================================
-           MODEL SIGNAL / CONFIDENCE
-        ============================================================== */
-
         .mobile-card-wide {
           display: grid;
 
@@ -315,10 +291,6 @@
         }
 
 
-        /* ==============================================================
-           DOSSIER / MATCHUP MOBILE HARDENING
-        ============================================================== */
-
         #view-dossier,
         #view-matchup {
           width: 100%;
@@ -369,25 +341,10 @@
           overflow-wrap: anywhere;
         }
 
-
-        /*
-          DOSSIER:
-          Values/ranks are deliberately compact and stay on one line.
-        */
-
         #view-dossier .metric-value,
         #view-dossier .metric-rank {
           white-space: nowrap;
         }
-
-
-        /*
-          MATCHUP:
-          Do NOT globally force metric values onto one line.
-
-          Some Weather Engine / audit values contain explanatory text
-          and need to wrap naturally.
-        */
 
         #view-matchup .metric-value,
         #view-matchup .metric-rank {
@@ -400,69 +357,66 @@
         }
 
 
-        /*
-          Long matchup metric rows get this class from JavaScript.
-
-          Instead of trying to squeeze a huge explanation into the
-          right side of a two-column row, put the label on top and the
-          explanation beneath it.
-        */
-
-        #view-matchup .metric-row.hammer-mobile-stack-row {
-          display: grid !important;
-
-          grid-template-columns:
-            minmax(0, 1fr) !important;
-
-          gap: 6px !important;
-
-          align-items: start !important;
-        }
-
-        #view-matchup
-        .metric-row.hammer-mobile-stack-row
-        .metric-name {
-          width: 100%;
-
-          margin: 0;
-
-          overflow-wrap: anywhere;
-        }
-
-        #view-matchup
-        .metric-row.hammer-mobile-stack-row
-        .metric-value {
-          width: 100%;
-          max-width: 100%;
-
-          margin: 0;
-
-          text-align: left !important;
-
-          white-space: normal !important;
-
-          overflow-wrap: anywhere;
-          word-break: normal;
-
-          line-height: 1.45;
-        }
-
-        #view-matchup
-        .metric-row.hammer-mobile-stack-row
-        .metric-rank {
-          width: 100%;
-
-          text-align: left !important;
-
-          white-space: normal !important;
-
-          overflow-wrap: anywhere;
-        }
-
-
         /* ==============================================================
-           EMPTY STATE
+           WEATHER ENGINE — MOBILE LONG TEXT FIX
         ============================================================== */
+
+        #view-matchup .hammer-mobile-weather-row {
+          display: block !important;
+
+          width: 100% !important;
+          max-width: 100% !important;
+
+          height: auto !important;
+          min-height: 0 !important;
+
+          margin: 10px 0 14px !important;
+
+          overflow: visible !important;
+        }
+
+        #view-matchup .hammer-mobile-weather-label {
+          display: block !important;
+
+          width: 100% !important;
+
+          margin: 0 0 7px !important;
+
+          color: var(--muted) !important;
+
+          font-family: inherit !important;
+          font-size: inherit !important;
+          font-weight: 400 !important;
+          line-height: 1.35 !important;
+
+          text-align: left !important;
+
+          white-space: normal !important;
+        }
+
+        #view-matchup .hammer-mobile-weather-value {
+          display: block !important;
+
+          width: 100% !important;
+          max-width: 100% !important;
+
+          margin: 0 !important;
+
+          padding: 0 !important;
+
+          font-family: var(--mono) !important;
+          font-weight: 700 !important;
+          line-height: 1.45 !important;
+
+          text-align: left !important;
+
+          white-space: normal !important;
+
+          overflow: visible !important;
+          overflow-wrap: break-word !important;
+          word-break: normal !important;
+        }
+
 
         .mobile-projection-empty {
           padding: 40px 18px;
@@ -618,15 +572,20 @@
 
 
   // ==========================================================================
-  // MATCHUP MOBILE ROW HARDENING
+  // WEATHER ENGINE MOBILE FIX
   // ==========================================================================
 
-  function hardenMatchupRows() {
+  function normalizeText(value) {
+    return String(value || "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+
+  function fixWeatherAuditRow() {
     matchupTimer = null;
 
-    if (
-      !mobileQuery.matches
-    ) {
+    if (!mobileQuery.matches) {
       return;
     }
 
@@ -639,70 +598,171 @@
       return;
     }
 
-    const rows =
+    const elements =
       Array.from(
         matchupView.querySelectorAll(
-          ".metric-row"
+          "div, p, li, span"
         )
       );
 
-    rows.forEach(row => {
-      row.classList.remove(
-        "hammer-mobile-stack-row"
+    const candidate =
+      elements.find(element => {
+        const text =
+          normalizeText(
+            element.textContent
+          ).toLowerCase();
+
+        return (
+          text.includes(
+            "spread adjustment"
+          ) &&
+          text.includes(
+            "locked"
+          ) &&
+          text.includes(
+            "requires"
+          )
+        );
+      });
+
+    if (!candidate) {
+      return;
+    }
+
+    if (
+      candidate.dataset
+        .hammerWeatherFixed ===
+      "1"
+    ) {
+      return;
+    }
+
+    /*
+      Walk downward until we reach the smallest practical container
+      that still contains the entire spread-adjustment line.
+    */
+
+    let target =
+      candidate;
+
+    const childMatches =
+      Array.from(
+        candidate.children
+      ).filter(child => {
+        const text =
+          normalizeText(
+            child.textContent
+          ).toLowerCase();
+
+        return (
+          text.includes(
+            "spread adjustment"
+          ) &&
+          text.includes(
+            "locked"
+          )
+        );
+      });
+
+    if (
+      childMatches.length === 1
+    ) {
+      target =
+        childMatches[0];
+    }
+
+    const fullText =
+      normalizeText(
+        target.textContent
       );
 
-      const value =
-        row.querySelector(
-          ".metric-value"
+    const lockedIndex =
+      fullText
+        .toLowerCase()
+        .indexOf(
+          "locked"
         );
 
-      if (!value) {
-        return;
-      }
+    if (
+      lockedIndex < 0
+    ) {
+      return;
+    }
 
-      const text =
-        String(
-          value.textContent || ""
+    const labelText =
+      fullText
+        .slice(
+          0,
+          lockedIndex
         )
-          .replace(/\s+/g, " ")
-          .trim();
+        .trim();
 
-      if (!text) {
-        return;
-      }
+    const valueText =
+      fullText
+        .slice(
+          lockedIndex
+        )
+        .trim();
 
-      /*
-        Normal numerical values stay in the normal compact row.
+    if (
+      !labelText
+        .toLowerCase()
+        .includes(
+          "spread adjustment"
+        )
+    ) {
+      return;
+    }
 
-        Explanatory values such as:
-        "Locked — requires 100+ 2026 offensive plays..."
-        are intentionally stacked.
-
-        The keyword checks make the Weather Engine gate deterministic,
-        while the length fallback catches future audit explanations.
-      */
-
-      const normalized =
-        text.toLowerCase();
-
-      const shouldStack =
-        text.length >= 34 ||
-        normalized.includes(
+    if (
+      !valueText
+        .toLowerCase()
+        .includes(
           "requires"
-        ) ||
-        normalized.includes(
-          "locked —"
-        ) ||
-        normalized.includes(
-          "locked -"
-        );
+        )
+    ) {
+      return;
+    }
 
-      if (shouldStack) {
-        row.classList.add(
-          "hammer-mobile-stack-row"
-        );
-      }
-    });
+    target.dataset
+      .hammerWeatherFixed =
+      "1";
+
+    target.classList.add(
+      "hammer-mobile-weather-row"
+    );
+
+    target.innerHTML = "";
+
+    const label =
+      document.createElement(
+        "div"
+      );
+
+    label.className =
+      "hammer-mobile-weather-label";
+
+    label.textContent =
+      "Spread adjustment";
+
+    const value =
+      document.createElement(
+        "div"
+      );
+
+    value.className =
+      "hammer-mobile-weather-value";
+
+    value.textContent =
+      valueText;
+
+    target.appendChild(
+      label
+    );
+
+    target.appendChild(
+      value
+    );
   }
 
 
@@ -717,8 +777,8 @@
 
     matchupTimer =
       window.setTimeout(
-        hardenMatchupRows,
-        40
+        fixWeatherAuditRow,
+        50
       );
   }
 
@@ -897,7 +957,12 @@
 
           window.setTimeout(
             scheduleMatchupHardening,
-            100
+            120
+          );
+
+          window.setTimeout(
+            scheduleMatchupHardening,
+            350
           );
         };
 
@@ -1163,14 +1228,6 @@
       return;
     }
 
-    /*
-      Do not destroy/recreate the entire mobile board
-      unless the source rows actually changed.
-
-      This is especially important during LIVE Week 1
-      status updates.
-    */
-
     const signature =
       sourceSignature(
         rows
@@ -1250,11 +1307,6 @@
           sourceRow.dataset.hammerGameState;
       }
 
-
-      // ================================================================
-      // MATCHUP
-      // ================================================================
-
       const matchup =
         createBlock(
           "mobile-card-matchup"
@@ -1265,14 +1317,6 @@
         cells[0]
       );
 
-      /*
-        Week 1 live/final decorators can replace portions
-        of the matchup cell.
-
-        If that mutation removed logo HTML, put it back
-        from teamLogoMarkup().
-      */
-
       restoreLogos(
         matchup
       );
@@ -1280,11 +1324,6 @@
       card.appendChild(
         matchup
       );
-
-
-      // ================================================================
-      // MAIN STATS
-      // ================================================================
 
       const grid =
         createBlock(
@@ -1345,11 +1384,6 @@
         grid
       );
 
-
-      // ================================================================
-      // SIGNAL + CONFIDENCE
-      // ================================================================
-
       addWideStat(
         card,
         "MODEL SIGNAL",
@@ -1362,11 +1396,6 @@
         cells[6],
         "mobile-card-confidence"
       );
-
-
-      // ================================================================
-      // REAL MOBILE CLICK HANDLERS
-      // ================================================================
 
       attachCardInteraction(
         card,
@@ -1395,12 +1424,6 @@
     ) {
       return;
     }
-
-    /*
-      Give sort-tables / live-score decorators a moment
-      to finish a complete DOM mutation burst before
-      rebuilding the mobile cards.
-    */
 
     buildTimer =
       window.setTimeout(
