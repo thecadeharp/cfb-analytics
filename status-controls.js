@@ -628,7 +628,18 @@
     pauseObserver(() => {
       tbody.querySelectorAll(`.${DESKTOP_DAY_CLASS}`).forEach(divider => divider.remove());
 
-      desired.forEach(row => tbody.appendChild(row));
+      // Reorder only when necessary. Re-appending every row on every update
+      // generates needless DOM mutations and can fight the live-status observer.
+      const currentRows = Array.from(
+        tbody.querySelectorAll(":scope > tr.game-row")
+      );
+      const orderChanged = desired.some((row, index) => row !== currentRows[index]);
+
+      if (orderChanged) {
+        const fragment = document.createDocumentFragment();
+        desired.forEach(row => fragment.appendChild(row));
+        tbody.appendChild(fragment);
+      }
 
       let previousGroupKey = null;
 
@@ -916,8 +927,25 @@
 
     if (projectionObserver) return;
 
-    projectionObserver = new MutationObserver(() => {
-      scheduleUpdate();
+    projectionObserver = new MutationObserver(mutations => {
+      // Only rebuild when the projection board itself gains/loses game rows.
+      // Ignore score badges, status text, FCS decorations, terminology text,
+      // and other descendant mutations from companion scripts. Those used to
+      // create a feedback loop with sort-tables.js after day dividers were added.
+      const boardStructureChanged = mutations.some(mutation => {
+        const changedNodes = [
+          ...Array.from(mutation.addedNodes || []),
+          ...Array.from(mutation.removedNodes || [])
+        ];
+
+        return changedNodes.some(node => {
+          if (!(node instanceof Element)) return false;
+          if (node.matches?.("tr.game-row, .projection-table")) return true;
+          return Boolean(node.querySelector?.("tr.game-row"));
+        });
+      });
+
+      if (boardStructureChanged) scheduleUpdate();
     });
 
     projectionObserver.observe(container, {
