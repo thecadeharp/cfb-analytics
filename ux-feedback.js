@@ -458,6 +458,52 @@
 
 
   // ==========================================================================
+
+  // ==========================================================================
+  // PROJECTIONS — ALWAYS-VISIBLE SIGNAL / CONFIDENCE GUIDE
+  //
+  // The guide used to be a <details> dropdown. Keep the full methodology/key
+  // visible so first-time users do not have to discover or open it themselves.
+  // ==========================================================================
+
+  function makeSignalGuidePersistent() {
+    const guide = document.querySelector("#view-projections details.signal-guide");
+    if (!guide || guide.dataset.hammerPersistentGuide === "1") return;
+
+    guide.dataset.hammerPersistentGuide = "1";
+    guide.open = true;
+
+    // A details element can still be toggled by script/keyboard. Force it open.
+    guide.addEventListener("toggle", () => {
+      if (!guide.open) guide.open = true;
+    });
+
+    const summary = guide.querySelector(":scope > summary");
+    if (summary) {
+      summary.style.cursor = "default";
+      summary.style.pointerEvents = "none";
+      summary.setAttribute("aria-disabled", "true");
+
+      // Remove the browser disclosure triangle while preserving the existing
+      // title/subtitle styling and wording.
+      const style = document.createElement("style");
+      style.textContent = `
+        #view-projections details.signal-guide > summary {
+          list-style: none;
+        }
+        #view-projections details.signal-guide > summary::-webkit-details-marker {
+          display: none;
+        }
+        #view-projections details.signal-guide > summary::marker {
+          display: none;
+          content: "";
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
+
+
   // FIRST-VISIT WELCOME
   // ==========================================================================
 
@@ -577,6 +623,7 @@
     installMatchupUx();
     installStickyProjectionHeader();
     installTerminologyObserver();
+    makeSignalGuidePersistent();
     installWelcomeModal();
   }
 
