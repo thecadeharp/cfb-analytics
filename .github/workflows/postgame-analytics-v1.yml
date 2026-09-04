@@ -64,10 +64,23 @@ jobs:
           payload = json.loads(path.read_text(encoding="utf-8"))
           assert isinstance(payload.get("meta"), dict)
           assert isinstance(payload.get("games"), dict)
+          settled = json.loads(
+              Path("data/reports/settled_results.json").read_text(encoding="utf-8")
+          )
+          eligible_ids = {
+              str(row.get("game_key"))
+              for row in settled.get("rows", [])
+              if row.get("result_settled") and row.get("game_key")
+          }
           for game_id, game in payload["games"].items():
               assert str(game.get("game_id")) == str(game_id)
               assert game.get("availability") in {"available", "partial"}
               assert game.get("away_team") and game.get("home_team")
+          if eligible_ids and not payload["games"]:
+              raise AssertionError(
+                  f"Postgame build produced zero games despite {len(eligible_ids)} "
+                  "eligible settled game(s). Open the build step for the CFBD error."
+              )
           print(f"Validated {len(payload['games'])} postgame game(s).")
           PY
 
