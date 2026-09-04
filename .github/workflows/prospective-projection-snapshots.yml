@@ -57,4 +57,8 @@ jobs:
           fi
 
           git commit -m "Refresh market and capture prospective snapshot"
-          git push
+
+          # Another workflow or manual edit may push while this job is running.
+          # Rebase onto the newest main before pushing so harmless races do not fail.
+          git pull --rebase origin main
+          git push origin main
