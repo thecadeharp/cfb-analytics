@@ -23,6 +23,7 @@
   let activeStatus = "all";
   let updateQueued = false;
   let projectionObserver = null;
+  let rowClickFallbackInstalled = false;
   let projectionsLoadStarted = false;
   let projectionByGameId = new Map();
 
@@ -420,6 +421,64 @@
     const day = Number(parts.find(part => part.type === "day")?.value);
 
     return `${weekday} — ${MONTHS[month] || ""} ${day}`.trim();
+  }
+
+
+  // ==========================================================================
+  // STABLE PROJECTION ROW CLICK HANDLER
+  //
+  // Day grouping reparents rows inside the same tbody. The original inline
+  // onclick remains in the markup, but this delegated handler guarantees that
+  // the matchup interaction survives any presentation-layer row movement.
+  // Team-name clicks are intentionally left alone so dossier navigation keeps
+  // working exactly as before.
+  // ==========================================================================
+
+  function installProjectionRowClickFallback() {
+    if (rowClickFallbackInstalled) return;
+
+    const container = document.querySelector(CONTAINER_SELECTOR);
+    if (!container) {
+      setTimeout(installProjectionRowClickFallback, 100);
+      return;
+    }
+
+    rowClickFallbackInstalled = true;
+
+    container.addEventListener(
+      "click",
+      event => {
+        const row = event.target.closest("tr.game-row");
+        if (!row || !container.contains(row)) return;
+
+        // Preserve team-name dossier clicks and any future interactive controls.
+        if (
+          event.target.closest(
+            ".team-name, a, button, input, select, textarea, [role='button']"
+          )
+        ) {
+          return;
+        }
+
+        const gameId = gameIdFromRow(row);
+        if (!gameId) return;
+
+        const opener =
+          typeof window.openMatchup === "function"
+            ? window.openMatchup
+            : (typeof openMatchup === "function" ? openMatchup : null);
+
+        if (!opener) return;
+
+        // We handle the click here so the old inline onclick cannot double-fire.
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+
+        opener(gameId);
+      },
+      true
+    );
   }
 
 
@@ -876,6 +935,7 @@
     installStyles();
     hideOldSummary();
     ensureFilterUI();
+    installProjectionRowClickFallback();
     loadProjectionMetadata();
     installProjectionObserver();
     updateEverything();
