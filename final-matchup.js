@@ -5,30 +5,33 @@
   const STYLE_ID = "hammer-final-matchup-styles";
 
   let finalGames = [];
-  let lastMatchupKey = "";
+  let observer = null;
+
+  // ==========================================================================
+  // HELPERS
+  // ==========================================================================
 
   function canonical(value) {
     return String(value || "")
       .toLowerCase()
-      .replaceAll(".", "")
-      .replaceAll("'", "")
-      .replaceAll("’", "")
-      .replaceAll("-", " ")
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/&/g, "and")
+      .replace(/[.'’(),_-]/g, " ")
       .replace(/\s+/g, " ")
       .trim();
   }
 
-  function equivalentTeamName(a, b) {
-    const left = canonical(a);
-    const right = canonical(b);
-
-    if (left === right) {
-      return true;
-    }
+  function normalizedTeam(value) {
+    const text = canonical(value);
 
     const aliases = {
       "umass": "massachusetts",
       "massachusetts": "massachusetts",
+
+      "usc": "southern california",
+      "southern cal": "southern california",
+      "southern california": "southern california",
 
       "jacksonville st": "jacksonville state",
       "jacksonville state": "jacksonville state",
@@ -51,286 +54,15 @@
       "san jose st": "san jose state",
       "san jose state": "san jose state",
 
-      "southern california": "usc",
-      "usc": "usc"
+      "hawaii": "hawaii",
+      "hawai i": "hawaii"
     };
 
-    return (aliases[left] || left) === (aliases[right] || right);
+    return aliases[text] || text;
   }
 
-  function installStyles() {
-    if (document.getElementById(STYLE_ID)) {
-      return;
-    }
-
-    const style = document.createElement("style");
-    style.id = STYLE_ID;
-
-    style.textContent = `
-      #view-matchup .projected-score-card.hammer-final-score-card {
-        border-color: var(--border-dark);
-      }
-
-      #view-matchup .hammer-final-score-card .projected-score-title {
-        color: var(--muted);
-      }
-
-      #view-matchup .hammer-final-score-status {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-
-        padding: 5px 10px;
-        margin-bottom: 10px;
-
-        border: 1px solid var(--border);
-        border-radius: 999px;
-
-        color: var(--text);
-        background: var(--surface-soft);
-
-        font-family: var(--mono);
-        font-size: 9px;
-        font-weight: 700;
-        letter-spacing: 0.8px;
-      }
-
-      #view-matchup .hammer-pregame-projection {
-        display: grid;
-        grid-template-columns: 1fr auto 1fr;
-        align-items: center;
-        gap: 18px;
-
-        margin-top: 14px;
-        padding-top: 14px;
-
-        border-top: 1px solid var(--border);
-      }
-
-      #view-matchup .hammer-pregame-team:last-child {
-        text-align: right;
-      }
-
-      #view-matchup .hammer-pregame-label {
-        margin-bottom: 8px;
-
-        color: var(--muted);
-
-        font-family: var(--mono);
-        font-size: 8px;
-        font-weight: 700;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-      }
-
-      #view-matchup .hammer-pregame-team-name {
-        color: var(--muted);
-        font-size: 11px;
-        font-weight: 600;
-      }
-
-      #view-matchup .hammer-pregame-score {
-        margin-top: 3px;
-
-        color: var(--muted);
-
-        font-family: var(--mono);
-        font-size: 19px;
-        font-weight: 700;
-      }
-
-      #view-matchup .hammer-pregame-divider {
-        color: var(--muted);
-
-        font-family: var(--mono);
-        font-size: 10px;
-        font-weight: 700;
-      }
-
-      #view-matchup .hammer-pregame-note {
-        margin-top: 10px;
-
-        color: var(--muted);
-
-        font-family: var(--mono);
-        font-size: 8px;
-        line-height: 1.55;
-      }
-
-      @media (max-width: 600px) {
-        #view-matchup .hammer-pregame-projection {
-          gap: 10px;
-        }
-
-        #view-matchup .hammer-pregame-score {
-          font-size: 17px;
-        }
-
-        #view-matchup .hammer-pregame-team-name {
-          font-size: 10px;
-        }
-      }
-    `;
-
-    document.head.appendChild(style);
-  }
-
-  async function loadFinals() {
-    try {
-      const response = await fetch(
-        `${RESULTS_URL}?v=${Date.now()}`,
-        {
-          cache: "no-store"
-        }
-      );
-
-      if (!response.ok) {
-        return;
-      }
-
-      const payload = await response.json();
-
-      finalGames = Array.isArray(payload?.games)
-        ? payload.games.filter(game =>
-            String(game?.game_state || "").toLowerCase() === "final"
-          )
-        : [];
-    } catch (error) {
-      console.warn(
-        "[Hammer Final Matchup] Could not load finals.",
-        error
-      );
-    }
-  }
-
-  function currentMatchupTeams() {
-    const title =
-      document.querySelector(
-        "#view-matchup .page-title"
-      ) ||
-      document.querySelector(
-        "#view-matchup h1"
-      );
-
-    if (!title) {
-      return null;
-    }
-
-    const text =
-      String(title.textContent || "")
-        .replace(/\s+/g, " ")
-        .trim();
-
-    if (!text) {
-      return null;
-    }
-
-    const separators = [
-      " @ ",
-      " vs. ",
-      " vs "
-    ];
-
-    for (const separator of separators) {
-      if (text.includes(separator)) {
-        const [away, home] =
-          text.split(separator);
-
-        if (away && home) {
-          return {
-            away: away.trim(),
-            home: home.trim()
-          };
-        }
-      }
-    }
-
-    return null;
-  }
-
-  function findFinalForCurrentMatchup() {
-    const teams =
-      currentMatchupTeams();
-
-    if (!teams) {
-      return null;
-    }
-
-    return finalGames.find(game =>
-      equivalentTeamName(
-        game?.away_team,
-        teams.away
-      ) &&
-      equivalentTeamName(
-        game?.home_team,
-        teams.home
-      )
-    ) || null;
-  }
-
-  function getProjectedScore(card) {
-    if (!card) {
-      return null;
-    }
-
-    const teams =
-      Array.from(
-        card.querySelectorAll(
-          ".projected-team"
-        )
-      );
-
-    if (teams.length < 2) {
-      return null;
-    }
-
-    const awayName =
-      teams[0]
-        .querySelector(
-          ".projected-team-name"
-        )
-        ?.textContent
-        ?.trim();
-
-    const awayScore =
-      teams[0]
-        .querySelector(
-          ".projected-team-score"
-        )
-        ?.textContent
-        ?.trim();
-
-    const homeName =
-      teams[1]
-        .querySelector(
-          ".projected-team-name"
-        )
-        ?.textContent
-        ?.trim();
-
-    const homeScore =
-      teams[1]
-        .querySelector(
-          ".projected-team-score"
-        )
-        ?.textContent
-        ?.trim();
-
-    if (
-      !awayName ||
-      !homeName ||
-      awayScore === undefined ||
-      homeScore === undefined
-    ) {
-      return null;
-    }
-
-    return {
-      awayName,
-      awayScore,
-      homeName,
-      homeScore
-    };
+  function sameTeam(a, b) {
+    return normalizedTeam(a) === normalizedTeam(b);
   }
 
   function escapeHtml(value) {
@@ -342,237 +74,379 @@
       .replaceAll("'", "&#039;");
   }
 
-  function applyFinalScore() {
-    const view =
-      document.querySelector(
-        "#view-matchup"
+  // ==========================================================================
+  // STYLES
+  // ==========================================================================
+
+  function installStyles() {
+    if (document.getElementById(STYLE_ID)) return;
+
+    const style = document.createElement("style");
+    style.id = STYLE_ID;
+
+    style.textContent = `
+      #matchup-container .projected-score-card.hammer-final-score-card {
+        border-color: var(--border-dark);
+      }
+
+      #matchup-container .hammer-final-score-card .projected-score-title {
+        color: var(--muted);
+      }
+
+      #matchup-container .hammer-final-pregame-block {
+        margin-top: 13px;
+        padding-top: 12px;
+        border-top: 1px solid #eeeeeb;
+      }
+
+      #matchup-container .hammer-final-pregame-heading {
+        margin-bottom: 9px;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+
+      #matchup-container .hammer-final-pregame-score {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        gap: 12px;
+        align-items: center;
+      }
+
+      #matchup-container .hammer-final-pregame-team {
+        min-width: 0;
+      }
+
+      #matchup-container .hammer-final-pregame-team:last-child {
+        text-align: right;
+      }
+
+      #matchup-container .hammer-final-pregame-name {
+        color: var(--muted);
+        font-size: 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      #matchup-container .hammer-final-pregame-points {
+        margin-top: 3px;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 17px;
+        font-weight: 700;
+      }
+
+      #matchup-container .hammer-final-pregame-separator {
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 9px;
+        font-weight: 700;
+      }
+
+      #matchup-container .hammer-final-pregame-note {
+        margin-top: 9px;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 8px;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 600px) {
+        #matchup-container .hammer-final-pregame-score {
+          gap: 8px;
+        }
+
+        #matchup-container .hammer-final-pregame-points {
+          font-size: 15px;
+        }
+      }
+    `;
+
+    document.head.appendChild(style);
+  }
+
+  // ==========================================================================
+  // RESULTS
+  // ==========================================================================
+
+  async function loadFinalResults() {
+    try {
+      const response = await fetch(
+        `${RESULTS_URL}?v=${Date.now()}`,
+        {
+          cache: "no-store"
+        }
       );
 
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const payload = await response.json();
+
+      finalGames = Array.isArray(payload?.games)
+        ? payload.games.filter(game =>
+            String(game?.game_state || "").toLowerCase() === "final"
+          )
+        : [];
+
+      applyFinalToCurrentMatchup();
+    } catch (error) {
+      console.warn(
+        "[Hammer Final Matchup] Results unavailable:",
+        error
+      );
+    }
+  }
+
+  // ==========================================================================
+  // SCORE CARD
+  // ==========================================================================
+
+  function currentScoreCard() {
+    return document.querySelector(
+      "#matchup-container .projected-score-card"
+    );
+  }
+
+  function scoreCardTeams(card) {
+    if (!card) return null;
+
+    const teams = Array.from(
+      card.querySelectorAll(".projected-team")
+    );
+
+    if (teams.length < 2) return null;
+
+    const awayName = teams[0]
+      .querySelector(".projected-team-name")
+      ?.textContent
+      ?.trim();
+
+    const homeName = teams[1]
+      .querySelector(".projected-team-name")
+      ?.textContent
+      ?.trim();
+
+    if (!awayName || !homeName) return null;
+
+    return {
+      awayName,
+      homeName,
+      awayNode: teams[0],
+      homeNode: teams[1]
+    };
+  }
+
+  function findFinal(awayName, homeName) {
+    return (
+      finalGames.find(game =>
+        sameTeam(game?.away_team, awayName) &&
+        sameTeam(game?.home_team, homeName)
+      ) || null
+    );
+  }
+
+  function readPregameProjection(nodes) {
+    const awayScore = nodes.awayNode
+      .querySelector(".projected-team-score")
+      ?.textContent
+      ?.trim();
+
+    const homeScore = nodes.homeNode
+      .querySelector(".projected-team-score")
+      ?.textContent
+      ?.trim();
+
     if (
-      !view ||
-      !view.classList.contains("active")
+      awayScore === undefined ||
+      awayScore === null ||
+      homeScore === undefined ||
+      homeScore === null
     ) {
-      lastMatchupKey = "";
+      return null;
+    }
+
+    return {
+      awayName: nodes.awayName,
+      homeName: nodes.homeName,
+      awayScore,
+      homeScore
+    };
+  }
+
+  function pregameMarkup(projection) {
+    return `
+      <div class="hammer-final-pregame-block">
+        <div class="hammer-final-pregame-heading">
+          Pregame Model Projection
+        </div>
+
+        <div class="hammer-final-pregame-score">
+          <div class="hammer-final-pregame-team">
+            <div class="hammer-final-pregame-name">
+              ${escapeHtml(projection.awayName)}
+            </div>
+            <div class="hammer-final-pregame-points">
+              ${escapeHtml(projection.awayScore)}
+            </div>
+          </div>
+
+          <div class="hammer-final-pregame-separator">
+            —
+          </div>
+
+          <div class="hammer-final-pregame-team">
+            <div class="hammer-final-pregame-name">
+              ${escapeHtml(projection.homeName)}
+            </div>
+            <div class="hammer-final-pregame-points">
+              ${escapeHtml(projection.homeScore)}
+            </div>
+          </div>
+        </div>
+
+        <div class="hammer-final-pregame-note">
+          Pregame projection preserved for reference. Actual final score shown above.
+        </div>
+      </div>
+    `;
+  }
+
+  function applyFinalToCurrentMatchup() {
+    const card = currentScoreCard();
+
+    if (!card) return;
+
+    // If this exact rendered card has already been converted,
+    // do not touch it again.
+    if (card.dataset.hammerFinalApplied === "true") {
       return;
     }
 
-    const final =
-      findFinalForCurrentMatchup();
+    const nodes = scoreCardTeams(card);
+
+    if (!nodes) return;
+
+    const final = findFinal(
+      nodes.awayName,
+      nodes.homeName
+    );
 
     if (!final) {
       return;
     }
 
-    const card =
-      view.querySelector(
-        ".projected-score-card"
-      );
+    const projection = readPregameProjection(nodes);
 
-    if (!card) {
-      return;
-    }
+    if (!projection) return;
 
-    const matchupKey =
-      [
-        canonical(final.away_team),
-        canonical(final.home_team),
-        final.away_points,
-        final.home_points
-      ].join("|");
+    const awayPoints = Number(final.away_points);
+    const homePoints = Number(final.home_points);
 
     if (
-      card.dataset.hammerFinalApplied ===
-        matchupKey &&
-      lastMatchupKey === matchupKey
+      !Number.isFinite(awayPoints) ||
+      !Number.isFinite(homePoints)
     ) {
       return;
     }
 
-    const projection =
-      getProjectedScore(card);
+    const title = card.querySelector(
+      ".projected-score-title"
+    );
 
-    if (!projection) {
-      return;
-    }
+    const separator = card.querySelector(
+      ".projected-score-separator"
+    );
 
-    const title =
-      card.querySelector(
-        ".projected-score-title"
-      );
+    const awayNameNode = nodes.awayNode.querySelector(
+      ".projected-team-name"
+    );
 
-    const scoreTeams =
-      Array.from(
-        card.querySelectorAll(
-          ".projected-team"
-        )
-      );
+    const awayScoreNode = nodes.awayNode.querySelector(
+      ".projected-team-score"
+    );
+
+    const homeNameNode = nodes.homeNode.querySelector(
+      ".projected-team-name"
+    );
+
+    const homeScoreNode = nodes.homeNode.querySelector(
+      ".projected-team-score"
+    );
 
     if (
       !title ||
-      scoreTeams.length < 2
+      !awayNameNode ||
+      !awayScoreNode ||
+      !homeNameNode ||
+      !homeScoreNode
     ) {
       return;
     }
 
-    title.textContent =
-      "Final Score";
+    // Mark FIRST so our own DOM changes cannot cause an observer loop.
+    card.dataset.hammerFinalApplied = "true";
 
-    scoreTeams[0]
-      .querySelector(
-        ".projected-team-name"
-      )
-      .textContent =
-        final.away_team;
+    title.textContent = "Final Score";
 
-    scoreTeams[0]
-      .querySelector(
-        ".projected-team-score"
-      )
-      .textContent =
-        String(final.away_points);
+    awayNameNode.textContent =
+      final.away_team || projection.awayName;
 
-    scoreTeams[1]
-      .querySelector(
-        ".projected-team-name"
-      )
-      .textContent =
-        final.home_team;
+    awayScoreNode.textContent =
+      String(awayPoints);
 
-    scoreTeams[1]
-      .querySelector(
-        ".projected-team-score"
-      )
-      .textContent =
-        String(final.home_points);
+    homeNameNode.textContent =
+      final.home_team || projection.homeName;
 
-    const middle =
-      card.querySelector(
-        ".projected-score-vs"
-      ) ||
-      card.querySelector(
-        ".projected-score-middle"
-      );
+    homeScoreNode.textContent =
+      String(homePoints);
 
-    if (middle) {
-      middle.textContent = "FINAL";
+    if (separator) {
+      separator.textContent = "FINAL";
     }
 
-    let status =
-      card.querySelector(
-        ".hammer-final-score-status"
-      );
+    // Keep the existing fair-line / projected-total metadata untouched.
+    // It is still valuable as the pregame model audit.
 
-    if (!status) {
-      status =
-        document.createElement("div");
+    const oldPregame = card.querySelector(
+      ".hammer-final-pregame-block"
+    );
 
-      status.className =
-        "hammer-final-score-status";
-
-      status.textContent =
-        "FINAL";
-
-      title.insertAdjacentElement(
-        "afterend",
-        status
-      );
+    if (oldPregame) {
+      oldPregame.remove();
     }
 
-    const existing =
-      card.querySelector(
-        ".hammer-pregame-projection"
-      );
-
-    if (existing) {
-      existing.remove();
-    }
-
-    const pregame =
-      document.createElement("div");
-
-    pregame.className =
-      "hammer-pregame-projection";
-
-    pregame.innerHTML = `
-      <div class="hammer-pregame-team">
-        <div class="hammer-pregame-label">
-          Pregame Projection
-        </div>
-
-        <div class="hammer-pregame-team-name">
-          ${escapeHtml(projection.awayName)}
-        </div>
-
-        <div class="hammer-pregame-score">
-          ${escapeHtml(projection.awayScore)}
-        </div>
-      </div>
-
-      <div class="hammer-pregame-divider">
-        —
-      </div>
-
-      <div class="hammer-pregame-team">
-        <div class="hammer-pregame-label">
-          Pregame Projection
-        </div>
-
-        <div class="hammer-pregame-team-name">
-          ${escapeHtml(projection.homeName)}
-        </div>
-
-        <div class="hammer-pregame-score">
-          ${escapeHtml(projection.homeScore)}
-        </div>
-      </div>
-    `;
-
-    const note =
-      document.createElement("div");
-
-    note.className =
-      "hammer-pregame-note";
-
-    note.textContent =
-      "Pregame model projection preserved for reference. Final score shown above.";
-
-    card.appendChild(pregame);
-    card.appendChild(note);
+    card.insertAdjacentHTML(
+      "beforeend",
+      pregameMarkup(projection)
+    );
 
     card.classList.add(
       "hammer-final-score-card"
     );
-
-    card.dataset.hammerFinalApplied =
-      matchupKey;
-
-    lastMatchupKey =
-      matchupKey;
   }
 
+  // ==========================================================================
+  // OBSERVER
+  // ==========================================================================
+
   function scheduleApply() {
-    requestAnimationFrame(() => {
-      applyFinalScore();
-    });
-
-    setTimeout(
-      applyFinalScore,
-      75
-    );
-
-    setTimeout(
-      applyFinalScore,
-      250
+    requestAnimationFrame(
+      applyFinalToCurrentMatchup
     );
   }
 
   function installObserver() {
-    const target =
-      document.querySelector(
-        "#view-matchup"
-      );
+    const container = document.getElementById(
+      "matchup-container"
+    );
 
-    if (!target) {
+    if (!container) {
       setTimeout(
         installObserver,
         250
@@ -581,47 +455,49 @@
       return;
     }
 
-    const observer =
-      new MutationObserver(() => {
-        scheduleApply();
-      });
+    if (observer) {
+      observer.disconnect();
+    }
+
+    observer = new MutationObserver(() => {
+      scheduleApply();
+    });
 
     observer.observe(
-      target,
+      container,
       {
         childList: true,
         subtree: true
       }
     );
+
+    scheduleApply();
   }
+
+  // ==========================================================================
+  // START
+  // ==========================================================================
 
   async function start() {
     installStyles();
 
-    await loadFinals();
+    await loadFinalResults();
 
     installObserver();
 
-    scheduleApply();
-
+    // Keep results current so a game that goes final while
+    // the site is open can convert automatically.
     setInterval(
-      async () => {
-        await loadFinals();
-        scheduleApply();
-      },
+      loadFinalResults,
       60000
     );
   }
 
-  if (
-    document.readyState === "loading"
-  ) {
+  if (document.readyState === "loading") {
     document.addEventListener(
       "DOMContentLoaded",
       start,
-      {
-        once: true
-      }
+      { once: true }
     );
   } else {
     start();
