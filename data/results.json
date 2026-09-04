@@ -1,8 +1,8 @@
 {
   "meta": {
     "season": 2026,
-    "generated_at": "2026-09-04T04:16:10.336634+00:00",
-    "source": "NCAA via ncaa-api",
+    "generated_at": "2026-09-04T04:20:19.442958+00:00",
+    "source": "NCAA primary + ESPN public fallback",
     "source_type": "public_scoreboard_no_auth",
     "scan_mode": "targeted_live_refresh",
     "weeks_scanned": [
@@ -13,12 +13,15 @@
     "notes": [
       "Completed games only.",
       "Previously collected finals are preserved.",
-      "Only explicit NCAA final states enter the settlement ledger.",
+      "NCAA is the primary scoreboard provider.",
+      "ESPN public scoreboard fills matchups absent from NCAA.",
+      "Only explicit provider final/completed states enter results.",
       "Evaluation only; Model A is untouched."
     ]
   },
   "scan_log": [
     {
+      "provider": "NCAA",
       "week": 1,
       "status": "ok",
       "scoreboard_games": 99,
@@ -26,11 +29,30 @@
       "live_games": 3
     },
     {
+      "provider": "NCAA",
       "week": 2,
       "status": "ok",
       "scoreboard_games": 80,
       "completed_games": 0,
       "live_games": 0
+    },
+    {
+      "provider": "ESPN fallback",
+      "date": "20260903",
+      "status": "unavailable",
+      "error": "Unable to fetch scoreboard URL: https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard"
+    },
+    {
+      "provider": "ESPN fallback",
+      "date": "20260904",
+      "status": "unavailable",
+      "error": "Unable to fetch scoreboard URL: https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard"
+    },
+    {
+      "provider": "ESPN fallback",
+      "date": "20260905",
+      "status": "unavailable",
+      "error": "Unable to fetch scoreboard URL: https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard"
     }
   ],
   "games": [
@@ -47,7 +69,7 @@
       "start_date": "09/03/2026",
       "neutral_site": false,
       "source": "NCAA",
-      "source_updated_at": "2026-09-04T04:16:09.729318+00:00",
+      "source_updated_at": "2026-09-04T04:19:59.193918+00:00",
       "status": "completed",
       "game_state": "final",
       "final_message": "FINAL"
@@ -57,7 +79,7 @@
       "season": 2026,
       "week": 1,
       "home_team": "Missouri",
-      "away_team": "Arkansas Pine Bluff",
+      "away_team": "Arkansas-Pine Bluff",
       "home_team_id": null,
       "away_team_id": null,
       "home_points": 54,
@@ -65,7 +87,7 @@
       "start_date": "09/03/2026",
       "neutral_site": false,
       "source": "NCAA",
-      "source_updated_at": "2026-09-04T04:16:09.729344+00:00",
+      "source_updated_at": "2026-09-04T04:19:59.193950+00:00",
       "status": "completed",
       "game_state": "final",
       "final_message": "FINAL"
@@ -83,7 +105,7 @@
       "start_date": "09/03/2026",
       "neutral_site": false,
       "source": "NCAA",
-      "source_updated_at": "2026-09-04T04:16:09.729237+00:00",
+      "source_updated_at": "2026-09-04T04:19:59.193861+00:00",
       "status": "completed",
       "game_state": "final",
       "final_message": "FINAL"
@@ -101,7 +123,7 @@
       "start_date": "09/03/2026",
       "neutral_site": false,
       "source": "NCAA",
-      "source_updated_at": "2026-09-04T04:16:09.729327+00:00",
+      "source_updated_at": "2026-09-04T04:19:59.193930+00:00",
       "status": "completed",
       "game_state": "final",
       "final_message": "FINAL"
@@ -111,7 +133,7 @@
       "season": 2026,
       "week": 1,
       "home_team": "Stanford",
-      "away_team": "Hawaii",
+      "away_team": "Hawai'i",
       "home_team_id": null,
       "away_team_id": null,
       "home_points": 37,
@@ -119,7 +141,7 @@
       "start_date": "08/29/2026",
       "neutral_site": false,
       "source": "NCAA",
-      "source_updated_at": "2026-09-04T04:16:09.729188+00:00",
+      "source_updated_at": "2026-09-04T04:19:59.193802+00:00",
       "status": "completed",
       "game_state": "final",
       "final_message": "FINAL"
@@ -128,8 +150,8 @@
       "game_id": "6604127",
       "season": 2026,
       "week": 1,
-      "home_team": "North Dakota St.",
-      "away_team": "Jacksonville St.",
+      "home_team": "North Dakota State",
+      "away_team": "Jacksonville State",
       "home_team_id": null,
       "away_team_id": null,
       "home_points": 33,
@@ -137,7 +159,7 @@
       "start_date": "08/29/2026",
       "neutral_site": false,
       "source": "NCAA",
-      "source_updated_at": "2026-09-04T04:16:09.729156+00:00",
+      "source_updated_at": "2026-09-04T04:19:59.193754+00:00",
       "status": "completed",
       "game_state": "final",
       "final_message": "FINAL"
@@ -155,7 +177,7 @@
       "start_date": "09/03/2026",
       "neutral_site": false,
       "source": "NCAA",
-      "source_updated_at": "2026-09-04T04:16:09.729228+00:00",
+      "source_updated_at": "2026-09-04T04:19:59.193847+00:00",
       "status": "completed",
       "game_state": "final",
       "final_message": "FINAL"
@@ -173,7 +195,7 @@
       "start_date": "08/29/2026",
       "neutral_site": false,
       "source": "NCAA",
-      "source_updated_at": "2026-09-04T04:16:09.729216+00:00",
+      "source_updated_at": "2026-09-04T04:19:59.193830+00:00",
       "status": "completed",
       "game_state": "final",
       "final_message": "FINAL"
@@ -191,7 +213,7 @@
       "start_date": "09/03/2026",
       "neutral_site": false,
       "source": "NCAA",
-      "source_updated_at": "2026-09-04T04:16:09.729254+00:00",
+      "source_updated_at": "2026-09-04T04:19:59.193888+00:00",
       "status": "completed",
       "game_state": "final",
       "final_message": "FINAL"
@@ -209,7 +231,7 @@
       "start_date": "08/29/2026",
       "neutral_site": false,
       "source": "NCAA",
-      "source_updated_at": "2026-09-04T04:16:09.729140+00:00",
+      "source_updated_at": "2026-09-04T04:19:59.193736+00:00",
       "status": "completed",
       "game_state": "final",
       "final_message": "FINAL"
@@ -218,8 +240,8 @@
       "game_id": "6603961",
       "season": 2026,
       "week": 1,
-      "home_team": "Florida St.",
-      "away_team": "New Mexico St.",
+      "home_team": "Florida State",
+      "away_team": "New Mexico State",
       "home_team_id": null,
       "away_team_id": null,
       "home_points": 34,
@@ -227,7 +249,7 @@
       "start_date": "08/29/2026",
       "neutral_site": false,
       "source": "NCAA",
-      "source_updated_at": "2026-09-04T04:16:09.729178+00:00",
+      "source_updated_at": "2026-09-04T04:19:59.193787+00:00",
       "status": "completed",
       "game_state": "final",
       "final_message": "FINAL"
@@ -245,7 +267,7 @@
       "start_date": "08/29/2026",
       "neutral_site": false,
       "source": "NCAA",
-      "source_updated_at": "2026-09-04T04:16:09.729099+00:00",
+      "source_updated_at": "2026-09-04T04:19:59.193674+00:00",
       "status": "completed",
       "game_state": "final",
       "final_message": "FINAL"
@@ -254,8 +276,8 @@
       "game_id": "6603974",
       "season": 2026,
       "week": 1,
-      "home_team": "Eastern Mich.",
-      "away_team": "Sacramento St.",
+      "home_team": "Eastern Michigan",
+      "away_team": "Sacramento State",
       "home_team_id": null,
       "away_team_id": null,
       "home_points": 28,
@@ -263,7 +285,7 @@
       "start_date": "08/29/2026",
       "neutral_site": false,
       "source": "NCAA",
-      "source_updated_at": "2026-09-04T04:16:09.729168+00:00",
+      "source_updated_at": "2026-09-04T04:19:59.193772+00:00",
       "status": "completed",
       "game_state": "final",
       "final_message": "FINAL"
@@ -272,8 +294,8 @@
       "game_id": "6603956",
       "season": 2026,
       "week": 1,
-      "home_team": "Southern California",
-      "away_team": "San Jose St.",
+      "home_team": "USC",
+      "away_team": "San Jose State",
       "home_team_id": null,
       "away_team_id": null,
       "home_points": 42,
@@ -281,7 +303,7 @@
       "start_date": "08/29/2026",
       "neutral_site": false,
       "source": "NCAA",
-      "source_updated_at": "2026-09-04T04:16:09.729126+00:00",
+      "source_updated_at": "2026-09-04T04:19:59.193716+00:00",
       "status": "completed",
       "game_state": "final",
       "final_message": "FINAL"
@@ -290,7 +312,7 @@
       "game_id": "6603790",
       "season": 2026,
       "week": 1,
-      "home_team": "Kennesaw St.",
+      "home_team": "Kennesaw State",
       "away_team": "West Georgia",
       "home_team_id": null,
       "away_team_id": null,
@@ -299,7 +321,7 @@
       "start_date": "09/03/2026",
       "neutral_site": false,
       "source": "NCAA",
-      "source_updated_at": "2026-09-04T04:16:09.729246+00:00",
+      "source_updated_at": "2026-09-04T04:19:59.193874+00:00",
       "status": "completed",
       "game_state": "final",
       "final_message": "FINAL"

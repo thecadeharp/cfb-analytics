@@ -1,8 +1,8 @@
 {
   "meta": {
     "season": 2026,
-    "generated_at": "2026-09-04T04:16:10.336656+00:00",
-    "source": "NCAA via ncaa-api",
+    "generated_at": "2026-09-04T04:20:19.442976+00:00",
+    "source": "NCAA primary + ESPN public fallback",
     "source_type": "public_scoreboard_no_auth",
     "scan_mode": "targeted_live_refresh",
     "weeks_scanned": [
@@ -13,33 +13,13 @@
     "notes": [
       "Live games only.",
       "Rebuilt on every refresh.",
+      "NCAA is primary; ESPN fills missing live matchups.",
       "Delayed/suspended/interrupted active games are included.",
-      "Never used by settlement.",
-      "Pregame Hammer Index projections remain frozen while games are live."
+      "Never used by settlement until an explicit final is received.",
+      "Pregame Hammer Index projections remain frozen while live."
     ]
   },
   "games": [
-    {
-      "game_id": "6604235",
-      "season": 2026,
-      "week": 1,
-      "home_team": "Buffalo",
-      "away_team": "Albany",
-      "home_team_id": null,
-      "away_team_id": null,
-      "home_points": 14,
-      "away_points": 10,
-      "start_date": "09/03/2026",
-      "neutral_site": false,
-      "source": "NCAA",
-      "source_updated_at": "2026-09-04T04:16:09.729263+00:00",
-      "status": "live",
-      "game_state": "live",
-      "period": "3RD",
-      "clock": "04:33",
-      "network": null,
-      "provider_status": "3RD"
-    },
     {
       "game_id": "6604087",
       "season": 2026,
@@ -53,11 +33,11 @@
       "start_date": "09/03/2026",
       "neutral_site": false,
       "source": "NCAA",
-      "source_updated_at": "2026-09-04T04:16:09.729369+00:00",
+      "source_updated_at": "2026-09-04T04:19:59.193979+00:00",
       "status": "live",
       "game_state": "live",
       "period": "4TH",
-      "clock": "06:29",
+      "clock": "02:00",
       "network": null,
       "provider_status": "4TH"
     },
@@ -70,17 +50,38 @@
       "home_team_id": null,
       "away_team_id": null,
       "home_points": 42,
+      "away_points": 22,
+      "start_date": "09/03/2026",
+      "neutral_site": false,
+      "source": "NCAA",
+      "source_updated_at": "2026-09-04T04:19:59.193963+00:00",
+      "status": "live",
+      "game_state": "live",
+      "period": "4TH",
+      "clock": "00:09",
+      "network": null,
+      "provider_status": "4TH"
+    },
+    {
+      "game_id": "6604235",
+      "season": 2026,
+      "week": 1,
+      "home_team": "Buffalo",
+      "away_team": "UAlbany",
+      "home_team_id": null,
+      "away_team_id": null,
+      "home_points": 14,
       "away_points": 16,
       "start_date": "09/03/2026",
       "neutral_site": false,
       "source": "NCAA",
-      "source_updated_at": "2026-09-04T04:16:09.729353+00:00",
+      "source_updated_at": "2026-09-04T04:19:59.193900+00:00",
       "status": "live",
       "game_state": "live",
-      "period": "4TH",
-      "clock": "02:00",
+      "period": "3RD",
+      "clock": "03:23",
       "network": null,
-      "provider_status": "4TH"
+      "provider_status": "3RD"
     }
   ]
 }
