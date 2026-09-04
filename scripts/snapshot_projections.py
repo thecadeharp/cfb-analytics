@@ -9,8 +9,8 @@ projections and writes immutable timestamped snapshots to:
 
     data/snapshots/projection_market_snapshots.jsonl
 
-Each run creates one snapshot per currently scheduled game that has a market
-spread. Existing snapshot_ids are never overwritten.
+Each run creates one snapshot per currently scheduled TRACKING-ELIGIBLE game
+that has a market spread. Existing snapshot_ids are never overwritten.
 
 This is the foundation for prospective CLV tracking. A future closing-line
 settlement step can compare the market line captured here with a closing line.
@@ -20,6 +20,8 @@ IMPORTANT:
 - It does not change projection math.
 - It does not use closing lines as predictive features.
 - It does not call an API itself.
+- Games with tracking_eligible == false are excluded from the official ledger.
+- FCS fallback games are explicitly excluded from official Model A tracking.
 """
 
 from __future__ import annotations
@@ -53,6 +55,20 @@ def number(value):
         return float(value) if value is not None else None
     except (TypeError, ValueError):
         return None
+
+
+def tracking_eligible(game):
+    """
+    Official prospective Model A tracking gate.
+
+    New cross-division/FCS fallback rows are intentionally public for research,
+    but they must never enter ATS, CLV, beat-close or Signal Confidence records.
+    """
+    if game.get("tracking_eligible") is False:
+        return False
+    if str(game.get("model_type") or "").strip().lower() == "fcs_fallback":
+        return False
+    return True
 
 
 def kickoff_has_passed(game, captured_at):
@@ -135,8 +151,13 @@ def main():
     conditions_by_game = conditions_payload.get("games") or {}
 
     rows = []
+    excluded_untracked = 0
 
     for game in games:
+        if not tracking_eligible(game):
+            excluded_untracked += 1
+            continue
+
         if game.get("status") == "completed":
             continue
         if kickoff_has_passed(game, captured_at):
@@ -175,6 +196,8 @@ def main():
             "captured_at_utc": captured_at,
             "model_version": MODEL_VERSION,
             "projection_source_generated": projections_meta.get("generated"),
+            "model_type": game.get("model_type") or "fbs_full_model",
+            "tracking_eligible": True,
             "game_id": game.get("game_id"),
             "week": game.get("week"),
             "start_date": game.get("start_date"),
@@ -242,10 +265,12 @@ def main():
         "captured_at_utc": captured_at,
         "model_version": MODEL_VERSION,
         "snapshots_added": len(rows),
+        "excluded_untracked_games": excluded_untracked,
         "ledger_path": str(LEDGER_PATH.relative_to(ROOT)),
         "note": (
-            "Prospective timestamped model/market snapshot. "
-            "Closing lines are evaluation targets only."
+            "Prospective timestamped Model A model/market snapshot. "
+            "Closing lines are evaluation targets only. "
+            "tracking_eligible=false and FCS fallback games are excluded."
         ),
         "snapshots": rows,
     }
@@ -261,6 +286,7 @@ def main():
     print("Model version:", MODEL_VERSION)
     print("Captured:", captured_at)
     print("Snapshots added:", len(rows))
+    print("Untracked/FCS games excluded:", excluded_untracked)
     print("Ledger:", LEDGER_PATH.relative_to(ROOT))
     print("Latest:", LATEST_PATH.relative_to(ROOT))
 
