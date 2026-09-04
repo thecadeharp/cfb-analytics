@@ -6,6 +6,7 @@
 
   let buildTimer = null;
   let buildFrame = null;
+  let matchupTimer = null;
   let lastSignature = "";
 
 
@@ -60,7 +61,6 @@
 
         .mobile-viewing-tip {
           display: block;
-
           margin: 16px 0 18px;
           padding: 14px 15px;
 
@@ -105,7 +105,6 @@
 
         #mobile-projection-cards {
           display: grid;
-
           gap: 12px;
 
           width: 100%;
@@ -370,11 +369,94 @@
           overflow-wrap: anywhere;
         }
 
+
+        /*
+          DOSSIER:
+          Values/ranks are deliberately compact and stay on one line.
+        */
+
         #view-dossier .metric-value,
-        #view-dossier .metric-rank,
+        #view-dossier .metric-rank {
+          white-space: nowrap;
+        }
+
+
+        /*
+          MATCHUP:
+          Do NOT globally force metric values onto one line.
+
+          Some Weather Engine / audit values contain explanatory text
+          and need to wrap naturally.
+        */
+
         #view-matchup .metric-value,
         #view-matchup .metric-rank {
-          white-space: nowrap;
+          min-width: 0;
+
+          white-space: normal;
+
+          overflow-wrap: anywhere;
+          word-break: normal;
+        }
+
+
+        /*
+          Long matchup metric rows get this class from JavaScript.
+
+          Instead of trying to squeeze a huge explanation into the
+          right side of a two-column row, put the label on top and the
+          explanation beneath it.
+        */
+
+        #view-matchup .metric-row.hammer-mobile-stack-row {
+          display: grid !important;
+
+          grid-template-columns:
+            minmax(0, 1fr) !important;
+
+          gap: 6px !important;
+
+          align-items: start !important;
+        }
+
+        #view-matchup
+        .metric-row.hammer-mobile-stack-row
+        .metric-name {
+          width: 100%;
+
+          margin: 0;
+
+          overflow-wrap: anywhere;
+        }
+
+        #view-matchup
+        .metric-row.hammer-mobile-stack-row
+        .metric-value {
+          width: 100%;
+          max-width: 100%;
+
+          margin: 0;
+
+          text-align: left !important;
+
+          white-space: normal !important;
+
+          overflow-wrap: anywhere;
+          word-break: normal;
+
+          line-height: 1.45;
+        }
+
+        #view-matchup
+        .metric-row.hammer-mobile-stack-row
+        .metric-rank {
+          width: 100%;
+
+          text-align: left !important;
+
+          white-space: normal !important;
+
+          overflow-wrap: anywhere;
         }
 
 
@@ -536,6 +618,147 @@
 
 
   // ==========================================================================
+  // MATCHUP MOBILE ROW HARDENING
+  // ==========================================================================
+
+  function hardenMatchupRows() {
+    matchupTimer = null;
+
+    if (
+      !mobileQuery.matches
+    ) {
+      return;
+    }
+
+    const matchupView =
+      document.getElementById(
+        "view-matchup"
+      );
+
+    if (!matchupView) {
+      return;
+    }
+
+    const rows =
+      Array.from(
+        matchupView.querySelectorAll(
+          ".metric-row"
+        )
+      );
+
+    rows.forEach(row => {
+      row.classList.remove(
+        "hammer-mobile-stack-row"
+      );
+
+      const value =
+        row.querySelector(
+          ".metric-value"
+        );
+
+      if (!value) {
+        return;
+      }
+
+      const text =
+        String(
+          value.textContent || ""
+        )
+          .replace(/\s+/g, " ")
+          .trim();
+
+      if (!text) {
+        return;
+      }
+
+      /*
+        Normal numerical values stay in the normal compact row.
+
+        Explanatory values such as:
+        "Locked — requires 100+ 2026 offensive plays..."
+        are intentionally stacked.
+
+        The keyword checks make the Weather Engine gate deterministic,
+        while the length fallback catches future audit explanations.
+      */
+
+      const normalized =
+        text.toLowerCase();
+
+      const shouldStack =
+        text.length >= 34 ||
+        normalized.includes(
+          "requires"
+        ) ||
+        normalized.includes(
+          "locked —"
+        ) ||
+        normalized.includes(
+          "locked -"
+        );
+
+      if (shouldStack) {
+        row.classList.add(
+          "hammer-mobile-stack-row"
+        );
+      }
+    });
+  }
+
+
+  function scheduleMatchupHardening() {
+    if (
+      matchupTimer !== null
+    ) {
+      window.clearTimeout(
+        matchupTimer
+      );
+    }
+
+    matchupTimer =
+      window.setTimeout(
+        hardenMatchupRows,
+        40
+      );
+  }
+
+
+  function installMatchupObserver() {
+    const matchupView =
+      document.getElementById(
+        "view-matchup"
+      );
+
+    if (!matchupView) {
+      window.setTimeout(
+        installMatchupObserver,
+        150
+      );
+
+      return;
+    }
+
+    const observer =
+      new MutationObserver(
+        () => {
+          scheduleMatchupHardening();
+        }
+      );
+
+    observer.observe(
+      matchupView,
+      {
+        childList: true,
+        subtree: true,
+        characterData: true
+      }
+    );
+
+    scheduleMatchupHardening();
+  }
+
+
+  // ==========================================================================
   // GAME ID
   // ==========================================================================
 
@@ -668,6 +891,13 @@
         () => {
           window.openMatchup(
             gameId
+          );
+
+          scheduleMatchupHardening();
+
+          window.setTimeout(
+            scheduleMatchupHardening,
+            100
           );
         };
 
@@ -1192,7 +1422,7 @@
 
 
   // ==========================================================================
-  // OBSERVER
+  // PROJECTION OBSERVER
   // ==========================================================================
 
   function installObserver() {
@@ -1245,7 +1475,11 @@
 
     installObserver();
 
+    installMatchupObserver();
+
     scheduleBuild();
+
+    scheduleMatchupHardening();
 
     window.setTimeout(
       scheduleBuild,
@@ -1261,12 +1495,25 @@
       scheduleBuild,
       1800
     );
+
+    window.setTimeout(
+      scheduleMatchupHardening,
+      300
+    );
+
+    window.setTimeout(
+      scheduleMatchupHardening,
+      900
+    );
   }
 
 
   document.addEventListener(
     "hammer:data-ready",
-    scheduleBuild
+    () => {
+      scheduleBuild();
+      scheduleMatchupHardening();
+    }
   );
 
 
@@ -1280,6 +1527,7 @@
         lastSignature = "";
 
         scheduleBuild();
+        scheduleMatchupHardening();
       }
     );
   } else {
@@ -1288,6 +1536,7 @@
         lastSignature = "";
 
         scheduleBuild();
+        scheduleMatchupHardening();
       }
     );
   }
@@ -1295,7 +1544,10 @@
 
   window.addEventListener(
     "resize",
-    scheduleBuild,
+    () => {
+      scheduleBuild();
+      scheduleMatchupHardening();
+    },
     {
       passive: true
     }
