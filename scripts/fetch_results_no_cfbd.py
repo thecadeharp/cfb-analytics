@@ -3,33 +3,30 @@
 CFB ANALYTICS
 fetch_results_no_cfbd.py
 
-Fetch live + completed FBS college-football scoreboard data without CFBD.
+Live + completed FBS scoreboard refresh without CFBD.
 
-Source:
-    NCAA scoreboard data through the public ncaa-api proxy.
+PRIMARY SOURCE
+    NCAA scoreboard via the public ncaa-api proxy.
 
-Outputs:
+FALLBACK SOURCE
+    ESPN public scoreboard endpoint, used only to fill games that the NCAA
+    scoreboard does not currently expose as LIVE or FINAL.
+
+OUTPUTS
     data/results.json
-        Completed games only. Existing finals are preserved so settlement
-        has a durable season-long results ledger.
+        Completed games only. Existing finals are preserved.
 
     data/live_scores.json
-        Current in-progress games only. Rebuilt on every run.
+        Current in-progress games only. Rebuilt every run.
 
-Important:
+SAFETY
     - no CFBD
-    - no ESPN
     - no model rebuild
-    - live games NEVER enter data/results.json
-    - only explicit NCAA "final" games can be settled
-
-2026-09-04 hardening:
-    - normalize several NCAA abbreviated FCS school names to the names used
-      by the projection board
-    - treat delayed / suspended / interrupted games as live presentation state
-    - recognize halftime / quarter / OT status text as live
-    - infer live state from period/clock only when the scoreboard supplies
-      actual scores and no explicit final state exists
+    - live games never enter results.json
+    - a final is accepted only when a provider explicitly marks it completed/post
+    - NCAA wins when both providers contain the same matchup/state
+    - ESPN is a coverage fallback, not a model input
+    - provider team names are aligned to exact projection-board names
 """
 
 from __future__ import annotations
@@ -38,7 +35,7 @@ import json
 import os
 import re
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -48,28 +45,36 @@ import requests
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS_PATH = ROOT / "data" / "results.json"
 LIVE_PATH = ROOT / "data" / "live_scores.json"
+PROJECTIONS_PATH = ROOT / "data" / "projections.json"
 
 SEASON = int(os.getenv("CFB_SEASON", "2026"))
-BASE_URL = "https://ncaa-api.henrygd.me/scoreboard/football/fbs"
+NCAA_BASE_URL = "https://ncaa-api.henrygd.me/scoreboard/football/fbs"
+ESPN_SCOREBOARD_URL = (
+    "https://site.api.espn.com/apis/site/v2/sports/football/"
+    "college-football/scoreboard"
+)
 ALL_WEEKS = list(range(1, 21))
 
 SESSION = requests.Session()
 SESSION.headers.update(
     {
         "Accept": "application/json",
-        "User-Agent": "the-hammer-index-scoreboard/3.1",
+        "User-Agent": "the-hammer-index-scoreboard/4.0",
     }
 )
 
-# Exact provider-name cleanup. Keep this conservative: only names we know the
-# NCAA scoreboard abbreviates differently from the public projection board.
+# Conservative provider-name cleanup into the naming used by the public board.
 TEAM_NAME_ALIASES = {
     "Ark.-Pine Bluff": "Arkansas Pine Bluff",
     "Ark.-Pine Bluff.": "Arkansas Pine Bluff",
     "Ark. Pine Bluff": "Arkansas Pine Bluff",
+    "Arkansas-Pine Bluff": "Arkansas Pine Bluff",
     "Eastern Ill.": "Eastern Illinois",
     "West Ga.": "West Georgia",
     "UAlbany": "Albany",
+    "Miami (FL)": "Miami",
+    "Miami (Fla.)": "Miami",
+    "Southern California": "USC",
 }
 
 
@@ -107,15 +112,57 @@ def as_int(value: Any) -> int | None:
         return None
 
 
-def fetch_week(week: int) -> dict[str, Any]:
-    url = f"{BASE_URL}/{SEASON}/{week:02d}/all-conf"
+def clean_team_name(value: Any) -> str | None:
+    if value is None:
+        return None
+
+    text = str(value).strip()
+    if not text:
+        return None
+
+    return TEAM_NAME_ALIASES.get(text, text)
+
+
+def canonical_team(value: Any) -> str:
+    text = clean_team_name(value) or ""
+    text = text.lower().replace("&", "and")
+    text = re.sub(r"\buniversity\b", "", text)
+    text = re.sub(r"\bst\.?\b", "state", text)
+    text = re.sub(r"\bmich\.?\b", "michigan", text)
+    text = re.sub(r"[^a-z0-9]+", "", text)
+
+    aliases = {
+        "miamifla": "miami",
+        "miamiflorida": "miami",
+        "olemiss": "mississippi",
+        "southernmiss": "southernmississippi",
+        "utsa": "texassanantonio",
+        "utep": "texaselpaso",
+        "ucf": "centralflorida",
+        "byu": "brighamyoung",
+        "lsu": "louisianastate",
+        "smu": "southernmethodist",
+        "tcu": "texaschristian",
+        "southerncalifornia": "usc",
+        "arkpinebluff": "arkansaspinebluff",
+        "ualbany": "albany",
+    }
+    return aliases.get(text, text)
+
+
+def matchup_key(game: dict[str, Any]) -> str:
+    away = canonical_team(game.get("away_team"))
+    home = canonical_team(game.get("home_team"))
+    return f"{away}@{home}" if away and home else ""
+
+
+def request_json(url: str, *, params: dict[str, Any] | None = None) -> dict[str, Any]:
     last_error: Exception | None = None
 
     for attempt in range(1, 4):
         try:
-            response = SESSION.get(url, timeout=30)
+            response = SESSION.get(url, params=params, timeout=30)
             response.raise_for_status()
-
             payload = response.json()
 
             if not isinstance(payload, dict):
@@ -125,105 +172,150 @@ def fetch_week(week: int) -> dict[str, Any]:
 
         except (requests.RequestException, ValueError) as exc:
             last_error = exc
-
             if attempt < 3:
                 time.sleep(attempt * 2)
 
-    raise RuntimeError(
-        f"Unable to fetch NCAA scoreboard season={SEASON}, week={week}"
-    ) from last_error
+    raise RuntimeError(f"Unable to fetch scoreboard URL: {url}") from last_error
+
+
+def projection_matchups() -> dict[str, tuple[str, str]]:
+    """
+    Build a lookup from canonical away@home to the EXACT team names currently
+    rendered by the projection board.
+
+    This removes the need for the scoreboard layer to guess whether a school is
+    displayed as Albany/UAlbany, Arkansas Pine Bluff/Ark.-Pine Bluff, etc.
+    """
+    payload = load_json(PROJECTIONS_PATH, {"games": []})
+
+    if isinstance(payload, dict):
+        games = payload.get("games") or payload.get("projections") or []
+    elif isinstance(payload, list):
+        games = payload
+    else:
+        games = []
+
+    lookup: dict[str, tuple[str, str]] = {}
+
+    for game in games:
+        if not isinstance(game, dict):
+            continue
+
+        away_obj = game.get("away") or {}
+        home_obj = game.get("home") or {}
+
+        away = (
+            away_obj.get("team")
+            if isinstance(away_obj, dict)
+            else None
+        ) or game.get("away_team") or game.get("awayTeam")
+
+        home = (
+            home_obj.get("team")
+            if isinstance(home_obj, dict)
+            else None
+        ) or game.get("home_team") or game.get("homeTeam")
+
+        away = str(away or "").strip()
+        home = str(home or "").strip()
+
+        if not away or not home:
+            continue
+
+        key = f"{canonical_team(away)}@{canonical_team(home)}"
+        if key and "@" in key:
+            lookup[key] = (away, home)
+
+    return lookup
+
+
+def align_to_projection_names(
+    game: dict[str, Any],
+    known_matchups: dict[str, tuple[str, str]],
+) -> dict[str, Any]:
+    """
+    Rewrite provider team names to the exact names used in projections.json
+    whenever the matchup can be resolved canonically.
+    """
+    key = matchup_key(game)
+    exact = known_matchups.get(key)
+
+    if not exact:
+        return game
+
+    away, home = exact
+    return {
+        **game,
+        "away_team": away,
+        "home_team": home,
+    }
+
+
+# ============================================================================
+# NCAA
+# ============================================================================
+
+def fetch_ncaa_week(week: int) -> dict[str, Any]:
+    return request_json(
+        f"{NCAA_BASE_URL}/{SEASON}/{week:02d}/all-conf"
+    )
 
 
 def unwrap_games(payload: Any) -> list[dict[str, Any]]:
     if isinstance(payload, list):
-        return [
-            item
-            for item in payload
-            if isinstance(item, dict)
-        ]
+        return [item for item in payload if isinstance(item, dict)]
 
     if not isinstance(payload, dict):
         return []
 
     for key in ("games", "contests", "events"):
         value = payload.get(key)
-
         if isinstance(value, list):
-            return [
-                item
-                for item in value
-                if isinstance(item, dict)
-            ]
+            return [item for item in value if isinstance(item, dict)]
 
     data = payload.get("data")
-
     if isinstance(data, dict):
         for key in ("games", "contests", "events"):
             value = data.get(key)
-
             if isinstance(value, list):
-                return [
-                    item
-                    for item in value
-                    if isinstance(item, dict)
-                ]
+                return [item for item in value if isinstance(item, dict)]
 
     return []
 
 
 def unwrap_game(entry: dict[str, Any]) -> dict[str, Any]:
     nested = entry.get("game")
-
-    return (
-        nested
-        if isinstance(nested, dict)
-        else entry
-    )
+    return nested if isinstance(nested, dict) else entry
 
 
-def clean_team_name(value: Any) -> str | None:
-    if value is None:
-        return None
-
-    text = str(value).strip()
-
-    if not text:
-        return None
-
-    return TEAM_NAME_ALIASES.get(text, text)
-
-
-def team_name(team: Any) -> str | None:
+def ncaa_team_name(team: Any) -> str | None:
     if not isinstance(team, dict):
         return None
 
     names = team.get("names")
-
     if isinstance(names, dict):
-        # The NCAA conversion frequently has names.short even when full is blank.
         value = first_nonempty(
             names.get("full"),
             names.get("short"),
             names.get("char6"),
             names.get("seo"),
         )
-
         cleaned = clean_team_name(value)
         if cleaned:
             return cleaned
 
-    value = first_nonempty(
-        team.get("name"),
-        team.get("displayName"),
-        team.get("shortName"),
-        team.get("nameShort"),
-        team.get("seo"),
+    return clean_team_name(
+        first_nonempty(
+            team.get("name"),
+            team.get("displayName"),
+            team.get("shortName"),
+            team.get("nameShort"),
+            team.get("seo"),
+        )
     )
 
-    return clean_team_name(value)
 
-
-def team_id(team: Any) -> str | None:
+def ncaa_team_id(team: Any) -> str | None:
     if not isinstance(team, dict):
         return None
 
@@ -234,15 +326,10 @@ def team_id(team: Any) -> str | None:
         team.get("seo"),
         team.get("seoname"),
     )
-
-    return (
-        str(value)
-        if value is not None
-        else None
-    )
+    return str(value) if value is not None else None
 
 
-def team_score(team: Any) -> int | None:
+def ncaa_team_score(team: Any) -> int | None:
     if not isinstance(team, dict):
         return None
 
@@ -255,32 +342,24 @@ def team_score(team: Any) -> int | None:
     )
 
 
-def home_away(
+def ncaa_home_away(
     game: dict[str, Any],
-) -> tuple[
-    dict[str, Any] | None,
-    dict[str, Any] | None,
-]:
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
     home = first_nonempty(
         game.get("home"),
         game.get("homeTeam"),
         game.get("home_team"),
     )
-
     away = first_nonempty(
         game.get("away"),
         game.get("awayTeam"),
         game.get("away_team"),
     )
 
-    if (
-        isinstance(home, dict)
-        and isinstance(away, dict)
-    ):
+    if isinstance(home, dict) and isinstance(away, dict):
         return home, away
 
     teams = game.get("teams")
-
     if isinstance(teams, list):
         home = None
         away = None
@@ -292,7 +371,6 @@ def home_away(
             if team.get("isHome") is True:
                 home = team
                 continue
-
             if team.get("isHome") is False:
                 away = team
                 continue
@@ -311,16 +389,13 @@ def home_away(
             elif designation == "away":
                 away = team
 
-        if (
-            isinstance(home, dict)
-            and isinstance(away, dict)
-        ):
+        if isinstance(home, dict) and isinstance(away, dict):
             return home, away
 
     return None, None
 
 
-def status_value(game: dict[str, Any]) -> Any:
+def ncaa_status_value(game: dict[str, Any]) -> Any:
     status = first_nonempty(
         game.get("status"),
         game.get("statusText"),
@@ -339,7 +414,7 @@ def status_value(game: dict[str, Any]) -> Any:
     return status
 
 
-def period_value(game: dict[str, Any]) -> Any:
+def ncaa_period_value(game: dict[str, Any]) -> Any:
     return first_nonempty(
         game.get("currentPeriod"),
         game.get("period"),
@@ -347,7 +422,7 @@ def period_value(game: dict[str, Any]) -> Any:
     )
 
 
-def clock_value(game: dict[str, Any]) -> Any:
+def ncaa_clock_value(game: dict[str, Any]) -> Any:
     return first_nonempty(
         game.get("contestClock"),
         game.get("clock"),
@@ -355,19 +430,7 @@ def clock_value(game: dict[str, Any]) -> Any:
     )
 
 
-def normalized_state(
-    game: dict[str, Any],
-) -> str:
-    """
-    Return one of: final, live, pre.
-
-    Settlement remains conservative: FINAL is still only accepted from explicit
-    provider final/completed state.
-
-    Presentation is intentionally more tolerant. NCAA has used delayed and
-    suspended states during active games, and some entries expose quarter /
-    halftime information even when gameState is not the normal "I".
-    """
+def ncaa_state(game: dict[str, Any]) -> str:
     raw = first_nonempty(
         game.get("gameState"),
         game.get("game_state"),
@@ -383,128 +446,65 @@ def normalized_state(
             raw.get("detail"),
         )
 
-    text = str(raw or "").strip().lower()
-    compact = re.sub(r"[^a-z0-9]+", "", text)
+    compact = re.sub(
+        r"[^a-z0-9]+",
+        "",
+        str(raw or "").strip().lower(),
+    )
 
-    # Explicit final states only.
     if compact in {
-        "f",
-        "final",
-        "post",
-        "completed",
-        "complete",
-        "closed",
-        "finalot",
-        "final2ot",
-        "final3ot",
+        "f", "final", "post", "completed", "complete", "closed",
+        "finalot", "final2ot", "final3ot",
     } or compact.startswith("final"):
         return "final"
 
-    # Standard in-progress plus active interruption states.
     if compact in {
-        "i",
-        "in",
-        "live",
-        "inprogress",
-        "d",
-        "delay",
-        "delayed",
-        "weatherdelay",
-        "suspended",
-        "suspend",
-        "interrupted",
-        "halftime",
-        "half",
-        "ot",
-        "overtime",
+        "i", "in", "live", "inprogress",
+        "d", "delay", "delayed", "weatherdelay",
+        "suspended", "suspend", "interrupted",
+        "halftime", "half", "ot", "overtime",
     }:
         return "live"
 
-    if compact in {
-        "p",
-        "pre",
-        "pregame",
-        "scheduled",
-    }:
-        explicit_pre = True
-    else:
-        explicit_pre = False
-
-    status = status_value(game)
-    status_text = str(status or "").strip().lower()
-    status_compact = re.sub(r"[^a-z0-9]+", "", status_text)
+    status_text = str(
+        ncaa_status_value(game) or ""
+    ).strip().lower()
 
     if any(
         word in status_text
-        for word in (
-            "final",
-            "completed",
-            "complete",
-        )
+        for word in ("final", "completed", "complete")
     ):
         return "final"
 
     if any(
         word in status_text
         for word in (
-            "live",
-            "in progress",
-            "in-progress",
-            "delay",
-            "suspend",
-            "interrupted",
-            "halftime",
-            "half time",
-            "overtime",
+            "live", "in progress", "in-progress",
+            "delay", "suspend", "interrupted",
+            "halftime", "half time", "overtime",
         )
     ):
         return "live"
 
-    # Some NCAA scoreboard records use short quarter/OT detail rather than a
-    # stable live state token.
-    if re.search(
-        r"\b(?:1st|2nd|3rd|4th)\b",
-        status_text,
-    ) or re.search(
-        r"\bq[1-4]\b",
-        status_text,
-    ) or status_compact in {
-        "1st",
-        "2nd",
-        "3rd",
-        "4th",
-        "1q",
-        "2q",
-        "3q",
-        "4q",
-        "ot",
-        "2ot",
-        "3ot",
-        "4ot",
-    }:
+    if re.search(r"\b(?:1st|2nd|3rd|4th)\b", status_text):
         return "live"
 
-    # Final fallback for presentation only: if the provider gives actual scores
-    # plus period/clock information, the contest has clearly started.
-    #
-    # Do not use this to infer FINAL; only explicit final state can settle.
-    home, away = home_away(game)
-    home_points = team_score(home)
-    away_points = team_score(away)
+    if re.search(r"\bq[1-4]\b", status_text):
+        return "live"
 
+    home, away = ncaa_home_away(game)
     has_scores = (
-        home_points is not None
-        and away_points is not None
+        ncaa_team_score(home) is not None
+        and ncaa_team_score(away) is not None
     )
 
-    period = period_value(game)
-    clock = clock_value(game)
+    period = ncaa_period_value(game)
+    clock = ncaa_clock_value(game)
 
     has_period = (
         period is not None
         and str(period).strip() not in {"", "0"}
     )
-
     has_clock = (
         clock is not None
         and str(clock).strip() not in {"", "0", "0:00", "00:00"}
@@ -513,44 +513,26 @@ def normalized_state(
     if has_scores and (has_period or has_clock):
         return "live"
 
-    if explicit_pre:
-        return "pre"
-
     return "pre"
 
 
-def clean_period(
-    value: Any,
-) -> str | None:
+def clean_period(value: Any) -> str | None:
     if value is None:
         return None
 
     text = str(value).strip()
-
-    if not text:
-        return None
-
-    if not re.fullmatch(r"\d+", text):
-        return text.upper()
-
-    return text
+    return text.upper() if text else None
 
 
-def clean_clock(
-    value: Any,
-) -> str | None:
+def clean_clock(value: Any) -> str | None:
     if value is None:
         return None
 
     text = str(value).strip()
-
-    if not text:
-        return None
-
-    return text
+    return text if text else None
 
 
-def game_identity(
+def ncaa_game_identity(
     game: dict[str, Any],
     week: int,
     away_name: str,
@@ -567,58 +549,37 @@ def game_identity(
     if value is not None:
         return str(value)
 
-    slug = (
-        f"ncaa-{SEASON}-{week}-"
-        f"{away_name}-{home_name}"
-    ).lower()
-
-    return re.sub(
-        r"[^a-z0-9]+",
-        "-",
-        slug,
-    ).strip("-")
+    slug = f"ncaa-{SEASON}-{week}-{away_name}-{home_name}".lower()
+    return re.sub(r"[^a-z0-9]+", "-", slug).strip("-")
 
 
-def normalize_entry(
+def normalize_ncaa_entry(
     entry: dict[str, Any],
     week: int,
 ) -> dict[str, Any] | None:
     game = unwrap_game(entry)
+    home, away = ncaa_home_away(game)
 
-    home, away = home_away(game)
-
-    if (
-        not isinstance(home, dict)
-        or not isinstance(away, dict)
-    ):
+    if not isinstance(home, dict) or not isinstance(away, dict):
         return None
 
-    home_name = team_name(home)
-    away_name = team_name(away)
+    home_name = ncaa_team_name(home)
+    away_name = ncaa_team_name(away)
 
-    if (
-        not home_name
-        or not away_name
-    ):
+    if not home_name or not away_name:
         return None
 
-    state = normalized_state(game)
-
-    # Pregame entries do not belong in either status output.
+    state = ncaa_state(game)
     if state == "pre":
         return None
 
-    home_points = team_score(home)
-    away_points = team_score(away)
+    home_points = ncaa_team_score(home)
+    away_points = ncaa_team_score(away)
 
-    # A LIVE or FINAL game should have a scoreboard value. Zero is valid.
-    if (
-        home_points is None
-        or away_points is None
-    ):
+    if home_points is None or away_points is None:
         return None
 
-    game_id = game_identity(
+    game_id = ncaa_game_identity(
         game,
         week,
         away_name,
@@ -638,8 +599,8 @@ def normalize_entry(
         "week": week,
         "home_team": home_name,
         "away_team": away_name,
-        "home_team_id": team_id(home),
-        "away_team_id": team_id(away),
+        "home_team_id": ncaa_team_id(home),
+        "away_team_id": ncaa_team_id(away),
         "home_points": home_points,
         "away_points": away_points,
         "start_date": start_date,
@@ -661,75 +622,317 @@ def normalize_entry(
             "game_state": "final",
             "final_message": str(
                 game.get("finalMessage")
-                or status_value(game)
-                or "Final"
-            ),
+                or ncaa_status_value(game)
+                or "FINAL"
+            ).upper(),
         }
 
     return {
         **base,
         "status": "live",
         "game_state": "live",
-        "period": clean_period(period_value(game)),
-        "clock": clean_clock(clock_value(game)),
+        "period": clean_period(ncaa_period_value(game)),
+        "clock": clean_clock(ncaa_clock_value(game)),
         "network": first_nonempty(
             game.get("network"),
             game.get("broadcasterName"),
         ),
         "provider_status": (
-            str(status_value(game)).strip()
-            if status_value(game) is not None
+            str(ncaa_status_value(game)).strip()
+            if ncaa_status_value(game) is not None
             else None
         ),
     }
 
 
-def merge_completed(
-    existing: list[dict[str, Any]],
-    fetched: list[dict[str, Any]],
-) -> list[dict[str, Any]]:
-    merged: dict[str, dict[str, Any]] = {}
+# ============================================================================
+# ESPN FALLBACK
+# ============================================================================
 
-    for game in existing + fetched:
-        if not isinstance(game, dict):
-            continue
+def espn_dates() -> list[str]:
+    now = utc_now()
+    return [
+        (now + timedelta(days=offset)).strftime("%Y%m%d")
+        for offset in (-1, 0, 1)
+    ]
 
-        if str(
-            game.get("status") or ""
-        ).lower() not in {
-            "completed",
-            "final",
-        }:
-            continue
 
-        key = str(
-            first_nonempty(
-                game.get("game_id"),
-                game.get("id"),
-                "",
-            )
-        )
-
-        if key:
-            merged[key] = game
-
-    return sorted(
-        merged.values(),
-        key=lambda game: (
-            int(game.get("week", 0) or 0),
-            str(game.get("away_team", "")),
-            str(game.get("home_team", "")),
-        ),
+def fetch_espn_date(date_string: str) -> dict[str, Any]:
+    return request_json(
+        ESPN_SCOREBOARD_URL,
+        params={
+            "dates": date_string,
+            "groups": "80",
+            "limit": "1000",
+        },
     )
 
+
+def espn_competitors(
+    competition: dict[str, Any],
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    home = None
+    away = None
+
+    for competitor in competition.get("competitors") or []:
+        if not isinstance(competitor, dict):
+            continue
+
+        side = str(
+            competitor.get("homeAway") or ""
+        ).strip().lower()
+
+        if side == "home":
+            home = competitor
+        elif side == "away":
+            away = competitor
+
+    return home, away
+
+
+def espn_team_name(competitor: Any) -> str | None:
+    if not isinstance(competitor, dict):
+        return None
+
+    team = competitor.get("team") or {}
+    if not isinstance(team, dict):
+        team = {}
+
+    return clean_team_name(
+        first_nonempty(
+            team.get("displayName"),
+            team.get("shortDisplayName"),
+            team.get("name"),
+            team.get("location"),
+            competitor.get("name"),
+        )
+    )
+
+
+def espn_team_id(competitor: Any) -> str | None:
+    if not isinstance(competitor, dict):
+        return None
+
+    team = competitor.get("team") or {}
+    if not isinstance(team, dict):
+        return None
+
+    value = team.get("id")
+    return str(value) if value is not None else None
+
+
+def espn_score(competitor: Any) -> int | None:
+    if not isinstance(competitor, dict):
+        return None
+    return as_int(competitor.get("score"))
+
+
+def espn_state(event: dict[str, Any], competition: dict[str, Any]) -> str:
+    status = competition.get("status") or event.get("status") or {}
+    if not isinstance(status, dict):
+        status = {}
+
+    status_type = status.get("type") or {}
+    if not isinstance(status_type, dict):
+        status_type = {}
+
+    state = str(
+        first_nonempty(
+            status_type.get("state"),
+            status.get("state"),
+            "",
+        )
+    ).strip().lower()
+
+    completed = bool(
+        first_nonempty(
+            status_type.get("completed"),
+            status.get("completed"),
+            False,
+        )
+    )
+
+    name = str(
+        first_nonempty(
+            status_type.get("name"),
+            status_type.get("description"),
+            status_type.get("detail"),
+            status.get("displayClock"),
+            "",
+        )
+    ).strip().lower()
+
+    if completed or state == "post" or "final" in name:
+        return "final"
+
+    if state == "in":
+        return "live"
+
+    if any(
+        word in name
+        for word in (
+            "delay", "suspend", "halftime",
+            "overtime", "1st", "2nd", "3rd", "4th",
+        )
+    ):
+        return "live"
+
+    return "pre"
+
+
+def espn_week(
+    payload: dict[str, Any],
+    event: dict[str, Any],
+    default_week: int,
+) -> int:
+    candidates = [
+        event.get("week"),
+        payload.get("week"),
+    ]
+
+    season = event.get("season")
+    if isinstance(season, dict):
+        candidates.append(season.get("week"))
+
+    for candidate in candidates:
+        if isinstance(candidate, dict):
+            number = as_int(
+                first_nonempty(
+                    candidate.get("number"),
+                    candidate.get("value"),
+                )
+            )
+        else:
+            number = as_int(candidate)
+
+        if number is not None:
+            return number
+
+    return default_week
+
+
+def normalize_espn_event(
+    payload: dict[str, Any],
+    event: dict[str, Any],
+    default_week: int,
+) -> dict[str, Any] | None:
+    competitions = event.get("competitions") or []
+    if not competitions or not isinstance(competitions[0], dict):
+        return None
+
+    competition = competitions[0]
+    home, away = espn_competitors(competition)
+
+    home_name = espn_team_name(home)
+    away_name = espn_team_name(away)
+
+    if not home_name or not away_name:
+        return None
+
+    state = espn_state(event, competition)
+    if state == "pre":
+        return None
+
+    home_points = espn_score(home)
+    away_points = espn_score(away)
+
+    if home_points is None or away_points is None:
+        return None
+
+    status = competition.get("status") or event.get("status") or {}
+    if not isinstance(status, dict):
+        status = {}
+    status_type = status.get("type") or {}
+    if not isinstance(status_type, dict):
+        status_type = {}
+
+    detail = first_nonempty(
+        status_type.get("shortDetail"),
+        status_type.get("detail"),
+        status_type.get("description"),
+    )
+
+    period = first_nonempty(
+        status.get("period"),
+        competition.get("status", {}).get("period")
+        if isinstance(competition.get("status"), dict)
+        else None,
+    )
+
+    clock = first_nonempty(
+        status.get("displayClock"),
+        status_type.get("displayClock"),
+    )
+
+    broadcasts = competition.get("broadcasts") or []
+    network = None
+    if broadcasts and isinstance(broadcasts[0], dict):
+        names = broadcasts[0].get("names") or []
+        if names:
+            network = names[0]
+
+    week = espn_week(
+        payload,
+        event,
+        default_week,
+    )
+
+    base = {
+        "game_id": str(
+            first_nonempty(
+                event.get("id"),
+                competition.get("id"),
+                f"espn-{SEASON}-{week}-{away_name}-{home_name}",
+            )
+        ),
+        "season": SEASON,
+        "week": week,
+        "home_team": home_name,
+        "away_team": away_name,
+        "home_team_id": espn_team_id(home),
+        "away_team_id": espn_team_id(away),
+        "home_points": home_points,
+        "away_points": away_points,
+        "start_date": first_nonempty(
+            event.get("date"),
+            competition.get("date"),
+        ),
+        "neutral_site": bool(
+            competition.get("neutralSite", False)
+        ),
+        "source": "ESPN fallback",
+        "source_updated_at": iso_now(),
+    }
+
+    if state == "final":
+        return {
+            **base,
+            "status": "completed",
+            "game_state": "final",
+            "final_message": str(detail or "FINAL").upper(),
+        }
+
+    return {
+        **base,
+        "status": "live",
+        "game_state": "live",
+        "period": clean_period(period),
+        "clock": clean_clock(clock),
+        "network": network,
+        "provider_status": str(detail).strip() if detail else None,
+    }
+
+
+# ============================================================================
+# MERGE / WEEK SELECTION
+# ============================================================================
 
 def infer_active_week(
     existing_payload: dict[str, Any],
 ) -> int:
     completed_weeks = [
         as_int(game.get("week"))
-        for game
-        in existing_payload.get("games", [])
+        for game in existing_payload.get("games", [])
         if (
             isinstance(game, dict)
             and as_int(game.get("week")) is not None
@@ -746,17 +949,12 @@ def infer_active_week(
         for row in scan_log:
             if not isinstance(row, dict):
                 continue
-
             if row.get("status") != "ok":
                 continue
-
-            if int(
-                row.get("scoreboard_games", 0) or 0
-            ) <= 0:
+            if int(row.get("scoreboard_games", 0) or 0) <= 0:
                 continue
 
             week = as_int(row.get("week"))
-
             if week is not None:
                 candidates.append(week)
 
@@ -768,15 +966,8 @@ def choose_weeks(
 ) -> tuple[list[int], str]:
     now = utc_now()
 
-    # Once each UTC morning, reconcile every NCAA week.
-    if (
-        now.hour == 8
-        and now.minute < 15
-    ):
-        return (
-            ALL_WEEKS,
-            "daily_full_reconciliation",
-        )
+    if now.hour == 8 and now.minute < 15:
+        return ALL_WEEKS, "daily_full_reconciliation"
 
     active = infer_active_week(existing_payload)
 
@@ -792,9 +983,79 @@ def choose_weeks(
         }
     )
 
-    return (
-        weeks,
-        "targeted_live_refresh",
+    return weeks, "targeted_live_refresh"
+
+
+def combine_provider_rows(
+    ncaa_rows: list[dict[str, Any]],
+    espn_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """
+    NCAA is primary. ESPN fills only matchups NCAA did not return in this state.
+    """
+    merged: dict[str, dict[str, Any]] = {}
+
+    for game in ncaa_rows:
+        key = matchup_key(game)
+        if key:
+            merged[key] = game
+
+    for game in espn_rows:
+        key = matchup_key(game)
+        if key and key not in merged:
+            merged[key] = game
+
+    return list(merged.values())
+
+
+def merge_completed(
+    existing: list[dict[str, Any]],
+    fetched: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """
+    Season-long durable final ledger.
+
+    Dedupe first by matchup when possible, otherwise by provider game id.
+    A freshly fetched final replaces an older row for the same matchup so
+    provider-name normalization corrections can propagate.
+    """
+    merged: dict[str, dict[str, Any]] = {}
+
+    for game in existing + fetched:
+        if not isinstance(game, dict):
+            continue
+
+        if str(game.get("status") or "").lower() not in {
+            "completed",
+            "final",
+        }:
+            continue
+
+        matchup = matchup_key(game)
+        game_id = str(
+            first_nonempty(
+                game.get("game_id"),
+                game.get("id"),
+                "",
+            )
+        )
+
+        key = (
+            f"matchup:{matchup}"
+            if matchup
+            else f"id:{game_id}"
+        )
+
+        if key:
+            merged[key] = game
+
+    return sorted(
+        merged.values(),
+        key=lambda game: (
+            int(game.get("week", 0) or 0),
+            str(game.get("away_team", "")),
+            str(game.get("home_team", "")),
+        ),
     )
 
 
@@ -808,16 +1069,21 @@ def main() -> None:
         "games",
         [],
     )
-
     if not isinstance(existing_games, list):
         existing_games = []
 
     weeks, scan_mode = choose_weeks(
         existing_payload
     )
+    known_projection_matchups = projection_matchups()
+    active_week = infer_active_week(
+        existing_payload
+    )
 
-    fetched_completed: list[dict[str, Any]] = []
-    fetched_live: list[dict[str, Any]] = []
+    ncaa_completed: list[dict[str, Any]] = []
+    ncaa_live: list[dict[str, Any]] = []
+    espn_completed: list[dict[str, Any]] = []
+    espn_live: list[dict[str, Any]] = []
     scan_log: list[dict[str, Any]] = []
 
     print(f"Season: {SEASON}")
@@ -829,14 +1095,14 @@ def main() -> None:
 
     for week in weeks:
         try:
-            payload = fetch_week(week)
+            payload = fetch_ncaa_week(week)
             entries = unwrap_games(payload)
 
             completed_count = 0
             live_count = 0
 
             for entry in entries:
-                normalized = normalize_entry(
+                normalized = normalize_ncaa_entry(
                     entry,
                     week,
                 )
@@ -844,20 +1110,21 @@ def main() -> None:
                 if normalized is None:
                     continue
 
-                if normalized["game_state"] == "final":
-                    fetched_completed.append(
-                        normalized
-                    )
-                    completed_count += 1
+                normalized = align_to_projection_names(
+                    normalized,
+                    known_projection_matchups,
+                )
 
+                if normalized["game_state"] == "final":
+                    ncaa_completed.append(normalized)
+                    completed_count += 1
                 elif normalized["game_state"] == "live":
-                    fetched_live.append(
-                        normalized
-                    )
+                    ncaa_live.append(normalized)
                     live_count += 1
 
             scan_log.append(
                 {
+                    "provider": "NCAA",
                     "week": week,
                     "status": "ok",
                     "scoreboard_games": len(entries),
@@ -867,7 +1134,7 @@ def main() -> None:
             )
 
             print(
-                f"Week {week:02d}: "
+                f"NCAA Week {week:02d}: "
                 f"{len(entries)} games, "
                 f"{live_count} live, "
                 f"{completed_count} completed"
@@ -876,6 +1143,7 @@ def main() -> None:
         except Exception as exc:
             scan_log.append(
                 {
+                    "provider": "NCAA",
                     "week": week,
                     "status": "unavailable",
                     "error": str(exc),
@@ -883,12 +1151,102 @@ def main() -> None:
             )
 
             print(
-                f"Week {week:02d}: "
+                f"NCAA Week {week:02d}: "
                 f"unavailable ({exc})"
             )
 
-        # Public API is rate limited.
         time.sleep(0.3)
+
+    # ESPN fallback is date-scoped so delayed games that cross midnight UTC
+    # remain visible.
+    for date_string in espn_dates():
+        try:
+            payload = fetch_espn_date(date_string)
+            events = payload.get("events") or []
+
+            completed_count = 0
+            live_count = 0
+
+            for event in events:
+                if not isinstance(event, dict):
+                    continue
+
+                normalized = normalize_espn_event(
+                    payload,
+                    event,
+                    active_week,
+                )
+
+                if normalized is None:
+                    continue
+
+                normalized = align_to_projection_names(
+                    normalized,
+                    known_projection_matchups,
+                )
+
+                if normalized["game_state"] == "final":
+                    espn_completed.append(normalized)
+                    completed_count += 1
+                elif normalized["game_state"] == "live":
+                    espn_live.append(normalized)
+                    live_count += 1
+
+            scan_log.append(
+                {
+                    "provider": "ESPN fallback",
+                    "date": date_string,
+                    "status": "ok",
+                    "scoreboard_games": len(events),
+                    "completed_games": completed_count,
+                    "live_games": live_count,
+                }
+            )
+
+            print(
+                f"ESPN {date_string}: "
+                f"{len(events)} games, "
+                f"{live_count} live, "
+                f"{completed_count} completed"
+            )
+
+        except Exception as exc:
+            scan_log.append(
+                {
+                    "provider": "ESPN fallback",
+                    "date": date_string,
+                    "status": "unavailable",
+                    "error": str(exc),
+                }
+            )
+
+            print(
+                f"ESPN {date_string}: "
+                f"unavailable ({exc})"
+            )
+
+        time.sleep(0.15)
+
+    fetched_completed = combine_provider_rows(
+        ncaa_completed,
+        espn_completed,
+    )
+    fetched_live = combine_provider_rows(
+        ncaa_live,
+        espn_live,
+    )
+
+    # If one provider reports a matchup final, never leave the same matchup live.
+    final_keys = {
+        matchup_key(game)
+        for game in fetched_completed
+        if matchup_key(game)
+    }
+    fetched_live = [
+        game
+        for game in fetched_live
+        if matchup_key(game) not in final_keys
+    ]
 
     merged_completed = merge_completed(
         existing_games,
@@ -899,7 +1257,7 @@ def main() -> None:
         "meta": {
             "season": SEASON,
             "generated_at": iso_now(),
-            "source": "NCAA via ncaa-api",
+            "source": "NCAA primary + ESPN public fallback",
             "source_type": "public_scoreboard_no_auth",
             "scan_mode": scan_mode,
             "weeks_scanned": weeks,
@@ -909,7 +1267,9 @@ def main() -> None:
             "notes": [
                 "Completed games only.",
                 "Previously collected finals are preserved.",
-                "Only explicit NCAA final states enter the settlement ledger.",
+                "NCAA is the primary scoreboard provider.",
+                "ESPN public scoreboard fills matchups absent from NCAA.",
+                "Only explicit provider final/completed states enter results.",
                 "Evaluation only; Model A is untouched.",
             ],
         },
@@ -921,7 +1281,7 @@ def main() -> None:
         "meta": {
             "season": SEASON,
             "generated_at": iso_now(),
-            "source": "NCAA via ncaa-api",
+            "source": "NCAA primary + ESPN public fallback",
             "source_type": "public_scoreboard_no_auth",
             "scan_mode": scan_mode,
             "weeks_scanned": weeks,
@@ -931,9 +1291,10 @@ def main() -> None:
             "notes": [
                 "Live games only.",
                 "Rebuilt on every refresh.",
+                "NCAA is primary; ESPN fills missing live matchups.",
                 "Delayed/suspended/interrupted active games are included.",
-                "Never used by settlement.",
-                "Pregame Hammer Index projections remain frozen while games are live.",
+                "Never used by settlement until an explicit final is received.",
+                "Pregame Hammer Index projections remain frozen while live.",
             ],
         },
         "games": sorted(
@@ -975,7 +1336,6 @@ def main() -> None:
         f"completed games to "
         f"{RESULTS_PATH}"
     )
-
     print(
         f"Wrote "
         f"{len(fetched_live)} "
