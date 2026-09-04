@@ -3,10 +3,10 @@ name: Settle Results + Live Scores - No CFBD
 on:
   workflow_dispatch:
 
-  # Refresh scoreboard state every 10 minutes.
-  # This powers LIVE rows and also catches finals quickly.
+  # Refresh scoreboard state every 5 minutes.
+  # This powers LIVE rows and catches finals quickly.
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/5 * * * *"
 
 permissions:
   contents: write
