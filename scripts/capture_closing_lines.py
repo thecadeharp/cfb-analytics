@@ -7,13 +7,16 @@ Near-kickoff market capture for prospective CLV evaluation.
 Runs after build_projections.py refreshes the current market using cached
 schedule mode. This script does not call CFBD or any API itself.
 
-It captures one near-kickoff market line per game:
+It captures one near-kickoff market line per TRACKING-ELIGIBLE game:
 - up to 90 minutes before scheduled kickoff
 - up to 10 minutes after scheduled kickoff
 
 Output:
     data/snapshots/closing_lines.jsonl
     data/snapshots/latest_closing_capture.json
+
+FCS fallback and any tracking_eligible == false games are excluded from the
+official closing-line ledger so they cannot enter CLV / Signal Confidence data.
 """
 
 from __future__ import annotations
@@ -55,6 +58,14 @@ def parse_datetime(value):
 def load_json(path):
     with path.open("r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def tracking_eligible(game):
+    if game.get("tracking_eligible") is False:
+        return False
+    if str(game.get("model_type") or "").strip().lower() == "fcs_fallback":
+        return False
+    return True
 
 
 def game_key(game):
@@ -108,11 +119,16 @@ def main():
     now = utc_now()
     existing_keys = load_existing_game_keys()
     rows = []
+    excluded_untracked = 0
 
     earliest = now - timedelta(minutes=POST_KICKOFF_GRACE_MINUTES)
     latest = now + timedelta(minutes=PRE_KICKOFF_WINDOW_MINUTES)
 
     for game in games:
+        if not tracking_eligible(game):
+            excluded_untracked += 1
+            continue
+
         if str(game.get("status") or "").lower() == "completed":
             continue
 
@@ -143,6 +159,8 @@ def main():
             "capture_type": "near_kickoff_closing_proxy",
             "model_version": MODEL_VERSION,
             "projection_source_generated": meta.get("generated"),
+            "model_type": game.get("model_type") or "fbs_full_model",
+            "tracking_eligible": True,
             "game_id": game.get("game_id"),
             "week": game.get("week"),
             "home_team": (game.get("home") or {}).get("team"),
@@ -183,7 +201,12 @@ def main():
             "post_kickoff_grace_minutes": POST_KICKOFF_GRACE_MINUTES,
         },
         "closing_lines_added": len(rows),
+        "excluded_untracked_games": excluded_untracked,
         "ledger_path": str(CLOSING_LEDGER_PATH.relative_to(ROOT)),
+        "note": (
+            "Official Model A closing-line capture. "
+            "tracking_eligible=false and FCS fallback games are excluded."
+        ),
         "captures": rows,
     }
 
@@ -197,6 +220,7 @@ def main():
     print("=" * 72)
     print("Captured:", now.isoformat())
     print("Closing lines added:", len(rows))
+    print("Untracked/FCS games excluded:", excluded_untracked)
     print("Ledger:", CLOSING_LEDGER_PATH.relative_to(ROOT))
     print("Latest:", LATEST_CLOSING_PATH.relative_to(ROOT))
 
