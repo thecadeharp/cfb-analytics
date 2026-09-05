@@ -1,7 +1,7 @@
 {
   "meta": {
     "year": 2026,
-    "generated": "2026-09-05T02:27:32.687850",
+    "generated": "2026-09-05T03:27:43.299341",
     "games": 888,
     "fbs_fbs_games": 761,
     "fbs_fcs_fallback_games": 127,
@@ -2814,20 +2814,20 @@
         }
       },
       "market": {
-        "home_spread": -49.5,
-        "total": 69.5,
-        "bookmaker": "Consensus (3 books)",
+        "home_spread": null,
+        "total": null,
+        "bookmaker": null,
         "method": "cross_book_median_consensus",
-        "spread_books": 3,
-        "total_books": 2,
+        "spread_books": 0,
+        "total_books": 0,
         "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 37.5,
-        "preferred_side": "North Carolina A&T",
-        "status": "OUTLIER",
-        "signal": "OUTLIER",
+        "disagreement": null,
+        "preferred_side": null,
+        "status": "NO MARKET",
+        "signal": "NO MARKET",
         "bet_status": "UNTRACKED",
         "status_system": "v2_the_signal",
         "status_thresholds": {
@@ -2850,11 +2850,6 @@
           "title": "FCS TOTAL WITHHELD",
           "text": "No opponent-specific model total is published for this game because the FCS opponent does not have the full efficiency profile required by the total model.",
           "source": "fcs_total_guard"
-        },
-        {
-          "title": "MARKET VS FCS FALLBACK",
-          "text": "The fallback line differs from the current market by 37.5 points toward North Carolina A&T.",
-          "source": "market"
         }
       ]
     },
@@ -3080,17 +3075,17 @@
         }
       },
       "market": {
-        "home_spread": -8.5,
-        "total": 46.5,
-        "bookmaker": "Consensus (5 books)",
+        "home_spread": -9.5,
+        "total": 50.5,
+        "bookmaker": "Consensus (4 books)",
         "method": "cross_book_median_consensus",
-        "spread_books": 5,
-        "total_books": 5,
+        "spread_books": 4,
+        "total_books": 2,
         "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 2.0,
+        "disagreement": 1.0,
         "preferred_side": "Michigan State",
         "status": "ALIGNED",
         "signal": "ALIGNED",
@@ -3114,11 +3109,6 @@
           "title": "LIVE MATCHUP DATA",
           "text": "No live matchup adjustment is being applied because both teams do not yet have comparable 2026 samples.",
           "source": "sample_guard"
-        },
-        {
-          "title": "MARKET VS MODEL",
-          "text": "The model is 2.0 points more favorable to Michigan State than the current market.",
-          "source": "market"
         }
       ]
     },
@@ -3208,21 +3198,21 @@
         }
       },
       "market": {
-        "home_spread": -51.5,
-        "total": 57.5,
-        "bookmaker": "Consensus (5 books)",
+        "home_spread": null,
+        "total": null,
+        "bookmaker": null,
         "method": "cross_book_median_consensus",
-        "spread_books": 5,
-        "total_books": 5,
+        "spread_books": 0,
+        "total_books": 0,
         "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 19.5,
-        "preferred_side": "UTEP",
-        "status": "OUTLIER",
-        "signal": "OUTLIER",
-        "bet_status": "TRACKING",
+        "disagreement": null,
+        "preferred_side": null,
+        "status": "NO MARKET",
+        "signal": "NO MARKET",
+        "bet_status": null,
         "status_system": "v2_the_signal",
         "status_thresholds": {
           "aligned_max": 2.5,
@@ -3242,11 +3232,6 @@
           "title": "LIVE MATCHUP DATA",
           "text": "No live matchup adjustment is being applied because both teams do not yet have comparable 2026 samples.",
           "source": "sample_guard"
-        },
-        {
-          "title": "MARKET VS MODEL",
-          "text": "The model is 19.5 points more favorable to UTEP than the current market.",
-          "source": "market"
         }
       ]
     },
@@ -3336,8 +3321,8 @@
         }
       },
       "market": {
-        "home_spread": -39.5,
-        "total": 50.5,
+        "home_spread": -38.5,
+        "total": 41.5,
         "bookmaker": "Consensus (5 books)",
         "method": "cross_book_median_consensus",
         "spread_books": 5,
@@ -3346,7 +3331,7 @@
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 25.5,
+        "disagreement": 24.5,
         "preferred_side": "Fresno State",
         "status": "OUTLIER",
         "signal": "OUTLIER",
@@ -3373,7 +3358,7 @@
         },
         {
           "title": "MARKET VS MODEL",
-          "text": "The model is 25.5 points more favorable to Fresno State than the current market.",
+          "text": "The model is 24.5 points more favorable to Fresno State than the current market.",
           "source": "market"
         }
       ]
@@ -3464,17 +3449,35 @@
         }
       },
       "market": {
-        "home_spread": 38.5,
-        "total": 54.5,
-        "bookmaker": "Consensus (5 books)",
+        "home_spread": 37.5,
+        "total": 56.5,
+        "bookmaker": "Consensus (3 books)",
         "method": "cross_book_median_consensus",
-        "spread_books": 5,
-        "total_books": 5,
-        "spread_outliers_removed": [],
-        "total_outliers_removed": []
+        "spread_books": 3,
+        "total_books": 3,
+        "spread_outliers_removed": [
+          {
+            "bookmaker": "DraftKings",
+            "value": 42.5
+          },
+          {
+            "bookmaker": "BetMGM",
+            "value": 42.5
+          }
+        ],
+        "total_outliers_removed": [
+          {
+            "bookmaker": "DraftKings",
+            "value": 61.5
+          },
+          {
+            "bookmaker": "BetMGM",
+            "value": 61.5
+          }
+        ]
       },
       "comparison": {
-        "disagreement": 23.5,
+        "disagreement": 22.5,
         "preferred_side": "Stanford",
         "status": "OUTLIER",
         "signal": "OUTLIER",
@@ -3501,7 +3504,7 @@
         },
         {
           "title": "MARKET VS MODEL",
-          "text": "The model is 23.5 points more favorable to Stanford than the current market.",
+          "text": "The model is 22.5 points more favorable to Stanford than the current market.",
           "source": "market"
         }
       ]
@@ -14062,7 +14065,7 @@
         }
       },
       "market": {
-        "home_spread": -10.0,
+        "home_spread": -9.0,
         "total": 56.0,
         "bookmaker": "Consensus (2 books)",
         "method": "cross_book_median_consensus",
@@ -14072,8 +14075,8 @@
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 0.0,
-        "preferred_side": null,
+        "disagreement": 1.0,
+        "preferred_side": "East Carolina",
         "status": "ALIGNED",
         "signal": "ALIGNED",
         "bet_status": "TRACKING",
