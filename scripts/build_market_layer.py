@@ -35,12 +35,7 @@ SPORT_KEY = "americanfootball_ncaaf"
 FETCH_ALT_LINES = os.environ.get("FETCH_ALT_LINES", "0") == "1"
 ALT_LOOKAHEAD_HOURS = int(os.environ.get("ALT_LOOKAHEAD_HOURS", "48"))
 ALT_MAX_GAMES = int(os.environ.get("ALT_MAX_GAMES", "40"))
-ALT_SIGNALS = {
-    "SMALL EDGE",
-    "PLAY",
-    "MATERIAL DISAGREEMENT",
-    "OUTLIER",
-}
+ALT_MODE = "all_regular_fbs_fbs_with_market_and_preferred_side"
 
 BOOK_ABBR = {
     "draftkings": "DK",
@@ -100,13 +95,67 @@ def team_matches(provider_name, model_name):
         return False
     return p == m or p.startswith(m + " ") or m.startswith(p + " ")
 
+def canonical_signal(value):
+    raw = str(value or "").upper().strip()
+    aliases = {
+        "AGREE W/ MARKET": "ALIGNED",
+        "ALIGNED": "ALIGNED",
+        "LEAN": "SMALL EDGE",
+        "SLIGHT EDGE": "SMALL EDGE",
+        "SMALL EDGE": "SMALL EDGE",
+        "EDGE": "PLAY",
+        "PLAY": "PLAY",
+        "STRONG EDGE": "MATERIAL DISAGREEMENT",
+        "MATERIAL DISAGREEMENT": "MATERIAL DISAGREEMENT",
+        "OUTLIER": "OUTLIER",
+    }
+    return aliases.get(raw, raw)
+
 def signal_name(game):
     comparison = game.get("comparison") or {}
-    return str(comparison.get("signal") or comparison.get("status") or "").upper()
+    return canonical_signal(comparison.get("signal") or comparison.get("status"))
 
-def preferred_side(game):
+def is_fcs_fallback(game):
+    return str(game.get("model_type") or "").lower() == "fcs_fallback"
+
+def preferred_side(game, odds_row=None):
     comparison = game.get("comparison") or {}
-    return comparison.get("preferred_side")
+    explicit = comparison.get("preferred_side")
+    if explicit:
+        return explicit
+
+    # ALIGNED games can still have a tiny directional difference even when
+    # the public signal is not a "play" tier. Infer the side only when the
+    # model and market are actually different.
+    home = game.get("home", {}).get("team") or game.get("home_team")
+    away = game.get("away", {}).get("team") or game.get("away_team")
+
+    model_home = projection_home_spread(game)
+    market_home = None
+
+    if odds_row is not None:
+        try:
+            market_home = float(odds_row.get("spread_home"))
+        except (TypeError, ValueError):
+            market_home = None
+
+    if market_home is None:
+        market = game.get("market") or {}
+        try:
+            market_home = float(market.get("home_spread"))
+        except (TypeError, ValueError):
+            market_home = None
+
+    if model_home is None or market_home is None:
+        return None
+
+    delta = model_home - market_home
+    if abs(delta) < 0.001:
+        return None
+
+    # If THI's home spread is more negative than market, THI is more bullish
+    # on the home team. If it is less negative / more positive, THI leans away.
+    return home if delta < 0 else away
 
 def projection_home_spread(game):
     projection = game.get("projection") or {}
@@ -200,53 +249,93 @@ def update_history(projections, odds_games):
         if not odds_row:
             continue
 
-        current = odds_row.get("spread_home")
         try:
-            current = float(current)
+            observed = float(odds_row.get("spread_home"))
         except (TypeError, ValueError):
             continue
 
         home = game.get("home", {}).get("team") or game.get("home_team")
         away = game.get("away", {}).get("team") or game.get("away_team")
         rid = history_row_id(game, odds_row)
+        start = game_start(game)
+        row = rows.get(rid)
 
-        row = rows.get(rid) or {
-            "game_id": game_id(game) or None,
-            "odds_event_id": odds_row.get("id"),
-            "home_team": home,
-            "away_team": away,
-            "start_date": game.get("start_date") or odds_row.get("commence_time"),
-            "open_home_spread": current,
-            "open_captured_at": stamp,
-            "current_home_spread": current,
-            "current_captured_at": stamp,
-            "close_home_spread": None,
-            "close_captured_at": None,
-            "snapshots": [],
-        }
+        # Never invent an "opening" or "closing" line from the first observation
+        # after a game has already kicked. If THI did not capture the game
+        # pre-kick, leave it without a history row.
+        if row is None and start and now >= start:
+            continue
+
+        if row is None:
+            row = {
+                "game_id": game_id(game) or None,
+                "odds_event_id": odds_row.get("id"),
+                "home_team": home,
+                "away_team": away,
+                "start_date": game.get("start_date") or odds_row.get("commence_time"),
+                "first_captured_home_spread": observed,
+                "first_captured_at": stamp,
+                # Backward-compatible aliases retained for existing frontend/data.
+                "open_home_spread": observed,
+                "open_captured_at": stamp,
+                "current_home_spread": observed,
+                "current_captured_at": stamp,
+                "close_home_spread": None,
+                "close_captured_at": None,
+                "snapshots": [],
+            }
 
         row["game_id"] = game_id(game) or row.get("game_id")
         row["odds_event_id"] = odds_row.get("id") or row.get("odds_event_id")
         row["home_team"] = home
         row["away_team"] = away
         row["start_date"] = game.get("start_date") or row.get("start_date")
-        row["current_home_spread"] = current
-        row["current_captured_at"] = stamp
+
+        # Migrate old rows to the clearer FIRST CAPTURED terminology without
+        # changing the originally stored number.
+        if row.get("first_captured_home_spread") is None:
+            row["first_captured_home_spread"] = row.get("open_home_spread")
+        if row.get("first_captured_at") is None:
+            row["first_captured_at"] = row.get("open_captured_at")
 
         snapshots = row.get("snapshots")
         if not isinstance(snapshots, list):
             snapshots = []
 
-        if not snapshots or snapshots[-1].get("home_spread") != current:
-            snapshots.append({"captured_at": stamp, "home_spread": current})
-        row["snapshots"] = snapshots[-96:]  # keep enough history without bloating forever
+        if start is None or now < start:
+            # Pregame only: update CURRENT and append market changes.
+            row["current_home_spread"] = observed
+            row["current_captured_at"] = stamp
 
-        start = game_start(game)
-        if start and now >= start and row.get("close_home_spread") is None:
-            # Last observed pre-kick/current number becomes the local closing snapshot.
-            row["close_home_spread"] = current
-            row["close_captured_at"] = stamp
+            if not snapshots or snapshots[-1].get("home_spread") != observed:
+                snapshots.append({
+                    "captured_at": stamp,
+                    "home_spread": observed,
+                })
+        else:
+            # At/after kickoff: do NOT allow a live/in-play quote to become
+            # CURRENT or CLOSE. Freeze the latest snapshot THI captured before
+            # kickoff as the local closing line.
+            if row.get("close_home_spread") is None:
+                prekick = []
+                for snap in snapshots:
+                    snap_time = parse_dt(snap.get("captured_at"))
+                    try:
+                        snap_spread = float(snap.get("home_spread"))
+                    except (TypeError, ValueError):
+                        continue
+                    if snap_time and snap_time <= start:
+                        prekick.append((snap_time, snap_spread))
 
+                if prekick:
+                    prekick.sort(key=lambda item: item[0])
+                    close_time, close_spread = prekick[-1]
+                    row["close_home_spread"] = close_spread
+                    row["close_captured_at"] = close_time.isoformat()
+                    row["current_home_spread"] = close_spread
+                    row["current_captured_at"] = close_time.isoformat()
+
+        row["snapshots"] = snapshots[-96:]
         rows[rid] = row
 
     payload = {
@@ -254,7 +343,9 @@ def update_history(projections, odds_games):
             "generated_at": stamp,
             "source": "THI consensus market snapshots",
             "model_a_touched": False,
-            "note": "Open = first THI-observed consensus line; close = last captured line at/after kickoff unless official closing capture supersedes it."
+            "first_line_definition": "FIRST CAPTURED = first consensus spread observed by THI, not a claimed sportsbook opener.",
+            "close_definition": "CLOSE = latest THI-captured pre-kick consensus spread. Post-kick/in-play quotes are never used.",
+            "note": "Historical rows created before this schema retain their original first-captured value through backward-compatible open_* fields."
         },
         "games": rows,
     }
@@ -376,17 +467,24 @@ def build_alt_lines(projections, odds_games, history):
 
     eligible = []
     for game in projections:
-        preferred = preferred_side(game)
-        signal = signal_name(game)
-        start = game_start(game)
+        if is_fcs_fallback(game):
+            continue
 
-        if not preferred or signal not in ALT_SIGNALS or not start:
+        start = game_start(game)
+        if not start:
             continue
         if start < now - timedelta(hours=1) or start > horizon:
             continue
 
         odds_row = find_odds_game(odds_games, game)
         if not odds_row or not odds_row.get("id"):
+            continue
+        if odds_row.get("spread_home") is None:
+            continue
+
+        preferred = preferred_side(game, odds_row)
+        if not preferred:
+            # Exact THI/market alignment has no honest preferred-side ladder.
             continue
 
         eligible.append((start, game, odds_row))
@@ -403,7 +501,7 @@ def build_alt_lines(projections, odds_games, history):
     fetched = 0
 
     for _, game, odds_row in eligible:
-        preferred = preferred_side(game)
+        preferred = preferred_side(game, odds_row)
         home = game.get("home", {}).get("team") or game.get("home_team")
         away = game.get("away", {}).get("team") or game.get("away_team")
         event_id = odds_row.get("id")
@@ -498,7 +596,7 @@ def build_alt_lines(projections, odds_games, history):
                 "model_a_touched": False,
                 "lookahead_hours": ALT_LOOKAHEAD_HOURS,
                 "max_games_per_run": ALT_MAX_GAMES,
-                "eligible_signals": sorted(ALT_SIGNALS),
+                "eligibility": ALT_MODE,
                 "games_refreshed": fetched,
                 "note": "Best observed American price per alternate point for THI preferred side. Event-level requests consume additional Odds API quota."
             },
