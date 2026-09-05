@@ -38,12 +38,98 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
+      - name: Back up last known-good market files
+        run: |
+          mkdir -p /tmp/thi-market-backup
+          if [ -f data/odds.json ]; then
+            cp data/odds.json /tmp/thi-market-backup/odds.json
+          fi
+          if [ -f data/projections.json ]; then
+            cp data/projections.json /tmp/thi-market-backup/projections.json
+          fi
+
       - name: Refresh current projections without CFBD
         env:
           USE_CACHED_SCHEDULE: "1"
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
         run: |
           python scripts/build_projections.py
+
+      - name: Validate odds refresh and restore cache if needed
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import shutil
+          import sys
+
+          odds_path = "data/odds.json"
+          backup_odds = "/tmp/thi-market-backup/odds.json"
+          projections_path = "data/projections.json"
+          backup_projections = "/tmp/thi-market-backup/projections.json"
+
+          def load_json(path):
+              try:
+                  with open(path, "r", encoding="utf-8") as f:
+                      return json.load(f)
+              except Exception:
+                  return None
+
+          fresh = load_json(odds_path)
+          fresh_games = fresh.get("games", []) if isinstance(fresh, dict) else []
+          fresh_matched = (
+              fresh.get("meta", {}).get("matched_games", 0)
+              if isinstance(fresh, dict)
+              else 0
+          )
+
+          valid_fresh = (
+              isinstance(fresh_games, list)
+              and len(fresh_games) > 0
+              and int(fresh_matched or 0) > 0
+          )
+
+          if valid_fresh:
+              print(
+                  f"✅ Fresh odds validated: "
+                  f"{len(fresh_games)} games, {fresh_matched} matched."
+              )
+              sys.exit(0)
+
+          cached = load_json(backup_odds)
+          cached_games = cached.get("games", []) if isinstance(cached, dict) else []
+          cached_matched = (
+              cached.get("meta", {}).get("matched_games", 0)
+              if isinstance(cached, dict)
+              else 0
+          )
+
+          valid_cache = (
+              isinstance(cached_games, list)
+              and len(cached_games) > 0
+              and int(cached_matched or 0) > 0
+              and os.path.exists(backup_projections)
+          )
+
+          if not valid_cache:
+              print(
+                  "❌ Fresh odds were invalid/empty and no valid cached "
+                  "odds + projections pair was available."
+              )
+              sys.exit(1)
+
+          shutil.copy2(backup_odds, odds_path)
+          shutil.copy2(backup_projections, projections_path)
+
+          print(
+              "⚠ Fresh Odds API pull was invalid/empty. "
+              "Restored last known-good odds.json and projections.json."
+          )
+          print(
+              f"✅ Cache restored: "
+              f"{len(cached_games)} games, {cached_matched} matched."
+          )
+          PY
 
       - name: Build market history + preferred-side alternate spreads
         env:
