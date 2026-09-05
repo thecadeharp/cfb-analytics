@@ -3,21 +3,44 @@
 THE HAMMER INDEX
 build_postgame_analytics.py
 
-Build a per-game retrospective postgame analytics layer for every FINAL in
-data/results.json using the public SportsDataverse/cfbfastR 2026 play-by-play.
+Canonical postgame analytics builder for The Hammer Index.
 
-IMPORTANT
+Builds a retrospective per-game package for every FINAL in data/results.json
+using the public SportsDataverse/cfbfastR 2026 play-by-play parquet.
+
+CANONICAL POSTGAME METRICS
+- EPA/play and total EPA
+- Pass and rush EPA
+- Pass and rush success rates
+- Explosive-play rate and EPA dependency
+- Standard-down and passing-down EPA/success
+- Early-down and third/fourth-down performance
+- Fourth-down attempts, success rate, and EPA
+- Sack rate allowed
+- Stuff rate allowed
+- TFL rate allowed
+- Drive efficiency and drive success rate
+- Three-and-out rate
+- Scoring-opportunity efficiency
+- Red-zone trips and points per trip
+- Red-zone overperformance
+- Average starting field position
+- Turnover EPA impact
+- Garbage-time share
+- EPA volatility
+- Postgame Win Expectancy
+- Adjusted Final Score
+- THI Reality Check
+
+SAFETY
 - No CFBD calls.
 - Does not modify Model A.
-- Does not rewrite any frozen pregame projection.
-- Every final receives a record in data/postgame_analytics.json.
-- If play-by-play has not arrived yet, that game's record is marked pending and
-  will be retried on a later settlement run.
-- Postgame Win Expectancy / Adjusted Final Score are explicitly BETA until the
-  historical calibration suite is completed.
-
-Primary output:
-    data/postgame_analytics.json
+- Does not rewrite frozen pregame projections.
+- Every final receives a postgame record.
+- If matching PBP has not arrived yet, the record is pending and automatically
+  retried by the existing settlement workflow.
+- Postgame Win Expectancy / Adjusted Final Score / Red-Zone Overperformance are
+  explicitly BETA until historical calibration is completed.
 """
 
 from __future__ import annotations
@@ -41,20 +64,20 @@ RESULTS_PATH = ROOT / "data" / "results.json"
 OUTPUT_PATH = ROOT / "data" / "postgame_analytics.json"
 
 YEAR = int(os.getenv("CFB_SEASON", "2026"))
+
 PBP_URL = (
     "https://raw.githubusercontent.com/sportsdataverse/"
     f"cfbfastR-cfb-data/main/cfb/pbp/parquet/play_by_play_{YEAR}.parquet"
 )
 
-# Avoid downloading the full parquet on every 5-minute scoreboard run if there
-# is nothing new to process. Pending games are retried every 15 minutes.
 PENDING_RETRY_MINUTES = 15
+RED_ZONE_EXPECTED_POINTS_PER_TRIP_BETA = 4.7
 
 SESSION = requests.Session()
 SESSION.headers.update(
     {
         "Accept": "*/*",
-        "User-Agent": "the-hammer-index-postgame/1.0",
+        "User-Agent": "the-hammer-index-postgame/2.0",
     }
 )
 
@@ -135,17 +158,30 @@ def clamp(value: float, low: float, high: float) -> float:
     return max(low, min(high, value))
 
 
+def mean(values: list[float]) -> float | None:
+    return sum(values) / len(values) if values else None
+
+
+def population_std(values: list[float]) -> float | None:
+    if not values:
+        return None
+    avg = sum(values) / len(values)
+    variance = sum((value - avg) ** 2 for value in values) / len(values)
+    return math.sqrt(variance)
+
+
 def first_present(row: pd.Series, *names: str, default: Any = None) -> Any:
     for name in names:
-        if name in row.index:
-            value = row[name]
-            try:
-                if pd.isna(value):
-                    continue
-            except (TypeError, ValueError):
-                pass
-            if value is not None and value != "":
-                return value
+        if name not in row.index:
+            continue
+        value = row[name]
+        try:
+            if pd.isna(value):
+                continue
+        except (TypeError, ValueError):
+            pass
+        if value is not None and value != "":
+            return value
     return default
 
 
@@ -222,6 +258,10 @@ def matchup_key(away: Any, home: Any) -> str:
     return f"{away_key}@{home_key}" if away_key and home_key else ""
 
 
+def same_team(a: Any, b: Any) -> bool:
+    return team_key(a) == team_key(b)
+
+
 # =============================================================================
 # PBP DOWNLOAD / NORMALIZATION
 # =============================================================================
@@ -249,7 +289,11 @@ def download_pbp() -> pd.DataFrame:
             os.remove(path)
 
 
-def infer_score_after(row: pd.Series, offense_score: float, defense_score: float) -> tuple[float, float]:
+def infer_score_after(
+    row: pd.Series,
+    offense_score: float,
+    defense_score: float,
+) -> tuple[float, float]:
     off_after = clean_number(
         first_present(
             row,
@@ -264,11 +308,9 @@ def infer_score_after(row: pd.Series, offense_score: float, defense_score: float
             row,
             "end.def_pos_team_score",
             "end_def_pos_team_score",
-            "def_pos_team_score_after",
             "defense_score_after",
         )
     )
-
     return (
         off_after if off_after is not None else offense_score,
         def_after if def_after is not None else defense_score,
@@ -309,16 +351,14 @@ def infer_touchdown(row: pd.Series, play_type: str, text: str) -> bool:
         for column in ("touchdown", "td", "is_touchdown")
     ):
         return True
-    blob = f"{play_type} {text}".lower()
-    return "touchdown" in blob
+    return "touchdown" in f"{play_type} {text}".lower()
 
 
 def infer_field_goal(row: pd.Series, play_type: str, text: str) -> bool:
-    made = any(
+    if any(
         as_bool(first_present(row, column, default=False))
         for column in ("field_goal_made", "fg_made", "fieldGoalMade")
-    )
-    if made:
+    ):
         return True
     blob = f"{play_type} {text}".lower()
     return "field goal" in blob and any(
@@ -326,7 +366,66 @@ def infer_field_goal(row: pd.Series, play_type: str, text: str) -> bool:
     )
 
 
-def is_garbage_time(period: int, offense_score: float, defense_score: float) -> bool:
+def infer_sack(row: pd.Series, play_type: str, text: str) -> bool:
+    if as_bool(first_present(row, "sack", "is_sack", default=False)):
+        return True
+    blob = f"{play_type} {text}".lower()
+    return "sacked" in blob or "sack" in play_type.lower()
+
+
+def infer_tfl(row: pd.Series, yards: float, play_type: str, text: str) -> bool:
+    if any(
+        as_bool(first_present(row, column, default=False))
+        for column in (
+            "tackle_for_loss",
+            "tackleForLoss",
+            "tfl",
+            "TFL",
+        )
+    ):
+        return True
+    blob = f"{play_type} {text}".lower()
+    if "tackle for loss" in blob:
+        return True
+    return yards < 0
+
+
+def infer_first_down(
+    row: pd.Series,
+    yards: float,
+    down: int | None,
+    distance: float | None,
+    play_type: str,
+    text: str,
+) -> bool:
+    if any(
+        as_bool(first_present(row, column, default=False))
+        for column in (
+            "first_down",
+            "firstDown",
+            "first_down_rush",
+            "first_down_pass",
+        )
+    ):
+        return True
+
+    blob = f"{play_type} {text}".lower()
+    if "first down" in blob:
+        return True
+
+    return (
+        down is not None
+        and distance is not None
+        and distance > 0
+        and yards >= distance
+    )
+
+
+def is_garbage_time(
+    period: int,
+    offense_score: float,
+    defense_score: float,
+) -> bool:
     margin = abs(offense_score - defense_score)
     return (period >= 4 and margin >= 28) or (period >= 3 and margin >= 38)
 
@@ -361,7 +460,7 @@ def normalize_play(row: pd.Series, row_index: int) -> dict[str, Any] | None:
             default=0,
         ),
         0,
-    ) or 0
+    ) or 0.0
     defense_score = clean_number(
         first_present(
             row,
@@ -371,13 +470,23 @@ def normalize_play(row: pd.Series, row_index: int) -> dict[str, Any] | None:
             default=0,
         ),
         0,
-    ) or 0
+    ) or 0.0
 
-    off_after, def_after = infer_score_after(row, offense_score, defense_score)
+    off_after, def_after = infer_score_after(
+        row,
+        offense_score,
+        defense_score,
+    )
 
-    period = as_int(first_present(row, "period", "period.number", default=1), 1) or 1
+    period = as_int(
+        first_present(row, "period", "period.number", default=1),
+        1,
+    ) or 1
+
     down = as_int(first_present(row, "down", "start.down"))
-    distance = clean_number(first_present(row, "distance", "start.distance"))
+    distance = clean_number(
+        first_present(row, "distance", "start.distance")
+    )
     yards_to_goal = clean_number(
         first_present(
             row,
@@ -395,39 +504,72 @@ def normalize_play(row: pd.Series, row_index: int) -> dict[str, Any] | None:
             default=0,
         ),
         0,
-    ) or 0
+    ) or 0.0
 
     play_type = str(
-        first_present(row, "type.text", "orig_play_type", "play_type", default="")
+        first_present(
+            row,
+            "type.text",
+            "orig_play_type",
+            "play_type",
+            default="",
+        )
     )
     play_text = str(
-        first_present(row, "text", "cleaned_text", "play_text", default="")
+        first_present(
+            row,
+            "text",
+            "cleaned_text",
+            "play_text",
+            default="",
+        )
     )
 
-    epa = clean_number(first_present(row, "EPA", "EPA_scrimmage", "epa"))
+    epa = clean_number(
+        first_present(row, "EPA", "EPA_scrimmage", "epa")
+    )
+    if epa is None:
+        return None
+
+    sack = infer_sack(row, play_type, play_text)
 
     is_pass = (
         as_bool(first_present(row, "pass", "pass_attempt", default=False))
-        or as_bool(first_present(row, "sack", default=False))
+        or sack
     )
     is_rush = (
         as_bool(first_present(row, "rush", "rush_attempt", default=False))
-        and not as_bool(first_present(row, "sack", default=False))
+        and not sack
     )
 
-    # Some cfbfastR rows have pass/rush flags missing while the play type/text is clear.
     lower_blob = f"{play_type} {play_text}".lower()
     if not is_pass and not is_rush:
-        if any(token in lower_blob for token in ("pass ", "pass complete", "pass incomplete", "sacked")):
+        if any(
+            token in lower_blob
+            for token in (
+                "pass ",
+                "pass complete",
+                "pass incomplete",
+                "sacked",
+            )
+        ):
             is_pass = True
-        elif any(token in lower_blob for token in ("rush", "run for", "rushed")):
+        elif any(
+            token in lower_blob
+            for token in ("rush", "run for", "rushed")
+        ):
             is_rush = True
 
-    scrimmage = is_pass or is_rush
-    if not scrimmage or epa is None:
+    if not is_pass and not is_rush:
         return None
 
-    success_raw = first_present(row, "EPA_success", "success", default=None)
+    success_raw = first_present(
+        row,
+        "EPA_success",
+        "success",
+        default=None,
+    )
+
     if success_raw is not None:
         success = as_bool(success_raw)
     else:
@@ -445,6 +587,27 @@ def normalize_play(row: pd.Series, row_index: int) -> dict[str, Any] | None:
         or (is_rush and yards >= 10)
     )
 
+    # Standard-down definition:
+    # 1st down; 2nd-and-7 or less; 3rd/4th-and-4 or less.
+    standard_down = (
+        down == 1
+        or (down == 2 and distance is not None and distance <= 7)
+        or (
+            down in {3, 4}
+            and distance is not None
+            and distance <= 4
+        )
+    )
+
+    passing_down = (
+        (down == 2 and distance is not None and distance >= 8)
+        or (
+            down in {3, 4}
+            and distance is not None
+            and distance >= 5
+        )
+    )
+
     drive_id = first_present(
         row,
         "drive_id",
@@ -452,23 +615,6 @@ def normalize_play(row: pd.Series, row_index: int) -> dict[str, Any] | None:
         "start.drive.id",
         "drive_number",
         "driveNumber",
-    )
-
-    start_yard_line = clean_number(
-        first_present(
-            row,
-            "start.yardLine",
-            "start_yard_line",
-            "yard_line",
-        )
-    )
-
-    kickoff_ts = first_present(
-        row,
-        "game_date",
-        "start_date",
-        "game_datetime",
-        "date",
     )
 
     return {
@@ -486,17 +632,37 @@ def normalize_play(row: pd.Series, row_index: int) -> dict[str, Any] | None:
         "down": down,
         "distance": distance,
         "yards_to_goal": yards_to_goal,
-        "start_yard_line": start_yard_line,
         "yards_gained": yards,
         "epa": epa,
         "success": bool(success),
+        "is_pass": bool(is_pass),
+        "is_rush": bool(is_rush),
+        "sack": bool(sack),
+        "stuff": bool(is_rush and yards <= 0),
+        "tfl": infer_tfl(row, yards, play_type, play_text),
+        "first_down": infer_first_down(
+            row,
+            yards,
+            down,
+            distance,
+            play_type,
+            play_text,
+        ),
         "explosive": bool(explosive),
+        "standard_down": bool(standard_down),
+        "passing_down": bool(passing_down),
+        "early_down": down in {1, 2},
+        "money_down": down in {3, 4},
+        "fourth_down": down == 4,
         "turnover": infer_turnover(row, play_type, play_text),
         "touchdown": infer_touchdown(row, play_type, play_text),
         "field_goal": infer_field_goal(row, play_type, play_text),
-        "garbage_time": is_garbage_time(period, offense_score, defense_score),
+        "garbage_time": is_garbage_time(
+            period,
+            offense_score,
+            defense_score,
+        ),
         "drive_id": str(drive_id) if drive_id is not None else None,
-        "kickoff_ts": str(kickoff_ts) if kickoff_ts is not None else None,
     }
 
 
@@ -505,8 +671,6 @@ def normalize_frame(frame: pd.DataFrame) -> list[dict[str, Any]]:
         season = pd.to_numeric(frame["season"], errors="coerce")
         frame = frame[season == YEAR]
 
-    # Keep all games; do not filter to FBS-only teams. That gives FBS-FCS finals
-    # the best possible chance of receiving full analysis.
     plays: list[dict[str, Any]] = []
     for index, (_, row) in enumerate(frame.iterrows()):
         play = normalize_play(row, index)
@@ -519,37 +683,51 @@ def normalize_frame(frame: pd.DataFrame) -> list[dict[str, Any]]:
 # GAME MATCHING
 # =============================================================================
 
-def build_game_index(plays: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+def build_game_index(
+    plays: list[dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
     grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+
     for play in plays:
         grouped[play["game_id"]].append(play)
 
-    out: dict[str, dict[str, Any]] = {}
+    games: dict[str, dict[str, Any]] = {}
+
     for game_id, rows in grouped.items():
         rows.sort(key=lambda play: play["row_index"])
 
-        home = next((play["home"] for play in rows if play.get("home")), "")
-        away = next((play["away"] for play in rows if play.get("away")), "")
+        home = next(
+            (play["home"] for play in rows if play.get("home")),
+            "",
+        )
+        away = next(
+            (play["away"] for play in rows if play.get("away")),
+            "",
+        )
 
-        # If explicit home/away names are unavailable, infer from participants.
         if not home or not away:
-            participants = []
+            participants: list[str] = []
             for play in rows:
-                for team in (play.get("offense"), play.get("defense")):
+                for team in (
+                    play.get("offense"),
+                    play.get("defense"),
+                ):
                     if team and team not in participants:
                         participants.append(team)
+
             if len(participants) >= 2:
                 away = away or participants[0]
                 home = home or participants[1]
 
-        out[game_id] = {
+        games[game_id] = {
             "game_id": game_id,
             "away": away,
             "home": home,
             "matchup_key": matchup_key(away, home),
             "plays": rows,
         }
-    return out
+
+    return games
 
 
 def find_pbp_game(
@@ -557,237 +735,424 @@ def find_pbp_game(
     games: dict[str, dict[str, Any]],
 ) -> dict[str, Any] | None:
     provider_id = str(final.get("game_id") or "")
+
     if provider_id and provider_id in games:
         return games[provider_id]
 
-    target = matchup_key(final.get("away_team"), final.get("home_team"))
+    target = matchup_key(
+        final.get("away_team"),
+        final.get("home_team"),
+    )
+
     if target:
         exact = [
-            game for game in games.values()
+            game
+            for game in games.values()
             if game.get("matchup_key") == target
         ]
         if len(exact) == 1:
             return exact[0]
 
-    # Reverse orientation fallback for neutral-site/provider orientation quirks.
-    reverse = matchup_key(final.get("home_team"), final.get("away_team"))
+    reverse = matchup_key(
+        final.get("home_team"),
+        final.get("away_team"),
+    )
+
     if reverse:
-        reverse_matches = [
-            game for game in games.values()
+        exact = [
+            game
+            for game in games.values()
             if game.get("matchup_key") == reverse
         ]
-        if len(reverse_matches) == 1:
-            return reverse_matches[0]
+        if len(exact) == 1:
+            return exact[0]
 
     return None
 
 
 # =============================================================================
-# DRIVE / TEAM METRICS
+# DRIVE HELPERS
 # =============================================================================
 
 def assign_drive_keys(plays: list[dict[str, Any]]) -> None:
-    sequence = 0
+    inferred_sequence = 0
     previous_offense = None
+    previous_provider_drive = None
 
     for play in plays:
         explicit = play.get("drive_id")
+
         if explicit:
             play["_drive_key"] = f"provider:{explicit}"
             previous_offense = play.get("offense")
+            previous_provider_drive = explicit
             continue
 
         offense = play.get("offense")
+
         if previous_offense is None or offense != previous_offense:
-            sequence += 1
-        play["_drive_key"] = f"inferred:{sequence}:{team_key(offense)}"
+            inferred_sequence += 1
+
+        play["_drive_key"] = (
+            f"inferred:{inferred_sequence}:{team_key(offense)}"
+        )
         previous_offense = offense
+        previous_provider_drive = None
+
+
+def drive_points(rows: list[dict[str, Any]]) -> float:
+    before = float(rows[0].get("offense_score") or 0)
+    after = max(
+        float(
+            play.get("offense_score_after")
+            or play.get("offense_score")
+            or 0
+        )
+        for play in rows
+    )
+
+    points = max(0.0, after - before)
+
+    if points <= 0:
+        if any(play.get("touchdown") for play in rows):
+            points = 7.0
+        elif any(play.get("field_goal") for play in rows):
+            points = 3.0
+
+    return points
 
 
 def summarize_drives(
     plays: list[dict[str, Any]],
     team: str,
 ) -> dict[str, Any]:
-    team_plays = [play for play in plays if same_team(play.get("offense"), team)]
+    offense_plays = [
+        play
+        for play in plays
+        if same_team(play.get("offense"), team)
+    ]
+
     drives: dict[str, list[dict[str, Any]]] = defaultdict(list)
 
-    for play in team_plays:
+    for play in offense_plays:
         drives[play["_drive_key"]].append(play)
 
-    opportunities = 0
-    opportunity_points = 0.0
+    drive_count = len(drives)
     scoring_drives = 0
-    drive_points_total = 0.0
-    start_positions: list[float] = []
-    yards_per_drive: list[float] = []
+    positive_epa_drives = 0
+    three_and_outs = 0
+    scoring_opportunities = 0
+    scoring_opportunity_points = 0.0
+    red_zone_trips = 0
+    red_zone_points = 0.0
+    points_total = 0.0
+    yards_total = 0.0
+    start_yards_to_goal: list[float] = []
 
     for rows in drives.values():
         rows.sort(key=lambda play: play["row_index"])
 
-        start = rows[0]
-        if start.get("yards_to_goal") is not None:
-            start_positions.append(float(start["yards_to_goal"]))
+        if rows[0].get("yards_to_goal") is not None:
+            start_yards_to_goal.append(
+                float(rows[0]["yards_to_goal"])
+            )
 
-        yards_per_drive.append(
-            sum(float(play.get("yards_gained") or 0) for play in rows)
+        drive_epa = sum(
+            float(play.get("epa") or 0)
+            for play in rows
         )
 
-        is_opportunity = any(
+        if drive_epa > 0:
+            positive_epa_drives += 1
+
+        yards = sum(
+            float(play.get("yards_gained") or 0)
+            for play in rows
+        )
+        yards_total += yards
+
+        points = drive_points(rows)
+        points_total += points
+
+        if points > 0:
+            scoring_drives += 1
+
+        opportunity = any(
             play.get("yards_to_goal") is not None
             and float(play["yards_to_goal"]) <= 40
             for play in rows
         )
-        if is_opportunity:
-            opportunities += 1
 
-        before = float(rows[0].get("offense_score") or 0)
-        after = max(
-            float(play.get("offense_score_after") or play.get("offense_score") or 0)
+        if opportunity:
+            scoring_opportunities += 1
+            scoring_opportunity_points += points
+
+        red_zone_trip = any(
+            play.get("yards_to_goal") is not None
+            and float(play["yards_to_goal"]) <= 20
             for play in rows
         )
-        drive_points = max(0.0, after - before)
 
-        # If post-play score fields are absent, infer obvious scoring outcomes.
-        if drive_points <= 0:
-            if any(play.get("touchdown") for play in rows):
-                drive_points = 7.0
-            elif any(play.get("field_goal") for play in rows):
-                drive_points = 3.0
+        if red_zone_trip:
+            red_zone_trips += 1
+            red_zone_points += points
 
-        drive_points_total += drive_points
-        if drive_points > 0:
-            scoring_drives += 1
-        if is_opportunity:
-            opportunity_points += drive_points
+        scrimmage_count = len(rows)
+        earned_first_down = any(
+            play.get("first_down")
+            for play in rows
+        )
 
-    drive_count = len(drives)
+        if (
+            scrimmage_count <= 3
+            and not earned_first_down
+            and points <= 0
+        ):
+            three_and_outs += 1
+
+    points_per_drive = (
+        points_total / drive_count
+        if drive_count
+        else None
+    )
+
+    drive_success_rate = (
+        positive_epa_drives / drive_count
+        if drive_count
+        else None
+    )
+
+    three_and_out_rate = (
+        three_and_outs / drive_count
+        if drive_count
+        else None
+    )
+
+    points_per_opportunity = (
+        scoring_opportunity_points / scoring_opportunities
+        if scoring_opportunities
+        else None
+    )
+
+    red_zone_points_per_trip = (
+        red_zone_points / red_zone_trips
+        if red_zone_trips
+        else None
+    )
+
+    red_zone_overperformance = (
+        red_zone_points_per_trip
+        - RED_ZONE_EXPECTED_POINTS_PER_TRIP_BETA
+        if red_zone_points_per_trip is not None
+        else None
+    )
 
     return {
         "drives": drive_count,
         "scoring_drives": scoring_drives,
-        "scoring_drive_rate": (
-            scoring_drives / drive_count if drive_count else None
-        ),
-        "points_per_drive": (
-            drive_points_total / drive_count if drive_count else None
-        ),
+        "points_per_drive": points_per_drive,
         "yards_per_drive": (
-            sum(yards_per_drive) / len(yards_per_drive)
-            if yards_per_drive else None
+            yards_total / drive_count
+            if drive_count
+            else None
         ),
-        "scoring_opportunities": opportunities,
-        "points_per_scoring_opportunity": (
-            opportunity_points / opportunities if opportunities else None
-        ),
-        "avg_start_yards_to_goal": (
-            sum(start_positions) / len(start_positions)
-            if start_positions else None
+        "drive_success_rate": drive_success_rate,
+        "three_and_outs": three_and_outs,
+        "three_and_out_rate": three_and_out_rate,
+        "scoring_opportunities": scoring_opportunities,
+        "points_per_scoring_opportunity": points_per_opportunity,
+        "red_zone_trips": red_zone_trips,
+        "red_zone_points_per_trip": red_zone_points_per_trip,
+        "red_zone_overperformance": red_zone_overperformance,
+        "avg_start_yards_to_goal": mean(start_yards_to_goal),
+    }
+
+
+# =============================================================================
+# TEAM / SPLIT METRICS
+# =============================================================================
+
+def split_summary(
+    plays: list[dict[str, Any]],
+) -> dict[str, Any]:
+    if not plays:
+        return {
+            "plays": 0,
+            "epa_total": None,
+            "epa_per_play": None,
+            "success_rate": None,
+        }
+
+    epa_values = [
+        float(play["epa"])
+        for play in plays
+    ]
+
+    return {
+        "plays": len(plays),
+        "epa_total": sum(epa_values),
+        "epa_per_play": mean(epa_values),
+        "success_rate": (
+            sum(1 for play in plays if play["success"])
+            / len(plays)
         ),
     }
 
 
-def same_team(a: Any, b: Any) -> bool:
-    return team_key(a) == team_key(b)
-
-
 def team_summary(
-    core: list[dict[str, Any]],
+    competitive_plays: list[dict[str, Any]],
     all_plays: list[dict[str, Any]],
     team: str,
 ) -> dict[str, Any]:
-    offense = [play for play in core if same_team(play.get("offense"), team)]
-    defense = [play for play in core if same_team(play.get("defense"), team)]
-    offense_all = [play for play in all_plays if same_team(play.get("offense"), team)]
-
-    plays = len(offense)
-    epa_total = sum(float(play["epa"]) for play in offense)
-    success_count = sum(1 for play in offense if play["success"])
-    explosive_count = sum(1 for play in offense if play["explosive"])
-    turnovers = sum(1 for play in offense_all if play["turnover"])
-
-    positive_epa = sum(max(float(play["epa"]), 0.0) for play in offense)
-    explosive_positive_epa = sum(
-        max(float(play["epa"]), 0.0)
-        for play in offense
-        if play["explosive"]
-    )
-
-    early = [play for play in offense if play.get("down") in {1, 2}]
-    late = [play for play in offense if play.get("down") in {3, 4}]
-    redzone = [
-        play for play in offense
-        if play.get("yards_to_goal") is not None
-        and float(play["yards_to_goal"]) <= 20
+    offense = [
+        play
+        for play in competitive_plays
+        if same_team(play.get("offense"), team)
     ]
 
-    leading = 0
-    tied = 0
-    for play in offense:
-        off_score = float(play.get("offense_score") or 0)
-        def_score = float(play.get("defense_score") or 0)
-        if off_score > def_score:
-            leading += 1
-        elif off_score == def_score:
-            tied += 1
+    offense_all = [
+        play
+        for play in all_plays
+        if same_team(play.get("offense"), team)
+    ]
 
-    drive = summarize_drives(all_plays, team)
+    pass_plays = [
+        play for play in offense
+        if play["is_pass"]
+    ]
+    rush_plays = [
+        play for play in offense
+        if play["is_rush"]
+    ]
+    standard_downs = [
+        play for play in offense
+        if play["standard_down"]
+    ]
+    passing_downs = [
+        play for play in offense
+        if play["passing_down"]
+    ]
+    early_downs = [
+        play for play in offense
+        if play["early_down"]
+    ]
+    money_downs = [
+        play for play in offense
+        if play["money_down"]
+    ]
+    fourth_downs = [
+        play for play in offense
+        if play["fourth_down"]
+    ]
+
+    overall = split_summary(offense)
+    passing = split_summary(pass_plays)
+    rushing = split_summary(rush_plays)
+    standard = split_summary(standard_downs)
+    passing_down = split_summary(passing_downs)
+    early = split_summary(early_downs)
+    money = split_summary(money_downs)
+    fourth = split_summary(fourth_downs)
+
+    explosive_plays = [
+        play for play in offense
+        if play["explosive"]
+    ]
+
+    positive_epa = sum(
+        max(float(play["epa"]), 0.0)
+        for play in offense
+    )
+    explosive_positive_epa = sum(
+        max(float(play["epa"]), 0.0)
+        for play in explosive_plays
+    )
+
+    sacks = sum(
+        1 for play in pass_plays
+        if play["sack"]
+    )
+    sack_rate_allowed = (
+        sacks / len(pass_plays)
+        if pass_plays
+        else None
+    )
+
+    stuff_count = sum(
+        1 for play in rush_plays
+        if play["stuff"]
+    )
+    stuff_rate_allowed = (
+        stuff_count / len(rush_plays)
+        if rush_plays
+        else None
+    )
+
+    tfl_count = sum(
+        1 for play in offense
+        if play["tfl"]
+    )
+    tfl_rate_allowed = (
+        tfl_count / len(offense)
+        if offense
+        else None
+    )
+
+    turnovers = [
+        play for play in offense_all
+        if play["turnover"]
+    ]
+    turnover_epa = sum(
+        float(play["epa"])
+        for play in turnovers
+    )
+
+    epa_values = [
+        float(play["epa"])
+        for play in offense
+    ]
+
+    drive = summarize_drives(
+        all_plays,
+        team,
+    )
 
     return {
-        "plays": plays,
-        "epa_total": epa_total,
-        "epa_per_play": epa_total / plays if plays else None,
-        "success_rate": success_count / plays if plays else None,
-        "explosive_rate": explosive_count / plays if plays else None,
-        "explosive_plays": explosive_count,
-        "explosive_epa_share": (
-            explosive_positive_epa / positive_epa if positive_epa > 0 else None
+        "overall": overall,
+        "passing": passing,
+        "rushing": rushing,
+        "standard_downs": standard,
+        "passing_downs": passing_down,
+        "early_downs": early,
+        "money_downs": money,
+        "fourth_downs": fourth,
+        "explosive_plays": len(explosive_plays),
+        "explosive_rate": (
+            len(explosive_plays) / len(offense)
+            if offense
+            else None
         ),
-        "turnovers": turnovers,
-        "early_down_epa_per_play": (
-            sum(float(play["epa"]) for play in early) / len(early)
-            if early else None
+        "explosive_epa_dependency": (
+            explosive_positive_epa / positive_epa
+            if positive_epa > 0
+            else None
         ),
-        "early_down_success_rate": (
-            sum(1 for play in early if play["success"]) / len(early)
-            if early else None
-        ),
-        "late_down_epa_per_play": (
-            sum(float(play["epa"]) for play in late) / len(late)
-            if late else None
-        ),
-        "late_down_success_rate": (
-            sum(1 for play in late if play["success"]) / len(late)
-            if late else None
-        ),
-        "red_zone_epa_per_play": (
-            sum(float(play["epa"]) for play in redzone) / len(redzone)
-            if redzone else None
-        ),
-        "red_zone_success_rate": (
-            sum(1 for play in redzone if play["success"]) / len(redzone)
-            if redzone else None
-        ),
-        "red_zone_plays": len(redzone),
-        "control_share": (
-            (leading + 0.5 * tied) / plays if plays else None
-        ),
-        "defensive_epa_allowed": (
-            sum(float(play["epa"]) for play in defense) / len(defense)
-            if defense else None
-        ),
+        "sacks_allowed": sacks,
+        "sack_rate_allowed": sack_rate_allowed,
+        "stuffs_allowed": stuff_count,
+        "stuff_rate_allowed": stuff_rate_allowed,
+        "tfl_allowed": tfl_count,
+        "tfl_rate_allowed": tfl_rate_allowed,
+        "turnovers": len(turnovers),
+        "turnover_epa_impact": turnover_epa,
+        "epa_volatility": population_std(epa_values),
         **drive,
     }
 
 
 # =============================================================================
-# POSTGAME DERIVED METRICS
+# HEADLINE RETROSPECTIVE METRICS
 # =============================================================================
-
-def difference(a: float | None, b: float | None) -> float | None:
-    if a is None or b is None:
-        return None
-    return a - b
-
 
 def quality_margin(
     home: dict[str, Any],
@@ -796,39 +1161,76 @@ def quality_margin(
     """
     BETA retrospective quality margin.
 
-    This intentionally uses process metrics rather than the final score:
-      EPA/play differential
-      success-rate differential
-      explosive-rate differential
-      scoring-opportunity differential
-      field-position differential
-      turnover margin (dampened)
-
-    Historical calibration will replace/tune these coefficients.
+    Uses only process metrics from the game. Historical evaluation/calibration
+    will tune or replace these coefficients.
     """
-    epa_diff = (home.get("epa_per_play") or 0) - (away.get("epa_per_play") or 0)
-    success_diff = (home.get("success_rate") or 0) - (away.get("success_rate") or 0)
-    explosive_diff = (home.get("explosive_rate") or 0) - (away.get("explosive_rate") or 0)
-    opp_diff = (home.get("scoring_opportunities") or 0) - (away.get("scoring_opportunities") or 0)
+    home_overall = home["overall"]
+    away_overall = away["overall"]
+
+    epa_diff = (
+        (home_overall.get("epa_per_play") or 0)
+        - (away_overall.get("epa_per_play") or 0)
+    )
+
+    success_diff = (
+        (home_overall.get("success_rate") or 0)
+        - (away_overall.get("success_rate") or 0)
+    )
+
+    explosive_diff = (
+        (home.get("explosive_rate") or 0)
+        - (away.get("explosive_rate") or 0)
+    )
+
+    drive_success_diff = (
+        (home.get("drive_success_rate") or 0)
+        - (away.get("drive_success_rate") or 0)
+    )
+
+    opportunity_diff = (
+        (home.get("scoring_opportunities") or 0)
+        - (away.get("scoring_opportunities") or 0)
+    )
 
     home_start = home.get("avg_start_yards_to_goal")
     away_start = away.get("avg_start_yards_to_goal")
-    field_edge = 0.0
-    if home_start is not None and away_start is not None:
-        # Lower yards-to-goal at drive start is better.
-        field_edge = away_start - home_start
 
-    turnover_margin = (away.get("turnovers") or 0) - (home.get("turnovers") or 0)
+    field_position_edge = 0.0
+
+    if home_start is not None and away_start is not None:
+        field_position_edge = away_start - home_start
+
+    turnover_epa_edge = (
+        (home.get("turnover_epa_impact") or 0)
+        - (away.get("turnover_epa_impact") or 0)
+    )
 
     margin = (
         12.0 * epa_diff
-        + 30.0 * success_diff
-        + 14.0 * explosive_diff
-        + 1.25 * opp_diff
-        + 0.18 * field_edge
-        + 1.25 * turnover_margin
+        + 26.0 * success_diff
+        + 12.0 * explosive_diff
+        + 10.0 * drive_success_diff
+        + 1.10 * opportunity_diff
+        + 0.16 * field_position_edge
+        + 0.35 * turnover_epa_edge
     )
-    return clamp(margin, -42.0, 42.0)
+
+    return clamp(
+        margin,
+        -42.0,
+        42.0,
+    )
+
+
+def postgame_win_expectancy(
+    home_quality_margin: float,
+) -> float:
+    return 1.0 / (
+        1.0
+        + math.exp(
+            -home_quality_margin / 7.5
+        )
+    )
 
 
 def adjusted_score(
@@ -836,59 +1238,71 @@ def adjusted_score(
     actual_away: int,
     home: dict[str, Any],
     away: dict[str, Any],
-    margin: float,
+    quality_margin_home: float,
 ) -> tuple[float, float]:
     """
-    BETA adjusted score.
+    BETA adjusted final score.
 
-    Expected total is driven primarily by scoring opportunities and drive
-    quality, then bounded to plausible CFB scoring. The quality margin is split
-    around that expected total.
+    Expected scoring level comes from drive/opportunity quality and is stabilized
+    by the actual total only enough to avoid absurd tiny-sample outputs.
     """
-    total_opps = (
+    total_opportunities = (
         (home.get("scoring_opportunities") or 0)
         + (away.get("scoring_opportunities") or 0)
     )
+
     total_drives = (
         (home.get("drives") or 0)
         + (away.get("drives") or 0)
     )
 
-    # 4.2 points per scoring opportunity is a neutral placeholder that will be
-    # calibrated historically. Blend with actual total only enough to stabilize
-    # tiny/missing drive samples.
-    process_total = 4.2 * total_opps
-    if total_opps <= 2:
-        process_total = actual_home + actual_away
+    process_total = (
+        4.2 * total_opportunities
+        if total_opportunities > 2
+        else actual_home + actual_away
+    )
 
-    if total_drives:
-        drive_ppd = (
-            (home.get("points_per_drive") or 0)
-            + (away.get("points_per_drive") or 0)
-        ) / 2.0
-        if drive_ppd > 0:
-            drive_total = drive_ppd * total_drives
-            process_total = 0.70 * process_total + 0.30 * drive_total
+    home_ppd = home.get("points_per_drive")
+    away_ppd = away.get("points_per_drive")
+
+    if (
+        total_drives
+        and home_ppd is not None
+        and away_ppd is not None
+    ):
+        drive_total = (
+            (home_ppd + away_ppd)
+            / 2.0
+            * total_drives
+        )
+        process_total = (
+            0.70 * process_total
+            + 0.30 * drive_total
+        )
 
     actual_total = actual_home + actual_away
+
     expected_total = clamp(
-        0.85 * process_total + 0.15 * actual_total,
+        0.85 * process_total
+        + 0.15 * actual_total,
         24.0,
         90.0,
     )
 
-    home_score = (expected_total + margin) / 2.0
-    away_score = (expected_total - margin) / 2.0
+    home_score = (
+        expected_total
+        + quality_margin_home
+    ) / 2.0
 
-    home_score = max(0.0, home_score)
-    away_score = max(0.0, away_score)
+    away_score = (
+        expected_total
+        - quality_margin_home
+    ) / 2.0
 
-    return round(home_score, 1), round(away_score, 1)
-
-
-def postgame_win_expectancy(home_quality_margin: float) -> float:
-    # BETA logistic mapping. Calibration suite will fit this historically.
-    return 1.0 / (1.0 + math.exp(-home_quality_margin / 7.5))
+    return (
+        round(max(0.0, home_score), 1),
+        round(max(0.0, away_score), 1),
+    )
 
 
 def reality_check_label(
@@ -927,78 +1341,59 @@ def reality_check_label(
     )
 
 
-def variance_score(
-    home: dict[str, Any],
-    away: dict[str, Any],
-) -> float:
-    turnover_margin = abs(
-        (home.get("turnovers") or 0)
-        - (away.get("turnovers") or 0)
-    )
-
-    explosive_gap = abs(
-        (home.get("explosive_epa_share") or 0)
-        - (away.get("explosive_epa_share") or 0)
-    )
-
-    late_early_gap = 0.0
-    for team in (home, away):
-        late = team.get("late_down_success_rate")
-        early = team.get("early_down_success_rate")
-        if late is not None and early is not None:
-            late_early_gap += abs(late - early)
-
-    redzone_gap = abs(
-        (home.get("red_zone_success_rate") or 0)
-        - (away.get("red_zone_success_rate") or 0)
-    )
-
-    score = (
-        turnover_margin * 14.0
-        + explosive_gap * 35.0
-        + late_early_gap * 35.0
-        + redzone_gap * 22.0
-    )
-    return round(clamp(score, 0.0, 100.0), 1)
-
-
-def game_control(
-    home: dict[str, Any],
-    away: dict[str, Any],
-) -> tuple[float | None, float | None]:
-    home_control = home.get("control_share")
-    away_control = away.get("control_share")
-    if home_control is None or away_control is None:
-        return None, None
-
-    total = home_control + away_control
-    if total <= 0:
-        return 0.5, 0.5
-
-    return home_control / total, away_control / total
-
+# =============================================================================
+# FINAL RECORD
+# =============================================================================
 
 def build_full_record(
     final: dict[str, Any],
     pbp_game: dict[str, Any],
 ) -> dict[str, Any]:
-    away = str(final.get("away_team") or pbp_game.get("away") or "")
-    home = str(final.get("home_team") or pbp_game.get("home") or "")
+    away = str(
+        final.get("away_team")
+        or pbp_game.get("away")
+        or ""
+    )
+    home = str(
+        final.get("home_team")
+        or pbp_game.get("home")
+        or ""
+    )
+
     away_points = int(final.get("away_points"))
     home_points = int(final.get("home_points"))
 
     plays = list(pbp_game["plays"])
     assign_drive_keys(plays)
 
-    core = [play for play in plays if not play["garbage_time"]]
-    if len(core) < 20:
-        core = plays
+    competitive = [
+        play
+        for play in plays
+        if not play["garbage_time"]
+    ]
 
-    home_stats = team_summary(core, plays, home)
-    away_stats = team_summary(core, plays, away)
+    if len(competitive) < 20:
+        competitive = plays
 
-    home_margin_quality = quality_margin(home_stats, away_stats)
-    home_pwe = postgame_win_expectancy(home_margin_quality)
+    home_stats = team_summary(
+        competitive,
+        plays,
+        home,
+    )
+    away_stats = team_summary(
+        competitive,
+        plays,
+        away,
+    )
+
+    home_quality_margin = quality_margin(
+        home_stats,
+        away_stats,
+    )
+
+    home_pwe = postgame_win_expectancy(
+        home_quality_margin
+    )
     away_pwe = 1.0 - home_pwe
 
     adjusted_home, adjusted_away = adjusted_score(
@@ -1006,37 +1401,162 @@ def build_full_record(
         away_points,
         home_stats,
         away_stats,
-        home_margin_quality,
+        home_quality_margin,
     )
 
-    actual_margin = home_points - away_points
-    adjusted_margin = adjusted_home - adjusted_away
+    actual_margin = (
+        home_points
+        - away_points
+    )
+    adjusted_margin = (
+        adjusted_home
+        - adjusted_away
+    )
+
     reality_label, reality_note = reality_check_label(
         actual_margin,
         adjusted_margin,
     )
 
-    home_control, away_control = game_control(home_stats, away_stats)
-
-    field_position_edge = difference(
-        away_stats.get("avg_start_yards_to_goal"),
-        home_stats.get("avg_start_yards_to_goal"),
+    garbage_plays = sum(
+        1 for play in plays
+        if play["garbage_time"]
     )
 
-    garbage_plays = sum(1 for play in plays if play["garbage_time"])
-    garbage_rate = garbage_plays / len(plays) if plays else 0.0
-
-    turnover_margin_home = (
-        (away_stats.get("turnovers") or 0)
-        - (home_stats.get("turnovers") or 0)
+    garbage_share = (
+        garbage_plays / len(plays)
+        if plays
+        else None
     )
+
+    def pack_split(split: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "plays": split.get("plays"),
+            "epa_total": rnd(
+                split.get("epa_total"),
+                2,
+            ),
+            "epa_per_play": rnd(
+                split.get("epa_per_play"),
+                3,
+            ),
+            "success_rate": pct(
+                split.get("success_rate")
+            ),
+        }
+
+    def pack_team(stats: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "overall": pack_split(stats["overall"]),
+            "passing": pack_split(stats["passing"]),
+            "rushing": pack_split(stats["rushing"]),
+            "standard_downs": pack_split(stats["standard_downs"]),
+            "passing_downs": pack_split(stats["passing_downs"]),
+            "early_downs": pack_split(stats["early_downs"]),
+            "third_fourth_downs": pack_split(stats["money_downs"]),
+            "fourth_down": {
+                **pack_split(stats["fourth_downs"]),
+                "attempts": stats["fourth_downs"].get("plays"),
+            },
+            "explosiveness": {
+                "explosive_plays": stats.get("explosive_plays"),
+                "explosive_play_rate": pct(
+                    stats.get("explosive_rate")
+                ),
+                "explosive_epa_dependency": pct(
+                    stats.get("explosive_epa_dependency")
+                ),
+            },
+            "negative_play_rates": {
+                "sacks_allowed": stats.get("sacks_allowed"),
+                "sack_rate_allowed": pct(
+                    stats.get("sack_rate_allowed")
+                ),
+                "stuffs_allowed": stats.get("stuffs_allowed"),
+                "stuff_rate_allowed": pct(
+                    stats.get("stuff_rate_allowed")
+                ),
+                "tfl_allowed": stats.get("tfl_allowed"),
+                "tfl_rate_allowed": pct(
+                    stats.get("tfl_rate_allowed")
+                ),
+            },
+            "drives": {
+                "drives": stats.get("drives"),
+                "points_per_drive": rnd(
+                    stats.get("points_per_drive"),
+                    2,
+                ),
+                "yards_per_drive": rnd(
+                    stats.get("yards_per_drive"),
+                    1,
+                ),
+                "drive_success_rate": pct(
+                    stats.get("drive_success_rate")
+                ),
+                "three_and_outs": stats.get("three_and_outs"),
+                "three_and_out_rate": pct(
+                    stats.get("three_and_out_rate")
+                ),
+            },
+            "scoring_opportunities": {
+                "opportunities": stats.get("scoring_opportunities"),
+                "points_per_opportunity": rnd(
+                    stats.get("points_per_scoring_opportunity"),
+                    2,
+                ),
+            },
+            "red_zone": {
+                "trips": stats.get("red_zone_trips"),
+                "points_per_trip": rnd(
+                    stats.get("red_zone_points_per_trip"),
+                    2,
+                ),
+                "overperformance_points_per_trip": rnd(
+                    stats.get("red_zone_overperformance"),
+                    2,
+                ),
+                "beta_expected_points_per_trip": (
+                    RED_ZONE_EXPECTED_POINTS_PER_TRIP_BETA
+                ),
+            },
+            "field_position": {
+                "avg_start_yards_to_goal": rnd(
+                    stats.get("avg_start_yards_to_goal"),
+                    1,
+                ),
+            },
+            "turnovers": {
+                "turnovers": stats.get("turnovers"),
+                "turnover_epa_impact": rnd(
+                    stats.get("turnover_epa_impact"),
+                    2,
+                ),
+            },
+            "epa_volatility": rnd(
+                stats.get("epa_volatility"),
+                3,
+            ),
+        }
 
     return {
-        "game_id": str(final.get("game_id") or ""),
+        "game_id": str(
+            final.get("game_id")
+            or ""
+        ),
         "pbp_game_id": pbp_game.get("game_id"),
-        "matchup_key": matchup_key(away, home),
-        "season": int(final.get("season") or YEAR),
-        "week": int(final.get("week") or 0),
+        "matchup_key": matchup_key(
+            away,
+            home,
+        ),
+        "season": int(
+            final.get("season")
+            or YEAR
+        ),
+        "week": int(
+            final.get("week")
+            or 0
+        ),
         "away_team": away,
         "home_team": home,
         "away_points": away_points,
@@ -1047,12 +1567,18 @@ def build_full_record(
         "source_note": (
             "Retrospective only. Does not alter the frozen pregame THI projection."
         ),
-        "calibration_status": "BETA — historical calibration pending",
+        "calibration_status": (
+            "BETA — historical calibration pending"
+        ),
         "headline": {
             "postgame_win_expectancy": {
-                "home_pct": pct(home_pwe),
                 "away_pct": pct(away_pwe),
-                "winner": home if home_pwe >= 0.5 else away,
+                "home_pct": pct(home_pwe),
+                "winner": (
+                    home
+                    if home_pwe >= 0.5
+                    else away
+                ),
             },
             "adjusted_final_score": {
                 "away": adjusted_away,
@@ -1062,173 +1588,102 @@ def build_full_record(
                 "label": reality_label,
                 "note": reality_note,
                 "actual_margin": actual_margin,
-                "adjusted_margin": rnd(adjusted_margin, 1),
+                "adjusted_margin": rnd(
+                    adjusted_margin,
+                    1,
+                ),
             },
         },
-        "game_control": {
-            "home_pct": pct(home_control),
-            "away_pct": pct(away_control),
-        },
-        "efficiency": {
-            "home_epa_per_play": rnd(home_stats.get("epa_per_play"), 3),
-            "away_epa_per_play": rnd(away_stats.get("epa_per_play"), 3),
-            "epa_margin": rnd(
-                difference(
-                    home_stats.get("epa_per_play"),
-                    away_stats.get("epa_per_play"),
-                ),
-                3,
-            ),
-            "home_success_rate": pct(home_stats.get("success_rate")),
-            "away_success_rate": pct(away_stats.get("success_rate")),
-            "success_rate_margin_pp": rnd(
-                (
-                    difference(
-                        home_stats.get("success_rate"),
-                        away_stats.get("success_rate"),
-                    )
-                    or 0
-                ) * 100.0,
-                1,
-            ),
-        },
-        "explosiveness": {
-            "home_explosive_rate": pct(home_stats.get("explosive_rate")),
-            "away_explosive_rate": pct(away_stats.get("explosive_rate")),
-            "home_explosive_plays": home_stats.get("explosive_plays"),
-            "away_explosive_plays": away_stats.get("explosive_plays"),
-            "home_explosive_epa_dependence_pct": pct(
-                home_stats.get("explosive_epa_share")
-            ),
-            "away_explosive_epa_dependence_pct": pct(
-                away_stats.get("explosive_epa_share")
-            ),
-        },
-        "turnovers": {
-            "home_turnovers": home_stats.get("turnovers"),
-            "away_turnovers": away_stats.get("turnovers"),
-            "home_turnover_margin": turnover_margin_home,
-            "home_turnover_luck_proxy_points": rnd(turnover_margin_home * 3.5, 1),
-            "note": (
-                "Turnover Luck is a transparent leverage proxy (3.5 points per "
-                "turnover of margin), not a claim that every turnover was random."
-            ),
-        },
-        "finishing_drives": {
-            "home_scoring_opportunities": home_stats.get("scoring_opportunities"),
-            "away_scoring_opportunities": away_stats.get("scoring_opportunities"),
-            "home_points_per_opportunity": rnd(
-                home_stats.get("points_per_scoring_opportunity"), 2
-            ),
-            "away_points_per_opportunity": rnd(
-                away_stats.get("points_per_scoring_opportunity"), 2
-            ),
-        },
-        "drive_efficiency": {
-            "home_drives": home_stats.get("drives"),
-            "away_drives": away_stats.get("drives"),
-            "home_points_per_drive": rnd(home_stats.get("points_per_drive"), 2),
-            "away_points_per_drive": rnd(away_stats.get("points_per_drive"), 2),
-            "home_yards_per_drive": rnd(home_stats.get("yards_per_drive"), 1),
-            "away_yards_per_drive": rnd(away_stats.get("yards_per_drive"), 1),
-            "home_scoring_drive_rate": pct(home_stats.get("scoring_drive_rate")),
-            "away_scoring_drive_rate": pct(away_stats.get("scoring_drive_rate")),
-        },
-        "field_position": {
-            "home_avg_start_yards_to_goal": rnd(
-                home_stats.get("avg_start_yards_to_goal"), 1
-            ),
-            "away_avg_start_yards_to_goal": rnd(
-                away_stats.get("avg_start_yards_to_goal"), 1
-            ),
-            "home_field_position_edge_yards": rnd(field_position_edge, 1),
-        },
-        "early_downs": {
-            "home_epa_per_play": rnd(
-                home_stats.get("early_down_epa_per_play"), 3
-            ),
-            "away_epa_per_play": rnd(
-                away_stats.get("early_down_epa_per_play"), 3
-            ),
-            "home_success_rate": pct(
-                home_stats.get("early_down_success_rate")
-            ),
-            "away_success_rate": pct(
-                away_stats.get("early_down_success_rate")
-            ),
-        },
-        "money_downs": {
-            "home_epa_per_play": rnd(
-                home_stats.get("late_down_epa_per_play"), 3
-            ),
-            "away_epa_per_play": rnd(
-                away_stats.get("late_down_epa_per_play"), 3
-            ),
-            "home_success_rate": pct(
-                home_stats.get("late_down_success_rate")
-            ),
-            "away_success_rate": pct(
-                away_stats.get("late_down_success_rate")
-            ),
-            "home_overperformance_vs_early_pp": rnd(
-                (
-                    difference(
-                        home_stats.get("late_down_success_rate"),
-                        home_stats.get("early_down_success_rate"),
-                    )
-                    or 0
-                ) * 100.0,
-                1,
-            ),
-            "away_overperformance_vs_early_pp": rnd(
-                (
-                    difference(
-                        away_stats.get("late_down_success_rate"),
-                        away_stats.get("early_down_success_rate"),
-                    )
-                    or 0
-                ) * 100.0,
-                1,
-            ),
-        },
-        "red_zone": {
-            "home_plays": home_stats.get("red_zone_plays"),
-            "away_plays": away_stats.get("red_zone_plays"),
-            "home_epa_per_play": rnd(
-                home_stats.get("red_zone_epa_per_play"), 3
-            ),
-            "away_epa_per_play": rnd(
-                away_stats.get("red_zone_epa_per_play"), 3
-            ),
-            "home_success_rate": pct(
-                home_stats.get("red_zone_success_rate")
-            ),
-            "away_success_rate": pct(
-                away_stats.get("red_zone_success_rate")
-            ),
-        },
-        "garbage_time": {
+        "away_metrics": pack_team(
+            away_stats
+        ),
+        "home_metrics": pack_team(
+            home_stats
+        ),
+        "game_context": {
             "total_scrimmage_plays": len(plays),
-            "competitive_scrimmage_plays": len(core),
+            "competitive_scrimmage_plays": len(competitive),
             "garbage_time_plays": garbage_plays,
-            "garbage_time_play_rate": pct(garbage_rate),
+            "garbage_time_share": pct(
+                garbage_share
+            ),
         },
-        "variance": {
-            "game_variance_score": variance_score(home_stats, away_stats),
-            "scale": "0-100; higher = more turnover/explosive/late-down/red-zone variance",
+        "definitions": {
+            "standard_down": (
+                "1st down; 2nd-and-7 or less; 3rd/4th-and-4 or less."
+            ),
+            "passing_down": (
+                "2nd-and-8+; 3rd/4th-and-5+."
+            ),
+            "drive_success_rate": (
+                "Share of offensive drives with positive cumulative EPA."
+            ),
+            "three_and_out_rate": (
+                "Share of drives with three or fewer qualifying scrimmage plays, "
+                "no first down, and no points."
+            ),
+            "scoring_opportunity": (
+                "Drive that reaches the opponent 40-yard line or closer."
+            ),
+            "red_zone_trip": (
+                "Drive that reaches the opponent 20-yard line or closer."
+            ),
+            "red_zone_overperformance": (
+                f"Points per red-zone trip minus the temporary beta baseline "
+                f"of {RED_ZONE_EXPECTED_POINTS_PER_TRIP_BETA:.1f}. "
+                "This baseline will be historically calibrated."
+            ),
+            "sack_rate_allowed": (
+                "Sacks divided by qualifying pass plays/dropbacks."
+            ),
+            "stuff_rate_allowed": (
+                "Rushes stopped for zero or negative yards divided by rush attempts."
+            ),
+            "tfl_rate_allowed": (
+                "Qualifying offensive plays ending in a tackle for loss / negative yardage "
+                "divided by all qualifying scrimmage plays."
+            ),
+            "turnover_epa_impact": (
+                "Sum of offensive EPA on turnover plays; more negative means greater lost value."
+            ),
+            "epa_volatility": (
+                "Population standard deviation of competitive-play EPA."
+            ),
         },
         "generated_at": iso_now(),
     }
 
 
-def pending_record(final: dict[str, Any], note: str) -> dict[str, Any]:
-    away = str(final.get("away_team") or "")
-    home = str(final.get("home_team") or "")
+def pending_record(
+    final: dict[str, Any],
+    note: str,
+) -> dict[str, Any]:
+    away = str(
+        final.get("away_team")
+        or ""
+    )
+    home = str(
+        final.get("home_team")
+        or ""
+    )
+
     return {
-        "game_id": str(final.get("game_id") or ""),
-        "matchup_key": matchup_key(away, home),
-        "season": int(final.get("season") or YEAR),
-        "week": int(final.get("week") or 0),
+        "game_id": str(
+            final.get("game_id")
+            or ""
+        ),
+        "matchup_key": matchup_key(
+            away,
+            home,
+        ),
+        "season": int(
+            final.get("season")
+            or YEAR
+        ),
+        "week": int(
+            final.get("week")
+            or 0
+        ),
         "away_team": away,
         "home_team": home,
         "away_points": final.get("away_points"),
@@ -1237,7 +1692,9 @@ def pending_record(final: dict[str, Any], note: str) -> dict[str, Any]:
         "analysis_level": "scoreboard_only",
         "source": "Final score available; PBP pending",
         "source_note": note,
-        "calibration_status": "BETA — historical calibration pending",
+        "calibration_status": (
+            "BETA — historical calibration pending"
+        ),
         "generated_at": iso_now(),
     }
 
@@ -1250,27 +1707,50 @@ def should_download(
     finals: list[dict[str, Any]],
     existing: dict[str, Any],
 ) -> bool:
-    existing_games = existing.get("games") or []
     by_matchup = {
         game.get("matchup_key"): game
-        for game in existing_games
-        if isinstance(game, dict) and game.get("matchup_key")
+        for game in (existing.get("games") or [])
+        if isinstance(game, dict)
+        and game.get("matchup_key")
     }
 
     for final in finals:
-        key = matchup_key(final.get("away_team"), final.get("home_team"))
+        key = matchup_key(
+            final.get("away_team"),
+            final.get("home_team"),
+        )
         row = by_matchup.get(key)
+
         if not row:
             return True
+
+        # Version 2 requires the canonical selected metric package.
+        # Rebuild any older "available" row that does not contain it.
         if row.get("analysis_status") == "available":
+            if (
+                "away_metrics" not in row
+                or "home_metrics" not in row
+            ):
+                return True
             continue
 
         generated = row.get("generated_at")
+
         if not generated:
             return True
+
         try:
-            when = datetime.fromisoformat(str(generated).replace("Z", "+00:00"))
-            age_minutes = (utc_now() - when.astimezone(timezone.utc)).total_seconds() / 60
+            when = datetime.fromisoformat(
+                str(generated).replace(
+                    "Z",
+                    "+00:00",
+                )
+            )
+            age_minutes = (
+                utc_now()
+                - when.astimezone(timezone.utc)
+            ).total_seconds() / 60.0
+
             if age_minutes >= PENDING_RETRY_MINUTES:
                 return True
         except Exception:
@@ -1280,12 +1760,20 @@ def should_download(
 
 
 def main() -> None:
-    results = read_json(RESULTS_PATH, {"games": []})
+    results = read_json(
+        RESULTS_PATH,
+        {"games": []},
+    )
+
     finals = [
         game
         for game in (results.get("games") or [])
         if isinstance(game, dict)
-        and str(game.get("game_state") or game.get("status") or "").lower()
+        and str(
+            game.get("game_state")
+            or game.get("status")
+            or ""
+        ).lower()
         in {"final", "completed"}
     ]
 
@@ -1295,6 +1783,7 @@ def main() -> None:
             {
                 "meta": {
                     "season": YEAR,
+                    "schema_version": "2.0-canonical-postgame",
                     "generated_at": iso_now(),
                     "final_games": 0,
                     "available": 0,
@@ -1308,52 +1797,91 @@ def main() -> None:
         print("No finals available yet.")
         return
 
-    existing = read_json(OUTPUT_PATH, {"games": []})
+    existing = read_json(
+        OUTPUT_PATH,
+        {"games": []},
+    )
+
     existing_by_matchup = {
         game.get("matchup_key"): game
         for game in (existing.get("games") or [])
-        if isinstance(game, dict) and game.get("matchup_key")
+        if isinstance(game, dict)
+        and game.get("matchup_key")
     }
 
-    if not should_download(finals, existing):
-        print("No new finals and no pending postgame records due for retry.")
+    if not should_download(
+        finals,
+        existing,
+    ):
+        print(
+            "No new finals, no old-schema rows, "
+            "and no pending postgame records due for retry."
+        )
         return
 
     try:
         frame = download_pbp()
         plays = normalize_frame(frame)
         games = build_game_index(plays)
-        print(f"Normalized {len(plays):,} scrimmage plays across {len(games)} games.")
+
+        print(
+            f"Normalized {len(plays):,} qualifying scrimmage plays "
+            f"across {len(games)} games."
+        )
+
     except Exception as exc:
-        print(f"WARNING: PBP unavailable: {exc}")
-        # Preserve all available analyses and ensure every final still has a record.
-        output_games = []
+        print(
+            f"WARNING: PBP unavailable: {exc}"
+        )
+
+        output_games: list[dict[str, Any]] = []
+
         for final in finals:
-            key = matchup_key(final.get("away_team"), final.get("home_team"))
+            key = matchup_key(
+                final.get("away_team"),
+                final.get("home_team"),
+            )
             prior = existing_by_matchup.get(key)
-            if prior and prior.get("analysis_status") == "available":
+
+            if (
+                prior
+                and prior.get("analysis_status")
+                == "available"
+                and "away_metrics" in prior
+                and "home_metrics" in prior
+            ):
                 output_games.append(prior)
             else:
                 output_games.append(
                     pending_record(
                         final,
-                        "PBP source could not be refreshed. Automatic retry scheduled.",
+                        (
+                            "PBP source could not be refreshed. "
+                            "Automatic retry scheduled."
+                        ),
                     )
                 )
 
         available = sum(
-            1 for game in output_games
-            if game.get("analysis_status") == "available"
+            1
+            for game in output_games
+            if game.get("analysis_status")
+            == "available"
         )
+
         write_json(
             OUTPUT_PATH,
             {
                 "meta": {
                     "season": YEAR,
+                    "schema_version": "2.0-canonical-postgame",
                     "generated_at": iso_now(),
                     "final_games": len(output_games),
                     "available": available,
-                    "pending": len(output_games) - available,
+                    "pending": (
+                        len(output_games)
+                        - available
+                    ),
                     "source": "SportsDataverse/cfbfastR PBP",
                     "model_a_touched": False,
                     "warning": str(exc),
@@ -1366,45 +1894,64 @@ def main() -> None:
     output_games: list[dict[str, Any]] = []
 
     for final in finals:
-        pbp_game = find_pbp_game(final, games)
+        pbp_game = find_pbp_game(
+            final,
+            games,
+        )
 
         if pbp_game is None:
             output_games.append(
                 pending_record(
                     final,
-                    "Final is recorded, but matching play-by-play has not arrived yet. "
-                    "The settlement workflow will retry automatically.",
+                    (
+                        "Final is recorded, but matching play-by-play has not arrived yet. "
+                        "The settlement workflow will retry automatically."
+                    ),
                 )
             )
             continue
 
         try:
             output_games.append(
-                build_full_record(final, pbp_game)
+                build_full_record(
+                    final,
+                    pbp_game,
+                )
             )
         except Exception as exc:
             print(
-                f"WARNING: postgame build failed for "
-                f"{final.get('away_team')} @ {final.get('home_team')}: {exc}"
+                "WARNING: postgame build failed for "
+                f"{final.get('away_team')} @ "
+                f"{final.get('home_team')}: {exc}"
             )
             output_games.append(
                 pending_record(
                     final,
-                    f"PBP matched, but analysis generation failed: {exc}",
+                    (
+                        "PBP matched, but canonical postgame generation failed: "
+                        f"{exc}"
+                    ),
                 )
             )
 
     available = sum(
-        1 for game in output_games
-        if game.get("analysis_status") == "available"
+        1
+        for game in output_games
+        if game.get("analysis_status")
+        == "available"
     )
-    pending = len(output_games) - available
+
+    pending = (
+        len(output_games)
+        - available
+    )
 
     write_json(
         OUTPUT_PATH,
         {
             "meta": {
                 "season": YEAR,
+                "schema_version": "2.0-canonical-postgame",
                 "generated_at": iso_now(),
                 "final_games": len(output_games),
                 "available": available,
@@ -1414,9 +1961,10 @@ def main() -> None:
                 "model_a_touched": False,
                 "notes": [
                     "Every final receives a postgame record.",
-                    "Full metrics appear when matching PBP is available.",
+                    "Full metrics appear only when matching PBP is available.",
                     "Pending games retry automatically.",
-                    "Postgame Win Expectancy and Adjusted Final Score are beta until historical calibration.",
+                    "Canonical selected postgame metric package is schema v2.0.",
+                    "Postgame Win Expectancy, Adjusted Final Score, and Red-Zone Overperformance are beta until historical calibration.",
                     "No CFBD calls are made.",
                 ],
             },
@@ -1425,7 +1973,9 @@ def main() -> None:
     )
 
     print(
-        f"Postgame analytics: {available} available, {pending} pending, "
+        f"Canonical postgame analytics: "
+        f"{available} available, "
+        f"{pending} pending, "
         f"{len(output_games)} finals total."
     )
     print("✅ No CFBD calls were made")
