@@ -236,6 +236,32 @@
         display:none !important;
       }
 
+      .thi-postgame-status-purple {
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        margin-top:6px;
+        margin-left:6px;
+        padding:4px 7px;
+        border:1px solid #b8a1d8;
+        border-radius:999px;
+        background:#f3eef9;
+        color:#6d4c8f;
+        font-family:var(--mono);
+        font-size:8px;
+        font-weight:900;
+        letter-spacing:.65px;
+        line-height:1;
+        text-transform:uppercase;
+        white-space:nowrap;
+      }
+
+      .thi-postgame-status-purple.pending {
+        border-color:#c8bdd8;
+        background:#f6f3fa;
+        color:#7f6c92;
+      }
+
       #${POSTGAME_SECTION_ID} {
         margin-top:22px;
         padding:18px;
@@ -564,11 +590,27 @@
     );
   }
 
-  function findPostgame(away, home) {
+  function findPostgameForFinal(final) {
+    if (!final) {
+      return null;
+    }
+
+    const finalId = String(final.game_id || "").trim();
+
+    if (finalId) {
+      const byId = postgameGames.find(game =>
+        String(game?.game_id || "").trim() === finalId
+      );
+
+      if (byId) {
+        return byId;
+      }
+    }
+
     return matchupFind(
       postgameGames,
-      away,
-      home
+      final.away_team,
+      final.home_team
     );
   }
 
@@ -1388,10 +1430,7 @@
     }
 
     const postgame =
-      findPostgame(
-        final.away_team,
-        final.home_team
-      );
+      findPostgameForFinal(final);
 
     removePostgameSection();
 
@@ -1476,11 +1515,8 @@
   }
 
   function existingPostgamePurplePill(row) {
-    /*
-     * The purple status pill is produced by the existing settled/final renderer.
-     * We deliberately update that existing element rather than creating another.
-     */
     return (
+      row.querySelector(".thi-postgame-status-purple") ||
       Array.from(
         row.querySelectorAll("*")
       ).find(node => {
@@ -1498,13 +1534,38 @@
           own === "POSTGAME ANALYSIS AVAILABLE" ||
           own === "POSTGAME ANALYSIS PENDING"
         );
-      }) || null
+      }) ||
+      null
     );
+  }
+
+  function ensurePurplePostgamePill(row) {
+    let pill = existingPostgamePurplePill(row);
+
+    if (pill) {
+      pill.classList.add("thi-postgame-status-purple");
+      return pill;
+    }
+
+    const meta =
+      row.querySelector(".hammer-game-status-meta") ||
+      row.querySelector(".matchup-cell");
+
+    if (!meta) {
+      return null;
+    }
+
+    pill = document.createElement("span");
+    pill.className = "thi-postgame-status-purple";
+    meta.appendChild(pill);
+
+    return pill;
   }
 
   function decorateBoardPostgameStatus() {
     /*
-     * Remove every legacy yellow duplicate from both current and cached markup.
+     * Remove every legacy duplicate from older postgame code.
+     * We then render exactly ONE purple postgame state.
      */
     document
       .querySelectorAll(
@@ -1514,16 +1575,23 @@
         node.remove()
       );
 
-    if (!postgameDataLoaded) {
-      return;
-    }
-
     const rows =
       document.querySelectorAll(
         "#projections-container .projection-table tbody tr.game-row"
       );
 
     rows.forEach(row => {
+      /*
+       * Remove duplicate custom purple pills if a mutation race ever produced one.
+       */
+      const existingCustom = Array.from(
+        row.querySelectorAll(".thi-postgame-status-purple")
+      );
+
+      existingCustom
+        .slice(1)
+        .forEach(node => node.remove());
+
       const teams =
         boardRowTeams(row);
 
@@ -1541,15 +1609,19 @@
         return;
       }
 
+      /*
+       * If postgame JSON itself has not loaded, do not invent a state.
+       */
+      if (!postgameDataLoaded) {
+        return;
+      }
+
       const pg =
-        findPostgame(
-          teams.away,
-          teams.home
-        );
+        findPostgameForFinal(final);
 
       /*
-       * No matching postgame record != pending.
-       * Only explicit states are surfaced.
+       * Only an explicit backend state is surfaced.
+       * Missing record is neither COMPLETE nor PENDING.
        */
       if (
         pg?.analysis_status !== "available" &&
@@ -1558,24 +1630,25 @@
         return;
       }
 
-      const desiredText =
-        pg.analysis_status === "available"
-          ? "POSTGAME ANALYSIS AVAILABLE"
-          : "POSTGAME ANALYSIS PENDING";
-
       const pill =
-        existingPostgamePurplePill(row);
+        ensurePurplePostgamePill(row);
 
       if (!pill) {
-        /*
-         * We intentionally do NOT create a fallback yellow/second pill.
-         * The existing renderer owns presentation of this status.
-         */
         return;
       }
 
+      const available =
+        pg.analysis_status === "available";
+
       pill.textContent =
-        desiredText;
+        available
+          ? "POSTGAME ANALYSIS AVAILABLE"
+          : "POSTGAME ANALYSIS PENDING";
+
+      pill.classList.toggle(
+        "pending",
+        !available
+      );
 
       pill.dataset.postgameStatus =
         pg.analysis_status;
