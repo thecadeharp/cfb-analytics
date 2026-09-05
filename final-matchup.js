@@ -9,8 +9,8 @@
   // 2) Read data/postgame_analytics.json.
   // 3) Render the exact canonical postgame metric package.
   // 4) Maintain exactly ONE projection-board postgame status pill:
-  //      AVAILABLE -> purple existing pill says POSTGAME ANALYSIS AVAILABLE
-  //      PENDING   -> same purple existing pill says POSTGAME ANALYSIS PENDING
+  //      AVAILABLE -> one purple pill says POSTGAME ANALYSIS COMPLETE
+  //      PENDING   -> one purple pill says POSTGAME ANALYSIS PENDING
   //    This file NEVER creates a second yellow postgame badge.
   // 5) Never call a game "pending" merely because the JSON fetch failed.
   // ==========================================================================
@@ -1626,6 +1626,7 @@
       const text = directText(node);
 
       if (
+        text === "POSTGAME ANALYSIS COMPLETE" ||
         text === "POSTGAME ANALYSIS AVAILABLE" ||
         text === "POSTGAME ANALYSIS PENDING"
       ) {
