@@ -590,6 +590,14 @@
     );
   }
 
+  function findPostgameByTeams(away, home) {
+    return matchupFind(
+      postgameGames,
+      away,
+      home
+    );
+  }
+
   function findPostgameForFinal(final) {
     if (!final) {
       return null;
@@ -607,11 +615,59 @@
       }
     }
 
-    return matchupFind(
-      postgameGames,
+    return findPostgameByTeams(
       final.away_team,
       final.home_team
     );
+  }
+
+  function matchupTitleTeams() {
+    const title = document.querySelector(
+      "#matchup-container .matchup-title"
+    );
+
+    const text = String(
+      title?.textContent || ""
+    )
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (!text) {
+      return null;
+    }
+
+    const parts = text.split(/\s+@\s+/);
+
+    if (parts.length !== 2) {
+      return null;
+    }
+
+    const away = parts[0].trim();
+    const home = parts[1].trim();
+
+    return away && home
+      ? { away, home }
+      : null;
+  }
+
+  function currentMatchupTeams() {
+    const fromTitle = matchupTitleTeams();
+
+    if (fromTitle) {
+      return fromTitle;
+    }
+
+    const card = currentScoreCard();
+    const nodes = scoreCardTeams(card);
+
+    if (!nodes) {
+      return null;
+    }
+
+    return {
+      away: nodes.awayName,
+      home: nodes.homeName
+    };
   }
 
   function readPregameProjection(nodes) {
@@ -1419,34 +1475,61 @@
     `;
   }
 
-  function renderPostgame(final) {
+  function renderPostgame(final = null) {
     const container =
       document.getElementById(
         "matchup-container"
       );
 
-    if (!container || !final) {
+    if (!container) {
       return;
     }
 
-    const postgame =
-      findPostgameForFinal(final);
+    const teams = currentMatchupTeams();
+
+    if (!teams) {
+      removePostgameSection();
+      return;
+    }
+
+    /*
+     * Resolve postgame state directly from the matchup currently displayed.
+     * This is intentionally independent of the results-ledger match used to
+     * convert the score card, so the board and matchup page use the SAME
+     * postgame record/status.
+     */
+    let postgame =
+      findPostgameByTeams(
+        teams.away,
+        teams.home
+      );
+
+    /*
+     * ID fallback when exact result context exists.
+     */
+    if (!postgame && final) {
+      postgame =
+        findPostgameForFinal(final);
+    }
 
     removePostgameSection();
 
     /*
-     * If the whole file has not loaded successfully, do not falsely render
-     * "pending." Just leave the section absent until a successful refresh.
+     * Failed whole-file load is NOT "pending."
      */
     if (!postgameDataLoaded) {
       return;
     }
 
     /*
-     * Only an explicit pending record is PENDING.
+     * Missing matchup record is also NOT "pending."
      */
+    if (!postgame) {
+      return;
+    }
+
     if (
-      postgame?.analysis_status
+      postgame.analysis_status
       === "pending"
     ) {
       container.insertAdjacentHTML(
@@ -1459,13 +1542,26 @@
     }
 
     if (
-      postgame?.analysis_status
+      postgame.analysis_status
       === "available"
     ) {
+      /*
+       * The full metric renderer only needs team names/scores from the final.
+       * If result matching ever failed, the postgame record itself contains
+       * those exact values, so use it as a safe display fallback.
+       */
+      const displayFinal =
+        final || {
+          away_team: postgame.away_team,
+          home_team: postgame.home_team,
+          away_points: postgame.away_points,
+          home_points: postgame.home_points
+        };
+
       container.insertAdjacentHTML(
         "beforeend",
         availablePostgameMarkup(
-          final,
+          displayFinal,
           postgame
         )
       );
@@ -1514,67 +1610,91 @@
       .toUpperCase();
   }
 
-  function existingPostgamePurplePill(row) {
-    return (
-      row.querySelector(".thi-postgame-status-purple") ||
-      Array.from(
-        row.querySelectorAll("*")
-      ).find(node => {
-        if (
-          node.classList?.contains(
-            "hammer-postgame-board-badge"
-          )
-        ) {
-          return false;
-        }
-
-        const own = directText(node);
-
-        return (
-          own === "POSTGAME ANALYSIS AVAILABLE" ||
-          own === "POSTGAME ANALYSIS PENDING"
-        );
-      }) ||
-      null
-    );
-  }
-
-  function ensurePurplePostgamePill(row) {
-    let pill = existingPostgamePurplePill(row);
-
-    if (pill) {
-      pill.classList.add("thi-postgame-status-purple");
-      return pill;
-    }
-
-    const meta =
-      row.querySelector(".hammer-game-status-meta") ||
-      row.querySelector(".matchup-cell");
-
-    if (!meta) {
-      return null;
-    }
-
-    pill = document.createElement("span");
-    pill.className = "thi-postgame-status-purple";
-    meta.appendChild(pill);
-
-    return pill;
-  }
-
-  function decorateBoardPostgameStatus() {
+  function removeAllPostgameStatusPills(row) {
     /*
-     * Remove every legacy duplicate from older postgame code.
-     * We then render exactly ONE purple postgame state.
+     * Remove every prior postgame-status implementation, regardless of class.
+     * We inspect the smallest text-bearing elements so unrelated row content
+     * is never removed.
      */
-    document
+    const candidates = Array.from(
+      row.querySelectorAll(
+        "span, div"
+      )
+    );
+
+    candidates.forEach(node => {
+      const text = directText(node);
+
+      if (
+        text === "POSTGAME ANALYSIS AVAILABLE" ||
+        text === "POSTGAME ANALYSIS PENDING"
+      ) {
+        node.remove();
+      }
+    });
+
+    row
       .querySelectorAll(
-        ".hammer-postgame-board-badge"
+        ".hammer-postgame-board-badge, .thi-postgame-status-purple"
       )
       .forEach(node =>
         node.remove()
       );
+  }
 
+  function addPurplePostgamePill(
+    row,
+    status
+  ) {
+    const meta =
+      row.querySelector(
+        ".hammer-game-status-meta"
+      ) ||
+      row.querySelector(
+        ".matchup-cell"
+      );
+
+    if (!meta) {
+      return;
+    }
+
+    const pill =
+      document.createElement(
+        "span"
+      );
+
+    const available =
+      status === "available";
+
+    pill.className =
+      "thi-postgame-status-purple" +
+      (available ? "" : " pending");
+
+    pill.dataset.postgameStatus =
+      status;
+
+    pill.textContent =
+      available
+        ? "POSTGAME ANALYSIS AVAILABLE"
+        : "POSTGAME ANALYSIS PENDING";
+
+    meta.appendChild(pill);
+  }
+
+  function rowIsFinal(row) {
+    return (
+      row.classList.contains(
+        "completed-row"
+      ) ||
+      row.classList.contains(
+        "hammer-final-untracked-row"
+      ) ||
+      row.dataset.hammerGameState
+        === "final"
+    );
+  }
+
+  function decorateBoardPostgameStatus() {
     const rows =
       document.querySelectorAll(
         "#projections-container .projection-table tbody tr.game-row"
@@ -1582,15 +1702,18 @@
 
     rows.forEach(row => {
       /*
-       * Remove duplicate custom purple pills if a mutation race ever produced one.
+       * Always clear old/duplicate presentation first.
        */
-      const existingCustom = Array.from(
-        row.querySelectorAll(".thi-postgame-status-purple")
+      removeAllPostgameStatusPills(
+        row
       );
 
-      existingCustom
-        .slice(1)
-        .forEach(node => node.remove());
+      if (
+        !postgameDataLoaded ||
+        !rowIsFinal(row)
+      ) {
+        return;
+      }
 
       const teams =
         boardRowTeams(row);
@@ -1599,30 +1722,16 @@
         return;
       }
 
-      const final =
-        findFinal(
+      /*
+       * Board status comes DIRECTLY from the same postgame record lookup used
+       * by the matchup page. No separate "complete" guess is allowed.
+       */
+      const pg =
+        findPostgameByTeams(
           teams.away,
           teams.home
         );
 
-      if (!final) {
-        return;
-      }
-
-      /*
-       * If postgame JSON itself has not loaded, do not invent a state.
-       */
-      if (!postgameDataLoaded) {
-        return;
-      }
-
-      const pg =
-        findPostgameForFinal(final);
-
-      /*
-       * Only an explicit backend state is surfaced.
-       * Missing record is neither COMPLETE nor PENDING.
-       */
       if (
         pg?.analysis_status !== "available" &&
         pg?.analysis_status !== "pending"
@@ -1630,28 +1739,10 @@
         return;
       }
 
-      const pill =
-        ensurePurplePostgamePill(row);
-
-      if (!pill) {
-        return;
-      }
-
-      const available =
-        pg.analysis_status === "available";
-
-      pill.textContent =
-        available
-          ? "POSTGAME ANALYSIS AVAILABLE"
-          : "POSTGAME ANALYSIS PENDING";
-
-      pill.classList.toggle(
-        "pending",
-        !available
+      addPurplePostgamePill(
+        row,
+        pg.analysis_status
       );
-
-      pill.dataset.postgameStatus =
-        pg.analysis_status;
     });
   }
 
@@ -1670,9 +1761,12 @@
       const final =
         applyFinalToCurrentMatchup();
 
-      if (final) {
-        renderPostgame(final);
-      }
+      /*
+       * Render from the displayed matchup regardless of whether the final-score
+       * ledger matched. The postgame record itself is authoritative for
+       * AVAILABLE vs PENDING.
+       */
+      renderPostgame(final);
 
       decorateBoardPostgameStatus();
 
