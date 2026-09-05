@@ -1,0 +1,74 @@
+name: Refresh THI Market Options - No CFBD
+
+on:
+  workflow_dispatch:
+    inputs:
+      lookahead_hours:
+        description: "Only refresh games starting within this many hours"
+        required: false
+        default: "48"
+      max_games:
+        description: "Maximum event-level alternate-spread requests this run"
+        required: false
+        default: "40"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-thi-market-options-no-cfbd
+  cancel-in-progress: false
+
+jobs:
+  refresh-market-options:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Refresh current projections without CFBD
+        env:
+          USE_CACHED_SCHEDULE: "1"
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: |
+          python scripts/build_projections.py
+
+      - name: Build market history + preferred-side alternate spreads
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          FETCH_ALT_LINES: "1"
+          ALT_LOOKAHEAD_HOURS: ${{ inputs.lookahead_hours }}
+          ALT_MAX_GAMES: ${{ inputs.max_games }}
+        run: |
+          python scripts/build_market_layer.py
+
+      - name: Commit THI market layer
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add data/odds.json
+          git add data/projections.json
+          git add data/market_history.json
+          git add data/alternate_spreads.json
+
+          if git diff --cached --quiet; then
+            echo "No THI market-layer changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Refresh THI market options"
+          git pull --rebase origin main
+          git push origin main
