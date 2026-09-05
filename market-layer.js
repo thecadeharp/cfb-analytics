@@ -143,16 +143,50 @@
     }) || null;
   }
 
-  function preferredSide(game) {
-    return game?.comparison?.preferred_side || null;
+  function canonicalSignal(value) {
+    const raw = String(value || "").toUpperCase().trim();
+    const aliases = {
+      "AGREE W/ MARKET": "ALIGNED",
+      "ALIGNED": "ALIGNED",
+      "LEAN": "SMALL EDGE",
+      "SLIGHT EDGE": "SMALL EDGE",
+      "SMALL EDGE": "SMALL EDGE",
+      "EDGE": "PLAY",
+      "PLAY": "PLAY",
+      "STRONG EDGE": "MATERIAL DISAGREEMENT",
+      "MATERIAL DISAGREEMENT": "MATERIAL DISAGREEMENT",
+      "OUTLIER": "OUTLIER",
+    };
+    return aliases[raw] || raw;
   }
 
   function signalName(game) {
-    return String(
+    return canonicalSignal(
       game?.comparison?.signal ??
       game?.comparison?.status ??
       ""
-    ).toUpperCase();
+    );
+  }
+
+  function isFcsFallback(game) {
+    return String(game?.model_type || "").toLowerCase() === "fcs_fallback";
+  }
+
+  function preferredSide(game) {
+    const explicit = game?.comparison?.preferred_side;
+    if (explicit) return explicit;
+
+    const home = game?.home?.team ?? game?.home_team;
+    const away = game?.away?.team ?? game?.away_team;
+    const model = modelHomeSpread(game);
+    const market = marketHomeSpread(game);
+
+    if (!home || !away || model === null || market === null) return null;
+
+    const delta = model - market;
+    if (Math.abs(delta) < 0.001) return null;
+
+    return delta < 0 ? home : away;
   }
 
   function gameId(game) {
@@ -605,7 +639,7 @@
           <div class="thi-market-head">
             <div>
               <div class="thi-market-kicker">Market movement</div>
-              <div class="thi-market-title">Open → Current → Close</div>
+              <div class="thi-market-title">First Captured → Current → Close</div>
             </div>
           </div>
           <div class="thi-market-empty">
@@ -615,8 +649,8 @@
       `;
     }
 
-    const open = sideSpread(
-      historyRow.open_home_spread,
+    const firstCaptured = sideSpread(
+      historyRow.first_captured_home_spread ?? historyRow.open_home_spread,
       preferred,
       home,
       away
@@ -634,22 +668,22 @@
       away
     );
 
-    const summary = movementSummary(open, current, model, close);
+    const summary = movementSummary(firstCaptured, current, model, close);
 
     return `
       <div class="thi-market-panel">
         <div class="thi-market-head">
           <div>
             <div class="thi-market-kicker">Market movement</div>
-            <div class="thi-market-title">${esc(preferred || "THI side")} line history</div>
+            <div class="thi-market-title">${esc(preferred || "Market")} line history</div>
           </div>
         </div>
 
         <div class="thi-movement-body">
           <div class="thi-movement-track">
             <div class="thi-move-point">
-              <div class="thi-move-label">Open</div>
-              <div class="thi-move-value">${esc(fmtSpread(open))}</div>
+              <div class="thi-move-label">First Captured</div>
+              <div class="thi-move-value">${esc(fmtSpread(firstCaptured))}</div>
             </div>
 
             <div class="thi-move-arrow">→</div>
@@ -724,23 +758,24 @@
         root.appendChild(why);
       }
 
-      const directionalSignals = new Set([
-        "SMALL EDGE",
-        "PLAY",
-        "MATERIAL DISAGREEMENT",
-        "OUTLIER",
-      ]);
+      const historyRow = findDataRow(
+        historyGames,
+        game,
+        teams.away,
+        teams.home
+      );
 
-      if (preferred && directionalSignals.has(signal)) {
+      // Market tools are context, not betting instructions. Every regular
+      // FBS-v-FBS matchup with a valid market can receive them regardless of
+      // ALIGNED / SMALL EDGE / PLAY / MATERIAL DISAGREEMENT / OUTLIER.
+      // FCS fallback remains intentionally excluded.
+      const regularMarketGame =
+        !isFcsFallback(game) &&
+        marketHomeSpread(game) !== null;
+
+      if (regularMarketGame && preferred) {
         const altRow = findDataRow(
           altGames,
-          game,
-          teams.away,
-          teams.home
-        );
-
-        const historyRow = findDataRow(
-          historyGames,
           game,
           teams.away,
           teams.home
@@ -765,26 +800,20 @@
           );
 
         root.appendChild(grid);
-      } else {
-        const historyRow = findDataRow(
-          historyGames,
+      } else if (regularMarketGame && historyRow) {
+        // Exact THI/market alignment can have no honest preferred side.
+        // Keep the factual market-history panel, but do not manufacture an
+        // alternate-spread direction.
+        const grid = document.createElement("div");
+        grid.className = "thi-market-grid";
+        grid.innerHTML = movementPanel(
           game,
-          teams.away,
-          teams.home
+          historyRow,
+          preferred,
+          teams.home,
+          teams.away
         );
-
-        if (historyRow && preferred) {
-          const grid = document.createElement("div");
-          grid.className = "thi-market-grid";
-          grid.innerHTML = movementPanel(
-            game,
-            historyRow,
-            preferred,
-            teams.home,
-            teams.away
-          );
-          root.appendChild(grid);
-        }
+        root.appendChild(grid);
       }
 
       analysisGrid.insertAdjacentElement("afterend", root);
