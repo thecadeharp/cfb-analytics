@@ -40,6 +40,12 @@ jobs:
         run: |
           python scripts/build_projections.py
 
+      - name: Update THI market movement history
+        env:
+          FETCH_ALT_LINES: "0"
+        run: |
+          python scripts/build_market_layer.py
+
       - name: Capture near-kickoff closing lines
         run: |
           python scripts/capture_closing_lines.py
@@ -48,13 +54,14 @@ jobs:
         run: |
           python scripts/build_clv_report.py
 
-      - name: Commit closing-line captures and CLV report
+      - name: Commit closing-line captures, market history and CLV report
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add data/odds.json
           git add data/projections.json
+          git add data/market_history.json
 
           if [ -f data/snapshots/latest_closing_capture.json ]; then
             git add data/snapshots/latest_closing_capture.json
@@ -73,10 +80,10 @@ jobs:
           fi
 
           if git diff --cached --quiet; then
-            echo "No closing-line or CLV report changes to commit."
+            echo "No closing-line, market-history or CLV changes to commit."
             exit 0
           fi
 
-          git commit -m "Capture closing lines and refresh CLV report"
+          git commit -m "Capture closing lines, market movement and refresh CLV report"
           git pull --rebase origin main
           git push origin main
