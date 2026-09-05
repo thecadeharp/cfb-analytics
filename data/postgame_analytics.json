@@ -2,10 +2,10 @@
   "meta": {
     "season": 2026,
     "schema_version": "2.0-canonical-postgame",
-    "generated_at": "2026-09-05T20:18:07.489637+00:00",
-    "final_games": 40,
-    "available": 27,
-    "pending": 13,
+    "generated_at": "2026-09-05T20:32:44.118335+00:00",
+    "final_games": 42,
+    "available": 41,
+    "pending": 1,
     "source": "SportsDataverse/cfbfastR PBP",
     "source_url": "https://raw.githubusercontent.com/sportsdataverse/cfbfastR-cfb-data/main/cfb/pbp/parquet/play_by_play_2026.parquet",
     "model_a_touched": false,
@@ -251,7 +251,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.307065+00:00"
+      "generated_at": "2026-09-05T20:32:43.839098+00:00"
     },
     {
       "game_id": "6604126",
@@ -485,10 +485,11 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.313762+00:00"
+      "generated_at": "2026-09-05T20:32:43.845632+00:00"
     },
     {
       "game_id": "6640530",
+      "pbp_game_id": "401858432",
       "matchup_key": "ballstate@ohiostate",
       "season": 2026,
       "week": 1,
@@ -496,12 +497,229 @@
       "home_team": "Ohio State",
       "away_points": 3,
       "home_points": 56,
-      "analysis_status": "pending",
-      "analysis_level": "scoreboard_only",
-      "source": "Final score available; PBP pending",
-      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
+      "analysis_status": "available",
+      "analysis_level": "full",
+      "source": "SportsDataverse/cfbfastR PBP",
+      "source_note": "Retrospective only. Does not alter the frozen pregame THI projection.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-05T20:18:07.313809+00:00"
+      "headline": {
+        "postgame_win_expectancy": {
+          "away_pct": 1.6,
+          "home_pct": 98.4,
+          "winner": "Ohio State"
+        },
+        "adjusted_final_score": {
+          "away": 3.9,
+          "home": 34.9
+        },
+        "reality_check": {
+          "label": "CLOSER THAN IT LOOKED",
+          "note": "The final margin was larger than the underlying efficiency and possession profile suggested.",
+          "actual_margin": 53,
+          "adjusted_margin": 31.0
+        }
+      },
+      "away_metrics": {
+        "overall": {
+          "plays": 38,
+          "epa_total": -12.52,
+          "epa_per_play": -0.329,
+          "success_rate": 23.7
+        },
+        "passing": {
+          "plays": 25,
+          "epa_total": -9.05,
+          "epa_per_play": -0.362,
+          "success_rate": 20.0
+        },
+        "rushing": {
+          "plays": 13,
+          "epa_total": -3.47,
+          "epa_per_play": -0.267,
+          "success_rate": 30.8
+        },
+        "standard_downs": {
+          "plays": 20,
+          "epa_total": -4.46,
+          "epa_per_play": -0.223,
+          "success_rate": 25.0
+        },
+        "passing_downs": {
+          "plays": 18,
+          "epa_total": -8.06,
+          "epa_per_play": -0.448,
+          "success_rate": 22.2
+        },
+        "early_downs": {
+          "plays": 28,
+          "epa_total": -8.47,
+          "epa_per_play": -0.303,
+          "success_rate": 21.4
+        },
+        "third_fourth_downs": {
+          "plays": 10,
+          "epa_total": -4.05,
+          "epa_per_play": -0.405,
+          "success_rate": 30.0
+        },
+        "fourth_down": {
+          "plays": 0,
+          "epa_total": null,
+          "epa_per_play": null,
+          "success_rate": null,
+          "attempts": 0
+        },
+        "explosiveness": {
+          "explosive_plays": 2,
+          "explosive_play_rate": 5.3,
+          "explosive_epa_dependency": 37.9
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 1,
+          "sack_rate_allowed": 4.0,
+          "stuffs_allowed": 2,
+          "stuff_rate_allowed": 15.4,
+          "tfl_allowed": 2,
+          "tfl_rate_allowed": 5.3
+        },
+        "drives": {
+          "drives": 12,
+          "points_per_drive": 0.0,
+          "yards_per_drive": 16.8,
+          "drive_success_rate": 8.3,
+          "three_and_outs": 5,
+          "three_and_out_rate": 41.7
+        },
+        "scoring_opportunities": {
+          "opportunities": 2,
+          "points_per_opportunity": 0.0
+        },
+        "red_zone": {
+          "trips": 0,
+          "points_per_trip": null,
+          "overperformance_points_per_trip": null,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 71.0
+        },
+        "turnovers": {
+          "turnovers": 1,
+          "turnover_epa_impact": -2.84
+        },
+        "epa_volatility": 1.042
+      },
+      "home_metrics": {
+        "overall": {
+          "plays": 46,
+          "epa_total": 22.79,
+          "epa_per_play": 0.495,
+          "success_rate": 63.0
+        },
+        "passing": {
+          "plays": 27,
+          "epa_total": 19.86,
+          "epa_per_play": 0.736,
+          "success_rate": 74.1
+        },
+        "rushing": {
+          "plays": 19,
+          "epa_total": 2.92,
+          "epa_per_play": 0.154,
+          "success_rate": 47.4
+        },
+        "standard_downs": {
+          "plays": 38,
+          "epa_total": 21.93,
+          "epa_per_play": 0.577,
+          "success_rate": 68.4
+        },
+        "passing_downs": {
+          "plays": 8,
+          "epa_total": 0.85,
+          "epa_per_play": 0.107,
+          "success_rate": 37.5
+        },
+        "early_downs": {
+          "plays": 39,
+          "epa_total": 15.68,
+          "epa_per_play": 0.402,
+          "success_rate": 64.1
+        },
+        "third_fourth_downs": {
+          "plays": 7,
+          "epa_total": 7.1,
+          "epa_per_play": 1.015,
+          "success_rate": 57.1
+        },
+        "fourth_down": {
+          "plays": 1,
+          "epa_total": 3.72,
+          "epa_per_play": 3.722,
+          "success_rate": 100.0,
+          "attempts": 1
+        },
+        "explosiveness": {
+          "explosive_plays": 13,
+          "explosive_play_rate": 28.3,
+          "explosive_epa_dependency": 58.0
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 2,
+          "sack_rate_allowed": 7.4,
+          "stuffs_allowed": 4,
+          "stuff_rate_allowed": 21.1,
+          "tfl_allowed": 6,
+          "tfl_rate_allowed": 13.0
+        },
+        "drives": {
+          "drives": 12,
+          "points_per_drive": 4.08,
+          "yards_per_drive": 52.9,
+          "drive_success_rate": 66.7,
+          "three_and_outs": 2,
+          "three_and_out_rate": 16.7
+        },
+        "scoring_opportunities": {
+          "opportunities": 5,
+          "points_per_opportunity": 7.0
+        },
+        "red_zone": {
+          "trips": 5,
+          "points_per_trip": 7.0,
+          "overperformance_points_per_trip": 2.3,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 76.6
+        },
+        "turnovers": {
+          "turnovers": 1,
+          "turnover_epa_impact": -3.37
+        },
+        "epa_volatility": 1.344
+      },
+      "game_context": {
+        "total_scrimmage_plays": 137,
+        "competitive_scrimmage_plays": 84,
+        "garbage_time_plays": 53,
+        "garbage_time_share": 38.7
+      },
+      "definitions": {
+        "standard_down": "1st down; 2nd-and-7 or less; 3rd/4th-and-4 or less.",
+        "passing_down": "2nd-and-8+; 3rd/4th-and-5+.",
+        "drive_success_rate": "Share of offensive drives with positive cumulative EPA.",
+        "three_and_out_rate": "Share of drives with three or fewer qualifying scrimmage plays, no first down, and no points.",
+        "scoring_opportunity": "Drive that reaches the opponent 40-yard line or closer.",
+        "red_zone_trip": "Drive that reaches the opponent 20-yard line or closer.",
+        "red_zone_overperformance": "Points per red-zone trip minus the temporary beta baseline of 4.7. This baseline will be historically calibrated.",
+        "sack_rate_allowed": "Sacks divided by qualifying pass plays/dropbacks.",
+        "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
+        "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
+        "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
+        "epa_volatility": "Population standard deviation of competitive-play EPA."
+      },
+      "generated_at": "2026-09-05T20:32:43.852769+00:00"
     },
     {
       "game_id": "6603624",
@@ -735,7 +953,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.319940+00:00"
+      "generated_at": "2026-09-05T20:32:43.858777+00:00"
     },
     {
       "game_id": "6603857",
@@ -751,10 +969,11 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-05T20:18:07.319984+00:00"
+      "generated_at": "2026-09-05T20:32:43.858824+00:00"
     },
     {
       "game_id": "6604281",
+      "pbp_game_id": "401856780",
       "matchup_key": "coastalcarolina@westvirginia",
       "season": 2026,
       "week": 1,
@@ -762,12 +981,229 @@
       "home_team": "West Virginia",
       "away_points": 24,
       "home_points": 31,
-      "analysis_status": "pending",
-      "analysis_level": "scoreboard_only",
-      "source": "Final score available; PBP pending",
-      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
+      "analysis_status": "available",
+      "analysis_level": "full",
+      "source": "SportsDataverse/cfbfastR PBP",
+      "source_note": "Retrospective only. Does not alter the frozen pregame THI projection.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-05T20:18:07.320023+00:00"
+      "headline": {
+        "postgame_win_expectancy": {
+          "away_pct": 47.0,
+          "home_pct": 53.0,
+          "winner": "West Virginia"
+        },
+        "adjusted_final_score": {
+          "away": 24.9,
+          "home": 25.8
+        },
+        "reality_check": {
+          "label": "CLOSER THAN IT LOOKED",
+          "note": "The final margin was larger than the underlying efficiency and possession profile suggested.",
+          "actual_margin": 7,
+          "adjusted_margin": 0.9
+        }
+      },
+      "away_metrics": {
+        "overall": {
+          "plays": 69,
+          "epa_total": 9.27,
+          "epa_per_play": 0.134,
+          "success_rate": 43.5
+        },
+        "passing": {
+          "plays": 47,
+          "epa_total": 10.24,
+          "epa_per_play": 0.218,
+          "success_rate": 44.7
+        },
+        "rushing": {
+          "plays": 22,
+          "epa_total": -0.97,
+          "epa_per_play": -0.044,
+          "success_rate": 40.9
+        },
+        "standard_downs": {
+          "plays": 43,
+          "epa_total": -6.45,
+          "epa_per_play": -0.15,
+          "success_rate": 41.9
+        },
+        "passing_downs": {
+          "plays": 26,
+          "epa_total": 15.72,
+          "epa_per_play": 0.604,
+          "success_rate": 46.2
+        },
+        "early_downs": {
+          "plays": 56,
+          "epa_total": 14.82,
+          "epa_per_play": 0.265,
+          "success_rate": 46.4
+        },
+        "third_fourth_downs": {
+          "plays": 13,
+          "epa_total": -5.55,
+          "epa_per_play": -0.427,
+          "success_rate": 30.8
+        },
+        "fourth_down": {
+          "plays": 2,
+          "epa_total": -0.55,
+          "epa_per_play": -0.274,
+          "success_rate": 50.0,
+          "attempts": 2
+        },
+        "explosiveness": {
+          "explosive_plays": 14,
+          "explosive_play_rate": 20.3,
+          "explosive_epa_dependency": 67.2
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 5,
+          "sack_rate_allowed": 10.6,
+          "stuffs_allowed": 6,
+          "stuff_rate_allowed": 27.3,
+          "tfl_allowed": 9,
+          "tfl_rate_allowed": 13.0
+        },
+        "drives": {
+          "drives": 13,
+          "points_per_drive": 1.62,
+          "yards_per_drive": 37.3,
+          "drive_success_rate": 38.5,
+          "three_and_outs": 1,
+          "three_and_out_rate": 7.7
+        },
+        "scoring_opportunities": {
+          "opportunities": 5,
+          "points_per_opportunity": 4.2
+        },
+        "red_zone": {
+          "trips": 2,
+          "points_per_trip": 3.5,
+          "overperformance_points_per_trip": -1.2,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 75.2
+        },
+        "turnovers": {
+          "turnovers": 3,
+          "turnover_epa_impact": -9.61
+        },
+        "epa_volatility": 1.779
+      },
+      "home_metrics": {
+        "overall": {
+          "plays": 76,
+          "epa_total": 6.17,
+          "epa_per_play": 0.081,
+          "success_rate": 38.2
+        },
+        "passing": {
+          "plays": 15,
+          "epa_total": 6.66,
+          "epa_per_play": 0.444,
+          "success_rate": 46.7
+        },
+        "rushing": {
+          "plays": 61,
+          "epa_total": -0.49,
+          "epa_per_play": -0.008,
+          "success_rate": 36.1
+        },
+        "standard_downs": {
+          "plays": 54,
+          "epa_total": 8.18,
+          "epa_per_play": 0.151,
+          "success_rate": 42.6
+        },
+        "passing_downs": {
+          "plays": 22,
+          "epa_total": -2.01,
+          "epa_per_play": -0.091,
+          "success_rate": 27.3
+        },
+        "early_downs": {
+          "plays": 57,
+          "epa_total": 2.39,
+          "epa_per_play": 0.042,
+          "success_rate": 33.3
+        },
+        "third_fourth_downs": {
+          "plays": 19,
+          "epa_total": 3.78,
+          "epa_per_play": 0.199,
+          "success_rate": 52.6
+        },
+        "fourth_down": {
+          "plays": 1,
+          "epa_total": 1.52,
+          "epa_per_play": 1.522,
+          "success_rate": 100.0,
+          "attempts": 1
+        },
+        "explosiveness": {
+          "explosive_plays": 9,
+          "explosive_play_rate": 11.8,
+          "explosive_epa_dependency": 56.5
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 1,
+          "sack_rate_allowed": 6.7,
+          "stuffs_allowed": 9,
+          "stuff_rate_allowed": 14.8,
+          "tfl_allowed": 8,
+          "tfl_rate_allowed": 10.5
+        },
+        "drives": {
+          "drives": 14,
+          "points_per_drive": 2.0,
+          "yards_per_drive": 30.6,
+          "drive_success_rate": 28.6,
+          "three_and_outs": 6,
+          "three_and_out_rate": 42.9
+        },
+        "scoring_opportunities": {
+          "opportunities": 7,
+          "points_per_opportunity": 3.0
+        },
+        "red_zone": {
+          "trips": 5,
+          "points_per_trip": 4.2,
+          "overperformance_points_per_trip": -0.5,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 67.3
+        },
+        "turnovers": {
+          "turnovers": 2,
+          "turnover_epa_impact": -5.46
+        },
+        "epa_volatility": 1.322
+      },
+      "game_context": {
+        "total_scrimmage_plays": 145,
+        "competitive_scrimmage_plays": 145,
+        "garbage_time_plays": 0,
+        "garbage_time_share": 0.0
+      },
+      "definitions": {
+        "standard_down": "1st down; 2nd-and-7 or less; 3rd/4th-and-4 or less.",
+        "passing_down": "2nd-and-8+; 3rd/4th-and-5+.",
+        "drive_success_rate": "Share of offensive drives with positive cumulative EPA.",
+        "three_and_out_rate": "Share of drives with three or fewer qualifying scrimmage plays, no first down, and no points.",
+        "scoring_opportunity": "Drive that reaches the opponent 40-yard line or closer.",
+        "red_zone_trip": "Drive that reaches the opponent 20-yard line or closer.",
+        "red_zone_overperformance": "Points per red-zone trip minus the temporary beta baseline of 4.7. This baseline will be historically calibrated.",
+        "sack_rate_allowed": "Sacks divided by qualifying pass plays/dropbacks.",
+        "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
+        "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
+        "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
+        "epa_volatility": "Population standard deviation of competitive-play EPA."
+      },
+      "generated_at": "2026-09-05T20:32:43.867623+00:00"
     },
     {
       "game_id": "6640529",
@@ -1001,10 +1437,11 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.327523+00:00"
+      "generated_at": "2026-09-05T20:32:43.874989+00:00"
     },
     {
       "game_id": "6604046",
+      "pbp_game_id": "401864496",
       "matchup_key": "duquesne@airforce",
       "season": 2026,
       "week": 1,
@@ -1012,15 +1449,233 @@
       "home_team": "Air Force",
       "away_points": 0,
       "home_points": 34,
-      "analysis_status": "pending",
-      "analysis_level": "scoreboard_only",
-      "source": "Final score available; PBP pending",
-      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
+      "analysis_status": "available",
+      "analysis_level": "full",
+      "source": "SportsDataverse/cfbfastR PBP",
+      "source_note": "Retrospective only. Does not alter the frozen pregame THI projection.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-05T20:18:07.327572+00:00"
+      "headline": {
+        "postgame_win_expectancy": {
+          "away_pct": 1.7,
+          "home_pct": 98.3,
+          "winner": "Air Force"
+        },
+        "adjusted_final_score": {
+          "away": 0.2,
+          "home": 30.8
+        },
+        "reality_check": {
+          "label": "ABOUT RIGHT",
+          "note": "The scoreboard was broadly consistent with the underlying game quality.",
+          "actual_margin": 34,
+          "adjusted_margin": 30.6
+        }
+      },
+      "away_metrics": {
+        "overall": {
+          "plays": 37,
+          "epa_total": -13.56,
+          "epa_per_play": -0.366,
+          "success_rate": 32.4
+        },
+        "passing": {
+          "plays": 19,
+          "epa_total": -11.55,
+          "epa_per_play": -0.608,
+          "success_rate": 31.6
+        },
+        "rushing": {
+          "plays": 18,
+          "epa_total": -2.01,
+          "epa_per_play": -0.111,
+          "success_rate": 33.3
+        },
+        "standard_downs": {
+          "plays": 26,
+          "epa_total": -9.82,
+          "epa_per_play": -0.378,
+          "success_rate": 38.5
+        },
+        "passing_downs": {
+          "plays": 11,
+          "epa_total": -3.73,
+          "epa_per_play": -0.339,
+          "success_rate": 18.2
+        },
+        "early_downs": {
+          "plays": 27,
+          "epa_total": -7.44,
+          "epa_per_play": -0.276,
+          "success_rate": 33.3
+        },
+        "third_fourth_downs": {
+          "plays": 10,
+          "epa_total": -6.11,
+          "epa_per_play": -0.611,
+          "success_rate": 30.0
+        },
+        "fourth_down": {
+          "plays": 0,
+          "epa_total": null,
+          "epa_per_play": null,
+          "success_rate": null,
+          "attempts": 0
+        },
+        "explosiveness": {
+          "explosive_plays": 3,
+          "explosive_play_rate": 8.1,
+          "explosive_epa_dependency": 35.1
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 1,
+          "sack_rate_allowed": 5.3,
+          "stuffs_allowed": 3,
+          "stuff_rate_allowed": 16.7,
+          "tfl_allowed": 2,
+          "tfl_rate_allowed": 5.4
+        },
+        "drives": {
+          "drives": 8,
+          "points_per_drive": 0.0,
+          "yards_per_drive": 18.5,
+          "drive_success_rate": 0.0,
+          "three_and_outs": 2,
+          "three_and_out_rate": 25.0
+        },
+        "scoring_opportunities": {
+          "opportunities": 0,
+          "points_per_opportunity": null
+        },
+        "red_zone": {
+          "trips": 0,
+          "points_per_trip": null,
+          "overperformance_points_per_trip": null,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 76.0
+        },
+        "turnovers": {
+          "turnovers": 2,
+          "turnover_epa_impact": -4.27
+        },
+        "epa_volatility": 1.095
+      },
+      "home_metrics": {
+        "overall": {
+          "plays": 71,
+          "epa_total": 15.38,
+          "epa_per_play": 0.217,
+          "success_rate": 54.9
+        },
+        "passing": {
+          "plays": 8,
+          "epa_total": -5.21,
+          "epa_per_play": -0.651,
+          "success_rate": 25.0
+        },
+        "rushing": {
+          "plays": 63,
+          "epa_total": 20.59,
+          "epa_per_play": 0.327,
+          "success_rate": 58.7
+        },
+        "standard_downs": {
+          "plays": 56,
+          "epa_total": 15.6,
+          "epa_per_play": 0.278,
+          "success_rate": 57.1
+        },
+        "passing_downs": {
+          "plays": 15,
+          "epa_total": -0.21,
+          "epa_per_play": -0.014,
+          "success_rate": 46.7
+        },
+        "early_downs": {
+          "plays": 54,
+          "epa_total": 6.72,
+          "epa_per_play": 0.124,
+          "success_rate": 53.7
+        },
+        "third_fourth_downs": {
+          "plays": 17,
+          "epa_total": 8.67,
+          "epa_per_play": 0.51,
+          "success_rate": 58.8
+        },
+        "fourth_down": {
+          "plays": 2,
+          "epa_total": 4.14,
+          "epa_per_play": 2.07,
+          "success_rate": 100.0,
+          "attempts": 2
+        },
+        "explosiveness": {
+          "explosive_plays": 14,
+          "explosive_play_rate": 19.7,
+          "explosive_epa_dependency": 46.5
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 0,
+          "sack_rate_allowed": 0.0,
+          "stuffs_allowed": 4,
+          "stuff_rate_allowed": 6.3,
+          "tfl_allowed": 1,
+          "tfl_rate_allowed": 1.4
+        },
+        "drives": {
+          "drives": 9,
+          "points_per_drive": 3.89,
+          "yards_per_drive": 50.7,
+          "drive_success_rate": 66.7,
+          "three_and_outs": 3,
+          "three_and_out_rate": 33.3
+        },
+        "scoring_opportunities": {
+          "opportunities": 7,
+          "points_per_opportunity": 5.0
+        },
+        "red_zone": {
+          "trips": 5,
+          "points_per_trip": 5.6,
+          "overperformance_points_per_trip": 0.9,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 73.0
+        },
+        "turnovers": {
+          "turnovers": 0,
+          "turnover_epa_impact": 0
+        },
+        "epa_volatility": 0.875
+      },
+      "game_context": {
+        "total_scrimmage_plays": 124,
+        "competitive_scrimmage_plays": 108,
+        "garbage_time_plays": 16,
+        "garbage_time_share": 12.9
+      },
+      "definitions": {
+        "standard_down": "1st down; 2nd-and-7 or less; 3rd/4th-and-4 or less.",
+        "passing_down": "2nd-and-8+; 3rd/4th-and-5+.",
+        "drive_success_rate": "Share of offensive drives with positive cumulative EPA.",
+        "three_and_out_rate": "Share of drives with three or fewer qualifying scrimmage plays, no first down, and no points.",
+        "scoring_opportunity": "Drive that reaches the opponent 40-yard line or closer.",
+        "red_zone_trip": "Drive that reaches the opponent 20-yard line or closer.",
+        "red_zone_overperformance": "Points per red-zone trip minus the temporary beta baseline of 4.7. This baseline will be historically calibrated.",
+        "sack_rate_allowed": "Sacks divided by qualifying pass plays/dropbacks.",
+        "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
+        "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
+        "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
+        "epa_volatility": "Population standard deviation of competitive-play EPA."
+      },
+      "generated_at": "2026-09-05T20:32:43.881370+00:00"
     },
     {
       "game_id": "6604294",
+      "pbp_game_id": "401856634",
       "matchup_key": "eastcarolina@alabama",
       "season": 2026,
       "week": 1,
@@ -1028,12 +1683,229 @@
       "home_team": "Alabama",
       "away_points": 10,
       "home_points": 48,
-      "analysis_status": "pending",
-      "analysis_level": "scoreboard_only",
-      "source": "Final score available; PBP pending",
-      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
+      "analysis_status": "available",
+      "analysis_level": "full",
+      "source": "SportsDataverse/cfbfastR PBP",
+      "source_note": "Retrospective only. Does not alter the frozen pregame THI projection.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-05T20:18:07.327609+00:00"
+      "headline": {
+        "postgame_win_expectancy": {
+          "away_pct": 5.4,
+          "home_pct": 94.6,
+          "winner": "Alabama"
+        },
+        "adjusted_final_score": {
+          "away": 11.0,
+          "home": 32.5
+        },
+        "reality_check": {
+          "label": "CLOSER THAN IT LOOKED",
+          "note": "The final margin was larger than the underlying efficiency and possession profile suggested.",
+          "actual_margin": 38,
+          "adjusted_margin": 21.5
+        }
+      },
+      "away_metrics": {
+        "overall": {
+          "plays": 33,
+          "epa_total": -10.34,
+          "epa_per_play": -0.313,
+          "success_rate": 39.4
+        },
+        "passing": {
+          "plays": 18,
+          "epa_total": -3.3,
+          "epa_per_play": -0.184,
+          "success_rate": 38.9
+        },
+        "rushing": {
+          "plays": 15,
+          "epa_total": -7.03,
+          "epa_per_play": -0.469,
+          "success_rate": 40.0
+        },
+        "standard_downs": {
+          "plays": 21,
+          "epa_total": -2.63,
+          "epa_per_play": -0.125,
+          "success_rate": 42.9
+        },
+        "passing_downs": {
+          "plays": 12,
+          "epa_total": -7.71,
+          "epa_per_play": -0.642,
+          "success_rate": 33.3
+        },
+        "early_downs": {
+          "plays": 26,
+          "epa_total": -2.47,
+          "epa_per_play": -0.095,
+          "success_rate": 50.0
+        },
+        "third_fourth_downs": {
+          "plays": 7,
+          "epa_total": -7.87,
+          "epa_per_play": -1.124,
+          "success_rate": 0.0
+        },
+        "fourth_down": {
+          "plays": 0,
+          "epa_total": null,
+          "epa_per_play": null,
+          "success_rate": null,
+          "attempts": 0
+        },
+        "explosiveness": {
+          "explosive_plays": 3,
+          "explosive_play_rate": 9.1,
+          "explosive_epa_dependency": 59.7
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 2,
+          "sack_rate_allowed": 11.1,
+          "stuffs_allowed": 7,
+          "stuff_rate_allowed": 46.7,
+          "tfl_allowed": 6,
+          "tfl_rate_allowed": 18.2
+        },
+        "drives": {
+          "drives": 10,
+          "points_per_drive": 1.4,
+          "yards_per_drive": 18.9,
+          "drive_success_rate": 10.0,
+          "three_and_outs": 4,
+          "three_and_out_rate": 40.0
+        },
+        "scoring_opportunities": {
+          "opportunities": 2,
+          "points_per_opportunity": 3.5
+        },
+        "red_zone": {
+          "trips": 2,
+          "points_per_trip": 3.5,
+          "overperformance_points_per_trip": -1.2,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 72.3
+        },
+        "turnovers": {
+          "turnovers": 1,
+          "turnover_epa_impact": -6.35
+        },
+        "epa_volatility": 1.863
+      },
+      "home_metrics": {
+        "overall": {
+          "plays": 61,
+          "epa_total": 9.17,
+          "epa_per_play": 0.15,
+          "success_rate": 54.1
+        },
+        "passing": {
+          "plays": 27,
+          "epa_total": 5.1,
+          "epa_per_play": 0.189,
+          "success_rate": 44.4
+        },
+        "rushing": {
+          "plays": 34,
+          "epa_total": 4.07,
+          "epa_per_play": 0.12,
+          "success_rate": 61.8
+        },
+        "standard_downs": {
+          "plays": 43,
+          "epa_total": 3.4,
+          "epa_per_play": 0.079,
+          "success_rate": 53.5
+        },
+        "passing_downs": {
+          "plays": 18,
+          "epa_total": 5.77,
+          "epa_per_play": 0.321,
+          "success_rate": 55.6
+        },
+        "early_downs": {
+          "plays": 50,
+          "epa_total": -1.74,
+          "epa_per_play": -0.035,
+          "success_rate": 54.0
+        },
+        "third_fourth_downs": {
+          "plays": 11,
+          "epa_total": 10.91,
+          "epa_per_play": 0.992,
+          "success_rate": 54.5
+        },
+        "fourth_down": {
+          "plays": 1,
+          "epa_total": 3.24,
+          "epa_per_play": 3.236,
+          "success_rate": 100.0,
+          "attempts": 1
+        },
+        "explosiveness": {
+          "explosive_plays": 11,
+          "explosive_play_rate": 18.0,
+          "explosive_epa_dependency": 62.7
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 1,
+          "sack_rate_allowed": 3.7,
+          "stuffs_allowed": 4,
+          "stuff_rate_allowed": 11.8,
+          "tfl_allowed": 6,
+          "tfl_rate_allowed": 9.8
+        },
+        "drives": {
+          "drives": 11,
+          "points_per_drive": 3.18,
+          "yards_per_drive": 43.3,
+          "drive_success_rate": 63.6,
+          "three_and_outs": 2,
+          "three_and_out_rate": 18.2
+        },
+        "scoring_opportunities": {
+          "opportunities": 7,
+          "points_per_opportunity": 5.0
+        },
+        "red_zone": {
+          "trips": 6,
+          "points_per_trip": 5.83,
+          "overperformance_points_per_trip": 1.13,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 71.6
+        },
+        "turnovers": {
+          "turnovers": 1,
+          "turnover_epa_impact": -6.2
+        },
+        "epa_volatility": 1.561
+      },
+      "game_context": {
+        "total_scrimmage_plays": 121,
+        "competitive_scrimmage_plays": 94,
+        "garbage_time_plays": 27,
+        "garbage_time_share": 22.3
+      },
+      "definitions": {
+        "standard_down": "1st down; 2nd-and-7 or less; 3rd/4th-and-4 or less.",
+        "passing_down": "2nd-and-8+; 3rd/4th-and-5+.",
+        "drive_success_rate": "Share of offensive drives with positive cumulative EPA.",
+        "three_and_out_rate": "Share of drives with three or fewer qualifying scrimmage plays, no first down, and no points.",
+        "scoring_opportunity": "Drive that reaches the opponent 40-yard line or closer.",
+        "red_zone_trip": "Drive that reaches the opponent 20-yard line or closer.",
+        "red_zone_overperformance": "Points per red-zone trip minus the temporary beta baseline of 4.7. This baseline will be historically calibrated.",
+        "sack_rate_allowed": "Sacks divided by qualifying pass plays/dropbacks.",
+        "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
+        "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
+        "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
+        "epa_volatility": "Population standard deviation of competitive-play EPA."
+      },
+      "generated_at": "2026-09-05T20:32:43.887669+00:00"
     },
     {
       "game_id": "6603681",
@@ -1267,7 +2139,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.333852+00:00"
+      "generated_at": "2026-09-05T20:32:43.893721+00:00"
     },
     {
       "game_id": "6640444",
@@ -1501,7 +2373,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.339527+00:00"
+      "generated_at": "2026-09-05T20:32:43.899308+00:00"
     },
     {
       "game_id": "6604106",
@@ -1735,7 +2607,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.344296+00:00"
+      "generated_at": "2026-09-05T20:32:43.903944+00:00"
     },
     {
       "game_id": "6604087",
@@ -1969,7 +2841,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.350824+00:00"
+      "generated_at": "2026-09-05T20:32:43.910456+00:00"
     },
     {
       "game_id": "6640460",
@@ -2203,7 +3075,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.357484+00:00"
+      "generated_at": "2026-09-05T20:32:43.916908+00:00"
     },
     {
       "game_id": "6604127",
@@ -2437,10 +3309,11 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.366260+00:00"
+      "generated_at": "2026-09-05T20:32:43.925277+00:00"
     },
     {
       "game_id": "6603924",
+      "pbp_game_id": "401856665",
       "matchup_key": "kentstate@southcarolina",
       "season": 2026,
       "week": 1,
@@ -2448,15 +3321,233 @@
       "home_team": "South Carolina",
       "away_points": 0,
       "home_points": 57,
-      "analysis_status": "pending",
-      "analysis_level": "scoreboard_only",
-      "source": "Final score available; PBP pending",
-      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
+      "analysis_status": "available",
+      "analysis_level": "full",
+      "source": "SportsDataverse/cfbfastR PBP",
+      "source_note": "Retrospective only. Does not alter the frozen pregame THI projection.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-05T20:18:07.366309+00:00"
+      "headline": {
+        "postgame_win_expectancy": {
+          "away_pct": 0.8,
+          "home_pct": 99.2,
+          "winner": "South Carolina"
+        },
+        "adjusted_final_score": {
+          "away": 2.2,
+          "home": 38.4
+        },
+        "reality_check": {
+          "label": "CLOSER THAN IT LOOKED",
+          "note": "The final margin was larger than the underlying efficiency and possession profile suggested.",
+          "actual_margin": 57,
+          "adjusted_margin": 36.2
+        }
+      },
+      "away_metrics": {
+        "overall": {
+          "plays": 39,
+          "epa_total": -5.82,
+          "epa_per_play": -0.149,
+          "success_rate": 33.3
+        },
+        "passing": {
+          "plays": 22,
+          "epa_total": -4.7,
+          "epa_per_play": -0.214,
+          "success_rate": 27.3
+        },
+        "rushing": {
+          "plays": 17,
+          "epa_total": -1.12,
+          "epa_per_play": -0.066,
+          "success_rate": 41.2
+        },
+        "standard_downs": {
+          "plays": 22,
+          "epa_total": -2.61,
+          "epa_per_play": -0.119,
+          "success_rate": 40.9
+        },
+        "passing_downs": {
+          "plays": 17,
+          "epa_total": -3.21,
+          "epa_per_play": -0.189,
+          "success_rate": 23.5
+        },
+        "early_downs": {
+          "plays": 27,
+          "epa_total": -5.9,
+          "epa_per_play": -0.218,
+          "success_rate": 29.6
+        },
+        "third_fourth_downs": {
+          "plays": 12,
+          "epa_total": 0.08,
+          "epa_per_play": 0.006,
+          "success_rate": 41.7
+        },
+        "fourth_down": {
+          "plays": 0,
+          "epa_total": null,
+          "epa_per_play": null,
+          "success_rate": null,
+          "attempts": 0
+        },
+        "explosiveness": {
+          "explosive_plays": 2,
+          "explosive_play_rate": 5.1,
+          "explosive_epa_dependency": 25.4
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 1,
+          "sack_rate_allowed": 4.5,
+          "stuffs_allowed": 3,
+          "stuff_rate_allowed": 17.6,
+          "tfl_allowed": 4,
+          "tfl_rate_allowed": 10.3
+        },
+        "drives": {
+          "drives": 10,
+          "points_per_drive": 0.0,
+          "yards_per_drive": 19.3,
+          "drive_success_rate": 10.0,
+          "three_and_outs": 1,
+          "three_and_out_rate": 10.0
+        },
+        "scoring_opportunities": {
+          "opportunities": 0,
+          "points_per_opportunity": null
+        },
+        "red_zone": {
+          "trips": 0,
+          "points_per_trip": null,
+          "overperformance_points_per_trip": null,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 76.2
+        },
+        "turnovers": {
+          "turnovers": 1,
+          "turnover_epa_impact": -2.83
+        },
+        "epa_volatility": 0.899
+      },
+      "home_metrics": {
+        "overall": {
+          "plays": 54,
+          "epa_total": 32.4,
+          "epa_per_play": 0.6,
+          "success_rate": 68.5
+        },
+        "passing": {
+          "plays": 30,
+          "epa_total": 20.35,
+          "epa_per_play": 0.678,
+          "success_rate": 73.3
+        },
+        "rushing": {
+          "plays": 24,
+          "epa_total": 12.05,
+          "epa_per_play": 0.502,
+          "success_rate": 62.5
+        },
+        "standard_downs": {
+          "plays": 43,
+          "epa_total": 19.19,
+          "epa_per_play": 0.446,
+          "success_rate": 67.4
+        },
+        "passing_downs": {
+          "plays": 11,
+          "epa_total": 13.2,
+          "epa_per_play": 1.2,
+          "success_rate": 72.7
+        },
+        "early_downs": {
+          "plays": 46,
+          "epa_total": 18.65,
+          "epa_per_play": 0.405,
+          "success_rate": 65.2
+        },
+        "third_fourth_downs": {
+          "plays": 8,
+          "epa_total": 13.75,
+          "epa_per_play": 1.719,
+          "success_rate": 87.5
+        },
+        "fourth_down": {
+          "plays": 0,
+          "epa_total": null,
+          "epa_per_play": null,
+          "success_rate": null,
+          "attempts": 0
+        },
+        "explosiveness": {
+          "explosive_plays": 14,
+          "explosive_play_rate": 25.9,
+          "explosive_epa_dependency": 69.9
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 2,
+          "sack_rate_allowed": 6.7,
+          "stuffs_allowed": 1,
+          "stuff_rate_allowed": 4.2,
+          "tfl_allowed": 3,
+          "tfl_rate_allowed": 5.6
+        },
+        "drives": {
+          "drives": 10,
+          "points_per_drive": 5.7,
+          "yards_per_drive": 66.2,
+          "drive_success_rate": 80.0,
+          "three_and_outs": 1,
+          "three_and_out_rate": 10.0
+        },
+        "scoring_opportunities": {
+          "opportunities": 7,
+          "points_per_opportunity": 7.14
+        },
+        "red_zone": {
+          "trips": 5,
+          "points_per_trip": 7.2,
+          "overperformance_points_per_trip": 2.5,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 80.1
+        },
+        "turnovers": {
+          "turnovers": 2,
+          "turnover_epa_impact": 1.32
+        },
+        "epa_volatility": 1.271
+      },
+      "game_context": {
+        "total_scrimmage_plays": 123,
+        "competitive_scrimmage_plays": 93,
+        "garbage_time_plays": 30,
+        "garbage_time_share": 24.4
+      },
+      "definitions": {
+        "standard_down": "1st down; 2nd-and-7 or less; 3rd/4th-and-4 or less.",
+        "passing_down": "2nd-and-8+; 3rd/4th-and-5+.",
+        "drive_success_rate": "Share of offensive drives with positive cumulative EPA.",
+        "three_and_out_rate": "Share of drives with three or fewer qualifying scrimmage plays, no first down, and no points.",
+        "scoring_opportunity": "Drive that reaches the opponent 40-yard line or closer.",
+        "red_zone_trip": "Drive that reaches the opponent 20-yard line or closer.",
+        "red_zone_overperformance": "Points per red-zone trip minus the temporary beta baseline of 4.7. This baseline will be historically calibrated.",
+        "sack_rate_allowed": "Sacks divided by qualifying pass plays/dropbacks.",
+        "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
+        "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
+        "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
+        "epa_volatility": "Population standard deviation of competitive-play EPA."
+      },
+      "generated_at": "2026-09-05T20:32:43.932018+00:00"
     },
     {
       "game_id": "6640532",
+      "pbp_game_id": "401861962",
       "matchup_key": "lafayette@connecticut",
       "season": 2026,
       "week": 1,
@@ -2464,15 +3555,233 @@
       "home_team": "UConn",
       "away_points": 7,
       "home_points": 56,
-      "analysis_status": "pending",
-      "analysis_level": "scoreboard_only",
-      "source": "Final score available; PBP pending",
-      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
+      "analysis_status": "available",
+      "analysis_level": "full",
+      "source": "SportsDataverse/cfbfastR PBP",
+      "source_note": "Retrospective only. Does not alter the frozen pregame THI projection.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-05T20:18:07.366343+00:00"
+      "headline": {
+        "postgame_win_expectancy": {
+          "away_pct": 1.3,
+          "home_pct": 98.7,
+          "winner": "UConn"
+        },
+        "adjusted_final_score": {
+          "away": 10.8,
+          "home": 43.5
+        },
+        "reality_check": {
+          "label": "CLOSER THAN IT LOOKED",
+          "note": "The final margin was larger than the underlying efficiency and possession profile suggested.",
+          "actual_margin": 49,
+          "adjusted_margin": 32.7
+        }
+      },
+      "away_metrics": {
+        "overall": {
+          "plays": 33,
+          "epa_total": -15.15,
+          "epa_per_play": -0.459,
+          "success_rate": 15.2
+        },
+        "passing": {
+          "plays": 25,
+          "epa_total": -10.97,
+          "epa_per_play": -0.439,
+          "success_rate": 16.0
+        },
+        "rushing": {
+          "plays": 8,
+          "epa_total": -4.17,
+          "epa_per_play": -0.522,
+          "success_rate": 12.5
+        },
+        "standard_downs": {
+          "plays": 13,
+          "epa_total": -4.99,
+          "epa_per_play": -0.384,
+          "success_rate": 23.1
+        },
+        "passing_downs": {
+          "plays": 20,
+          "epa_total": -10.16,
+          "epa_per_play": -0.508,
+          "success_rate": 10.0
+        },
+        "early_downs": {
+          "plays": 23,
+          "epa_total": -12.15,
+          "epa_per_play": -0.528,
+          "success_rate": 13.0
+        },
+        "third_fourth_downs": {
+          "plays": 10,
+          "epa_total": -3.0,
+          "epa_per_play": -0.3,
+          "success_rate": 20.0
+        },
+        "fourth_down": {
+          "plays": 0,
+          "epa_total": null,
+          "epa_per_play": null,
+          "success_rate": null,
+          "attempts": 0
+        },
+        "explosiveness": {
+          "explosive_plays": 4,
+          "explosive_play_rate": 12.1,
+          "explosive_epa_dependency": 87.2
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 2,
+          "sack_rate_allowed": 8.0,
+          "stuffs_allowed": 4,
+          "stuff_rate_allowed": 50.0,
+          "tfl_allowed": 4,
+          "tfl_rate_allowed": 12.1
+        },
+        "drives": {
+          "drives": 13,
+          "points_per_drive": 0.54,
+          "yards_per_drive": 21.2,
+          "drive_success_rate": 7.7,
+          "three_and_outs": 5,
+          "three_and_out_rate": 38.5
+        },
+        "scoring_opportunities": {
+          "opportunities": 3,
+          "points_per_opportunity": 2.33
+        },
+        "red_zone": {
+          "trips": 2,
+          "points_per_trip": 3.5,
+          "overperformance_points_per_trip": -1.2,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 78.5
+        },
+        "turnovers": {
+          "turnovers": 0,
+          "turnover_epa_impact": 0
+        },
+        "epa_volatility": 0.767
+      },
+      "home_metrics": {
+        "overall": {
+          "plays": 60,
+          "epa_total": 20.03,
+          "epa_per_play": 0.334,
+          "success_rate": 51.7
+        },
+        "passing": {
+          "plays": 30,
+          "epa_total": 12.17,
+          "epa_per_play": 0.406,
+          "success_rate": 56.7
+        },
+        "rushing": {
+          "plays": 30,
+          "epa_total": 7.86,
+          "epa_per_play": 0.262,
+          "success_rate": 46.7
+        },
+        "standard_downs": {
+          "plays": 42,
+          "epa_total": 13.22,
+          "epa_per_play": 0.315,
+          "success_rate": 54.8
+        },
+        "passing_downs": {
+          "plays": 18,
+          "epa_total": 6.81,
+          "epa_per_play": 0.378,
+          "success_rate": 44.4
+        },
+        "early_downs": {
+          "plays": 48,
+          "epa_total": 8.63,
+          "epa_per_play": 0.18,
+          "success_rate": 47.9
+        },
+        "third_fourth_downs": {
+          "plays": 12,
+          "epa_total": 11.4,
+          "epa_per_play": 0.95,
+          "success_rate": 66.7
+        },
+        "fourth_down": {
+          "plays": 2,
+          "epa_total": 7.02,
+          "epa_per_play": 3.51,
+          "success_rate": 100.0,
+          "attempts": 2
+        },
+        "explosiveness": {
+          "explosive_plays": 18,
+          "explosive_play_rate": 30.0,
+          "explosive_epa_dependency": 69.5
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 0,
+          "sack_rate_allowed": 0.0,
+          "stuffs_allowed": 5,
+          "stuff_rate_allowed": 16.7,
+          "tfl_allowed": 4,
+          "tfl_rate_allowed": 6.7
+        },
+        "drives": {
+          "drives": 14,
+          "points_per_drive": 4.5,
+          "yards_per_drive": 53.0,
+          "drive_success_rate": 64.3,
+          "three_and_outs": 1,
+          "three_and_out_rate": 7.1
+        },
+        "scoring_opportunities": {
+          "opportunities": 8,
+          "points_per_opportunity": 5.25
+        },
+        "red_zone": {
+          "trips": 5,
+          "points_per_trip": 7.0,
+          "overperformance_points_per_trip": 2.3,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 67.4
+        },
+        "turnovers": {
+          "turnovers": 3,
+          "turnover_epa_impact": -4.01
+        },
+        "epa_volatility": 1.341
+      },
+      "game_context": {
+        "total_scrimmage_plays": 154,
+        "competitive_scrimmage_plays": 93,
+        "garbage_time_plays": 61,
+        "garbage_time_share": 39.6
+      },
+      "definitions": {
+        "standard_down": "1st down; 2nd-and-7 or less; 3rd/4th-and-4 or less.",
+        "passing_down": "2nd-and-8+; 3rd/4th-and-5+.",
+        "drive_success_rate": "Share of offensive drives with positive cumulative EPA.",
+        "three_and_out_rate": "Share of drives with three or fewer qualifying scrimmage plays, no first down, and no points.",
+        "scoring_opportunity": "Drive that reaches the opponent 40-yard line or closer.",
+        "red_zone_trip": "Drive that reaches the opponent 20-yard line or closer.",
+        "red_zone_overperformance": "Points per red-zone trip minus the temporary beta baseline of 4.7. This baseline will be historically calibrated.",
+        "sack_rate_allowed": "Sacks divided by qualifying pass plays/dropbacks.",
+        "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
+        "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
+        "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
+        "epa_volatility": "Population standard deviation of competitive-play EPA."
+      },
+      "generated_at": "2026-09-05T20:32:43.939722+00:00"
     },
     {
       "game_id": "6603933",
+      "pbp_game_id": "401869960",
       "matchup_key": "liberty@jamesmadison",
       "season": 2026,
       "week": 1,
@@ -2480,12 +3789,229 @@
       "home_team": "James Madison",
       "away_points": 13,
       "home_points": 20,
-      "analysis_status": "pending",
-      "analysis_level": "scoreboard_only",
-      "source": "Final score available; PBP pending",
-      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
+      "analysis_status": "available",
+      "analysis_level": "full",
+      "source": "SportsDataverse/cfbfastR PBP",
+      "source_note": "Retrospective only. Does not alter the frozen pregame THI projection.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-05T20:18:07.366381+00:00"
+      "headline": {
+        "postgame_win_expectancy": {
+          "away_pct": 51.6,
+          "home_pct": 48.4,
+          "winner": "Liberty"
+        },
+        "adjusted_final_score": {
+          "away": 18.8,
+          "home": 18.3
+        },
+        "reality_check": {
+          "label": "MISLEADING FINAL",
+          "note": "The underlying play profile favored the opposite team from the final scoreboard.",
+          "actual_margin": 7,
+          "adjusted_margin": -0.5
+        }
+      },
+      "away_metrics": {
+        "overall": {
+          "plays": 70,
+          "epa_total": 1.35,
+          "epa_per_play": 0.019,
+          "success_rate": 44.3
+        },
+        "passing": {
+          "plays": 33,
+          "epa_total": 6.88,
+          "epa_per_play": 0.209,
+          "success_rate": 54.5
+        },
+        "rushing": {
+          "plays": 37,
+          "epa_total": -5.54,
+          "epa_per_play": -0.15,
+          "success_rate": 35.1
+        },
+        "standard_downs": {
+          "plays": 47,
+          "epa_total": -1.4,
+          "epa_per_play": -0.03,
+          "success_rate": 40.4
+        },
+        "passing_downs": {
+          "plays": 23,
+          "epa_total": 2.74,
+          "epa_per_play": 0.119,
+          "success_rate": 52.2
+        },
+        "early_downs": {
+          "plays": 51,
+          "epa_total": 5.06,
+          "epa_per_play": 0.099,
+          "success_rate": 45.1
+        },
+        "third_fourth_downs": {
+          "plays": 19,
+          "epa_total": -3.71,
+          "epa_per_play": -0.195,
+          "success_rate": 42.1
+        },
+        "fourth_down": {
+          "plays": 3,
+          "epa_total": -4.8,
+          "epa_per_play": -1.599,
+          "success_rate": 33.3,
+          "attempts": 3
+        },
+        "explosiveness": {
+          "explosive_plays": 10,
+          "explosive_play_rate": 14.3,
+          "explosive_epa_dependency": 52.9
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 2,
+          "sack_rate_allowed": 6.1,
+          "stuffs_allowed": 5,
+          "stuff_rate_allowed": 13.5,
+          "tfl_allowed": 5,
+          "tfl_rate_allowed": 7.1
+        },
+        "drives": {
+          "drives": 9,
+          "points_per_drive": 1.56,
+          "yards_per_drive": 41.4,
+          "drive_success_rate": 44.4,
+          "three_and_outs": 2,
+          "three_and_out_rate": 22.2
+        },
+        "scoring_opportunities": {
+          "opportunities": 5,
+          "points_per_opportunity": 2.8
+        },
+        "red_zone": {
+          "trips": 2,
+          "points_per_trip": 0.0,
+          "overperformance_points_per_trip": -4.7,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 72.2
+        },
+        "turnovers": {
+          "turnovers": 2,
+          "turnover_epa_impact": -1.61
+        },
+        "epa_volatility": 1.353
+      },
+      "home_metrics": {
+        "overall": {
+          "plays": 53,
+          "epa_total": 6.75,
+          "epa_per_play": 0.127,
+          "success_rate": 39.6
+        },
+        "passing": {
+          "plays": 20,
+          "epa_total": 6.11,
+          "epa_per_play": 0.306,
+          "success_rate": 45.0
+        },
+        "rushing": {
+          "plays": 33,
+          "epa_total": 0.63,
+          "epa_per_play": 0.019,
+          "success_rate": 36.4
+        },
+        "standard_downs": {
+          "plays": 40,
+          "epa_total": 3.5,
+          "epa_per_play": 0.087,
+          "success_rate": 40.0
+        },
+        "passing_downs": {
+          "plays": 13,
+          "epa_total": 3.25,
+          "epa_per_play": 0.25,
+          "success_rate": 38.5
+        },
+        "early_downs": {
+          "plays": 43,
+          "epa_total": 5.79,
+          "epa_per_play": 0.135,
+          "success_rate": 39.5
+        },
+        "third_fourth_downs": {
+          "plays": 10,
+          "epa_total": 0.95,
+          "epa_per_play": 0.095,
+          "success_rate": 40.0
+        },
+        "fourth_down": {
+          "plays": 0,
+          "epa_total": null,
+          "epa_per_play": null,
+          "success_rate": null,
+          "attempts": 0
+        },
+        "explosiveness": {
+          "explosive_plays": 8,
+          "explosive_play_rate": 15.1,
+          "explosive_epa_dependency": 44.0
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 0,
+          "sack_rate_allowed": 0.0,
+          "stuffs_allowed": 7,
+          "stuff_rate_allowed": 21.2,
+          "tfl_allowed": 4,
+          "tfl_rate_allowed": 7.5
+        },
+        "drives": {
+          "drives": 9,
+          "points_per_drive": 1.56,
+          "yards_per_drive": 38.0,
+          "drive_success_rate": 33.3,
+          "three_and_outs": 3,
+          "three_and_out_rate": 33.3
+        },
+        "scoring_opportunities": {
+          "opportunities": 5,
+          "points_per_opportunity": 2.8
+        },
+        "red_zone": {
+          "trips": 4,
+          "points_per_trip": 3.5,
+          "overperformance_points_per_trip": -1.2,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 72.9
+        },
+        "turnovers": {
+          "turnovers": 0,
+          "turnover_epa_impact": 0
+        },
+        "epa_volatility": 1.171
+      },
+      "game_context": {
+        "total_scrimmage_plays": 123,
+        "competitive_scrimmage_plays": 123,
+        "garbage_time_plays": 0,
+        "garbage_time_share": 0.0
+      },
+      "definitions": {
+        "standard_down": "1st down; 2nd-and-7 or less; 3rd/4th-and-4 or less.",
+        "passing_down": "2nd-and-8+; 3rd/4th-and-5+.",
+        "drive_success_rate": "Share of offensive drives with positive cumulative EPA.",
+        "three_and_out_rate": "Share of drives with three or fewer qualifying scrimmage plays, no first down, and no points.",
+        "scoring_opportunity": "Drive that reaches the opponent 40-yard line or closer.",
+        "red_zone_trip": "Drive that reaches the opponent 20-yard line or closer.",
+        "red_zone_overperformance": "Points per red-zone trip minus the temporary beta baseline of 4.7. This baseline will be historically calibrated.",
+        "sack_rate_allowed": "Sacks divided by qualifying pass plays/dropbacks.",
+        "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
+        "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
+        "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
+        "epa_volatility": "Population standard deviation of competitive-play EPA."
+      },
+      "generated_at": "2026-09-05T20:32:43.946660+00:00"
     },
     {
       "game_id": "6604056",
@@ -2719,7 +4245,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.373660+00:00"
+      "generated_at": "2026-09-05T20:32:43.953940+00:00"
     },
     {
       "game_id": "6603866",
@@ -2953,7 +4479,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.380985+00:00"
+      "generated_at": "2026-09-05T20:32:43.961150+00:00"
     },
     {
       "game_id": "6603713",
@@ -3187,7 +4713,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.388653+00:00"
+      "generated_at": "2026-09-05T20:32:43.968773+00:00"
     },
     {
       "game_id": "6604072",
@@ -3421,7 +4947,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.395677+00:00"
+      "generated_at": "2026-09-05T20:32:43.975629+00:00"
     },
     {
       "game_id": "6604107",
@@ -3655,7 +5181,241 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.402492+00:00"
+      "generated_at": "2026-09-05T20:32:43.982413+00:00"
+    },
+    {
+      "game_id": "6640531",
+      "pbp_game_id": "401858207",
+      "matchup_key": "miamioh@pittsburgh",
+      "season": 2026,
+      "week": 1,
+      "away_team": "Miami (OH)",
+      "home_team": "Pittsburgh",
+      "away_points": 14,
+      "home_points": 59,
+      "analysis_status": "available",
+      "analysis_level": "full",
+      "source": "SportsDataverse/cfbfastR PBP",
+      "source_note": "Retrospective only. Does not alter the frozen pregame THI projection.",
+      "calibration_status": "BETA \u2014 historical calibration pending",
+      "headline": {
+        "postgame_win_expectancy": {
+          "away_pct": 2.9,
+          "home_pct": 97.1,
+          "winner": "Pittsburgh"
+        },
+        "adjusted_final_score": {
+          "away": 11.6,
+          "home": 37.9
+        },
+        "reality_check": {
+          "label": "CLOSER THAN IT LOOKED",
+          "note": "The final margin was larger than the underlying efficiency and possession profile suggested.",
+          "actual_margin": 45,
+          "adjusted_margin": 26.3
+        }
+      },
+      "away_metrics": {
+        "overall": {
+          "plays": 42,
+          "epa_total": 0.78,
+          "epa_per_play": 0.019,
+          "success_rate": 26.2
+        },
+        "passing": {
+          "plays": 32,
+          "epa_total": 5.06,
+          "epa_per_play": 0.158,
+          "success_rate": 31.2
+        },
+        "rushing": {
+          "plays": 10,
+          "epa_total": -4.28,
+          "epa_per_play": -0.428,
+          "success_rate": 10.0
+        },
+        "standard_downs": {
+          "plays": 21,
+          "epa_total": 2.29,
+          "epa_per_play": 0.109,
+          "success_rate": 23.8
+        },
+        "passing_downs": {
+          "plays": 21,
+          "epa_total": -1.51,
+          "epa_per_play": -0.072,
+          "success_rate": 28.6
+        },
+        "early_downs": {
+          "plays": 31,
+          "epa_total": -0.21,
+          "epa_per_play": -0.007,
+          "success_rate": 25.8
+        },
+        "third_fourth_downs": {
+          "plays": 11,
+          "epa_total": 0.99,
+          "epa_per_play": 0.09,
+          "success_rate": 27.3
+        },
+        "fourth_down": {
+          "plays": 1,
+          "epa_total": 4.29,
+          "epa_per_play": 4.285,
+          "success_rate": 100.0,
+          "attempts": 1
+        },
+        "explosiveness": {
+          "explosive_plays": 7,
+          "explosive_play_rate": 16.7,
+          "explosive_epa_dependency": 76.6
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 2,
+          "sack_rate_allowed": 6.2,
+          "stuffs_allowed": 1,
+          "stuff_rate_allowed": 10.0,
+          "tfl_allowed": 3,
+          "tfl_rate_allowed": 7.1
+        },
+        "drives": {
+          "drives": 11,
+          "points_per_drive": 1.27,
+          "yards_per_drive": 24.4,
+          "drive_success_rate": 27.3,
+          "three_and_outs": 5,
+          "three_and_out_rate": 45.5
+        },
+        "scoring_opportunities": {
+          "opportunities": 1,
+          "points_per_opportunity": 7.0
+        },
+        "red_zone": {
+          "trips": 1,
+          "points_per_trip": 7.0,
+          "overperformance_points_per_trip": 2.3,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 73.9
+        },
+        "turnovers": {
+          "turnovers": 1,
+          "turnover_epa_impact": -1.49
+        },
+        "epa_volatility": 1.749
+      },
+      "home_metrics": {
+        "overall": {
+          "plays": 58,
+          "epa_total": 28.52,
+          "epa_per_play": 0.492,
+          "success_rate": 55.2
+        },
+        "passing": {
+          "plays": 37,
+          "epa_total": 26.17,
+          "epa_per_play": 0.707,
+          "success_rate": 67.6
+        },
+        "rushing": {
+          "plays": 21,
+          "epa_total": 2.36,
+          "epa_per_play": 0.112,
+          "success_rate": 33.3
+        },
+        "standard_downs": {
+          "plays": 41,
+          "epa_total": 13.34,
+          "epa_per_play": 0.325,
+          "success_rate": 56.1
+        },
+        "passing_downs": {
+          "plays": 17,
+          "epa_total": 15.18,
+          "epa_per_play": 0.893,
+          "success_rate": 52.9
+        },
+        "early_downs": {
+          "plays": 48,
+          "epa_total": 12.7,
+          "epa_per_play": 0.264,
+          "success_rate": 52.1
+        },
+        "third_fourth_downs": {
+          "plays": 10,
+          "epa_total": 15.83,
+          "epa_per_play": 1.583,
+          "success_rate": 70.0
+        },
+        "fourth_down": {
+          "plays": 0,
+          "epa_total": null,
+          "epa_per_play": null,
+          "success_rate": null,
+          "attempts": 0
+        },
+        "explosiveness": {
+          "explosive_plays": 11,
+          "explosive_play_rate": 19.0,
+          "explosive_epa_dependency": 65.6
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 1,
+          "sack_rate_allowed": 2.7,
+          "stuffs_allowed": 3,
+          "stuff_rate_allowed": 14.3,
+          "tfl_allowed": 1,
+          "tfl_rate_allowed": 1.7
+        },
+        "drives": {
+          "drives": 11,
+          "points_per_drive": 5.36,
+          "yards_per_drive": 62.2,
+          "drive_success_rate": 81.8,
+          "three_and_outs": 1,
+          "three_and_out_rate": 9.1
+        },
+        "scoring_opportunities": {
+          "opportunities": 7,
+          "points_per_opportunity": 6.43
+        },
+        "red_zone": {
+          "trips": 3,
+          "points_per_trip": 4.67,
+          "overperformance_points_per_trip": -0.03,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 70.4
+        },
+        "turnovers": {
+          "turnovers": 1,
+          "turnover_epa_impact": -0.87
+        },
+        "epa_volatility": 1.332
+      },
+      "game_context": {
+        "total_scrimmage_plays": 129,
+        "competitive_scrimmage_plays": 100,
+        "garbage_time_plays": 29,
+        "garbage_time_share": 22.5
+      },
+      "definitions": {
+        "standard_down": "1st down; 2nd-and-7 or less; 3rd/4th-and-4 or less.",
+        "passing_down": "2nd-and-8+; 3rd/4th-and-5+.",
+        "drive_success_rate": "Share of offensive drives with positive cumulative EPA.",
+        "three_and_out_rate": "Share of drives with three or fewer qualifying scrimmage plays, no first down, and no points.",
+        "scoring_opportunity": "Drive that reaches the opponent 40-yard line or closer.",
+        "red_zone_trip": "Drive that reaches the opponent 20-yard line or closer.",
+        "red_zone_overperformance": "Points per red-zone trip minus the temporary beta baseline of 4.7. This baseline will be historically calibrated.",
+        "sack_rate_allowed": "Sacks divided by qualifying pass plays/dropbacks.",
+        "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
+        "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
+        "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
+        "epa_volatility": "Population standard deviation of competitive-play EPA."
+      },
+      "generated_at": "2026-09-05T20:32:43.989264+00:00"
     },
     {
       "game_id": "6603992",
@@ -3889,10 +5649,11 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.409348+00:00"
+      "generated_at": "2026-09-05T20:32:43.996111+00:00"
     },
     {
       "game_id": "6640364",
+      "pbp_game_id": "401858208",
       "matchup_key": "newhampshire@syracuse",
       "season": 2026,
       "week": 1,
@@ -3900,12 +5661,229 @@
       "home_team": "Syracuse",
       "away_points": 3,
       "home_points": 66,
-      "analysis_status": "pending",
-      "analysis_level": "scoreboard_only",
-      "source": "Final score available; PBP pending",
-      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
+      "analysis_status": "available",
+      "analysis_level": "full",
+      "source": "SportsDataverse/cfbfastR PBP",
+      "source_note": "Retrospective only. Does not alter the frozen pregame THI projection.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-05T20:18:07.409391+00:00"
+      "headline": {
+        "postgame_win_expectancy": {
+          "away_pct": 0.4,
+          "home_pct": 99.6,
+          "winner": "Syracuse"
+        },
+        "adjusted_final_score": {
+          "away": 8.2,
+          "home": 50.2
+        },
+        "reality_check": {
+          "label": "CLOSER THAN IT LOOKED",
+          "note": "The final margin was larger than the underlying efficiency and possession profile suggested.",
+          "actual_margin": 63,
+          "adjusted_margin": 42.0
+        }
+      },
+      "away_metrics": {
+        "overall": {
+          "plays": 34,
+          "epa_total": -12.41,
+          "epa_per_play": -0.365,
+          "success_rate": 35.3
+        },
+        "passing": {
+          "plays": 22,
+          "epa_total": -7.76,
+          "epa_per_play": -0.353,
+          "success_rate": 31.8
+        },
+        "rushing": {
+          "plays": 12,
+          "epa_total": -4.65,
+          "epa_per_play": -0.387,
+          "success_rate": 41.7
+        },
+        "standard_downs": {
+          "plays": 19,
+          "epa_total": -6.86,
+          "epa_per_play": -0.361,
+          "success_rate": 31.6
+        },
+        "passing_downs": {
+          "plays": 15,
+          "epa_total": -5.55,
+          "epa_per_play": -0.37,
+          "success_rate": 40.0
+        },
+        "early_downs": {
+          "plays": 25,
+          "epa_total": -10.78,
+          "epa_per_play": -0.431,
+          "success_rate": 32.0
+        },
+        "third_fourth_downs": {
+          "plays": 9,
+          "epa_total": -1.63,
+          "epa_per_play": -0.181,
+          "success_rate": 44.4
+        },
+        "fourth_down": {
+          "plays": 0,
+          "epa_total": null,
+          "epa_per_play": null,
+          "success_rate": null,
+          "attempts": 0
+        },
+        "explosiveness": {
+          "explosive_plays": 2,
+          "explosive_play_rate": 5.9,
+          "explosive_epa_dependency": 20.2
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 3,
+          "sack_rate_allowed": 13.6,
+          "stuffs_allowed": 4,
+          "stuff_rate_allowed": 33.3,
+          "tfl_allowed": 8,
+          "tfl_rate_allowed": 23.5
+        },
+        "drives": {
+          "drives": 13,
+          "points_per_drive": 0.54,
+          "yards_per_drive": 14.8,
+          "drive_success_rate": 23.1,
+          "three_and_outs": 4,
+          "three_and_out_rate": 30.8
+        },
+        "scoring_opportunities": {
+          "opportunities": 2,
+          "points_per_opportunity": 0.0
+        },
+        "red_zone": {
+          "trips": 0,
+          "points_per_trip": null,
+          "overperformance_points_per_trip": null,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 79.1
+        },
+        "turnovers": {
+          "turnovers": 4,
+          "turnover_epa_impact": -16.1
+        },
+        "epa_volatility": 1.205
+      },
+      "home_metrics": {
+        "overall": {
+          "plays": 47,
+          "epa_total": 24.8,
+          "epa_per_play": 0.528,
+          "success_rate": 63.8
+        },
+        "passing": {
+          "plays": 25,
+          "epa_total": 11.34,
+          "epa_per_play": 0.454,
+          "success_rate": 60.0
+        },
+        "rushing": {
+          "plays": 22,
+          "epa_total": 13.46,
+          "epa_per_play": 0.612,
+          "success_rate": 68.2
+        },
+        "standard_downs": {
+          "plays": 35,
+          "epa_total": 15.89,
+          "epa_per_play": 0.454,
+          "success_rate": 65.7
+        },
+        "passing_downs": {
+          "plays": 12,
+          "epa_total": 8.91,
+          "epa_per_play": 0.743,
+          "success_rate": 58.3
+        },
+        "early_downs": {
+          "plays": 42,
+          "epa_total": 17.27,
+          "epa_per_play": 0.411,
+          "success_rate": 61.9
+        },
+        "third_fourth_downs": {
+          "plays": 5,
+          "epa_total": 7.53,
+          "epa_per_play": 1.506,
+          "success_rate": 80.0
+        },
+        "fourth_down": {
+          "plays": 0,
+          "epa_total": null,
+          "epa_per_play": null,
+          "success_rate": null,
+          "attempts": 0
+        },
+        "explosiveness": {
+          "explosive_plays": 14,
+          "explosive_play_rate": 29.8,
+          "explosive_epa_dependency": 66.6
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 2,
+          "sack_rate_allowed": 8.0,
+          "stuffs_allowed": 2,
+          "stuff_rate_allowed": 9.1,
+          "tfl_allowed": 4,
+          "tfl_rate_allowed": 8.5
+        },
+        "drives": {
+          "drives": 13,
+          "points_per_drive": 4.15,
+          "yards_per_drive": 42.1,
+          "drive_success_rate": 69.2,
+          "three_and_outs": 2,
+          "three_and_out_rate": 15.4
+        },
+        "scoring_opportunities": {
+          "opportunities": 11,
+          "points_per_opportunity": 4.91
+        },
+        "red_zone": {
+          "trips": 9,
+          "points_per_trip": 5.22,
+          "overperformance_points_per_trip": 0.52,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 53.5
+        },
+        "turnovers": {
+          "turnovers": 0,
+          "turnover_epa_impact": 0
+        },
+        "epa_volatility": 1.256
+      },
+      "game_context": {
+        "total_scrimmage_plays": 141,
+        "competitive_scrimmage_plays": 81,
+        "garbage_time_plays": 60,
+        "garbage_time_share": 42.6
+      },
+      "definitions": {
+        "standard_down": "1st down; 2nd-and-7 or less; 3rd/4th-and-4 or less.",
+        "passing_down": "2nd-and-8+; 3rd/4th-and-5+.",
+        "drive_success_rate": "Share of offensive drives with positive cumulative EPA.",
+        "three_and_out_rate": "Share of drives with three or fewer qualifying scrimmage plays, no first down, and no points.",
+        "scoring_opportunity": "Drive that reaches the opponent 40-yard line or closer.",
+        "red_zone_trip": "Drive that reaches the opponent 20-yard line or closer.",
+        "red_zone_overperformance": "Points per red-zone trip minus the temporary beta baseline of 4.7. This baseline will be historically calibrated.",
+        "sack_rate_allowed": "Sacks divided by qualifying pass plays/dropbacks.",
+        "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
+        "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
+        "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
+        "epa_volatility": "Population standard deviation of competitive-play EPA."
+      },
+      "generated_at": "2026-09-05T20:32:44.003020+00:00"
     },
     {
       "game_id": "6603961",
@@ -4139,7 +6117,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.415497+00:00"
+      "generated_at": "2026-09-05T20:32:44.009027+00:00"
     },
     {
       "game_id": "6604316",
@@ -4373,7 +6351,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.422741+00:00"
+      "generated_at": "2026-09-05T20:32:44.016135+00:00"
     },
     {
       "game_id": "6604001",
@@ -4607,10 +6585,11 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.430133+00:00"
+      "generated_at": "2026-09-05T20:32:44.023428+00:00"
     },
     {
       "game_id": "6603946",
+      "pbp_game_id": "401858425",
       "matchup_key": "northtexas@indiana",
       "season": 2026,
       "week": 1,
@@ -4618,15 +6597,233 @@
       "home_team": "Indiana",
       "away_points": 16,
       "home_points": 52,
-      "analysis_status": "pending",
-      "analysis_level": "scoreboard_only",
-      "source": "Final score available; PBP pending",
-      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
+      "analysis_status": "available",
+      "analysis_level": "full",
+      "source": "SportsDataverse/cfbfastR PBP",
+      "source_note": "Retrospective only. Does not alter the frozen pregame THI projection.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-05T20:18:07.430176+00:00"
+      "headline": {
+        "postgame_win_expectancy": {
+          "away_pct": 11.4,
+          "home_pct": 88.6,
+          "winner": "Indiana"
+        },
+        "adjusted_final_score": {
+          "away": 18.3,
+          "home": 33.7
+        },
+        "reality_check": {
+          "label": "CLOSER THAN IT LOOKED",
+          "note": "The final margin was larger than the underlying efficiency and possession profile suggested.",
+          "actual_margin": 36,
+          "adjusted_margin": 15.4
+        }
+      },
+      "away_metrics": {
+        "overall": {
+          "plays": 62,
+          "epa_total": 9.0,
+          "epa_per_play": 0.145,
+          "success_rate": 43.5
+        },
+        "passing": {
+          "plays": 30,
+          "epa_total": 8.48,
+          "epa_per_play": 0.283,
+          "success_rate": 50.0
+        },
+        "rushing": {
+          "plays": 32,
+          "epa_total": 0.52,
+          "epa_per_play": 0.016,
+          "success_rate": 37.5
+        },
+        "standard_downs": {
+          "plays": 38,
+          "epa_total": 3.71,
+          "epa_per_play": 0.098,
+          "success_rate": 47.4
+        },
+        "passing_downs": {
+          "plays": 24,
+          "epa_total": 5.28,
+          "epa_per_play": 0.22,
+          "success_rate": 37.5
+        },
+        "early_downs": {
+          "plays": 47,
+          "epa_total": 3.44,
+          "epa_per_play": 0.073,
+          "success_rate": 42.6
+        },
+        "third_fourth_downs": {
+          "plays": 15,
+          "epa_total": 5.56,
+          "epa_per_play": 0.37,
+          "success_rate": 46.7
+        },
+        "fourth_down": {
+          "plays": 2,
+          "epa_total": -0.13,
+          "epa_per_play": -0.063,
+          "success_rate": 50.0,
+          "attempts": 2
+        },
+        "explosiveness": {
+          "explosive_plays": 10,
+          "explosive_play_rate": 16.1,
+          "explosive_epa_dependency": 51.2
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 1,
+          "sack_rate_allowed": 3.3,
+          "stuffs_allowed": 3,
+          "stuff_rate_allowed": 9.4,
+          "tfl_allowed": 5,
+          "tfl_rate_allowed": 8.1
+        },
+        "drives": {
+          "drives": 9,
+          "points_per_drive": 0.78,
+          "yards_per_drive": 48.9,
+          "drive_success_rate": 44.4,
+          "three_and_outs": 2,
+          "three_and_out_rate": 22.2
+        },
+        "scoring_opportunities": {
+          "opportunities": 5,
+          "points_per_opportunity": 1.4
+        },
+        "red_zone": {
+          "trips": 2,
+          "points_per_trip": 3.5,
+          "overperformance_points_per_trip": -1.2,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 75.0
+        },
+        "turnovers": {
+          "turnovers": 1,
+          "turnover_epa_impact": -2.32
+        },
+        "epa_volatility": 1.473
+      },
+      "home_metrics": {
+        "overall": {
+          "plays": 46,
+          "epa_total": 20.19,
+          "epa_per_play": 0.439,
+          "success_rate": 54.3
+        },
+        "passing": {
+          "plays": 16,
+          "epa_total": 22.24,
+          "epa_per_play": 1.39,
+          "success_rate": 81.2
+        },
+        "rushing": {
+          "plays": 30,
+          "epa_total": -2.05,
+          "epa_per_play": -0.068,
+          "success_rate": 40.0
+        },
+        "standard_downs": {
+          "plays": 32,
+          "epa_total": 6.68,
+          "epa_per_play": 0.209,
+          "success_rate": 53.1
+        },
+        "passing_downs": {
+          "plays": 14,
+          "epa_total": 13.5,
+          "epa_per_play": 0.964,
+          "success_rate": 57.1
+        },
+        "early_downs": {
+          "plays": 36,
+          "epa_total": 8.13,
+          "epa_per_play": 0.226,
+          "success_rate": 50.0
+        },
+        "third_fourth_downs": {
+          "plays": 10,
+          "epa_total": 12.05,
+          "epa_per_play": 1.205,
+          "success_rate": 70.0
+        },
+        "fourth_down": {
+          "plays": 2,
+          "epa_total": 3.3,
+          "epa_per_play": 1.65,
+          "success_rate": 100.0,
+          "attempts": 2
+        },
+        "explosiveness": {
+          "explosive_plays": 9,
+          "explosive_play_rate": 19.6,
+          "explosive_epa_dependency": 56.3
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 1,
+          "sack_rate_allowed": 6.2,
+          "stuffs_allowed": 4,
+          "stuff_rate_allowed": 13.3,
+          "tfl_allowed": 2,
+          "tfl_rate_allowed": 4.3
+        },
+        "drives": {
+          "drives": 9,
+          "points_per_drive": 5.44,
+          "yards_per_drive": 43.3,
+          "drive_success_rate": 77.8,
+          "three_and_outs": 1,
+          "three_and_out_rate": 11.1
+        },
+        "scoring_opportunities": {
+          "opportunities": 6,
+          "points_per_opportunity": 5.83
+        },
+        "red_zone": {
+          "trips": 4,
+          "points_per_trip": 7.0,
+          "overperformance_points_per_trip": 2.3,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 53.8
+        },
+        "turnovers": {
+          "turnovers": 0,
+          "turnover_epa_impact": 0
+        },
+        "epa_volatility": 1.22
+      },
+      "game_context": {
+        "total_scrimmage_plays": 118,
+        "competitive_scrimmage_plays": 108,
+        "garbage_time_plays": 10,
+        "garbage_time_share": 8.5
+      },
+      "definitions": {
+        "standard_down": "1st down; 2nd-and-7 or less; 3rd/4th-and-4 or less.",
+        "passing_down": "2nd-and-8+; 3rd/4th-and-5+.",
+        "drive_success_rate": "Share of offensive drives with positive cumulative EPA.",
+        "three_and_out_rate": "Share of drives with three or fewer qualifying scrimmage plays, no first down, and no points.",
+        "scoring_opportunity": "Drive that reaches the opponent 40-yard line or closer.",
+        "red_zone_trip": "Drive that reaches the opponent 20-yard line or closer.",
+        "red_zone_overperformance": "Points per red-zone trip minus the temporary beta baseline of 4.7. This baseline will be historically calibrated.",
+        "sack_rate_allowed": "Sacks divided by qualifying pass plays/dropbacks.",
+        "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
+        "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
+        "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
+        "epa_volatility": "Population standard deviation of competitive-play EPA."
+      },
+      "generated_at": "2026-09-05T20:32:44.029856+00:00"
     },
     {
       "game_id": "6604332",
+      "pbp_game_id": "401858430",
       "matchup_key": "ohio@nebraska",
       "season": 2026,
       "week": 1,
@@ -4634,15 +6831,233 @@
       "home_team": "Nebraska",
       "away_points": 21,
       "home_points": 49,
-      "analysis_status": "pending",
-      "analysis_level": "scoreboard_only",
-      "source": "Final score available; PBP pending",
-      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
+      "analysis_status": "available",
+      "analysis_level": "full",
+      "source": "SportsDataverse/cfbfastR PBP",
+      "source_note": "Retrospective only. Does not alter the frozen pregame THI projection.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-05T20:18:07.430209+00:00"
+      "headline": {
+        "postgame_win_expectancy": {
+          "away_pct": 14.9,
+          "home_pct": 85.1,
+          "winner": "Nebraska"
+        },
+        "adjusted_final_score": {
+          "away": 21.8,
+          "home": 34.8
+        },
+        "reality_check": {
+          "label": "CLOSER THAN IT LOOKED",
+          "note": "The final margin was larger than the underlying efficiency and possession profile suggested.",
+          "actual_margin": 28,
+          "adjusted_margin": 13.0
+        }
+      },
+      "away_metrics": {
+        "overall": {
+          "plays": 63,
+          "epa_total": 1.07,
+          "epa_per_play": 0.017,
+          "success_rate": 41.3
+        },
+        "passing": {
+          "plays": 35,
+          "epa_total": -3.29,
+          "epa_per_play": -0.094,
+          "success_rate": 34.3
+        },
+        "rushing": {
+          "plays": 28,
+          "epa_total": 4.36,
+          "epa_per_play": 0.156,
+          "success_rate": 50.0
+        },
+        "standard_downs": {
+          "plays": 39,
+          "epa_total": 10.89,
+          "epa_per_play": 0.279,
+          "success_rate": 48.7
+        },
+        "passing_downs": {
+          "plays": 24,
+          "epa_total": -9.82,
+          "epa_per_play": -0.409,
+          "success_rate": 29.2
+        },
+        "early_downs": {
+          "plays": 47,
+          "epa_total": 0.94,
+          "epa_per_play": 0.02,
+          "success_rate": 38.3
+        },
+        "third_fourth_downs": {
+          "plays": 16,
+          "epa_total": 0.13,
+          "epa_per_play": 0.008,
+          "success_rate": 50.0
+        },
+        "fourth_down": {
+          "plays": 1,
+          "epa_total": 2.67,
+          "epa_per_play": 2.665,
+          "success_rate": 100.0,
+          "attempts": 1
+        },
+        "explosiveness": {
+          "explosive_plays": 8,
+          "explosive_play_rate": 12.7,
+          "explosive_epa_dependency": 45.1
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 2,
+          "sack_rate_allowed": 5.7,
+          "stuffs_allowed": 3,
+          "stuff_rate_allowed": 10.7,
+          "tfl_allowed": 4,
+          "tfl_rate_allowed": 6.3
+        },
+        "drives": {
+          "drives": 12,
+          "points_per_drive": 1.25,
+          "yards_per_drive": 29.5,
+          "drive_success_rate": 41.7,
+          "three_and_outs": 3,
+          "three_and_out_rate": 25.0
+        },
+        "scoring_opportunities": {
+          "opportunities": 5,
+          "points_per_opportunity": 3.0
+        },
+        "red_zone": {
+          "trips": 2,
+          "points_per_trip": 7.5,
+          "overperformance_points_per_trip": 2.8,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 71.4
+        },
+        "turnovers": {
+          "turnovers": 1,
+          "turnover_epa_impact": -4.37
+        },
+        "epa_volatility": 1.31
+      },
+      "home_metrics": {
+        "overall": {
+          "plays": 74,
+          "epa_total": 27.64,
+          "epa_per_play": 0.374,
+          "success_rate": 52.7
+        },
+        "passing": {
+          "plays": 34,
+          "epa_total": 14.62,
+          "epa_per_play": 0.43,
+          "success_rate": 47.1
+        },
+        "rushing": {
+          "plays": 40,
+          "epa_total": 13.02,
+          "epa_per_play": 0.325,
+          "success_rate": 57.5
+        },
+        "standard_downs": {
+          "plays": 55,
+          "epa_total": 16.87,
+          "epa_per_play": 0.307,
+          "success_rate": 49.1
+        },
+        "passing_downs": {
+          "plays": 19,
+          "epa_total": 10.77,
+          "epa_per_play": 0.567,
+          "success_rate": 63.2
+        },
+        "early_downs": {
+          "plays": 57,
+          "epa_total": 12.14,
+          "epa_per_play": 0.213,
+          "success_rate": 49.1
+        },
+        "third_fourth_downs": {
+          "plays": 17,
+          "epa_total": 15.5,
+          "epa_per_play": 0.912,
+          "success_rate": 64.7
+        },
+        "fourth_down": {
+          "plays": 2,
+          "epa_total": 0.67,
+          "epa_per_play": 0.335,
+          "success_rate": 50.0,
+          "attempts": 2
+        },
+        "explosiveness": {
+          "explosive_plays": 18,
+          "explosive_play_rate": 24.3,
+          "explosive_epa_dependency": 65.7
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 2,
+          "sack_rate_allowed": 5.9,
+          "stuffs_allowed": 6,
+          "stuff_rate_allowed": 15.0,
+          "tfl_allowed": 6,
+          "tfl_rate_allowed": 8.1
+        },
+        "drives": {
+          "drives": 11,
+          "points_per_drive": 5.09,
+          "yards_per_drive": 47.5,
+          "drive_success_rate": 63.6,
+          "three_and_outs": 1,
+          "three_and_out_rate": 9.1
+        },
+        "scoring_opportunities": {
+          "opportunities": 6,
+          "points_per_opportunity": 7.0
+        },
+        "red_zone": {
+          "trips": 4,
+          "points_per_trip": 7.0,
+          "overperformance_points_per_trip": 2.3,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 70.0
+        },
+        "turnovers": {
+          "turnovers": 1,
+          "turnover_epa_impact": -1.84
+        },
+        "epa_volatility": 1.378
+      },
+      "game_context": {
+        "total_scrimmage_plays": 140,
+        "competitive_scrimmage_plays": 137,
+        "garbage_time_plays": 3,
+        "garbage_time_share": 2.1
+      },
+      "definitions": {
+        "standard_down": "1st down; 2nd-and-7 or less; 3rd/4th-and-4 or less.",
+        "passing_down": "2nd-and-8+; 3rd/4th-and-5+.",
+        "drive_success_rate": "Share of offensive drives with positive cumulative EPA.",
+        "three_and_out_rate": "Share of drives with three or fewer qualifying scrimmage plays, no first down, and no points.",
+        "scoring_opportunity": "Drive that reaches the opponent 40-yard line or closer.",
+        "red_zone_trip": "Drive that reaches the opponent 20-yard line or closer.",
+        "red_zone_overperformance": "Points per red-zone trip minus the temporary beta baseline of 4.7. This baseline will be historically calibrated.",
+        "sack_rate_allowed": "Sacks divided by qualifying pass plays/dropbacks.",
+        "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
+        "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
+        "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
+        "epa_volatility": "Population standard deviation of competitive-play EPA."
+      },
+      "generated_at": "2026-09-05T20:32:44.037133+00:00"
     },
     {
       "game_id": "6604065",
+      "pbp_game_id": "401856778",
       "matchup_key": "oregonstate@houston",
       "season": 2026,
       "week": 1,
@@ -4650,12 +7065,229 @@
       "home_team": "Houston",
       "away_points": 20,
       "home_points": 33,
-      "analysis_status": "pending",
-      "analysis_level": "scoreboard_only",
-      "source": "Final score available; PBP pending",
-      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
+      "analysis_status": "available",
+      "analysis_level": "full",
+      "source": "SportsDataverse/cfbfastR PBP",
+      "source_note": "Retrospective only. Does not alter the frozen pregame THI projection.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-05T20:18:07.430243+00:00"
+      "headline": {
+        "postgame_win_expectancy": {
+          "away_pct": 28.9,
+          "home_pct": 71.1,
+          "winner": "Houston"
+        },
+        "adjusted_final_score": {
+          "away": 21.6,
+          "home": 28.4
+        },
+        "reality_check": {
+          "label": "CLOSER THAN IT LOOKED",
+          "note": "The final margin was larger than the underlying efficiency and possession profile suggested.",
+          "actual_margin": 13,
+          "adjusted_margin": 6.8
+        }
+      },
+      "away_metrics": {
+        "overall": {
+          "plays": 73,
+          "epa_total": 7.47,
+          "epa_per_play": 0.102,
+          "success_rate": 43.8
+        },
+        "passing": {
+          "plays": 51,
+          "epa_total": 10.26,
+          "epa_per_play": 0.201,
+          "success_rate": 49.0
+        },
+        "rushing": {
+          "plays": 22,
+          "epa_total": -2.79,
+          "epa_per_play": -0.127,
+          "success_rate": 31.8
+        },
+        "standard_downs": {
+          "plays": 46,
+          "epa_total": 10.87,
+          "epa_per_play": 0.236,
+          "success_rate": 50.0
+        },
+        "passing_downs": {
+          "plays": 27,
+          "epa_total": -3.4,
+          "epa_per_play": -0.126,
+          "success_rate": 33.3
+        },
+        "early_downs": {
+          "plays": 53,
+          "epa_total": 11.78,
+          "epa_per_play": 0.222,
+          "success_rate": 49.1
+        },
+        "third_fourth_downs": {
+          "plays": 20,
+          "epa_total": -4.31,
+          "epa_per_play": -0.216,
+          "success_rate": 30.0
+        },
+        "fourth_down": {
+          "plays": 5,
+          "epa_total": -1.95,
+          "epa_per_play": -0.389,
+          "success_rate": 40.0,
+          "attempts": 5
+        },
+        "explosiveness": {
+          "explosive_plays": 8,
+          "explosive_play_rate": 11.0,
+          "explosive_epa_dependency": 43.1
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 4,
+          "sack_rate_allowed": 7.8,
+          "stuffs_allowed": 1,
+          "stuff_rate_allowed": 4.5,
+          "tfl_allowed": 4,
+          "tfl_rate_allowed": 5.5
+        },
+        "drives": {
+          "drives": 11,
+          "points_per_drive": 1.82,
+          "yards_per_drive": 37.7,
+          "drive_success_rate": 45.5,
+          "three_and_outs": 2,
+          "three_and_out_rate": 18.2
+        },
+        "scoring_opportunities": {
+          "opportunities": 5,
+          "points_per_opportunity": 4.0
+        },
+        "red_zone": {
+          "trips": 3,
+          "points_per_trip": 6.67,
+          "overperformance_points_per_trip": 1.97,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 75.7
+        },
+        "turnovers": {
+          "turnovers": 0,
+          "turnover_epa_impact": 0
+        },
+        "epa_volatility": 1.395
+      },
+      "home_metrics": {
+        "overall": {
+          "plays": 70,
+          "epa_total": 19.36,
+          "epa_per_play": 0.277,
+          "success_rate": 50.0
+        },
+        "passing": {
+          "plays": 34,
+          "epa_total": 16.81,
+          "epa_per_play": 0.495,
+          "success_rate": 55.9
+        },
+        "rushing": {
+          "plays": 36,
+          "epa_total": 2.55,
+          "epa_per_play": 0.071,
+          "success_rate": 44.4
+        },
+        "standard_downs": {
+          "plays": 49,
+          "epa_total": 1.69,
+          "epa_per_play": 0.034,
+          "success_rate": 44.9
+        },
+        "passing_downs": {
+          "plays": 21,
+          "epa_total": 17.67,
+          "epa_per_play": 0.842,
+          "success_rate": 61.9
+        },
+        "early_downs": {
+          "plays": 56,
+          "epa_total": 7.96,
+          "epa_per_play": 0.142,
+          "success_rate": 44.6
+        },
+        "third_fourth_downs": {
+          "plays": 14,
+          "epa_total": 11.4,
+          "epa_per_play": 0.814,
+          "success_rate": 71.4
+        },
+        "fourth_down": {
+          "plays": 1,
+          "epa_total": 1.62,
+          "epa_per_play": 1.617,
+          "success_rate": 100.0,
+          "attempts": 1
+        },
+        "explosiveness": {
+          "explosive_plays": 16,
+          "explosive_play_rate": 22.9,
+          "explosive_epa_dependency": 67.6
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 1,
+          "sack_rate_allowed": 2.9,
+          "stuffs_allowed": 6,
+          "stuff_rate_allowed": 16.7,
+          "tfl_allowed": 5,
+          "tfl_rate_allowed": 7.1
+        },
+        "drives": {
+          "drives": 10,
+          "points_per_drive": 2.7,
+          "yards_per_drive": 55.3,
+          "drive_success_rate": 60.0,
+          "three_and_outs": 1,
+          "three_and_out_rate": 10.0
+        },
+        "scoring_opportunities": {
+          "opportunities": 7,
+          "points_per_opportunity": 2.86
+        },
+        "red_zone": {
+          "trips": 5,
+          "points_per_trip": 2.8,
+          "overperformance_points_per_trip": -1.9,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 72.8
+        },
+        "turnovers": {
+          "turnovers": 3,
+          "turnover_epa_impact": -7.1
+        },
+        "epa_volatility": 1.522
+      },
+      "game_context": {
+        "total_scrimmage_plays": 143,
+        "competitive_scrimmage_plays": 143,
+        "garbage_time_plays": 0,
+        "garbage_time_share": 0.0
+      },
+      "definitions": {
+        "standard_down": "1st down; 2nd-and-7 or less; 3rd/4th-and-4 or less.",
+        "passing_down": "2nd-and-8+; 3rd/4th-and-5+.",
+        "drive_success_rate": "Share of offensive drives with positive cumulative EPA.",
+        "three_and_out_rate": "Share of drives with three or fewer qualifying scrimmage plays, no first down, and no points.",
+        "scoring_opportunity": "Drive that reaches the opponent 40-yard line or closer.",
+        "red_zone_trip": "Drive that reaches the opponent 20-yard line or closer.",
+        "red_zone_overperformance": "Points per red-zone trip minus the temporary beta baseline of 4.7. This baseline will be historically calibrated.",
+        "sack_rate_allowed": "Sacks divided by qualifying pass plays/dropbacks.",
+        "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
+        "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
+        "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
+        "epa_volatility": "Population standard deviation of competitive-play EPA."
+      },
+      "generated_at": "2026-09-05T20:32:44.045095+00:00"
     },
     {
       "game_id": "6603974",
@@ -4889,7 +7521,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.437547+00:00"
+      "generated_at": "2026-09-05T20:32:44.052327+00:00"
     },
     {
       "game_id": "6603957",
@@ -5123,7 +7755,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.447019+00:00"
+      "generated_at": "2026-09-05T20:32:44.061764+00:00"
     },
     {
       "game_id": "6603956",
@@ -5357,10 +7989,11 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.454417+00:00"
+      "generated_at": "2026-09-05T20:32:44.069071+00:00"
     },
     {
       "game_id": "6604282",
+      "pbp_game_id": "401866410",
       "matchup_key": "tarletonstate@bowlinggreen",
       "season": 2026,
       "week": 1,
@@ -5368,12 +8001,229 @@
       "home_team": "Bowling Green",
       "away_points": 20,
       "home_points": 13,
-      "analysis_status": "pending",
-      "analysis_level": "scoreboard_only",
-      "source": "Final score available; PBP pending",
-      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
+      "analysis_status": "available",
+      "analysis_level": "full",
+      "source": "SportsDataverse/cfbfastR PBP",
+      "source_note": "Retrospective only. Does not alter the frozen pregame THI projection.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-05T20:18:07.454460+00:00"
+      "headline": {
+        "postgame_win_expectancy": {
+          "away_pct": 56.7,
+          "home_pct": 43.3,
+          "winner": "Tarleton State"
+        },
+        "adjusted_final_score": {
+          "away": 21.2,
+          "home": 19.2
+        },
+        "reality_check": {
+          "label": "ABOUT RIGHT",
+          "note": "The scoreboard was broadly consistent with the underlying game quality.",
+          "actual_margin": -7,
+          "adjusted_margin": -2.0
+        }
+      },
+      "away_metrics": {
+        "overall": {
+          "plays": 60,
+          "epa_total": 2.81,
+          "epa_per_play": 0.047,
+          "success_rate": 45.0
+        },
+        "passing": {
+          "plays": 28,
+          "epa_total": 6.12,
+          "epa_per_play": 0.218,
+          "success_rate": 46.4
+        },
+        "rushing": {
+          "plays": 32,
+          "epa_total": -3.3,
+          "epa_per_play": -0.103,
+          "success_rate": 43.8
+        },
+        "standard_downs": {
+          "plays": 42,
+          "epa_total": 11.29,
+          "epa_per_play": 0.269,
+          "success_rate": 52.4
+        },
+        "passing_downs": {
+          "plays": 18,
+          "epa_total": -8.48,
+          "epa_per_play": -0.471,
+          "success_rate": 27.8
+        },
+        "early_downs": {
+          "plays": 45,
+          "epa_total": 15.52,
+          "epa_per_play": 0.345,
+          "success_rate": 51.1
+        },
+        "third_fourth_downs": {
+          "plays": 15,
+          "epa_total": -12.7,
+          "epa_per_play": -0.847,
+          "success_rate": 26.7
+        },
+        "fourth_down": {
+          "plays": 5,
+          "epa_total": -3.32,
+          "epa_per_play": -0.665,
+          "success_rate": 40.0,
+          "attempts": 5
+        },
+        "explosiveness": {
+          "explosive_plays": 9,
+          "explosive_play_rate": 15.0,
+          "explosive_epa_dependency": 58.4
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 1,
+          "sack_rate_allowed": 3.6,
+          "stuffs_allowed": 8,
+          "stuff_rate_allowed": 25.0,
+          "tfl_allowed": 2,
+          "tfl_rate_allowed": 3.3
+        },
+        "drives": {
+          "drives": 9,
+          "points_per_drive": 1.56,
+          "yards_per_drive": 54.7,
+          "drive_success_rate": 44.4,
+          "three_and_outs": 0,
+          "three_and_out_rate": 0.0
+        },
+        "scoring_opportunities": {
+          "opportunities": 6,
+          "points_per_opportunity": 2.33
+        },
+        "red_zone": {
+          "trips": 4,
+          "points_per_trip": 1.75,
+          "overperformance_points_per_trip": -2.95,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 73.7
+        },
+        "turnovers": {
+          "turnovers": 1,
+          "turnover_epa_impact": -2.88
+        },
+        "epa_volatility": 1.476
+      },
+      "home_metrics": {
+        "overall": {
+          "plays": 67,
+          "epa_total": -0.88,
+          "epa_per_play": -0.013,
+          "success_rate": 46.3
+        },
+        "passing": {
+          "plays": 30,
+          "epa_total": 20.94,
+          "epa_per_play": 0.698,
+          "success_rate": 66.7
+        },
+        "rushing": {
+          "plays": 37,
+          "epa_total": -21.82,
+          "epa_per_play": -0.59,
+          "success_rate": 29.7
+        },
+        "standard_downs": {
+          "plays": 47,
+          "epa_total": -3.89,
+          "epa_per_play": -0.083,
+          "success_rate": 51.1
+        },
+        "passing_downs": {
+          "plays": 20,
+          "epa_total": 3.0,
+          "epa_per_play": 0.15,
+          "success_rate": 35.0
+        },
+        "early_downs": {
+          "plays": 52,
+          "epa_total": -1.46,
+          "epa_per_play": -0.028,
+          "success_rate": 44.2
+        },
+        "third_fourth_downs": {
+          "plays": 15,
+          "epa_total": 0.58,
+          "epa_per_play": 0.039,
+          "success_rate": 53.3
+        },
+        "fourth_down": {
+          "plays": 2,
+          "epa_total": -6.52,
+          "epa_per_play": -3.261,
+          "success_rate": 50.0,
+          "attempts": 2
+        },
+        "explosiveness": {
+          "explosive_plays": 13,
+          "explosive_play_rate": 19.4,
+          "explosive_epa_dependency": 57.6
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 0,
+          "sack_rate_allowed": 0.0,
+          "stuffs_allowed": 9,
+          "stuff_rate_allowed": 24.3,
+          "tfl_allowed": 4,
+          "tfl_rate_allowed": 6.0
+        },
+        "drives": {
+          "drives": 10,
+          "points_per_drive": 0.7,
+          "yards_per_drive": 39.5,
+          "drive_success_rate": 40.0,
+          "three_and_outs": 2,
+          "three_and_out_rate": 20.0
+        },
+        "scoring_opportunities": {
+          "opportunities": 6,
+          "points_per_opportunity": 1.17
+        },
+        "red_zone": {
+          "trips": 2,
+          "points_per_trip": 3.5,
+          "overperformance_points_per_trip": -1.2,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 73.7
+        },
+        "turnovers": {
+          "turnovers": 2,
+          "turnover_epa_impact": -7.76
+        },
+        "epa_volatility": 1.681
+      },
+      "game_context": {
+        "total_scrimmage_plays": 127,
+        "competitive_scrimmage_plays": 127,
+        "garbage_time_plays": 0,
+        "garbage_time_share": 0.0
+      },
+      "definitions": {
+        "standard_down": "1st down; 2nd-and-7 or less; 3rd/4th-and-4 or less.",
+        "passing_down": "2nd-and-8+; 3rd/4th-and-5+.",
+        "drive_success_rate": "Share of offensive drives with positive cumulative EPA.",
+        "three_and_out_rate": "Share of drives with three or fewer qualifying scrimmage plays, no first down, and no points.",
+        "scoring_opportunity": "Drive that reaches the opponent 40-yard line or closer.",
+        "red_zone_trip": "Drive that reaches the opponent 20-yard line or closer.",
+        "red_zone_overperformance": "Points per red-zone trip minus the temporary beta baseline of 4.7. This baseline will be historically calibrated.",
+        "sack_rate_allowed": "Sacks divided by qualifying pass plays/dropbacks.",
+        "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
+        "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
+        "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
+        "epa_volatility": "Population standard deviation of competitive-play EPA."
+      },
+      "generated_at": "2026-09-05T20:32:44.076715+00:00"
     },
     {
       "game_id": "6604263",
@@ -5607,7 +8457,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.462025+00:00"
+      "generated_at": "2026-09-05T20:32:44.084248+00:00"
     },
     {
       "game_id": "6603734",
@@ -5841,7 +8691,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.468546+00:00"
+      "generated_at": "2026-09-05T20:32:44.090638+00:00"
     },
     {
       "game_id": "6604235",
@@ -6075,7 +8925,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.476804+00:00"
+      "generated_at": "2026-09-05T20:32:44.098842+00:00"
     },
     {
       "game_id": "6603903",
@@ -6309,7 +9159,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.482336+00:00"
+      "generated_at": "2026-09-05T20:32:44.104316+00:00"
     },
     {
       "game_id": "6603790",
@@ -6543,7 +9393,241 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-05T20:18:07.489611+00:00"
+      "generated_at": "2026-09-05T20:32:44.111546+00:00"
+    },
+    {
+      "game_id": "6603655",
+      "pbp_game_id": "401856659",
+      "matchup_key": "youngstownstate@kentucky",
+      "season": 2026,
+      "week": 1,
+      "away_team": "Youngstown State",
+      "home_team": "Kentucky",
+      "away_points": 13,
+      "home_points": 45,
+      "analysis_status": "available",
+      "analysis_level": "full",
+      "source": "SportsDataverse/cfbfastR PBP",
+      "source_note": "Retrospective only. Does not alter the frozen pregame THI projection.",
+      "calibration_status": "BETA \u2014 historical calibration pending",
+      "headline": {
+        "postgame_win_expectancy": {
+          "away_pct": 6.6,
+          "home_pct": 93.4,
+          "winner": "Kentucky"
+        },
+        "adjusted_final_score": {
+          "away": 16.4,
+          "home": 36.3
+        },
+        "reality_check": {
+          "label": "CLOSER THAN IT LOOKED",
+          "note": "The final margin was larger than the underlying efficiency and possession profile suggested.",
+          "actual_margin": 32,
+          "adjusted_margin": 19.9
+        }
+      },
+      "away_metrics": {
+        "overall": {
+          "plays": 56,
+          "epa_total": 6.0,
+          "epa_per_play": 0.107,
+          "success_rate": 48.2
+        },
+        "passing": {
+          "plays": 32,
+          "epa_total": 7.24,
+          "epa_per_play": 0.226,
+          "success_rate": 46.9
+        },
+        "rushing": {
+          "plays": 24,
+          "epa_total": -1.24,
+          "epa_per_play": -0.052,
+          "success_rate": 50.0
+        },
+        "standard_downs": {
+          "plays": 35,
+          "epa_total": 5.05,
+          "epa_per_play": 0.144,
+          "success_rate": 48.6
+        },
+        "passing_downs": {
+          "plays": 21,
+          "epa_total": 0.95,
+          "epa_per_play": 0.045,
+          "success_rate": 47.6
+        },
+        "early_downs": {
+          "plays": 42,
+          "epa_total": 6.51,
+          "epa_per_play": 0.155,
+          "success_rate": 45.2
+        },
+        "third_fourth_downs": {
+          "plays": 14,
+          "epa_total": -0.51,
+          "epa_per_play": -0.037,
+          "success_rate": 57.1
+        },
+        "fourth_down": {
+          "plays": 1,
+          "epa_total": -2.33,
+          "epa_per_play": -2.327,
+          "success_rate": 0.0,
+          "attempts": 1
+        },
+        "explosiveness": {
+          "explosive_plays": 5,
+          "explosive_play_rate": 8.9,
+          "explosive_epa_dependency": 35.9
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 1,
+          "sack_rate_allowed": 3.1,
+          "stuffs_allowed": 5,
+          "stuff_rate_allowed": 20.8,
+          "tfl_allowed": 4,
+          "tfl_rate_allowed": 7.1
+        },
+        "drives": {
+          "drives": 9,
+          "points_per_drive": 1.44,
+          "yards_per_drive": 35.4,
+          "drive_success_rate": 22.2,
+          "three_and_outs": 2,
+          "three_and_out_rate": 22.2
+        },
+        "scoring_opportunities": {
+          "opportunities": 5,
+          "points_per_opportunity": 2.6
+        },
+        "red_zone": {
+          "trips": 2,
+          "points_per_trip": 6.5,
+          "overperformance_points_per_trip": 1.8,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 77.4
+        },
+        "turnovers": {
+          "turnovers": 1,
+          "turnover_epa_impact": -2.21
+        },
+        "epa_volatility": 1.277
+      },
+      "home_metrics": {
+        "overall": {
+          "plays": 48,
+          "epa_total": 22.16,
+          "epa_per_play": 0.462,
+          "success_rate": 62.5
+        },
+        "passing": {
+          "plays": 22,
+          "epa_total": 16.76,
+          "epa_per_play": 0.762,
+          "success_rate": 59.1
+        },
+        "rushing": {
+          "plays": 26,
+          "epa_total": 5.39,
+          "epa_per_play": 0.207,
+          "success_rate": 65.4
+        },
+        "standard_downs": {
+          "plays": 41,
+          "epa_total": 19.27,
+          "epa_per_play": 0.47,
+          "success_rate": 63.4
+        },
+        "passing_downs": {
+          "plays": 7,
+          "epa_total": 2.88,
+          "epa_per_play": 0.412,
+          "success_rate": 57.1
+        },
+        "early_downs": {
+          "plays": 42,
+          "epa_total": 19.95,
+          "epa_per_play": 0.475,
+          "success_rate": 64.3
+        },
+        "third_fourth_downs": {
+          "plays": 6,
+          "epa_total": 2.21,
+          "epa_per_play": 0.368,
+          "success_rate": 50.0
+        },
+        "fourth_down": {
+          "plays": 1,
+          "epa_total": 3.5,
+          "epa_per_play": 3.499,
+          "success_rate": 100.0,
+          "attempts": 1
+        },
+        "explosiveness": {
+          "explosive_plays": 13,
+          "explosive_play_rate": 27.1,
+          "explosive_epa_dependency": 51.6
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 0,
+          "sack_rate_allowed": 0.0,
+          "stuffs_allowed": 4,
+          "stuff_rate_allowed": 15.4,
+          "tfl_allowed": 3,
+          "tfl_rate_allowed": 6.2
+        },
+        "drives": {
+          "drives": 9,
+          "points_per_drive": 4.67,
+          "yards_per_drive": 59.8,
+          "drive_success_rate": 77.8,
+          "three_and_outs": 1,
+          "three_and_out_rate": 11.1
+        },
+        "scoring_opportunities": {
+          "opportunities": 7,
+          "points_per_opportunity": 6.0
+        },
+        "red_zone": {
+          "trips": 5,
+          "points_per_trip": 5.6,
+          "overperformance_points_per_trip": 0.9,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 70.1
+        },
+        "turnovers": {
+          "turnovers": 0,
+          "turnover_epa_impact": 0
+        },
+        "epa_volatility": 1.086
+      },
+      "game_context": {
+        "total_scrimmage_plays": 122,
+        "competitive_scrimmage_plays": 104,
+        "garbage_time_plays": 18,
+        "garbage_time_share": 14.8
+      },
+      "definitions": {
+        "standard_down": "1st down; 2nd-and-7 or less; 3rd/4th-and-4 or less.",
+        "passing_down": "2nd-and-8+; 3rd/4th-and-5+.",
+        "drive_success_rate": "Share of offensive drives with positive cumulative EPA.",
+        "three_and_out_rate": "Share of drives with three or fewer qualifying scrimmage plays, no first down, and no points.",
+        "scoring_opportunity": "Drive that reaches the opponent 40-yard line or closer.",
+        "red_zone_trip": "Drive that reaches the opponent 20-yard line or closer.",
+        "red_zone_overperformance": "Points per red-zone trip minus the temporary beta baseline of 4.7. This baseline will be historically calibrated.",
+        "sack_rate_allowed": "Sacks divided by qualifying pass plays/dropbacks.",
+        "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
+        "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
+        "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
+        "epa_volatility": "Population standard deviation of competitive-play EPA."
+      },
+      "generated_at": "2026-09-05T20:32:44.118317+00:00"
     }
   ]
 }
