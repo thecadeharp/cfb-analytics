@@ -4,11 +4,14 @@
   // ==========================================================================
   // THE HAMMER INDEX — MATCHUP MARKET LAYER
   //
-  // Additive frontend only:
-  // - Moves the existing "Why the model differs" panel higher on matchup pages.
-  // - Adds THI preferred-side alternate spread ladder.
-  // - Adds factual "Distance From THI" labels.
-  // - Adds open/current/close line movement.
+  // Performance + presentation pass:
+  // - Keeps directional movement relative to THI.
+  // - Collapses long alt ladders to a compact 8-row default.
+  // - Keeps MAIN + THI-nearby lines prioritized in the compact view.
+  // - Avoids destroying/rebuilding the market layer when nothing changed.
+  // - Ignores its own DOM mutations.
+  // - Lazy-loads market JSON only when a matchup is actually present.
+  // - Uses browser revalidation instead of cache-busting every request.
   // - Does NOT alter Model A or projection calculations.
   // ==========================================================================
 
@@ -17,13 +20,24 @@
   const HISTORY_URL = "./data/market_history.json";
 
   const ROOT_ID = "thi-market-story";
-  const STYLE_ID = "thi-market-layer-styles-v1";
+  const STYLE_ID = "thi-market-layer-styles-v2";
+  const COMPACT_ALT_ROWS = 8;
+  const REFRESH_MS = 5 * 60 * 1000;
 
   let projectionGames = [];
   let altGames = {};
   let historyGames = {};
-  let observer = null;
-  let applying = false;
+
+  let containerObserver = null;
+  let titleObserver = null;
+  let refreshTimer = null;
+  let renderTimer = null;
+
+  let dataLoaded = false;
+  let dataLoading = null;
+  let lastRenderSignature = "";
+  let lastMatchupKey = "";
+  let expandedGameKey = null;
 
   const BOOK_CLASS = {
     draftkings: "book-dk",
@@ -90,40 +104,62 @@
   }
 
   async function fetchJson(url) {
-    const response = await fetch(`${url}?v=${Date.now()}`, {
-      cache: "no-store",
+    const response = await fetch(url, {
+      cache: "no-cache",
     });
-    if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
+    if (!response.ok) {
+      throw new Error(`${url}: HTTP ${response.status}`);
+    }
     return response.json();
   }
 
-  async function loadData() {
-    const [p, a, h] = await Promise.allSettled([
-      fetchJson(PROJECTIONS_URL),
-      fetchJson(ALTS_URL),
-      fetchJson(HISTORY_URL),
-    ]);
+  async function loadData(force = false) {
+    if (dataLoading) return dataLoading;
+    if (dataLoaded && !force) return;
 
-    if (p.status === "fulfilled") {
-      projectionGames = payloadGames(p.value);
-    }
+    dataLoading = (async () => {
+      const [p, a, h] = await Promise.allSettled([
+        fetchJson(PROJECTIONS_URL),
+        fetchJson(ALTS_URL),
+        fetchJson(HISTORY_URL),
+      ]);
 
-    if (a.status === "fulfilled") {
-      altGames = a.value?.games && typeof a.value.games === "object"
-        ? a.value.games
-        : {};
-    }
+      if (p.status === "fulfilled") {
+        projectionGames = payloadGames(p.value);
+      }
 
-    if (h.status === "fulfilled") {
-      historyGames = h.value?.games && typeof h.value.games === "object"
-        ? h.value.games
-        : {};
+      if (a.status === "fulfilled") {
+        altGames =
+          a.value?.games && typeof a.value.games === "object"
+            ? a.value.games
+            : {};
+      }
+
+      if (h.status === "fulfilled") {
+        historyGames =
+          h.value?.games && typeof h.value.games === "object"
+            ? h.value.games
+            : {};
+      }
+
+      dataLoaded = projectionGames.length > 0;
+    })();
+
+    try {
+      await dataLoading;
+    } finally {
+      dataLoading = null;
     }
+  }
+
+  function matchupContainer() {
+    return document.getElementById("matchup-container");
   }
 
   function currentMatchupTeams() {
     const title = document.querySelector("#matchup-container .matchup-title");
     const text = String(title?.textContent || "").trim();
+
     if (!text.includes("@")) return null;
 
     const parts = text.split("@");
@@ -135,41 +171,31 @@
     };
   }
 
+  function matchupKey(teams) {
+    if (!teams) return "";
+    return `${canonical(teams.away)}@${canonical(teams.home)}`;
+  }
+
   function findProjection(away, home) {
-    return projectionGames.find(game => {
-      const gameAway = game?.away?.team ?? game?.away_team;
-      const gameHome = game?.home?.team ?? game?.home_team;
-      return sameTeam(gameAway, away) && sameTeam(gameHome, home);
-    }) || null;
-  }
-
-  function canonicalSignal(value) {
-    const raw = String(value || "").toUpperCase().trim();
-    const aliases = {
-      "AGREE W/ MARKET": "ALIGNED",
-      "ALIGNED": "ALIGNED",
-      "LEAN": "SMALL EDGE",
-      "SLIGHT EDGE": "SMALL EDGE",
-      "SMALL EDGE": "SMALL EDGE",
-      "EDGE": "PLAY",
-      "PLAY": "PLAY",
-      "STRONG EDGE": "MATERIAL DISAGREEMENT",
-      "MATERIAL DISAGREEMENT": "MATERIAL DISAGREEMENT",
-      "OUTLIER": "OUTLIER",
-    };
-    return aliases[raw] || raw;
-  }
-
-  function signalName(game) {
-    return canonicalSignal(
-      game?.comparison?.signal ??
-      game?.comparison?.status ??
-      ""
+    return (
+      projectionGames.find((game) => {
+        const gameAway = game?.away?.team ?? game?.away_team;
+        const gameHome = game?.home?.team ?? game?.home_team;
+        return sameTeam(gameAway, away) && sameTeam(gameHome, home);
+      }) || null
     );
   }
 
   function isFcsFallback(game) {
     return String(game?.model_type || "").toLowerCase() === "fcs_fallback";
+  }
+
+  function modelHomeSpread(game) {
+    return num(game?.projection?.home_spread);
+  }
+
+  function marketHomeSpread(game) {
+    return num(game?.market?.home_spread);
   }
 
   function preferredSide(game) {
@@ -197,10 +223,12 @@
     const id = gameId(game);
     if (id && rows[id]) return rows[id];
 
-    return Object.values(rows).find(row =>
-      sameTeam(row?.away_team, away) &&
-      sameTeam(row?.home_team, home)
-    ) || null;
+    return (
+      Object.values(rows).find(
+        (row) =>
+          sameTeam(row?.away_team, away) && sameTeam(row?.home_team, home)
+      ) || null
+    );
   }
 
   function sideSpread(homeSpread, preferred, home, away) {
@@ -211,16 +239,11 @@
     return null;
   }
 
-  function modelHomeSpread(game) {
-    return num(game?.projection?.home_spread);
-  }
-
-  function marketHomeSpread(game) {
-    return num(game?.market?.home_spread);
-  }
-
   function installStyles() {
     if (document.getElementById(STYLE_ID)) return;
+
+    const oldStyle = document.getElementById("thi-market-layer-styles-v1");
+    if (oldStyle) oldStyle.remove();
 
     const style = document.createElement("style");
     style.id = STYLE_ID;
@@ -236,6 +259,7 @@
         display: grid;
         grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr);
         gap: 12px;
+        align-items: start;
       }
 
       #${ROOT_ID} .analysis-panel {
@@ -247,6 +271,7 @@
         border: 1px solid var(--border);
         border-radius: var(--radius);
         background: var(--surface);
+        contain: layout paint;
       }
 
       #${ROOT_ID} .thi-market-head {
@@ -325,7 +350,7 @@
         vertical-align: middle;
       }
 
-      #${ROOT_ID} .thi-alt-table tr:last-child td {
+      #${ROOT_ID} .thi-alt-table tbody tr:last-child td {
         border-bottom: none;
       }
 
@@ -400,6 +425,31 @@
         line-height: 1.55;
       }
 
+      #${ROOT_ID} .thi-alt-toggle-wrap {
+        padding: 9px 14px 11px;
+        border-top: 1px solid #eeeeeb;
+        background: #fafaf8;
+      }
+
+      #${ROOT_ID} .thi-alt-toggle {
+        width: 100%;
+        min-height: 34px;
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        background: #fff;
+        color: var(--text);
+        font-family: var(--mono);
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: .35px;
+        cursor: pointer;
+      }
+
+      #${ROOT_ID} .thi-alt-toggle:hover {
+        background: #f5f5f2;
+        border-color: var(--border-dark);
+      }
+
       #${ROOT_ID} .thi-movement-body {
         padding: 14px 16px;
       }
@@ -436,8 +486,23 @@
         font-size: 12px;
       }
 
+      #${ROOT_ID} .thi-move-direction {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 12px;
+        padding: 6px 8px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: #fafaf8;
+        color: var(--text);
+        font-family: var(--mono);
+        font-size: 9px;
+        font-weight: 800;
+      }
+
       #${ROOT_ID} .thi-move-callout {
-        margin-top: 13px;
+        margin-top: 11px;
         padding-top: 11px;
         border-top: 1px solid #eeeeeb;
         color: var(--muted);
@@ -501,16 +566,99 @@
   function bookBadge(row) {
     const key = String(row?.bookmaker_key || "");
     const abbr = String(
-      row?.book_abbr ||
-      row?.bookmaker ||
-      "BOOK"
-    ).slice(0, 5).toUpperCase();
+      row?.book_abbr || row?.bookmaker || "BOOK"
+    )
+      .slice(0, 5)
+      .toUpperCase();
 
     const css = BOOK_CLASS[key] || "";
-    return `<span class="thi-book ${esc(css)}" title="${esc(row?.bookmaker || abbr)}">${esc(abbr)}</span>`;
+    return `<span class="thi-book ${esc(css)}" title="${esc(
+      row?.bookmaker || abbr
+    )}">${esc(abbr)}</span>`;
   }
 
-  function altPanel(game, altRow, preferred, home, away) {
+  function linePoint(row) {
+    return num(row?.point);
+  }
+
+  function compactAltLines(lines, modelSide) {
+    if (!Array.isArray(lines) || lines.length <= COMPACT_ALT_ROWS) {
+      return lines || [];
+    }
+
+    const main = lines.find((row) => row?.is_main) || null;
+    const mainPoint = linePoint(main);
+
+    const ranked = lines
+      .map((row, index) => {
+        const point = linePoint(row);
+
+        const modelDistance =
+          point === null || modelSide === null
+            ? Number.POSITIVE_INFINITY
+            : Math.abs(point - modelSide);
+
+        const mainDistance =
+          point === null || mainPoint === null
+            ? Number.POSITIVE_INFINITY
+            : Math.abs(point - mainPoint);
+
+        return {
+          row,
+          index,
+          score: Math.min(modelDistance, mainDistance),
+          mustKeep: Boolean(row?.is_main),
+        };
+      })
+      .sort((a, b) => {
+        if (a.mustKeep !== b.mustKeep) return a.mustKeep ? -1 : 1;
+        if (a.score !== b.score) return a.score - b.score;
+        return a.index - b.index;
+      })
+      .slice(0, COMPACT_ALT_ROWS)
+      .sort((a, b) => a.index - b.index);
+
+    return ranked.map((item) => item.row);
+  }
+
+  function altRowsHtml(lines, preferred) {
+    return lines
+      .map((row) => {
+        const distance = num(row.distance_from_thi);
+        const inside = distance !== null && distance >= 0;
+
+        const label =
+          row.distance_label ||
+          (distance === null
+            ? "—"
+            : `${Math.abs(distance).toFixed(1)} pts ${
+                inside ? "inside" : "beyond"
+              } THI`);
+
+        return `
+          <tr class="${row.is_main ? "main" : ""}">
+            <td>
+              <span class="thi-alt-line">${esc(preferred)} ${esc(
+          fmtSpread(row.point)
+        )}</span>
+              ${
+                row.is_main
+                  ? `<span class="thi-main-pill">Main</span>`
+                  : ""
+              }
+            </td>
+            <td class="thi-alt-price">${esc(fmtPrice(row.price))}</td>
+            <td>${bookBadge(row)}</td>
+            <td class="thi-alt-distance ${inside ? "inside" : ""}">
+              ${esc(label)}
+            </td>
+          </tr>
+        `;
+      })
+      .join("");
+  }
+
+  function altPanel(game, altRow, preferred, home, away, expanded) {
     const modelSide = sideSpread(
       modelHomeSpread(game),
       preferred,
@@ -524,12 +672,18 @@
           <div class="thi-market-head">
             <div>
               <div class="thi-market-kicker">Market options</div>
-              <div class="thi-market-title">Alternate spreads — ${esc(preferred || "THI preferred side")}</div>
+              <div class="thi-market-title">Alternate spreads — ${esc(
+                preferred || "THI preferred side"
+              )}</div>
             </div>
             <div class="thi-market-reference">
               <div class="thi-market-reference-label">THI Spread</div>
               <div class="thi-market-reference-value">
-                ${preferred && modelSide !== null ? `${esc(preferred)} ${esc(fmtSpread(modelSide))}` : "—"}
+                ${
+                  preferred && modelSide !== null
+                    ? `${esc(preferred)} ${esc(fmtSpread(modelSide))}`
+                    : "—"
+                }
               </div>
             </div>
           </div>
@@ -541,40 +695,27 @@
       `;
     }
 
-    const rows = altRow.lines.map(row => {
-      const distance = num(row.distance_from_thi);
-      const inside = distance !== null && distance >= 0;
-      const label = row.distance_label || (
-        distance === null
-          ? "—"
-          : `${Math.abs(distance).toFixed(1)} pts ${inside ? "inside" : "beyond"} THI`
-      );
+    const allLines = altRow.lines;
+    const visibleLines = expanded
+      ? allLines
+      : compactAltLines(allLines, modelSide);
 
-      return `
-        <tr class="${row.is_main ? "main" : ""}">
-          <td>
-            <span class="thi-alt-line">${esc(preferred)} ${esc(fmtSpread(row.point))}</span>
-            ${row.is_main ? `<span class="thi-main-pill">Main</span>` : ""}
-          </td>
-          <td class="thi-alt-price">${esc(fmtPrice(row.price))}</td>
-          <td>${bookBadge(row)}</td>
-          <td class="thi-alt-distance ${inside ? "inside" : ""}">
-            ${esc(label)}
-          </td>
-        </tr>
-      `;
-    }).join("");
+    const hiddenCount = Math.max(0, allLines.length - visibleLines.length);
 
     return `
-      <div class="thi-market-panel">
+      <div class="thi-market-panel" data-thi-alt-panel>
         <div class="thi-market-head">
           <div>
             <div class="thi-market-kicker">What the market offers on THI's side</div>
-            <div class="thi-market-title">Alternate spreads — ${esc(preferred)}</div>
+            <div class="thi-market-title">Alternate spreads — ${esc(
+              preferred
+            )}</div>
           </div>
           <div class="thi-market-reference">
             <div class="thi-market-reference-label">THI Spread</div>
-            <div class="thi-market-reference-value">${esc(preferred)} ${esc(fmtSpread(modelSide))}</div>
+            <div class="thi-market-reference-value">${esc(
+              preferred
+            )} ${esc(fmtSpread(modelSide))}</div>
           </div>
         </div>
 
@@ -587,42 +728,99 @@
               <th>Distance From THI</th>
             </tr>
           </thead>
-          <tbody>${rows}</tbody>
+          <tbody>${altRowsHtml(visibleLines, preferred)}</tbody>
         </table>
+
+        ${
+          allLines.length > COMPACT_ALT_ROWS
+            ? `
+          <div class="thi-alt-toggle-wrap">
+            <button
+              type="button"
+              class="thi-alt-toggle"
+              data-thi-alt-toggle
+              aria-expanded="${expanded ? "true" : "false"}"
+            >
+              ${
+                expanded
+                  ? "Show compact alternate spreads"
+                  : `Show all alternate spreads (${allLines.length}) · ${hiddenCount} more`
+              }
+            </button>
+          </div>
+        `
+            : ""
+        }
       </div>
     `;
   }
 
-  function movementSummary(open, current, model, close) {
-    if (open === null || current === null || model === null) {
-      return "Not enough captured market history yet.";
+  function movementState(firstCaptured, current, model) {
+    if (
+      firstCaptured === null ||
+      current === null ||
+      model === null
+    ) {
+      return {
+        kind: "unknown",
+        label: "Direction pending",
+        summary: "Not enough captured market history yet.",
+      };
     }
 
-    const actualDelta = current - open;
-    const targetDelta = model - open;
+    const actualDelta = current - firstCaptured;
+    const targetDelta = model - firstCaptured;
 
     if (Math.abs(actualDelta) < 0.05) {
-      return "Market is unchanged from THI's first captured line.";
+      return {
+        kind: "flat",
+        label: "↔ Unchanged vs first capture",
+        summary: "Market is unchanged from THI's first captured line.",
+      };
     }
 
     if (Math.abs(targetDelta) < 0.05) {
-      return "The opening market was already aligned with the THI spread.";
+      return {
+        kind: "aligned",
+        label: "↔ THI was aligned at first capture",
+        summary: "The first captured market was already aligned with the THI spread.",
+      };
     }
 
-    const sameDirection = Math.sign(actualDelta) === Math.sign(targetDelta);
+    const sameDirection =
+      Math.sign(actualDelta) === Math.sign(targetDelta);
+
     const crossed =
       sameDirection &&
       Math.abs(actualDelta) > Math.abs(targetDelta);
 
     if (crossed) {
-      return `Market moved through the THI spread and is now ${Math.abs(current - model).toFixed(1)} pts beyond it.`;
+      return {
+        kind: "through",
+        label: `↗ ${Math.abs(actualDelta).toFixed(1)} pts through THI`,
+        summary: `Market moved through the THI spread and is now ${Math.abs(
+          current - model
+        ).toFixed(1)} pts beyond it.`,
+      };
     }
 
     if (sameDirection) {
-      return `Market has moved ${Math.abs(actualDelta).toFixed(1)} pts toward THI.`;
+      return {
+        kind: "toward",
+        label: `↗ ${Math.abs(actualDelta).toFixed(1)} pts toward THI`,
+        summary: `Market has moved ${Math.abs(actualDelta).toFixed(
+          1
+        )} pts toward THI.`,
+      };
     }
 
-    return `Market has moved ${Math.abs(actualDelta).toFixed(1)} pts away from THI.`;
+    return {
+      kind: "away",
+      label: `↘ ${Math.abs(actualDelta).toFixed(1)} pts away from THI`,
+      summary: `Market has moved ${Math.abs(actualDelta).toFixed(
+        1
+      )} pts away from THI.`,
+    };
   }
 
   function movementPanel(game, historyRow, preferred, home, away) {
@@ -650,17 +848,20 @@
     }
 
     const firstCaptured = sideSpread(
-      historyRow.first_captured_home_spread ?? historyRow.open_home_spread,
+      historyRow.first_captured_home_spread ??
+        historyRow.open_home_spread,
       preferred,
       home,
       away
     );
+
     const current = sideSpread(
       historyRow.current_home_spread,
       preferred,
       home,
       away
     );
+
     const close = sideSpread(
       historyRow.close_home_spread,
       preferred,
@@ -668,14 +869,16 @@
       away
     );
 
-    const summary = movementSummary(firstCaptured, current, model, close);
+    const movement = movementState(firstCaptured, current, model);
 
     return `
       <div class="thi-market-panel">
         <div class="thi-market-head">
           <div>
             <div class="thi-market-kicker">Market movement</div>
-            <div class="thi-market-title">${esc(preferred || "Market")} line history</div>
+            <div class="thi-market-title">${esc(
+              preferred || "Market"
+            )} line history</div>
           </div>
         </div>
 
@@ -683,14 +886,18 @@
           <div class="thi-movement-track">
             <div class="thi-move-point">
               <div class="thi-move-label">First Captured</div>
-              <div class="thi-move-value">${esc(fmtSpread(firstCaptured))}</div>
+              <div class="thi-move-value">${esc(
+                fmtSpread(firstCaptured)
+              )}</div>
             </div>
 
             <div class="thi-move-arrow">→</div>
 
             <div class="thi-move-point">
               <div class="thi-move-label">Current</div>
-              <div class="thi-move-value">${esc(fmtSpread(current))}</div>
+              <div class="thi-move-value">${esc(
+                fmtSpread(current)
+              )}</div>
             </div>
 
             <div class="thi-move-arrow">→</div>
@@ -705,8 +912,12 @@
             🔨 THI <strong>${esc(fmtSpread(model))}</strong>
           </div>
 
+          <div class="thi-move-direction">
+            ${esc(movement.label)}
+          </div>
+
           <div class="thi-move-callout">
-            <strong>${esc(summary)}</strong>
+            <strong>${esc(movement.summary)}</strong>
           </div>
         </div>
       </div>
@@ -715,19 +926,262 @@
 
   function findWhyPanel(container) {
     const panels = [...container.querySelectorAll(".analysis-panel")];
-    return panels.find(panel => {
-      const title = panel.querySelector(".analysis-panel-title");
-      return String(title?.textContent || "").trim().toLowerCase() === "why the model differs";
-    }) || null;
+
+    return (
+      panels.find((panel) => {
+        const title = panel.querySelector(".analysis-panel-title");
+        const text = String(title?.textContent || "")
+          .trim()
+          .toLowerCase();
+
+        return (
+          text === "why the model differs" ||
+          text.startsWith("why thi leans ") ||
+          text === "why thi differs"
+        );
+      }) || null
+    );
   }
 
-  function apply() {
-    if (applying) return;
-    applying = true;
+  function renderSignature(game, historyRow, altRow, preferred, expanded) {
+    const altLines = Array.isArray(altRow?.lines)
+      ? altRow.lines.map((row) => [
+          row?.point,
+          row?.price,
+          row?.bookmaker_key,
+          row?.is_main,
+          row?.distance_from_thi,
+        ])
+      : [];
 
-    try {
-      const container = document.getElementById("matchup-container");
-      if (!container) return;
+    return JSON.stringify({
+      game: gameId(game),
+      preferred,
+      model: modelHomeSpread(game),
+      market: marketHomeSpread(game),
+      first:
+        historyRow?.first_captured_home_spread ??
+        historyRow?.open_home_spread ??
+        null,
+      current: historyRow?.current_home_spread ?? null,
+      close: historyRow?.close_home_spread ?? null,
+      alt: altLines,
+      expanded,
+    });
+  }
+
+  function renderMarketLayer(game, teams) {
+    const container = matchupContainer();
+    if (!container) return;
+
+    const preferred = preferredSide(game);
+    const regularMarketGame =
+      !isFcsFallback(game) && marketHomeSpread(game) !== null;
+
+    const historyRow = findDataRow(
+      historyGames,
+      game,
+      teams.away,
+      teams.home
+    );
+
+    const altRow =
+      regularMarketGame && preferred
+        ? findDataRow(
+            altGames,
+            game,
+            teams.away,
+            teams.home
+          )
+        : null;
+
+    const key = gameId(game) || matchupKey(teams);
+    const expanded = expandedGameKey === key;
+
+    const signature = renderSignature(
+      game,
+      historyRow,
+      altRow,
+      preferred,
+      expanded
+    );
+
+    const analysisGrid = container.querySelector(".analysis-grid");
+    if (!analysisGrid) return;
+
+    const existingRoot = document.getElementById(ROOT_ID);
+
+    // Critical performance guard:
+    // if the actual game/market payload has not changed, do nothing.
+    if (
+      existingRoot &&
+      lastRenderSignature === signature &&
+      existingRoot.isConnected
+    ) {
+      return;
+    }
+
+    let root = existingRoot;
+
+    if (!root) {
+      root = document.createElement("div");
+      root.id = ROOT_ID;
+      analysisGrid.insertAdjacentElement("afterend", root);
+    }
+
+    const why = findWhyPanel(container);
+    if (why && !root.contains(why)) {
+      const whyTitle = why.querySelector(".analysis-panel-title");
+
+      if (whyTitle) {
+        whyTitle.textContent = preferred
+          ? `Why THI leans ${preferred}`
+          : "Why THI differs";
+      }
+
+      root.appendChild(why);
+    }
+
+    let marketHtml = "";
+
+    if (regularMarketGame && preferred) {
+      marketHtml = `
+        <div class="thi-market-grid">
+          ${altPanel(
+            game,
+            altRow,
+            preferred,
+            teams.home,
+            teams.away,
+            expanded
+          )}
+          ${movementPanel(
+            game,
+            historyRow,
+            preferred,
+            teams.home,
+            teams.away
+          )}
+        </div>
+      `;
+    } else if (regularMarketGame && historyRow) {
+      marketHtml = `
+        <div class="thi-market-grid">
+          ${movementPanel(
+            game,
+            historyRow,
+            preferred,
+            teams.home,
+            teams.away
+          )}
+        </div>
+      `;
+    }
+
+    const oldGrid = root.querySelector(".thi-market-grid");
+    if (oldGrid) {
+      oldGrid.outerHTML = marketHtml;
+    } else if (marketHtml) {
+      root.insertAdjacentHTML("beforeend", marketHtml);
+    }
+
+    lastRenderSignature = signature;
+  }
+
+  async function apply(forceDataRefresh = false) {
+    const teams = currentMatchupTeams();
+
+    if (!teams) {
+      lastMatchupKey = "";
+      lastRenderSignature = "";
+      return;
+    }
+
+    const key = matchupKey(teams);
+
+    if (key !== lastMatchupKey) {
+      lastMatchupKey = key;
+      lastRenderSignature = "";
+      expandedGameKey = null;
+    }
+
+    await loadData(forceDataRefresh);
+
+    const game = findProjection(teams.away, teams.home);
+    if (!game) return;
+
+    renderMarketLayer(game, teams);
+  }
+
+  function scheduleApply(delay = 45) {
+    window.clearTimeout(renderTimer);
+    renderTimer = window.setTimeout(() => {
+      apply(false).catch(() => {});
+    }, delay);
+  }
+
+  function mutationIsOnlyOurLayer(mutations) {
+    return mutations.every((mutation) => {
+      const target =
+        mutation.target?.nodeType === Node.ELEMENT_NODE
+          ? mutation.target
+          : mutation.target?.parentElement;
+
+      return Boolean(target?.closest?.(`#${ROOT_ID}`));
+    });
+  }
+
+  function bindTitleObserver() {
+    if (titleObserver) {
+      titleObserver.disconnect();
+      titleObserver = null;
+    }
+
+    const title = document.querySelector(
+      "#matchup-container .matchup-title"
+    );
+
+    if (!title) return;
+
+    titleObserver = new MutationObserver((mutations) => {
+      if (mutationIsOnlyOurLayer(mutations)) return;
+      scheduleApply(20);
+    });
+
+    titleObserver.observe(title, {
+      childList: true,
+      characterData: true,
+      subtree: true,
+    });
+  }
+
+  function bindContainerObserver() {
+    const container = matchupContainer();
+    if (!container) return;
+
+    if (containerObserver) containerObserver.disconnect();
+
+    containerObserver = new MutationObserver((mutations) => {
+      if (mutationIsOnlyOurLayer(mutations)) return;
+
+      // Only use the container observer to detect route/page structure changes.
+      // Heavy subtree observation is intentionally avoided.
+      bindTitleObserver();
+      scheduleApply(45);
+    });
+
+    containerObserver.observe(container, {
+      childList: true,
+      subtree: false,
+    });
+
+    bindTitleObserver();
+  }
+
+  function bindRootEvents() {
+    document.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-thi-alt-toggle]");
+      if (!button) return;
 
       const teams = currentMatchupTeams();
       if (!teams) return;
@@ -735,119 +1189,40 @@
       const game = findProjection(teams.away, teams.home);
       if (!game) return;
 
-      const preferred = preferredSide(game);
-      const signal = signalName(game);
+      const key = gameId(game) || matchupKey(teams);
+      expandedGameKey =
+        expandedGameKey === key ? null : key;
 
-      const existingRoot = document.getElementById(ROOT_ID);
-      if (existingRoot) existingRoot.remove();
-
-      const analysisGrid = container.querySelector(".analysis-grid");
-      if (!analysisGrid) return;
-
-      const root = document.createElement("div");
-      root.id = ROOT_ID;
-
-      const why = findWhyPanel(container);
-      if (why) {
-        const whyTitle = why.querySelector(".analysis-panel-title");
-        if (whyTitle) {
-          whyTitle.textContent = preferred
-            ? `Why THI leans ${preferred}`
-            : "Why THI differs";
-        }
-        root.appendChild(why);
-      }
-
-      const historyRow = findDataRow(
-        historyGames,
-        game,
-        teams.away,
-        teams.home
-      );
-
-      // Market tools are context, not betting instructions. Every regular
-      // FBS-v-FBS matchup with a valid market can receive them regardless of
-      // ALIGNED / SMALL EDGE / PLAY / MATERIAL DISAGREEMENT / OUTLIER.
-      // FCS fallback remains intentionally excluded.
-      const regularMarketGame =
-        !isFcsFallback(game) &&
-        marketHomeSpread(game) !== null;
-
-      if (regularMarketGame && preferred) {
-        const altRow = findDataRow(
-          altGames,
-          game,
-          teams.away,
-          teams.home
-        );
-
-        const grid = document.createElement("div");
-        grid.className = "thi-market-grid";
-        grid.innerHTML =
-          altPanel(
-            game,
-            altRow,
-            preferred,
-            teams.home,
-            teams.away
-          ) +
-          movementPanel(
-            game,
-            historyRow,
-            preferred,
-            teams.home,
-            teams.away
-          );
-
-        root.appendChild(grid);
-      } else if (regularMarketGame && historyRow) {
-        // Exact THI/market alignment can have no honest preferred side.
-        // Keep the factual market-history panel, but do not manufacture an
-        // alternate-spread direction.
-        const grid = document.createElement("div");
-        grid.className = "thi-market-grid";
-        grid.innerHTML = movementPanel(
-          game,
-          historyRow,
-          preferred,
-          teams.home,
-          teams.away
-        );
-        root.appendChild(grid);
-      }
-
-      analysisGrid.insertAdjacentElement("afterend", root);
-    } finally {
-      applying = false;
-    }
+      lastRenderSignature = "";
+      renderMarketLayer(game, teams);
+    });
   }
 
   async function init() {
     installStyles();
-    await loadData();
-    apply();
+    bindRootEvents();
+    bindContainerObserver();
 
-    const container = document.getElementById("matchup-container");
-    if (!container) return;
+    // Lazy: if there is no matchup open, do not download market-layer data yet.
+    if (currentMatchupTeams()) {
+      await apply(false);
+    }
 
-    observer = new MutationObserver(() => {
-      window.clearTimeout(observer._thiTimer);
-      observer._thiTimer = window.setTimeout(apply, 35);
-    });
+    refreshTimer = window.setInterval(async () => {
+      if (!currentMatchupTeams()) return;
 
-    observer.observe(container, {
-      childList: true,
-      subtree: true,
-    });
-
-    window.setInterval(async () => {
-      await loadData();
-      apply();
-    }, 5 * 60 * 1000);
+      try {
+        await apply(true);
+      } catch (_) {
+        // Keep the last good rendered state if a refresh fails.
+      }
+    }, REFRESH_MS);
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init, { once: true });
+    document.addEventListener("DOMContentLoaded", init, {
+      once: true,
+    });
   } else {
     init();
   }
