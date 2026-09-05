@@ -1,9 +1,11 @@
 {
   "meta": {
-    "generated_at": "2026-09-05T12:31:19.768262+00:00",
+    "generated_at": "2026-09-05T13:11:26.892836+00:00",
     "source": "THI consensus market snapshots",
     "model_a_touched": false,
-    "note": "Open = first THI-observed consensus line; close = last captured line at/after kickoff unless official closing capture supersedes it."
+    "first_line_definition": "FIRST CAPTURED = first consensus spread observed by THI, not a claimed sportsbook opener.",
+    "close_definition": "CLOSE = latest THI-captured pre-kick consensus spread. Post-kick/in-play quotes are never used.",
+    "note": "Historical rows created before this schema retain their original first-captured value through backward-compatible open_* fields."
   },
   "games": {
     "401862701": {
@@ -15,7 +17,7 @@
       "open_home_spread": -37.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -37.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -23,7 +25,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -37.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -37.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856780": {
       "game_id": "401856780",
@@ -34,7 +38,7 @@
       "open_home_spread": -21.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -21.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -42,7 +46,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -21.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -21.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856634": {
       "game_id": "401856634",
@@ -53,7 +59,7 @@
       "open_home_spread": -28.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -28.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -61,7 +67,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -28.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -28.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401861962": {
       "game_id": "401861962",
@@ -71,16 +79,22 @@
       "start_date": "2026-09-05T16:00:00.000Z",
       "open_home_spread": -19.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
-      "current_home_spread": -19.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_home_spread": -20.0,
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
         {
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -19.5
+        },
+        {
+          "captured_at": "2026-09-05T13:11:26.892836+00:00",
+          "home_spread": -20.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -19.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401869960": {
       "game_id": "401869960",
@@ -91,7 +105,7 @@
       "open_home_spread": -6.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -6.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -99,7 +113,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -6.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -6.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858208": {
       "game_id": "401858208",
@@ -109,16 +125,22 @@
       "start_date": "2026-09-05T16:00:00.000Z",
       "open_home_spread": -35.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
-      "current_home_spread": -35.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_home_spread": -35.5,
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
         {
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -35.0
+        },
+        {
+          "captured_at": "2026-09-05T13:11:26.892836+00:00",
+          "home_spread": -35.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -35.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858425": {
       "game_id": "401858425",
@@ -129,7 +151,7 @@
       "open_home_spread": -40.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -40.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -137,7 +159,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -40.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -40.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858430": {
       "game_id": "401858430",
@@ -148,7 +172,7 @@
       "open_home_spread": -24.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -24.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -156,7 +180,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -24.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -24.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856778": {
       "game_id": "401856778",
@@ -167,7 +193,7 @@
       "open_home_spread": -21.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -21.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -175,7 +201,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -21.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -21.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401866410": {
       "game_id": "401866410",
@@ -186,7 +214,7 @@
       "open_home_spread": -2.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -2.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -194,7 +222,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -2.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -2.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858432": {
       "game_id": "401858432",
@@ -205,7 +235,7 @@
       "open_home_spread": -50.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -50.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -213,7 +243,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -50.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -50.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858207": {
       "game_id": "401858207",
@@ -224,7 +256,7 @@
       "open_home_spread": -16.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -16.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -232,7 +264,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -16.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -16.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856665": {
       "game_id": "401856665",
@@ -243,7 +277,7 @@
       "open_home_spread": -35.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -35.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -251,7 +285,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -35.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -35.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401864496": {
       "game_id": "401864496",
@@ -262,7 +298,7 @@
       "open_home_spread": -28.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -28.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -270,7 +306,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -28.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -28.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856779": {
       "game_id": "401856779",
@@ -281,7 +319,7 @@
       "open_home_spread": -30.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -30.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -289,7 +327,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -30.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -30.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401862698": {
       "game_id": "401862698",
@@ -300,7 +340,7 @@
       "open_home_spread": -14.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -14.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -308,7 +348,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -14.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -14.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856658": {
       "game_id": "401856658",
@@ -319,7 +361,7 @@
       "open_home_spread": -46.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -46.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -327,7 +369,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -46.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -46.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856636": {
       "game_id": "401856636",
@@ -338,7 +382,7 @@
       "open_home_spread": -7.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -7.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -346,7 +390,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -7.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -7.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858433": {
       "game_id": "401858433",
@@ -357,7 +403,7 @@
       "open_home_spread": -24.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -24.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -365,7 +411,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -24.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -24.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856777": {
       "game_id": "401856777",
@@ -376,7 +424,7 @@
       "open_home_spread": -7.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -7.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -384,7 +432,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -7.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -7.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401864499": {
       "game_id": "401864499",
@@ -395,7 +445,7 @@
       "open_home_spread": -41.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -41.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -403,7 +453,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -41.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -41.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856666": {
       "game_id": "401856666",
@@ -414,7 +466,7 @@
       "open_home_spread": -48.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -48.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -422,7 +474,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -48.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -48.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401866627": {
       "game_id": "401866627",
@@ -433,7 +487,7 @@
       "open_home_spread": -19.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -19.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -441,7 +495,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -19.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -19.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858434": {
       "game_id": "401858434",
@@ -452,7 +508,7 @@
       "open_home_spread": -23.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -23.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -460,7 +516,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -23.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -23.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856667": {
       "game_id": "401856667",
@@ -471,7 +529,7 @@
       "open_home_spread": -29.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -29.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -479,7 +537,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -29.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -29.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401862696": {
       "game_id": "401862696",
@@ -490,7 +550,7 @@
       "open_home_spread": -30.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -30.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -498,7 +558,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -30.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -30.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858209": {
       "game_id": "401858209",
@@ -509,7 +571,7 @@
       "open_home_spread": -7.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -7.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -517,7 +579,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -7.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -7.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401862700": {
       "game_id": "401862700",
@@ -528,7 +592,7 @@
       "open_home_spread": -28.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -28.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -536,7 +600,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -28.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -28.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856772": {
       "game_id": "401856772",
@@ -547,7 +613,7 @@
       "open_home_spread": 13.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 13.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -555,7 +621,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 13.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 13.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856635": {
       "game_id": "401856635",
@@ -566,7 +634,7 @@
       "open_home_spread": -40.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -40.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -574,7 +642,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -40.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -40.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858426": {
       "game_id": "401858426",
@@ -585,7 +655,7 @@
       "open_home_spread": -31.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -31.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -593,7 +663,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -31.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -31.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401868356": {
       "game_id": "401868356",
@@ -604,7 +676,7 @@
       "open_home_spread": -17.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -17.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -612,7 +684,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -17.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -17.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401867973": {
       "game_id": "401867973",
@@ -623,7 +697,7 @@
       "open_home_spread": -41.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -41.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -631,7 +705,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -41.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -41.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401860878": {
       "game_id": "401860878",
@@ -642,7 +718,7 @@
       "open_home_spread": -3.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -3.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -650,7 +726,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -3.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -3.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856770": {
       "game_id": "401856770",
@@ -661,7 +739,7 @@
       "open_home_spread": -42.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -42.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -669,7 +747,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -42.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -42.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401862695": {
       "game_id": "401862695",
@@ -680,7 +760,7 @@
       "open_home_spread": -11.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -11.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -688,7 +768,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -11.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -11.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856669": {
       "game_id": "401856669",
@@ -699,7 +781,7 @@
       "open_home_spread": -29.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -29.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -707,7 +789,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -29.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -29.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401868170": {
       "game_id": "401868170",
@@ -717,16 +801,22 @@
       "start_date": "2026-09-05T23:00:00.000Z",
       "open_home_spread": -25.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
-      "current_home_spread": -25.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_home_spread": -26.5,
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
         {
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -25.5
+        },
+        {
+          "captured_at": "2026-09-05T13:11:26.892836+00:00",
+          "home_spread": -26.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -25.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401868140": {
       "game_id": "401868140",
@@ -736,16 +826,22 @@
       "start_date": "2026-09-05T23:00:00.000Z",
       "open_home_spread": -20.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
-      "current_home_spread": -20.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_home_spread": -21.0,
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
         {
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -20.5
+        },
+        {
+          "captured_at": "2026-09-05T13:11:26.892836+00:00",
+          "home_spread": -21.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -20.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401862699": {
       "game_id": "401862699",
@@ -756,7 +852,7 @@
       "open_home_spread": -14.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -14.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -764,7 +860,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -14.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -14.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401860880": {
       "game_id": "401860880",
@@ -775,7 +873,7 @@
       "open_home_spread": -14.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -14.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -783,7 +881,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -14.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -14.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856668": {
       "game_id": "401856668",
@@ -794,7 +894,7 @@
       "open_home_spread": -40.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -40.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -802,7 +902,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -40.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -40.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401867866": {
       "game_id": "401867866",
@@ -812,16 +914,22 @@
       "start_date": "2026-09-05T23:00:00.000Z",
       "open_home_spread": -21.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
-      "current_home_spread": -21.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_home_spread": -21.5,
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
         {
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -21.0
+        },
+        {
+          "captured_at": "2026-09-05T13:11:26.892836+00:00",
+          "home_spread": -21.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -21.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856771": {
       "game_id": "401856771",
@@ -831,16 +939,22 @@
       "start_date": "2026-09-05T23:00:00.000Z",
       "open_home_spread": -41.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
-      "current_home_spread": -41.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_home_spread": -41.5,
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
         {
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -41.0
+        },
+        {
+          "captured_at": "2026-09-05T13:11:26.892836+00:00",
+          "home_spread": -41.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -41.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401870763": {
       "game_id": "401870763",
@@ -851,7 +965,7 @@
       "open_home_spread": -16.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -16.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -859,7 +973,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -16.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -16.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856660": {
       "game_id": "401856660",
@@ -870,7 +986,7 @@
       "open_home_spread": -10.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -10.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -878,7 +994,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -10.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -10.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401869129": {
       "game_id": "401869129",
@@ -889,7 +1007,7 @@
       "open_home_spread": -44.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -44.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -897,7 +1015,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -44.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -44.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856662": {
       "game_id": "401856662",
@@ -908,7 +1028,7 @@
       "open_home_spread": -28.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -28.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -916,7 +1036,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -28.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -28.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858211": {
       "game_id": "401858211",
@@ -927,7 +1049,7 @@
       "open_home_spread": -55.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -55.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -935,7 +1057,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -55.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -55.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858428": {
       "game_id": "401858428",
@@ -946,7 +1070,7 @@
       "open_home_spread": -27.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -27.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -954,7 +1078,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -27.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -27.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856637": {
       "game_id": "401856637",
@@ -965,7 +1091,7 @@
       "open_home_spread": -26.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -26.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -973,7 +1099,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -26.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -26.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858427": {
       "game_id": "401858427",
@@ -984,7 +1112,7 @@
       "open_home_spread": -45.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -45.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -992,7 +1120,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -45.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -45.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401869142": {
       "game_id": "401869142",
@@ -1002,16 +1132,22 @@
       "start_date": "2026-09-06T00:00:00.000Z",
       "open_home_spread": -19.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
-      "current_home_spread": -19.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_home_spread": -20.5,
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
         {
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -19.0
+        },
+        {
+          "captured_at": "2026-09-05T13:11:26.892836+00:00",
+          "home_spread": -20.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -19.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858431": {
       "game_id": "401858431",
@@ -1022,7 +1158,7 @@
       "open_home_spread": -12.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -12.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1030,7 +1166,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -12.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -12.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856775": {
       "game_id": "401856775",
@@ -1041,7 +1179,7 @@
       "open_home_spread": -51.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -51.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1049,7 +1187,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -51.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -51.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401870790": {
       "game_id": "401870790",
@@ -1060,7 +1200,7 @@
       "open_home_spread": -28.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -28.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1068,7 +1208,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -28.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -28.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856773": {
       "game_id": "401856773",
@@ -1079,7 +1221,7 @@
       "open_home_spread": -31.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -31.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1087,7 +1229,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -31.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -31.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401860879": {
       "game_id": "401860879",
@@ -1098,7 +1242,7 @@
       "open_home_spread": -40.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -40.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1106,7 +1250,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -40.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -40.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401864498": {
       "game_id": "401864498",
@@ -1117,7 +1263,7 @@
       "open_home_spread": -10.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -10.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1125,7 +1271,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -10.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -10.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401866411": {
       "game_id": "401866411",
@@ -1136,7 +1284,7 @@
       "open_home_spread": -37.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -37.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1144,7 +1292,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -37.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -37.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856774": {
       "game_id": "401856774",
@@ -1155,7 +1305,7 @@
       "open_home_spread": -43.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -43.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1163,7 +1313,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -43.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -43.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401864497": {
       "game_id": "401864497",
@@ -1174,7 +1326,7 @@
       "open_home_spread": 3.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 3.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1182,7 +1334,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 3.0
         }
-      ]
+      ],
+      "first_captured_home_spread": 3.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858210": {
       "game_id": "401858210",
@@ -1193,7 +1347,7 @@
       "open_home_spread": 2.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 2.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1201,7 +1355,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 2.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 2.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401864432": {
       "game_id": "401864432",
@@ -1212,7 +1368,7 @@
       "open_home_spread": 1.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 1.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1220,7 +1376,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 1.0
         }
-      ]
+      ],
+      "first_captured_home_spread": 1.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858437": {
       "game_id": "401858437",
@@ -1231,7 +1389,7 @@
       "open_home_spread": -23.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -23.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1239,7 +1397,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -23.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -23.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856661": {
       "game_id": "401856661",
@@ -1250,7 +1410,7 @@
       "open_home_spread": -6.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -6.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1258,7 +1418,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -6.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -6.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858438": {
       "game_id": "401858438",
@@ -1269,7 +1431,7 @@
       "open_home_spread": -20.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -20.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1277,7 +1439,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -20.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -20.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858212": {
       "game_id": "401858212",
@@ -1288,7 +1452,7 @@
       "open_home_spread": 3.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 3.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1296,7 +1460,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 3.0
         }
-      ]
+      ],
+      "first_captured_home_spread": 3.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858213": {
       "game_id": "401858213",
@@ -1307,7 +1473,7 @@
       "open_home_spread": -53.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -53.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1315,7 +1481,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -53.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -53.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858220": {
       "game_id": "401858220",
@@ -1326,7 +1494,7 @@
       "open_home_spread": -43.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -43.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1334,7 +1502,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -43.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -43.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858222": {
       "game_id": "401858222",
@@ -1345,7 +1515,7 @@
       "open_home_spread": -30.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -30.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1353,7 +1523,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -30.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -30.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858215": {
       "game_id": "401858215",
@@ -1364,7 +1536,7 @@
       "open_home_spread": -35.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -35.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1372,7 +1544,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -35.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -35.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858214": {
       "game_id": "401858214",
@@ -1383,7 +1557,7 @@
       "open_home_spread": -6.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -6.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1391,7 +1565,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -6.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -6.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856678": {
       "game_id": "401856678",
@@ -1402,7 +1578,7 @@
       "open_home_spread": 6.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 6.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1410,7 +1586,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 6.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 6.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401864571": {
       "game_id": "401864571",
@@ -1421,7 +1599,7 @@
       "open_home_spread": -9.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -9.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1429,7 +1607,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -9.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -9.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856683": {
       "game_id": "401856683",
@@ -1440,7 +1620,7 @@
       "open_home_spread": -15.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -15.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1448,7 +1628,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -15.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -15.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858218": {
       "game_id": "401858218",
@@ -1459,7 +1641,7 @@
       "open_home_spread": -35.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -35.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1467,7 +1649,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -35.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -35.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856679": {
       "game_id": "401856679",
@@ -1478,7 +1662,7 @@
       "open_home_spread": 0.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 0.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1486,7 +1670,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 0.0
         }
-      ]
+      ],
+      "first_captured_home_spread": 0.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858221": {
       "game_id": "401858221",
@@ -1497,7 +1683,7 @@
       "open_home_spread": -16.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -16.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1505,7 +1691,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -16.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -16.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856782": {
       "game_id": "401856782",
@@ -1516,7 +1704,7 @@
       "open_home_spread": 19.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 19.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1524,7 +1712,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 19.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 19.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858442": {
       "game_id": "401858442",
@@ -1535,7 +1725,7 @@
       "open_home_spread": 22.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 22.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1543,7 +1733,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 22.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 22.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401862702": {
       "game_id": "401862702",
@@ -1554,7 +1746,7 @@
       "open_home_spread": -1.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -1.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1562,7 +1754,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -1.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -1.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858224": {
       "game_id": "401858224",
@@ -1573,7 +1767,7 @@
       "open_home_spread": 4.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 4.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1581,7 +1775,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 4.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 4.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856781": {
       "game_id": "401856781",
@@ -1592,7 +1788,7 @@
       "open_home_spread": -17.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -17.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1600,7 +1796,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -17.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -17.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856673": {
       "game_id": "401856673",
@@ -1611,7 +1809,7 @@
       "open_home_spread": -35.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -35.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1619,7 +1817,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -35.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -35.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856674": {
       "game_id": "401856674",
@@ -1630,7 +1830,7 @@
       "open_home_spread": 10.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 10.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1638,7 +1838,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 10.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 10.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856810": {
       "game_id": "401856810",
@@ -1649,7 +1851,7 @@
       "open_home_spread": -8.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -8.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1657,7 +1859,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -8.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -8.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858216": {
       "game_id": "401858216",
@@ -1668,7 +1872,7 @@
       "open_home_spread": 2.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 2.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1676,7 +1880,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 2.0
         }
-      ]
+      ],
+      "first_captured_home_spread": 2.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858217": {
       "game_id": "401858217",
@@ -1687,7 +1893,7 @@
       "open_home_spread": -8.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -8.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1695,7 +1901,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -8.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -8.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858440": {
       "game_id": "401858440",
@@ -1706,7 +1914,7 @@
       "open_home_spread": -17.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -17.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1714,7 +1922,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -17.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -17.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858444": {
       "game_id": "401858444",
@@ -1725,7 +1935,7 @@
       "open_home_spread": 13.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 13.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1733,7 +1943,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 13.0
         }
-      ]
+      ],
+      "first_captured_home_spread": 13.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856677": {
       "game_id": "401856677",
@@ -1744,7 +1956,7 @@
       "open_home_spread": -2.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -2.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1752,7 +1964,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -2.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -2.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401859184": {
       "game_id": "401859184",
@@ -1763,7 +1977,7 @@
       "open_home_spread": -44.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -44.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1771,7 +1985,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -44.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -44.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856790": {
       "game_id": "401856790",
@@ -1782,7 +1998,7 @@
       "open_home_spread": -8.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -8.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1790,7 +2006,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -8.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -8.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401862708": {
       "game_id": "401862708",
@@ -1801,7 +2019,7 @@
       "open_home_spread": -8.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -8.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1809,7 +2027,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -8.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -8.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401860884": {
       "game_id": "401860884",
@@ -1820,7 +2040,7 @@
       "open_home_spread": 0.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 0.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1828,7 +2048,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 0.0
         }
-      ]
+      ],
+      "first_captured_home_spread": 0.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858446": {
       "game_id": "401858446",
@@ -1839,7 +2061,7 @@
       "open_home_spread": -24.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -24.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1847,7 +2069,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -24.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -24.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401862705": {
       "game_id": "401862705",
@@ -1858,7 +2082,7 @@
       "open_home_spread": 6.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 6.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1866,7 +2090,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 6.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 6.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401865252": {
       "game_id": "401865252",
@@ -1877,7 +2103,7 @@
       "open_home_spread": -41.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -41.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1885,7 +2111,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -41.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -41.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856684": {
       "game_id": "401856684",
@@ -1896,7 +2124,7 @@
       "open_home_spread": -21.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -21.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1904,7 +2132,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -21.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -21.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401866414": {
       "game_id": "401866414",
@@ -1915,7 +2145,7 @@
       "open_home_spread": -7.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -7.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1923,7 +2153,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -7.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -7.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401866418": {
       "game_id": "401866418",
@@ -1934,7 +2166,7 @@
       "open_home_spread": -2.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -2.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1942,7 +2174,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -2.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -2.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401860881": {
       "game_id": "401860881",
@@ -1953,7 +2187,7 @@
       "open_home_spread": -7.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -7.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1961,7 +2195,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -7.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -7.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858441": {
       "game_id": "401858441",
@@ -1972,7 +2208,7 @@
       "open_home_spread": -25.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -25.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1980,7 +2216,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -25.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -25.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401871045": {
       "game_id": "401871045",
@@ -1991,7 +2229,7 @@
       "open_home_spread": -17.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -17.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -1999,7 +2237,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -17.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -17.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401864575": {
       "game_id": "401864575",
@@ -2010,7 +2250,7 @@
       "open_home_spread": -10.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -10.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2018,7 +2258,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -10.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -10.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856681": {
       "game_id": "401856681",
@@ -2029,7 +2271,7 @@
       "open_home_spread": 12.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 12.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2037,7 +2279,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 12.0
         }
-      ]
+      ],
+      "first_captured_home_spread": 12.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401862707": {
       "game_id": "401862707",
@@ -2048,7 +2292,7 @@
       "open_home_spread": 11.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 11.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2056,7 +2300,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 11.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 11.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858443": {
       "game_id": "401858443",
@@ -2067,7 +2313,7 @@
       "open_home_spread": -10.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -10.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2075,7 +2321,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -10.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -10.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858219": {
       "game_id": "401858219",
@@ -2086,7 +2334,7 @@
       "open_home_spread": -26.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -26.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2094,7 +2342,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -26.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -26.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856788": {
       "game_id": "401856788",
@@ -2105,7 +2355,7 @@
       "open_home_spread": -13.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -13.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2113,7 +2363,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -13.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -13.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856682": {
       "game_id": "401856682",
@@ -2124,7 +2376,7 @@
       "open_home_spread": -1.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -1.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2132,7 +2384,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -1.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -1.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856783": {
       "game_id": "401856783",
@@ -2143,7 +2397,7 @@
       "open_home_spread": 28.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 28.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2151,7 +2405,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 28.0
         }
-      ]
+      ],
+      "first_captured_home_spread": 28.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401864504": {
       "game_id": "401864504",
@@ -2162,7 +2418,7 @@
       "open_home_spread": -20.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -20.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2170,7 +2426,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -20.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -20.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856670": {
       "game_id": "401856670",
@@ -2181,7 +2439,7 @@
       "open_home_spread": -9.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -9.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2189,7 +2447,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -9.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -9.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401864578": {
       "game_id": "401864578",
@@ -2200,7 +2460,7 @@
       "open_home_spread": -11.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -11.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2208,7 +2468,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -11.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -11.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856811": {
       "game_id": "401856811",
@@ -2219,7 +2481,7 @@
       "open_home_spread": -13.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -13.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2227,7 +2489,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -13.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -13.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856686": {
       "game_id": "401856686",
@@ -2238,7 +2502,7 @@
       "open_home_spread": 16.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 16.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2246,7 +2510,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 16.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 16.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858230": {
       "game_id": "401858230",
@@ -2257,7 +2523,7 @@
       "open_home_spread": -1.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -1.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2265,7 +2531,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -1.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -1.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856687": {
       "game_id": "401856687",
@@ -2276,7 +2544,7 @@
       "open_home_spread": 1.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 1.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2284,7 +2552,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 1.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 1.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856688": {
       "game_id": "401856688",
@@ -2295,7 +2565,7 @@
       "open_home_spread": -2.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -2.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2303,7 +2573,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -2.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -2.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856702": {
       "game_id": "401856702",
@@ -2314,7 +2586,7 @@
       "open_home_spread": -3.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -3.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2322,7 +2594,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -3.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -3.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856704": {
       "game_id": "401856704",
@@ -2333,7 +2607,7 @@
       "open_home_spread": 6.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 6.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2341,7 +2615,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 6.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 6.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856712": {
       "game_id": "401856712",
@@ -2352,7 +2628,7 @@
       "open_home_spread": 3.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 3.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2360,7 +2636,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 3.0
         }
-      ]
+      ],
+      "first_captured_home_spread": 3.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856717": {
       "game_id": "401856717",
@@ -2371,7 +2649,7 @@
       "open_home_spread": 6.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 6.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2379,7 +2657,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 6.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 6.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856723": {
       "game_id": "401856723",
@@ -2390,7 +2670,7 @@
       "open_home_spread": 1.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 1.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2398,7 +2678,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 1.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 1.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856719": {
       "game_id": "401856719",
@@ -2409,7 +2691,7 @@
       "open_home_spread": -16.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -16.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2417,7 +2699,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -16.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -16.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858492": {
       "game_id": "401858492",
@@ -2428,7 +2712,7 @@
       "open_home_spread": -21.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -21.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2436,7 +2720,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -21.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -21.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856809": {
       "game_id": "401856809",
@@ -2447,7 +2733,7 @@
       "open_home_spread": 10.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 10.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2455,7 +2741,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 10.0
         }
-      ]
+      ],
+      "first_captured_home_spread": 10.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858488": {
       "game_id": "401858488",
@@ -2466,7 +2754,7 @@
       "open_home_spread": 1.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 1.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2474,7 +2762,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 1.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 1.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858490": {
       "game_id": "401858490",
@@ -2485,7 +2775,7 @@
       "open_home_spread": -6.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -6.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2493,7 +2783,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -6.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -6.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858496": {
       "game_id": "401858496",
@@ -2504,7 +2796,7 @@
       "open_home_spread": 6.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 6.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2512,7 +2804,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 6.0
         }
-      ]
+      ],
+      "first_captured_home_spread": 6.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856732": {
       "game_id": "401856732",
@@ -2523,7 +2817,7 @@
       "open_home_spread": -8.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -8.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2531,7 +2825,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -8.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -8.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856727": {
       "game_id": "401856727",
@@ -2542,7 +2838,7 @@
       "open_home_spread": -2.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -2.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2550,7 +2846,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -2.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -2.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856734": {
       "game_id": "401856734",
@@ -2561,7 +2859,7 @@
       "open_home_spread": -12.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -12.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2569,7 +2867,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -12.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -12.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856740": {
       "game_id": "401856740",
@@ -2580,7 +2880,7 @@
       "open_home_spread": -3.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -3.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2588,7 +2888,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -3.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -3.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856741": {
       "game_id": "401856741",
@@ -2599,7 +2901,7 @@
       "open_home_spread": 4.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 4.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2607,7 +2909,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 4.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 4.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858514": {
       "game_id": "401858514",
@@ -2618,7 +2922,7 @@
       "open_home_spread": -6.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -6.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2626,7 +2930,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -6.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -6.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858291": {
       "game_id": "401858291",
@@ -2637,7 +2943,7 @@
       "open_home_spread": -6.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -6.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2645,7 +2951,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -6.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -6.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858523": {
       "game_id": "401858523",
@@ -2656,7 +2964,7 @@
       "open_home_spread": -13.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -13.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2664,7 +2972,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -13.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -13.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856888": {
       "game_id": "401856888",
@@ -2675,7 +2985,7 @@
       "open_home_spread": -8.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -8.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2683,7 +2993,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -8.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -8.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856885": {
       "game_id": "401856885",
@@ -2694,7 +3006,7 @@
       "open_home_spread": 2.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 2.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2702,7 +3014,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 2.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 2.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856863": {
       "game_id": "401856863",
@@ -2713,7 +3027,7 @@
       "open_home_spread": 15.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 15.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2721,7 +3035,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 15.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 15.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856754": {
       "game_id": "401856754",
@@ -2732,7 +3048,7 @@
       "open_home_spread": 1.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 1.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2740,7 +3056,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 1.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 1.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858307": {
       "game_id": "401858307",
@@ -2751,7 +3069,7 @@
       "open_home_spread": -17.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -17.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2759,7 +3077,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -17.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -17.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856762": {
       "game_id": "401856762",
@@ -2770,7 +3090,7 @@
       "open_home_spread": -14.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -14.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2778,7 +3098,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -14.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -14.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856756": {
       "game_id": "401856756",
@@ -2789,7 +3111,7 @@
       "open_home_spread": 2.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 2.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2797,7 +3119,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 2.5
         }
-      ]
+      ],
+      "first_captured_home_spread": 2.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856873": {
       "game_id": "401856873",
@@ -2808,7 +3132,7 @@
       "open_home_spread": -4.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -4.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2816,7 +3140,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -4.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -4.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856757": {
       "game_id": "401856757",
@@ -2827,7 +3153,7 @@
       "open_home_spread": -10.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -10.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2835,7 +3161,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -10.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -10.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856764": {
       "game_id": "401856764",
@@ -2846,7 +3174,7 @@
       "open_home_spread": -3.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -3.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2854,7 +3182,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -3.0
         }
-      ]
+      ],
+      "first_captured_home_spread": -3.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401856765": {
       "game_id": "401856765",
@@ -2865,7 +3195,7 @@
       "open_home_spread": 3.0,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": 3.0,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2873,7 +3203,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": 3.0
         }
-      ]
+      ],
+      "first_captured_home_spread": 3.0,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858541": {
       "game_id": "401858541",
@@ -2884,7 +3216,7 @@
       "open_home_spread": -15.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -15.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2892,7 +3224,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -15.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -15.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     },
     "401858540": {
       "game_id": "401858540",
@@ -2903,7 +3237,7 @@
       "open_home_spread": -13.5,
       "open_captured_at": "2026-09-05T12:29:13.959394+00:00",
       "current_home_spread": -13.5,
-      "current_captured_at": "2026-09-05T12:31:19.768262+00:00",
+      "current_captured_at": "2026-09-05T13:11:26.892836+00:00",
       "close_home_spread": null,
       "close_captured_at": null,
       "snapshots": [
@@ -2911,7 +3245,9 @@
           "captured_at": "2026-09-05T12:29:13.959394+00:00",
           "home_spread": -13.5
         }
-      ]
+      ],
+      "first_captured_home_spread": -13.5,
+      "first_captured_at": "2026-09-05T12:29:13.959394+00:00"
     }
   }
 }
