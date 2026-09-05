@@ -76,6 +76,12 @@ TEAM_NAME_ALIASES = {
     "Miami (FL)": "Miami",
     "Miami (Fla.)": "Miami",
     "Southern California": "USC",
+
+    # NCAA short-name variants that differ from the THI projection board.
+    "Georgia St.": "Georgia State",
+    "N.C. A&T": "North Carolina A&T",
+    "NC A&T": "North Carolina A&T",
+    "LIU": "Long Island University",
 }
 
 
@@ -147,6 +153,14 @@ def canonical_team(value: Any) -> str:
         "southerncalifornia": "usc",
         "arkpinebluff": "arkansaspinebluff",
         "ualbany": "albany",
+
+        # NCAA / projection-board canonical bridges.
+        "liu": "longisland",
+        "longislanduniversity": "longisland",
+        "ncandt": "northcarolinaandt",
+        "northcarolinaandt": "northcarolinaandt",
+        "georgiast": "georgiastate",
+        "georgiastate": "georgiastate",
     }
     return aliases.get(text, text)
 
