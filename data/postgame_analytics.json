@@ -2,10 +2,10 @@
   "meta": {
     "season": 2026,
     "schema_version": "2.0-canonical-postgame",
-    "generated_at": "2026-09-06T02:00:09.828465+00:00",
-    "final_games": 64,
-    "available": 55,
-    "pending": 9,
+    "generated_at": "2026-09-06T02:19:56.980846+00:00",
+    "final_games": 70,
+    "available": 58,
+    "pending": 12,
     "source": "SportsDataverse/cfbfastR PBP",
     "source_url": "https://raw.githubusercontent.com/sportsdataverse/cfbfastR-cfb-data/main/cfb/pbp/parquet/play_by_play_2026.parquet",
     "model_a_touched": false,
@@ -251,7 +251,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.521826+00:00"
+      "generated_at": "2026-09-06T02:19:56.661941+00:00"
     },
     {
       "game_id": "6603913",
@@ -267,7 +267,241 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-06T02:00:09.521889+00:00"
+      "generated_at": "2026-09-06T02:19:56.662003+00:00"
+    },
+    {
+      "game_id": "6603714",
+      "pbp_game_id": "401862695",
+      "matchup_key": "arkansasstate@memphis",
+      "season": 2026,
+      "week": 1,
+      "away_team": "Arkansas State",
+      "home_team": "Memphis",
+      "away_points": 24,
+      "home_points": 42,
+      "analysis_status": "available",
+      "analysis_level": "full",
+      "source": "SportsDataverse/cfbfastR PBP",
+      "source_note": "Retrospective only. Does not alter the frozen pregame THI projection.",
+      "calibration_status": "BETA \u2014 historical calibration pending",
+      "headline": {
+        "postgame_win_expectancy": {
+          "away_pct": 31.3,
+          "home_pct": 68.7,
+          "winner": "Memphis"
+        },
+        "adjusted_final_score": {
+          "away": 11.8,
+          "home": 17.7
+        },
+        "reality_check": {
+          "label": "CLOSER THAN IT LOOKED",
+          "note": "The final margin was larger than the underlying efficiency and possession profile suggested.",
+          "actual_margin": 18,
+          "adjusted_margin": 5.9
+        }
+      },
+      "away_metrics": {
+        "overall": {
+          "plays": 30,
+          "epa_total": 0.99,
+          "epa_per_play": 0.033,
+          "success_rate": 53.3
+        },
+        "passing": {
+          "plays": 13,
+          "epa_total": 6.82,
+          "epa_per_play": 0.525,
+          "success_rate": 61.5
+        },
+        "rushing": {
+          "plays": 17,
+          "epa_total": -5.83,
+          "epa_per_play": -0.343,
+          "success_rate": 47.1
+        },
+        "standard_downs": {
+          "plays": 20,
+          "epa_total": 4.67,
+          "epa_per_play": 0.234,
+          "success_rate": 55.0
+        },
+        "passing_downs": {
+          "plays": 10,
+          "epa_total": -3.68,
+          "epa_per_play": -0.368,
+          "success_rate": 50.0
+        },
+        "early_downs": {
+          "plays": 25,
+          "epa_total": 2.38,
+          "epa_per_play": 0.095,
+          "success_rate": 56.0
+        },
+        "third_fourth_downs": {
+          "plays": 5,
+          "epa_total": -1.39,
+          "epa_per_play": -0.277,
+          "success_rate": 40.0
+        },
+        "fourth_down": {
+          "plays": 0,
+          "epa_total": null,
+          "epa_per_play": null,
+          "success_rate": null,
+          "attempts": 0
+        },
+        "explosiveness": {
+          "explosive_plays": 8,
+          "explosive_play_rate": 26.7,
+          "explosive_epa_dependency": 66.1
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 0,
+          "sack_rate_allowed": 0.0,
+          "stuffs_allowed": 2,
+          "stuff_rate_allowed": 11.8,
+          "tfl_allowed": 2,
+          "tfl_rate_allowed": 6.7
+        },
+        "drives": {
+          "drives": 5,
+          "points_per_drive": 2.8,
+          "yards_per_drive": 55.2,
+          "drive_success_rate": 20.0,
+          "three_and_outs": 0,
+          "three_and_out_rate": 0.0
+        },
+        "scoring_opportunities": {
+          "opportunities": 3,
+          "points_per_opportunity": 2.33
+        },
+        "red_zone": {
+          "trips": 1,
+          "points_per_trip": 7.0,
+          "overperformance_points_per_trip": 2.3,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 65.4
+        },
+        "turnovers": {
+          "turnovers": 1,
+          "turnover_epa_impact": -2.61
+        },
+        "epa_volatility": 2.015
+      },
+      "home_metrics": {
+        "overall": {
+          "plays": 27,
+          "epa_total": 8.65,
+          "epa_per_play": 0.32,
+          "success_rate": 63.0
+        },
+        "passing": {
+          "plays": 8,
+          "epa_total": 6.29,
+          "epa_per_play": 0.786,
+          "success_rate": 62.5
+        },
+        "rushing": {
+          "plays": 19,
+          "epa_total": 2.36,
+          "epa_per_play": 0.124,
+          "success_rate": 63.2
+        },
+        "standard_downs": {
+          "plays": 23,
+          "epa_total": 7.42,
+          "epa_per_play": 0.322,
+          "success_rate": 65.2
+        },
+        "passing_downs": {
+          "plays": 4,
+          "epa_total": 1.23,
+          "epa_per_play": 0.308,
+          "success_rate": 50.0
+        },
+        "early_downs": {
+          "plays": 22,
+          "epa_total": 1.24,
+          "epa_per_play": 0.056,
+          "success_rate": 59.1
+        },
+        "third_fourth_downs": {
+          "plays": 5,
+          "epa_total": 7.41,
+          "epa_per_play": 1.482,
+          "success_rate": 80.0
+        },
+        "fourth_down": {
+          "plays": 0,
+          "epa_total": null,
+          "epa_per_play": null,
+          "success_rate": null,
+          "attempts": 0
+        },
+        "explosiveness": {
+          "explosive_plays": 6,
+          "explosive_play_rate": 22.2,
+          "explosive_epa_dependency": 60.2
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 0,
+          "sack_rate_allowed": 0.0,
+          "stuffs_allowed": 4,
+          "stuff_rate_allowed": 21.1,
+          "tfl_allowed": 3,
+          "tfl_rate_allowed": 11.1
+        },
+        "drives": {
+          "drives": 5,
+          "points_per_drive": 2.8,
+          "yards_per_drive": 42.6,
+          "drive_success_rate": 60.0,
+          "three_and_outs": 1,
+          "three_and_out_rate": 20.0
+        },
+        "scoring_opportunities": {
+          "opportunities": 2,
+          "points_per_opportunity": 7.0
+        },
+        "red_zone": {
+          "trips": 2,
+          "points_per_trip": 7.0,
+          "overperformance_points_per_trip": 2.3,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 82.8
+        },
+        "turnovers": {
+          "turnovers": 1,
+          "turnover_epa_impact": -1.62
+        },
+        "epa_volatility": 1.286
+      },
+      "game_context": {
+        "total_scrimmage_plays": 57,
+        "competitive_scrimmage_plays": 57,
+        "garbage_time_plays": 0,
+        "garbage_time_share": 0.0
+      },
+      "definitions": {
+        "standard_down": "1st down; 2nd-and-7 or less; 3rd/4th-and-4 or less.",
+        "passing_down": "2nd-and-8+; 3rd/4th-and-5+.",
+        "drive_success_rate": "Share of offensive drives with positive cumulative EPA.",
+        "three_and_out_rate": "Share of drives with three or fewer qualifying scrimmage plays, no first down, and no points.",
+        "scoring_opportunity": "Drive that reaches the opponent 40-yard line or closer.",
+        "red_zone_trip": "Drive that reaches the opponent 20-yard line or closer.",
+        "red_zone_overperformance": "Points per red-zone trip minus the temporary beta baseline of 4.7. This baseline will be historically calibrated.",
+        "sack_rate_allowed": "Sacks divided by qualifying pass plays/dropbacks.",
+        "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
+        "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
+        "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
+        "epa_volatility": "Population standard deviation of competitive-play EPA."
+      },
+      "generated_at": "2026-09-06T02:19:56.665305+00:00"
     },
     {
       "game_id": "6604126",
@@ -501,7 +735,241 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.528274+00:00"
+      "generated_at": "2026-09-06T02:19:56.671873+00:00"
+    },
+    {
+      "game_id": "6640273",
+      "pbp_game_id": "401856669",
+      "matchup_key": "austinpeay@vanderbilt",
+      "season": 2026,
+      "week": 1,
+      "away_team": "Austin Peay",
+      "home_team": "Vanderbilt",
+      "away_points": 9,
+      "home_points": 28,
+      "analysis_status": "available",
+      "analysis_level": "full",
+      "source": "SportsDataverse/cfbfastR PBP",
+      "source_note": "Retrospective only. Does not alter the frozen pregame THI projection.",
+      "calibration_status": "BETA \u2014 historical calibration pending",
+      "headline": {
+        "postgame_win_expectancy": {
+          "away_pct": 46.9,
+          "home_pct": 53.1,
+          "winner": "Vanderbilt"
+        },
+        "adjusted_final_score": {
+          "away": 11.5,
+          "home": 12.5
+        },
+        "reality_check": {
+          "label": "CLOSER THAN IT LOOKED",
+          "note": "The final margin was larger than the underlying efficiency and possession profile suggested.",
+          "actual_margin": 19,
+          "adjusted_margin": 1.0
+        }
+      },
+      "away_metrics": {
+        "overall": {
+          "plays": 21,
+          "epa_total": 5.86,
+          "epa_per_play": 0.279,
+          "success_rate": 57.1
+        },
+        "passing": {
+          "plays": 14,
+          "epa_total": 1.93,
+          "epa_per_play": 0.138,
+          "success_rate": 57.1
+        },
+        "rushing": {
+          "plays": 7,
+          "epa_total": 3.93,
+          "epa_per_play": 0.561,
+          "success_rate": 57.1
+        },
+        "standard_downs": {
+          "plays": 14,
+          "epa_total": 5.53,
+          "epa_per_play": 0.395,
+          "success_rate": 64.3
+        },
+        "passing_downs": {
+          "plays": 7,
+          "epa_total": 0.33,
+          "epa_per_play": 0.047,
+          "success_rate": 42.9
+        },
+        "early_downs": {
+          "plays": 16,
+          "epa_total": 5.52,
+          "epa_per_play": 0.345,
+          "success_rate": 62.5
+        },
+        "third_fourth_downs": {
+          "plays": 5,
+          "epa_total": 0.33,
+          "epa_per_play": 0.067,
+          "success_rate": 40.0
+        },
+        "fourth_down": {
+          "plays": 1,
+          "epa_total": 2.29,
+          "epa_per_play": 2.286,
+          "success_rate": 100.0,
+          "attempts": 1
+        },
+        "explosiveness": {
+          "explosive_plays": 3,
+          "explosive_play_rate": 14.3,
+          "explosive_epa_dependency": 37.7
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 1,
+          "sack_rate_allowed": 7.1,
+          "stuffs_allowed": 1,
+          "stuff_rate_allowed": 14.3,
+          "tfl_allowed": 1,
+          "tfl_rate_allowed": 4.8
+        },
+        "drives": {
+          "drives": 3,
+          "points_per_drive": 2.0,
+          "yards_per_drive": 40.7,
+          "drive_success_rate": 66.7,
+          "three_and_outs": 0,
+          "three_and_out_rate": 0.0
+        },
+        "scoring_opportunities": {
+          "opportunities": 2,
+          "points_per_opportunity": 3.0
+        },
+        "red_zone": {
+          "trips": 0,
+          "points_per_trip": null,
+          "overperformance_points_per_trip": null,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 75.0
+        },
+        "turnovers": {
+          "turnovers": 0,
+          "turnover_epa_impact": 0
+        },
+        "epa_volatility": 1.194
+      },
+      "home_metrics": {
+        "overall": {
+          "plays": 34,
+          "epa_total": 5.71,
+          "epa_per_play": 0.168,
+          "success_rate": 58.8
+        },
+        "passing": {
+          "plays": 12,
+          "epa_total": 8.93,
+          "epa_per_play": 0.744,
+          "success_rate": 75.0
+        },
+        "rushing": {
+          "plays": 22,
+          "epa_total": -3.22,
+          "epa_per_play": -0.146,
+          "success_rate": 50.0
+        },
+        "standard_downs": {
+          "plays": 28,
+          "epa_total": 1.75,
+          "epa_per_play": 0.063,
+          "success_rate": 60.7
+        },
+        "passing_downs": {
+          "plays": 6,
+          "epa_total": 3.96,
+          "epa_per_play": 0.659,
+          "success_rate": 50.0
+        },
+        "early_downs": {
+          "plays": 27,
+          "epa_total": 11.56,
+          "epa_per_play": 0.428,
+          "success_rate": 63.0
+        },
+        "third_fourth_downs": {
+          "plays": 7,
+          "epa_total": -5.85,
+          "epa_per_play": -0.836,
+          "success_rate": 42.9
+        },
+        "fourth_down": {
+          "plays": 1,
+          "epa_total": 2.47,
+          "epa_per_play": 2.465,
+          "success_rate": 100.0,
+          "attempts": 1
+        },
+        "explosiveness": {
+          "explosive_plays": 8,
+          "explosive_play_rate": 23.5,
+          "explosive_epa_dependency": 52.8
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 0,
+          "sack_rate_allowed": 0.0,
+          "stuffs_allowed": 1,
+          "stuff_rate_allowed": 4.5,
+          "tfl_allowed": 1,
+          "tfl_rate_allowed": 2.9
+        },
+        "drives": {
+          "drives": 4,
+          "points_per_drive": 3.5,
+          "yards_per_drive": 64.8,
+          "drive_success_rate": 75.0,
+          "three_and_outs": 0,
+          "three_and_out_rate": 0.0
+        },
+        "scoring_opportunities": {
+          "opportunities": 3,
+          "points_per_opportunity": 4.67
+        },
+        "red_zone": {
+          "trips": 2,
+          "points_per_trip": 7.0,
+          "overperformance_points_per_trip": 2.3,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 82.8
+        },
+        "turnovers": {
+          "turnovers": 1,
+          "turnover_epa_impact": 0.03
+        },
+        "epa_volatility": 1.74
+      },
+      "game_context": {
+        "total_scrimmage_plays": 55,
+        "competitive_scrimmage_plays": 55,
+        "garbage_time_plays": 0,
+        "garbage_time_share": 0.0
+      },
+      "definitions": {
+        "standard_down": "1st down; 2nd-and-7 or less; 3rd/4th-and-4 or less.",
+        "passing_down": "2nd-and-8+; 3rd/4th-and-5+.",
+        "drive_success_rate": "Share of offensive drives with positive cumulative EPA.",
+        "three_and_out_rate": "Share of drives with three or fewer qualifying scrimmage plays, no first down, and no points.",
+        "scoring_opportunity": "Drive that reaches the opponent 40-yard line or closer.",
+        "red_zone_trip": "Drive that reaches the opponent 20-yard line or closer.",
+        "red_zone_overperformance": "Points per red-zone trip minus the temporary beta baseline of 4.7. This baseline will be historically calibrated.",
+        "sack_rate_allowed": "Sacks divided by qualifying pass plays/dropbacks.",
+        "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
+        "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
+        "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
+        "epa_volatility": "Population standard deviation of competitive-play EPA."
+      },
+      "generated_at": "2026-09-06T02:19:56.675088+00:00"
     },
     {
       "game_id": "6640530",
@@ -735,7 +1203,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.535319+00:00"
+      "generated_at": "2026-09-06T02:19:56.682211+00:00"
     },
     {
       "game_id": "6603944",
@@ -969,7 +1437,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.536497+00:00"
+      "generated_at": "2026-09-06T02:19:56.683370+00:00"
     },
     {
       "game_id": "6603624",
@@ -1203,7 +1671,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.542541+00:00"
+      "generated_at": "2026-09-06T02:19:56.689422+00:00"
     },
     {
       "game_id": "6604288",
@@ -1437,7 +1905,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.543826+00:00"
+      "generated_at": "2026-09-06T02:19:56.690754+00:00"
     },
     {
       "game_id": "6604252",
@@ -1671,7 +2139,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.544573+00:00"
+      "generated_at": "2026-09-06T02:19:56.691504+00:00"
     },
     {
       "game_id": "6603857",
@@ -1687,7 +2155,7 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-06T02:00:09.544619+00:00"
+      "generated_at": "2026-09-06T02:19:56.691552+00:00"
     },
     {
       "game_id": "6603778",
@@ -1703,7 +2171,7 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-06T02:00:09.544661+00:00"
+      "generated_at": "2026-09-06T02:19:56.691610+00:00"
     },
     {
       "game_id": "6604281",
@@ -1937,7 +2405,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.553489+00:00"
+      "generated_at": "2026-09-06T02:19:56.700523+00:00"
     },
     {
       "game_id": "6640529",
@@ -2171,7 +2639,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.560730+00:00"
+      "generated_at": "2026-09-06T02:19:56.707892+00:00"
     },
     {
       "game_id": "6604046",
@@ -2405,7 +2873,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.567293+00:00"
+      "generated_at": "2026-09-06T02:19:56.714362+00:00"
     },
     {
       "game_id": "6604294",
@@ -2639,7 +3107,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.573532+00:00"
+      "generated_at": "2026-09-06T02:19:56.720627+00:00"
     },
     {
       "game_id": "6603681",
@@ -2873,7 +3341,39 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.579556+00:00"
+      "generated_at": "2026-09-06T02:19:56.726865+00:00"
+    },
+    {
+      "game_id": "6603854",
+      "matchup_key": "easternky@jacksonvillestate",
+      "season": 2026,
+      "week": 1,
+      "away_team": "Eastern Ky.",
+      "home_team": "Jacksonville St.",
+      "away_points": 7,
+      "home_points": 49,
+      "analysis_status": "pending",
+      "analysis_level": "scoreboard_only",
+      "source": "Final score available; PBP pending",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
+      "calibration_status": "BETA \u2014 historical calibration pending",
+      "generated_at": "2026-09-06T02:19:56.726918+00:00"
+    },
+    {
+      "game_id": "6603844",
+      "matchup_key": "fiu@southfla",
+      "season": 2026,
+      "week": 1,
+      "away_team": "FIU",
+      "home_team": "South Fla.",
+      "away_points": 9,
+      "home_points": 19,
+      "analysis_status": "pending",
+      "analysis_level": "scoreboard_only",
+      "source": "Final score available; PBP pending",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
+      "calibration_status": "BETA \u2014 historical calibration pending",
+      "generated_at": "2026-09-06T02:19:56.726959+00:00"
     },
     {
       "game_id": "6603888",
@@ -3107,7 +3607,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.581273+00:00"
+      "generated_at": "2026-09-06T02:19:56.728732+00:00"
     },
     {
       "game_id": "6640444",
@@ -3341,7 +3841,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.586932+00:00"
+      "generated_at": "2026-09-06T02:19:56.734342+00:00"
     },
     {
       "game_id": "6604018",
@@ -3575,7 +4075,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.588446+00:00"
+      "generated_at": "2026-09-06T02:19:56.735934+00:00"
     },
     {
       "game_id": "6604106",
@@ -3809,7 +4309,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.593063+00:00"
+      "generated_at": "2026-09-06T02:19:56.740645+00:00"
     },
     {
       "game_id": "6604087",
@@ -4043,7 +4543,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.599451+00:00"
+      "generated_at": "2026-09-06T02:19:56.747096+00:00"
     },
     {
       "game_id": "6640460",
@@ -4277,7 +4777,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.606014+00:00"
+      "generated_at": "2026-09-06T02:19:56.753685+00:00"
     },
     {
       "game_id": "6604127",
@@ -4511,7 +5011,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.614273+00:00"
+      "generated_at": "2026-09-06T02:19:56.762140+00:00"
     },
     {
       "game_id": "6603924",
@@ -4745,7 +5245,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.621012+00:00"
+      "generated_at": "2026-09-06T02:19:56.769017+00:00"
     },
     {
       "game_id": "6640532",
@@ -4979,7 +5479,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.628082+00:00"
+      "generated_at": "2026-09-06T02:19:56.776215+00:00"
     },
     {
       "game_id": "6603933",
@@ -5213,7 +5713,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.634934+00:00"
+      "generated_at": "2026-09-06T02:19:56.783104+00:00"
     },
     {
       "game_id": "6604056",
@@ -5447,7 +5947,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.642148+00:00"
+      "generated_at": "2026-09-06T02:19:56.790280+00:00"
     },
     {
       "game_id": "6604160",
@@ -5681,7 +6181,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.643470+00:00"
+      "generated_at": "2026-09-06T02:19:56.791640+00:00"
     },
     {
       "game_id": "6603756",
@@ -5915,7 +6415,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.644541+00:00"
+      "generated_at": "2026-09-06T02:19:56.792746+00:00"
     },
     {
       "game_id": "6603866",
@@ -6149,7 +6649,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.651745+00:00"
+      "generated_at": "2026-09-06T02:19:56.800001+00:00"
     },
     {
       "game_id": "6603713",
@@ -6383,7 +6883,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.659204+00:00"
+      "generated_at": "2026-09-06T02:19:56.807606+00:00"
     },
     {
       "game_id": "6604072",
@@ -6617,7 +7117,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.666051+00:00"
+      "generated_at": "2026-09-06T02:19:56.814450+00:00"
     },
     {
       "game_id": "6604107",
@@ -6851,7 +7351,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.672747+00:00"
+      "generated_at": "2026-09-06T02:19:56.821134+00:00"
     },
     {
       "game_id": "6640531",
@@ -7085,7 +7585,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.679573+00:00"
+      "generated_at": "2026-09-06T02:19:56.828046+00:00"
     },
     {
       "game_id": "6603992",
@@ -7319,7 +7819,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.686716+00:00"
+      "generated_at": "2026-09-06T02:19:56.834793+00:00"
     },
     {
       "game_id": "6603606",
@@ -7335,7 +7835,7 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-06T02:00:09.686766+00:00"
+      "generated_at": "2026-09-06T02:19:56.834846+00:00"
     },
     {
       "game_id": "6640364",
@@ -7569,7 +8069,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.693672+00:00"
+      "generated_at": "2026-09-06T02:19:56.841774+00:00"
     },
     {
       "game_id": "6603961",
@@ -7803,7 +8303,241 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.699574+00:00"
+      "generated_at": "2026-09-06T02:19:56.847751+00:00"
+    },
+    {
+      "game_id": "6604228",
+      "pbp_game_id": "401856771",
+      "matchup_key": "nicholls@kansasstate",
+      "season": 2026,
+      "week": 1,
+      "away_team": "Nicholls",
+      "home_team": "Kansas State",
+      "away_points": 3,
+      "home_points": 71,
+      "analysis_status": "available",
+      "analysis_level": "full",
+      "source": "SportsDataverse/cfbfastR PBP",
+      "source_note": "Retrospective only. Does not alter the frozen pregame THI projection.",
+      "calibration_status": "BETA \u2014 historical calibration pending",
+      "headline": {
+        "postgame_win_expectancy": {
+          "away_pct": 3.1,
+          "home_pct": 96.9,
+          "winner": "Kansas State"
+        },
+        "adjusted_final_score": {
+          "away": 0.2,
+          "home": 26.0
+        },
+        "reality_check": {
+          "label": "CLOSER THAN IT LOOKED",
+          "note": "The final margin was larger than the underlying efficiency and possession profile suggested.",
+          "actual_margin": 68,
+          "adjusted_margin": 25.8
+        }
+      },
+      "away_metrics": {
+        "overall": {
+          "plays": 25,
+          "epa_total": -10.89,
+          "epa_per_play": -0.436,
+          "success_rate": 20.0
+        },
+        "passing": {
+          "plays": 14,
+          "epa_total": -6.24,
+          "epa_per_play": -0.446,
+          "success_rate": 21.4
+        },
+        "rushing": {
+          "plays": 11,
+          "epa_total": -4.65,
+          "epa_per_play": -0.422,
+          "success_rate": 18.2
+        },
+        "standard_downs": {
+          "plays": 13,
+          "epa_total": -5.41,
+          "epa_per_play": -0.416,
+          "success_rate": 23.1
+        },
+        "passing_downs": {
+          "plays": 12,
+          "epa_total": -5.48,
+          "epa_per_play": -0.457,
+          "success_rate": 16.7
+        },
+        "early_downs": {
+          "plays": 17,
+          "epa_total": -7.22,
+          "epa_per_play": -0.425,
+          "success_rate": 23.5
+        },
+        "third_fourth_downs": {
+          "plays": 8,
+          "epa_total": -3.67,
+          "epa_per_play": -0.458,
+          "success_rate": 12.5
+        },
+        "fourth_down": {
+          "plays": 1,
+          "epa_total": 3.7,
+          "epa_per_play": 3.703,
+          "success_rate": 100.0,
+          "attempts": 1
+        },
+        "explosiveness": {
+          "explosive_plays": 2,
+          "explosive_play_rate": 8.0,
+          "explosive_epa_dependency": 42.2
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 0,
+          "sack_rate_allowed": 0.0,
+          "stuffs_allowed": 5,
+          "stuff_rate_allowed": 45.5,
+          "tfl_allowed": 4,
+          "tfl_rate_allowed": 16.0
+        },
+        "drives": {
+          "drives": 5,
+          "points_per_drive": 0.0,
+          "yards_per_drive": 15.0,
+          "drive_success_rate": 20.0,
+          "three_and_outs": 3,
+          "three_and_out_rate": 60.0
+        },
+        "scoring_opportunities": {
+          "opportunities": 1,
+          "points_per_opportunity": 0.0
+        },
+        "red_zone": {
+          "trips": 1,
+          "points_per_trip": 0.0,
+          "overperformance_points_per_trip": -4.7,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 74.4
+        },
+        "turnovers": {
+          "turnovers": 1,
+          "turnover_epa_impact": 1.76
+        },
+        "epa_volatility": 1.225
+      },
+      "home_metrics": {
+        "overall": {
+          "plays": 34,
+          "epa_total": 9.79,
+          "epa_per_play": 0.288,
+          "success_rate": 55.9
+        },
+        "passing": {
+          "plays": 14,
+          "epa_total": 7.83,
+          "epa_per_play": 0.559,
+          "success_rate": 57.1
+        },
+        "rushing": {
+          "plays": 20,
+          "epa_total": 1.96,
+          "epa_per_play": 0.098,
+          "success_rate": 55.0
+        },
+        "standard_downs": {
+          "plays": 25,
+          "epa_total": 7.27,
+          "epa_per_play": 0.291,
+          "success_rate": 56.0
+        },
+        "passing_downs": {
+          "plays": 9,
+          "epa_total": 2.52,
+          "epa_per_play": 0.28,
+          "success_rate": 55.6
+        },
+        "early_downs": {
+          "plays": 29,
+          "epa_total": 5.75,
+          "epa_per_play": 0.198,
+          "success_rate": 51.7
+        },
+        "third_fourth_downs": {
+          "plays": 5,
+          "epa_total": 4.04,
+          "epa_per_play": 0.809,
+          "success_rate": 80.0
+        },
+        "fourth_down": {
+          "plays": 0,
+          "epa_total": null,
+          "epa_per_play": null,
+          "success_rate": null,
+          "attempts": 0
+        },
+        "explosiveness": {
+          "explosive_plays": 8,
+          "explosive_play_rate": 23.5,
+          "explosive_epa_dependency": 45.8
+        },
+        "negative_play_rates": {
+          "sacks_allowed": 0,
+          "sack_rate_allowed": 0.0,
+          "stuffs_allowed": 3,
+          "stuff_rate_allowed": 15.0,
+          "tfl_allowed": 1,
+          "tfl_rate_allowed": 2.9
+        },
+        "drives": {
+          "drives": 6,
+          "points_per_drive": 3.67,
+          "yards_per_drive": 40.2,
+          "drive_success_rate": 66.7,
+          "three_and_outs": 0,
+          "three_and_out_rate": 0.0
+        },
+        "scoring_opportunities": {
+          "opportunities": 3,
+          "points_per_opportunity": 7.33
+        },
+        "red_zone": {
+          "trips": 2,
+          "points_per_trip": 7.5,
+          "overperformance_points_per_trip": 2.8,
+          "beta_expected_points_per_trip": 4.7
+        },
+        "field_position": {
+          "avg_start_yards_to_goal": 67.8
+        },
+        "turnovers": {
+          "turnovers": 1,
+          "turnover_epa_impact": -3.89
+        },
+        "epa_volatility": 1.297
+      },
+      "game_context": {
+        "total_scrimmage_plays": 59,
+        "competitive_scrimmage_plays": 59,
+        "garbage_time_plays": 0,
+        "garbage_time_share": 0.0
+      },
+      "definitions": {
+        "standard_down": "1st down; 2nd-and-7 or less; 3rd/4th-and-4 or less.",
+        "passing_down": "2nd-and-8+; 3rd/4th-and-5+.",
+        "drive_success_rate": "Share of offensive drives with positive cumulative EPA.",
+        "three_and_out_rate": "Share of drives with three or fewer qualifying scrimmage plays, no first down, and no points.",
+        "scoring_opportunity": "Drive that reaches the opponent 40-yard line or closer.",
+        "red_zone_trip": "Drive that reaches the opponent 20-yard line or closer.",
+        "red_zone_overperformance": "Points per red-zone trip minus the temporary beta baseline of 4.7. This baseline will be historically calibrated.",
+        "sack_rate_allowed": "Sacks divided by qualifying pass plays/dropbacks.",
+        "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
+        "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
+        "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
+        "epa_volatility": "Population standard deviation of competitive-play EPA."
+      },
+      "generated_at": "2026-09-06T02:19:56.851210+00:00"
     },
     {
       "game_id": "6603711",
@@ -8037,7 +8771,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.704777+00:00"
+      "generated_at": "2026-09-06T02:19:56.856493+00:00"
     },
     {
       "game_id": "6603767",
@@ -8053,7 +8787,7 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-06T02:00:09.704823+00:00"
+      "generated_at": "2026-09-06T02:19:56.856539+00:00"
     },
     {
       "game_id": "6604316",
@@ -8287,7 +9021,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.711892+00:00"
+      "generated_at": "2026-09-06T02:19:56.863648+00:00"
     },
     {
       "game_id": "6604001",
@@ -8521,7 +9255,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.719112+00:00"
+      "generated_at": "2026-09-06T02:19:56.870970+00:00"
     },
     {
       "game_id": "6603946",
@@ -8755,7 +9489,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.725570+00:00"
+      "generated_at": "2026-09-06T02:19:56.877556+00:00"
     },
     {
       "game_id": "6604332",
@@ -8989,7 +9723,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.732798+00:00"
+      "generated_at": "2026-09-06T02:19:56.884755+00:00"
     },
     {
       "game_id": "6603612",
@@ -9223,7 +9957,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.733383+00:00"
+      "generated_at": "2026-09-06T02:19:56.885336+00:00"
     },
     {
       "game_id": "6604065",
@@ -9457,7 +10191,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.741398+00:00"
+      "generated_at": "2026-09-06T02:19:56.893398+00:00"
     },
     {
       "game_id": "6604000",
@@ -9691,7 +10425,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.745429+00:00"
+      "generated_at": "2026-09-06T02:19:56.897450+00:00"
     },
     {
       "game_id": "6603974",
@@ -9925,7 +10659,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.752590+00:00"
+      "generated_at": "2026-09-06T02:19:56.904681+00:00"
     },
     {
       "game_id": "6603957",
@@ -10159,7 +10893,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.762146+00:00"
+      "generated_at": "2026-09-06T02:19:56.914167+00:00"
     },
     {
       "game_id": "6603956",
@@ -10393,7 +11127,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.769482+00:00"
+      "generated_at": "2026-09-06T02:19:56.921435+00:00"
     },
     {
       "game_id": "6603656",
@@ -10409,7 +11143,23 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-06T02:00:09.769538+00:00"
+      "generated_at": "2026-09-06T02:19:56.921493+00:00"
+    },
+    {
+      "game_id": "6604173",
+      "matchup_key": "southeasternla@southalabama",
+      "season": 2026,
+      "week": 1,
+      "away_team": "Southeastern La.",
+      "home_team": "South Alabama",
+      "away_points": 14,
+      "home_points": 39,
+      "analysis_status": "pending",
+      "analysis_level": "scoreboard_only",
+      "source": "Final score available; PBP pending",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
+      "calibration_status": "BETA \u2014 historical calibration pending",
+      "generated_at": "2026-09-06T02:19:56.921534+00:00"
     },
     {
       "game_id": "6604282",
@@ -10643,7 +11393,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.777263+00:00"
+      "generated_at": "2026-09-06T02:19:56.929232+00:00"
     },
     {
       "game_id": "6640492",
@@ -10877,7 +11627,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.779628+00:00"
+      "generated_at": "2026-09-06T02:19:56.931621+00:00"
     },
     {
       "game_id": "6604218",
@@ -11111,7 +11861,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.781203+00:00"
+      "generated_at": "2026-09-06T02:19:56.933226+00:00"
     },
     {
       "game_id": "6604181",
@@ -11127,7 +11877,7 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-06T02:00:09.781247+00:00"
+      "generated_at": "2026-09-06T02:19:56.933271+00:00"
     },
     {
       "game_id": "6604263",
@@ -11361,7 +12111,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.788723+00:00"
+      "generated_at": "2026-09-06T02:19:56.940835+00:00"
     },
     {
       "game_id": "6603695",
@@ -11595,7 +12345,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.790013+00:00"
+      "generated_at": "2026-09-06T02:19:56.942153+00:00"
     },
     {
       "game_id": "6603666",
@@ -11611,7 +12361,7 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-06T02:00:09.790058+00:00"
+      "generated_at": "2026-09-06T02:19:56.942193+00:00"
     },
     {
       "game_id": "6603734",
@@ -11845,7 +12595,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.796551+00:00"
+      "generated_at": "2026-09-06T02:19:56.948672+00:00"
     },
     {
       "game_id": "6604235",
@@ -12079,7 +12829,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.804687+00:00"
+      "generated_at": "2026-09-06T02:19:56.956850+00:00"
     },
     {
       "game_id": "6603903",
@@ -12313,7 +13063,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.810064+00:00"
+      "generated_at": "2026-09-06T02:19:56.962249+00:00"
     },
     {
       "game_id": "6604272",
@@ -12329,7 +13079,7 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-06T02:00:09.810103+00:00"
+      "generated_at": "2026-09-06T02:19:56.962289+00:00"
     },
     {
       "game_id": "6603790",
@@ -12563,7 +13313,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.817363+00:00"
+      "generated_at": "2026-09-06T02:19:56.969551+00:00"
     },
     {
       "game_id": "6604196",
@@ -12797,7 +13547,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.821740+00:00"
+      "generated_at": "2026-09-06T02:19:56.974039+00:00"
     },
     {
       "game_id": "6603655",
@@ -13031,7 +13781,7 @@
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
         "epa_volatility": "Population standard deviation of competitive-play EPA."
       },
-      "generated_at": "2026-09-06T02:00:09.828437+00:00"
+      "generated_at": "2026-09-06T02:19:56.980820+00:00"
     }
   ]
 }
