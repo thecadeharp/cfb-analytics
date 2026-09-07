@@ -667,6 +667,11 @@
     const signature = boardSignature();
 
     if (!force && signature === lastBoardSignature) {
+      // Another presentation layer can replace the table rows with visually
+      // identical new DOM nodes. Re-apply the active filter even when the
+      // game/status signature is unchanged so those replacement rows do not
+      // become visible again under Upcoming, Live, or Final.
+      applyFilterAndUI();
       return;
     }
 
@@ -729,6 +734,13 @@
       "hammer:data-ready",
       () => {
         setTimeout(() => syncIfBoardChanged(true), 0);
+      }
+    );
+
+    window.addEventListener(
+      "hammer:game-status-updated",
+      () => {
+        window.requestAnimationFrame(() => syncIfBoardChanged(true));
       }
     );
 
