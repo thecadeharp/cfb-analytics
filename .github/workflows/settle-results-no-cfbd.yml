@@ -4,16 +4,16 @@ on:
   workflow_dispatch:
 
   # Refresh scoreboard state every 5 minutes.
-  # This powers LIVE rows, catches finals quickly, refreshes public signal
-  # records, and automatically builds retrospective postgame analytics.
   schedule:
     - cron: "*/5 * * * *"
 
 permissions:
   contents: write
 
+# Shared writer lock with the other automated THI data jobs.
+# Jobs queue instead of rebasing/pushing generated files at the same time.
 concurrency:
-  group: settle-results-no-cfbd
+  group: thi-data-writer
   cancel-in-progress: false
 
 jobs:
@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -73,4 +75,4 @@ jobs:
 
           git commit -m "Refresh live scores, settlements, postgame analytics, and signal records"
           git pull --rebase origin main
-          git push origin main
+          git push origin HEAD:main
