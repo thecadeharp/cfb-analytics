@@ -504,13 +504,24 @@
     window.openMatchup = wrapped;
   }
 
+  function wrapSelectWeek() {
+    if (typeof window.selectWeek !== "function" || window.selectWeek.__hammerScorecardWrapped) return;
+    const original = window.selectWeek;
+    const wrapped = function() {
+      const result = original.apply(this, arguments);
+      requestAnimationFrame(applyPerformanceScorecard);
+      return result;
+    };
+    wrapped.__hammerScorecardWrapped = true;
+    window.selectWeek = wrapped;
+  }
+
   function installObserver() {
     observer?.disconnect();
     observer = new MutationObserver(() => {
       requestAnimationFrame(() => {
         addAvailabilityIndicators();
         applyPanel();
-        applyPerformanceScorecard();
       });
     });
     observer.observe(document.body, { childList: true, subtree: true });
@@ -545,6 +556,7 @@
       payload = { meta: {}, games: {} };
     }
     wrapOpenMatchup();
+    wrapSelectWeek();
     addAvailabilityIndicators();
     applyPanel();
     applyPerformanceScorecard();
@@ -553,6 +565,7 @@
   async function start() {
     installStyles();
     wrapOpenMatchup();
+    wrapSelectWeek();
     installObserver();
     await load();
   }
