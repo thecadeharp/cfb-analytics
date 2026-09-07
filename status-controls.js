@@ -1,17 +1,26 @@
 (() => {
   "use strict";
 
-  const VIEW_SELECTOR = "#view-projections";
-  const CONTAINER_SELECTOR = "#projections-container";
-  const ROW_SELECTOR =
-    "#projections-container .projection-table tbody tr.game-row";
-  const SUMMARY_SELECTOR = "#projection-summary";
+  // ==========================================================================
+  // THE HAMMER INDEX — STATUS CONTROLS
+  //
+  // Single owner for:
+  //   • All / Upcoming / Live / Final filters
+  //   • Upcoming → Live → Final ordering
+  //   • Date dividers
+  //
+  // IMPORTANT:
+  //   sort-tables.js owns score/final decoration only.
+  //   This file owns board ordering/filtering only.
+  //   No MutationObserver is used here, which prevents the prior flashing loop.
+  // ==========================================================================
 
+  const CONTAINER_ID = "projections-container";
+  const VIEW_ID = "view-projections";
   const FILTER_ID = "hammer-game-status-filters";
   const STYLE_ID = "hammer-game-status-filter-styles";
   const EMPTY_ID = "hammer-game-status-empty";
-  const DESKTOP_DAY_CLASS = "hammer-day-divider-row";
-  const MOBILE_DAY_CLASS = "hammer-mobile-day-divider";
+  const DIVIDER_CLASS = "hammer-day-divider-row";
   const PROJECTIONS_URL = "./data/projections.json";
   const EASTERN_TZ = "America/New_York";
 
@@ -21,266 +30,42 @@
   ];
 
   let activeStatus = "all";
-  let updateQueued = false;
-  let projectionObserver = null;
-  let rowClickFallbackInstalled = false;
-  let projectionsLoadStarted = false;
   let projectionByGameId = new Map();
+  let lastBoardSignature = "";
+  let pollTimer = null;
 
+  // --------------------------------------------------------------------------
+  // BASIC HELPERS
+  // --------------------------------------------------------------------------
 
-  // ==========================================================================
-  // STYLES
-  // ==========================================================================
-
-  function installStyles() {
-    if (document.getElementById(STYLE_ID)) return;
-
-    const style = document.createElement("style");
-    style.id = STYLE_ID;
-
-    style.textContent = `
-      #projection-summary {
-        display: none !important;
-      }
-
-      .hammer-status-filter-wrap {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 20px;
-        margin: 4px 0 16px;
-        padding: 15px 17px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        position: relative;
-        z-index: 50;
-        pointer-events: auto;
-      }
-
-      .hammer-status-filter-title {
-        flex: 0 0 auto;
-        color: var(--muted);
-        font-family: var(--mono);
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: 1.2px;
-        text-transform: uppercase;
-        white-space: nowrap;
-      }
-
-      .hammer-status-filter-buttons {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(110px, 1fr));
-        gap: 9px;
-        width: min(100%, 620px);
-        position: relative;
-        z-index: 51;
-        pointer-events: auto;
-      }
-
-      .hammer-status-filter-button {
-        appearance: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        min-height: 40px;
-        padding: 9px 15px;
-        border: 1px solid var(--border);
-        border-radius: 999px;
-        background: #fff;
-        color: var(--muted);
-        font-family: var(--mono);
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: 0.3px;
-        white-space: nowrap;
-        cursor: pointer;
-        position: relative;
-        z-index: 52;
-        pointer-events: auto;
-        transition:
-          background 0.15s ease,
-          border-color 0.15s ease,
-          color 0.15s ease,
-          transform 0.15s ease;
-      }
-
-      .hammer-status-filter-button:hover {
-        color: var(--text);
-        border-color: var(--border-dark);
-        transform: translateY(-1px);
-      }
-
-      .hammer-status-filter-button.is-active {
-        background: var(--text);
-        border-color: var(--text);
-        color: #fff;
-      }
-
-      .hammer-status-filter-button[data-status="live"] {
-        color: #b42318;
-        border-color: #e6b7b3;
-        background: #fffafa;
-      }
-
-      .hammer-status-filter-button[data-status="live"]:hover {
-        border-color: #d87e77;
-      }
-
-      .hammer-status-filter-button[data-status="live"].is-active {
-        background: #b42318;
-        border-color: #b42318;
-        color: #fff;
-      }
-
-      .hammer-status-live-dot {
-        width: 7px;
-        height: 7px;
-        flex: 0 0 7px;
-        border-radius: 50%;
-        background: currentColor;
-        pointer-events: none;
-      }
-
-      .hammer-status-count {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 20px;
-        height: 20px;
-        padding: 0 5px;
-        border-radius: 999px;
-        background: rgba(0, 0, 0, 0.055);
-        font-size: 9px;
-        line-height: 1;
-        pointer-events: none;
-      }
-
-      .hammer-status-filter-button.is-active .hammer-status-count {
-        background: rgba(255, 255, 255, 0.16);
-      }
-
-      .hammer-status-filter-button[data-status="live"] .hammer-status-count {
-        background: rgba(180, 35, 24, 0.07);
-      }
-
-      .hammer-status-filter-button[data-status="live"].is-active .hammer-status-count {
-        background: rgba(255, 255, 255, 0.17);
-      }
-
-      .hammer-status-empty {
-        display: none;
-        margin: 0 0 14px;
-        padding: 28px 18px;
-        text-align: center;
-        color: var(--muted);
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        font-size: 12px;
-      }
-
-      .${DESKTOP_DAY_CLASS} td {
-        padding: 0 !important;
-        border: 0 !important;
-        background: var(--bg) !important;
-      }
-
-      .${DESKTOP_DAY_CLASS}:hover {
-        background: transparent !important;
-      }
-
-      .hammer-day-divider-box {
-        display: flex;
-        align-items: center;
-        min-height: 46px;
-        margin: 12px 0 8px;
-        padding: 0 16px;
-        background: #fff8dc;
-        border: 1px solid #e7c967;
-        border-radius: 9px;
-        color: #5f4900;
-        font-family: var(--mono);
-        font-size: 13px;
-        font-weight: 700;
-        letter-spacing: 0.7px;
-        line-height: 1.2;
-        text-transform: uppercase;
-      }
-
-      .hammer-mobile-day-divider {
-        display: none;
-      }
-
-      @media (max-width: 900px) {
-        .hammer-status-filter-wrap {
-          align-items: flex-start;
-          flex-direction: column;
-        }
-
-        .hammer-status-filter-buttons {
-          width: 100%;
-        }
-      }
-
-      @media (max-width: 600px) {
-        .hammer-status-filter-wrap {
-          gap: 10px;
-          margin-bottom: 14px;
-          padding: 12px;
-        }
-
-        .hammer-status-filter-buttons {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 8px;
-        }
-
-        .hammer-status-filter-button {
-          width: 100%;
-          min-height: 42px;
-          padding: 9px 10px;
-          font-size: 10px;
-        }
-
-        .hammer-mobile-day-divider {
-          display: flex;
-          align-items: center;
-          min-height: 46px;
-          padding: 0 14px;
-          background: #fff8dc;
-          border: 1px solid #e7c967;
-          border-radius: 9px;
-          color: #5f4900;
-          font-family: var(--mono);
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: 0.55px;
-          line-height: 1.25;
-          text-transform: uppercase;
-        }
-      }
-    `;
-
-    document.head.appendChild(style);
+  function container() {
+    return document.getElementById(CONTAINER_ID);
   }
 
+  function table() {
+    return container()?.querySelector(".projection-table") ?? null;
+  }
 
-  // ==========================================================================
-  // GAME HELPERS
-  // ==========================================================================
+  function tbody() {
+    return table()?.querySelector("tbody") ?? null;
+  }
 
-  function projectionRows() {
-    return Array.from(document.querySelectorAll(ROW_SELECTOR));
+  function rows() {
+    return Array.from(
+      container()?.querySelectorAll(".projection-table tbody tr.game-row") ?? []
+    );
   }
 
   function gameIdFromRow(row) {
     if (!row) return "";
-    if (row.dataset.gameId) return String(row.dataset.gameId);
+
+    if (row.dataset.gameId) {
+      return String(row.dataset.gameId);
+    }
 
     const onclick = String(row.getAttribute("onclick") || "");
     const match = onclick.match(/openMatchup\(\s*['"]([^'"]+)['"]\s*\)/);
+
     return match?.[1] ? String(match[1]) : "";
   }
 
@@ -306,51 +91,37 @@
   }
 
   function statusPriority(status) {
-    if (status === "final") return 0;
+    if (status === "upcoming") return 0;
     if (status === "live") return 1;
     return 2;
   }
 
-  function loadProjectionMetadata() {
-    if (projectionsLoadStarted) return;
-    projectionsLoadStarted = true;
-
-    fetch(`${PROJECTIONS_URL}?v=${Date.now()}`, { cache: "no-store" })
-      .then(response => {
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return response.json();
-      })
-      .then(payload => {
-        const games = Array.isArray(payload?.games) ? payload.games : [];
-        projectionByGameId = new Map(
-          games
-            .filter(game => game?.game_id !== null && game?.game_id !== undefined)
-            .map(game => [String(game.game_id), game])
-        );
-        scheduleUpdate();
-      })
-      .catch(error => {
-        console.warn("Slate day metadata unavailable; using row date fallback.", error);
-      });
+  function cleanText(value) {
+    return String(value ?? "").replace(/\s+/g, " ").trim();
   }
+
+  // --------------------------------------------------------------------------
+  // DATE HELPERS
+  // --------------------------------------------------------------------------
 
   function fallbackRowDate(row) {
     const cell = row?.querySelector(".matchup-cell");
     if (!cell) return null;
 
-    const text = String(cell.textContent || "").replace(/\s+/g, " ");
+    const text = cleanText(cell.textContent);
+
     const match = text.match(
       /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+(\d{1,2}),\s+(\d{1,2}):(\d{2})\s*(AM|PM)\b/i
     );
 
     if (!match) return null;
 
-    const monthNames = {
+    const monthMap = {
       jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
       jul: 6, aug: 7, sep: 8, sept: 8, oct: 9, nov: 10, dec: 11
     };
 
-    const month = monthNames[match[1].toLowerCase()];
+    const month = monthMap[match[1].toLowerCase()];
     let hour = Number(match[3]);
     const minute = Number(match[4]);
     const ampm = match[5].toUpperCase();
@@ -368,7 +139,9 @@
 
     if (startDate) {
       const date = new Date(startDate);
-      if (!Number.isNaN(date.getTime())) return date;
+      if (!Number.isNaN(date.getTime())) {
+        return date;
+      }
     }
 
     return fallbackRowDate(row);
@@ -391,7 +164,9 @@
     }).formatToParts(date);
 
     const values = Object.fromEntries(
-      parts.filter(part => part.type !== "literal").map(part => [part.type, part.value])
+      parts
+        .filter(part => part.type !== "literal")
+        .map(part => [part.type, part.value])
     );
 
     return `${values.year}-${values.month}-${values.day}`;
@@ -412,81 +187,196 @@
       day: "numeric"
     }).formatToParts(date);
 
-    const month = Number(parts.find(part => part.type === "month")?.value) - 1;
-    const day = Number(parts.find(part => part.type === "day")?.value);
+    const monthIndex =
+      Number(parts.find(part => part.type === "month")?.value) - 1;
 
-    return `${weekday} — ${MONTHS[month] || ""} ${day}`.trim();
+    const day =
+      Number(parts.find(part => part.type === "day")?.value);
+
+    return `${weekday} — ${MONTHS[monthIndex] || ""} ${day}`.trim();
   }
 
+  // --------------------------------------------------------------------------
+  // STYLES
+  // --------------------------------------------------------------------------
 
-  // ==========================================================================
-  // STABLE PROJECTION ROW CLICK HANDLER
-  // ==========================================================================
+  function installStyles() {
+    if (document.getElementById(STYLE_ID)) return;
 
-  function installProjectionRowClickFallback() {
-    if (rowClickFallbackInstalled) return;
+    const style = document.createElement("style");
+    style.id = STYLE_ID;
 
-    const container = document.querySelector(CONTAINER_SELECTOR);
-    if (!container) {
-      setTimeout(installProjectionRowClickFallback, 100);
-      return;
-    }
+    style.textContent = `
+      #projection-summary {
+        display: none !important;
+      }
 
-    rowClickFallbackInstalled = true;
+      .hammer-status-filter-wrap {
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:20px;
+        margin:4px 0 16px;
+        padding:15px 17px;
+        background:var(--surface);
+        border:1px solid var(--border);
+        border-radius:var(--radius);
+      }
 
-    container.addEventListener(
-      "click",
-      event => {
-        const row = event.target.closest("tr.game-row");
-        if (!row || !container.contains(row)) return;
+      .hammer-status-filter-title {
+        color:var(--muted);
+        font-family:var(--mono);
+        font-size:10px;
+        font-weight:700;
+        letter-spacing:1.2px;
+        text-transform:uppercase;
+        white-space:nowrap;
+      }
 
-        if (
-          event.target.closest(
-            ".team-name, a, button, input, select, textarea, [role='button']"
-          )
-        ) {
-          return;
+      .hammer-status-filter-buttons {
+        display:grid;
+        grid-template-columns:repeat(4,minmax(110px,1fr));
+        gap:9px;
+        width:min(100%,620px);
+      }
+
+      .hammer-status-filter-button {
+        appearance:none;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        gap:8px;
+        min-height:40px;
+        padding:9px 15px;
+        border:1px solid var(--border);
+        border-radius:999px;
+        background:#fff;
+        color:var(--muted);
+        font-family:var(--mono);
+        font-size:10px;
+        font-weight:700;
+        cursor:pointer;
+      }
+
+      .hammer-status-filter-button:hover {
+        color:var(--text);
+        border-color:var(--border-dark);
+      }
+
+      .hammer-status-filter-button.is-active {
+        background:var(--text);
+        border-color:var(--text);
+        color:#fff;
+      }
+
+      .hammer-status-filter-button[data-status="live"] {
+        color:#b42318;
+        border-color:#e6b7b3;
+        background:#fffafa;
+      }
+
+      .hammer-status-filter-button[data-status="live"].is-active {
+        background:#b42318;
+        border-color:#b42318;
+        color:#fff;
+      }
+
+      .hammer-status-live-dot {
+        width:7px;
+        height:7px;
+        border-radius:50%;
+        background:currentColor;
+      }
+
+      .hammer-status-count {
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        min-width:20px;
+        height:20px;
+        padding:0 5px;
+        border-radius:999px;
+        background:rgba(0,0,0,.055);
+        font-size:9px;
+        line-height:1;
+      }
+
+      .hammer-status-filter-button.is-active .hammer-status-count {
+        background:rgba(255,255,255,.16);
+      }
+
+      .${DIVIDER_CLASS} td {
+        padding:0 !important;
+        border:0 !important;
+        background:var(--bg) !important;
+      }
+
+      .${DIVIDER_CLASS}:hover {
+        background:transparent !important;
+      }
+
+      .hammer-day-divider-box {
+        display:flex;
+        align-items:center;
+        min-height:46px;
+        margin:12px 0 8px;
+        padding:0 16px;
+        background:#fff8dc;
+        border:1px solid #e7c967;
+        border-radius:9px;
+        color:#5f4900;
+        font-family:var(--mono);
+        font-size:13px;
+        font-weight:700;
+        letter-spacing:.7px;
+        text-transform:uppercase;
+      }
+
+      .hammer-status-empty {
+        display:none;
+        margin:0 0 14px;
+        padding:28px 18px;
+        text-align:center;
+        color:var(--muted);
+        background:var(--surface);
+        border:1px solid var(--border);
+        border-radius:var(--radius);
+        font-size:12px;
+      }
+
+      @media (max-width:900px) {
+        .hammer-status-filter-wrap {
+          align-items:flex-start;
+          flex-direction:column;
         }
 
-        const gameId = gameIdFromRow(row);
-        if (!gameId) return;
+        .hammer-status-filter-buttons {
+          width:100%;
+        }
+      }
 
-        const opener =
-          typeof window.openMatchup === "function"
-            ? window.openMatchup
-            : (typeof openMatchup === "function" ? openMatchup : null);
+      @media (max-width:600px) {
+        .hammer-status-filter-buttons {
+          grid-template-columns:repeat(2,minmax(0,1fr));
+        }
 
-        if (!opener) return;
+        .hammer-status-filter-button {
+          width:100%;
+        }
+      }
+    `;
 
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-
-        opener(gameId);
-      },
-      true
-    );
+    document.head.appendChild(style);
   }
 
-
-  // ==========================================================================
-  // FILTER COUNTS + UI
-  // ==========================================================================
-
-  function statusCounts() {
-    const counts = { all: 0, upcoming: 0, live: 0, final: 0 };
-
-    projectionRows().forEach(row => {
-      const status = rowStatus(row);
-      counts.all += 1;
-      counts[status] += 1;
-    });
-
-    return counts;
-  }
+  // --------------------------------------------------------------------------
+  // FILTER UI
+  // --------------------------------------------------------------------------
 
   function ensureFilterUI() {
-    const tableCard = document.querySelector(`${VIEW_SELECTOR} .table-card`);
+    const view = document.getElementById(VIEW_ID);
+    const tableCard = view?.querySelector(".table-card");
+
     if (!tableCard) return null;
 
     let wrapper = document.getElementById(FILTER_ID);
@@ -498,21 +388,25 @@
 
     wrapper.innerHTML = `
       <div class="hammer-status-filter-title">Game Status</div>
+
       <div class="hammer-status-filter-buttons">
-        <button type="button" class="hammer-status-filter-button is-active" data-status="all" aria-pressed="true">
+        <button type="button" class="hammer-status-filter-button is-active" data-status="all">
           <span>All Games</span>
           <span class="hammer-status-count" data-count-for="all">0</span>
         </button>
-        <button type="button" class="hammer-status-filter-button" data-status="upcoming" aria-pressed="false">
+
+        <button type="button" class="hammer-status-filter-button" data-status="upcoming">
           <span>Upcoming</span>
           <span class="hammer-status-count" data-count-for="upcoming">0</span>
         </button>
-        <button type="button" class="hammer-status-filter-button" data-status="live" aria-pressed="false">
-          <span class="hammer-status-live-dot" aria-hidden="true"></span>
+
+        <button type="button" class="hammer-status-filter-button" data-status="live">
+          <span class="hammer-status-live-dot"></span>
           <span>Live</span>
           <span class="hammer-status-count" data-count-for="live">0</span>
         </button>
-        <button type="button" class="hammer-status-filter-button" data-status="final" aria-pressed="false">
+
+        <button type="button" class="hammer-status-filter-button" data-status="final">
           <span>Final</span>
           <span class="hammer-status-count" data-count-for="final">0</span>
         </button>
@@ -524,294 +418,198 @@
     wrapper.addEventListener("click", event => {
       const button = event.target.closest(".hammer-status-filter-button");
       if (!button) return;
-      event.preventDefault();
-      selectStatus(button.dataset.status);
+
+      activeStatus = button.dataset.status || "all";
+      applyFilterAndUI();
     });
 
     return wrapper;
+  }
+
+  function counts() {
+    const result = {
+      all: 0,
+      upcoming: 0,
+      live: 0,
+      final: 0
+    };
+
+    rows().forEach(row => {
+      const status = rowStatus(row);
+      result.all += 1;
+      result[status] += 1;
+    });
+
+    return result;
   }
 
   function updateFilterUI() {
     const wrapper = ensureFilterUI();
     if (!wrapper) return;
 
-    const counts = statusCounts();
+    const currentCounts = counts();
 
     ["all", "upcoming", "live", "final"].forEach(status => {
       const button = wrapper.querySelector(
         `.hammer-status-filter-button[data-status="${status}"]`
       );
-      const count = wrapper.querySelector(`[data-count-for="${status}"]`);
 
-      if (count) count.textContent = String(counts[status]);
+      const count = wrapper.querySelector(
+        `[data-count-for="${status}"]`
+      );
+
+      if (count) {
+        count.textContent = String(currentCounts[status]);
+      }
 
       if (button) {
-        const active = activeStatus === status;
-        button.classList.toggle("is-active", active);
-        button.setAttribute("aria-pressed", active ? "true" : "false");
+        button.classList.toggle(
+          "is-active",
+          activeStatus === status
+        );
       }
     });
   }
 
-  function selectStatus(status) {
-    if (!["all", "upcoming", "live", "final"].includes(status)) return;
+  // --------------------------------------------------------------------------
+  // ORDERING + DIVIDERS
+  // --------------------------------------------------------------------------
 
-    activeStatus = status;
-    updateFilterUI();
-    applyDesktopFilter();
-    applyMobileFilter();
-    syncDesktopDividerVisibility();
-    syncMobileDayDividers();
-    updateEmptyState();
-  }
+  function sortedRows() {
+    return [...rows()].sort((a, b) => {
+      const statusDiff =
+        statusPriority(rowStatus(a)) -
+        statusPriority(rowStatus(b));
 
+      if (statusDiff !== 0) {
+        return statusDiff;
+      }
 
-  // ==========================================================================
-  // SLATE ORDER + DAY GROUPING
-  // ==========================================================================
+      const timeDiff = rowTime(a) - rowTime(b);
 
-  function sortRowsForSlate(rows) {
-    return [...rows].sort((a, b) => {
-      const timeDifference = rowTime(a) - rowTime(b);
-      if (timeDifference !== 0) return timeDifference;
-
-      const statusDifference =
-        statusPriority(rowStatus(a)) - statusPriority(rowStatus(b));
-      if (statusDifference !== 0) return statusDifference;
+      if (timeDiff !== 0) {
+        return timeDiff;
+      }
 
       return gameIdFromRow(a).localeCompare(gameIdFromRow(b));
     });
   }
 
-  function pauseObserver(callback) {
-    const container = document.querySelector(CONTAINER_SELECTOR);
-
-    if (projectionObserver) projectionObserver.disconnect();
-
-    try {
-      callback();
-    } finally {
-      if (projectionObserver && container) {
-        projectionObserver.observe(container, {
-          childList: true,
-          subtree: true
-        });
-      }
-    }
+  function removeDividers() {
+    tbody()?.querySelectorAll(`.${DIVIDER_CLASS}`)
+      .forEach(node => node.remove());
   }
 
-  function rebuildDesktopDayGroups() {
-    const tbody = document.querySelector(
-      `${CONTAINER_SELECTOR} .projection-table tbody`
+  function rebuildBoardOrderAndDividers() {
+    const body = tbody();
+    if (!body) return;
+
+    const ordered = sortedRows();
+    if (!ordered.length) return;
+
+    removeDividers();
+
+    // Reorder once per actual state/row change.
+    const current = Array.from(
+      body.querySelectorAll(":scope > tr.game-row")
     );
-    if (!tbody) return;
 
-    const rows = projectionRows();
-    if (!rows.length) return;
+    const orderChanged =
+      ordered.some((row, index) => row !== current[index]);
 
-    const desired = sortRowsForSlate(rows);
+    if (orderChanged) {
+      const fragment = document.createDocumentFragment();
 
-    pauseObserver(() => {
-      tbody.querySelectorAll(`.${DESKTOP_DAY_CLASS}`).forEach(divider => divider.remove());
-
-      const currentRows = Array.from(
-        tbody.querySelectorAll(":scope > tr.game-row")
-      );
-      const orderChanged = desired.some((row, index) => row !== currentRows[index]);
-
-      if (orderChanged) {
-        const fragment = document.createDocumentFragment();
-        desired.forEach(row => fragment.appendChild(row));
-        tbody.appendChild(fragment);
-      }
-
-      let previousGroupKey = null;
-
-      desired.forEach(row => {
-        const groupKey = dayKey(row);
-        if (groupKey === previousGroupKey) return;
-        previousGroupKey = groupKey;
-
-        const divider = document.createElement("tr");
-        divider.className = DESKTOP_DAY_CLASS;
-        divider.dataset.hammerDayKey = groupKey;
-
-        const cell = document.createElement("td");
-        cell.colSpan = 7;
-
-        const box = document.createElement("div");
-        box.className = "hammer-day-divider-box";
-        box.textContent = dayLabel(row);
-
-        cell.appendChild(box);
-        divider.appendChild(cell);
-        tbody.insertBefore(divider, row);
+      ordered.forEach(row => {
+        fragment.appendChild(row);
       });
+
+      body.appendChild(fragment);
+    }
+
+    let previousGroup = "";
+
+    ordered.forEach(row => {
+      const group = `${rowStatus(row)}|${dayKey(row)}`;
+
+      if (group === previousGroup) return;
+      previousGroup = group;
+
+      const divider = document.createElement("tr");
+      divider.className = DIVIDER_CLASS;
+      divider.dataset.hammerStatus = rowStatus(row);
+
+      const cell = document.createElement("td");
+      cell.colSpan = 7;
+
+      const box = document.createElement("div");
+      box.className = "hammer-day-divider-box";
+      box.textContent = dayLabel(row);
+
+      cell.appendChild(box);
+      divider.appendChild(cell);
+
+      body.insertBefore(divider, row);
     });
   }
 
-  function syncDesktopDividerVisibility() {
-    document.querySelectorAll(`.${DESKTOP_DAY_CLASS}`).forEach(divider => {
-      let sibling = divider.nextElementSibling;
-      let hasVisibleGame = false;
+  // --------------------------------------------------------------------------
+  // FILTERING
+  // --------------------------------------------------------------------------
 
-      while (sibling && !sibling.classList.contains(DESKTOP_DAY_CLASS)) {
-        if (
-          sibling.classList.contains("game-row") &&
-          sibling.style.display !== "none" &&
-          !sibling.hidden
-        ) {
-          hasVisibleGame = true;
-          break;
-        }
-        sibling = sibling.nextElementSibling;
-      }
+  function applyRowVisibility() {
+    rows().forEach(row => {
+      const visible =
+        activeStatus === "all" ||
+        rowStatus(row) === activeStatus;
 
-      divider.style.display = hasVisibleGame ? "" : "none";
-    });
-  }
-
-  function syncMobileDayDividers() {
-    const host = document.getElementById("mobile-projection-cards");
-    if (!host) return;
-
-    host.querySelectorAll(`.${MOBILE_DAY_CLASS}`).forEach(divider => divider.remove());
-
-    const rows = projectionRows();
-    const cards = Array.from(host.querySelectorAll(".mobile-projection-card"));
-    if (!rows.length || rows.length !== cards.length) return;
-
-    let previousGroupKey = null;
-
-    rows.forEach((row, index) => {
-      const card = cards[index];
-      const groupKey = dayKey(row);
-
-      if (groupKey !== previousGroupKey) {
-        previousGroupKey = groupKey;
-
-        const divider = document.createElement("div");
-        divider.className = MOBILE_DAY_CLASS;
-        divider.dataset.hammerDayKey = groupKey;
-        divider.textContent = dayLabel(row);
-        host.insertBefore(divider, card);
-      }
-    });
-
-    host.querySelectorAll(`.${MOBILE_DAY_CLASS}`).forEach(divider => {
-      let sibling = divider.nextElementSibling;
-      let hasVisibleCard = false;
-
-      while (sibling && !sibling.classList.contains(MOBILE_DAY_CLASS)) {
-        if (
-          sibling.classList.contains("mobile-projection-card") &&
-          sibling.style.display !== "none" &&
-          !sibling.hidden
-        ) {
-          hasVisibleCard = true;
-          break;
-        }
-        sibling = sibling.nextElementSibling;
-      }
-
-      divider.style.display = hasVisibleCard ? "" : "none";
-    });
-  }
-
-
-  // ==========================================================================
-  // FILTER ROWS
-  // ==========================================================================
-
-  function applyDesktopFilter() {
-    projectionRows().forEach(row => {
-      const status = rowStatus(row);
-      const visible = activeStatus === "all" || status === activeStatus;
       row.hidden = !visible;
       row.style.display = visible ? "" : "none";
     });
   }
 
-  function applyMobileFilter() {
-    const sourceRows = projectionRows();
-    const cards = Array.from(document.querySelectorAll(".mobile-projection-card"));
+  function syncDividerVisibility() {
+    tbody()?.querySelectorAll(`.${DIVIDER_CLASS}`)
+      .forEach(divider => {
+        let node = divider.nextElementSibling;
+        let visibleGameFound = false;
 
-    cards.forEach((card, index) => {
-      const sourceRow = sourceRows[index];
-      if (!sourceRow) return;
+        while (
+          node &&
+          !node.classList.contains(DIVIDER_CLASS)
+        ) {
+          if (
+            node.classList.contains("game-row") &&
+            !node.hidden &&
+            node.style.display !== "none"
+          ) {
+            visibleGameFound = true;
+            break;
+          }
 
-      const status = rowStatus(sourceRow);
-      const visible = activeStatus === "all" || status === activeStatus;
-      card.hidden = !visible;
-      card.style.display = visible ? "" : "none";
-    });
+          node = node.nextElementSibling;
+        }
+
+        divider.style.display =
+          visibleGameFound ? "" : "none";
+      });
   }
-
-
-  // ==========================================================================
-  // BRAND TERMINOLOGY
-  // ==========================================================================
-
-  function replaceExactText(selector, replacements) {
-    document.querySelectorAll(selector).forEach(element => {
-      const current = String(element.textContent || "").trim();
-      if (Object.prototype.hasOwnProperty.call(replacements, current)) {
-        element.textContent = replacements[current];
-      }
-    });
-  }
-
-  function applyThiTerminology() {
-    replaceExactText(
-      "#projections-container .projection-table thead th",
-      {
-        "Our Line": "THI Spread",
-        "Total": "THI Total"
-      }
-    );
-
-    replaceExactText(
-      "#view-projections .line-secondary",
-      {
-        "Model total": "THI Total",
-        "Frozen public line": "Frozen THI spread"
-      }
-    );
-
-    replaceExactText(
-      "#mobile-projection-cards .mobile-card-label",
-      {
-        "FAIR LINE": "THI SPREAD",
-        "FROZEN LINE": "FROZEN THI SPREAD",
-        "PROJECTED TOTAL": "THI TOTAL"
-      }
-    );
-
-    replaceExactText(
-      "#view-matchup .analysis-label",
-      {
-        "Fair Line": "THI Spread",
-        "Model Total": "THI Total"
-      }
-    );
-  }
-
-
-  // ==========================================================================
-  // EMPTY STATE + OLD SUMMARY + ET LABELS
-  // ==========================================================================
 
   function ensureEmptyState() {
-    let empty = document.getElementById(EMPTY_ID);
-    if (empty) return empty;
+    const view = document.getElementById(VIEW_ID);
+    const tableCard = view?.querySelector(".table-card");
 
-    const tableCard = document.querySelector(`${VIEW_SELECTOR} .table-card`);
     if (!tableCard) return null;
 
-    empty = document.createElement("div");
-    empty.id = EMPTY_ID;
-    empty.className = "hammer-status-empty";
-    tableCard.insertAdjacentElement("beforebegin", empty);
+    let empty = document.getElementById(EMPTY_ID);
+
+    if (!empty) {
+      empty = document.createElement("div");
+      empty.id = EMPTY_ID;
+      empty.className = "hammer-status-empty";
+      tableCard.insertAdjacentElement("beforebegin", empty);
+    }
+
     return empty;
   }
 
@@ -819,8 +617,9 @@
     const empty = ensureEmptyState();
     if (!empty) return;
 
-    const counts = statusCounts();
-    if (activeStatus === "all" || counts[activeStatus] > 0) {
+    const visibleRows = rows().filter(row => !row.hidden);
+
+    if (visibleRows.length) {
       empty.style.display = "none";
       return;
     }
@@ -831,131 +630,123 @@
       final: "final games"
     };
 
-    empty.textContent = `No ${labels[activeStatus]} are available in this week.`;
+    empty.textContent =
+      activeStatus === "all"
+        ? "No games are available."
+        : `No ${labels[activeStatus] || "games"} are available.`;
+
     empty.style.display = "block";
   }
 
-  function hideOldSummary() {
-    const summary = document.querySelector(SUMMARY_SELECTOR);
-    if (summary) summary.style.display = "none";
-  }
-
-  function addEasternTimeLabels() {
-    projectionRows().forEach(row => {
-      const targets = row.querySelectorAll(".matchup-cell, .team-meta");
-
-      targets.forEach(target => {
-        const walker = document.createTreeWalker(target, NodeFilter.SHOW_TEXT);
-        const nodes = [];
-        while (walker.nextNode()) nodes.push(walker.currentNode);
-
-        nodes.forEach(node => {
-          const original = String(node.nodeValue ?? "");
-          const updated = original.replace(
-            /(\b\d{1,2}:\d{2}\s*(?:AM|PM)\b)(?!\s*ET\b)/gi,
-            "$1 ET"
-          );
-          if (updated !== original) node.nodeValue = updated;
-        });
-      });
-    });
-  }
-
-
-  // ==========================================================================
-  // UPDATE
-  // ==========================================================================
-
-  function updateEverything() {
-    installStyles();
-    hideOldSummary();
-    ensureFilterUI();
+  function applyFilterAndUI() {
     updateFilterUI();
-
-    addEasternTimeLabels();
-    rebuildDesktopDayGroups();
-    applyThiTerminology();
-
-    applyDesktopFilter();
-    applyMobileFilter();
-    syncDesktopDividerVisibility();
-    syncMobileDayDividers();
-
+    applyRowVisibility();
+    syncDividerVisibility();
     updateEmptyState();
   }
 
-  function scheduleUpdate() {
-    if (updateQueued) return;
-    updateQueued = true;
+  // --------------------------------------------------------------------------
+  // CHANGE DETECTION
+  //
+  // No MutationObserver.
+  // We only rebuild when the actual set/order/status of game rows changes.
+  // This avoids the old infinite feedback loop and date-bar flashing.
+  // --------------------------------------------------------------------------
 
-    requestAnimationFrame(() => {
-      updateQueued = false;
-      updateEverything();
-    });
+  function boardSignature() {
+    return rows()
+      .map(row => [
+        gameIdFromRow(row),
+        rowStatus(row),
+        rowDate(row)?.getTime() ?? ""
+      ].join(":"))
+      .join("|");
   }
 
+  function syncIfBoardChanged(force = false) {
+    const signature = boardSignature();
 
-  // ==========================================================================
-  // OBSERVER
-  // ==========================================================================
-
-  function installProjectionObserver() {
-    const container = document.querySelector(CONTAINER_SELECTOR);
-
-    if (!container) {
-      setTimeout(installProjectionObserver, 100);
+    if (!force && signature === lastBoardSignature) {
       return;
     }
 
-    if (projectionObserver) return;
+    lastBoardSignature = signature;
 
-    projectionObserver = new MutationObserver(mutations => {
-      const boardStructureChanged = mutations.some(mutation => {
-        const changedNodes = [
-          ...Array.from(mutation.addedNodes || []),
-          ...Array.from(mutation.removedNodes || [])
-        ];
-
-        return changedNodes.some(node => {
-          if (!(node instanceof Element)) return false;
-          if (node.matches?.("tr.game-row, .projection-table")) return true;
-          return Boolean(node.querySelector?.("tr.game-row"));
-        });
-      });
-
-      if (boardStructureChanged) scheduleUpdate();
-    });
-
-    projectionObserver.observe(container, {
-      childList: true,
-      subtree: true
-    });
+    rebuildBoardOrderAndDividers();
+    applyFilterAndUI();
   }
 
+  // --------------------------------------------------------------------------
+  // DATA
+  // --------------------------------------------------------------------------
 
-  // ==========================================================================
+  async function loadProjectionMetadata() {
+    try {
+      const response = await fetch(
+        `${PROJECTIONS_URL}?v=${Date.now()}`,
+        { cache: "no-store" }
+      );
+
+      if (!response.ok) return;
+
+      const payload = await response.json();
+      const games = Array.isArray(payload?.games)
+        ? payload.games
+        : [];
+
+      projectionByGameId = new Map(
+        games
+          .filter(game =>
+            game?.game_id !== null &&
+            game?.game_id !== undefined
+          )
+          .map(game => [
+            String(game.game_id),
+            game
+          ])
+      );
+    } catch (error) {
+      console.warn(
+        "Projection metadata unavailable for status controls:",
+        error
+      );
+    }
+  }
+
+  // --------------------------------------------------------------------------
   // START
-  // ==========================================================================
+  // --------------------------------------------------------------------------
 
-  function start() {
+  async function start() {
     installStyles();
-    hideOldSummary();
     ensureFilterUI();
-    installProjectionRowClickFallback();
-    loadProjectionMetadata();
-    installProjectionObserver();
-    updateEverything();
 
-    window.addEventListener("hammer:data-ready", scheduleUpdate);
-    window.addEventListener("resize", scheduleUpdate);
+    await loadProjectionMetadata();
 
-    [250, 750, 1500, 3000].forEach(delay => {
-      setTimeout(scheduleUpdate, delay);
-    });
+    syncIfBoardChanged(true);
+
+    document.addEventListener(
+      "hammer:data-ready",
+      () => {
+        setTimeout(() => syncIfBoardChanged(true), 0);
+      }
+    );
+
+    // Covers week-tab changes and score/final updates from sort-tables.js.
+    // Because this only rebuilds when the row/status signature changes,
+    // it does not create a flashing loop.
+    pollTimer = window.setInterval(
+      () => syncIfBoardChanged(false),
+      1000
+    );
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", start, { once: true });
+    document.addEventListener(
+      "DOMContentLoaded",
+      start,
+      { once: true }
+    );
   } else {
     start();
   }
