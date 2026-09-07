@@ -843,46 +843,9 @@
   }
 
   function reorderProjectionRows() {
-    const tbody = document.querySelector(
-      "#projections-container .projection-table tbody"
-    );
-
-    if (!tbody) return;
-
-    const rows = Array.from(
-      tbody.querySelectorAll(":scope > tr.game-row")
-    );
-
-    if (rows.length < 2) return;
-
-    const priority = {
-      upcoming: 0,
-      live: 1,
-      final: 2
-    };
-
-    const decorated = rows.map((row, index) => ({
-      row,
-      index,
-      priority:
-        priority[row.dataset.hammerGameState ?? "upcoming"] ?? 0
-    }));
-
-    const ordered = [...decorated].sort(
-      (a, b) =>
-        a.priority - b.priority ||
-        a.index - b.index
-    );
-
-    const changed = ordered.some(
-      (item, index) => item.row !== rows[index]
-    );
-
-    if (!changed) return;
-
-    const fragment = document.createDocumentFragment();
-    ordered.forEach(item => fragment.appendChild(item.row));
-    tbody.appendChild(fragment);
+    // Ordering is owned exclusively by status-controls.js.
+    // Do not move rows here: doing so pushes newly-final games away from
+    // their date group and can fight the day-grouping layer.
   }
 
   function decorateProjectionRows() {
