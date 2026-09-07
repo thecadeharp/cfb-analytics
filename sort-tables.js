@@ -843,110 +843,9 @@
   }
 
   function reorderProjectionRows() {
-    const tbody = document.querySelector(
-      "#projections-container .projection-table tbody"
-    );
-
-    if (!tbody) return;
-
-    const rows = Array.from(
-      tbody.querySelectorAll(":scope > tr.game-row")
-    );
-
-    if (rows.length < 2) return;
-
-    const priority = {
-      upcoming: 0,
-      live: 1,
-      final: 2
-    };
-
-    const ordered = rows
-      .map((row, index) => ({
-        row,
-        index,
-        priority:
-          priority[row.dataset.hammerGameState ?? "upcoming"] ?? 0
-      }))
-      .sort(
-        (a, b) =>
-          a.priority - b.priority ||
-          a.index - b.index
-      );
-
-    const changed = ordered.some(
-      (item, index) => item.row !== rows[index]
-    );
-
-    if (!changed) return;
-
-    const fragment = document.createDocumentFragment();
-    ordered.forEach(item => fragment.appendChild(item.row));
-    tbody.appendChild(fragment);
-  }
-
-  function currentStatusFilter() {
-    return (
-      document.querySelector(
-        ".hammer-status-filter-button.is-active"
-      )?.dataset?.status ?? "all"
-    );
-  }
-
-  function syncStatusFilterVisibility() {
-    const active = currentStatusFilter();
-
-    const rows = Array.from(
-      document.querySelectorAll(
-        "#projections-container .projection-table tbody tr.game-row"
-      )
-    );
-
-    rows.forEach(row => {
-      const state =
-        row.dataset.hammerGameState === "final" ||
-        row.classList.contains("completed-row") ||
-        row.classList.contains("hammer-final-untracked-row")
-          ? "final"
-          : row.dataset.hammerGameState === "live" ||
-            row.classList.contains("hammer-live-row")
-            ? "live"
-            : "upcoming";
-
-      const visible =
-        active === "all" ||
-        state === active;
-
-      row.hidden = !visible;
-      row.style.display = visible ? "" : "none";
-    });
-
-    // Keep day dividers honest after another script re-renders or
-    // re-decorates the board.
-    document
-      .querySelectorAll(".hammer-day-divider-row")
-      .forEach(divider => {
-        let sibling = divider.nextElementSibling;
-        let hasVisibleGame = false;
-
-        while (
-          sibling &&
-          !sibling.classList.contains("hammer-day-divider-row")
-        ) {
-          if (
-            sibling.classList.contains("game-row") &&
-            sibling.style.display !== "none" &&
-            !sibling.hidden
-          ) {
-            hasVisibleGame = true;
-            break;
-          }
-          sibling = sibling.nextElementSibling;
-        }
-
-        divider.style.display =
-          hasVisibleGame ? "" : "none";
-      });
+    // Ordering is owned exclusively by status-controls.js.
+    // Do not move rows here: doing so pushes newly-final games away from
+    // their date group and can fight the day-grouping layer.
   }
 
   function decorateProjectionRows() {
@@ -991,7 +890,12 @@
       });
 
       reorderProjectionRows();
-      syncStatusFilterVisibility();
+
+      // Tell the single board owner (status-controls.js) that LIVE/FINAL states
+      // are now authoritative. It will re-count, re-filter, and re-group once.
+      window.dispatchEvent(
+        new CustomEvent("hammer:game-status-updated")
+      );
 
     } finally {
       decorating = false;
@@ -1141,26 +1045,6 @@
 
   function start() {
     installStyles();
-
-    document.addEventListener(
-      "click",
-      event => {
-        if (
-          event.target.closest(
-            ".hammer-status-filter-button"
-          )
-        ) {
-          window.requestAnimationFrame(
-            syncStatusFilterVisibility
-          );
-          window.setTimeout(
-            syncStatusFilterVisibility,
-            75
-          );
-        }
-      },
-      true
-    );
 
     enhanceTables(document);
     observeTables();
