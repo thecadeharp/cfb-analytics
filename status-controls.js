@@ -2,271 +2,366 @@
   "use strict";
 
   // ==========================================================================
-  // THE HAMMER INDEX
-  // sort-tables.js
+  // THE HAMMER INDEX — STATUS CONTROLS
   //
-  // 1) Keeps Team Ratings / Portal / Variance tables sortable.
-  // 2) Adds a presentation-only game-status layer to the Projections board.
+  // Single owner for:
+  //   • All / Upcoming / Live / Final filters
+  //   • Upcoming → Live → Final ordering
+  //   • Date dividers
   //
-  // Game status rules:
-  //   UPCOMING -> normal projection row
-  //   LIVE     -> red LIVE badge + current score; pregame model stays frozen
-  //   FINAL    -> existing settled renderer wins when available
-  //            -> otherwise show FINAL · NOT GRADED for pre-tracking games
-  //
-  // Model A is NEVER recalculated here.
+  // IMPORTANT:
+  //   sort-tables.js owns score/final decoration only.
+  //   This file owns board ordering/filtering only.
+  //   No MutationObserver is used here, which prevents the prior flashing loop.
   // ==========================================================================
 
-  const TABLE_SELECTOR = [
-    "#view-ratings table",
-    "#view-portal table",
-    "#view-variance table"
-  ].join(", ");
+  const CONTAINER_ID = "projections-container";
+  const VIEW_ID = "view-projections";
+  const FILTER_ID = "hammer-game-status-filters";
+  const STYLE_ID = "hammer-game-status-filter-styles";
+  const EMPTY_ID = "hammer-game-status-empty";
+  const DIVIDER_CLASS = "hammer-day-divider-row";
+  const PROJECTIONS_URL = "./data/projections.json";
+  const EASTERN_TZ = "America/New_York";
 
-  const LIVE_URL =
-    "./data/live_scores.json";
+  const MONTHS = [
+    "JAN.", "FEB.", "MAR.", "APR.", "MAY", "JUN.",
+    "JUL.", "AUG.", "SEP.", "OCT.", "NOV.", "DEC."
+  ];
 
-  const RESULTS_URL =
-    "./data/results.json";
+  let activeStatus = "all";
+  let projectionByGameId = new Map();
+  let lastBoardSignature = "";
+  let pollTimer = null;
 
-  const state =
-    new WeakMap();
+  // --------------------------------------------------------------------------
+  // BASIC HELPERS
+  // --------------------------------------------------------------------------
 
-  let liveGames = [];
-  let completedGames = [];
+  function container() {
+    return document.getElementById(CONTAINER_ID);
+  }
 
-  let statusRefreshTimer = null;
-  let decorationQueued = false;
-  let decorating = false;
+  function table() {
+    return container()?.querySelector(".projection-table") ?? null;
+  }
 
-  // ==========================================================================
-  // TEAM NAME NORMALIZATION
-  // ==========================================================================
-  const TEAM_ALIASES =
-    new Map([
-      ["miamifla", "miamifl"],
-      ["miamiflorida", "miamifl"],
-      ["olemiss", "mississippi"],
+  function tbody() {
+    return table()?.querySelector("tbody") ?? null;
+  }
 
-      // NCAA scoreboard naming variants that differ from projection names.
-      ["armywestpoint", "army"],
-      ["gasouthern", "georgiasouthern"],
-      ["charlestonso", "charlestonsouthern"],
-      ["alcorn", "alcornstate"],
-      ["southernmiss", "southernmississippi"],
-      ["utsa", "texassanantonio"],
-      ["utep", "texaselpaso"],
-      ["ucf", "centralflorida"],
-      ["byu", "brighamyoung"],
-      ["lsu", "louisianastate"],
-      ["smu", "southernmethodist"],
-      ["tcu", "texaschristian"],
-      ["usc", "southerncalifornia"],
-      ["appalachianst", "appalachianstate"],
-      ["arizonast", "arizonastate"],
-      ["arkansasst", "arkansasstate"],
-      ["ballst", "ballstate"],
-      ["boisest", "boisestate"],
-      ["coloradost", "coloradostate"],
-      ["floridast", "floridastate"],
-      ["fresnost", "fresnostate"],
-      ["georgiast", "georgiastate"],
-      ["iowast", "iowastate"],
-      ["jacksonvillest", "jacksonvillestate"],
-      ["kansasst", "kansasstate"],
-      ["kennesawst", "kennesawstate"],
-      ["kentst", "kentstate"],
-      ["mississippist", "mississippistate"],
-      ["missourist", "missouristate"],
-      ["newmexicost", "newmexicostate"],
-      ["northdakotast", "northdakotastate"],
-      ["oklahomast", "oklahomastate"],
-      ["oregonst", "oregonstate"],
-      ["pennst", "pennstate"],
-      ["sacramentost", "sacramentostate"],
-      ["sandiegost", "sandiegostate"],
-      ["sanjosest", "sanjosestate"],
-      ["texasst", "texasstate"],
-      ["utahst", "utahstate"],
-      ["washingtonst", "washingtonstate"],
-      ["centralmich", "centralmichigan"],
-      ["easternmich", "easternmichigan"],
-      ["westernmich", "westernmichigan"],
-      // NCAA Week 1 scoreboard abbreviations.
-      ["easternky", "easternkentucky"],
-      ["fiu", "floridainternational"],
-      ["flaatlantic", "floridaatlantic"],
-      ["middletenn", "middletennessee"],
-      ["mississippival", "mississippivalleystate"],
-      ["niu", "northernillinois"],
-      ["northala", "northalabama"],
-      ["northernariz", "northernarizona"],
-      ["southfla", "southflorida"],
-      ["southeastmostate", "southeastmissouristate"],
-      ["southeasternla", "selouisiana"],
-      ["ulm", "ulmonroe"],
-      ["utrgv", "utriograndevalley"],
-      ["westernky", "westernkentucky"]
-    ]);
+  function rows() {
+    return Array.from(
+      container()?.querySelectorAll(".projection-table tbody tr.game-row") ?? []
+    );
+  }
+
+  function gameIdFromRow(row) {
+    if (!row) return "";
+
+    if (row.dataset.gameId) {
+      return String(row.dataset.gameId);
+    }
+
+    const onclick = String(row.getAttribute("onclick") || "");
+    const match = onclick.match(/openMatchup\(\s*['"]([^'"]+)['"]\s*\)/);
+
+    return match?.[1] ? String(match[1]) : "";
+  }
+
+  function rowStatus(row) {
+    if (!row) return "upcoming";
+
+    if (
+      row.classList.contains("completed-row") ||
+      row.classList.contains("hammer-final-untracked-row") ||
+      row.dataset.hammerGameState === "final"
+    ) {
+      return "final";
+    }
+
+    if (
+      row.classList.contains("hammer-live-row") ||
+      row.dataset.hammerGameState === "live"
+    ) {
+      return "live";
+    }
+
+    return "upcoming";
+  }
+
+  function statusPriority(status) {
+    if (status === "upcoming") return 0;
+    if (status === "live") return 1;
+    return 2;
+  }
+
+  function cleanText(value) {
+    return String(value ?? "").replace(/\s+/g, " ").trim();
+  }
+
+  // --------------------------------------------------------------------------
+  // DATE HELPERS
+  // --------------------------------------------------------------------------
+
+  function fallbackRowDate(row) {
+    const cell = row?.querySelector(".matchup-cell");
+    if (!cell) return null;
+
+    const text = cleanText(cell.textContent);
+
+    const match = text.match(
+      /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+(\d{1,2}),\s+(\d{1,2}):(\d{2})\s*(AM|PM)\b/i
+    );
+
+    if (!match) return null;
+
+    const monthMap = {
+      jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+      jul: 6, aug: 7, sep: 8, sept: 8, oct: 9, nov: 10, dec: 11
+    };
+
+    const month = monthMap[match[1].toLowerCase()];
+    let hour = Number(match[3]);
+    const minute = Number(match[4]);
+    const ampm = match[5].toUpperCase();
+
+    if (ampm === "PM" && hour !== 12) hour += 12;
+    if (ampm === "AM" && hour === 12) hour = 0;
+
+    const year = new Date().getFullYear();
+    return new Date(year, month, Number(match[2]), hour, minute);
+  }
+
+  function rowDate(row) {
+    const gameId = gameIdFromRow(row);
+    const startDate = projectionByGameId.get(gameId)?.start_date;
+
+    if (startDate) {
+      const date = new Date(startDate);
+      if (!Number.isNaN(date.getTime())) {
+        return date;
+      }
+    }
+
+    return fallbackRowDate(row);
+  }
+
+  function rowTime(row) {
+    const date = rowDate(row);
+    return date ? date.getTime() : Number.MAX_SAFE_INTEGER;
+  }
+
+  function dayKey(row) {
+    const date = rowDate(row);
+    if (!date) return "unknown";
+
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: EASTERN_TZ,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(date);
+
+    const values = Object.fromEntries(
+      parts
+        .filter(part => part.type !== "literal")
+        .map(part => [part.type, part.value])
+    );
+
+    return `${values.year}-${values.month}-${values.day}`;
+  }
+
+  function dayLabel(row) {
+    const date = rowDate(row);
+    if (!date) return "DATE TBD";
+
+    const weekday = new Intl.DateTimeFormat("en-US", {
+      timeZone: EASTERN_TZ,
+      weekday: "long"
+    }).format(date).toUpperCase();
+
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: EASTERN_TZ,
+      month: "numeric",
+      day: "numeric"
+    }).formatToParts(date);
+
+    const monthIndex =
+      Number(parts.find(part => part.type === "month")?.value) - 1;
+
+    const day =
+      Number(parts.find(part => part.type === "day")?.value);
+
+    return `${weekday} — ${MONTHS[monthIndex] || ""} ${day}`.trim();
+  }
+
+  // --------------------------------------------------------------------------
+  // STYLES
+  // --------------------------------------------------------------------------
 
   function installStyles() {
-    if (document.getElementById("hammer-sortable-table-styles")) return;
+    if (document.getElementById(STYLE_ID)) return;
 
     const style = document.createElement("style");
-    style.id = "hammer-sortable-table-styles";
+    style.id = STYLE_ID;
+
     style.textContent = `
-      .hammer-sortable-table thead th[data-sortable-column] {
-        position: relative;
-        cursor: pointer;
-        user-select: none;
-        transition: color 0.15s ease, background 0.15s ease;
+      #projection-summary {
+        display: none !important;
       }
 
-      .hammer-sortable-table thead th[data-sortable-column]:hover {
-        color: var(--text);
-        background: rgba(24, 33, 43, 0.035);
+      .hammer-status-filter-wrap {
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:20px;
+        margin:4px 0 16px;
+        padding:15px 17px;
+        background:var(--surface);
+        border:1px solid var(--border);
+        border-radius:var(--radius);
       }
 
-      .hammer-sort-label {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
+      .hammer-status-filter-title {
+        color:var(--muted);
+        font-family:var(--mono);
+        font-size:10px;
+        font-weight:700;
+        letter-spacing:1.2px;
+        text-transform:uppercase;
+        white-space:nowrap;
       }
 
-      .hammer-sort-arrow {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 13px;
-        height: 13px;
-        color: var(--muted-light);
-        font-family: var(--mono);
-        font-size: 10px;
-        font-weight: 700;
-        line-height: 1;
-        opacity: 0.55;
-        transition: opacity 0.15s ease, color 0.15s ease;
+      .hammer-status-filter-buttons {
+        display:grid;
+        grid-template-columns:repeat(4,minmax(110px,1fr));
+        gap:9px;
+        width:min(100%,620px);
       }
 
-      .hammer-sortable-table thead th[data-sortable-column]:hover .hammer-sort-arrow {
-        opacity: 1;
+      .hammer-status-filter-button {
+        appearance:none;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        gap:8px;
+        min-height:40px;
+        padding:9px 15px;
+        border:1px solid var(--border);
+        border-radius:999px;
+        background:#fff;
+        color:var(--muted);
+        font-family:var(--mono);
+        font-size:10px;
+        font-weight:700;
+        cursor:pointer;
       }
 
-      .hammer-sortable-table thead th[data-sort-direction="asc"],
-      .hammer-sortable-table thead th[data-sort-direction="desc"] {
-        color: var(--text);
-        background: rgba(24, 33, 43, 0.045);
+      .hammer-status-filter-button:hover {
+        color:var(--text);
+        border-color:var(--border-dark);
       }
 
-      .hammer-sortable-table thead th[data-sort-direction="asc"] .hammer-sort-arrow,
-      .hammer-sortable-table thead th[data-sort-direction="desc"] .hammer-sort-arrow {
-        color: var(--green);
-        opacity: 1;
+      .hammer-status-filter-button.is-active {
+        background:var(--text);
+        border-color:var(--text);
+        color:#fff;
       }
 
-      .hammer-live-row {
-        background: #fffafa !important;
+      .hammer-status-filter-button[data-status="live"] {
+        color:#b42318;
+        border-color:#e6b7b3;
+        background:#fffafa;
       }
 
-      .hammer-live-row:hover {
-        background: #fff6f6 !important;
-        box-shadow: inset 3px 0 0 #c62828 !important;
+      .hammer-status-filter-button[data-status="live"].is-active {
+        background:#b42318;
+        border-color:#b42318;
+        color:#fff;
       }
 
-      .hammer-live-badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        margin-top: 6px;
-        padding: 4px 7px;
-        border: 1px solid #e2a1a1;
-        border-radius: 999px;
-        background: #fdeaea;
-        color: #b71c1c;
-        font-family: var(--mono);
-        font-size: 9px;
-        font-weight: 900;
-        letter-spacing: 1px;
-        line-height: 1;
-        text-transform: uppercase;
+      .hammer-status-live-dot {
+        width:7px;
+        height:7px;
+        border-radius:50%;
+        background:currentColor;
       }
 
-      .hammer-live-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 999px;
-        background: #d71920;
-        box-shadow: 0 0 0 3px rgba(215, 25, 32, 0.10);
+      .hammer-status-count {
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        min-width:20px;
+        height:20px;
+        padding:0 5px;
+        border-radius:999px;
+        background:rgba(0,0,0,.055);
+        font-size:9px;
+        line-height:1;
       }
 
-      .hammer-live-detail {
-        margin-left: 6px;
-        color: #9b3131;
-        font-family: var(--mono);
-        font-size: 9px;
-        font-weight: 700;
-        letter-spacing: 0.25px;
+      .hammer-status-filter-button.is-active .hammer-status-count {
+        background:rgba(255,255,255,.16);
       }
 
-      .hammer-live-score,
-      .hammer-final-score {
-        margin-left: auto;
-        padding-left: 10px;
-        font-family: var(--mono);
-        font-size: 15px;
-        font-weight: 900;
-        color: var(--ink);
+      .${DIVIDER_CLASS} td {
+        padding:0 !important;
+        border:0 !important;
+        background:var(--bg) !important;
       }
 
-      .hammer-final-untracked-row {
-        background: #fafaf8 !important;
+      .${DIVIDER_CLASS}:hover {
+        background:transparent !important;
       }
 
-      .hammer-final-untracked-label {
-        display: inline-flex;
-        align-items: center;
-        margin-top: 6px;
-        padding: 4px 7px;
-        border: 1px solid var(--border);
-        border-radius: 999px;
-        background: #f1f1ee;
-        color: var(--muted);
-        font-family: var(--mono);
-        font-size: 9px;
-        font-weight: 900;
-        letter-spacing: 0.8px;
-        line-height: 1;
-        text-transform: uppercase;
+      .hammer-day-divider-box {
+        display:flex;
+        align-items:center;
+        min-height:46px;
+        margin:12px 0 8px;
+        padding:0 16px;
+        background:#fff8dc;
+        border:1px solid #e7c967;
+        border-radius:9px;
+        color:#5f4900;
+        font-family:var(--mono);
+        font-size:13px;
+        font-weight:700;
+        letter-spacing:.7px;
+        text-transform:uppercase;
       }
 
-      .hammer-untracked-status {
-        display: inline-flex;
-        justify-content: center;
-        border: 1px solid var(--border);
-        border-radius: 999px;
-        padding: 5px 8px;
-        background: #f4f4f2;
-        color: var(--muted);
-        font-family: var(--mono);
-        font-size: 9px;
-        font-weight: 800;
-        letter-spacing: 0.4px;
-        white-space: nowrap;
+      .hammer-status-empty {
+        display:none;
+        margin:0 0 14px;
+        padding:28px 18px;
+        text-align:center;
+        color:var(--muted);
+        background:var(--surface);
+        border:1px solid var(--border);
+        border-radius:var(--radius);
+        font-size:12px;
       }
 
-      @media (max-width: 600px) {
-        .hammer-sortable-table thead th[data-sortable-column] {
-          touch-action: manipulation;
+      @media (max-width:900px) {
+        .hammer-status-filter-wrap {
+          align-items:flex-start;
+          flex-direction:column;
         }
 
-        .hammer-sort-label {
-          gap: 5px;
+        .hammer-status-filter-buttons {
+          width:100%;
+        }
+      }
+
+      @media (max-width:600px) {
+        .hammer-status-filter-buttons {
+          grid-template-columns:repeat(2,minmax(0,1fr));
         }
 
-        .hammer-sort-arrow {
-          width: 12px;
-          font-size: 9px;
+        .hammer-status-filter-button {
+          width:100%;
         }
       }
     `;
@@ -274,826 +369,395 @@
     document.head.appendChild(style);
   }
 
-  function cleanText(value) {
-    return String(value ?? "").replace(/\s+/g, " ").trim();
-  }
+  // --------------------------------------------------------------------------
+  // FILTER UI
+  // --------------------------------------------------------------------------
 
-  function isMissing(value) {
-    const text = cleanText(value).toLowerCase();
-    return (
-      text === "" ||
-      text === "—" ||
-      text === "-" ||
-      text === "n/a" ||
-      text === "na" ||
-      text === "null" ||
-      text === "undefined"
-    );
-  }
+  function ensureFilterUI() {
+    const view = document.getElementById(VIEW_ID);
+    const tableCard = view?.querySelector(".table-card");
 
-  function numericValue(value) {
-    const text = cleanText(value);
-    if (isMissing(text)) return null;
+    if (!tableCard) return null;
 
-    const match = text.match(/[+-]?(?:\d+(?:,\d{3})*|\d*\.\d+)/);
-    if (!match) return null;
+    let wrapper = document.getElementById(FILTER_ID);
+    if (wrapper) return wrapper;
 
-    const number = Number(match[0].replace(/,/g, ""));
-    return Number.isFinite(number) ? number : null;
-  }
+    wrapper = document.createElement("div");
+    wrapper.id = FILTER_ID;
+    wrapper.className = "hammer-status-filter-wrap";
 
-  function columnLooksNumeric(rows, columnIndex) {
-    let numeric = 0;
-    let text = 0;
+    wrapper.innerHTML = `
+      <div class="hammer-status-filter-title">Game Status</div>
 
-    rows.slice(0, 25).forEach(row => {
-      const cell = row.cells[columnIndex];
-      if (!cell) return;
+      <div class="hammer-status-filter-buttons">
+        <button type="button" class="hammer-status-filter-button is-active" data-status="all">
+          <span>All Games</span>
+          <span class="hammer-status-count" data-count-for="all">0</span>
+        </button>
 
-      const value = cleanText(cell.textContent);
-      if (isMissing(value)) return;
+        <button type="button" class="hammer-status-filter-button" data-status="upcoming">
+          <span>Upcoming</span>
+          <span class="hammer-status-count" data-count-for="upcoming">0</span>
+        </button>
 
-      if (numericValue(value) !== null) numeric += 1;
-      else text += 1;
-    });
+        <button type="button" class="hammer-status-filter-button" data-status="live">
+          <span class="hammer-status-live-dot"></span>
+          <span>Live</span>
+          <span class="hammer-status-count" data-count-for="live">0</span>
+        </button>
 
-    return numeric > 0 && numeric >= text;
-  }
-
-  function compareMissing(aMissing, bMissing) {
-    if (aMissing && bMissing) return 0;
-    if (aMissing) return 1;
-    if (bMissing) return -1;
-    return null;
-  }
-
-  function compareNumeric(a, b, direction) {
-    const aNumber = numericValue(a);
-    const bNumber = numericValue(b);
-
-    const missingResult = compareMissing(
-      aNumber === null,
-      bNumber === null
-    );
-
-    if (missingResult !== null) return missingResult;
-
-    return direction === "asc"
-      ? aNumber - bNumber
-      : bNumber - aNumber;
-  }
-
-  function compareText(a, b, direction) {
-    const aText = cleanText(a);
-    const bText = cleanText(b);
-
-    const missingResult = compareMissing(
-      isMissing(aText),
-      isMissing(bText)
-    );
-
-    if (missingResult !== null) return missingResult;
-
-    const result = aText.localeCompare(
-      bText,
-      undefined,
-      {
-        numeric: true,
-        sensitivity: "base"
-      }
-    );
-
-    return direction === "asc" ? result : -result;
-  }
-
-  function resetHeaders(table, activeHeader) {
-    table.querySelectorAll("thead th[data-sortable-column]").forEach(header => {
-      if (header === activeHeader) return;
-
-      header.removeAttribute("data-sort-direction");
-
-      const arrow = header.querySelector(".hammer-sort-arrow");
-      if (arrow) arrow.textContent = "↕";
-
-      header.setAttribute("aria-sort", "none");
-    });
-  }
-
-  function updateActiveHeader(header, direction) {
-    header.setAttribute("data-sort-direction", direction);
-    header.setAttribute(
-      "aria-sort",
-      direction === "asc" ? "ascending" : "descending"
-    );
-
-    const arrow = header.querySelector(".hammer-sort-arrow");
-    if (arrow) {
-      arrow.textContent = direction === "asc" ? "↑" : "↓";
-    }
-  }
-
-  function sortTable(table, columnIndex) {
-    const tbody = table.tBodies?.[0];
-    if (!tbody) return;
-
-    const rows = Array.from(tbody.rows);
-    if (rows.length < 2) return;
-
-    const currentState = state.get(table) ?? {
-      column: null,
-      direction: null
-    };
-
-    const numeric = columnLooksNumeric(rows, columnIndex);
-
-    let direction;
-    if (currentState.column === columnIndex) {
-      direction =
-        currentState.direction === "desc" ? "asc" : "desc";
-    } else {
-      direction = numeric ? "desc" : "asc";
-    }
-
-    const decoratedRows = rows.map((row, originalIndex) => ({
-      row,
-      originalIndex,
-      value: row.cells[columnIndex]?.textContent ?? ""
-    }));
-
-    decoratedRows.sort((a, b) => {
-      const result = numeric
-        ? compareNumeric(a.value, b.value, direction)
-        : compareText(a.value, b.value, direction);
-
-      if (result === 0) {
-        return a.originalIndex - b.originalIndex;
-      }
-
-      return result;
-    });
-
-    const fragment = document.createDocumentFragment();
-    decoratedRows.forEach(item => fragment.appendChild(item.row));
-    tbody.appendChild(fragment);
-
-    const header = table.tHead?.rows?.[0]?.cells?.[columnIndex];
-    if (header) {
-      resetHeaders(table, header);
-      updateActiveHeader(header, direction);
-    }
-
-    state.set(table, {
-      column: columnIndex,
-      direction
-    });
-  }
-
-  function makeHeaderSortable(table, header, columnIndex) {
-    if (header.hasAttribute("data-sortable-column")) return;
-
-    header.setAttribute("data-sortable-column", String(columnIndex));
-    header.setAttribute("role", "button");
-    header.setAttribute("tabindex", "0");
-    header.setAttribute("aria-sort", "none");
-
-    const originalContent = header.innerHTML;
-
-    header.innerHTML = `
-      <span class="hammer-sort-label">
-        <span class="hammer-sort-title">
-          ${originalContent}
-        </span>
-
-        <span
-          class="hammer-sort-arrow"
-          aria-hidden="true"
-        >↕</span>
-      </span>
+        <button type="button" class="hammer-status-filter-button" data-status="final">
+          <span>Final</span>
+          <span class="hammer-status-count" data-count-for="final">0</span>
+        </button>
+      </div>
     `;
 
-    function activate(event) {
-      if (
-        event.type === "keydown" &&
-        event.key !== "Enter" &&
-        event.key !== " "
-      ) {
-        return;
-      }
+    tableCard.insertAdjacentElement("beforebegin", wrapper);
 
-      if (event.type === "keydown") event.preventDefault();
-      sortTable(table, columnIndex);
-    }
+    wrapper.addEventListener("click", event => {
+      const button = event.target.closest(".hammer-status-filter-button");
+      if (!button) return;
 
-    header.addEventListener("click", activate);
-    header.addEventListener("keydown", activate);
-  }
-
-  function enhanceTable(table) {
-    if (!table?.tHead) return;
-    if (table.dataset.hammerSortable === "true") return;
-
-    const headerRow = table.tHead.rows?.[0];
-    if (!headerRow) return;
-
-    const bodyRows = Array.from(table.tBodies?.[0]?.rows ?? []);
-    if (!bodyRows.length) return;
-
-    table.classList.add("hammer-sortable-table");
-
-    Array.from(headerRow.cells).forEach((header, columnIndex) => {
-      makeHeaderSortable(table, header, columnIndex);
+      activeStatus = button.dataset.status || "all";
+      applyFilterAndUI();
     });
 
-    table.dataset.hammerSortable = "true";
+    return wrapper;
   }
 
-  function enhanceTables(root = document) {
-    root.querySelectorAll(TABLE_SELECTOR).forEach(enhanceTable);
-  }
-
-  function observeTables() {
-    const targets = [
-      document.getElementById("ratings-container"),
-      document.getElementById("view-portal"),
-      document.getElementById("view-variance")
-    ].filter(Boolean);
-
-    targets.forEach(target => {
-      const observer = new MutationObserver(() => {
-        window.requestAnimationFrame(() => enhanceTables(document));
-      });
-
-      observer.observe(target, {
-        childList: true,
-        subtree: true
-      });
-    });
-  }
-
-  function canonicalTeam(value) {
-    let text = String(value ?? "")
-      .trim()
-      .toLowerCase()
-      .replace(/\bst\.?\b/g, "state")
-      .replace(/\bmich\.?\b/g, "michigan")
-      .replace(/&/g, "and")
-      .replace(/\buniversity\b/g, "")
-      .replace(/[^a-z0-9]+/g, "");
-
-    text = TEAM_ALIASES.get(text) ?? text;
-    return text;
-  }
-
-  function matchupKey(away, home) {
-    const awayKey = canonicalTeam(away);
-    const homeKey = canonicalTeam(home);
-
-    if (!awayKey || !homeKey) return "";
-    return `${awayKey}@${homeKey}`;
-  }
-
-  function gameMap(rows) {
-    const map = new Map();
-
-    (Array.isArray(rows) ? rows : []).forEach(game => {
-      if (!game || typeof game !== "object") return;
-
-      const key = matchupKey(
-        game.away_team ?? game.awayTeam ?? game.away,
-        game.home_team ?? game.homeTeam ?? game.home
-      );
-
-      if (key) map.set(key, game);
-    });
-
-    return map;
-  }
-
-  function projectionRowTeams(row) {
-    const names = Array.from(
-      row.querySelectorAll(".matchup-cell .team-name")
-    ).map(node => cleanText(node.textContent));
-
-    if (names.length < 2) return null;
-
-    return {
-      away: names[0],
-      home: names[1]
+  function counts() {
+    const result = {
+      all: 0,
+      upcoming: 0,
+      live: 0,
+      final: 0
     };
+
+    rows().forEach(row => {
+      const status = rowStatus(row);
+      result.all += 1;
+      result[status] += 1;
+    });
+
+    return result;
   }
 
-  function rowKey(row) {
-    const teams = projectionRowTeams(row);
-    return teams
-      ? matchupKey(teams.away, teams.home)
-      : "";
-  }
+  function updateFilterUI() {
+    const wrapper = ensureFilterUI();
+    if (!wrapper) return;
 
-  function periodText(period) {
-    const text = cleanText(period);
-    if (!text) return "";
+    const currentCounts = counts();
 
-    if (/^\d+$/.test(text)) {
-      const number = Number(text);
+    ["all", "upcoming", "live", "final"].forEach(status => {
+      const button = wrapper.querySelector(
+        `.hammer-status-filter-button[data-status="${status}"]`
+      );
 
-      if (number <= 4) return `Q${number}`;
-      return number === 5 ? "OT" : `${number - 4}OT`;
-    }
+      const count = wrapper.querySelector(
+        `[data-count-for="${status}"]`
+      );
 
-    return text.toUpperCase();
-  }
-
-  function liveDetail(game) {
-    const parts = [];
-
-    const period = periodText(
-      game?.period ??
-      game?.currentPeriod ??
-      game?.quarter
-    );
-
-    const clock = cleanText(
-      game?.clock ??
-      game?.contestClock ??
-      ""
-    );
-
-    if (period) parts.push(period);
-    if (clock) parts.push(clock);
-
-    return parts.join(" · ");
-  }
-
-  function setSecondary(cell, text) {
-    if (!cell) return;
-
-    let secondary = cell.querySelector(".line-secondary");
-    if (!secondary) {
-      secondary = document.createElement("div");
-      secondary.className = "line-secondary";
-      cell.appendChild(secondary);
-    }
-
-    secondary.textContent = text;
-  }
-
-  function setPrimary(cell, text) {
-    if (!cell) return;
-
-    let primary = cell.querySelector(".line-primary");
-    if (!primary) {
-      primary = document.createElement("div");
-      primary.className = "line-primary";
-      cell.prepend(primary);
-    }
-
-    primary.textContent = text;
-  }
-
-  function removeStatusArtifacts(row) {
-    row.querySelectorAll(
-      ".hammer-live-score, " +
-      ".hammer-final-score, " +
-      ".hammer-live-badge, " +
-      ".hammer-live-detail, " +
-      ".hammer-final-untracked-label"
-    ).forEach(node => node.remove());
-
-    row.classList.remove(
-      "hammer-live-row",
-      "hammer-final-untracked-row"
-    );
-  }
-
-  function appendTeamScores(
-    row,
-    awayPoints,
-    homePoints,
-    className
-  ) {
-    const lines = row.querySelectorAll(
-      ".matchup-cell .team-line"
-    );
-
-    if (lines.length < 2) return;
-
-    const awayScore = document.createElement("span");
-    awayScore.className = className;
-    awayScore.textContent = Number.isFinite(Number(awayPoints))
-      ? String(Number(awayPoints))
-      : "—";
-
-    const homeScore = document.createElement("span");
-    homeScore.className = className;
-    homeScore.textContent = Number.isFinite(Number(homePoints))
-      ? String(Number(homePoints))
-      : "—";
-
-    lines[0].appendChild(awayScore);
-    lines[1].appendChild(homeScore);
-  }
-
-  function statusMetaContainer(row) {
-    const matchupCell = row.querySelector(".matchup-cell");
-    if (!matchupCell) return null;
-
-    let container = matchupCell.querySelector(".hammer-game-status-meta");
-
-    if (!container) {
-      container = document.createElement("div");
-      container.className = "hammer-game-status-meta";
-      matchupCell.appendChild(container);
-    } else {
-      container.innerHTML = "";
-    }
-
-    return container;
-  }
-
-  function decorateLiveRow(row, game) {
-    removeStatusArtifacts(row);
-
-    row.dataset.hammerGameState = "live";
-    row.classList.add("hammer-live-row");
-
-    appendTeamScores(
-      row,
-      game?.away_points,
-      game?.home_points,
-      "hammer-live-score"
-    );
-
-    const meta = statusMetaContainer(row);
-
-    if (meta) {
-      const badge = document.createElement("span");
-      badge.className = "hammer-live-badge";
-      badge.innerHTML =
-        '<span class="hammer-live-dot"></span>LIVE';
-
-      meta.appendChild(badge);
-
-      const detail = liveDetail(game);
-      if (detail) {
-        const detailNode = document.createElement("span");
-        detailNode.className = "hammer-live-detail";
-        detailNode.textContent = detail;
-        meta.appendChild(detailNode);
+      if (count) {
+        count.textContent = String(currentCounts[status]);
       }
-    }
 
-    const cells = row.cells;
-
-    setSecondary(cells?.[1], "Pregame Hammer fair line");
-
-    const marketPrimary = cleanText(
-      cells?.[2]
-        ?.querySelector(".line-primary")
-        ?.textContent
-    );
-
-    setSecondary(
-      cells?.[2],
-      isMissing(marketPrimary)
-        ? "Pregame market unavailable"
-        : "Pregame market snapshot"
-    );
-
-    setSecondary(
-      cells?.[3],
-      "Pregame projected total"
-    );
-
-    const note =
-      cells?.[4]?.querySelector(".disagreement-note");
-
-    if (
-      note &&
-      !note.textContent.startsWith("Pregame · ")
-    ) {
-      note.textContent =
-        `Pregame · ${cleanText(note.textContent)}`;
-    }
-  }
-
-  function decorateUntrackedFinalRow(row, game) {
-    removeStatusArtifacts(row);
-
-    row.dataset.hammerGameState = "final";
-    row.classList.add("hammer-final-untracked-row");
-
-    appendTeamScores(
-      row,
-      game?.away_points,
-      game?.home_points,
-      "hammer-final-score"
-    );
-
-    const meta = statusMetaContainer(row);
-
-    if (meta) {
-      const label = document.createElement("span");
-      label.className = "hammer-final-untracked-label";
-      label.textContent = "FINAL · NOT GRADED";
-      meta.appendChild(label);
-    }
-
-    const cells = row.cells;
-
-    setSecondary(
-      cells?.[1],
-      "Historical model fair line"
-    );
-
-    setPrimary(
-      cells?.[2],
-      "NOT TRACKED"
-    );
-
-    setSecondary(
-      cells?.[2],
-      "No prospective market snapshot"
-    );
-
-    setSecondary(
-      cells?.[3],
-      "Historical projected total"
-    );
-
-    if (cells?.[4]) {
-      cells[4].innerHTML = `
-        <span class="hammer-untracked-status">
-          NOT GRADED
-        </span>
-
-        <div class="disagreement-note">
-          Pre-tracking game
-        </div>
-      `;
-    }
-
-    if (cells?.[5]) {
-      cells[5].innerHTML = `
-        <span class="hammer-untracked-status">
-          UNTRACKED
-        </span>
-      `;
-    }
-
-    if (cells?.[6]) {
-      cells[6].innerHTML = `
-        <span class="hammer-untracked-status">
-          —
-        </span>
-
-        <div class="signal-record">
-          Not included in prospective record
-        </div>
-      `;
-    }
-  }
-
-  function markSettledRow(row) {
-    row.dataset.hammerGameState = "final";
-  }
-
-  function reorderProjectionRows() {
-    // Ordering is owned exclusively by status-controls.js.
-    // Do not move rows here: doing so pushes newly-final games away from
-    // their date group and can fight the day-grouping layer.
-  }
-
-  function decorateProjectionRows() {
-    if (decorating) return;
-
-    decorating = true;
-
-    try {
-      const liveByMatchup = gameMap(liveGames);
-      const finalByMatchup = gameMap(completedGames);
-
-      const rows = document.querySelectorAll(
-        "#projections-container .projection-table tbody tr.game-row"
-      );
-
-      rows.forEach(row => {
-        if (row.classList.contains("completed-row")) {
-          markSettledRow(row);
-          return;
-        }
-
-        const key = rowKey(row);
-
-        if (!key) {
-          row.dataset.hammerGameState = "upcoming";
-          return;
-        }
-
-        const live = liveByMatchup.get(key);
-        if (live) {
-          decorateLiveRow(row, live);
-          return;
-        }
-
-        const final = finalByMatchup.get(key);
-        if (final) {
-          decorateUntrackedFinalRow(row, final);
-          return;
-        }
-
-        row.dataset.hammerGameState = "upcoming";
-      });
-
-      reorderProjectionRows();
-
-      // Tell the single board owner (status-controls.js) that LIVE/FINAL states
-      // are now authoritative. It will re-count, re-filter, and re-group once.
-      window.dispatchEvent(
-        new CustomEvent("hammer:game-status-updated")
-      );
-
-    } finally {
-      decorating = false;
-    }
-  }
-
-  function queueProjectionDecoration() {
-    if (decorationQueued) return;
-
-    decorationQueued = true;
-
-    window.requestAnimationFrame(() => {
-      decorationQueued = false;
-      decorateProjectionRows();
+      if (button) {
+        button.classList.toggle(
+          "is-active",
+          activeStatus === status
+        );
+      }
     });
   }
 
-  async function fetchJson(url) {
-    const separator =
-      url.includes("?") ? "&" : "?";
+  // --------------------------------------------------------------------------
+  // ORDERING + DIVIDERS
+  // --------------------------------------------------------------------------
 
-    const response = await fetch(
-      `${url}${separator}t=${Date.now()}`,
-      {
-        cache: "no-store"
+  function sortedRows() {
+    return [...rows()].sort((a, b) => {
+      const statusDiff =
+        statusPriority(rowStatus(a)) -
+        statusPriority(rowStatus(b));
+
+      if (statusDiff !== 0) {
+        return statusDiff;
       }
+
+      const timeDiff = rowTime(a) - rowTime(b);
+
+      if (timeDiff !== 0) {
+        return timeDiff;
+      }
+
+      return gameIdFromRow(a).localeCompare(gameIdFromRow(b));
+    });
+  }
+
+  function removeDividers() {
+    tbody()?.querySelectorAll(`.${DIVIDER_CLASS}`)
+      .forEach(node => node.remove());
+  }
+
+  function rebuildBoardOrderAndDividers() {
+    const body = tbody();
+    if (!body) return;
+
+    const ordered = sortedRows();
+    if (!ordered.length) return;
+
+    removeDividers();
+
+    // Reorder once per actual state/row change.
+    const current = Array.from(
+      body.querySelectorAll(":scope > tr.game-row")
     );
 
-    if (!response.ok) {
-      throw new Error(`${url} returned ${response.status}`);
+    const orderChanged =
+      ordered.some((row, index) => row !== current[index]);
+
+    if (orderChanged) {
+      const fragment = document.createDocumentFragment();
+
+      ordered.forEach(row => {
+        fragment.appendChild(row);
+      });
+
+      body.appendChild(fragment);
     }
 
-    return response.json();
+    let previousGroup = "";
+
+    ordered.forEach(row => {
+      const group = `${rowStatus(row)}|${dayKey(row)}`;
+
+      if (group === previousGroup) return;
+      previousGroup = group;
+
+      const divider = document.createElement("tr");
+      divider.className = DIVIDER_CLASS;
+      divider.dataset.hammerStatus = rowStatus(row);
+
+      const cell = document.createElement("td");
+      cell.colSpan = 7;
+
+      const box = document.createElement("div");
+      box.className = "hammer-day-divider-box";
+      box.textContent = dayLabel(row);
+
+      cell.appendChild(box);
+      divider.appendChild(cell);
+
+      body.insertBefore(divider, row);
+    });
   }
 
-  async function refreshGameStatusData() {
-    const [liveResult, finalResult] =
-      await Promise.allSettled([
-        fetchJson(LIVE_URL),
-        fetchJson(RESULTS_URL)
-      ]);
+  // --------------------------------------------------------------------------
+  // FILTERING
+  // --------------------------------------------------------------------------
 
-    if (liveResult.status === "fulfilled") {
-      liveGames = Array.isArray(
-        liveResult.value?.games
-      )
-        ? liveResult.value.games
-        : [];
-    }
+  function applyRowVisibility() {
+    rows().forEach(row => {
+      const visible =
+        activeStatus === "all" ||
+        rowStatus(row) === activeStatus;
 
-    if (finalResult.status === "fulfilled") {
-      completedGames = Array.isArray(
-        finalResult.value?.games
-      )
-        ? finalResult.value.games
-        : [];
-    }
-
-    queueProjectionDecoration();
+      row.hidden = !visible;
+      row.style.display = visible ? "" : "none";
+    });
   }
 
-  function observeProjectionRows() {
-    const target =
-      document.getElementById(
-        "projections-container"
-      );
+  function syncDividerVisibility() {
+    tbody()?.querySelectorAll(`.${DIVIDER_CLASS}`)
+      .forEach(divider => {
+        let node = divider.nextElementSibling;
+        let visibleGameFound = false;
 
-    if (!target) {
+        while (
+          node &&
+          !node.classList.contains(DIVIDER_CLASS)
+        ) {
+          if (
+            node.classList.contains("game-row") &&
+            !node.hidden &&
+            node.style.display !== "none"
+          ) {
+            visibleGameFound = true;
+            break;
+          }
+
+          node = node.nextElementSibling;
+        }
+
+        divider.style.display =
+          visibleGameFound ? "" : "none";
+      });
+  }
+
+  function ensureEmptyState() {
+    const view = document.getElementById(VIEW_ID);
+    const tableCard = view?.querySelector(".table-card");
+
+    if (!tableCard) return null;
+
+    let empty = document.getElementById(EMPTY_ID);
+
+    if (!empty) {
+      empty = document.createElement("div");
+      empty.id = EMPTY_ID;
+      empty.className = "hammer-status-empty";
+      tableCard.insertAdjacentElement("beforebegin", empty);
+    }
+
+    return empty;
+  }
+
+  function updateEmptyState() {
+    const empty = ensureEmptyState();
+    if (!empty) return;
+
+    const visibleRows = rows().filter(row => !row.hidden);
+
+    if (visibleRows.length) {
+      empty.style.display = "none";
       return;
     }
 
-    const observer =
-      new MutationObserver(
-        mutations => {
-          if (decorating) {
-            return;
-          }
+    const labels = {
+      upcoming: "upcoming games",
+      live: "live games",
+      final: "final games"
+    };
 
-          const boardStructureChanged =
-            mutations.some(
-              mutation => {
-                const changedNodes = [
-                  ...Array.from(
-                    mutation.addedNodes || []
-                  ),
-                  ...Array.from(
-                    mutation.removedNodes || []
-                  )
-                ];
+    empty.textContent =
+      activeStatus === "all"
+        ? "No games are available."
+        : `No ${labels[activeStatus] || "games"} are available.`;
 
-                return changedNodes.some(
-                  node => {
-                    if (
-                      !(node instanceof Element)
-                    ) {
-                      return false;
-                    }
+    empty.style.display = "block";
+  }
 
-                    if (
-                      node.matches?.(
-                        "tr.game-row, .projection-table"
-                      )
-                    ) {
-                      return true;
-                    }
+  function applyFilterAndUI() {
+    updateFilterUI();
+    applyRowVisibility();
+    syncDividerVisibility();
+    updateEmptyState();
+  }
 
-                    return Boolean(
-                      node.querySelector?.(
-                        "tr.game-row"
-                      )
-                    );
-                  }
-                );
-              }
-            );
+  // --------------------------------------------------------------------------
+  // CHANGE DETECTION
+  //
+  // No MutationObserver.
+  // We only rebuild when the actual set/order/status of game rows changes.
+  // This avoids the old infinite feedback loop and date-bar flashing.
+  // --------------------------------------------------------------------------
 
-          if (boardStructureChanged) {
-            queueProjectionDecoration();
-          }
-        }
+  function boardSignature() {
+    return rows()
+      .map(row => [
+        gameIdFromRow(row),
+        rowStatus(row),
+        rowDate(row)?.getTime() ?? ""
+      ].join(":"))
+      .join("|");
+  }
+
+  function syncIfBoardChanged(force = false) {
+    const signature = boardSignature();
+
+    if (!force && signature === lastBoardSignature) {
+      // Another presentation layer can replace the table rows with visually
+      // identical new DOM nodes. Re-apply the active filter even when the
+      // game/status signature is unchanged so those replacement rows do not
+      // become visible again under Upcoming, Live, or Final.
+      applyFilterAndUI();
+      return;
+    }
+
+    lastBoardSignature = signature;
+
+    rebuildBoardOrderAndDividers();
+    applyFilterAndUI();
+  }
+
+  // --------------------------------------------------------------------------
+  // DATA
+  // --------------------------------------------------------------------------
+
+  async function loadProjectionMetadata() {
+    try {
+      const response = await fetch(
+        `${PROJECTIONS_URL}?v=${Date.now()}`,
+        { cache: "no-store" }
       );
 
-    observer.observe(
-      target,
-      {
-        childList: true,
-        subtree: true
+      if (!response.ok) return;
+
+      const payload = await response.json();
+      const games = Array.isArray(payload?.games)
+        ? payload.games
+        : [];
+
+      projectionByGameId = new Map(
+        games
+          .filter(game =>
+            game?.game_id !== null &&
+            game?.game_id !== undefined
+          )
+          .map(game => [
+            String(game.game_id),
+            game
+          ])
+      );
+    } catch (error) {
+      console.warn(
+        "Projection metadata unavailable for status controls:",
+        error
+      );
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // START
+  // --------------------------------------------------------------------------
+
+  async function start() {
+    installStyles();
+    ensureFilterUI();
+
+    await loadProjectionMetadata();
+
+    syncIfBoardChanged(true);
+
+    document.addEventListener(
+      "hammer:data-ready",
+      () => {
+        setTimeout(() => syncIfBoardChanged(true), 0);
       }
     );
+
+    window.addEventListener(
+      "hammer:game-status-updated",
+      () => {
+        window.requestAnimationFrame(() => syncIfBoardChanged(true));
+      }
+    );
+
+    // Covers week-tab changes and score/final updates from sort-tables.js.
+    // Because this only rebuilds when the row/status signature changes,
+    // it does not create a flashing loop.
+    pollTimer = window.setInterval(
+      () => syncIfBoardChanged(false),
+      1000
+    );
   }
-
-  function startGameStatusPolling() {
-    refreshGameStatusData().catch(() => {});
-
-    if (statusRefreshTimer) {
-      window.clearInterval(statusRefreshTimer);
-    }
-
-    statusRefreshTimer =
-      window.setInterval(
-        () => {
-          refreshGameStatusData().catch(() => {});
-        },
-        60_000
-      );
-  }
-
-  function start() {
-    installStyles();
-
-    enhanceTables(document);
-    observeTables();
-    observeProjectionRows();
-    startGameStatusPolling();
-
-    window.setTimeout(() => {
-      enhanceTables(document);
-      queueProjectionDecoration();
-    }, 250);
-
-    window.setTimeout(() => {
-      enhanceTables(document);
-      queueProjectionDecoration();
-    }, 1000);
-  }
-
-  document.addEventListener(
-    "hammer:data-ready",
-    () => {
-      window.requestAnimationFrame(() => {
-        enhanceTables(document);
-        queueProjectionDecoration();
-      });
-    }
-  );
 
   if (document.readyState === "loading") {
     document.addEventListener(
       "DOMContentLoaded",
       start,
-      {
-        once: true
-      }
+      { once: true }
     );
   } else {
     start();
