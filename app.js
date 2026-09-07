@@ -13,6 +13,8 @@ const DATA_URLS = {
   externalRatings: "./data/external_ratings.json",
   rosterFoundation: "./data/roster_foundation.json",
   hfa: "./data/hfa_2026.json",
+  results: "./data/results.json",
+  liveScores: "./data/live_scores.json",
 };
 
 let metricsData = null;
@@ -24,6 +26,8 @@ let advancedMetricsData = null;
 let externalRatingsData = null;
 let rosterFoundationData = null;
 let hfaData = null;
+let resultsData = null;
+let liveScoresData = null;
 
 let teams = {};
 let projections = [];
@@ -952,7 +956,9 @@ async function init() {
       advancedMetricsData,
       externalRatingsData,
       rosterFoundationData,
-      hfaData
+      hfaData,
+      resultsData,
+      liveScoresData
     ] = await Promise.all([
       loadJson(DATA_URLS.metrics),
       loadJson(DATA_URLS.schedule),
@@ -963,6 +969,8 @@ async function init() {
       loadJson(DATA_URLS.externalRatings).catch(() => null),
       loadJson(DATA_URLS.rosterFoundation).catch(() => null),
       loadJson(DATA_URLS.hfa),
+      loadJson(DATA_URLS.results).catch(() => null),
+      loadJson(DATA_URLS.liveScores).catch(() => null),
     ]);
 
     teams = metricsData?.teams ?? {};
@@ -1037,6 +1045,59 @@ function availableWeeks() {
 
 function determineDefaultWeek(weeks) {
   if (!weeks.length) return null;
+
+  const completedGames = Array.isArray(resultsData?.games)
+    ? resultsData.games
+    : [];
+
+  const liveGames = Array.isArray(liveScoresData?.games)
+    ? liveScoresData.games
+    : [];
+
+  // The public scoreboard refreshes every five minutes. Keep the earliest
+  // unfinished week selected, then move forward once every scheduled game is
+  // final. The grace period prevents a canceled or provider-missed game from
+  // pinning the board indefinitely.
+  if (completedGames.length || liveGames.length) {
+    const now = Date.now();
+    const completionGraceMs = 18 * 60 * 60 * 1000;
+
+    for (const week of weeks) {
+      const scheduled = projections.filter(
+        game => Number(game.week) === Number(week)
+      );
+
+      if (!scheduled.length) continue;
+
+      const completedCount = completedGames.filter(
+        game => Number(game.week) === Number(week)
+      ).length;
+
+      const hasLiveGame = liveGames.some(
+        game => Number(game.week) === Number(week)
+      );
+
+      const kickoffTimes = scheduled
+        .map(game => new Date(game.start_date).getTime())
+        .filter(Number.isFinite);
+
+      const latestKickoff = kickoffTimes.length
+        ? Math.max(...kickoffTimes)
+        : null;
+
+      const everyGameFinal =
+        completedCount >= scheduled.length && !hasLiveGame;
+
+      const safelyPastWeek =
+        latestKickoff !== null &&
+        now >= latestKickoff + completionGraceMs &&
+        !hasLiveGame;
+
+      if (!everyGameFinal && !safelyPastWeek) return week;
+    }
+
+    return weeks[weeks.length - 1];
+  }
 
   const marketWeeks = projections
     .filter(game => hasValue(game?.market?.home_spread))
