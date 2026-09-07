@@ -1,10 +1,8 @@
 name: Postgame Analytics v1 — No CFBD
 
+# Settlement already builds postgame analytics every five minutes.
+# Keep this only as a manual repair/rebuild tool.
 on:
-  workflow_run:
-    workflows: ["Settle Results + Live Scores - No CFBD"]
-    types: [completed]
-
   workflow_dispatch:
     inputs:
       refresh_existing:
@@ -17,14 +15,11 @@ permissions:
   contents: write
 
 concurrency:
-  group: postgame-analytics-v1
+  group: thi-data-writer
   cancel-in-progress: false
 
 jobs:
   build:
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
 
     steps:
@@ -72,20 +67,25 @@ jobs:
           payload = json.loads(path.read_text(encoding="utf-8"))
           assert isinstance(payload.get("meta"), dict)
           assert isinstance(payload.get("games"), dict)
+
           settled = json.loads(
               Path("data/reports/settled_results.json").read_text(encoding="utf-8")
           )
+
           eligible_ids = {
               str(row.get("game_key"))
               for row in settled.get("rows", [])
               if row.get("result_settled") and row.get("game_key")
           }
+
           for game_id, game in payload["games"].items():
               assert str(game.get("game_id")) == str(game_id)
               assert game.get("availability") in {"available", "partial"}
               assert game.get("away_team") and game.get("home_team")
+
           pending = eligible_ids.difference(payload["games"])
           print(f"Validated {len(payload['games'])} postgame game(s).")
+
           if pending:
               print(
                   f"{len(pending)} settled game(s) are waiting for the public "
@@ -100,6 +100,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
           git add data/postgame_analytics.json
 
           if git diff --cached --quiet; then
