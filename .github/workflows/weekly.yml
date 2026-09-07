@@ -1,24 +1,27 @@
 name: Update CFB Analytics
 
+# TEMPORARILY MANUAL-ONLY.
+# The scheduled version calls CFBD and currently fails because the monthly
+# quota is exhausted. Do not silently substitute a different source for Model A.
 on:
   workflow_dispatch:
 
-  schedule:
-    # Runs every Sunday night at 9:00 PM ET during daylight saving time
-    # GitHub cron uses UTC, so this is Monday 1:00 AM UTC
-    - cron: "0 1 * * 1"
-
 permissions:
   contents: write
+
+concurrency:
+  group: thi-data-writer
+  cancel-in-progress: false
 
 jobs:
   update-analytics:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -53,6 +56,11 @@ jobs:
           git add data/odds.json
           git add data/projections.json
 
-          git diff --staged --quiet || git commit -m "Update CFB analytics data"
+          if git diff --staged --quiet; then
+            echo "No CFB analytics changes to commit."
+            exit 0
+          fi
 
-          git push
+          git commit -m "Update CFB analytics data"
+          git pull --rebase origin main
+          git push origin HEAD:main
