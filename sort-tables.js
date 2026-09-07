@@ -91,7 +91,22 @@
       ["washingtonst", "washingtonstate"],
       ["centralmich", "centralmichigan"],
       ["easternmich", "easternmichigan"],
-      ["westernmich", "westernmichigan"]
+      ["westernmich", "westernmichigan"],
+      // NCAA Week 1 scoreboard abbreviations.
+      ["easternky", "easternkentucky"],
+      ["fiu", "floridainternational"],
+      ["flaatlantic", "floridaatlantic"],
+      ["middletenn", "middletennessee"],
+      ["mississippival", "mississippivalleystate"],
+      ["niu", "northernillinois"],
+      ["northala", "northalabama"],
+      ["northernariz", "northernarizona"],
+      ["southfla", "southflorida"],
+      ["southeastmostate", "southeastmissouristate"],
+      ["southeasternla", "selouisiana"],
+      ["ulm", "ulmonroe"],
+      ["utrgv", "utriograndevalley"],
+      ["westernky", "westernkentucky"]
     ]);
 
   function installStyles() {
