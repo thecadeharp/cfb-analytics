@@ -10,8 +10,9 @@ on:
 permissions:
   contents: write
 
+# Same shared writer lock as settlement/live scores.
 concurrency:
-  group: capture-closing-lines-no-cfbd
+  group: thi-data-writer
   cancel-in-progress: false
 
 jobs:
@@ -22,6 +23,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -86,4 +89,4 @@ jobs:
 
           git commit -m "Capture closing lines, market movement and refresh CLV report"
           git pull --rebase origin main
-          git push origin main
+          git push origin HEAD:main
