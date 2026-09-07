@@ -182,11 +182,6 @@
         font-size: 12px;
       }
 
-      /* ================================================================
-         DAY SLATE DIVIDERS
-         Full-width date bars inside the board. They are presentation only.
-      ================================================================ */
-
       .${DESKTOP_DAY_CLASS} td {
         padding: 0 !important;
         border: 0 !important;
@@ -311,7 +306,7 @@
   }
 
   function statusPriority(status) {
-    if (status === "upcoming") return 0;
+    if (status === "final") return 0;
     if (status === "live") return 1;
     return 2;
   }
@@ -426,12 +421,6 @@
 
   // ==========================================================================
   // STABLE PROJECTION ROW CLICK HANDLER
-  //
-  // Day grouping reparents rows inside the same tbody. The original inline
-  // onclick remains in the markup, but this delegated handler guarantees that
-  // the matchup interaction survives any presentation-layer row movement.
-  // Team-name clicks are intentionally left alone so dossier navigation keeps
-  // working exactly as before.
   // ==========================================================================
 
   function installProjectionRowClickFallback() {
@@ -451,7 +440,6 @@
         const row = event.target.closest("tr.game-row");
         if (!row || !container.contains(row)) return;
 
-        // Preserve team-name dossier clicks and any future interactive controls.
         if (
           event.target.closest(
             ".team-name, a, button, input, select, textarea, [role='button']"
@@ -470,7 +458,6 @@
 
         if (!opener) return;
 
-        // We handle the click here so the old inline onclick cannot double-fire.
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
@@ -585,13 +572,12 @@
 
   function sortRowsForSlate(rows) {
     return [...rows].sort((a, b) => {
-      const statusA = rowStatus(a);
-      const statusB = rowStatus(b);
-      const priorityDifference = statusPriority(statusA) - statusPriority(statusB);
-      if (priorityDifference !== 0) return priorityDifference;
-
       const timeDifference = rowTime(a) - rowTime(b);
       if (timeDifference !== 0) return timeDifference;
+
+      const statusDifference =
+        statusPriority(rowStatus(a)) - statusPriority(rowStatus(b));
+      if (statusDifference !== 0) return statusDifference;
 
       return gameIdFromRow(a).localeCompare(gameIdFromRow(b));
     });
@@ -628,8 +614,6 @@
     pauseObserver(() => {
       tbody.querySelectorAll(`.${DESKTOP_DAY_CLASS}`).forEach(divider => divider.remove());
 
-      // Reorder only when necessary. Re-appending every row on every update
-      // generates needless DOM mutations and can fight the live-status observer.
       const currentRows = Array.from(
         tbody.querySelectorAll(":scope > tr.game-row")
       );
@@ -644,14 +628,13 @@
       let previousGroupKey = null;
 
       desired.forEach(row => {
-        const groupKey = `${rowStatus(row)}|${dayKey(row)}`;
+        const groupKey = dayKey(row);
         if (groupKey === previousGroupKey) return;
         previousGroupKey = groupKey;
 
         const divider = document.createElement("tr");
         divider.className = DESKTOP_DAY_CLASS;
-        divider.dataset.hammerStatus = rowStatus(row);
-        divider.dataset.hammerDayKey = dayKey(row);
+        divider.dataset.hammerDayKey = groupKey;
 
         const cell = document.createElement("td");
         cell.colSpan = 7;
@@ -702,15 +685,14 @@
 
     rows.forEach((row, index) => {
       const card = cards[index];
-      const groupKey = `${rowStatus(row)}|${dayKey(row)}`;
+      const groupKey = dayKey(row);
 
       if (groupKey !== previousGroupKey) {
         previousGroupKey = groupKey;
 
         const divider = document.createElement("div");
         divider.className = MOBILE_DAY_CLASS;
-        divider.dataset.hammerStatus = rowStatus(row);
-        divider.dataset.hammerDayKey = dayKey(row);
+        divider.dataset.hammerDayKey = groupKey;
         divider.textContent = dayLabel(row);
         host.insertBefore(divider, card);
       }
@@ -928,10 +910,6 @@
     if (projectionObserver) return;
 
     projectionObserver = new MutationObserver(mutations => {
-      // Only rebuild when the projection board itself gains/loses game rows.
-      // Ignore score badges, status text, FCS decorations, terminology text,
-      // and other descendant mutations from companion scripts. Those used to
-      // create a feedback loop with sort-tables.js after day dividers were added.
       const boardStructureChanged = mutations.some(mutation => {
         const changedNodes = [
           ...Array.from(mutation.addedNodes || []),
