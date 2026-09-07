@@ -47,6 +47,12 @@
       ["miamifla", "miamifl"],
       ["miamiflorida", "miamifl"],
       ["olemiss", "mississippi"],
+
+      // NCAA scoreboard naming variants that differ from projection names.
+      ["armywestpoint", "army"],
+      ["gasouthern", "georgiasouthern"],
+      ["charlestonso", "charlestonsouthern"],
+      ["alcorn", "alcornstate"],
       ["southernmiss", "southernmississippi"],
       ["utsa", "texassanantonio"],
       ["utep", "texaselpaso"],
