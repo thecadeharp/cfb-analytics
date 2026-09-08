@@ -675,18 +675,13 @@
       console.warn("[Hammer Postgame Analytics] Data unavailable:", error);
       payload = { meta: {}, games: {} };
     }
-    wrapOpenMatchup();
     wrapSelectWeek();
-    addAvailabilityIndicators();
-    applyPanel();
     applyPerformanceScorecard();
   }
 
   async function start() {
     installStyles();
-    wrapOpenMatchup();
     wrapSelectWeek();
-    installObserver();
     await load();
   }
 
