@@ -875,7 +875,7 @@
         "beforebegin",
         `<div class="testing-notice-bar" id="testing-notice-bar">
           <strong>Projections: Live Testing</strong>
-          <span>Week 1 begins prospective validation. Model lines, projected scores and signals are experimental—not betting recommendations. Team data, advanced metrics and power ratings remain available for research.</span>
+          <span>Prospective tracking is active. Model lines, projected scores and signals remain experimental—not betting recommendations. Ratings and advanced metrics update as weekly data becomes available.</span>
         </div>`,
       );
     }
@@ -898,7 +898,7 @@
         <h2 id="testing-modal-title">Welcome to The Hammer Index</h2>
         <p>
           Cade Harper's college football data platform is open for research. Model spreads, projected scores
-          and signals are beginning prospective Week 1 validation and should not
+          and signals are under prospective validation and should not
           be treated as established betting recommendations.
         </p>
         <div class="testing-modal-points">
