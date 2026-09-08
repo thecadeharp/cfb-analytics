@@ -56,6 +56,13 @@ jobs:
         run: |
           python scripts/build_signal_report.py
 
+      - name: Post deduplicated Discord report updates
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          THI_SITE_URL: "https://thehammerindex.com"
+        run: |
+          python scripts/post_discord_alerts.py
+
       - name: Commit scoreboard, settlement, postgame, and signal outputs
         run: |
           git config user.name "github-actions[bot]"
@@ -67,6 +74,7 @@ jobs:
           git add data/reports/settled_results.json
           git add data/reports/settled_snapshot_rows.csv
           git add data/reports/signal_report.json
+          git add data/discord_notification_state.json
 
           if git diff --cached --quiet; then
             echo "No scoreboard, settlement, postgame, or signal changes to commit."
