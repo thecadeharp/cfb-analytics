@@ -80,7 +80,8 @@ jobs:
 
           for game_id, game in payload["games"].items():
               assert str(game.get("game_id")) == str(game_id)
-              assert game.get("availability") in {"available", "partial"}
+              status = game.get("analysis_status") or game.get("availability")
+              assert status in {"available", "partial", "pending"}
               assert game.get("away_team") and game.get("home_team")
 
           pending = eligible_ids.difference(payload["games"])
