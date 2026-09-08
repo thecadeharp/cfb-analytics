@@ -1,0 +1,75 @@
+name: The Hammer Index Discord Report
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Choose test, quiet baseline, or normal alert processing"
+        required: true
+        default: test
+        type: choice
+        options:
+          - test
+          - bootstrap
+          - live
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thi-data-writer
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Discord report
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          THI_SITE_URL: "https://thehammerindex.com"
+          REPORT_MODE: ${{ inputs.mode }}
+        run: |
+          case "$REPORT_MODE" in
+            test)
+              python scripts/post_discord_alerts.py --test
+              ;;
+            bootstrap)
+              python scripts/post_discord_alerts.py --bootstrap
+              ;;
+            live)
+              python scripts/post_discord_alerts.py
+              ;;
+            *)
+              echo "Unknown report mode: $REPORT_MODE"
+              exit 1
+              ;;
+          esac
+
+      - name: Commit notification state when changed
+        if: ${{ inputs.mode != 'test' }}
+        run: |
+          if git diff --quiet -- data/discord_notification_state.json; then
+            echo "Notification state is already current."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/discord_notification_state.json
+          git commit -m "Update Discord notification state"
+          git pull --rebase origin main
+          git push origin HEAD:main
