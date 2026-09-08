@@ -15,6 +15,7 @@ const DATA_URLS = {
   hfa: "./data/hfa_2026.json",
   results: "./data/results.json",
   liveScores: "./data/live_scores.json",
+  openWeeklyRatings: "./data/open_weekly_ratings.json",
 };
 
 let metricsData = null;
@@ -28,6 +29,7 @@ let rosterFoundationData = null;
 let hfaData = null;
 let resultsData = null;
 let liveScoresData = null;
+let openWeeklyRatingsData = null;
 
 let teams = {};
 let projections = [];
@@ -291,6 +293,19 @@ function average(values) {
   return valid.reduce((sum, value) => sum + value, 0) / valid.length;
 }
 
+function openWeeklyTeam(teamName) {
+  return openWeeklyRatingsData?.teams?.[teamName] ?? null;
+}
+
+function openWeeklyRating(teamName) {
+  return openWeeklyTeam(teamName)?.rating ?? null;
+}
+
+function openWeeklyRank(teamName) {
+  const rank = openWeeklyTeam(teamName)?.rank;
+  return hasValue(rank) ? `#${Number(rank)}` : "—";
+}
+
 function conferenceStandings() {
   const grouped = new Map();
 
@@ -314,6 +329,7 @@ function conferenceStandings() {
       liveCount: liveMembers.length,
       topTeam: topTeam?.team || "—",
       modelRating: average(members.map(team => team.power_rating)),
+      openRating: average(members.map(team => openWeeklyRating(team.team))),
       spPlus: average(members.map(team => team?.sp_plus?.overall)),
       specialTeams: average(members.map(team =>
         externalRatingsData?.teams?.[team.team]?.fpi_special_teams
@@ -958,7 +974,8 @@ async function init() {
       rosterFoundationData,
       hfaData,
       resultsData,
-      liveScoresData
+      liveScoresData,
+      openWeeklyRatingsData
     ] = await Promise.all([
       loadJson(DATA_URLS.metrics),
       loadJson(DATA_URLS.schedule),
@@ -971,6 +988,7 @@ async function init() {
       loadJson(DATA_URLS.hfa),
       loadJson(DATA_URLS.results).catch(() => null),
       loadJson(DATA_URLS.liveScores).catch(() => null),
+      loadJson(DATA_URLS.openWeeklyRatings).catch(() => null),
     ]);
 
     teams = metricsData?.teams ?? {};
@@ -1732,6 +1750,7 @@ function renderTeams() {
             <th>Conference</th>
             <th>Record</th>
             <th>Power Rating</th>
+            <th>Open Rating</th>
             <th>SP+</th>
           </tr>
         </thead>
@@ -1747,6 +1766,11 @@ function renderTeams() {
               <td class="team-meta">${escapeHtml(team.conference ?? "—")}</td>
               <td class="team-meta">${recordText(team)}</td>
               <td class="line-primary">${formatSigned(team.power_rating, 3)}</td>
+              <td class="team-meta">
+                ${hasValue(openWeeklyRating(team.team))
+                  ? `${formatSigned(openWeeklyRating(team.team), 3)} (${openWeeklyRank(team.team)})`
+                  : "—"}
+              </td>
               <td class="team-meta">${formatSigned(team?.sp_plus?.overall, 1)}</td>
             </tr>
           `).join("")}
@@ -1774,6 +1798,15 @@ function renderRatings() {
     : "Live 2026 weight unavailable.";
 
   const externalWeek = externalRatingsData?.meta?.week;
+  const openWeek = openWeeklyRatingsData?.meta?.through_week;
+  const openWeight = Number(openWeeklyRatingsData?.meta?.blend_weight);
+  const openLabel = openWeeklyRatingsData
+    ? `Open Rating: data through Week ${openWeek ?? "—"}, ${
+        Number.isFinite(openWeight)
+          ? formatPercent(openWeight * 100, 0)
+          : "—"
+      } live weight.`
+    : "Open Rating is awaiting its first refresh.";
 
   const externalLabel = externalRatingsData
     ? `ESPN FPI snapshot: Week ${externalWeek ?? "—"}.`
@@ -1791,6 +1824,7 @@ function renderRatings() {
             <th>Conference</th>
             <th>Record</th>
             <th>Model Rating</th>
+            <th>Open Rating</th>
             <th>SP+</th>
             <th>ESPN FPI</th>
             <th>Special Teams</th>
@@ -1820,6 +1854,11 @@ function renderRatings() {
                 <td class="team-meta">${escapeHtml(team.conference ?? "—")}</td>
                 <td class="team-meta">${recordText(team)}</td>
                 <td class="line-primary">${formatSigned(team.power_rating, 3)}</td>
+                <td class="team-meta">
+                  ${hasValue(openWeeklyRating(team.team))
+                    ? `${formatSigned(openWeeklyRating(team.team), 3)} (${openWeeklyRank(team.team)})`
+                    : "—"}
+                </td>
                 <td class="team-meta">${formatSigned(team?.sp_plus?.overall, 1)}</td>
 
                 <td class="team-meta">
@@ -1852,6 +1891,7 @@ function renderRatings() {
             <th>${isConferenceView ? "Conference Rank" : "Power Rank"}</th>
             <th>Team</th>
             <th>Model Rating</th>
+            <th>Open Rating</th>
             <th>Preseason SP+</th>
             <th>ESPN FPI</th>
             <th>Special Teams</th>
@@ -1896,6 +1936,11 @@ function renderRatings() {
                 </td>
 
                 <td class="line-primary">${formatSigned(team.power_rating, 3)}</td>
+                <td class="team-meta">
+                  ${hasValue(openWeeklyRating(team.team))
+                    ? `${formatSigned(openWeeklyRating(team.team), 3)} (${openWeeklyRank(team.team)})`
+                    : "—"}
+                </td>
                 <td class="team-meta">${formatSigned(team?.sp_plus?.overall, 1)}</td>
 
                 <td class="team-meta">
@@ -1952,6 +1997,7 @@ function renderRatings() {
             <th>Conference Rank</th>
             <th>Conference</th>
             <th>Avg Model Rating</th>
+            <th>Avg Open Rating</th>
             <th>Avg SP+</th>
             <th>Avg Special Teams</th>
             <th>2026 Net EPA</th>
@@ -1969,6 +2015,7 @@ function renderRatings() {
               <td class="team-meta">#${index + 1}</td>
               <td><strong>${escapeHtml(conference.conference)}</strong></td>
               <td class="line-primary">${formatSigned(conference.modelRating, 3)}</td>
+              <td class="team-meta">${formatSigned(conference.openRating, 3)}</td>
               <td class="team-meta">${formatSigned(conference.spPlus, 1)}</td>
               <td class="team-meta">${formatSigned(conference.specialTeams, 3)}</td>
               <td class="team-meta">${formatEPA(conference.netEpa)}</td>
@@ -1993,9 +2040,10 @@ function renderRatings() {
   container.innerHTML = `
     <div class="ratings-note">
       <strong>How to read these ratings:</strong>
-      Model Rating blends the frozen preseason baseline with current-season
-      performance. The 2026 columns contain current-season results only.
-      ${weightLabel} ${weekLabel} ${externalLabel}
+      Model Rating is the production Model A rating and is not changed by the
+      fallback feed. Open Rating blends the frozen preseason foundation with
+      the complete public play-by-play sample and is display-only.
+      ${openLabel} Production status: ${weightLabel} ${weekLabel} ${externalLabel}
       Special Teams is ESPN's FPI component and is display-only; it is not used
       by Model A.
     </div>
@@ -3728,6 +3776,23 @@ function renderDossier(team) {
 
           <span class="dossier-rank-inline">
             (${powerRank(team)} Overall)
+          </span>
+        </div>
+      </div>
+
+      <div class="dossier-stat">
+        <div class="dossier-label">
+          Open Rating · Display Only
+        </div>
+
+        <div class="dossier-value">
+          ${formatSigned(
+            openWeeklyRating(team.team),
+            3
+          )}
+
+          <span class="dossier-rank-inline">
+            (${openWeeklyRank(team.team)} Overall)
           </span>
         </div>
       </div>
