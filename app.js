@@ -3582,7 +3582,7 @@ function renderSeasonOutlook(team) {
   return `
     <div class="season-outlook">
       <div class="eyebrow">
-        Season outlook
+        Preseason season outlook
       </div>
 
       <div class="season-summary-grid">
