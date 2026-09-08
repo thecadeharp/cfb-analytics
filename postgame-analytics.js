@@ -92,7 +92,7 @@
       #${PANEL_ID} .pg-title { margin-top:5px; font-size:22px; font-weight:800; }
       #${PANEL_ID} .pg-note { margin-top:5px; color:var(--muted); font-size:10px; line-height:1.55; }
       #${PANEL_ID} .pg-headlines {
-        display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; padding:14px;
+        display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; padding:14px;
       }
       #${PANEL_ID} .pg-card {
         min-width:0; padding:16px; border:1px solid var(--border); border-radius:10px;
@@ -142,6 +142,103 @@
 
   function gameData(gameId) {
     return payload?.games?.[String(gameId)] || null;
+  }
+
+  function flattenCanonicalTeam(stats = {}) {
+    return {
+      epa_per_play: stats?.overall?.epa_per_play,
+      total_epa: stats?.overall?.epa_total,
+      success_rate: stats?.overall?.success_rate,
+      pass_epa: stats?.passing?.epa_per_play,
+      pass_success_rate: stats?.passing?.success_rate,
+      rush_epa: stats?.rushing?.epa_per_play,
+      rush_success_rate: stats?.rushing?.success_rate,
+      standard_down_epa: stats?.standard_downs?.epa_per_play,
+      standard_down_success_rate: stats?.standard_downs?.success_rate,
+      passing_down_epa: stats?.passing_downs?.epa_per_play,
+      passing_down_success_rate: stats?.passing_downs?.success_rate,
+      early_down_epa: stats?.early_downs?.epa_per_play,
+      late_down_epa: stats?.third_fourth_downs?.epa_per_play,
+      third_fourth_down_success_rate: stats?.third_fourth_downs?.success_rate,
+      fourth_down_attempts: stats?.fourth_down?.attempts,
+      fourth_down_success_rate: stats?.fourth_down?.success_rate,
+      fourth_down_epa: stats?.fourth_down?.epa_per_play,
+      explosive_play_rate: stats?.explosiveness?.explosive_play_rate,
+      explosive_epa_dependency_pct: stats?.explosiveness?.explosive_epa_dependency,
+      sack_rate_allowed: stats?.negative_play_rates?.sack_rate_allowed,
+      stuff_rate_allowed: stats?.negative_play_rates?.stuff_rate_allowed,
+      tfl_rate_allowed: stats?.negative_play_rates?.tfl_rate_allowed,
+      points_per_opportunity: stats?.scoring_opportunities?.points_per_opportunity,
+      points_per_drive: stats?.drives?.points_per_drive,
+      drive_success_rate: stats?.drives?.drive_success_rate,
+      three_and_out_rate: stats?.drives?.three_and_out_rate,
+      drives_tracked: stats?.drives?.drives,
+      average_drive_start_yardline: stats?.field_position?.avg_start_yards_to_goal,
+      red_zone_trips: stats?.red_zone?.trips,
+      red_zone_points_per_trip: stats?.red_zone?.points_per_trip,
+      red_zone_overperformance: stats?.red_zone?.overperformance_points_per_trip,
+      play_epa_volatility: stats?.epa_volatility,
+      turnover_epa_impact: stats?.turnovers?.turnover_epa_impact,
+    };
+  }
+
+  function normalizeGame(game) {
+    if (!game || game.teams) return game;
+    const away = flattenCanonicalTeam(game.away_metrics);
+    const home = flattenCanonicalTeam(game.home_metrics);
+    const pgwe = game?.headline?.postgame_win_expectancy || {};
+    const adjusted = game?.headline?.adjusted_final_score || {};
+    const reality = game?.headline?.reality_check || {};
+    const efficiency = game?.headline?.efficiency_margin || {};
+    const expected = game?.headline?.expected_margin || {};
+    const homeEfficiency = hasValue(efficiency.home)
+      ? Number(efficiency.home)
+      : (hasValue(home.epa_per_play) && hasValue(away.epa_per_play)
+          ? Number(home.epa_per_play) - Number(away.epa_per_play)
+          : null);
+    const homeExpected = hasValue(expected.home)
+      ? Number(expected.home)
+      : (hasValue(reality.adjusted_margin) ? Number(reality.adjusted_margin) : null);
+    const garbageShare = game?.game_context?.garbage_time_share;
+    away.garbage_time_play_share_pct = garbageShare;
+    home.garbage_time_play_share_pct = garbageShare;
+    return {
+      ...game,
+      availability: game.analysis_status,
+      headline: {
+        ...game.headline,
+        away_win_expectancy_pct: pgwe.away_pct,
+        home_win_expectancy_pct: pgwe.home_pct,
+        efficiency_margin_home: homeEfficiency,
+        expected_margin_home: homeExpected,
+        adjusted_score: { away_points: adjusted.away, home_points: adjusted.home },
+        reality_check: reality.label,
+        reality_note: reality.note,
+      },
+      teams: { away, home },
+      comparisons: {
+        epa_margin_home: homeEfficiency,
+        turnover_epa_swing_home:
+          hasValue(home.turnover_epa_impact) && hasValue(away.turnover_epa_impact)
+            ? Number(home.turnover_epa_impact) - Number(away.turnover_epa_impact)
+            : null,
+      },
+    };
+  }
+
+  function normalizePayload(parsed) {
+    const games = parsed?.games;
+    if (Array.isArray(games)) {
+      const indexed = {};
+      games.forEach(raw => {
+        const game = normalizeGame(raw);
+        if (game?.game_id) indexed[String(game.game_id)] = game;
+      });
+      return { ...parsed, games: indexed };
+    }
+    const indexed = {};
+    Object.entries(games || {}).forEach(([id, raw]) => { indexed[id] = normalizeGame(raw); });
+    return { ...(parsed || {}), games: indexed };
   }
 
   function canonicalSignalName(value) {
@@ -383,15 +480,26 @@
     return `${escapeHtml(game.away_team)} ${Math.round(score.away_points)} — ${Math.round(score.home_points)} ${escapeHtml(game.home_team)}`;
   }
 
+  function marginLeader(game, value, digits, suffix) {
+    if (!hasValue(value)) return { team: "Unavailable", value: "—" };
+    const numeric = Number(value);
+    return {
+      team: numeric >= 0 ? game.home_team : game.away_team,
+      value: `${Math.abs(numeric).toFixed(digits)}${suffix}`,
+    };
+  }
+
   function panelMarkup(game) {
     const expectancy = winnerExpectation(game);
     const c = game.comparisons || {};
+    const efficiency = marginLeader(game, game?.headline?.efficiency_margin_home ?? c.epa_margin_home, 3, " EPA/play");
+    const expected = marginLeader(game, game?.headline?.expected_margin_home, 1, " pts");
     return `
       <section id="${PANEL_ID}" aria-label="Postgame analysis">
         <div class="pg-shell">
           <div class="pg-header">
             <div class="pg-kicker">🔨 Postgame Analysis</div>
-            <div class="pg-title">What really happened?</div>
+            <div class="pg-title">Did We Get Beat That Bad?</div>
             <div class="pg-note">Retrospective completed-game analysis. This layer does not revise the frozen pregame THI prediction or feed Model A.</div>
           </div>
           <div class="pg-headlines">
@@ -399,6 +507,16 @@
               <div class="pg-label">Postgame Win Expectancy</div>
               <div class="pg-value">${escapeHtml(expectancy.pct)}</div>
               <span class="pg-team">${escapeHtml(expectancy.team)}</span>
+            </div>
+            <div class="pg-card">
+              <div class="pg-label">Efficiency Margin</div>
+              <div class="pg-value" style="font-size:18px">${escapeHtml(efficiency.value)}</div>
+              <span class="pg-team">${escapeHtml(efficiency.team)} · non-garbage EPA/play edge</span>
+            </div>
+            <div class="pg-card">
+              <div class="pg-label">Expected Margin</div>
+              <div class="pg-value">${escapeHtml(expected.value)}</div>
+              <span class="pg-team">${escapeHtml(expected.team)} · retrospective</span>
             </div>
             <div class="pg-card">
               <div class="pg-label">Adjusted Score</div>
@@ -459,7 +577,7 @@
               ${metric("Red-Zone Overperformance", pair(game, "red_zone_overperformance", 2, " pts/trip vs baseline"))}
             </div>
           </div>
-          <div class="pg-method">Postgame Win Expectancy uses non-garbage-time cfbfastR EPA margin. Adjusted Score splits the frozen THI total by that retrospective EPA margin. This display-only layer makes no CFBD calls and never changes Model A.</div>
+          <div class="pg-method"><strong>PGWE / EM — BETA:</strong> Efficiency Margin is the non-garbage-time EPA/play differential. Expected Margin translates the complete underlying performance profile into a scoreboard margin, and Postgame Win Expectancy converts that margin into a win probability. Adjusted Score uses the same retrospective game-quality margin. This display-only layer makes no CFBD calls and never changes Model A.</div>
         </div>
       </section>
     `;
@@ -537,7 +655,9 @@
       ]);
       if (!analyticsResponse.ok) throw new Error(`Postgame HTTP ${analyticsResponse.status}`);
       const parsed = await analyticsResponse.json();
-      payload = parsed && typeof parsed === "object" ? parsed : { meta: {}, games: {} };
+      payload = parsed && typeof parsed === "object"
+        ? normalizePayload(parsed)
+        : { meta: {}, games: {} };
       if (settledResponse.ok) {
         const settled = await settledResponse.json();
         const rows = (settled?.rows || []).filter(row => row?.result_settled);
