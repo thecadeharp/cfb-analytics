@@ -2,7 +2,7 @@
   "meta": {
     "season": 2026,
     "schema_version": "2.0-canonical-postgame",
-    "generated_at": "2026-09-08T14:45:17.666773+00:00",
+    "generated_at": "2026-09-08T15:00:24.865877+00:00",
     "final_games": 99,
     "available": 81,
     "pending": 18,
@@ -18,8 +18,8 @@
       "No CFBD calls are made."
     ]
   },
-  "games": [
-    {
+  "games": {
+    "6603982": {
       "game_id": "6603982",
       "pbp_game_id": "401856770",
       "matchup_key": "abilenechristian@texastech",
@@ -39,6 +39,18 @@
           "away_pct": 1.7,
           "home_pct": 98.3,
           "winner": "Texas Tech"
+        },
+        "efficiency_margin": {
+          "away": -0.761,
+          "home": 0.761,
+          "unit": "EPA/play",
+          "leader": "Texas Tech"
+        },
+        "expected_margin": {
+          "away": -30.5,
+          "home": 30.5,
+          "unit": "points",
+          "leader": "Texas Tech"
         },
         "adjusted_final_score": {
           "away": 0.0,
@@ -249,11 +261,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.396418+00:00"
+      "generated_at": "2026-09-08T15:00:24.444394+00:00"
     },
-    {
+    "6604351": {
       "game_id": "6604351",
       "pbp_game_id": "401858204",
       "matchup_key": "akron@wakeforest",
@@ -273,6 +288,18 @@
           "away_pct": 10.6,
           "home_pct": 89.4,
           "winner": "Wake Forest"
+        },
+        "efficiency_margin": {
+          "away": -0.566,
+          "home": 0.566,
+          "unit": "EPA/play",
+          "leader": "Wake Forest"
+        },
+        "expected_margin": {
+          "away": -16.0,
+          "home": 16.0,
+          "unit": "points",
+          "leader": "Wake Forest"
         },
         "adjusted_final_score": {
           "away": 12.6,
@@ -483,11 +510,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.401050+00:00"
+      "generated_at": "2026-09-08T15:00:24.451566+00:00"
     },
-    {
+    "6603913": {
       "game_id": "6603913",
       "matchup_key": "alcorn@southernmississippi",
       "season": 2026,
@@ -501,9 +531,9 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-08T14:45:17.401084+00:00"
+      "generated_at": "2026-09-08T15:00:24.451622+00:00"
     },
-    {
+    "6603714": {
       "game_id": "6603714",
       "pbp_game_id": "401862695",
       "matchup_key": "arkansasstate@memphis",
@@ -523,6 +553,18 @@
           "away_pct": 31.3,
           "home_pct": 68.7,
           "winner": "Memphis"
+        },
+        "efficiency_margin": {
+          "away": -0.287,
+          "home": 0.287,
+          "unit": "EPA/play",
+          "leader": "Memphis"
+        },
+        "expected_margin": {
+          "away": -5.9,
+          "home": 5.9,
+          "unit": "points",
+          "leader": "Memphis"
         },
         "adjusted_final_score": {
           "away": 11.8,
@@ -733,11 +775,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.403151+00:00"
+      "generated_at": "2026-09-08T15:00:24.454863+00:00"
     },
-    {
+    "6604126": {
       "game_id": "6604126",
       "pbp_game_id": "401856663",
       "matchup_key": "arkansaspinebluff@missouri",
@@ -757,6 +802,18 @@
           "away_pct": 0.8,
           "home_pct": 99.2,
           "winner": "Missouri"
+        },
+        "efficiency_margin": {
+          "away": -0.885,
+          "home": 0.885,
+          "unit": "EPA/play",
+          "leader": "Missouri"
+        },
+        "expected_margin": {
+          "away": -36.6,
+          "home": 36.6,
+          "unit": "points",
+          "leader": "Missouri"
         },
         "adjusted_final_score": {
           "away": 10.7,
@@ -967,11 +1024,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.407461+00:00"
+      "generated_at": "2026-09-08T15:00:24.461529+00:00"
     },
-    {
+    "6640273": {
       "game_id": "6640273",
       "pbp_game_id": "401856669",
       "matchup_key": "austinpeay@vanderbilt",
@@ -991,6 +1051,18 @@
           "away_pct": 46.9,
           "home_pct": 53.1,
           "winner": "Vanderbilt"
+        },
+        "efficiency_margin": {
+          "away": 0.111,
+          "home": -0.111,
+          "unit": "EPA/play",
+          "leader": "Austin Peay"
+        },
+        "expected_margin": {
+          "away": -0.9,
+          "home": 0.9,
+          "unit": "points",
+          "leader": "Vanderbilt"
         },
         "adjusted_final_score": {
           "away": 11.5,
@@ -1201,11 +1273,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.409530+00:00"
+      "generated_at": "2026-09-08T15:00:24.464617+00:00"
     },
-    {
+    "6640530": {
       "game_id": "6640530",
       "pbp_game_id": "401858432",
       "matchup_key": "ballstate@ohiostate",
@@ -1225,6 +1300,18 @@
           "away_pct": 1.6,
           "home_pct": 98.4,
           "winner": "Ohio State"
+        },
+        "efficiency_margin": {
+          "away": -0.825,
+          "home": 0.825,
+          "unit": "EPA/play",
+          "leader": "Ohio State"
+        },
+        "expected_margin": {
+          "away": -30.9,
+          "home": 30.9,
+          "unit": "points",
+          "leader": "Ohio State"
         },
         "adjusted_final_score": {
           "away": 3.9,
@@ -1435,11 +1522,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.414004+00:00"
+      "generated_at": "2026-09-08T15:00:24.471533+00:00"
     },
-    {
+    "6603944": {
       "game_id": "6603944",
       "pbp_game_id": "401856636",
       "matchup_key": "baylor@auburn",
@@ -1459,6 +1549,18 @@
           "away_pct": 80.4,
           "home_pct": 19.6,
           "winner": "Baylor"
+        },
+        "efficiency_margin": {
+          "away": 0.146,
+          "home": -0.146,
+          "unit": "EPA/play",
+          "leader": "Baylor"
+        },
+        "expected_margin": {
+          "away": 10.6,
+          "home": -10.6,
+          "unit": "points",
+          "leader": "Baylor"
         },
         "adjusted_final_score": {
           "away": 17.6,
@@ -1669,11 +1771,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.414718+00:00"
+      "generated_at": "2026-09-08T15:00:24.472675+00:00"
     },
-    {
+    "6603624": {
       "game_id": "6603624",
       "pbp_game_id": "401856767",
       "matchup_key": "bethunecookman@centralflorida",
@@ -1693,6 +1798,18 @@
           "away_pct": 0.6,
           "home_pct": 99.4,
           "winner": "UCF"
+        },
+        "efficiency_margin": {
+          "away": -0.612,
+          "home": 0.612,
+          "unit": "EPA/play",
+          "leader": "UCF"
+        },
+        "expected_margin": {
+          "away": -37.9,
+          "home": 37.9,
+          "unit": "points",
+          "leader": "UCF"
         },
         "adjusted_final_score": {
           "away": 10.7,
@@ -1903,11 +2020,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.418488+00:00"
+      "generated_at": "2026-09-08T15:00:24.478553+00:00"
     },
-    {
+    "6604288": {
       "game_id": "6604288",
       "pbp_game_id": "401858433",
       "matchup_key": "boisestate@oregon",
@@ -1927,6 +2047,18 @@
           "away_pct": 92.1,
           "home_pct": 7.9,
           "winner": "Boise State"
+        },
+        "efficiency_margin": {
+          "away": 0.686,
+          "home": -0.686,
+          "unit": "EPA/play",
+          "leader": "Boise State"
+        },
+        "expected_margin": {
+          "away": 18.4,
+          "home": -18.4,
+          "unit": "points",
+          "leader": "Boise State"
         },
         "adjusted_final_score": {
           "away": 32.7,
@@ -2137,11 +2269,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.419331+00:00"
+      "generated_at": "2026-09-08T15:00:24.479830+00:00"
     },
-    {
+    "6604252": {
       "game_id": "6604252",
       "pbp_game_id": "401856777",
       "matchup_key": "bostoncollege@cincinnati",
@@ -2161,6 +2296,18 @@
           "away_pct": 29.3,
           "home_pct": 70.7,
           "winner": "Cincinnati"
+        },
+        "efficiency_margin": {
+          "away": -0.371,
+          "home": 0.371,
+          "unit": "EPA/play",
+          "leader": "Cincinnati"
+        },
+        "expected_margin": {
+          "away": -6.6,
+          "home": 6.6,
+          "unit": "points",
+          "leader": "Cincinnati"
         },
         "adjusted_final_score": {
           "away": 15.0,
@@ -2371,11 +2518,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.419821+00:00"
+      "generated_at": "2026-09-08T15:00:24.480560+00:00"
     },
-    {
+    "6603857": {
       "game_id": "6603857",
       "matchup_key": "bryant@armywestpoint",
       "season": 2026,
@@ -2389,9 +2539,9 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-08T14:45:17.419851+00:00"
+      "generated_at": "2026-09-08T15:00:24.480607+00:00"
     },
-    {
+    "6603890": {
       "game_id": "6603890",
       "pbp_game_id": "401864498",
       "matchup_key": "centralmichigan@newmexico",
@@ -2411,6 +2561,18 @@
           "away_pct": 1.4,
           "home_pct": 98.6,
           "winner": "New Mexico"
+        },
+        "efficiency_margin": {
+          "away": -0.634,
+          "home": 0.634,
+          "unit": "EPA/play",
+          "leader": "New Mexico"
+        },
+        "expected_margin": {
+          "away": -32.0,
+          "home": 32.0,
+          "unit": "points",
+          "leader": "New Mexico"
         },
         "adjusted_final_score": {
           "away": 2.8,
@@ -2621,11 +2783,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.424149+00:00"
+      "generated_at": "2026-09-08T15:00:24.487349+00:00"
     },
-    {
+    "6603778": {
       "game_id": "6603778",
       "matchup_key": "charlestonso@gasouthern",
       "season": 2026,
@@ -2639,9 +2804,9 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-08T14:45:17.424181+00:00"
+      "generated_at": "2026-09-08T15:00:24.487401+00:00"
     },
-    {
+    "6603812": {
       "game_id": "6603812",
       "pbp_game_id": "401856660",
       "matchup_key": "clemson@louisianastate",
@@ -2661,6 +2826,18 @@
           "away_pct": 0.7,
           "home_pct": 99.3,
           "winner": "LSU"
+        },
+        "efficiency_margin": {
+          "away": -0.951,
+          "home": 0.951,
+          "unit": "EPA/play",
+          "leader": "LSU"
+        },
+        "expected_margin": {
+          "away": -37.7,
+          "home": 37.7,
+          "unit": "points",
+          "leader": "LSU"
         },
         "adjusted_final_score": {
           "away": 8.8,
@@ -2871,11 +3048,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.428305+00:00"
+      "generated_at": "2026-09-08T15:00:24.493999+00:00"
     },
-    {
+    "6604281": {
       "game_id": "6604281",
       "pbp_game_id": "401856780",
       "matchup_key": "coastalcarolina@westvirginia",
@@ -2895,6 +3075,18 @@
           "away_pct": 47.0,
           "home_pct": 53.0,
           "winner": "West Virginia"
+        },
+        "efficiency_margin": {
+          "away": 0.053,
+          "home": -0.053,
+          "unit": "EPA/play",
+          "leader": "Coastal Carolina"
+        },
+        "expected_margin": {
+          "away": -0.9,
+          "home": 0.9,
+          "unit": "points",
+          "leader": "West Virginia"
         },
         "adjusted_final_score": {
           "away": 24.9,
@@ -3105,11 +3297,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.433885+00:00"
+      "generated_at": "2026-09-08T15:00:24.502931+00:00"
     },
-    {
+    "6640529": {
       "game_id": "6640529",
       "pbp_game_id": "401856776",
       "matchup_key": "colorado@georgiatech",
@@ -3129,6 +3324,18 @@
           "away_pct": 48.2,
           "home_pct": 51.8,
           "winner": "Georgia Tech"
+        },
+        "efficiency_margin": {
+          "away": 0.018,
+          "home": -0.018,
+          "unit": "EPA/play",
+          "leader": "Colorado"
+        },
+        "expected_margin": {
+          "away": -0.5,
+          "home": 0.5,
+          "unit": "points",
+          "leader": "Georgia Tech"
         },
         "adjusted_final_score": {
           "away": 16.0,
@@ -3339,11 +3546,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.438772+00:00"
+      "generated_at": "2026-09-08T15:00:24.510139+00:00"
     },
-    {
+    "6604046": {
       "game_id": "6604046",
       "pbp_game_id": "401864496",
       "matchup_key": "duquesne@airforce",
@@ -3363,6 +3573,18 @@
           "away_pct": 1.7,
           "home_pct": 98.3,
           "winner": "Air Force"
+        },
+        "efficiency_margin": {
+          "away": -0.583,
+          "home": 0.583,
+          "unit": "EPA/play",
+          "leader": "Air Force"
+        },
+        "expected_margin": {
+          "away": -30.6,
+          "home": 30.6,
+          "unit": "points",
+          "leader": "Air Force"
         },
         "adjusted_final_score": {
           "away": 0.2,
@@ -3573,11 +3795,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.442882+00:00"
+      "generated_at": "2026-09-08T15:00:24.516445+00:00"
     },
-    {
+    "6604294": {
       "game_id": "6604294",
       "pbp_game_id": "401856634",
       "matchup_key": "eastcarolina@alabama",
@@ -3597,6 +3822,18 @@
           "away_pct": 5.4,
           "home_pct": 94.6,
           "winner": "Alabama"
+        },
+        "efficiency_margin": {
+          "away": -0.464,
+          "home": 0.464,
+          "unit": "EPA/play",
+          "leader": "Alabama"
+        },
+        "expected_margin": {
+          "away": -21.5,
+          "home": 21.5,
+          "unit": "points",
+          "leader": "Alabama"
         },
         "adjusted_final_score": {
           "away": 11.0,
@@ -3807,11 +4044,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.446820+00:00"
+      "generated_at": "2026-09-08T15:00:24.522909+00:00"
     },
-    {
+    "6603681": {
       "game_id": "6603681",
       "pbp_game_id": "401858422",
       "matchup_key": "easternillinois@minnesota",
@@ -3831,6 +4071,18 @@
           "away_pct": 0.8,
           "home_pct": 99.2,
           "winner": "Minnesota"
+        },
+        "efficiency_margin": {
+          "away": -0.627,
+          "home": 0.627,
+          "unit": "EPA/play",
+          "leader": "Minnesota"
+        },
+        "expected_margin": {
+          "away": -36.5,
+          "home": 36.5,
+          "unit": "points",
+          "leader": "Minnesota"
         },
         "adjusted_final_score": {
           "away": 5.4,
@@ -4041,11 +4293,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.450620+00:00"
+      "generated_at": "2026-09-08T15:00:24.529000+00:00"
     },
-    {
+    "6603854": {
       "game_id": "6603854",
       "matchup_key": "easternky@jacksonvillestate",
       "season": 2026,
@@ -4059,9 +4314,9 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-08T14:45:17.450652+00:00"
+      "generated_at": "2026-09-08T15:00:24.529062+00:00"
     },
-    {
+    "6603844": {
       "game_id": "6603844",
       "matchup_key": "fiu@southfla",
       "season": 2026,
@@ -4075,9 +4330,9 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-08T14:45:17.450677+00:00"
+      "generated_at": "2026-09-08T15:00:24.529102+00:00"
     },
-    {
+    "6603643": {
       "game_id": "6603643",
       "matchup_key": "flaatlantic@florida",
       "season": 2026,
@@ -4091,9 +4346,9 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-08T14:45:17.450710+00:00"
+      "generated_at": "2026-09-08T15:00:24.529140+00:00"
     },
-    {
+    "6603888": {
       "game_id": "6603888",
       "pbp_game_id": "401864499",
       "matchup_key": "fordham@northdakotastate",
@@ -4113,6 +4368,18 @@
           "away_pct": 1.2,
           "home_pct": 98.8,
           "winner": "North Dakota State"
+        },
+        "efficiency_margin": {
+          "away": -0.664,
+          "home": 0.664,
+          "unit": "EPA/play",
+          "leader": "North Dakota State"
+        },
+        "expected_margin": {
+          "away": -33.0,
+          "home": 33.0,
+          "unit": "points",
+          "leader": "North Dakota State"
         },
         "adjusted_final_score": {
           "away": 0.0,
@@ -4323,11 +4590,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.451813+00:00"
+      "generated_at": "2026-09-08T15:00:24.530856+00:00"
     },
-    {
+    "6640444": {
       "game_id": "6640444",
       "pbp_game_id": "401858436",
       "matchup_key": "fresnostate@southerncalifornia",
@@ -4347,6 +4617,18 @@
           "away_pct": 4.3,
           "home_pct": 95.7,
           "winner": "USC"
+        },
+        "efficiency_margin": {
+          "away": -0.494,
+          "home": 0.494,
+          "unit": "EPA/play",
+          "leader": "USC"
+        },
+        "expected_margin": {
+          "away": -23.2,
+          "home": 23.2,
+          "unit": "points",
+          "leader": "USC"
         },
         "adjusted_final_score": {
           "away": 7.5,
@@ -4557,11 +4839,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.455401+00:00"
+      "generated_at": "2026-09-08T15:00:24.536388+00:00"
     },
-    {
+    "6604018": {
       "game_id": "6604018",
       "pbp_game_id": "401856666",
       "matchup_key": "furman@tennessee",
@@ -4581,6 +4866,18 @@
           "away_pct": 4.3,
           "home_pct": 95.7,
           "winner": "Tennessee"
+        },
+        "efficiency_margin": {
+          "away": -0.707,
+          "home": 0.707,
+          "unit": "EPA/play",
+          "leader": "Tennessee"
+        },
+        "expected_margin": {
+          "away": -23.3,
+          "home": 23.3,
+          "unit": "points",
+          "leader": "Tennessee"
         },
         "adjusted_final_score": {
           "away": 0.3,
@@ -4791,11 +5088,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.456367+00:00"
+      "generated_at": "2026-09-08T15:00:24.537903+00:00"
     },
-    {
+    "6603983": {
       "game_id": "6603983",
       "pbp_game_id": "401858427",
       "matchup_key": "hampton@maryland",
@@ -4815,6 +5115,18 @@
           "away_pct": 4.8,
           "home_pct": 95.2,
           "winner": "Maryland"
+        },
+        "efficiency_margin": {
+          "away": -1.226,
+          "home": 1.226,
+          "unit": "EPA/play",
+          "leader": "Maryland"
+        },
+        "expected_margin": {
+          "away": -22.4,
+          "home": 22.4,
+          "unit": "points",
+          "leader": "Maryland"
         },
         "adjusted_final_score": {
           "away": 12.6,
@@ -5025,11 +5337,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.456854+00:00"
+      "generated_at": "2026-09-08T15:00:24.538638+00:00"
     },
-    {
+    "6604106": {
       "game_id": "6604106",
       "pbp_game_id": "401858201",
       "matchup_key": "hawaii@stanford",
@@ -5049,6 +5364,18 @@
           "away_pct": 8.2,
           "home_pct": 91.8,
           "winner": "Stanford"
+        },
+        "efficiency_margin": {
+          "away": -0.449,
+          "home": 0.449,
+          "unit": "EPA/play",
+          "leader": "Stanford"
+        },
+        "expected_margin": {
+          "away": -18.1,
+          "home": 18.1,
+          "unit": "points",
+          "leader": "Stanford"
         },
         "adjusted_final_score": {
           "away": 6.8,
@@ -5259,11 +5586,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.459820+00:00"
+      "generated_at": "2026-09-08T15:00:24.543217+00:00"
     },
-    {
+    "6603744": {
       "game_id": "6603744",
       "pbp_game_id": "401862697",
       "matchup_key": "houstonchristian@rice",
@@ -5283,6 +5613,18 @@
           "away_pct": 2.5,
           "home_pct": 97.5,
           "winner": "Rice"
+        },
+        "efficiency_margin": {
+          "away": -0.688,
+          "home": 0.688,
+          "unit": "EPA/play",
+          "leader": "Rice"
+        },
+        "expected_margin": {
+          "away": -27.4,
+          "home": 27.4,
+          "unit": "points",
+          "leader": "Rice"
         },
         "adjusted_final_score": {
           "away": 0.0,
@@ -5493,11 +5835,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.461554+00:00"
+      "generated_at": "2026-09-08T15:00:24.545980+00:00"
     },
-    {
+    "6604087": {
       "game_id": "6604087",
       "pbp_game_id": "401856768",
       "matchup_key": "idaho@utah",
@@ -5517,6 +5862,18 @@
           "away_pct": 0.7,
           "home_pct": 99.3,
           "winner": "Utah"
+        },
+        "efficiency_margin": {
+          "away": -0.619,
+          "home": 0.619,
+          "unit": "EPA/play",
+          "leader": "Utah"
+        },
+        "expected_margin": {
+          "away": -36.8,
+          "home": 36.8,
+          "unit": "points",
+          "leader": "Utah"
         },
         "adjusted_final_score": {
           "away": 13.9,
@@ -5727,11 +6084,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.465626+00:00"
+      "generated_at": "2026-09-08T15:00:24.552339+00:00"
     },
-    {
+    "6603922": {
       "game_id": "6603922",
       "pbp_game_id": "401860880",
       "matchup_key": "idahostate@utahstate",
@@ -5751,6 +6111,18 @@
           "away_pct": 77.2,
           "home_pct": 22.8,
           "winner": "Idaho State"
+        },
+        "efficiency_margin": {
+          "away": 0.113,
+          "home": -0.113,
+          "unit": "EPA/play",
+          "leader": "Idaho State"
+        },
+        "expected_margin": {
+          "away": 9.1,
+          "home": -9.1,
+          "unit": "points",
+          "leader": "Idaho State"
         },
         "adjusted_final_score": {
           "away": 17.3,
@@ -5961,11 +6333,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.467784+00:00"
+      "generated_at": "2026-09-08T15:00:24.555659+00:00"
     },
-    {
+    "6640460": {
       "game_id": "6640460",
       "pbp_game_id": "401858435",
       "matchup_key": "indianastate@purdue",
@@ -5985,6 +6360,18 @@
           "away_pct": 2.6,
           "home_pct": 97.4,
           "winner": "Purdue"
+        },
+        "efficiency_margin": {
+          "away": -0.567,
+          "home": 0.567,
+          "unit": "EPA/play",
+          "leader": "Purdue"
+        },
+        "expected_margin": {
+          "away": -27.2,
+          "home": 27.2,
+          "unit": "points",
+          "leader": "Purdue"
         },
         "adjusted_final_score": {
           "away": 13.4,
@@ -6195,11 +6582,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.471927+00:00"
+      "generated_at": "2026-09-08T15:00:24.562238+00:00"
     },
-    {
+    "6604127": {
       "game_id": "6604127",
       "pbp_game_id": "401864577",
       "matchup_key": "jacksonvillestate@northdakotastate",
@@ -6219,6 +6609,18 @@
           "away_pct": 7.4,
           "home_pct": 92.6,
           "winner": "North Dakota State"
+        },
+        "efficiency_margin": {
+          "away": -0.566,
+          "home": 0.566,
+          "unit": "EPA/play",
+          "leader": "North Dakota State"
+        },
+        "expected_margin": {
+          "away": -19.0,
+          "home": 19.0,
+          "unit": "points",
+          "leader": "North Dakota State"
         },
         "adjusted_final_score": {
           "away": 8.3,
@@ -6429,11 +6831,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.477241+00:00"
+      "generated_at": "2026-09-08T15:00:24.570480+00:00"
     },
-    {
+    "6603924": {
       "game_id": "6603924",
       "pbp_game_id": "401856665",
       "matchup_key": "kentstate@southcarolina",
@@ -6453,6 +6858,18 @@
           "away_pct": 0.8,
           "home_pct": 99.2,
           "winner": "South Carolina"
+        },
+        "efficiency_margin": {
+          "away": -0.749,
+          "home": 0.749,
+          "unit": "EPA/play",
+          "leader": "South Carolina"
+        },
+        "expected_margin": {
+          "away": -36.2,
+          "home": 36.2,
+          "unit": "points",
+          "leader": "South Carolina"
         },
         "adjusted_final_score": {
           "away": 2.2,
@@ -6663,11 +7080,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.481504+00:00"
+      "generated_at": "2026-09-08T15:00:24.577179+00:00"
     },
-    {
+    "6640532": {
       "game_id": "6640532",
       "pbp_game_id": "401861962",
       "matchup_key": "lafayette@connecticut",
@@ -6687,6 +7107,18 @@
           "away_pct": 1.3,
           "home_pct": 98.7,
           "winner": "UConn"
+        },
+        "efficiency_margin": {
+          "away": -0.793,
+          "home": 0.793,
+          "unit": "EPA/play",
+          "leader": "UConn"
+        },
+        "expected_margin": {
+          "away": -32.7,
+          "home": 32.7,
+          "unit": "points",
+          "leader": "UConn"
         },
         "adjusted_final_score": {
           "away": 10.8,
@@ -6897,11 +7329,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.485894+00:00"
+      "generated_at": "2026-09-08T15:00:24.584123+00:00"
     },
-    {
+    "6603746": {
       "game_id": "6603746",
       "pbp_game_id": "401869142",
       "matchup_key": "lamar@louisiana",
@@ -6921,6 +7356,18 @@
           "away_pct": 4.9,
           "home_pct": 95.1,
           "winner": "Louisiana"
+        },
+        "efficiency_margin": {
+          "away": -0.836,
+          "home": 0.836,
+          "unit": "EPA/play",
+          "leader": "Louisiana"
+        },
+        "expected_margin": {
+          "away": -22.3,
+          "home": 22.3,
+          "unit": "points",
+          "leader": "Louisiana"
         },
         "adjusted_final_score": {
           "away": 6.5,
@@ -7131,11 +7578,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.486457+00:00"
+      "generated_at": "2026-09-08T15:00:24.585039+00:00"
     },
-    {
+    "6603933": {
       "game_id": "6603933",
       "pbp_game_id": "401869960",
       "matchup_key": "liberty@jamesmadison",
@@ -7155,6 +7605,18 @@
           "away_pct": 51.6,
           "home_pct": 48.4,
           "winner": "Liberty"
+        },
+        "efficiency_margin": {
+          "away": -0.108,
+          "home": 0.108,
+          "unit": "EPA/play",
+          "leader": "James Madison"
+        },
+        "expected_margin": {
+          "away": 0.5,
+          "home": -0.5,
+          "unit": "points",
+          "leader": "Liberty"
         },
         "adjusted_final_score": {
           "away": 18.8,
@@ -7365,11 +7827,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.490883+00:00"
+      "generated_at": "2026-09-08T15:00:24.591799+00:00"
     },
-    {
+    "6604056": {
       "game_id": "6604056",
       "pbp_game_id": "401856769",
       "matchup_key": "longisland@kansas",
@@ -7389,6 +7854,18 @@
           "away_pct": 1.5,
           "home_pct": 98.5,
           "winner": "Kansas"
+        },
+        "efficiency_margin": {
+          "away": -0.724,
+          "home": 0.724,
+          "unit": "EPA/play",
+          "leader": "Kansas"
+        },
+        "expected_margin": {
+          "away": -31.3,
+          "home": 31.3,
+          "unit": "points",
+          "leader": "Kansas"
         },
         "adjusted_final_score": {
           "away": 11.0,
@@ -7599,11 +8076,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.495414+00:00"
+      "generated_at": "2026-09-08T15:00:24.598835+00:00"
     },
-    {
+    "6640534": {
       "game_id": "6640534",
       "pbp_game_id": "401856661",
       "matchup_key": "louisville@mississippi",
@@ -7623,6 +8103,18 @@
           "away_pct": 52.5,
           "home_pct": 47.5,
           "winner": "Louisville"
+        },
+        "efficiency_margin": {
+          "away": 0.114,
+          "home": -0.114,
+          "unit": "EPA/play",
+          "leader": "Louisville"
+        },
+        "expected_margin": {
+          "away": 0.8,
+          "home": -0.8,
+          "unit": "points",
+          "leader": "Louisville"
         },
         "adjusted_final_score": {
           "away": 28.6,
@@ -7833,11 +8325,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.500679+00:00"
+      "generated_at": "2026-09-08T15:00:24.607034+00:00"
     },
-    {
+    "6604160": {
       "game_id": "6604160",
       "pbp_game_id": "401866627",
       "matchup_key": "maine@appalachianstate",
@@ -7857,6 +8352,18 @@
           "away_pct": 0.4,
           "home_pct": 99.6,
           "winner": "App State"
+        },
+        "efficiency_margin": {
+          "away": -1.27,
+          "home": 1.27,
+          "unit": "EPA/play",
+          "leader": "App State"
+        },
+        "expected_margin": {
+          "away": -42.0,
+          "home": 42.0,
+          "unit": "points",
+          "leader": "App State"
         },
         "adjusted_final_score": {
           "away": 1.5,
@@ -8067,11 +8574,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.501525+00:00"
+      "generated_at": "2026-09-08T15:00:24.608320+00:00"
     },
-    {
+    "6603756": {
       "game_id": "6603756",
       "pbp_game_id": "401858434",
       "matchup_key": "marshall@pennstate",
@@ -8091,6 +8601,18 @@
           "away_pct": 0.7,
           "home_pct": 99.3,
           "winner": "Penn State"
+        },
+        "efficiency_margin": {
+          "away": -1.086,
+          "home": 1.086,
+          "unit": "EPA/play",
+          "leader": "Penn State"
+        },
+        "expected_margin": {
+          "away": -36.8,
+          "home": 36.8,
+          "unit": "points",
+          "leader": "Penn State"
         },
         "adjusted_final_score": {
           "away": 0.0,
@@ -8301,11 +8823,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.502229+00:00"
+      "generated_at": "2026-09-08T15:00:24.609373+00:00"
     },
-    {
+    "6603866": {
       "game_id": "6603866",
       "pbp_game_id": "401858423",
       "matchup_key": "massachusetts@rutgers",
@@ -8325,6 +8850,18 @@
           "away_pct": 94.1,
           "home_pct": 5.9,
           "winner": "Massachusetts"
+        },
+        "efficiency_margin": {
+          "away": 0.296,
+          "home": -0.296,
+          "unit": "EPA/play",
+          "leader": "Massachusetts"
+        },
+        "expected_margin": {
+          "away": 20.8,
+          "home": -20.8,
+          "unit": "points",
+          "leader": "Massachusetts"
         },
         "adjusted_final_score": {
           "away": 38.1,
@@ -8535,11 +9072,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.506722+00:00"
+      "generated_at": "2026-09-08T15:00:24.616517+00:00"
     },
-    {
+    "6603713": {
       "game_id": "6603713",
       "pbp_game_id": "401862693",
       "matchup_key": "memphis@unlv",
@@ -8559,6 +9099,18 @@
           "away_pct": 55.4,
           "home_pct": 44.6,
           "winner": "Memphis"
+        },
+        "efficiency_margin": {
+          "away": 0.094,
+          "home": -0.094,
+          "unit": "EPA/play",
+          "leader": "Memphis"
+        },
+        "expected_margin": {
+          "away": 1.6,
+          "home": -1.6,
+          "unit": "points",
+          "leader": "Memphis"
         },
         "adjusted_final_score": {
           "away": 22.3,
@@ -8769,11 +9321,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.511348+00:00"
+      "generated_at": "2026-09-08T15:00:24.623900+00:00"
     },
-    {
+    "6640263": {
       "game_id": "6640263",
       "pbp_game_id": "401870790",
       "matchup_key": "mercyhurst@newmexicostate",
@@ -8793,6 +9348,18 @@
           "away_pct": 2.4,
           "home_pct": 97.6,
           "winner": "New Mexico State"
+        },
+        "efficiency_margin": {
+          "away": -0.622,
+          "home": 0.622,
+          "unit": "EPA/play",
+          "leader": "New Mexico State"
+        },
+        "expected_margin": {
+          "away": -27.7,
+          "home": 27.7,
+          "unit": "points",
+          "leader": "New Mexico State"
         },
         "adjusted_final_score": {
           "away": 10.5,
@@ -9003,11 +9570,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.515843+00:00"
+      "generated_at": "2026-09-08T15:00:24.630926+00:00"
     },
-    {
+    "6604072": {
       "game_id": "6604072",
       "pbp_game_id": "401864424",
       "matchup_key": "merrimack@delaware",
@@ -9027,6 +9597,18 @@
           "away_pct": 3.0,
           "home_pct": 97.0,
           "winner": "Delaware"
+        },
+        "efficiency_margin": {
+          "away": -0.583,
+          "home": 0.583,
+          "unit": "EPA/play",
+          "leader": "Delaware"
+        },
+        "expected_margin": {
+          "away": -26.1,
+          "home": 26.1,
+          "unit": "points",
+          "leader": "Delaware"
         },
         "adjusted_final_score": {
           "away": 13.1,
@@ -9237,11 +9819,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.520086+00:00"
+      "generated_at": "2026-09-08T15:00:24.637590+00:00"
     },
-    {
+    "6604107": {
       "game_id": "6604107",
       "pbp_game_id": "401858206",
       "matchup_key": "miami@stanford",
@@ -9261,6 +9846,18 @@
           "away_pct": 95.3,
           "home_pct": 4.7,
           "winner": "Miami"
+        },
+        "efficiency_margin": {
+          "away": 0.644,
+          "home": -0.644,
+          "unit": "EPA/play",
+          "leader": "Miami"
+        },
+        "expected_margin": {
+          "away": 22.5,
+          "home": -22.5,
+          "unit": "points",
+          "leader": "Miami"
         },
         "adjusted_final_score": {
           "away": 32.4,
@@ -9471,11 +10068,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.524226+00:00"
+      "generated_at": "2026-09-08T15:00:24.644185+00:00"
     },
-    {
+    "6640531": {
       "game_id": "6640531",
       "pbp_game_id": "401858207",
       "matchup_key": "miamioh@pittsburgh",
@@ -9495,6 +10095,18 @@
           "away_pct": 2.8,
           "home_pct": 97.2,
           "winner": "Pittsburgh"
+        },
+        "efficiency_margin": {
+          "away": -0.473,
+          "home": 0.473,
+          "unit": "EPA/play",
+          "leader": "Pittsburgh"
+        },
+        "expected_margin": {
+          "away": -26.5,
+          "home": 26.5,
+          "unit": "points",
+          "leader": "Pittsburgh"
         },
         "adjusted_final_score": {
           "away": 11.5,
@@ -9705,11 +10317,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.528565+00:00"
+      "generated_at": "2026-09-08T15:00:24.650947+00:00"
     },
-    {
+    "6603680": {
       "game_id": "6603680",
       "matchup_key": "mississippival@sacramentostate",
       "season": 2026,
@@ -9723,9 +10338,9 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-08T14:45:17.528599+00:00"
+      "generated_at": "2026-09-08T15:00:24.651002+00:00"
     },
-    {
+    "6604183": {
       "game_id": "6604183",
       "pbp_game_id": "401856668",
       "matchup_key": "missouristate@texasaandm",
@@ -9745,6 +10360,18 @@
           "away_pct": 4.4,
           "home_pct": 95.6,
           "winner": "Texas A&M"
+        },
+        "efficiency_margin": {
+          "away": -0.529,
+          "home": 0.529,
+          "unit": "EPA/play",
+          "leader": "Texas A&M"
+        },
+        "expected_margin": {
+          "away": -23.1,
+          "home": 23.1,
+          "unit": "points",
+          "leader": "Texas A&M"
         },
         "adjusted_final_score": {
           "away": 8.4,
@@ -9955,11 +10582,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.530556+00:00"
+      "generated_at": "2026-09-08T15:00:24.653994+00:00"
     },
-    {
+    "6604331": {
       "game_id": "6604331",
       "pbp_game_id": "401856774",
       "matchup_key": "morganstate@arizonastate",
@@ -9979,6 +10609,18 @@
           "away_pct": 0.7,
           "home_pct": 99.3,
           "winner": "Arizona State"
+        },
+        "efficiency_margin": {
+          "away": -0.944,
+          "home": 0.944,
+          "unit": "EPA/play",
+          "leader": "Arizona State"
+        },
+        "expected_margin": {
+          "away": -36.9,
+          "home": 36.9,
+          "unit": "points",
+          "leader": "Arizona State"
         },
         "adjusted_final_score": {
           "away": 10.0,
@@ -10189,11 +10831,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.534485+00:00"
+      "generated_at": "2026-09-08T15:00:24.660055+00:00"
     },
-    {
+    "6640287": {
       "game_id": "6640287",
       "matchup_key": "murraystate@middletenn",
       "season": 2026,
@@ -10207,9 +10852,9 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-08T14:45:17.534516+00:00"
+      "generated_at": "2026-09-08T15:00:24.660104+00:00"
     },
-    {
+    "6603992": {
       "game_id": "6603992",
       "pbp_game_id": "401858202",
       "matchup_key": "ncstate@virginia",
@@ -10229,6 +10874,18 @@
           "away_pct": 8.8,
           "home_pct": 91.2,
           "winner": "Virginia"
+        },
+        "efficiency_margin": {
+          "away": -0.468,
+          "home": 0.468,
+          "unit": "EPA/play",
+          "leader": "Virginia"
+        },
+        "expected_margin": {
+          "away": -17.5,
+          "home": 17.5,
+          "unit": "points",
+          "leader": "Virginia"
         },
         "adjusted_final_score": {
           "away": 6.6,
@@ -10439,11 +11096,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.538778+00:00"
+      "generated_at": "2026-09-08T15:00:24.666785+00:00"
     },
-    {
+    "6603606": {
       "game_id": "6603606",
       "matchup_key": "niu@iowa",
       "season": 2026,
@@ -10457,9 +11117,9 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-08T14:45:17.538803+00:00"
+      "generated_at": "2026-09-08T15:00:24.666826+00:00"
     },
-    {
+    "6640364": {
       "game_id": "6640364",
       "pbp_game_id": "401858208",
       "matchup_key": "newhampshire@syracuse",
@@ -10479,6 +11139,18 @@
           "away_pct": 0.4,
           "home_pct": 99.6,
           "winner": "Syracuse"
+        },
+        "efficiency_margin": {
+          "away": -0.893,
+          "home": 0.893,
+          "unit": "EPA/play",
+          "leader": "Syracuse"
+        },
+        "expected_margin": {
+          "away": -42.0,
+          "home": 42.0,
+          "unit": "points",
+          "leader": "Syracuse"
         },
         "adjusted_final_score": {
           "away": 8.2,
@@ -10689,11 +11361,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.543127+00:00"
+      "generated_at": "2026-09-08T15:00:24.673697+00:00"
     },
-    {
+    "6603961": {
       "game_id": "6603961",
       "pbp_game_id": "401864570",
       "matchup_key": "newmexicostate@floridastate",
@@ -10713,6 +11388,18 @@
           "away_pct": 19.1,
           "home_pct": 80.9,
           "winner": "Florida State"
+        },
+        "efficiency_margin": {
+          "away": -0.093,
+          "home": 0.093,
+          "unit": "EPA/play",
+          "leader": "Florida State"
+        },
+        "expected_margin": {
+          "away": -10.8,
+          "home": 10.8,
+          "unit": "points",
+          "leader": "Florida State"
         },
         "adjusted_final_score": {
           "away": 12.9,
@@ -10923,11 +11610,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.547026+00:00"
+      "generated_at": "2026-09-08T15:00:24.679501+00:00"
     },
-    {
+    "6604228": {
       "game_id": "6604228",
       "pbp_game_id": "401856771",
       "matchup_key": "nicholls@kansasstate",
@@ -10947,6 +11637,18 @@
           "away_pct": 3.1,
           "home_pct": 96.9,
           "winner": "Kansas State"
+        },
+        "efficiency_margin": {
+          "away": -0.724,
+          "home": 0.724,
+          "unit": "EPA/play",
+          "leader": "Kansas State"
+        },
+        "expected_margin": {
+          "away": -25.8,
+          "home": 25.8,
+          "unit": "points",
+          "leader": "Kansas State"
         },
         "adjusted_final_score": {
           "away": 0.2,
@@ -11157,11 +11859,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.549176+00:00"
+      "generated_at": "2026-09-08T15:00:24.682921+00:00"
     },
-    {
+    "6603711": {
       "game_id": "6603711",
       "pbp_game_id": "401867973",
       "matchup_key": "norfolkstate@olddominion",
@@ -11181,6 +11886,18 @@
           "away_pct": 22.6,
           "home_pct": 77.4,
           "winner": "Old Dominion"
+        },
+        "efficiency_margin": {
+          "away": -0.219,
+          "home": 0.219,
+          "unit": "EPA/play",
+          "leader": "Old Dominion"
+        },
+        "expected_margin": {
+          "away": -9.2,
+          "home": 9.2,
+          "unit": "points",
+          "leader": "Old Dominion"
         },
         "adjusted_final_score": {
           "away": 13.5,
@@ -11391,11 +12108,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.552514+00:00"
+      "generated_at": "2026-09-08T15:00:24.687998+00:00"
     },
-    {
+    "6603767": {
       "game_id": "6603767",
       "matchup_key": "northala@arkansas",
       "season": 2026,
@@ -11409,9 +12129,9 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-08T14:45:17.552542+00:00"
+      "generated_at": "2026-09-08T15:00:24.688041+00:00"
     },
-    {
+    "6604316": {
       "game_id": "6604316",
       "pbp_game_id": "401856766",
       "matchup_key": "northcarolina@texaschristian",
@@ -11431,6 +12151,18 @@
           "away_pct": 57.3,
           "home_pct": 42.7,
           "winner": "North Carolina"
+        },
+        "efficiency_margin": {
+          "away": 0.156,
+          "home": -0.156,
+          "unit": "EPA/play",
+          "leader": "North Carolina"
+        },
+        "expected_margin": {
+          "away": 2.2,
+          "home": -2.2,
+          "unit": "points",
+          "leader": "North Carolina"
         },
         "adjusted_final_score": {
           "away": 18.5,
@@ -11641,11 +12373,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.557167+00:00"
+      "generated_at": "2026-09-08T15:00:24.695080+00:00"
     },
-    {
+    "6604001": {
       "game_id": "6604001",
       "pbp_game_id": "401866623",
       "matchup_key": "northcarolinaaandt@georgiastate",
@@ -11665,6 +12400,18 @@
           "away_pct": 0.8,
           "home_pct": 99.2,
           "winner": "Georgia State"
+        },
+        "efficiency_margin": {
+          "away": -0.642,
+          "home": 0.642,
+          "unit": "EPA/play",
+          "leader": "Georgia State"
+        },
+        "expected_margin": {
+          "away": -35.9,
+          "home": 35.9,
+          "unit": "points",
+          "leader": "Georgia State"
         },
         "adjusted_final_score": {
           "away": 9.5,
@@ -11875,11 +12622,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.561784+00:00"
+      "generated_at": "2026-09-08T15:00:24.702154+00:00"
     },
-    {
+    "6603946": {
       "game_id": "6603946",
       "pbp_game_id": "401858425",
       "matchup_key": "northtexas@indiana",
@@ -11899,6 +12649,18 @@
           "away_pct": 11.4,
           "home_pct": 88.6,
           "winner": "Indiana"
+        },
+        "efficiency_margin": {
+          "away": -0.294,
+          "home": 0.294,
+          "unit": "EPA/play",
+          "leader": "Indiana"
+        },
+        "expected_margin": {
+          "away": -15.4,
+          "home": 15.4,
+          "unit": "points",
+          "leader": "Indiana"
         },
         "adjusted_final_score": {
           "away": 18.3,
@@ -12109,11 +12871,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.565851+00:00"
+      "generated_at": "2026-09-08T15:00:24.708505+00:00"
     },
-    {
+    "6640454": {
       "game_id": "6640454",
       "matchup_key": "northernariz@arizona",
       "season": 2026,
@@ -12127,9 +12892,9 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-08T14:45:17.565879+00:00"
+      "generated_at": "2026-09-08T15:00:24.708554+00:00"
     },
-    {
+    "6604309": {
       "game_id": "6604309",
       "pbp_game_id": "401869129",
       "matchup_key": "northwesternstate@louisianatech",
@@ -12149,6 +12914,18 @@
           "away_pct": 0.4,
           "home_pct": 99.6,
           "winner": "Louisiana Tech"
+        },
+        "efficiency_margin": {
+          "away": -1.415,
+          "home": 1.415,
+          "unit": "EPA/play",
+          "leader": "Louisiana Tech"
+        },
+        "expected_margin": {
+          "away": -42.0,
+          "home": 42.0,
+          "unit": "points",
+          "leader": "Louisiana Tech"
         },
         "adjusted_final_score": {
           "away": 0.0,
@@ -12359,11 +13136,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.567345+00:00"
+      "generated_at": "2026-09-08T15:00:24.710827+00:00"
     },
-    {
+    "6604332": {
       "game_id": "6604332",
       "pbp_game_id": "401858430",
       "matchup_key": "ohio@nebraska",
@@ -12383,6 +13163,18 @@
           "away_pct": 14.9,
           "home_pct": 85.1,
           "winner": "Nebraska"
+        },
+        "efficiency_margin": {
+          "away": -0.356,
+          "home": 0.356,
+          "unit": "EPA/play",
+          "leader": "Nebraska"
+        },
+        "expected_margin": {
+          "away": -13.1,
+          "home": 13.1,
+          "unit": "points",
+          "leader": "Nebraska"
         },
         "adjusted_final_score": {
           "away": 21.8,
@@ -12593,11 +13385,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.571786+00:00"
+      "generated_at": "2026-09-08T15:00:24.717906+00:00"
     },
-    {
+    "6603612": {
       "game_id": "6603612",
       "pbp_game_id": "401856772",
       "matchup_key": "oklahomastate@tulsa",
@@ -12617,6 +13412,18 @@
           "away_pct": 99.6,
           "home_pct": 0.4,
           "winner": "Oklahoma State"
+        },
+        "efficiency_margin": {
+          "away": 1.035,
+          "home": -1.035,
+          "unit": "EPA/play",
+          "leader": "Oklahoma State"
+        },
+        "expected_margin": {
+          "away": 42.0,
+          "home": -42.0,
+          "unit": "points",
+          "leader": "Oklahoma State"
         },
         "adjusted_final_score": {
           "away": 33.7,
@@ -12827,11 +13634,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.572197+00:00"
+      "generated_at": "2026-09-08T15:00:24.718527+00:00"
     },
-    {
+    "6604065": {
       "game_id": "6604065",
       "pbp_game_id": "401856778",
       "matchup_key": "oregonstate@houston",
@@ -12851,6 +13661,18 @@
           "away_pct": 25.9,
           "home_pct": 74.1,
           "winner": "Houston"
+        },
+        "efficiency_margin": {
+          "away": -0.18,
+          "home": 0.18,
+          "unit": "EPA/play",
+          "leader": "Houston"
+        },
+        "expected_margin": {
+          "away": -7.9,
+          "home": 7.9,
+          "unit": "points",
+          "leader": "Houston"
         },
         "adjusted_final_score": {
           "away": 21.0,
@@ -13061,11 +13883,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.577285+00:00"
+      "generated_at": "2026-09-08T15:00:24.726462+00:00"
     },
-    {
+    "6604162": {
       "game_id": "6604162",
       "pbp_game_id": "401860879",
       "matchup_key": "portlandstate@sandiegostate",
@@ -13085,6 +13910,18 @@
           "away_pct": 10.8,
           "home_pct": 89.2,
           "winner": "San Diego State"
+        },
+        "efficiency_margin": {
+          "away": -0.553,
+          "home": 0.553,
+          "unit": "EPA/play",
+          "leader": "San Diego State"
+        },
+        "expected_margin": {
+          "away": -15.8,
+          "home": 15.8,
+          "unit": "points",
+          "leader": "San Diego State"
         },
         "adjusted_final_score": {
           "away": 23.6,
@@ -13295,11 +14132,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.582807+00:00"
+      "generated_at": "2026-09-08T15:00:24.735102+00:00"
     },
-    {
+    "6604000": {
       "game_id": "6604000",
       "pbp_game_id": "401862698",
       "matchup_key": "rhodeisland@temple",
@@ -13319,6 +14159,18 @@
           "away_pct": 20.0,
           "home_pct": 80.0,
           "winner": "Temple"
+        },
+        "efficiency_margin": {
+          "away": -0.177,
+          "home": 0.177,
+          "unit": "EPA/play",
+          "leader": "Temple"
+        },
+        "expected_margin": {
+          "away": -10.4,
+          "home": 10.4,
+          "unit": "points",
+          "leader": "Temple"
         },
         "adjusted_final_score": {
           "away": 10.7,
@@ -13529,11 +14381,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.585347+00:00"
+      "generated_at": "2026-09-08T15:00:24.739077+00:00"
     },
-    {
+    "6603962": {
       "game_id": "6603962",
       "pbp_game_id": "401858212",
       "matchup_key": "southernmethodist@floridastate",
@@ -13553,6 +14408,18 @@
           "away_pct": 73.7,
           "home_pct": 26.3,
           "winner": "SMU"
+        },
+        "efficiency_margin": {
+          "away": 0.232,
+          "home": -0.232,
+          "unit": "EPA/play",
+          "leader": "SMU"
+        },
+        "expected_margin": {
+          "away": 7.7,
+          "home": -7.7,
+          "unit": "points",
+          "leader": "SMU"
         },
         "adjusted_final_score": {
           "away": 25.5,
@@ -13763,11 +14630,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.590012+00:00"
+      "generated_at": "2026-09-08T15:00:24.746269+00:00"
     },
-    {
+    "6603974": {
       "game_id": "6603974",
       "pbp_game_id": "401866408",
       "matchup_key": "sacramentostate@easternmichigan",
@@ -13787,6 +14657,18 @@
           "away_pct": 12.2,
           "home_pct": 87.8,
           "winner": "Eastern Michigan"
+        },
+        "efficiency_margin": {
+          "away": -0.489,
+          "home": 0.489,
+          "unit": "EPA/play",
+          "leader": "Eastern Michigan"
+        },
+        "expected_margin": {
+          "away": -14.8,
+          "home": 14.8,
+          "unit": "points",
+          "leader": "Eastern Michigan"
         },
         "adjusted_final_score": {
           "away": 10.4,
@@ -13997,11 +14879,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.594542+00:00"
+      "generated_at": "2026-09-08T15:00:24.753290+00:00"
     },
-    {
+    "6603878": {
       "game_id": "6603878",
       "pbp_game_id": "401870763",
       "matchup_key": "samhouston@troy",
@@ -14021,6 +14906,18 @@
           "away_pct": 59.4,
           "home_pct": 40.6,
           "winner": "Sam Houston"
+        },
+        "efficiency_margin": {
+          "away": 0.0,
+          "home": -0.0,
+          "unit": "EPA/play",
+          "leader": "Sam Houston"
+        },
+        "expected_margin": {
+          "away": 2.9,
+          "home": -2.9,
+          "unit": "points",
+          "leader": "Sam Houston"
         },
         "adjusted_final_score": {
           "away": 13.4,
@@ -14231,11 +15128,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.596646+00:00"
+      "generated_at": "2026-09-08T15:00:24.756547+00:00"
     },
-    {
+    "6603957": {
       "game_id": "6603957",
       "pbp_game_id": "401864495",
       "matchup_key": "sanjosestate@easternmichigan",
@@ -14255,6 +15155,18 @@
           "away_pct": 77.4,
           "home_pct": 22.6,
           "winner": "San Jose State"
+        },
+        "efficiency_margin": {
+          "away": 0.117,
+          "home": -0.117,
+          "unit": "EPA/play",
+          "leader": "San Jose State"
+        },
+        "expected_margin": {
+          "away": 9.3,
+          "home": -9.3,
+          "unit": "points",
+          "leader": "San Jose State"
         },
         "adjusted_final_score": {
           "away": 24.8,
@@ -14465,11 +15377,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.602557+00:00"
+      "generated_at": "2026-09-08T15:00:24.765917+00:00"
     },
-    {
+    "6603956": {
       "game_id": "6603956",
       "pbp_game_id": "401864494",
       "matchup_key": "sanjosestate@southerncalifornia",
@@ -14489,6 +15404,18 @@
           "away_pct": 11.4,
           "home_pct": 88.6,
           "winner": "USC"
+        },
+        "efficiency_margin": {
+          "away": -0.262,
+          "home": 0.262,
+          "unit": "EPA/play",
+          "leader": "USC"
+        },
+        "expected_margin": {
+          "away": -15.3,
+          "home": 15.3,
+          "unit": "points",
+          "leader": "USC"
         },
         "adjusted_final_score": {
           "away": 21.9,
@@ -14699,11 +15626,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.607175+00:00"
+      "generated_at": "2026-09-08T15:00:24.773065+00:00"
     },
-    {
+    "6603796": {
       "game_id": "6603796",
       "pbp_game_id": "401858431",
       "matchup_key": "southdakotastate@northwestern",
@@ -14723,6 +15653,18 @@
           "away_pct": 0.4,
           "home_pct": 99.6,
           "winner": "Northwestern"
+        },
+        "efficiency_margin": {
+          "away": -2.104,
+          "home": 2.104,
+          "unit": "EPA/play",
+          "leader": "Northwestern"
+        },
+        "expected_margin": {
+          "away": -42.0,
+          "home": 42.0,
+          "unit": "points",
+          "leader": "Northwestern"
         },
         "adjusted_final_score": {
           "away": 0.0,
@@ -14933,11 +15875,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.607773+00:00"
+      "generated_at": "2026-09-08T15:00:24.773992+00:00"
     },
-    {
+    "6603656": {
       "game_id": "6603656",
       "matchup_key": "southeastmostate@iowastate",
       "season": 2026,
@@ -14951,9 +15896,9 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-08T14:45:17.607806+00:00"
+      "generated_at": "2026-09-08T15:00:24.774040+00:00"
     },
-    {
+    "6604173": {
       "game_id": "6604173",
       "matchup_key": "southeasternla@southalabama",
       "season": 2026,
@@ -14967,9 +15912,9 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-08T14:45:17.607832+00:00"
+      "generated_at": "2026-09-08T15:00:24.774080+00:00"
     },
-    {
+    "6604282": {
       "game_id": "6604282",
       "pbp_game_id": "401866410",
       "matchup_key": "tarletonstate@bowlinggreen",
@@ -14989,6 +15934,18 @@
           "away_pct": 54.9,
           "home_pct": 45.1,
           "winner": "Tarleton State"
+        },
+        "efficiency_margin": {
+          "away": 0.044,
+          "home": -0.044,
+          "unit": "EPA/play",
+          "leader": "Tarleton State"
+        },
+        "expected_margin": {
+          "away": 1.5,
+          "home": -1.5,
+          "unit": "points",
+          "leader": "Tarleton State"
         },
         "adjusted_final_score": {
           "away": 20.9,
@@ -15199,11 +16156,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.612768+00:00"
+      "generated_at": "2026-09-08T15:00:24.781732+00:00"
     },
-    {
+    "6640492": {
       "game_id": "6640492",
       "pbp_game_id": "401856658",
       "matchup_key": "tennesseestate@georgia",
@@ -15223,6 +16183,18 @@
           "away_pct": 0.4,
           "home_pct": 99.6,
           "winner": "Georgia"
+        },
+        "efficiency_margin": {
+          "away": -1.566,
+          "home": 1.566,
+          "unit": "EPA/play",
+          "leader": "Georgia"
+        },
+        "expected_margin": {
+          "away": -42.0,
+          "home": 42.0,
+          "unit": "points",
+          "leader": "Georgia"
         },
         "adjusted_final_score": {
           "away": 0.0,
@@ -15433,11 +16405,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.614299+00:00"
+      "generated_at": "2026-09-08T15:00:24.784063+00:00"
     },
-    {
+    "6604218": {
       "game_id": "6604218",
       "pbp_game_id": "401856667",
       "matchup_key": "texasstate@texas",
@@ -15457,6 +16432,18 @@
           "away_pct": 1.1,
           "home_pct": 98.9,
           "winner": "Texas"
+        },
+        "efficiency_margin": {
+          "away": -1.1,
+          "home": 1.1,
+          "unit": "EPA/play",
+          "leader": "Texas"
+        },
+        "expected_margin": {
+          "away": -34.1,
+          "home": 34.1,
+          "unit": "points",
+          "leader": "Texas"
         },
         "adjusted_final_score": {
           "away": 0.0,
@@ -15667,11 +16654,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.615294+00:00"
+      "generated_at": "2026-09-08T15:00:24.785598+00:00"
     },
-    {
+    "6604181": {
       "game_id": "6604181",
       "matchup_key": "thecitadel@charlotte",
       "season": 2026,
@@ -15685,9 +16675,9 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-08T14:45:17.615322+00:00"
+      "generated_at": "2026-09-08T15:00:24.785639+00:00"
     },
-    {
+    "6604263": {
       "game_id": "6604263",
       "pbp_game_id": "401858429",
       "matchup_key": "toledo@michiganstate",
@@ -15707,6 +16697,18 @@
           "away_pct": 11.9,
           "home_pct": 88.1,
           "winner": "Michigan State"
+        },
+        "efficiency_margin": {
+          "away": 0.069,
+          "home": -0.069,
+          "unit": "EPA/play",
+          "leader": "Toledo"
+        },
+        "expected_margin": {
+          "away": -15.0,
+          "home": 15.0,
+          "unit": "points",
+          "leader": "Michigan State"
         },
         "adjusted_final_score": {
           "away": 16.1,
@@ -15917,11 +16919,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.620040+00:00"
+      "generated_at": "2026-09-08T15:00:24.792928+00:00"
     },
-    {
+    "6603695": {
       "game_id": "6603695",
       "pbp_game_id": "401862696",
       "matchup_key": "towson@navy",
@@ -15941,6 +16946,18 @@
           "away_pct": 0.8,
           "home_pct": 99.2,
           "winner": "Navy"
+        },
+        "efficiency_margin": {
+          "away": -1.072,
+          "home": 1.072,
+          "unit": "EPA/play",
+          "leader": "Navy"
+        },
+        "expected_margin": {
+          "away": -36.0,
+          "home": 36.0,
+          "unit": "points",
+          "leader": "Navy"
         },
         "adjusted_final_score": {
           "away": 4.1,
@@ -16151,11 +17168,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.620843+00:00"
+      "generated_at": "2026-09-08T15:00:24.794190+00:00"
     },
-    {
+    "6603666": {
       "game_id": "6603666",
       "matchup_key": "tulane@duke",
       "season": 2026,
@@ -16169,9 +17189,9 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-08T14:45:17.620868+00:00"
+      "generated_at": "2026-09-08T15:00:24.794229+00:00"
     },
-    {
+    "6603734": {
       "game_id": "6603734",
       "pbp_game_id": "401858424",
       "matchup_key": "uab@illinois",
@@ -16191,6 +17211,18 @@
           "away_pct": 22.9,
           "home_pct": 77.1,
           "winner": "Illinois"
+        },
+        "efficiency_margin": {
+          "away": -0.446,
+          "home": 0.446,
+          "unit": "EPA/play",
+          "leader": "Illinois"
+        },
+        "expected_margin": {
+          "away": -9.1,
+          "home": 9.1,
+          "unit": "points",
+          "leader": "Illinois"
         },
         "adjusted_final_score": {
           "away": 17.8,
@@ -16401,11 +17433,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.624834+00:00"
+      "generated_at": "2026-09-08T15:00:24.800452+00:00"
     },
-    {
+    "6604235": {
       "game_id": "6604235",
       "pbp_game_id": "401866409",
       "matchup_key": "ualbany@buffalo",
@@ -16425,6 +17460,18 @@
           "away_pct": 38.3,
           "home_pct": 61.7,
           "winner": "Buffalo"
+        },
+        "efficiency_margin": {
+          "away": -0.098,
+          "home": 0.098,
+          "unit": "EPA/play",
+          "leader": "Buffalo"
+        },
+        "expected_margin": {
+          "away": -3.6,
+          "home": 3.6,
+          "unit": "points",
+          "leader": "Buffalo"
         },
         "adjusted_final_score": {
           "away": 15.5,
@@ -16635,11 +17682,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.629953+00:00"
+      "generated_at": "2026-09-08T15:00:24.808485+00:00"
     },
-    {
+    "6604117": {
       "game_id": "6604117",
       "pbp_game_id": "401858210",
       "matchup_key": "ucla@california",
@@ -16659,6 +17709,18 @@
           "away_pct": 93.7,
           "home_pct": 6.3,
           "winner": "UCLA"
+        },
+        "efficiency_margin": {
+          "away": 0.371,
+          "home": -0.371,
+          "unit": "EPA/play",
+          "leader": "UCLA"
+        },
+        "expected_margin": {
+          "away": 20.3,
+          "home": -20.3,
+          "unit": "points",
+          "leader": "UCLA"
         },
         "adjusted_final_score": {
           "away": 35.8,
@@ -16869,11 +17931,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.634976+00:00"
+      "generated_at": "2026-09-08T15:00:24.816500+00:00"
     },
-    {
+    "6603699": {
       "game_id": "6603699",
       "matchup_key": "ulm@mississippistate",
       "season": 2026,
@@ -16887,9 +17952,9 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-08T14:45:17.635007+00:00"
+      "generated_at": "2026-09-08T15:00:24.816549+00:00"
     },
-    {
+    "6604206": {
       "game_id": "6604206",
       "pbp_game_id": "401864497",
       "matchup_key": "unlv@hawaii",
@@ -16909,6 +17974,18 @@
           "away_pct": 74.8,
           "home_pct": 25.2,
           "winner": "UNLV"
+        },
+        "efficiency_margin": {
+          "away": 0.115,
+          "home": -0.115,
+          "unit": "EPA/play",
+          "leader": "UNLV"
+        },
+        "expected_margin": {
+          "away": 8.2,
+          "home": -8.2,
+          "unit": "points",
+          "leader": "UNLV"
         },
         "adjusted_final_score": {
           "away": 18.7,
@@ -17119,11 +18196,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.639872+00:00"
+      "generated_at": "2026-09-08T15:00:24.823949+00:00"
     },
-    {
+    "6603903": {
       "game_id": "6603903",
       "pbp_game_id": "401856664",
       "matchup_key": "texaselpaso@oklahoma",
@@ -17143,6 +18223,18 @@
           "away_pct": 4.7,
           "home_pct": 95.3,
           "winner": "Oklahoma"
+        },
+        "efficiency_margin": {
+          "away": -0.525,
+          "home": 0.525,
+          "unit": "EPA/play",
+          "leader": "Oklahoma"
+        },
+        "expected_margin": {
+          "away": -22.6,
+          "home": 22.6,
+          "unit": "points",
+          "leader": "Oklahoma"
         },
         "adjusted_final_score": {
           "away": 12.9,
@@ -17353,11 +18445,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.643267+00:00"
+      "generated_at": "2026-09-08T15:00:24.829208+00:00"
     },
-    {
+    "6604272": {
       "game_id": "6604272",
       "matchup_key": "utrgv@texassanantonio",
       "season": 2026,
@@ -17371,9 +18466,9 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-08T14:45:17.643294+00:00"
+      "generated_at": "2026-09-08T15:00:24.829248+00:00"
     },
-    {
+    "6603811": {
       "game_id": "6603811",
       "pbp_game_id": "401856775",
       "matchup_key": "utahtech@brighamyoung",
@@ -17393,6 +18488,18 @@
           "away_pct": 0.4,
           "home_pct": 99.6,
           "winner": "BYU"
+        },
+        "efficiency_margin": {
+          "away": -2.004,
+          "home": 2.004,
+          "unit": "EPA/play",
+          "leader": "BYU"
+        },
+        "expected_margin": {
+          "away": -42.0,
+          "home": 42.0,
+          "unit": "points",
+          "leader": "BYU"
         },
         "adjusted_final_score": {
           "away": 6.0,
@@ -17603,11 +18710,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.643793+00:00"
+      "generated_at": "2026-09-08T15:00:24.829983+00:00"
     },
-    {
+    "6603799": {
       "game_id": "6603799",
       "pbp_game_id": "401858211",
       "matchup_key": "vmi@virginiatech",
@@ -17627,6 +18737,18 @@
           "away_pct": 0.4,
           "home_pct": 99.6,
           "winner": "Virginia Tech"
+        },
+        "efficiency_margin": {
+          "away": -1.239,
+          "home": 1.239,
+          "unit": "EPA/play",
+          "leader": "Virginia Tech"
+        },
+        "expected_margin": {
+          "away": -42.0,
+          "home": 42.0,
+          "unit": "points",
+          "leader": "Virginia Tech"
         },
         "adjusted_final_score": {
           "away": 0.0,
@@ -17837,11 +18959,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.645059+00:00"
+      "generated_at": "2026-09-08T15:00:24.831921+00:00"
     },
-    {
+    "6640533": {
       "game_id": "6640533",
       "pbp_game_id": "401858437",
       "matchup_key": "washingtonstate@washington",
@@ -17861,6 +18986,18 @@
           "away_pct": 7.8,
           "home_pct": 92.2,
           "winner": "Washington"
+        },
+        "efficiency_margin": {
+          "away": -0.349,
+          "home": 0.349,
+          "unit": "EPA/play",
+          "leader": "Washington"
+        },
+        "expected_margin": {
+          "away": -18.5,
+          "home": 18.5,
+          "unit": "points",
+          "leader": "Washington"
         },
         "adjusted_final_score": {
           "away": 11.9,
@@ -18071,11 +19208,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.649689+00:00"
+      "generated_at": "2026-09-08T15:00:24.839100+00:00"
     },
-    {
+    "6603790": {
       "game_id": "6603790",
       "pbp_game_id": "401864425",
       "matchup_key": "westgeorgia@kennesawstate",
@@ -18095,6 +19235,18 @@
           "away_pct": 0.7,
           "home_pct": 99.3,
           "winner": "Kennesaw State"
+        },
+        "efficiency_margin": {
+          "away": -0.887,
+          "home": 0.887,
+          "unit": "EPA/play",
+          "leader": "Kennesaw State"
+        },
+        "expected_margin": {
+          "away": -37.4,
+          "home": 37.4,
+          "unit": "points",
+          "leader": "Kennesaw State"
         },
         "adjusted_final_score": {
           "away": 1.9,
@@ -18305,11 +19457,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.654180+00:00"
+      "generated_at": "2026-09-08T15:00:24.846124+00:00"
     },
-    {
+    "6604164": {
       "game_id": "6604164",
       "matchup_key": "westernky@nevada",
       "season": 2026,
@@ -18323,9 +19478,9 @@
       "source": "Final score available; PBP pending",
       "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-08T14:45:17.654211+00:00"
+      "generated_at": "2026-09-08T15:00:24.846168+00:00"
     },
-    {
+    "6603823": {
       "game_id": "6603823",
       "pbp_game_id": "401858428",
       "matchup_key": "westernmichigan@michigan",
@@ -18345,6 +19500,18 @@
           "away_pct": 8.9,
           "home_pct": 91.1,
           "winner": "Michigan"
+        },
+        "efficiency_margin": {
+          "away": -0.653,
+          "home": 0.653,
+          "unit": "EPA/play",
+          "leader": "Michigan"
+        },
+        "expected_margin": {
+          "away": -17.5,
+          "home": 17.5,
+          "unit": "points",
+          "leader": "Michigan"
         },
         "adjusted_final_score": {
           "away": 3.3,
@@ -18555,11 +19722,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.655377+00:00"
+      "generated_at": "2026-09-08T15:00:24.847951+00:00"
     },
-    {
+    "6604115": {
       "game_id": "6604115",
       "pbp_game_id": "401858438",
       "matchup_key": "wisconsin@notredame",
@@ -18579,6 +19749,18 @@
           "away_pct": 18.5,
           "home_pct": 81.5,
           "winner": "Notre Dame"
+        },
+        "efficiency_margin": {
+          "away": -0.406,
+          "home": 0.406,
+          "unit": "EPA/play",
+          "leader": "Notre Dame"
+        },
+        "expected_margin": {
+          "away": -11.1,
+          "home": 11.1,
+          "unit": "points",
+          "leader": "Notre Dame"
         },
         "adjusted_final_score": {
           "away": 16.9,
@@ -18789,11 +19971,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.659691+00:00"
+      "generated_at": "2026-09-08T15:00:24.854618+00:00"
     },
-    {
+    "6604196": {
       "game_id": "6604196",
       "pbp_game_id": "401860878",
       "matchup_key": "wyoming@coloradostate",
@@ -18813,6 +19998,18 @@
           "away_pct": 42.3,
           "home_pct": 57.7,
           "winner": "Colorado State"
+        },
+        "efficiency_margin": {
+          "away": -0.005,
+          "home": 0.005,
+          "unit": "EPA/play",
+          "leader": "Colorado State"
+        },
+        "expected_margin": {
+          "away": -2.3,
+          "home": 2.3,
+          "unit": "points",
+          "leader": "Colorado State"
         },
         "adjusted_final_score": {
           "away": 13.0,
@@ -19023,11 +20220,14 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.662520+00:00"
+      "generated_at": "2026-09-08T15:00:24.858951+00:00"
     },
-    {
+    "6603655": {
       "game_id": "6603655",
       "pbp_game_id": "401856659",
       "matchup_key": "youngstownstate@kentucky",
@@ -19047,6 +20247,18 @@
           "away_pct": 6.6,
           "home_pct": 93.4,
           "winner": "Kentucky"
+        },
+        "efficiency_margin": {
+          "away": -0.354,
+          "home": 0.354,
+          "unit": "EPA/play",
+          "leader": "Kentucky"
+        },
+        "expected_margin": {
+          "away": -19.8,
+          "home": 19.8,
+          "unit": "points",
+          "leader": "Kentucky"
         },
         "adjusted_final_score": {
           "away": 16.4,
@@ -19257,9 +20469,12 @@
         "stuff_rate_allowed": "Rushes stopped for zero or negative yards divided by rush attempts.",
         "tfl_rate_allowed": "Qualifying offensive plays ending in a tackle for loss / negative yardage divided by all qualifying scrimmage plays.",
         "turnover_epa_impact": "Sum of offensive EPA on turnover plays; more negative means greater lost value.",
-        "epa_volatility": "Population standard deviation of competitive-play EPA."
+        "epa_volatility": "Population standard deviation of competitive-play EPA.",
+        "efficiency_margin": "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play.",
+        "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
+        "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-08T14:45:17.666753+00:00"
+      "generated_at": "2026-09-08T15:00:24.865855+00:00"
     }
-  ]
+  }
 }
