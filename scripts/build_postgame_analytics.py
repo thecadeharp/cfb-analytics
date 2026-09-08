@@ -112,6 +112,22 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:
     )
 
 
+def game_rows(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    """Accept both the original list schema and the keyed canonical schema."""
+    games = payload.get("games") or []
+    if isinstance(games, dict):
+        games = games.values()
+    return [game for game in games if isinstance(game, dict)]
+
+
+def index_games(games: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    return {
+        str(game["game_id"]): game
+        for game in games
+        if game.get("game_id")
+    }
+
+
 def clean_number(value: Any, default: float | None = None) -> float | None:
     try:
         if value is None or pd.isna(value):
@@ -1391,6 +1407,15 @@ def build_full_record(
         away_stats,
     )
 
+    # Keep the two "margin" concepts separate and explicit:
+    # - efficiency margin is the raw, non-garbage-time EPA/play differential;
+    # - expected margin is the beta scoreboard margin produced by the broader
+    #   retrospective quality model. Neither value feeds the pregame model.
+    home_efficiency_margin = (
+        (home_stats["overall"].get("epa_per_play") or 0.0)
+        - (away_stats["overall"].get("epa_per_play") or 0.0)
+    )
+
     home_pwe = postgame_win_expectancy(
         home_quality_margin
     )
@@ -1580,6 +1605,26 @@ def build_full_record(
                     else away
                 ),
             },
+            "efficiency_margin": {
+                "away": rnd(-home_efficiency_margin, 3),
+                "home": rnd(home_efficiency_margin, 3),
+                "unit": "EPA/play",
+                "leader": (
+                    home
+                    if home_efficiency_margin >= 0
+                    else away
+                ),
+            },
+            "expected_margin": {
+                "away": rnd(-home_quality_margin, 1),
+                "home": rnd(home_quality_margin, 1),
+                "unit": "points",
+                "leader": (
+                    home
+                    if home_quality_margin >= 0
+                    else away
+                ),
+            },
             "adjusted_final_score": {
                 "away": adjusted_away,
                 "home": adjusted_home,
@@ -1649,6 +1694,15 @@ def build_full_record(
             "epa_volatility": (
                 "Population standard deviation of competitive-play EPA."
             ),
+            "efficiency_margin": (
+                "Non-garbage-time offensive EPA/play minus the opponent's offensive EPA/play."
+            ),
+            "expected_margin": (
+                "Beta retrospective scoring margin derived from the complete underlying game-quality profile."
+            ),
+            "postgame_win_expectancy": (
+                "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
+            ),
         },
         "generated_at": iso_now(),
     }
@@ -1709,9 +1763,8 @@ def should_download(
 ) -> bool:
     by_matchup = {
         game.get("matchup_key"): game
-        for game in (existing.get("games") or [])
-        if isinstance(game, dict)
-        and game.get("matchup_key")
+        for game in game_rows(existing)
+        if game.get("matchup_key")
     }
 
     for final in finals:
@@ -1730,6 +1783,8 @@ def should_download(
             if (
                 "away_metrics" not in row
                 or "home_metrics" not in row
+                or "efficiency_margin" not in (row.get("headline") or {})
+                or "expected_margin" not in (row.get("headline") or {})
             ):
                 return True
             continue
@@ -1791,7 +1846,7 @@ def main() -> None:
                     "source": "SportsDataverse/cfbfastR PBP",
                     "model_a_touched": False,
                 },
-                "games": [],
+                "games": {},
             },
         )
         print("No finals available yet.")
@@ -1804,9 +1859,8 @@ def main() -> None:
 
     existing_by_matchup = {
         game.get("matchup_key"): game
-        for game in (existing.get("games") or [])
-        if isinstance(game, dict)
-        and game.get("matchup_key")
+        for game in game_rows(existing)
+        if game.get("matchup_key")
     }
 
     if not should_download(
@@ -1886,7 +1940,7 @@ def main() -> None:
                     "model_a_touched": False,
                     "warning": str(exc),
                 },
-                "games": output_games,
+                "games": index_games(output_games),
             },
         )
         return
@@ -1968,7 +2022,7 @@ def main() -> None:
                     "No CFBD calls are made.",
                 ],
             },
-            "games": output_games,
+            "games": index_games(output_games),
         },
     )
 
