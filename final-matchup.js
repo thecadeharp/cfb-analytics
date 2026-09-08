@@ -514,11 +514,21 @@
 
     if (postgameResult.status === "fulfilled") {
       postgameDataLoaded = true;
-      postgameGames = Array.isArray(
-        postgameResult.value?.games
-      )
-        ? postgameResult.value.games
-        : [];
+      const games =
+        postgameResult.value?.games;
+
+      /*
+       * Canonical postgame output is keyed by game ID. Continue accepting the
+       * original array shape so older cached files remain harmless.
+       */
+      postgameGames = Array.isArray(games)
+        ? games
+        : (
+            games &&
+            typeof games === "object"
+          )
+          ? Object.values(games)
+          : [];
     } else {
       /*
        * CRITICAL:
