@@ -10,7 +10,7 @@
   // 3) Render the exact canonical postgame metric package.
   // 4) Maintain exactly ONE projection-board postgame status pill:
   //      AVAILABLE -> one purple pill says POSTGAME ANALYSIS COMPLETE
-  //      PENDING   -> one purple pill says POSTGAME ANALYSIS PENDING
+  //      PENDING   -> one yellow pill says POSTGAME ANALYSIS PENDING
   //    This file NEVER creates a second yellow postgame badge.
   // 5) Never call a game "pending" merely because the JSON fetch failed.
   // ==========================================================================
@@ -227,11 +227,8 @@
         line-height:1.5;
       }
 
-      /*
-       * IMPORTANT:
-       * No yellow postgame badge exists anymore.
-       * Any leftover badge from an older cached script is forcibly hidden.
-       */
+      /* Hide the retired legacy badge; the canonical status pill below owns
+       * both states: purple for available and yellow for pending. */
       .hammer-postgame-board-badge {
         display:none !important;
       }
@@ -257,9 +254,9 @@
       }
 
       .thi-postgame-status-purple.pending {
-        border-color:#c8bdd8;
-        background:#f6f3fa;
-        color:#7f6c92;
+        border-color:#e1c86c;
+        background:#fff8dd;
+        color:#6f5d1a;
       }
 
       #${POSTGAME_SECTION_ID} {
@@ -1552,12 +1549,11 @@
         findPostgameForFinal(final);
     }
 
-    removePostgameSection();
-
     /*
      * Failed whole-file load is NOT "pending."
      */
     if (!postgameDataLoaded) {
+      removePostgameSection();
       return;
     }
 
@@ -1565,8 +1561,34 @@
      * Missing matchup record is also NOT "pending."
      */
     if (!postgame) {
+      removePostgameSection();
       return;
     }
+
+    const renderKey = [
+      postgame.game_id || postgame.matchup_key || "",
+      postgame.analysis_status || "",
+      postgame.generated_at || ""
+    ].join("|");
+
+    const currentSection =
+      document.getElementById(
+        POSTGAME_SECTION_ID
+      );
+
+    /*
+     * The observer sees DOM mutations from other presentation layers. Do not
+     * remove/reinsert our own section when it already represents this exact
+     * game and data revision.
+     */
+    if (
+      currentSection?.dataset
+        ?.postgameRenderKey === renderKey
+    ) {
+      return;
+    }
+
+    removePostgameSection();
 
     if (
       postgame.analysis_status
@@ -1578,6 +1600,16 @@
           postgame
         )
       );
+
+      const inserted =
+        document.getElementById(
+          POSTGAME_SECTION_ID
+        );
+
+      if (inserted) {
+        inserted.dataset.postgameRenderKey =
+          renderKey;
+      }
       return;
     }
 
@@ -1605,6 +1637,16 @@
           postgame
         )
       );
+
+      const inserted =
+        document.getElementById(
+          POSTGAME_SECTION_ID
+        );
+
+      if (inserted) {
+        inserted.dataset.postgameRenderKey =
+          renderKey;
+      }
     }
   }
 
@@ -1742,17 +1784,13 @@
       );
 
     rows.forEach(row => {
-      /*
-       * Always clear old/duplicate presentation first.
-       */
-      removeAllPostgameStatusPills(
-        row
-      );
-
       if (
         !postgameDataLoaded ||
         !rowIsFinal(row)
       ) {
+        removeAllPostgameStatusPills(
+          row
+        );
         return;
       }
 
@@ -1760,6 +1798,9 @@
         boardRowTeams(row);
 
       if (!teams) {
+        removeAllPostgameStatusPills(
+          row
+        );
         return;
       }
 
@@ -1777,12 +1818,49 @@
         pg?.analysis_status !== "available" &&
         pg?.analysis_status !== "pending"
       ) {
+        removeAllPostgameStatusPills(
+          row
+        );
         return;
       }
 
+      const desiredStatus =
+        pg.analysis_status;
+
+      const desiredText =
+        desiredStatus === "available"
+          ? "POSTGAME ANALYSIS AVAILABLE"
+          : "POSTGAME ANALYSIS PENDING";
+
+      const currentPills = Array.from(
+        row.querySelectorAll(
+          ".thi-postgame-status-purple"
+        )
+      );
+
+      const legacyPills =
+        row.querySelectorAll(
+          ".hammer-postgame-board-badge"
+        );
+
+      if (
+        currentPills.length === 1 &&
+        legacyPills.length === 0 &&
+        currentPills[0].dataset
+          .postgameStatus === desiredStatus &&
+        currentPills[0].textContent
+          ?.trim().toUpperCase() === desiredText
+      ) {
+        return;
+      }
+
+      removeAllPostgameStatusPills(
+        row
+      );
+
       addPurplePostgamePill(
         row,
-        pg.analysis_status
+        desiredStatus
       );
     });
   }
