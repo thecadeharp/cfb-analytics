@@ -314,7 +314,7 @@
 
       #${POSTGAME_SECTION_ID} .hammer-pg-headlines {
         display:grid;
-        grid-template-columns:repeat(3,minmax(0,1fr));
+        grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
         gap:10px;
         margin-top:16px;
       }
@@ -976,6 +976,12 @@
     const pwe =
       headline.postgame_win_expectancy || {};
 
+    const efficiencyMargin =
+      headline.efficiency_margin || {};
+
+    const expectedMargin =
+      headline.expected_margin || {};
+
     const adjusted =
       headline.adjusted_final_score || {};
 
@@ -1385,7 +1391,7 @@
         </div>
 
         <div class="hammer-pg-title">
-          What actually happened?
+          Underlying Performance Review
         </div>
 
         <div class="hammer-pg-subtitle">
@@ -1412,6 +1418,40 @@
             </div>
             <div class="hammer-pg-card-note">
               Retrospective process-based probability, not live win probability.
+            </div>
+          </div>
+
+          <div class="hammer-pg-card">
+            <div class="hammer-pg-card-label">
+              Efficiency Margin
+            </div>
+            <div class="hammer-pg-card-value">
+              ${escapeHtml(efficiencyMargin.leader || "—")}
+              ${
+                numeric(efficiencyMargin.home) === null
+                  ? "—"
+                  : `${fmtSigned(Math.abs(Number(efficiencyMargin.home)), 3)} EPA/play`
+              }
+            </div>
+            <div class="hammer-pg-card-note">
+              Non-garbage-time EPA/play advantage over the opponent.
+            </div>
+          </div>
+
+          <div class="hammer-pg-card">
+            <div class="hammer-pg-card-label">
+              Expected Margin
+            </div>
+            <div class="hammer-pg-card-value">
+              ${escapeHtml(expectedMargin.leader || "—")}
+              ${
+                numeric(expectedMargin.home) === null
+                  ? "—"
+                  : `by ${fmt(Math.abs(Number(expectedMargin.home)), 1)}`
+              }
+            </div>
+            <div class="hammer-pg-card-note">
+              Retrospective margin implied by the complete underlying game profile.
             </div>
           </div>
 
@@ -1468,7 +1508,7 @@
             pg.source ||
             "SportsDataverse/cfbfastR PBP"
           )}.
-          PWE, Adjusted Final Score, and Red-Zone Overperformance remain beta
+          PGWE, Expected Margin, Adjusted Final Score, and Red-Zone Overperformance remain beta
           until the historical calibration work is completed.
         </div>
       </section>
