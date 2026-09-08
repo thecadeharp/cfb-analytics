@@ -99,9 +99,69 @@ function formatRate(value, digits = 1) {
 }
 
 function recordText(team) {
+  const publicRecord = publicResultsRecord(team?.team);
+  if (publicRecord.games > 0) {
+    return `${publicRecord.wins}-${publicRecord.losses}`;
+  }
+
   const record = team?.record;
   if (!record) return "—";
   return `${record.wins ?? 0}-${record.losses ?? 0}`;
+}
+
+function resultTeamKey(value) {
+  const key = String(value ?? "")
+    .toLowerCase()
+    .replace(/university/g, "")
+    .replace(/[^a-z0-9]+/g, "");
+
+  const aliases = {
+    armywestpoint: "army",
+    fiu: "floridainternational",
+    flaatlantic: "floridaatlantic",
+    gasouthern: "georgiasouthern",
+    iowast: "iowastate",
+    jacksonvillest: "jacksonvillestate",
+    middletenn: "middletennessee",
+    mississippist: "mississippistate",
+    niu: "northernillinois",
+    southfla: "southflorida",
+    southernmiss: "southernmississippi",
+    ulm: "ulmonroe",
+    westernky: "westernkentucky",
+  };
+
+  return aliases[key] ?? key;
+}
+
+function publicResultsRecord(teamName) {
+  const teamKey = resultTeamKey(teamName);
+  const games = Array.isArray(resultsData?.games) ? resultsData.games : [];
+  let wins = 0;
+  let losses = 0;
+
+  games.forEach(game => {
+    const isFinal =
+      game?.game_state === "final" ||
+      game?.status === "completed";
+
+    if (!isFinal) return;
+
+    const homeKey = resultTeamKey(game?.home_team);
+    const awayKey = resultTeamKey(game?.away_team);
+    if (teamKey !== homeKey && teamKey !== awayKey) return;
+
+    const homePoints = Number(game?.home_points);
+    const awayPoints = Number(game?.away_points);
+    if (!Number.isFinite(homePoints) || !Number.isFinite(awayPoints)) return;
+
+    const teamPoints = teamKey === homeKey ? homePoints : awayPoints;
+    const opponentPoints = teamKey === homeKey ? awayPoints : homePoints;
+    if (teamPoints > opponentPoints) wins += 1;
+    if (teamPoints < opponentPoints) losses += 1;
+  });
+
+  return { wins, losses, games: wins + losses };
 }
 
 function canonicalSignal(status) {
@@ -438,6 +498,18 @@ function liveNet(team, field) {
 }
 
 function liveSampleLabel(team) {
+  const openTeam = openWeeklyTeam(team?.team);
+  const openOffense = Number(openTeam?.sample?.offense ?? 0);
+  const openDefense = Number(openTeam?.sample?.defense ?? 0);
+
+  if (hasValue(openTeam?.live_rating)) {
+    return `Week ${openWeeklyRatingsData?.meta?.through_week ?? "—"} open-data sample available`;
+  }
+
+  if (openOffense > 0 || openDefense > 0) {
+    return "Open-data sample developing";
+  }
+
   const offense = livePlays(team, "offense");
   const defense = livePlays(team, "defense");
   return offense > 0 && defense > 0
