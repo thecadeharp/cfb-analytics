@@ -1,7 +1,7 @@
 {
   "meta": {
     "year": 2026,
-    "generated": "2026-09-12T18:29:02.639061",
+    "generated": "2026-09-12T19:25:45.235633",
     "games": 888,
     "fbs_fbs_games": 761,
     "fbs_fcs_fallback_games": 127,
@@ -13712,17 +13712,27 @@
         }
       },
       "market": {
-        "home_spread": 4.5,
-        "total": 65.5,
-        "bookmaker": "Consensus (5 books)",
+        "home_spread": 9.5,
+        "total": 44.5,
+        "bookmaker": "Consensus (3 books)",
         "method": "cross_book_median_consensus",
-        "spread_books": 5,
-        "total_books": 5,
-        "spread_outliers_removed": [],
-        "total_outliers_removed": []
+        "spread_books": 3,
+        "total_books": 2,
+        "spread_outliers_removed": [
+          {
+            "bookmaker": "FanDuel",
+            "value": 13.5
+          }
+        ],
+        "total_outliers_removed": [
+          {
+            "bookmaker": "Bovada",
+            "value": 50.5
+          }
+        ]
       },
       "comparison": {
-        "disagreement": 14.5,
+        "disagreement": 19.5,
         "preferred_side": "East Carolina",
         "status": "OUTLIER",
         "signal": "OUTLIER",
@@ -13749,7 +13759,7 @@
         },
         {
           "title": "MARKET VS MODEL",
-          "text": "The model is 14.5 points more favorable to East Carolina than the current market.",
+          "text": "The model is 19.5 points more favorable to East Carolina than the current market.",
           "source": "market"
         }
       ]
@@ -13840,34 +13850,20 @@
         }
       },
       "market": {
-        "home_spread": -7.5,
-        "total": 58.5,
+        "home_spread": -28.5,
+        "total": 68.5,
         "bookmaker": "Consensus (3 books)",
         "method": "cross_book_median_consensus",
         "spread_books": 3,
-        "total_books": 3,
-        "spread_outliers_removed": [
-          {
-            "bookmaker": "MyBookie.ag",
-            "value": -13.5
-          },
-          {
-            "bookmaker": "Bovada",
-            "value": -13.5
-          }
-        ],
-        "total_outliers_removed": [
-          {
-            "bookmaker": "Bovada",
-            "value": 53.0
-          }
-        ]
+        "total_books": 2,
+        "spread_outliers_removed": [],
+        "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 8.0,
-        "preferred_side": "Texas A&M",
-        "status": "STRONG EDGE",
-        "signal": "STRONG EDGE",
+        "disagreement": 13.0,
+        "preferred_side": "Arizona State",
+        "status": "OUTLIER",
+        "signal": "OUTLIER",
         "bet_status": "TRACKING",
         "status_system": "v2_the_signal",
         "status_thresholds": {
@@ -13891,7 +13887,7 @@
         },
         {
           "title": "MARKET VS MODEL",
-          "text": "The model is 8.0 points more favorable to Texas A&M than the current market.",
+          "text": "The model is 13.0 points more favorable to Arizona State than the current market.",
           "source": "market"
         }
       ]
@@ -13994,11 +13990,11 @@
       },
       "market": {
         "home_spread": -42.5,
-        "total": 48.5,
-        "bookmaker": "Consensus (4 books)",
+        "total": 48.0,
+        "bookmaker": "Consensus (2 books)",
         "method": "cross_book_median_consensus",
-        "spread_books": 4,
-        "total_books": 4,
+        "spread_books": 2,
+        "total_books": 2,
         "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
@@ -14134,34 +14130,20 @@
         }
       },
       "market": {
-        "home_spread": -65.0,
-        "total": 62.5,
-        "bookmaker": "Consensus (2 books)",
+        "home_spread": null,
+        "total": null,
+        "bookmaker": null,
         "method": "cross_book_median_consensus",
-        "spread_books": 2,
-        "total_books": 2,
-        "spread_outliers_removed": [
-          {
-            "bookmaker": "FanDuel",
-            "value": -61.5
-          },
-          {
-            "bookmaker": "MyBookie.ag",
-            "value": -68.5
-          }
-        ],
-        "total_outliers_removed": [
-          {
-            "bookmaker": "BetMGM",
-            "value": 68.5
-          }
-        ]
+        "spread_books": 0,
+        "total_books": 0,
+        "spread_outliers_removed": [],
+        "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 26.0,
-        "preferred_side": "Howard",
-        "status": "OUTLIER",
-        "signal": "OUTLIER",
+        "disagreement": null,
+        "preferred_side": null,
+        "status": "NO MARKET",
+        "signal": "NO MARKET",
         "bet_status": "UNTRACKED",
         "status_system": "v2_the_signal",
         "status_thresholds": {
@@ -14184,11 +14166,6 @@
           "title": "FCS TOTAL WITHHELD",
           "text": "No opponent-specific model total is published for this game because the FCS opponent does not have the full efficiency profile required by the total model.",
           "source": "fcs_total_guard"
-        },
-        {
-          "title": "MARKET VS FCS FALLBACK",
-          "text": "The fallback line differs from the current market by 26.0 points toward Howard.",
-          "source": "market"
         }
       ]
     },
@@ -14278,20 +14255,25 @@
         }
       },
       "market": {
-        "home_spread": -1.5,
-        "total": 32.5,
-        "bookmaker": "Consensus (5 books)",
+        "home_spread": -6.5,
+        "total": 27.5,
+        "bookmaker": "Consensus (3 books)",
         "method": "cross_book_median_consensus",
-        "spread_books": 4,
-        "total_books": 5,
-        "spread_outliers_removed": [],
+        "spread_books": 3,
+        "total_books": 3,
+        "spread_outliers_removed": [
+          {
+            "bookmaker": "Bovada",
+            "value": 2.5
+          }
+        ],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 0.0,
-        "preferred_side": null,
-        "status": "ALIGNED",
-        "signal": "ALIGNED",
+        "disagreement": 5.0,
+        "preferred_side": "Oklahoma",
+        "status": "SLIGHT EDGE",
+        "signal": "SLIGHT EDGE",
         "bet_status": "TRACKING",
         "status_system": "v2_the_signal",
         "status_thresholds": {
@@ -14312,6 +14294,11 @@
           "title": "LIVE MATCHUP DATA",
           "text": "No live matchup adjustment is being applied because both teams do not yet have comparable 2026 samples.",
           "source": "sample_guard"
+        },
+        {
+          "title": "MARKET VS MODEL",
+          "text": "The model is 5.0 points more favorable to Oklahoma than the current market.",
+          "source": "market"
         }
       ]
     },
@@ -14401,34 +14388,20 @@
         }
       },
       "market": {
-        "home_spread": -40.5,
-        "total": 61.5,
+        "home_spread": -23.5,
+        "total": 65.5,
         "bookmaker": "Consensus (3 books)",
         "method": "cross_book_median_consensus",
         "spread_books": 3,
-        "total_books": 3,
-        "spread_outliers_removed": [
-          {
-            "bookmaker": "MyBookie.ag",
-            "value": -35.5
-          },
-          {
-            "bookmaker": "BetMGM",
-            "value": -35.5
-          }
-        ],
-        "total_outliers_removed": [
-          {
-            "bookmaker": "BetMGM",
-            "value": 56.5
-          }
-        ]
+        "total_books": 2,
+        "spread_outliers_removed": [],
+        "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 26.0,
+        "disagreement": 9.0,
         "preferred_side": "Old Dominion",
-        "status": "OUTLIER",
-        "signal": "OUTLIER",
+        "status": "STRONG EDGE",
+        "signal": "STRONG EDGE",
         "bet_status": "TRACKING",
         "status_system": "v2_the_signal",
         "status_thresholds": {
@@ -14452,7 +14425,7 @@
         },
         {
           "title": "MARKET VS MODEL",
-          "text": "The model is 26.0 points more favorable to Old Dominion than the current market.",
+          "text": "The model is 9.0 points more favorable to Old Dominion than the current market.",
           "source": "market"
         }
       ]
@@ -14543,25 +14516,20 @@
         }
       },
       "market": {
-        "home_spread": 4.5,
-        "total": 58.5,
-        "bookmaker": "Consensus (5 books)",
+        "home_spread": 3.0,
+        "total": 69.5,
+        "bookmaker": "Consensus (4 books)",
         "method": "cross_book_median_consensus",
         "spread_books": 4,
-        "total_books": 5,
-        "spread_outliers_removed": [
-          {
-            "bookmaker": "MyBookie.ag",
-            "value": 12.5
-          }
-        ],
+        "total_books": 4,
+        "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 10.0,
+        "disagreement": 11.5,
         "preferred_side": "Oregon",
-        "status": "STRONG EDGE",
-        "signal": "STRONG EDGE",
+        "status": "OUTLIER",
+        "signal": "OUTLIER",
         "bet_status": "TRACKING",
         "status_system": "v2_the_signal",
         "status_thresholds": {
@@ -14585,7 +14553,7 @@
         },
         {
           "title": "MARKET VS MODEL",
-          "text": "The model is 10.0 points more favorable to Oregon than the current market.",
+          "text": "The model is 11.5 points more favorable to Oregon than the current market.",
           "source": "market"
         }
       ]
@@ -14676,21 +14644,21 @@
         }
       },
       "market": {
-        "home_spread": 23.5,
-        "total": 32.5,
-        "bookmaker": "Consensus (5 books)",
+        "home_spread": null,
+        "total": null,
+        "bookmaker": null,
         "method": "cross_book_median_consensus",
-        "spread_books": 5,
-        "total_books": 5,
+        "spread_books": 0,
+        "total_books": 0,
         "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 5.5,
-        "preferred_side": "Temple",
-        "status": "EDGE",
-        "signal": "EDGE",
-        "bet_status": "TRACKING",
+        "disagreement": null,
+        "preferred_side": null,
+        "status": "NO MARKET",
+        "signal": "NO MARKET",
+        "bet_status": null,
         "status_system": "v2_the_signal",
         "status_thresholds": {
           "aligned_max": 2.5,
@@ -14710,11 +14678,6 @@
           "title": "LIVE MATCHUP DATA",
           "text": "No live matchup adjustment is being applied because both teams do not yet have comparable 2026 samples.",
           "source": "sample_guard"
-        },
-        {
-          "title": "MARKET VS MODEL",
-          "text": "The model is 5.5 points more favorable to Temple than the current market.",
-          "source": "market"
         }
       ]
     },
@@ -14804,20 +14767,20 @@
         }
       },
       "market": {
-        "home_spread": -3.0,
-        "total": 39.5,
-        "bookmaker": "Consensus (4 books)",
+        "home_spread": 3.5,
+        "total": 52.5,
+        "bookmaker": "Consensus (1 books)",
         "method": "cross_book_median_consensus",
-        "spread_books": 4,
-        "total_books": 3,
+        "spread_books": 1,
+        "total_books": 1,
         "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 2.0,
-        "preferred_side": "South Florida",
-        "status": "ALIGNED",
-        "signal": "ALIGNED",
+        "disagreement": 4.5,
+        "preferred_side": "Army",
+        "status": "SLIGHT EDGE",
+        "signal": "SLIGHT EDGE",
         "bet_status": "TRACKING",
         "status_system": "v2_the_signal",
         "status_thresholds": {
@@ -14841,7 +14804,7 @@
         },
         {
           "title": "MARKET VS MODEL",
-          "text": "The model is 2.0 points more favorable to South Florida than the current market.",
+          "text": "The model is 4.5 points more favorable to Army than the current market.",
           "source": "market"
         }
       ]
@@ -14932,21 +14895,21 @@
         }
       },
       "market": {
-        "home_spread": 6.5,
-        "total": 46.0,
-        "bookmaker": "Consensus (5 books)",
+        "home_spread": null,
+        "total": null,
+        "bookmaker": null,
         "method": "cross_book_median_consensus",
-        "spread_books": 5,
-        "total_books": 5,
+        "spread_books": 0,
+        "total_books": 0,
         "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 4.0,
-        "preferred_side": "Purdue",
-        "status": "SLIGHT EDGE",
-        "signal": "SLIGHT EDGE",
-        "bet_status": "TRACKING",
+        "disagreement": null,
+        "preferred_side": null,
+        "status": "NO MARKET",
+        "signal": "NO MARKET",
+        "bet_status": null,
         "status_system": "v2_the_signal",
         "status_thresholds": {
           "aligned_max": 2.5,
@@ -14966,11 +14929,6 @@
           "title": "LIVE MATCHUP DATA",
           "text": "No live matchup adjustment is being applied because both teams do not yet have comparable 2026 samples.",
           "source": "sample_guard"
-        },
-        {
-          "title": "MARKET VS MODEL",
-          "text": "The model is 4.0 points more favorable to Purdue than the current market.",
-          "source": "market"
         }
       ]
     },
@@ -15060,20 +15018,20 @@
         }
       },
       "market": {
-        "home_spread": -19.5,
-        "total": 47.5,
-        "bookmaker": "Consensus (5 books)",
+        "home_spread": -29.0,
+        "total": 48.5,
+        "bookmaker": "Consensus (4 books)",
         "method": "cross_book_median_consensus",
-        "spread_books": 5,
-        "total_books": 5,
+        "spread_books": 4,
+        "total_books": 4,
         "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 6.5,
+        "disagreement": 16.0,
         "preferred_side": "Washington State",
-        "status": "EDGE",
-        "signal": "EDGE",
+        "status": "OUTLIER",
+        "signal": "OUTLIER",
         "bet_status": "TRACKING",
         "status_system": "v2_the_signal",
         "status_thresholds": {
@@ -15097,7 +15055,7 @@
         },
         {
           "title": "MARKET VS MODEL",
-          "text": "The model is 6.5 points more favorable to Washington State than the current market.",
+          "text": "The model is 16.0 points more favorable to Washington State than the current market.",
           "source": "market"
         }
       ]
@@ -15199,20 +15157,20 @@
         }
       },
       "market": {
-        "home_spread": -2.5,
-        "total": 40.0,
-        "bookmaker": "Consensus (5 books)",
+        "home_spread": -21.5,
+        "total": 51.5,
+        "bookmaker": "Consensus (3 books)",
         "method": "cross_book_median_consensus",
-        "spread_books": 5,
-        "total_books": 4,
+        "spread_books": 3,
+        "total_books": 2,
         "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 13.0,
-        "preferred_side": "Kent State",
-        "status": "OUTLIER",
-        "signal": "OUTLIER",
+        "disagreement": 6.0,
+        "preferred_side": "Wofford",
+        "status": "EDGE",
+        "signal": "EDGE",
         "bet_status": "UNTRACKED",
         "status_system": "v2_the_signal",
         "status_thresholds": {
@@ -15238,7 +15196,7 @@
         },
         {
           "title": "MARKET VS FCS FALLBACK",
-          "text": "The fallback line differs from the current market by 13.0 points toward Kent State.",
+          "text": "The fallback line differs from the current market by 6.0 points toward Wofford.",
           "source": "market"
         }
       ]
@@ -15330,7 +15288,7 @@
       },
       "market": {
         "home_spread": -67.5,
-        "total": 83.0,
+        "total": 82.5,
         "bookmaker": "Consensus (4 books)",
         "method": "cross_book_median_consensus",
         "spread_books": 4,
@@ -15468,17 +15426,22 @@
         }
       },
       "market": {
-        "home_spread": -1.5,
-        "total": 33.5,
+        "home_spread": -2.5,
+        "total": 24.5,
         "bookmaker": "Consensus (5 books)",
         "method": "cross_book_median_consensus",
-        "spread_books": 5,
-        "total_books": 4,
-        "spread_outliers_removed": [],
+        "spread_books": 4,
+        "total_books": 5,
+        "spread_outliers_removed": [
+          {
+            "bookmaker": "MyBookie.ag",
+            "value": 2.5
+          }
+        ],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 17.5,
+        "disagreement": 16.5,
         "preferred_side": "Central Michigan",
         "status": "OUTLIER",
         "signal": "OUTLIER",
@@ -15507,7 +15470,7 @@
         },
         {
           "title": "MARKET VS FCS FALLBACK",
-          "text": "The fallback line differs from the current market by 17.5 points toward Central Michigan.",
+          "text": "The fallback line differs from the current market by 16.5 points toward Central Michigan.",
           "source": "market"
         }
       ]
@@ -15609,17 +15572,22 @@
         }
       },
       "market": {
-        "home_spread": -56.5,
-        "total": 63.5,
+        "home_spread": -44.5,
+        "total": 59.5,
         "bookmaker": "Consensus (4 books)",
         "method": "cross_book_median_consensus",
-        "spread_books": 4,
+        "spread_books": 3,
         "total_books": 4,
-        "spread_outliers_removed": [],
+        "spread_outliers_removed": [
+          {
+            "bookmaker": "MyBookie.ag",
+            "value": -52.5
+          }
+        ],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 32.5,
+        "disagreement": 20.5,
         "preferred_side": "Holy Cross",
         "status": "OUTLIER",
         "signal": "OUTLIER",
@@ -15648,7 +15616,7 @@
         },
         {
           "title": "MARKET VS FCS FALLBACK",
-          "text": "The fallback line differs from the current market by 32.5 points toward Holy Cross.",
+          "text": "The fallback line differs from the current market by 20.5 points toward Holy Cross.",
           "source": "market"
         }
       ]
@@ -15750,22 +15718,17 @@
         }
       },
       "market": {
-        "home_spread": -42.5,
-        "total": 54.5,
-        "bookmaker": "Consensus (5 books)",
+        "home_spread": -55.5,
+        "total": 57.5,
+        "bookmaker": "Consensus (4 books)",
         "method": "cross_book_median_consensus",
         "spread_books": 4,
-        "total_books": 5,
-        "spread_outliers_removed": [
-          {
-            "bookmaker": "Bovada",
-            "value": -48.5
-          }
-        ],
+        "total_books": 4,
+        "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 16.5,
+        "disagreement": 29.5,
         "preferred_side": "UT Martin",
         "status": "OUTLIER",
         "signal": "OUTLIER",
@@ -15794,7 +15757,7 @@
         },
         {
           "title": "MARKET VS FCS FALLBACK",
-          "text": "The fallback line differs from the current market by 16.5 points toward UT Martin.",
+          "text": "The fallback line differs from the current market by 29.5 points toward UT Martin.",
           "source": "market"
         }
       ]
@@ -15896,20 +15859,20 @@
         }
       },
       "market": {
-        "home_spread": -13.5,
-        "total": 44.5,
+        "home_spread": -27.5,
+        "total": 51.5,
         "bookmaker": "Consensus (5 books)",
         "method": "cross_book_median_consensus",
-        "spread_books": 4,
+        "spread_books": 5,
         "total_books": 5,
         "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 1.0,
-        "preferred_side": "Ball State",
-        "status": "ALIGNED",
-        "signal": "ALIGNED",
+        "disagreement": 13.0,
+        "preferred_side": "Stony Brook",
+        "status": "OUTLIER",
+        "signal": "OUTLIER",
         "bet_status": "UNTRACKED",
         "status_system": "v2_the_signal",
         "status_thresholds": {
@@ -15932,6 +15895,11 @@
           "title": "FCS TOTAL WITHHELD",
           "text": "No opponent-specific model total is published for this game because the FCS opponent does not have the full efficiency profile required by the total model.",
           "source": "fcs_total_guard"
+        },
+        {
+          "title": "MARKET VS FCS FALLBACK",
+          "text": "The fallback line differs from the current market by 13.0 points toward Stony Brook.",
+          "source": "market"
         }
       ]
     },
@@ -16149,8 +16117,8 @@
         }
       },
       "market": {
-        "home_spread": -7.0,
-        "total": 48.5,
+        "home_spread": -6.5,
+        "total": 49.0,
         "bookmaker": "Consensus (9 books)",
         "method": "cross_book_median_consensus",
         "spread_books": 9,
@@ -16159,8 +16127,8 @@
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 0.0,
-        "preferred_side": null,
+        "disagreement": 0.5,
+        "preferred_side": "BYU",
         "status": "ALIGNED",
         "signal": "ALIGNED",
         "bet_status": "TRACKING",
@@ -16272,8 +16240,8 @@
         }
       },
       "market": {
-        "home_spread": -3.5,
-        "total": 56.5,
+        "home_spread": -4.0,
+        "total": 57.0,
         "bookmaker": "Consensus (9 books)",
         "method": "cross_book_median_consensus",
         "spread_books": 9,
@@ -16282,10 +16250,10 @@
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 5.0,
+        "disagreement": 5.5,
         "preferred_side": "California",
-        "status": "SLIGHT EDGE",
-        "signal": "SLIGHT EDGE",
+        "status": "EDGE",
+        "signal": "EDGE",
         "bet_status": "TRACKING",
         "status_system": "v2_the_signal",
         "status_thresholds": {
@@ -16309,7 +16277,7 @@
         },
         {
           "title": "MARKET VS MODEL",
-          "text": "The model is 5.0 points more favorable to California than the current market.",
+          "text": "The model is 5.5 points more favorable to California than the current market.",
           "source": "market"
         }
       ]
@@ -16416,7 +16384,7 @@
         "bookmaker": "Consensus (5 books)",
         "method": "cross_book_median_consensus",
         "spread_books": 5,
-        "total_books": 4,
+        "total_books": 5,
         "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
@@ -16541,7 +16509,7 @@
         }
       },
       "market": {
-        "home_spread": -6.0,
+        "home_spread": -6.5,
         "total": 51.5,
         "bookmaker": "Consensus (9 books)",
         "method": "cross_book_median_consensus",
@@ -16551,8 +16519,8 @@
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 0.0,
-        "preferred_side": null,
+        "disagreement": 0.5,
+        "preferred_side": "Duke",
         "status": "ALIGNED",
         "signal": "ALIGNED",
         "bet_status": "TRACKING",
@@ -16665,7 +16633,7 @@
       },
       "market": {
         "home_spread": -17.5,
-        "total": 49.5,
+        "total": 50.0,
         "bookmaker": "Consensus (9 books)",
         "method": "cross_book_median_consensus",
         "spread_books": 9,
@@ -16797,7 +16765,7 @@
         "bookmaker": "Consensus (9 books)",
         "method": "cross_book_median_consensus",
         "spread_books": 9,
-        "total_books": 8,
+        "total_books": 9,
         "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
@@ -16915,8 +16883,8 @@
         }
       },
       "market": {
-        "home_spread": 1.0,
-        "total": 54.5,
+        "home_spread": 0.0,
+        "total": 53.5,
         "bookmaker": "Consensus (9 books)",
         "method": "cross_book_median_consensus",
         "spread_books": 9,
@@ -16925,7 +16893,7 @@
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 4.5,
+        "disagreement": 3.5,
         "preferred_side": "Minnesota",
         "status": "SLIGHT EDGE",
         "signal": "SLIGHT EDGE",
@@ -16952,7 +16920,7 @@
         },
         {
           "title": "MARKET VS MODEL",
-          "text": "The model is 4.5 points more favorable to Minnesota than the current market.",
+          "text": "The model is 3.5 points more favorable to Minnesota than the current market.",
           "source": "market"
         }
       ]
@@ -17182,8 +17150,8 @@
         }
       },
       "market": {
-        "home_spread": -27.5,
-        "total": 46.5,
+        "home_spread": -26.5,
+        "total": 45.5,
         "bookmaker": "Consensus (7 books)",
         "method": "cross_book_median_consensus",
         "spread_books": 7,
@@ -17192,7 +17160,7 @@
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 12.5,
+        "disagreement": 11.5,
         "preferred_side": "Robert Morris",
         "status": "OUTLIER",
         "signal": "OUTLIER",
@@ -17221,7 +17189,7 @@
         },
         {
           "title": "MARKET VS FCS FALLBACK",
-          "text": "The fallback line differs from the current market by 12.5 points toward Robert Morris.",
+          "text": "The fallback line differs from the current market by 11.5 points toward Robert Morris.",
           "source": "market"
         }
       ]
@@ -17577,7 +17545,7 @@
       },
       "market": {
         "home_spread": -9.5,
-        "total": 54.5,
+        "total": 53.5,
         "bookmaker": "Consensus (9 books)",
         "method": "cross_book_median_consensus",
         "spread_books": 9,
@@ -17704,7 +17672,7 @@
         }
       },
       "market": {
-        "home_spread": -2.5,
+        "home_spread": -2.0,
         "total": 65.5,
         "bookmaker": "Consensus (9 books)",
         "method": "cross_book_median_consensus",
@@ -17714,7 +17682,7 @@
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 1.5,
+        "disagreement": 1.0,
         "preferred_side": "UTSA",
         "status": "ALIGNED",
         "signal": "ALIGNED",
@@ -17738,11 +17706,6 @@
           "title": "LIVE MATCHUP DATA",
           "text": "No live matchup adjustment is being applied because both teams do not yet have comparable 2026 samples.",
           "source": "sample_guard"
-        },
-        {
-          "title": "MARKET VS MODEL",
-          "text": "The model is 1.5 points more favorable to UTSA than the current market.",
-          "source": "market"
         }
       ]
     },
@@ -17971,17 +17934,17 @@
         }
       },
       "market": {
-        "home_spread": -69.5,
-        "total": 79.5,
-        "bookmaker": "Consensus (3 books)",
+        "home_spread": -77.5,
+        "total": 83.5,
+        "bookmaker": "Consensus (2 books)",
         "method": "cross_book_median_consensus",
-        "spread_books": 3,
-        "total_books": 3,
+        "spread_books": 2,
+        "total_books": 2,
         "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 43.5,
+        "disagreement": 51.5,
         "preferred_side": "Wagner",
         "status": "OUTLIER",
         "signal": "OUTLIER",
@@ -18010,7 +17973,7 @@
         },
         {
           "title": "MARKET VS FCS FALLBACK",
-          "text": "The fallback line differs from the current market by 43.5 points toward Wagner.",
+          "text": "The fallback line differs from the current market by 51.5 points toward Wagner.",
           "source": "market"
         }
       ]
@@ -18794,7 +18757,7 @@
         }
       },
       "market": {
-        "home_spread": -32.5,
+        "home_spread": -32.0,
         "total": 58.5,
         "bookmaker": "Consensus (7 books)",
         "method": "cross_book_median_consensus",
@@ -18804,7 +18767,7 @@
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 1.0,
+        "disagreement": 0.5,
         "preferred_side": "UC Davis",
         "status": "ALIGNED",
         "signal": "ALIGNED",
@@ -18920,7 +18883,7 @@
       },
       "market": {
         "home_spread": -21.0,
-        "total": 55.0,
+        "total": 54.5,
         "bookmaker": "Consensus (9 books)",
         "method": "cross_book_median_consensus",
         "spread_books": 9,
@@ -19327,17 +19290,17 @@
         }
       },
       "market": {
-        "home_spread": -4.0,
-        "total": 58.0,
-        "bookmaker": "Consensus (4 books)",
+        "home_spread": -1.5,
+        "total": 49.5,
+        "bookmaker": "Consensus (2 books)",
         "method": "cross_book_median_consensus",
-        "spread_books": 4,
-        "total_books": 4,
+        "spread_books": 1,
+        "total_books": 2,
         "spread_outliers_removed": [],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 19.5,
+        "disagreement": 22.0,
         "preferred_side": "Liberty",
         "status": "OUTLIER",
         "signal": "OUTLIER",
@@ -19366,7 +19329,7 @@
         },
         {
           "title": "MARKET VS FCS FALLBACK",
-          "text": "The fallback line differs from the current market by 19.5 points toward Liberty.",
+          "text": "The fallback line differs from the current market by 22.0 points toward Liberty.",
           "source": "market"
         }
       ]
@@ -19585,7 +19548,7 @@
         }
       },
       "market": {
-        "home_spread": -9.0,
+        "home_spread": -8.5,
         "total": 55.0,
         "bookmaker": "Consensus (9 books)",
         "method": "cross_book_median_consensus",
@@ -19595,7 +19558,7 @@
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 4.5,
+        "disagreement": 4.0,
         "preferred_side": "Memphis",
         "status": "SLIGHT EDGE",
         "signal": "SLIGHT EDGE",
@@ -19622,7 +19585,7 @@
         },
         {
           "title": "MARKET VS MODEL",
-          "text": "The model is 4.5 points more favorable to Memphis than the current market.",
+          "text": "The model is 4.0 points more favorable to Memphis than the current market.",
           "source": "market"
         }
       ]
@@ -20649,7 +20612,7 @@
         }
       },
       "market": {
-        "home_spread": -51.5,
+        "home_spread": -52.0,
         "total": 61.5,
         "bookmaker": "Consensus (7 books)",
         "method": "cross_book_median_consensus",
@@ -20659,7 +20622,7 @@
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 22.0,
+        "disagreement": 22.5,
         "preferred_side": "Southern",
         "status": "OUTLIER",
         "signal": "OUTLIER",
@@ -20688,7 +20651,7 @@
         },
         {
           "title": "MARKET VS FCS FALLBACK",
-          "text": "The fallback line differs from the current market by 22.0 points toward Southern.",
+          "text": "The fallback line differs from the current market by 22.5 points toward Southern.",
           "source": "market"
         }
       ]
@@ -21594,7 +21557,7 @@
         }
       },
       "market": {
-        "home_spread": -13.0,
+        "home_spread": -13.5,
         "total": 54.5,
         "bookmaker": "Consensus (9 books)",
         "method": "cross_book_median_consensus",
@@ -21604,7 +21567,7 @@
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 8.0,
+        "disagreement": 8.5,
         "preferred_side": "San Diego State",
         "status": "STRONG EDGE",
         "signal": "STRONG EDGE",
@@ -21631,7 +21594,7 @@
         },
         {
           "title": "MARKET VS MODEL",
-          "text": "The model is 8.0 points more favorable to San Diego State than the current market.",
+          "text": "The model is 8.5 points more favorable to San Diego State than the current market.",
           "source": "market"
         }
       ]
@@ -21874,7 +21837,7 @@
         }
       },
       "market": {
-        "home_spread": -35.5,
+        "home_spread": -36.0,
         "total": 54.0,
         "bookmaker": "Consensus (7 books)",
         "method": "cross_book_median_consensus",
@@ -21884,7 +21847,7 @@
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 16.5,
+        "disagreement": 17.0,
         "preferred_side": "Fordham",
         "status": "OUTLIER",
         "signal": "OUTLIER",
@@ -21913,7 +21876,7 @@
         },
         {
           "title": "MARKET VS FCS FALLBACK",
-          "text": "The fallback line differs from the current market by 16.5 points toward Fordham.",
+          "text": "The fallback line differs from the current market by 17.0 points toward Fordham.",
           "source": "market"
         }
       ]
@@ -22507,7 +22470,7 @@
       },
       "market": {
         "home_spread": -1.5,
-        "total": 50.0,
+        "total": 50.5,
         "bookmaker": "Consensus (9 books)",
         "method": "cross_book_median_consensus",
         "spread_books": 9,
@@ -23029,7 +22992,7 @@
         }
       },
       "market": {
-        "home_spread": -44.0,
+        "home_spread": -44.5,
         "total": 55.5,
         "bookmaker": "Consensus (7 books)",
         "method": "cross_book_median_consensus",
@@ -23039,7 +23002,7 @@
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 15.0,
+        "disagreement": 15.5,
         "preferred_side": "Grambling",
         "status": "OUTLIER",
         "signal": "OUTLIER",
@@ -23068,7 +23031,7 @@
         },
         {
           "title": "MARKET VS FCS FALLBACK",
-          "text": "The fallback line differs from the current market by 15.0 points toward Grambling.",
+          "text": "The fallback line differs from the current market by 15.5 points toward Grambling.",
           "source": "market"
         }
       ]
