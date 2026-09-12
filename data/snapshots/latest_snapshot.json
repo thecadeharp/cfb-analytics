@@ -1,511 +1,16 @@
 {
-  "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+  "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
   "model_version": "production-model-a-2026-week1-freeze-v1",
-  "snapshots_added": 61,
+  "snapshots_added": 39,
   "excluded_untracked_games": 127,
   "ledger_path": "data/snapshots/projection_market_snapshots.jsonl",
   "note": "Prospective timestamped Model A model/market snapshot. Closing lines are evaluation targets only. tracking_eligible=false and FCS fallback games are excluded.",
   "snapshots": [
     {
-      "snapshot_id": "70df117c2cb64c108724fa67",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "956c64f4cf298fab49b85abf",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401864571,
-      "week": 2,
-      "start_date": "2026-09-12T16:00:00.000Z",
-      "home_team": "East Carolina",
-      "away_team": "App State",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -10.0,
-        "total": 53.5,
-        "home_win_probability": 73.4
-      },
-      "public_projection": {
-        "home_spread": -10.0,
-        "total": 53.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "89\u00b0F \u00b7 5 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -6.5,
-        "total": 56.0,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 3.5,
-        "preferred_side": "East Carolina",
-        "market_disagreement_status": "SLIGHT EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "838a313d00ccc7bbcea273e0",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401856683,
-      "week": 2,
-      "start_date": "2026-09-12T16:00:00.000Z",
-      "home_team": "Texas A&M",
-      "away_team": "Arizona State",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -15.5,
-        "total": 53.5,
-        "home_win_probability": 83.4
-      },
-      "public_projection": {
-        "home_spread": -15.5,
-        "total": 53.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "89\u00b0F \u00b7 8 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -14.5,
-        "total": 50.5,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 1.0,
-        "preferred_side": "Texas A&M",
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "b92e5c9ce3d6504bc3eb0620",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401856679,
-      "week": 2,
-      "start_date": "2026-09-12T16:00:00.000Z",
-      "home_team": "Michigan",
-      "away_team": "Oklahoma",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -1.5,
-        "total": 53.0,
-        "home_win_probability": 53.7
-      },
-      "public_projection": {
-        "home_spread": -1.5,
-        "total": 53.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "77\u00b0F \u00b7 7 mph wind \u00b7 gusts 15 \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": 4.5,
-        "total": 43.5,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 6.0,
-        "preferred_side": "Michigan",
-        "market_disagreement_status": "EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "ec74abfbad8fb31e48141a8b",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401858221,
-      "week": 2,
-      "start_date": "2026-09-12T16:00:00.000Z",
-      "home_team": "Virginia Tech",
-      "away_team": "Old Dominion",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -14.5,
-        "total": 53.5,
-        "home_win_probability": 81.8
-      },
-      "public_projection": {
-        "home_spread": -14.5,
-        "total": 53.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "Forecast unavailable",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -19.5,
-        "total": 47.5,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 5.0,
-        "preferred_side": "Old Dominion",
-        "market_disagreement_status": "SLIGHT EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "602792892ee283d0221350db",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401856782,
-      "week": 2,
-      "start_date": "2026-09-12T16:00:00.000Z",
-      "home_team": "Oklahoma State",
-      "away_team": "Oregon",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 14.5,
-        "total": 52.0,
-        "home_win_probability": 18.2
-      },
-      "public_projection": {
-        "home_spread": 14.5,
-        "total": 52.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "86\u00b0F \u00b7 7 mph wind \u00b7 gusts 15 \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": 23.5,
-        "total": 55.0,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 9.0,
-        "preferred_side": "Oklahoma State",
-        "market_disagreement_status": "STRONG EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "2c56887198c87a066d4ee0c9",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401858442,
-      "week": 2,
-      "start_date": "2026-09-12T16:00:00.000Z",
-      "home_team": "Temple",
-      "away_team": "Penn State",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 18.0,
-        "total": 53.5,
-        "home_win_probability": 13.0
-      },
-      "public_projection": {
-        "home_spread": 18.0,
-        "total": 53.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "75\u00b0F \u00b7 4 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": 24.0,
-        "total": 51.0,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 6.0,
-        "preferred_side": "Temple",
-        "market_disagreement_status": "EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "4121ac3172f08642e9ceacb7",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401862702,
-      "week": 2,
-      "start_date": "2026-09-12T16:00:00.000Z",
-      "home_team": "Army",
-      "away_team": "South Florida",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -1.0,
-        "total": 54.5,
-        "home_win_probability": 52.5
-      },
-      "public_projection": {
-        "home_spread": -1.0,
-        "total": 54.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "70\u00b0F \u00b7 6 mph wind \u00b7 gusts 12 \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -3.5,
-        "total": 46.0,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 2.5,
-        "preferred_side": "South Florida",
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "734fa5ac8cbc40e807e9285d",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401858224,
-      "week": 2,
-      "start_date": "2026-09-12T16:00:00.000Z",
-      "home_team": "Purdue",
-      "away_team": "Wake Forest",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 2.5,
-        "total": 52.0,
-        "home_win_probability": 43.8
-      },
-      "public_projection": {
-        "home_spread": 2.5,
-        "total": 52.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "Forecast unavailable",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": 3.0,
-        "total": 50.5,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 0.5,
-        "preferred_side": "Purdue",
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "0635e4d632b6ff1d6f48bbf8",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401856781,
-      "week": 2,
-      "start_date": "2026-09-12T16:00:00.000Z",
-      "home_team": "Kansas State",
-      "away_team": "Washington State",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -13.0,
-        "total": 53.0,
-        "home_win_probability": 79.2
-      },
-      "public_projection": {
-        "home_spread": -13.0,
-        "total": 52.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "79\u00b0F \u00b7 12 mph wind \u00b7 Dry",
-        "impact": "Moderate",
-        "total_adjustment": -0.5,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -17.5,
-        "total": 49.0,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 4.5,
-        "preferred_side": "Washington State",
-        "market_disagreement_status": "SLIGHT EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "4bbef20b3bd8571991db5212",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856673,
@@ -525,19 +30,19 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "81\u00b0F \u00b7 7 mph wind \u00b7 gusts 14 \u00b7 Dry",
+        "conditions_line": "82\u00b0F \u00b7 10 mph wind \u00b7 gusts 17 \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
-        "home_spread": -40.0,
+        "home_spread": -40.5,
         "total": 55.5,
         "bookmaker": "Consensus (8 books)"
       },
       "comparison_at_snapshot": {
-        "disagreement": 11.0,
+        "disagreement": 11.5,
         "preferred_side": "Western Kentucky",
         "market_disagreement_status": "OUTLIER",
         "status_system": "v2_the_signal"
@@ -557,10 +62,10 @@
       }
     },
     {
-      "snapshot_id": "5614bf3a5d3407974acddda7",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "7a4d71eec75de73bd097b851",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856674,
@@ -576,25 +81,25 @@
       },
       "public_projection": {
         "home_spread": 7.0,
-        "total": 52.5,
+        "total": 52.0,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "77\u00b0F \u00b7 7 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
+        "conditions_line": "81\u00b0F \u00b7 11 mph wind \u00b7 Dry",
+        "impact": "Moderate",
+        "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
-        "home_spread": 10.0,
-        "total": 48.5,
+        "home_spread": 9.0,
+        "total": 47.0,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
-        "disagreement": 3.0,
+        "disagreement": 2.0,
         "preferred_side": "Kentucky",
-        "market_disagreement_status": "SLIGHT EDGE",
+        "market_disagreement_status": "ALIGNED",
         "status_system": "v2_the_signal"
       },
       "clv": {
@@ -612,10 +117,10 @@
       }
     },
     {
-      "snapshot_id": "89be02d25ead69e28f9051a9",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "82f0ac3e7377d5545a81a951",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856810,
@@ -642,13 +147,13 @@
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
-        "home_spread": -7.5,
+        "home_spread": -7.0,
         "total": 48.5,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
-        "disagreement": 0.5,
-        "preferred_side": "Arizona",
+        "disagreement": 0.0,
+        "preferred_side": null,
         "market_disagreement_status": "ALIGNED",
         "status_system": "v2_the_signal"
       },
@@ -667,10 +172,10 @@
       }
     },
     {
-      "snapshot_id": "b99a03d8f11b76bee73f4bea",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "a3ca8de83ae38f32427d65d1",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858216,
@@ -722,10 +227,10 @@
       }
     },
     {
-      "snapshot_id": "feef8493e59eaa4322842e2b",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "5b3733bdd6cab6367c161edf",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858217,
@@ -745,7 +250,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "85\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+        "conditions_line": "86\u00b0F \u00b7 8 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -777,10 +282,10 @@
       }
     },
     {
-      "snapshot_id": "fdbc78d5a9a883f00d2cb264",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "d41157e31e0bfa6a4abf8ec0",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858440,
@@ -800,7 +305,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "84\u00b0F \u00b7 12 mph wind \u00b7 gusts 17 \u00b7 Dry",
+        "conditions_line": "83\u00b0F \u00b7 10 mph wind \u00b7 Dry",
         "impact": "Moderate",
         "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
@@ -808,7 +313,7 @@
       },
       "market_at_snapshot": {
         "home_spread": -17.5,
-        "total": 50.0,
+        "total": 49.5,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
@@ -832,10 +337,10 @@
       }
     },
     {
-      "snapshot_id": "690200efdd83668ee83eb252",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "f0d7e7a8522648add579bd8c",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858444,
@@ -863,7 +368,7 @@
       },
       "market_at_snapshot": {
         "home_spread": 11.5,
-        "total": 52.0,
+        "total": 52.5,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
@@ -887,10 +392,10 @@
       }
     },
     {
-      "snapshot_id": "b8fc342ca4b53571297e9471",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "db0f7eb23f4eca2685332e2f",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856677,
@@ -910,19 +415,19 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "73\u00b0F \u00b7 13 mph wind \u00b7 gusts 19 \u00b7 Dry",
+        "conditions_line": "74\u00b0F \u00b7 13 mph wind \u00b7 gusts 19 \u00b7 Dry",
         "impact": "Moderate",
         "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
-        "home_spread": 0.0,
+        "home_spread": 1.0,
         "total": 54.5,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
-        "disagreement": 3.5,
+        "disagreement": 4.5,
         "preferred_side": "Minnesota",
         "market_disagreement_status": "SLIGHT EDGE",
         "status_system": "v2_the_signal"
@@ -942,10 +447,10 @@
       }
     },
     {
-      "snapshot_id": "2fc406c82da67a2489250648",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "d2d1dc9c5824357bee5f586a",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401859184,
@@ -965,7 +470,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "86\u00b0F \u00b7 9 mph wind \u00b7 Dry",
+        "conditions_line": "85\u00b0F \u00b7 8 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -973,7 +478,7 @@
       },
       "market_at_snapshot": {
         "home_spread": -44.5,
-        "total": 55.0,
+        "total": 54.5,
         "bookmaker": "Consensus (8 books)"
       },
       "comparison_at_snapshot": {
@@ -997,10 +502,10 @@
       }
     },
     {
-      "snapshot_id": "699cb7360e142e9298d19be3",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "d4608ebb12be54395852b82b",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856790,
@@ -1020,7 +525,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "86\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+        "conditions_line": "85\u00b0F \u00b7 5 mph wind \u00b7 gusts 10 \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -1052,10 +557,10 @@
       }
     },
     {
-      "snapshot_id": "b348892c4d27a3565a877579",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "fa3fed71b467b3622e90a4fd",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401862708,
@@ -1082,12 +587,12 @@
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
-        "home_spread": -9.5,
+        "home_spread": -9.0,
         "total": 54.5,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
-        "disagreement": 1.5,
+        "disagreement": 2.0,
         "preferred_side": "UAB",
         "market_disagreement_status": "ALIGNED",
         "status_system": "v2_the_signal"
@@ -1107,10 +612,10 @@
       }
     },
     {
-      "snapshot_id": "7f699e4cedb0e6d79e1b0d11",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "5c63807a36931e95b7e52769",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401860884,
@@ -1130,19 +635,19 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "97\u00b0F \u00b7 9 mph wind \u00b7 Dry",
+        "conditions_line": "98\u00b0F \u00b7 10 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
-        "home_spread": -1.5,
-        "total": 66.0,
+        "home_spread": -2.5,
+        "total": 65.5,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
-        "disagreement": 0.5,
+        "disagreement": 1.5,
         "preferred_side": "UTSA",
         "market_disagreement_status": "ALIGNED",
         "status_system": "v2_the_signal"
@@ -1162,10 +667,10 @@
       }
     },
     {
-      "snapshot_id": "d2204b104ac9d13da28ad420",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "e2777f38b6fe6a831dd116f5",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858446,
@@ -1185,19 +690,19 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "63\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+        "conditions_line": "62\u00b0F \u00b7 6 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
-        "home_spread": -27.0,
+        "home_spread": -28.0,
         "total": 55.5,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
-        "disagreement": 5.5,
+        "disagreement": 6.5,
         "preferred_side": "Utah State",
         "market_disagreement_status": "EDGE",
         "status_system": "v2_the_signal"
@@ -1217,10 +722,10 @@
       }
     },
     {
-      "snapshot_id": "0f8f799be1e7282b746be691",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "a41424f2a6d4b82f14c1bd48",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401862705,
@@ -1240,7 +745,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "101\u00b0F \u00b7 9 mph wind \u00b7 Dry",
+        "conditions_line": "102\u00b0F \u00b7 10 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
@@ -1248,7 +753,7 @@
       },
       "market_at_snapshot": {
         "home_spread": 3.0,
-        "total": 58.0,
+        "total": 57.5,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
@@ -1272,10 +777,10 @@
       }
     },
     {
-      "snapshot_id": "52357f54f34ca2fe9cca8d32",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "207e73af973a00f240c364b2",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856684,
@@ -1303,7 +808,7 @@
       },
       "market_at_snapshot": {
         "home_spread": -21.0,
-        "total": 54.5,
+        "total": 55.0,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
@@ -1327,10 +832,10 @@
       }
     },
     {
-      "snapshot_id": "2d661f8b79b27e182a9cad1a",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "c4e85719c9838a6e0e97ba03",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401866414,
@@ -1350,7 +855,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "80\u00b0F \u00b7 3 mph wind \u00b7 Dry",
+        "conditions_line": "86\u00b0F \u00b7 2 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -1382,10 +887,10 @@
       }
     },
     {
-      "snapshot_id": "c6d9153940b3af4f630d9bcc",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "c152d20ab9b5a9997868c298",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401866418,
@@ -1405,19 +910,19 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "75\u00b0F \u00b7 3 mph wind \u00b7 Dry",
+        "conditions_line": "82\u00b0F \u00b7 3 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
-        "home_spread": -2.5,
-        "total": 49.5,
+        "home_spread": -2.0,
+        "total": 50.5,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
-        "disagreement": 4.0,
+        "disagreement": 3.5,
         "preferred_side": "Jacksonville State",
         "market_disagreement_status": "SLIGHT EDGE",
         "status_system": "v2_the_signal"
@@ -1437,10 +942,10 @@
       }
     },
     {
-      "snapshot_id": "4d34cd053bfd716e75bd8019",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "d841583541dff20656ef5c69",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401860881,
@@ -1460,19 +965,19 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "87\u00b0F \u00b7 3 mph wind \u00b7 gusts 16 \u00b7 Dry",
+        "conditions_line": "Forecast unavailable",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
-        "home_spread": -8.5,
-        "total": 56.0,
+        "home_spread": -9.0,
+        "total": 55.5,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
-        "disagreement": 4.0,
+        "disagreement": 4.5,
         "preferred_side": "Memphis",
         "market_disagreement_status": "SLIGHT EDGE",
         "status_system": "v2_the_signal"
@@ -1492,10 +997,10 @@
       }
     },
     {
-      "snapshot_id": "51b6ff4617f4235fe37e567c",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "3f26e8f0225384610190accb",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858441,
@@ -1515,7 +1020,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "Forecast unavailable",
+        "conditions_line": "71\u00b0F \u00b7 6 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -1547,10 +1052,10 @@
       }
     },
     {
-      "snapshot_id": "3cbf1ea87c25e9e48b9d4ce7",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "e2c696f10e1b0467073874a8",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401869955,
@@ -1570,19 +1075,19 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "80\u00b0F \u00b7 2 mph wind \u00b7 Dry",
+        "conditions_line": "79\u00b0F \u00b7 2 mph wind \u00b7 gusts 7 \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
-        "home_spread": -8.5,
+        "home_spread": -8.0,
         "total": 54.5,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
-        "disagreement": 5.5,
+        "disagreement": 6.0,
         "preferred_side": "Kennesaw State",
         "market_disagreement_status": "EDGE",
         "status_system": "v2_the_signal"
@@ -1602,10 +1107,10 @@
       }
     },
     {
-      "snapshot_id": "52703a8604292e35d9ba341a",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "10f246969eaa124f9e8dd7c2",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401871045,
@@ -1625,7 +1130,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "79\u00b0F \u00b7 3 mph wind \u00b7 gusts 10 \u00b7 Dry",
+        "conditions_line": "81\u00b0F \u00b7 4 mph wind \u00b7 gusts 12 \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -1633,7 +1138,7 @@
       },
       "market_at_snapshot": {
         "home_spread": -13.0,
-        "total": 57.0,
+        "total": 56.5,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
@@ -1657,10 +1162,10 @@
       }
     },
     {
-      "snapshot_id": "fc5601221e82c873503e2325",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "343d419f9aebb06718c6e122",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401864575,
@@ -1676,19 +1181,19 @@
       },
       "public_projection": {
         "home_spread": -10.0,
-        "total": 52.0,
+        "total": 52.5,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "82\u00b0F \u00b7 10 mph wind \u00b7 Dry",
-        "impact": "Moderate",
-        "total_adjustment": -0.5,
+        "conditions_line": "Forecast unavailable",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
         "home_spread": -9.5,
-        "total": 49.5,
+        "total": 48.5,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
@@ -1712,10 +1217,10 @@
       }
     },
     {
-      "snapshot_id": "60192289c33bbd3a2d0221af",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "eb826aa8befb2c3f5626ed85",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856681,
@@ -1735,19 +1240,19 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "Forecast unavailable",
+        "conditions_line": "81\u00b0F \u00b7 4 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
-        "home_spread": 11.5,
+        "home_spread": 12.0,
         "total": 55.5,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
-        "disagreement": 4.5,
+        "disagreement": 5.0,
         "preferred_side": "Georgia Tech",
         "market_disagreement_status": "SLIGHT EDGE",
         "status_system": "v2_the_signal"
@@ -1767,10 +1272,10 @@
       }
     },
     {
-      "snapshot_id": "104c461b933bc685ac40a80b",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "48f2fdb6a230c549c6842b18",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401862707,
@@ -1786,23 +1291,23 @@
       },
       "public_projection": {
         "home_spread": 14.0,
-        "total": 47.5,
+        "total": 48.5,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "86\u00b0F \u00b7 22 mph wind \u00b7 gusts 34 \u00b7 Dry",
+        "conditions_line": "90\u00b0F \u00b7 16 mph wind \u00b7 gusts 23 \u00b7 Dry",
         "impact": "Moderate",
-        "total_adjustment": -2.5,
+        "total_adjustment": -1.5,
         "spread_adjustment": 0.0,
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
-        "home_spread": 13.5,
+        "home_spread": 12.5,
         "total": 51.5,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
-        "disagreement": 0.5,
+        "disagreement": 1.5,
         "preferred_side": "Tulsa",
         "market_disagreement_status": "ALIGNED",
         "status_system": "v2_the_signal"
@@ -1822,10 +1327,10 @@
       }
     },
     {
-      "snapshot_id": "ced884c4fee1a942a2b50b76",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "6c778cc946fcdd105ec03dd5",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858443,
@@ -1845,19 +1350,19 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "87\u00b0F \u00b7 8 mph wind \u00b7 Dry",
+        "conditions_line": "87\u00b0F \u00b7 7 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
-        "home_spread": -12.5,
+        "home_spread": -13.0,
         "total": 54.5,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
-        "disagreement": 7.5,
+        "disagreement": 8.0,
         "preferred_side": "San Diego State",
         "market_disagreement_status": "STRONG EDGE",
         "status_system": "v2_the_signal"
@@ -1877,10 +1382,10 @@
       }
     },
     {
-      "snapshot_id": "3d3cab3665af670b8c1f3baf",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "3c34b3d345078cdd65f4f4ed",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858219,
@@ -1900,7 +1405,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "77\u00b0F \u00b7 3 mph wind \u00b7 Dry",
+        "conditions_line": "Forecast unavailable",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -1908,7 +1413,7 @@
       },
       "market_at_snapshot": {
         "home_spread": -20.0,
-        "total": 55.0,
+        "total": 55.5,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
@@ -1932,10 +1437,10 @@
       }
     },
     {
-      "snapshot_id": "95e55185a63f1664de3018a2",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "22eb7364277ef39ad896be54",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856788,
@@ -1955,7 +1460,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "Forecast unavailable",
+        "conditions_line": "78\u00b0F \u00b7 9 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -1987,10 +1492,10 @@
       }
     },
     {
-      "snapshot_id": "fbaf1586acb95abc31d802c0",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "f75ce42468d26292dd040627",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401867796,
@@ -2010,8 +1515,8 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "92\u00b0F \u00b7 6 mph wind \u00b7 Dry",
-        "impact": "Minimal",
+        "conditions_line": "79\u00b0F \u00b7 12 mph wind \u00b7 gusts 18 \u00b7 Dry",
+        "impact": "Moderate",
         "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
         "spread_status": "LOCKED"
@@ -2042,10 +1547,10 @@
       }
     },
     {
-      "snapshot_id": "a50c857c7d7026e756c657d8",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "5c94a49550898f92b54576b3",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401862703,
@@ -2065,7 +1570,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "80\u00b0F \u00b7 10 mph wind \u00b7 Dry",
+        "conditions_line": "76\u00b0F \u00b7 4 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -2073,7 +1578,7 @@
       },
       "market_at_snapshot": {
         "home_spread": 4.0,
-        "total": 58.5,
+        "total": 59.5,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
@@ -2097,10 +1602,10 @@
       }
     },
     {
-      "snapshot_id": "28cc518a3c023d6a36f2dc5b",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "a534e7d333e8430472e83e94",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856682,
@@ -2116,13 +1621,13 @@
       },
       "public_projection": {
         "home_spread": 4.5,
-        "total": 55.0,
+        "total": 55.5,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "99\u00b0F \u00b7 10 mph wind \u00b7 Dry",
+        "conditions_line": "Forecast unavailable",
         "impact": "Minimal",
-        "total_adjustment": -0.5,
+        "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "LOCKED"
       },
@@ -2152,10 +1657,10 @@
       }
     },
     {
-      "snapshot_id": "61e02f064f5ca2a0e6282eac",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "38562e43831b30daa5c28f90",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856783,
@@ -2175,21 +1680,21 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "Forecast unavailable",
+        "conditions_line": "65\u00b0F \u00b7 9 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
-        "home_spread": 25.5,
-        "total": 53.0,
+        "home_spread": 26.0,
+        "total": 53.5,
         "bookmaker": "Consensus (9 books)"
       },
       "comparison_at_snapshot": {
-        "disagreement": 7.0,
+        "disagreement": 7.5,
         "preferred_side": "Oregon State",
-        "market_disagreement_status": "EDGE",
+        "market_disagreement_status": "STRONG EDGE",
         "status_system": "v2_the_signal"
       },
       "clv": {
@@ -2207,10 +1712,10 @@
       }
     },
     {
-      "snapshot_id": "2bee4b3a902e9917d4254f19",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "3f78d8ade9cc893fe9208169",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856676,
@@ -2226,19 +1731,19 @@
       },
       "public_projection": {
         "home_spread": -34.0,
-        "total": 51.0,
+        "total": 51.5,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "91\u00b0F \u00b7 4 mph wind \u00b7 Dry",
+        "conditions_line": "88\u00b0F \u00b7 3 mph wind \u00b7 Dry",
         "impact": "Minimal",
-        "total_adjustment": -0.5,
+        "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
         "home_spread": -45.5,
-        "total": 60.0,
+        "total": 59.5,
         "bookmaker": "Consensus (7 books)"
       },
       "comparison_at_snapshot": {
@@ -2262,10 +1767,10 @@
       }
     },
     {
-      "snapshot_id": "cfe74e16b4730327122577a3",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "948b866fd020ac58b8cff4b8",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856671,
@@ -2285,7 +1790,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "81\u00b0F \u00b7 4 mph wind \u00b7 Dry",
+        "conditions_line": "80\u00b0F \u00b7 4 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -2317,10 +1822,10 @@
       }
     },
     {
-      "snapshot_id": "c406724d6e8dfedb51e15f37",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "dc31fdb88327f61274e145e5",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401864502,
@@ -2340,7 +1845,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "69\u00b0F \u00b7 10 mph wind \u00b7 gusts 15 \u00b7 Dry",
+        "conditions_line": "Forecast unavailable",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -2372,10 +1877,10 @@
       }
     },
     {
-      "snapshot_id": "c08da2f582c6228e4dea6d3d",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "a518cd223db3e1f4d7ee1c13",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856670,
@@ -2395,7 +1900,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "Forecast unavailable",
+        "conditions_line": "82\u00b0F \u00b7 4 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -2427,10 +1932,10 @@
       }
     },
     {
-      "snapshot_id": "4365a730fcebe6fda16ab861",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "1b79e3c95f64cfe8fb5f8ea7",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401860883,
@@ -2450,7 +1955,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "90\u00b0F \u00b7 11 mph wind \u00b7 gusts 21 \u00b7 Dry",
+        "conditions_line": "89\u00b0F \u00b7 12 mph wind \u00b7 gusts 22 \u00b7 Dry",
         "impact": "Moderate",
         "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
@@ -2482,10 +1987,10 @@
       }
     },
     {
-      "snapshot_id": "7ae2653b2dd306eae94c2792",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "3d2e6f392cad98bec40d13e1",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858445,
@@ -2537,10 +2042,10 @@
       }
     },
     {
-      "snapshot_id": "4405c396da95446dd8872028",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "da07472ee2e2235c780d04e6",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401864578,
@@ -2560,7 +2065,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "78\u00b0F \u00b7 9 mph wind \u00b7 gusts 21 \u00b7 Dry",
+        "conditions_line": "78\u00b0F \u00b7 9 mph wind \u00b7 gusts 22 \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -2592,560 +2097,10 @@
       }
     },
     {
-      "snapshot_id": "57a78c015dd01b280b2530d4",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
+      "snapshot_id": "4207462e8145af52878d4774",
+      "captured_at_utc": "2026-09-12T16:22:04.940344+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401858225,
-      "week": 3,
-      "start_date": "2026-09-17T23:30:00.000Z",
-      "home_team": "Pittsburgh",
-      "away_team": "Syracuse",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -8.5,
-        "total": 51.0,
-        "home_win_probability": 70.2
-      },
-      "public_projection": {
-        "home_spread": -8.5,
-        "total": 50.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "75\u00b0F \u00b7 2 mph wind \u00b7 Light rain",
-        "impact": "Moderate",
-        "total_adjustment": -0.5,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -10.5,
-        "total": 59.5,
-        "bookmaker": "Consensus (1 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 2.0,
-        "preferred_side": "Syracuse",
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "60cc635e24058c0f860dbac2",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401858226,
-      "week": 3,
-      "start_date": "2026-09-18T23:30:00.000Z",
-      "home_team": "Wake Forest",
-      "away_team": "Miami",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 12.5,
-        "total": 54.0,
-        "home_win_probability": 21.7
-      },
-      "public_projection": {
-        "home_spread": 12.5,
-        "total": 54.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "Forecast unavailable",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": 20.5,
-        "total": 53.5,
-        "bookmaker": "Consensus (1 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 8.0,
-        "preferred_side": "Wake Forest",
-        "market_disagreement_status": "STRONG EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "f6cf88fa574a243d28700a1b",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401856811,
-      "week": 3,
-      "start_date": "2026-09-19T00:00:00.000Z",
-      "home_team": "Texas Tech",
-      "away_team": "Houston",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -13.5,
-        "total": 54.0,
-        "home_win_probability": 80.1
-      },
-      "public_projection": {
-        "home_spread": -13.5,
-        "total": 53.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "86\u00b0F \u00b7 13 mph wind \u00b7 Light rain",
-        "impact": "Moderate",
-        "total_adjustment": -1.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -14.0,
-        "total": 51.5,
-        "bookmaker": "Consensus (1 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 0.5,
-        "preferred_side": "Houston",
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "52e621cde076be4f2afc0860",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401856686,
-      "week": 3,
-      "start_date": "2026-09-19T16:00:00.000Z",
-      "home_team": "Arkansas",
-      "away_team": "Georgia",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 13.5,
-        "total": 55.0,
-        "home_win_probability": 19.9
-      },
-      "public_projection": {
-        "home_spread": 13.5,
-        "total": 54.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "92\u00b0F \u00b7 6 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": -0.5,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": 17.5,
-        "total": 52.5,
-        "bookmaker": "Consensus (1 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 4.0,
-        "preferred_side": "Arkansas",
-        "market_disagreement_status": "SLIGHT EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "be83f34082b5abe50e48459e",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401858229,
-      "week": 3,
-      "start_date": "2026-09-19T16:00:00.000Z",
-      "home_team": "Clemson",
-      "away_team": "North Carolina",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -10.5,
-        "total": 52.5,
-        "home_win_probability": 74.4
-      },
-      "public_projection": {
-        "home_spread": -10.5,
-        "total": 52.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "89\u00b0F \u00b7 4 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -8.5,
-        "total": 44.5,
-        "bookmaker": "Consensus (1 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 2.0,
-        "preferred_side": "Clemson",
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "98d70246f9ecc3169ca3a204",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401856685,
-      "week": 3,
-      "start_date": "2026-09-19T19:30:00.000Z",
-      "home_team": "Alabama",
-      "away_team": "Florida State",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -9.5,
-        "total": 54.5,
-        "home_win_probability": 72.4
-      },
-      "public_projection": {
-        "home_spread": -9.5,
-        "total": 54.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "95\u00b0F \u00b7 4 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": -0.5,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -17.5,
-        "total": 51.0,
-        "bookmaker": "Consensus (2 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 8.0,
-        "preferred_side": "Florida State",
-        "market_disagreement_status": "STRONG EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "dacf5a1367584e048723e5f3",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401858230,
-      "week": 3,
-      "start_date": "2026-09-19T19:30:00.000Z",
-      "home_team": "Louisville",
-      "away_team": "SMU",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -1.5,
-        "total": 54.5,
-        "home_win_probability": 53.7
-      },
-      "public_projection": {
-        "home_spread": -1.5,
-        "total": 54.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "Forecast unavailable",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -2.0,
-        "total": 57.5,
-        "bookmaker": "Consensus (2 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 0.5,
-        "preferred_side": "SMU",
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "817a049e1c736ad56f16b77b",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401856691,
-      "week": 3,
-      "start_date": "2026-09-19T20:15:00.000Z",
-      "home_team": "South Carolina",
-      "away_team": "Mississippi State",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -9.0,
-        "total": 51.0,
-        "home_win_probability": 71.3
-      },
-      "public_projection": {
-        "home_spread": -9.0,
-        "total": 50.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "92\u00b0F \u00b7 6 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": -0.5,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -7.5,
-        "total": 54.5,
-        "bookmaker": "Consensus (1 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 1.5,
-        "preferred_side": "South Carolina",
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "52a1003694260822023863fa",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401856687,
-      "week": 3,
-      "start_date": "2026-09-19T23:00:00.000Z",
-      "home_team": "Auburn",
-      "away_team": "Florida",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 0.0,
-        "total": 53.0,
-        "home_win_probability": 50.0
-      },
-      "public_projection": {
-        "home_spread": 0.0,
-        "total": 53.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "81\u00b0F \u00b7 6 mph wind \u00b7 gusts 14 \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": 2.5,
-        "total": 52.0,
-        "bookmaker": "Consensus (2 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 2.5,
-        "preferred_side": "Auburn",
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "033fbcba87bc0055599878a3",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401856796,
-      "week": 3,
-      "start_date": "2026-09-19T23:30:00.000Z",
-      "home_team": "Northwestern",
-      "away_team": "Colorado",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -5.0,
-        "total": 51.0,
-        "home_win_probability": 62.3
-      },
-      "public_projection": {
-        "home_spread": -5.0,
-        "total": 50.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "70\u00b0F \u00b7 8 mph wind \u00b7 gusts 13 \u00b7 Light rain",
-        "impact": "Moderate",
-        "total_adjustment": -0.5,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -3.5,
-        "total": 45.5,
-        "bookmaker": "Consensus (1 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 1.5,
-        "preferred_side": "Northwestern",
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "bf44389daffd7060f365d94e",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
+      "projection_source_generated": "2026-09-12T16:22:04.700280",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856688,
@@ -3165,7 +2120,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "86\u00b0F \u00b7 7 mph wind \u00b7 gusts 14 \u00b7 Dry",
+        "conditions_line": "89\u00b0F \u00b7 3 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -3173,177 +2128,12 @@
       },
       "market_at_snapshot": {
         "home_spread": 2.5,
-        "total": 58.0,
-        "bookmaker": "Consensus (2 books)"
+        "total": 58.5,
+        "bookmaker": "Consensus (1 books)"
       },
       "comparison_at_snapshot": {
         "disagreement": 2.0,
         "preferred_side": "Ole Miss",
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "73981c97d14b279ae9471596",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401858453,
-      "week": 3,
-      "start_date": "2026-09-19T23:30:00.000Z",
-      "home_team": "Notre Dame",
-      "away_team": "Michigan State",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -21.5,
-        "total": 54.5,
-        "home_win_probability": 91.0
-      },
-      "public_projection": {
-        "home_spread": -21.5,
-        "total": 54.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "73\u00b0F \u00b7 7 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -29.5,
-        "total": 53.0,
-        "bookmaker": "Consensus (2 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 8.0,
-        "preferred_side": "Michigan State",
-        "market_disagreement_status": "STRONG EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "4f9f933ea49a4e652f4ecbaa",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401858232,
-      "week": 3,
-      "start_date": "2026-09-19T23:30:00.000Z",
-      "home_team": "Maryland",
-      "away_team": "Virginia Tech",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 0.5,
-        "total": 51.5,
-        "home_win_probability": 48.8
-      },
-      "public_projection": {
-        "home_spread": 0.5,
-        "total": 51.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "Forecast unavailable",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": 2.0,
-        "total": 50.0,
-        "bookmaker": "Consensus (2 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 1.5,
-        "preferred_side": "Maryland",
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "6347ce0fd56bc6df8e98bd22",
-      "captured_at_utc": "2026-09-12T10:21:09.778382+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T10:21:09.501830",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401856802,
-      "week": 3,
-      "start_date": "2026-09-19T23:30:00.000Z",
-      "home_team": "Virginia",
-      "away_team": "West Virginia",
-      "neutral_site": true,
-      "model": {
-        "home_spread": -9.5,
-        "total": 52.5,
-        "home_win_probability": 72.4
-      },
-      "public_projection": {
-        "home_spread": -9.5,
-        "total": 52.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "85\u00b0F \u00b7 6 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -8.5,
-        "total": 53.0,
-        "bookmaker": "Consensus (2 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 1.0,
-        "preferred_side": "Virginia",
         "market_disagreement_status": "ALIGNED",
         "status_system": "v2_the_signal"
       },
