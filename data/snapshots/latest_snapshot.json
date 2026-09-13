@@ -1,31 +1,31 @@
 {
-  "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
+  "captured_at_utc": "2026-09-13T04:22:15.457748+00:00",
   "model_version": "production-model-a-2026-week1-freeze-v1",
-  "snapshots_added": 23,
+  "snapshots_added": 14,
   "excluded_untracked_games": 127,
   "ledger_path": "data/snapshots/projection_market_snapshots.jsonl",
   "note": "Prospective timestamped Model A model/market snapshot. Closing lines are evaluation targets only. tracking_eligible=false and FCS fallback games are excluded.",
   "snapshots": [
     {
-      "snapshot_id": "107fe94d1eafaa85d63cca36",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
+      "snapshot_id": "fab0be430baa98e66d300fde",
+      "captured_at_utc": "2026-09-13T04:22:15.457748+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
+      "projection_source_generated": "2026-09-13T04:22:15.233940",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
-      "game_id": 401858441,
-      "week": 2,
-      "start_date": "2026-09-12T23:00:00.000Z",
-      "home_team": "Nebraska",
-      "away_team": "Bowling Green",
+      "game_id": 401858225,
+      "week": 3,
+      "start_date": "2026-09-17T23:30:00.000Z",
+      "home_team": "Pittsburgh",
+      "away_team": "Syracuse",
       "neutral_site": false,
       "model": {
-        "home_spread": -21.5,
+        "home_spread": -8.5,
         "total": 51.0,
-        "home_win_probability": 91.0
+        "home_win_probability": 70.2
       },
       "public_projection": {
-        "home_spread": -21.5,
+        "home_spread": -8.5,
         "total": 51.0,
         "weather_applied": true
       },
@@ -37,13 +37,68 @@
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
-        "home_spread": -30.5,
-        "total": 49.5,
-        "bookmaker": "Consensus (9 books)"
+        "home_spread": -10.0,
+        "total": 53.0,
+        "bookmaker": "Consensus (2 books)"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 1.5,
+        "preferred_side": "Syracuse",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "f8d92e7df8c99ee34fef9c81",
+      "captured_at_utc": "2026-09-13T04:22:15.457748+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-09-13T04:22:15.233940",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401858226,
+      "week": 3,
+      "start_date": "2026-09-18T23:30:00.000Z",
+      "home_team": "Wake Forest",
+      "away_team": "Miami",
+      "neutral_site": false,
+      "model": {
+        "home_spread": 12.5,
+        "total": 54.0,
+        "home_win_probability": 21.7
+      },
+      "public_projection": {
+        "home_spread": 12.5,
+        "total": 54.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "85\u00b0F \u00b7 4 mph wind \u00b7 gusts 10 \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
+      "market_at_snapshot": {
+        "home_spread": 21.5,
+        "total": 53.5,
+        "bookmaker": "Consensus (3 books)"
       },
       "comparison_at_snapshot": {
         "disagreement": 9.0,
-        "preferred_side": "Bowling Green",
+        "preferred_side": "Wake Forest",
         "market_disagreement_status": "STRONG EDGE",
         "status_system": "v2_the_signal"
       },
@@ -62,43 +117,98 @@
       }
     },
     {
-      "snapshot_id": "d913cbdcc5a6dbd0cd4b7c18",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
+      "snapshot_id": "69b38b2e06add71e7a84008d",
+      "captured_at_utc": "2026-09-13T04:22:15.457748+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
+      "projection_source_generated": "2026-09-13T04:22:15.233940",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
-      "game_id": 401869955,
-      "week": 2,
-      "start_date": "2026-09-12T23:00:00.000Z",
-      "home_team": "Kennesaw State",
-      "away_team": "Georgia State",
+      "game_id": 401856811,
+      "week": 3,
+      "start_date": "2026-09-19T00:00:00.000Z",
+      "home_team": "Texas Tech",
+      "away_team": "Houston",
       "neutral_site": false,
       "model": {
-        "home_spread": -14.0,
-        "total": 51.5,
-        "home_win_probability": 80.9
+        "home_spread": -13.5,
+        "total": 54.0,
+        "home_win_probability": 80.1
       },
       "public_projection": {
-        "home_spread": -14.0,
-        "total": 51.5,
+        "home_spread": -13.5,
+        "total": 52.0,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "80\u00b0F \u00b7 2 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
+        "conditions_line": "72\u00b0F \u00b7 16 mph wind \u00b7 gusts 24 \u00b7 Light rain",
+        "impact": "Moderate",
+        "total_adjustment": -2.0,
         "spread_adjustment": 0.0,
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
-        "home_spread": -7.5,
-        "total": 55.5,
-        "bookmaker": "Consensus (9 books)"
+        "home_spread": -10.0,
+        "total": 51.5,
+        "bookmaker": "Consensus (1 books)"
       },
       "comparison_at_snapshot": {
-        "disagreement": 6.5,
-        "preferred_side": "Kennesaw State",
+        "disagreement": 3.5,
+        "preferred_side": "Texas Tech",
+        "market_disagreement_status": "SLIGHT EDGE",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "92d91fae09328b50975831d4",
+      "captured_at_utc": "2026-09-13T04:22:15.457748+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-09-13T04:22:15.233940",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401858454,
+      "week": 3,
+      "start_date": "2026-09-19T16:00:00.000Z",
+      "home_team": "Ohio State",
+      "away_team": "Kent State",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -45.5,
+        "total": 54.0,
+        "home_win_probability": 99.0
+      },
+      "public_projection": {
+        "home_spread": -45.5,
+        "total": 53.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "63\u00b0F \u00b7 11 mph wind \u00b7 gusts 17 \u00b7 Dry",
+        "impact": "Moderate",
+        "total_adjustment": -0.5,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
+      "market_at_snapshot": {
+        "home_spread": -52.5,
+        "total": 56.5,
+        "bookmaker": "Consensus (1 books)"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 7.0,
+        "preferred_side": "Kent State",
         "market_disagreement_status": "EDGE",
         "status_system": "v2_the_signal"
       },
@@ -117,263 +227,43 @@
       }
     },
     {
-      "snapshot_id": "09ae99f802d7a2fa02440be5",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
+      "snapshot_id": "c9b6c886c6a8b9ca8368550f",
+      "captured_at_utc": "2026-09-13T04:22:15.457748+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
+      "projection_source_generated": "2026-09-13T04:22:15.233940",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
-      "game_id": 401871045,
-      "week": 2,
-      "start_date": "2026-09-12T23:00:00.000Z",
-      "home_team": "Marshall",
-      "away_team": "Middle Tennessee",
+      "game_id": 401856685,
+      "week": 3,
+      "start_date": "2026-09-19T19:30:00.000Z",
+      "home_team": "Alabama",
+      "away_team": "Florida State",
       "neutral_site": false,
       "model": {
-        "home_spread": -16.0,
-        "total": 53.0,
-        "home_win_probability": 84.1
-      },
-      "public_projection": {
-        "home_spread": -16.0,
-        "total": 53.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "78\u00b0F \u00b7 3 mph wind \u00b7 gusts 9 \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -13.0,
-        "total": 55.5,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 3.0,
-        "preferred_side": "Marshall",
-        "market_disagreement_status": "SLIGHT EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "7b6fdf6d031a09d70f5b026e",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401864575,
-      "week": 2,
-      "start_date": "2026-09-12T23:00:00.000Z",
-      "home_team": "Tulane",
-      "away_team": "South Alabama",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -10.0,
-        "total": 52.5,
-        "home_win_probability": 73.4
-      },
-      "public_projection": {
-        "home_spread": -10.0,
-        "total": 52.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "78\u00b0F \u00b7 5 mph wind \u00b7 gusts 10 \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
         "home_spread": -9.5,
-        "total": 48.0,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 0.5,
-        "preferred_side": "Tulane",
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "c1452f6262ef201923f2c381",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401856681,
-      "week": 2,
-      "start_date": "2026-09-12T23:00:00.000Z",
-      "home_team": "Georgia Tech",
-      "away_team": "Tennessee",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 7.0,
-        "total": 56.0,
-        "home_win_probability": 33.1
-      },
-      "public_projection": {
-        "home_spread": 7.0,
-        "total": 56.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "80\u00b0F \u00b7 1 mph wind \u00b7 gusts 6 \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": 12.0,
-        "total": 55.5,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 5.0,
-        "preferred_side": "Georgia Tech",
-        "market_disagreement_status": "SLIGHT EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "06ddb9d68243f38a3e8972ef",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401862707,
-      "week": 2,
-      "start_date": "2026-09-12T23:00:00.000Z",
-      "home_team": "Sam Houston",
-      "away_team": "Tulsa",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 14.0,
-        "total": 50.0,
-        "home_win_probability": 19.1
-      },
-      "public_projection": {
-        "home_spread": 14.0,
-        "total": 50.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "Forecast unavailable",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": 12.5,
-        "total": 51.5,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 1.5,
-        "preferred_side": "Tulsa",
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "67fc989c39c517072c4130f6",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401858443,
-      "week": 2,
-      "start_date": "2026-09-12T23:15:00.000Z",
-      "home_team": "UCLA",
-      "away_team": "San Diego State",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -5.0,
-        "total": 52.5,
-        "home_win_probability": 62.3
-      },
-      "public_projection": {
-        "home_spread": -5.0,
-        "total": 52.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "87\u00b0F \u00b7 7 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -13.5,
         "total": 54.5,
-        "bookmaker": "Consensus (9 books)"
+        "home_win_probability": 72.4
+      },
+      "public_projection": {
+        "home_spread": -9.5,
+        "total": 54.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "81\u00b0F \u00b7 10 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
+      "market_at_snapshot": {
+        "home_spread": -18.0,
+        "total": 50.5,
+        "bookmaker": "Consensus (3 books)"
       },
       "comparison_at_snapshot": {
         "disagreement": 8.5,
-        "preferred_side": "San Diego State",
+        "preferred_side": "Florida State",
         "market_disagreement_status": "STRONG EDGE",
         "status_system": "v2_the_signal"
       },
@@ -392,204 +282,39 @@
       }
     },
     {
-      "snapshot_id": "b48d37274f0a350ebfd6665f",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
+      "snapshot_id": "76387a59ca189a9e4863c769",
+      "captured_at_utc": "2026-09-13T04:22:15.457748+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
+      "projection_source_generated": "2026-09-13T04:22:15.233940",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
-      "game_id": 401858219,
-      "week": 2,
-      "start_date": "2026-09-12T23:30:00.000Z",
-      "home_team": "Clemson",
-      "away_team": "Georgia Southern",
+      "game_id": 401856694,
+      "week": 3,
+      "start_date": "2026-09-19T19:30:00.000Z",
+      "home_team": "Texas A&M",
+      "away_team": "Kentucky",
       "neutral_site": false,
       "model": {
-        "home_spread": -21.5,
+        "home_spread": -15.0,
         "total": 53.0,
-        "home_win_probability": 91.0
+        "home_win_probability": 82.6
       },
       "public_projection": {
-        "home_spread": -21.5,
-        "total": 53.0,
+        "home_spread": -15.0,
+        "total": 52.5,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "79\u00b0F \u00b7 2 mph wind \u00b7 Dry",
+        "conditions_line": "100\u00b0F \u00b7 2 mph wind \u00b7 Dry",
         "impact": "Minimal",
-        "total_adjustment": 0.0,
+        "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
-        "home_spread": -19.5,
-        "total": 55.0,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 2.0,
-        "preferred_side": "Clemson",
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "1cb56c5e2885598e5f6c3c80",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401856788,
-      "week": 2,
-      "start_date": "2026-09-12T23:30:00.000Z",
-      "home_team": "Iowa",
-      "away_team": "Iowa State",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -14.5,
-        "total": 54.0,
-        "home_win_probability": 81.8
-      },
-      "public_projection": {
-        "home_spread": -14.5,
-        "total": 54.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "78\u00b0F \u00b7 9 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -14.0,
-        "total": 42.5,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 0.5,
-        "preferred_side": "Iowa",
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "854f75a5c64c127898eb7a84",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401867796,
-      "week": 2,
-      "start_date": "2026-09-12T23:30:00.000Z",
-      "home_team": "LSU",
-      "away_team": "Louisiana Tech",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -26.0,
-        "total": 52.0,
-        "home_win_probability": 94.8
-      },
-      "public_projection": {
-        "home_spread": -26.0,
-        "total": 52.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "87\u00b0F \u00b7 8 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -35.0,
-        "total": 55.0,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 9.0,
-        "preferred_side": "Louisiana Tech",
-        "market_disagreement_status": "STRONG EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "bdc3f38299c50ea909009ade",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401862703,
-      "week": 2,
-      "start_date": "2026-09-12T23:30:00.000Z",
-      "home_team": "Florida Atlantic",
-      "away_team": "Navy",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 4.0,
-        "total": 53.5,
-        "home_win_probability": 40.1
-      },
-      "public_projection": {
-        "home_spread": 4.0,
-        "total": 53.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "Forecast unavailable",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": 4.0,
-        "total": 59.5,
-        "bookmaker": "Consensus (9 books)"
+        "home_spread": -15.0,
+        "total": 48.5,
+        "bookmaker": "Consensus (3 books)"
       },
       "comparison_at_snapshot": {
         "disagreement": 0.0,
@@ -612,246 +337,26 @@
       }
     },
     {
-      "snapshot_id": "060b0950a444abf8c0f872f1",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
+      "snapshot_id": "36dc82efdfacfdba4093e8d1",
+      "captured_at_utc": "2026-09-13T04:22:15.457748+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
+      "projection_source_generated": "2026-09-13T04:22:15.233940",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
-      "game_id": 401856682,
-      "week": 2,
-      "start_date": "2026-09-12T23:30:00.000Z",
-      "home_team": "Texas",
-      "away_team": "Ohio State",
+      "game_id": 401858230,
+      "week": 3,
+      "start_date": "2026-09-19T19:30:00.000Z",
+      "home_team": "Louisville",
+      "away_team": "SMU",
       "neutral_site": false,
       "model": {
-        "home_spread": 4.5,
-        "total": 55.5,
-        "home_win_probability": 38.9
-      },
-      "public_projection": {
-        "home_spread": 4.5,
-        "total": 55.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "99\u00b0F \u00b7 10 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": -0.5,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
         "home_spread": -1.5,
-        "total": 50.5,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 6.0,
-        "preferred_side": "Ohio State",
-        "market_disagreement_status": "EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "d03f87401dd95841d1263a72",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401856783,
-      "week": 2,
-      "start_date": "2026-09-12T23:30:00.000Z",
-      "home_team": "Oregon State",
-      "away_team": "Texas Tech",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 18.5,
-        "total": 53.5,
-        "home_win_probability": 12.4
+        "total": 54.5,
+        "home_win_probability": 53.7
       },
       "public_projection": {
-        "home_spread": 18.5,
-        "total": 52.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "63\u00b0F \u00b7 12 mph wind \u00b7 Light rain",
-        "impact": "Moderate",
-        "total_adjustment": -1.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": 25.5,
-        "total": 52.5,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 7.0,
-        "preferred_side": "Oregon State",
-        "market_disagreement_status": "EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "7cd068da8ad2770194eec9d7",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401856676,
-      "week": 2,
-      "start_date": "2026-09-12T23:45:00.000Z",
-      "home_team": "Ole Miss",
-      "away_team": "Charlotte",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -34.0,
-        "total": 51.5,
-        "home_win_probability": 98.3
-      },
-      "public_projection": {
-        "home_spread": -34.0,
-        "total": 51.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "80\u00b0F \u00b7 4 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -45.0,
-        "total": 59.5,
-        "bookmaker": "Consensus (7 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 11.0,
-        "preferred_side": "Charlotte",
-        "market_disagreement_status": "OUTLIER",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "cc5514094084e3b53fb181c0",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401856671,
-      "week": 2,
-      "start_date": "2026-09-12T23:45:00.000Z",
-      "home_team": "Auburn",
-      "away_team": "Southern Miss",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -27.5,
-        "total": 53.0,
-        "home_win_probability": 95.7
-      },
-      "public_projection": {
-        "home_spread": -27.5,
-        "total": 53.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "81\u00b0F \u00b7 3 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -33.0,
-        "total": 56.5,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 5.5,
-        "preferred_side": "Southern Miss",
-        "market_disagreement_status": "EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "ebf859d709321ea381012dd4",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401864502,
-      "week": 2,
-      "start_date": "2026-09-13T02:00:00.000Z",
-      "home_team": "Air Force",
-      "away_team": "North Dakota State",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 1.5,
-        "total": 48.5,
-        "home_win_probability": 46.3
-      },
-      "public_projection": {
-        "home_spread": 1.5,
-        "total": 48.5,
+        "home_spread": -1.5,
+        "total": 54.5,
         "weather_applied": true
       },
       "weather_at_snapshot": {
@@ -862,13 +367,13 @@
         "spread_status": "LOCKED"
       },
       "market_at_snapshot": {
-        "home_spread": 2.0,
-        "total": 47.5,
-        "bookmaker": "Consensus (9 books)"
+        "home_spread": -1.5,
+        "total": 59.5,
+        "bookmaker": "Consensus (3 books)"
       },
       "comparison_at_snapshot": {
-        "disagreement": 0.5,
-        "preferred_side": "Air Force",
+        "disagreement": 0.0,
+        "preferred_side": null,
         "market_disagreement_status": "ALIGNED",
         "status_system": "v2_the_signal"
       },
@@ -887,285 +392,10 @@
       }
     },
     {
-      "snapshot_id": "9522c48d2161539bb2f29565",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
+      "snapshot_id": "449ec3ce7a1e84152fd95384",
+      "captured_at_utc": "2026-09-13T04:22:15.457748+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401856670,
-      "week": 2,
-      "start_date": "2026-09-13T02:15:00.000Z",
-      "home_team": "Utah",
-      "away_team": "Arkansas",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -6.0,
-        "total": 56.0,
-        "home_win_probability": 64.6
-      },
-      "public_projection": {
-        "home_spread": -6.0,
-        "total": 56.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "81\u00b0F \u00b7 4 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -12.5,
-        "total": 55.5,
-        "bookmaker": "Consensus (8 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 6.5,
-        "preferred_side": "Arkansas",
-        "market_disagreement_status": "EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "a08cdf6df3a387dc2b66bf07",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401860883,
-      "week": 2,
-      "start_date": "2026-09-13T02:30:00.000Z",
-      "home_team": "Fresno State",
-      "away_team": "Sacramento State",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -16.0,
-        "total": 46.5,
-        "home_win_probability": 84.1
-      },
-      "public_projection": {
-        "home_spread": -16.0,
-        "total": 46.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "89\u00b0F \u00b7 11 mph wind \u00b7 gusts 21 \u00b7 Dry",
-        "impact": "Moderate",
-        "total_adjustment": -0.5,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -17.5,
-        "total": 44.5,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 1.5,
-        "preferred_side": "Sacramento State",
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "58c3f83bfb669756ca1ec016",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401858445,
-      "week": 2,
-      "start_date": "2026-09-13T03:00:00.000Z",
-      "home_team": "USC",
-      "away_team": "Louisiana",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -21.0,
-        "total": 54.5,
-        "home_win_probability": 90.5
-      },
-      "public_projection": {
-        "home_spread": -21.0,
-        "total": 54.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "73\u00b0F \u00b7 4 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -31.0,
-        "total": 59.0,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 10.0,
-        "preferred_side": "Louisiana",
-        "market_disagreement_status": "STRONG EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "40b1d392f883d5a0aeb56974",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401864578,
-      "week": 2,
-      "start_date": "2026-09-13T03:59:00.000Z",
-      "home_team": "Hawai'i",
-      "away_team": "New Mexico State",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -13.0,
-        "total": 50.5,
-        "home_win_probability": 79.2
-      },
-      "public_projection": {
-        "home_spread": -13.0,
-        "total": 50.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "78\u00b0F \u00b7 9 mph wind \u00b7 gusts 22 \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": -7.5,
-        "total": 50.0,
-        "bookmaker": "Consensus (9 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 5.5,
-        "preferred_side": "Hawai'i",
-        "market_disagreement_status": "EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "d348ac7dd0be26676ef29cd3",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401858226,
-      "week": 3,
-      "start_date": "2026-09-18T23:30:00.000Z",
-      "home_team": "Wake Forest",
-      "away_team": "Miami",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 12.5,
-        "total": 54.0,
-        "home_win_probability": 21.7
-      },
-      "public_projection": {
-        "home_spread": 12.5,
-        "total": 54.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "87\u00b0F \u00b7 5 mph wind \u00b7 gusts 13 \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "LOCKED"
-      },
-      "market_at_snapshot": {
-        "home_spread": 23.0,
-        "total": 54.5,
-        "bookmaker": "Consensus (2 books)"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 10.5,
-        "preferred_side": "Wake Forest",
-        "market_disagreement_status": "OUTLIER",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "448289e3e7c888e2c7e49a83",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
+      "projection_source_generated": "2026-09-13T04:22:15.233940",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858449,
@@ -1185,8 +415,8 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "91\u00b0F \u00b7 7 mph wind \u00b7 Dry",
-        "impact": "Minimal",
+        "conditions_line": "71\u00b0F \u00b7 11 mph wind \u00b7 Dry",
+        "impact": "Moderate",
         "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
         "spread_status": "LOCKED"
@@ -1217,10 +447,120 @@
       }
     },
     {
-      "snapshot_id": "4460f709cbb0a36e06e234bf",
-      "captured_at_utc": "2026-09-12T22:20:53.699602+00:00",
+      "snapshot_id": "ebb1103c2236ec7bbaee9825",
+      "captured_at_utc": "2026-09-13T04:22:15.457748+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-09-12T22:20:53.420240",
+      "projection_source_generated": "2026-09-13T04:22:15.233940",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401856691,
+      "week": 3,
+      "start_date": "2026-09-19T20:15:00.000Z",
+      "home_team": "South Carolina",
+      "away_team": "Mississippi State",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -9.0,
+        "total": 51.0,
+        "home_win_probability": 71.3
+      },
+      "public_projection": {
+        "home_spread": -9.0,
+        "total": 51.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "Forecast unavailable",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
+      "market_at_snapshot": {
+        "home_spread": -5.5,
+        "total": 56.5,
+        "bookmaker": "Consensus (1 books)"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 3.5,
+        "preferred_side": "South Carolina",
+        "market_disagreement_status": "SLIGHT EDGE",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "ff2bfa3d7eb56f85a173dcda",
+      "captured_at_utc": "2026-09-13T04:22:15.457748+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-09-13T04:22:15.233940",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401856796,
+      "week": 3,
+      "start_date": "2026-09-19T23:30:00.000Z",
+      "home_team": "Northwestern",
+      "away_team": "Colorado",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -5.0,
+        "total": 51.0,
+        "home_win_probability": 62.3
+      },
+      "public_projection": {
+        "home_spread": -5.0,
+        "total": 51.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "63\u00b0F \u00b7 9 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
+      "market_at_snapshot": {
+        "home_spread": -2.5,
+        "total": 45.5,
+        "bookmaker": "Consensus (1 books)"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 2.5,
+        "preferred_side": "Northwestern",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "954f59c5046930e1c3218866",
+      "captured_at_utc": "2026-09-13T04:22:15.457748+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-09-13T04:22:15.233940",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856688,
@@ -1240,7 +580,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "86\u00b0F \u00b7 8 mph wind \u00b7 gusts 16 \u00b7 Dry",
+        "conditions_line": "74\u00b0F \u00b7 7 mph wind \u00b7 gusts 13 \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -1249,12 +589,177 @@
       "market_at_snapshot": {
         "home_spread": 2.5,
         "total": 58.5,
-        "bookmaker": "Consensus (1 books)"
+        "bookmaker": "Consensus (2 books)"
       },
       "comparison_at_snapshot": {
         "disagreement": 2.0,
         "preferred_side": "Ole Miss",
         "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "df4f51f7b126a9760a154514",
+      "captured_at_utc": "2026-09-13T04:22:15.457748+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-09-13T04:22:15.233940",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401858453,
+      "week": 3,
+      "start_date": "2026-09-19T23:30:00.000Z",
+      "home_team": "Notre Dame",
+      "away_team": "Michigan State",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -21.5,
+        "total": 54.5,
+        "home_win_probability": 91.0
+      },
+      "public_projection": {
+        "home_spread": -21.5,
+        "total": 54.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "Forecast unavailable",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
+      "market_at_snapshot": {
+        "home_spread": -29.5,
+        "total": 53.5,
+        "bookmaker": "Consensus (3 books)"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 8.0,
+        "preferred_side": "Michigan State",
+        "market_disagreement_status": "STRONG EDGE",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "5f698bbc9fe0e4c24dfceb06",
+      "captured_at_utc": "2026-09-13T04:22:15.457748+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-09-13T04:22:15.233940",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401858232,
+      "week": 3,
+      "start_date": "2026-09-19T23:30:00.000Z",
+      "home_team": "Maryland",
+      "away_team": "Virginia Tech",
+      "neutral_site": false,
+      "model": {
+        "home_spread": 0.5,
+        "total": 51.5,
+        "home_win_probability": 48.8
+      },
+      "public_projection": {
+        "home_spread": 0.5,
+        "total": 51.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "57\u00b0F \u00b7 10 mph wind \u00b7 gusts 24 \u00b7 Light rain",
+        "impact": "Moderate",
+        "total_adjustment": -0.5,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
+      "market_at_snapshot": {
+        "home_spread": 1.5,
+        "total": 54.5,
+        "bookmaker": "Consensus (1 books)"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 1.0,
+        "preferred_side": "Maryland",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "e01132c6fe8045c350d82cb9",
+      "captured_at_utc": "2026-09-13T04:22:15.457748+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-09-13T04:22:15.233940",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401856693,
+      "week": 3,
+      "start_date": "2026-09-20T00:00:00.000Z",
+      "home_team": "Texas",
+      "away_team": "UTSA",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -21.5,
+        "total": 53.5,
+        "home_win_probability": 91.0
+      },
+      "public_projection": {
+        "home_spread": -21.5,
+        "total": 53.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "99\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": -0.5,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
+      "market_at_snapshot": {
+        "home_spread": -29.5,
+        "total": 57.5,
+        "bookmaker": "Consensus (1 books)"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 8.0,
+        "preferred_side": "UTSA",
+        "market_disagreement_status": "STRONG EDGE",
         "status_system": "v2_the_signal"
       },
       "clv": {
