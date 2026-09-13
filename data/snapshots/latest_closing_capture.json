@@ -1,12 +1,46 @@
 {
-  "captured_at_utc": "2026-09-12T23:26:19.511875+00:00",
+  "captured_at_utc": "2026-09-13T00:36:35.305391+00:00",
   "window": {
     "pre_kickoff_minutes": 90,
     "post_kickoff_grace_minutes": 10
   },
-  "closing_lines_added": 0,
+  "closing_lines_added": 1,
   "excluded_untracked_games": 127,
   "ledger_path": "data/snapshots/closing_lines.jsonl",
   "note": "Official Model A closing-line capture. tracking_eligible=false and FCS fallback games are excluded.",
-  "captures": []
+  "captures": [
+    {
+      "closing_id": "80ceaf6b91adb2c812295d7a",
+      "game_key": "401864502",
+      "captured_at_utc": "2026-09-13T00:36:35.305391+00:00",
+      "scheduled_kickoff_utc": "2026-09-13T02:00:00+00:00",
+      "minutes_to_kickoff": 83.4,
+      "capture_type": "near_kickoff_closing_proxy",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-09-13T00:36:34.860370",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401864502,
+      "week": 2,
+      "home_team": "Air Force",
+      "away_team": "North Dakota State",
+      "neutral_site": false,
+      "model_reference": {
+        "home_spread": 1.5,
+        "total": 48.5
+      },
+      "closing_market": {
+        "home_spread": 1.5,
+        "total": 47.5,
+        "bookmaker": "Consensus (9 books)"
+      },
+      "signal_at_close": {
+        "disagreement": 0.0,
+        "preferred_side": null,
+        "signal": "ALIGNED",
+        "bet_status": "TRACKING",
+        "status_system": "v2_the_signal"
+      }
+    }
+  ]
 }
