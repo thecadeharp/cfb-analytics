@@ -2,13 +2,21 @@
   "meta": {
     "season": 2026,
     "schema_version": "2.0-canonical-postgame",
-    "generated_at": "2026-09-18T18:21:30.464172+00:00",
+    "generated_at": "2026-09-18T18:37:28.357096+00:00",
     "final_games": 186,
     "available": 155,
     "pending": 31,
     "source": "SportsDataverse/cfbfastR PBP",
+    "source_url": "https://raw.githubusercontent.com/sportsdataverse/cfbfastR-cfb-data/main/cfb/pbp/parquet/play_by_play_2026.parquet",
     "model_a_touched": false,
-    "warning": "HTTPSConnectionPool(host='raw.githubusercontent.com', port=443): Read timed out. (read timeout=120)"
+    "notes": [
+      "Every final receives a postgame record.",
+      "Full metrics appear only when matching PBP is available.",
+      "Pending games retry automatically.",
+      "Canonical selected postgame metric package is schema v2.0.",
+      "Postgame Win Expectancy, Adjusted Final Score, and Red-Zone Overperformance are beta until historical calibration.",
+      "No CFBD calls are made."
+    ]
   },
   "games": {
     "6603982": {
@@ -258,7 +266,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:06.888665+00:00"
+      "generated_at": "2026-09-18T18:37:27.198137+00:00"
     },
     "6604351": {
       "game_id": "6604351",
@@ -507,7 +515,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:06.896922+00:00"
+      "generated_at": "2026-09-18T18:37:27.205747+00:00"
     },
     "6603913": {
       "game_id": "6603913",
@@ -521,9 +529,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.461771+00:00"
+      "generated_at": "2026-09-18T18:37:27.205825+00:00"
     },
     "6603714": {
       "game_id": "6603714",
@@ -772,7 +780,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:06.904600+00:00"
+      "generated_at": "2026-09-18T18:37:27.213293+00:00"
     },
     "6604126": {
       "game_id": "6604126",
@@ -1021,7 +1029,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:06.911651+00:00"
+      "generated_at": "2026-09-18T18:37:27.220373+00:00"
     },
     "6640273": {
       "game_id": "6640273",
@@ -1270,7 +1278,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:06.918038+00:00"
+      "generated_at": "2026-09-18T18:37:27.226912+00:00"
     },
     "6640530": {
       "game_id": "6640530",
@@ -1519,7 +1527,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:06.925511+00:00"
+      "generated_at": "2026-09-18T18:37:27.234267+00:00"
     },
     "6603944": {
       "game_id": "6603944",
@@ -1768,7 +1776,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:06.934905+00:00"
+      "generated_at": "2026-09-18T18:37:27.243996+00:00"
     },
     "6603624": {
       "game_id": "6603624",
@@ -2017,7 +2025,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:06.941981+00:00"
+      "generated_at": "2026-09-18T18:37:27.250927+00:00"
     },
     "6604288": {
       "game_id": "6604288",
@@ -2266,7 +2274,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:06.949622+00:00"
+      "generated_at": "2026-09-18T18:37:27.258618+00:00"
     },
     "6604252": {
       "game_id": "6604252",
@@ -2515,7 +2523,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:06.957887+00:00"
+      "generated_at": "2026-09-18T18:37:27.266923+00:00"
     },
     "6603857": {
       "game_id": "6603857",
@@ -2529,9 +2537,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.461907+00:00"
+      "generated_at": "2026-09-18T18:37:27.266994+00:00"
     },
     "6603890": {
       "game_id": "6603890",
@@ -2780,7 +2788,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:06.965158+00:00"
+      "generated_at": "2026-09-18T18:37:27.274161+00:00"
     },
     "6603778": {
       "game_id": "6603778",
@@ -2794,9 +2802,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.461946+00:00"
+      "generated_at": "2026-09-18T18:37:27.274232+00:00"
     },
     "6603812": {
       "game_id": "6603812",
@@ -3045,7 +3053,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:06.972144+00:00"
+      "generated_at": "2026-09-18T18:37:27.281104+00:00"
     },
     "6604281": {
       "game_id": "6604281",
@@ -3294,7 +3302,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:06.981385+00:00"
+      "generated_at": "2026-09-18T18:37:27.290229+00:00"
     },
     "manual-colorado-georgia-tech-2026-09-03": {
       "game_id": "manual-colorado-georgia-tech-2026-09-03",
@@ -3543,7 +3551,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:06.989170+00:00"
+      "generated_at": "2026-09-18T18:37:27.298033+00:00"
     },
     "6604046": {
       "game_id": "6604046",
@@ -3792,7 +3800,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:06.995966+00:00"
+      "generated_at": "2026-09-18T18:37:27.304736+00:00"
     },
     "6604294": {
       "game_id": "6604294",
@@ -4041,7 +4049,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.002553+00:00"
+      "generated_at": "2026-09-18T18:37:27.311204+00:00"
     },
     "6603681": {
       "game_id": "6603681",
@@ -4290,7 +4298,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.008868+00:00"
+      "generated_at": "2026-09-18T18:37:27.317551+00:00"
     },
     "6603854": {
       "game_id": "6603854",
@@ -4304,9 +4312,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.462092+00:00"
+      "generated_at": "2026-09-18T18:37:27.317633+00:00"
     },
     "6603844": {
       "game_id": "6603844",
@@ -4320,9 +4328,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.462117+00:00"
+      "generated_at": "2026-09-18T18:37:27.317684+00:00"
     },
     "6603643": {
       "game_id": "6603643",
@@ -4336,9 +4344,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.462142+00:00"
+      "generated_at": "2026-09-18T18:37:27.317733+00:00"
     },
     "6603888": {
       "game_id": "6603888",
@@ -4587,7 +4595,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.015766+00:00"
+      "generated_at": "2026-09-18T18:37:27.324451+00:00"
     },
     "6640444": {
       "game_id": "6640444",
@@ -4836,7 +4844,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.021655+00:00"
+      "generated_at": "2026-09-18T18:37:27.330317+00:00"
     },
     "6604018": {
       "game_id": "6604018",
@@ -5085,7 +5093,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.028140+00:00"
+      "generated_at": "2026-09-18T18:37:27.336789+00:00"
     },
     "6603983": {
       "game_id": "6603983",
@@ -5334,7 +5342,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.034574+00:00"
+      "generated_at": "2026-09-18T18:37:27.343204+00:00"
     },
     "6604106": {
       "game_id": "6604106",
@@ -5583,7 +5591,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.042884+00:00"
+      "generated_at": "2026-09-18T18:37:27.351399+00:00"
     },
     "6603744": {
       "game_id": "6603744",
@@ -5832,7 +5840,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.050571+00:00"
+      "generated_at": "2026-09-18T18:37:27.359004+00:00"
     },
     "6604087": {
       "game_id": "6604087",
@@ -6081,7 +6089,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.057278+00:00"
+      "generated_at": "2026-09-18T18:37:27.365670+00:00"
     },
     "6603922": {
       "game_id": "6603922",
@@ -6330,7 +6338,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.067408+00:00"
+      "generated_at": "2026-09-18T18:37:27.375400+00:00"
     },
     "6640460": {
       "game_id": "6640460",
@@ -6579,7 +6587,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.074386+00:00"
+      "generated_at": "2026-09-18T18:37:27.382227+00:00"
     },
     "6604127": {
       "game_id": "6604127",
@@ -6828,7 +6836,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.083282+00:00"
+      "generated_at": "2026-09-18T18:37:27.390938+00:00"
     },
     "6603924": {
       "game_id": "6603924",
@@ -7077,7 +7085,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.090589+00:00"
+      "generated_at": "2026-09-18T18:37:27.398088+00:00"
     },
     "6640532": {
       "game_id": "6640532",
@@ -7326,7 +7334,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.097945+00:00"
+      "generated_at": "2026-09-18T18:37:27.405445+00:00"
     },
     "6603746": {
       "game_id": "6603746",
@@ -7575,7 +7583,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.104730+00:00"
+      "generated_at": "2026-09-18T18:37:27.412530+00:00"
     },
     "6603933": {
       "game_id": "6603933",
@@ -7824,7 +7832,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.111918+00:00"
+      "generated_at": "2026-09-18T18:37:27.419711+00:00"
     },
     "6604056": {
       "game_id": "6604056",
@@ -8073,7 +8081,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.119379+00:00"
+      "generated_at": "2026-09-18T18:37:27.427277+00:00"
     },
     "6640534": {
       "game_id": "6640534",
@@ -8322,7 +8330,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.128130+00:00"
+      "generated_at": "2026-09-18T18:37:27.436030+00:00"
     },
     "6604160": {
       "game_id": "6604160",
@@ -8571,7 +8579,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.134831+00:00"
+      "generated_at": "2026-09-18T18:37:27.442766+00:00"
     },
     "6603756": {
       "game_id": "6603756",
@@ -8820,7 +8828,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.141622+00:00"
+      "generated_at": "2026-09-18T18:37:27.449506+00:00"
     },
     "6603866": {
       "game_id": "6603866",
@@ -9069,7 +9077,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.149391+00:00"
+      "generated_at": "2026-09-18T18:37:27.457159+00:00"
     },
     "6603713": {
       "game_id": "6603713",
@@ -9318,7 +9326,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.157166+00:00"
+      "generated_at": "2026-09-18T18:37:27.464943+00:00"
     },
     "6640263": {
       "game_id": "6640263",
@@ -9567,7 +9575,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.164609+00:00"
+      "generated_at": "2026-09-18T18:37:27.472392+00:00"
     },
     "6604072": {
       "game_id": "6604072",
@@ -9816,7 +9824,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.171885+00:00"
+      "generated_at": "2026-09-18T18:37:27.479799+00:00"
     },
     "6604107": {
       "game_id": "6604107",
@@ -10065,7 +10073,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.178818+00:00"
+      "generated_at": "2026-09-18T18:37:27.486936+00:00"
     },
     "6640531": {
       "game_id": "6640531",
@@ -10314,7 +10322,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.186334+00:00"
+      "generated_at": "2026-09-18T18:37:27.494455+00:00"
     },
     "6603680": {
       "game_id": "6603680",
@@ -10328,9 +10336,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.462412+00:00"
+      "generated_at": "2026-09-18T18:37:27.494557+00:00"
     },
     "6604183": {
       "game_id": "6604183",
@@ -10579,7 +10587,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.193932+00:00"
+      "generated_at": "2026-09-18T18:37:27.502005+00:00"
     },
     "6604331": {
       "game_id": "6604331",
@@ -10828,7 +10836,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.200604+00:00"
+      "generated_at": "2026-09-18T18:37:27.508500+00:00"
     },
     "6640287": {
       "game_id": "6640287",
@@ -10842,9 +10850,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.462465+00:00"
+      "generated_at": "2026-09-18T18:37:27.508588+00:00"
     },
     "6603992": {
       "game_id": "6603992",
@@ -11093,7 +11101,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.207710+00:00"
+      "generated_at": "2026-09-18T18:37:27.515526+00:00"
     },
     "6603606": {
       "game_id": "6603606",
@@ -11107,9 +11115,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.462497+00:00"
+      "generated_at": "2026-09-18T18:37:27.515588+00:00"
     },
     "6640364": {
       "game_id": "6640364",
@@ -11358,7 +11366,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.214756+00:00"
+      "generated_at": "2026-09-18T18:37:27.522752+00:00"
     },
     "6603961": {
       "game_id": "6603961",
@@ -11607,7 +11615,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.223475+00:00"
+      "generated_at": "2026-09-18T18:37:27.531543+00:00"
     },
     "6604228": {
       "game_id": "6604228",
@@ -11856,7 +11864,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.230287+00:00"
+      "generated_at": "2026-09-18T18:37:27.538535+00:00"
     },
     "6603711": {
       "game_id": "6603711",
@@ -12105,7 +12113,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.237831+00:00"
+      "generated_at": "2026-09-18T18:37:27.545984+00:00"
     },
     "6603767": {
       "game_id": "6603767",
@@ -12119,9 +12127,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.462562+00:00"
+      "generated_at": "2026-09-18T18:37:27.546062+00:00"
     },
     "6604316": {
       "game_id": "6604316",
@@ -12370,7 +12378,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.245344+00:00"
+      "generated_at": "2026-09-18T18:37:27.553499+00:00"
     },
     "6604001": {
       "game_id": "6604001",
@@ -12619,7 +12627,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.253050+00:00"
+      "generated_at": "2026-09-18T18:37:27.561006+00:00"
     },
     "6603946": {
       "game_id": "6603946",
@@ -12868,7 +12876,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.259826+00:00"
+      "generated_at": "2026-09-18T18:37:27.567674+00:00"
     },
     "6640454": {
       "game_id": "6640454",
@@ -12882,9 +12890,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.462617+00:00"
+      "generated_at": "2026-09-18T18:37:27.567746+00:00"
     },
     "6604309": {
       "game_id": "6604309",
@@ -13133,7 +13141,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.266734+00:00"
+      "generated_at": "2026-09-18T18:37:27.574467+00:00"
     },
     "6604332": {
       "game_id": "6604332",
@@ -13382,7 +13390,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.274168+00:00"
+      "generated_at": "2026-09-18T18:37:27.581991+00:00"
     },
     "6603612": {
       "game_id": "6603612",
@@ -13631,7 +13639,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.283269+00:00"
+      "generated_at": "2026-09-18T18:37:27.590960+00:00"
     },
     "6604065": {
       "game_id": "6604065",
@@ -13880,7 +13888,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.292168+00:00"
+      "generated_at": "2026-09-18T18:37:27.599726+00:00"
     },
     "6604162": {
       "game_id": "6604162",
@@ -14129,7 +14137,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.301430+00:00"
+      "generated_at": "2026-09-18T18:37:27.608833+00:00"
     },
     "6604000": {
       "game_id": "6604000",
@@ -14378,7 +14386,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.308752+00:00"
+      "generated_at": "2026-09-18T18:37:27.616062+00:00"
     },
     "6603962": {
       "game_id": "6603962",
@@ -14627,7 +14635,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.316608+00:00"
+      "generated_at": "2026-09-18T18:37:27.623793+00:00"
     },
     "6603974": {
       "game_id": "6603974",
@@ -14876,7 +14884,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.325742+00:00"
+      "generated_at": "2026-09-18T18:37:27.632993+00:00"
     },
     "6603878": {
       "game_id": "6603878",
@@ -15125,7 +15133,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.333673+00:00"
+      "generated_at": "2026-09-18T18:37:27.641243+00:00"
     },
     "6603957": {
       "game_id": "6603957",
@@ -15374,7 +15382,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.343623+00:00"
+      "generated_at": "2026-09-18T18:37:27.650985+00:00"
     },
     "6603956": {
       "game_id": "6603956",
@@ -15623,7 +15631,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.351237+00:00"
+      "generated_at": "2026-09-18T18:37:27.658453+00:00"
     },
     "6603796": {
       "game_id": "6603796",
@@ -15872,7 +15880,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.361063+00:00"
+      "generated_at": "2026-09-18T18:37:27.668109+00:00"
     },
     "6603656": {
       "game_id": "6603656",
@@ -15886,9 +15894,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.462769+00:00"
+      "generated_at": "2026-09-18T18:37:27.668171+00:00"
     },
     "6604173": {
       "game_id": "6604173",
@@ -15902,9 +15910,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.462793+00:00"
+      "generated_at": "2026-09-18T18:37:27.668220+00:00"
     },
     "6604282": {
       "game_id": "6604282",
@@ -16153,7 +16161,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.369235+00:00"
+      "generated_at": "2026-09-18T18:37:27.676172+00:00"
     },
     "6640492": {
       "game_id": "6640492",
@@ -16402,7 +16410,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.375585+00:00"
+      "generated_at": "2026-09-18T18:37:27.682431+00:00"
     },
     "6604218": {
       "game_id": "6604218",
@@ -16651,7 +16659,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.382747+00:00"
+      "generated_at": "2026-09-18T18:37:27.689755+00:00"
     },
     "6604181": {
       "game_id": "6604181",
@@ -16900,7 +16908,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.390823+00:00"
+      "generated_at": "2026-09-18T18:37:27.697890+00:00"
     },
     "6604263": {
       "game_id": "6604263",
@@ -17149,7 +17157,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.398814+00:00"
+      "generated_at": "2026-09-18T18:37:27.705714+00:00"
     },
     "6603695": {
       "game_id": "6603695",
@@ -17398,7 +17406,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.405293+00:00"
+      "generated_at": "2026-09-18T18:37:27.712144+00:00"
     },
     "6603666": {
       "game_id": "6603666",
@@ -17647,7 +17655,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.412735+00:00"
+      "generated_at": "2026-09-18T18:37:27.719556+00:00"
     },
     "6603734": {
       "game_id": "6603734",
@@ -17896,7 +17904,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.419312+00:00"
+      "generated_at": "2026-09-18T18:37:27.726123+00:00"
     },
     "6604235": {
       "game_id": "6604235",
@@ -18145,7 +18153,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.427747+00:00"
+      "generated_at": "2026-09-18T18:37:27.734569+00:00"
     },
     "6604117": {
       "game_id": "6604117",
@@ -18394,7 +18402,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.436005+00:00"
+      "generated_at": "2026-09-18T18:37:27.742765+00:00"
     },
     "6603699": {
       "game_id": "6603699",
@@ -18408,9 +18416,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.462914+00:00"
+      "generated_at": "2026-09-18T18:37:27.742828+00:00"
     },
     "6604206": {
       "game_id": "6604206",
@@ -18659,7 +18667,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.444089+00:00"
+      "generated_at": "2026-09-18T18:37:27.750718+00:00"
     },
     "6603903": {
       "game_id": "6603903",
@@ -18908,7 +18916,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.449704+00:00"
+      "generated_at": "2026-09-18T18:37:27.756222+00:00"
     },
     "6604272": {
       "game_id": "6604272",
@@ -18922,9 +18930,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.462953+00:00"
+      "generated_at": "2026-09-18T18:37:27.756275+00:00"
     },
     "6603811": {
       "game_id": "6603811",
@@ -19173,7 +19181,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.455768+00:00"
+      "generated_at": "2026-09-18T18:37:27.762137+00:00"
     },
     "6603799": {
       "game_id": "6603799",
@@ -19422,7 +19430,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.462468+00:00"
+      "generated_at": "2026-09-18T18:37:27.768731+00:00"
     },
     "6640533": {
       "game_id": "6640533",
@@ -19671,7 +19679,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.470324+00:00"
+      "generated_at": "2026-09-18T18:37:27.776416+00:00"
     },
     "6603790": {
       "game_id": "6603790",
@@ -19920,7 +19928,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.477877+00:00"
+      "generated_at": "2026-09-18T18:37:27.783884+00:00"
     },
     "6604164": {
       "game_id": "6604164",
@@ -19934,9 +19942,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.463028+00:00"
+      "generated_at": "2026-09-18T18:37:27.783942+00:00"
     },
     "6603823": {
       "game_id": "6603823",
@@ -20185,7 +20193,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.485390+00:00"
+      "generated_at": "2026-09-18T18:37:27.791228+00:00"
     },
     "6604115": {
       "game_id": "6604115",
@@ -20434,7 +20442,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.492482+00:00"
+      "generated_at": "2026-09-18T18:37:27.798292+00:00"
     },
     "6604196": {
       "game_id": "6604196",
@@ -20683,7 +20691,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.499873+00:00"
+      "generated_at": "2026-09-18T18:37:27.805711+00:00"
     },
     "6603655": {
       "game_id": "6603655",
@@ -20932,7 +20940,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.507281+00:00"
+      "generated_at": "2026-09-18T18:37:27.813014+00:00"
     },
     "6604093": {
       "game_id": "6604093",
@@ -21181,7 +21189,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.514488+00:00"
+      "generated_at": "2026-09-18T18:37:27.820183+00:00"
     },
     "6640428": {
       "game_id": "6640428",
@@ -21430,7 +21438,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.522149+00:00"
+      "generated_at": "2026-09-18T18:37:27.827812+00:00"
     },
     "6604296": {
       "game_id": "6604296",
@@ -21679,7 +21687,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.531338+00:00"
+      "generated_at": "2026-09-18T18:37:27.836811+00:00"
     },
     "6640760": {
       "game_id": "6640760",
@@ -21928,7 +21936,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.537952+00:00"
+      "generated_at": "2026-09-18T18:37:27.843541+00:00"
     },
     "6604259": {
       "game_id": "6604259",
@@ -22177,7 +22185,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.546100+00:00"
+      "generated_at": "2026-09-18T18:37:27.851430+00:00"
     },
     "6603768": {
       "game_id": "6603768",
@@ -22426,7 +22434,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.553712+00:00"
+      "generated_at": "2026-09-18T18:37:27.858929+00:00"
     },
     "6604283": {
       "game_id": "6604283",
@@ -22675,7 +22683,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.560316+00:00"
+      "generated_at": "2026-09-18T18:37:27.865403+00:00"
     },
     "6603845": {
       "game_id": "6603845",
@@ -22689,9 +22697,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.463158+00:00"
+      "generated_at": "2026-09-18T18:37:27.865471+00:00"
     },
     "6603636": {
       "game_id": "6603636",
@@ -22940,7 +22948,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.569780+00:00"
+      "generated_at": "2026-09-18T18:37:27.874832+00:00"
     },
     "6640738": {
       "game_id": "6640738",
@@ -23189,7 +23197,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.578427+00:00"
+      "generated_at": "2026-09-18T18:37:27.883379+00:00"
     },
     "6603644": {
       "game_id": "6603644",
@@ -23438,7 +23446,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.584433+00:00"
+      "generated_at": "2026-09-18T18:37:27.889344+00:00"
     },
     "6604241": {
       "game_id": "6604241",
@@ -23452,9 +23460,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.463214+00:00"
+      "generated_at": "2026-09-18T18:37:27.889410+00:00"
     },
     "6640766": {
       "game_id": "6640766",
@@ -23703,7 +23711,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.591307+00:00"
+      "generated_at": "2026-09-18T18:37:27.896007+00:00"
     },
     "6603891": {
       "game_id": "6603891",
@@ -23952,7 +23960,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.599157+00:00"
+      "generated_at": "2026-09-18T18:37:27.903784+00:00"
     },
     "6604074": {
       "game_id": "6604074",
@@ -24201,7 +24209,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.606937+00:00"
+      "generated_at": "2026-09-18T18:37:27.911518+00:00"
     },
     "6603667": {
       "game_id": "6603667",
@@ -24450,7 +24458,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.614117+00:00"
+      "generated_at": "2026-09-18T18:37:27.918616+00:00"
     },
     "6604016": {
       "game_id": "6604016",
@@ -24464,9 +24472,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.463276+00:00"
+      "generated_at": "2026-09-18T18:37:27.918671+00:00"
     },
     "6640470": {
       "game_id": "6640470",
@@ -24715,7 +24723,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.622103+00:00"
+      "generated_at": "2026-09-18T18:37:27.926535+00:00"
     },
     "6604311": {
       "game_id": "6604311",
@@ -24964,7 +24972,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.628111+00:00"
+      "generated_at": "2026-09-18T18:37:27.932468+00:00"
     },
     "6603889": {
       "game_id": "6603889",
@@ -25213,7 +25221,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.635293+00:00"
+      "generated_at": "2026-09-18T18:37:27.939666+00:00"
     },
     "6603779": {
       "game_id": "6603779",
@@ -25227,9 +25235,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.463331+00:00"
+      "generated_at": "2026-09-18T18:37:27.939723+00:00"
     },
     "6640269": {
       "game_id": "6640269",
@@ -25478,7 +25486,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.643797+00:00"
+      "generated_at": "2026-09-18T18:37:27.948052+00:00"
     },
     "6604002": {
       "game_id": "6604002",
@@ -25727,7 +25735,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.652176+00:00"
+      "generated_at": "2026-09-18T18:37:27.956269+00:00"
     },
     "6604317": {
       "game_id": "6604317",
@@ -25976,7 +25984,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.658430+00:00"
+      "generated_at": "2026-09-18T18:37:27.962390+00:00"
     },
     "6603986": {
       "game_id": "6603986",
@@ -26225,7 +26233,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.664038+00:00"
+      "generated_at": "2026-09-18T18:37:27.967881+00:00"
     },
     "6603697": {
       "game_id": "6603697",
@@ -26474,7 +26482,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.669286+00:00"
+      "generated_at": "2026-09-18T18:37:27.973046+00:00"
     },
     "6604325": {
       "game_id": "6604325",
@@ -26488,9 +26496,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.463403+00:00"
+      "generated_at": "2026-09-18T18:37:27.973100+00:00"
     },
     "6603605": {
       "game_id": "6603605",
@@ -26739,7 +26747,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.675763+00:00"
+      "generated_at": "2026-09-18T18:37:27.979464+00:00"
     },
     "6604176": {
       "game_id": "6604176",
@@ -26988,7 +26996,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.684932+00:00"
+      "generated_at": "2026-09-18T18:37:27.988074+00:00"
     },
     "6603678": {
       "game_id": "6603678",
@@ -27237,7 +27245,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.692578+00:00"
+      "generated_at": "2026-09-18T18:37:27.995579+00:00"
     },
     "6603747": {
       "game_id": "6603747",
@@ -27486,7 +27494,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.699500+00:00"
+      "generated_at": "2026-09-18T18:37:28.002297+00:00"
     },
     "6603813": {
       "game_id": "6603813",
@@ -27735,7 +27743,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.707571+00:00"
+      "generated_at": "2026-09-18T18:37:28.010329+00:00"
     },
     "6603984": {
       "game_id": "6603984",
@@ -27984,7 +27992,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.714992+00:00"
+      "generated_at": "2026-09-18T18:37:28.017740+00:00"
     },
     "6603715": {
       "game_id": "6603715",
@@ -28233,7 +28241,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.723010+00:00"
+      "generated_at": "2026-09-18T18:37:28.025648+00:00"
     },
     "6640264": {
       "game_id": "6640264",
@@ -28482,7 +28490,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.729840+00:00"
+      "generated_at": "2026-09-18T18:37:28.032428+00:00"
     },
     "6640727": {
       "game_id": "6640727",
@@ -28496,9 +28504,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.463505+00:00"
+      "generated_at": "2026-09-18T18:37:28.032487+00:00"
     },
     "6603682": {
       "game_id": "6603682",
@@ -28747,7 +28755,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.738784+00:00"
+      "generated_at": "2026-09-18T18:37:28.041429+00:00"
     },
     "6604057": {
       "game_id": "6604057",
@@ -28996,7 +29004,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.746455+00:00"
+      "generated_at": "2026-09-18T18:37:28.049078+00:00"
     },
     "6603824": {
       "game_id": "6603824",
@@ -29245,7 +29253,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.754888+00:00"
+      "generated_at": "2026-09-18T18:37:28.057467+00:00"
     },
     "6640494": {
       "game_id": "6640494",
@@ -29494,7 +29502,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.763199+00:00"
+      "generated_at": "2026-09-18T18:37:28.065767+00:00"
     },
     "6604236": {
       "game_id": "6604236",
@@ -29508,9 +29516,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.463567+00:00"
+      "generated_at": "2026-09-18T18:37:28.065828+00:00"
     },
     "6604207": {
       "game_id": "6604207",
@@ -29759,7 +29767,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.772381+00:00"
+      "generated_at": "2026-09-18T18:37:28.074841+00:00"
     },
     "6603712": {
       "game_id": "6603712",
@@ -30008,7 +30016,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.779380+00:00"
+      "generated_at": "2026-09-18T18:37:28.081781+00:00"
     },
     "6604047": {
       "game_id": "6604047",
@@ -30257,7 +30265,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.787743+00:00"
+      "generated_at": "2026-09-18T18:37:28.089969+00:00"
     },
     "6603901": {
       "game_id": "6603901",
@@ -30271,9 +30279,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.463622+00:00"
+      "generated_at": "2026-09-18T18:37:28.090032+00:00"
     },
     "6640723": {
       "game_id": "6640723",
@@ -30522,7 +30530,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.796187+00:00"
+      "generated_at": "2026-09-18T18:37:28.098282+00:00"
     },
     "6604188": {
       "game_id": "6604188",
@@ -30771,7 +30779,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.803160+00:00"
+      "generated_at": "2026-09-18T18:37:28.105362+00:00"
     },
     "6603800": {
       "game_id": "6603800",
@@ -31020,7 +31028,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.811756+00:00"
+      "generated_at": "2026-09-18T18:37:28.117717+00:00"
     },
     "6603833": {
       "game_id": "6603833",
@@ -31269,7 +31277,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.820865+00:00"
+      "generated_at": "2026-09-18T18:37:28.126347+00:00"
     },
     "6603757": {
       "game_id": "6603757",
@@ -31518,7 +31526,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.828066+00:00"
+      "generated_at": "2026-09-18T18:37:28.133278+00:00"
     },
     "6604037": {
       "game_id": "6604037",
@@ -31532,9 +31540,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.463697+00:00"
+      "generated_at": "2026-09-18T18:37:28.133336+00:00"
     },
     "6604138": {
       "game_id": "6604138",
@@ -31783,7 +31791,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.833668+00:00"
+      "generated_at": "2026-09-18T18:37:28.138765+00:00"
     },
     "6604227": {
       "game_id": "6604227",
@@ -32032,7 +32040,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.840133+00:00"
+      "generated_at": "2026-09-18T18:37:28.144861+00:00"
     },
     "6604323": {
       "game_id": "6604323",
@@ -32281,7 +32289,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.846916+00:00"
+      "generated_at": "2026-09-18T18:37:28.151407+00:00"
     },
     "6640598": {
       "game_id": "6640598",
@@ -32530,7 +32538,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.854702+00:00"
+      "generated_at": "2026-09-18T18:37:28.158930+00:00"
     },
     "6603973": {
       "game_id": "6603973",
@@ -32779,7 +32787,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.862456+00:00"
+      "generated_at": "2026-09-18T18:37:28.166400+00:00"
     },
     "6603867": {
       "game_id": "6603867",
@@ -33028,7 +33036,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.868977+00:00"
+      "generated_at": "2026-09-18T18:37:28.172726+00:00"
     },
     "6604118": {
       "game_id": "6604118",
@@ -33277,7 +33285,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.876757+00:00"
+      "generated_at": "2026-09-18T18:37:28.180226+00:00"
     },
     "6603725": {
       "game_id": "6603725",
@@ -33526,7 +33534,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.884261+00:00"
+      "generated_at": "2026-09-18T18:37:28.187569+00:00"
     },
     "6603859": {
       "game_id": "6603859",
@@ -33540,9 +33548,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.463801+00:00"
+      "generated_at": "2026-09-18T18:37:28.187630+00:00"
     },
     "6603914": {
       "game_id": "6603914",
@@ -33791,7 +33799,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.892379+00:00"
+      "generated_at": "2026-09-18T18:37:28.195459+00:00"
     },
     "6604066": {
       "game_id": "6604066",
@@ -33805,9 +33813,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.463834+00:00"
+      "generated_at": "2026-09-18T18:37:28.195531+00:00"
     },
     "6603943": {
       "game_id": "6603943",
@@ -34056,7 +34064,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.900831+00:00"
+      "generated_at": "2026-09-18T18:37:28.203542+00:00"
     },
     "6603694": {
       "game_id": "6603694",
@@ -34305,7 +34313,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.909428+00:00"
+      "generated_at": "2026-09-18T18:37:28.211941+00:00"
     },
     "6604019": {
       "game_id": "6604019",
@@ -34554,7 +34562,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.917845+00:00"
+      "generated_at": "2026-09-18T18:37:28.220221+00:00"
     },
     "6603902": {
       "game_id": "6603902",
@@ -34803,7 +34811,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.924444+00:00"
+      "generated_at": "2026-09-18T18:37:28.226646+00:00"
     },
     "6604300": {
       "game_id": "6604300",
@@ -35052,7 +35060,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.933699+00:00"
+      "generated_at": "2026-09-18T18:37:28.235674+00:00"
     },
     "6603696": {
       "game_id": "6603696",
@@ -35301,7 +35309,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.941397+00:00"
+      "generated_at": "2026-09-18T18:37:28.243266+00:00"
     },
     "6603613": {
       "game_id": "6603613",
@@ -35550,7 +35558,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.949558+00:00"
+      "generated_at": "2026-09-18T18:37:28.251303+00:00"
     },
     "6604153": {
       "game_id": "6604153",
@@ -35799,7 +35807,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.955266+00:00"
+      "generated_at": "2026-09-18T18:37:28.257019+00:00"
     },
     "6603625": {
       "game_id": "6603625",
@@ -36048,7 +36056,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.962403+00:00"
+      "generated_at": "2026-09-18T18:37:28.264058+00:00"
     },
     "6603700": {
       "game_id": "6603700",
@@ -36062,9 +36070,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.463945+00:00"
+      "generated_at": "2026-09-18T18:37:28.264109+00:00"
     },
     "6604134": {
       "game_id": "6604134",
@@ -36313,7 +36321,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.970391+00:00"
+      "generated_at": "2026-09-18T18:37:28.271909+00:00"
     },
     "6640303": {
       "game_id": "6640303",
@@ -36562,7 +36570,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.977750+00:00"
+      "generated_at": "2026-09-18T18:37:28.279105+00:00"
     },
     "6604219": {
       "game_id": "6604219",
@@ -36811,7 +36819,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.987062+00:00"
+      "generated_at": "2026-09-18T18:37:28.288256+00:00"
     },
     "6640756": {
       "game_id": "6640756",
@@ -37060,7 +37068,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:07.995135+00:00"
+      "generated_at": "2026-09-18T18:37:28.296144+00:00"
     },
     "6604015": {
       "game_id": "6604015",
@@ -37309,7 +37317,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:08.002096+00:00"
+      "generated_at": "2026-09-18T18:37:28.303031+00:00"
     },
     "6603934": {
       "game_id": "6603934",
@@ -37558,7 +37566,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:08.008875+00:00"
+      "generated_at": "2026-09-18T18:37:28.309658+00:00"
     },
     "6604352": {
       "game_id": "6604352",
@@ -37807,7 +37815,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:08.017652+00:00"
+      "generated_at": "2026-09-18T18:37:28.318259+00:00"
     },
     "6604229": {
       "game_id": "6604229",
@@ -38056,7 +38064,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:08.025789+00:00"
+      "generated_at": "2026-09-18T18:37:28.326221+00:00"
     },
     "6604350": {
       "game_id": "6604350",
@@ -38305,7 +38313,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:08.034444+00:00"
+      "generated_at": "2026-09-18T18:37:28.334729+00:00"
     },
     "6603791": {
       "game_id": "6603791",
@@ -38554,7 +38562,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:08.041728+00:00"
+      "generated_at": "2026-09-18T18:37:28.341821+00:00"
     },
     "6603693": {
       "game_id": "6603693",
@@ -38568,9 +38576,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.464079+00:00"
+      "generated_at": "2026-09-18T18:37:28.341876+00:00"
     },
     "6604017": {
       "game_id": "6604017",
@@ -38584,9 +38592,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.464102+00:00"
+      "generated_at": "2026-09-18T18:37:28.341924+00:00"
     },
     "6604165": {
       "game_id": "6604165",
@@ -38600,9 +38608,9 @@
       "analysis_status": "pending",
       "analysis_level": "scoreboard_only",
       "source": "Final score available; PBP pending",
-      "source_note": "PBP source could not be refreshed. Automatic retry scheduled.",
+      "source_note": "Final is recorded, but matching play-by-play has not arrived yet. The settlement workflow will retry automatically.",
       "calibration_status": "BETA \u2014 historical calibration pending",
-      "generated_at": "2026-09-18T18:21:30.464125+00:00"
+      "generated_at": "2026-09-18T18:37:28.341968+00:00"
     },
     "6604012": {
       "game_id": "6604012",
@@ -38851,7 +38859,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:08.049531+00:00"
+      "generated_at": "2026-09-18T18:37:28.349414+00:00"
     },
     "6640733": {
       "game_id": "6640733",
@@ -39100,7 +39108,7 @@
         "expected_margin": "Beta retrospective scoring margin derived from the complete underlying game-quality profile.",
         "postgame_win_expectancy": "Beta win probability derived from expected margin; retrospective and not a pregame forecast."
       },
-      "generated_at": "2026-09-18T17:44:08.057247+00:00"
+      "generated_at": "2026-09-18T18:37:28.357039+00:00"
     }
   }
 }
