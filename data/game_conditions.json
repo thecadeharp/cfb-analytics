@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "weather-engine-v1",
-    "generated": "2026-09-18T15:28:49.441535+00:00",
+    "generated": "2026-09-18T18:30:56.256423+00:00",
     "forecast_source": "Open-Meteo",
     "venue_source": "ESPN event venue metadata",
     "total_adjustment_cap": -6.0,
@@ -44,14 +44,14 @@
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-09-18T23:00Z",
-        "temperature_f": 81.2,
-        "precip_probability_pct": 32.0,
+        "temperature_f": 85.9,
+        "precip_probability_pct": 20.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 5.2,
-        "wind_gust_mph": 16.8,
-        "weather_code": 2,
+        "wind_mph": 6.3,
+        "wind_gust_mph": 16.6,
+        "weather_code": 1,
         "summary": "Partly cloudy",
         "precipitation_label": "Dry",
         "location": {
@@ -63,7 +63,7 @@
           "query": "Winston-Salem, NC, USA"
         }
       },
-      "conditions_line": "81\u00b0F \u00b7 5 mph wind \u00b7 gusts 17 \u00b7 Dry",
+      "conditions_line": "86\u00b0F \u00b7 6 mph wind \u00b7 gusts 17 \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -115,13 +115,13 @@
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-09-19T00:00Z",
-        "temperature_f": 90.9,
-        "precip_probability_pct": 1.0,
+        "temperature_f": 90.5,
+        "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 10.5,
-        "wind_gust_mph": 14.5,
+        "wind_mph": 10.2,
+        "wind_gust_mph": 14.3,
         "weather_code": 0,
         "summary": "Clear",
         "precipitation_label": "Dry",
@@ -134,7 +134,7 @@
           "query": "Lubbock, TX, USA"
         }
       },
-      "conditions_line": "91\u00b0F \u00b7 10 mph wind \u00b7 Dry",
+      "conditions_line": "90\u00b0F \u00b7 10 mph wind \u00b7 Dry",
       "impact": "Moderate",
       "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
@@ -258,7 +258,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T16:00Z",
         "temperature_f": 58.0,
-        "precip_probability_pct": 5.0,
+        "precip_probability_pct": 13.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -328,7 +328,7 @@
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-09-19T16:00Z",
-        "temperature_f": 69.6,
+        "temperature_f": 69.8,
         "precip_probability_pct": 47.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
@@ -397,30 +397,10 @@
       "kickoff_utc": "2026-09-19T16:00:00+00:00",
       "venue": "Jack Trice Stadium",
       "indoor": false,
-      "forecast": {
-        "forecast_time_utc": "2026-09-19T16:00Z",
-        "temperature_f": 75.1,
-        "precip_probability_pct": 23.0,
-        "precipitation_in": 0.0,
-        "rain_in": 0.0,
-        "snowfall_in": 0.0,
-        "wind_mph": 5.6,
-        "wind_gust_mph": 8.3,
-        "weather_code": 3,
-        "summary": "Cloudy",
-        "precipitation_label": "Dry",
-        "location": {
-          "latitude": 42.03471,
-          "longitude": -93.61994,
-          "resolved_name": "Ames",
-          "resolved_admin1": "Iowa",
-          "resolved_country": "United States",
-          "query": "Ames, IA, USA"
-        }
-      },
-      "conditions_line": "75\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+      "forecast": null,
+      "conditions_line": "Forecast unavailable",
       "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
+      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
       "baseline": {
         "home_spread": -13.5,
         "total": 51.5
@@ -441,26 +421,7 @@
       },
       "spread_logic": {
         "status": "LOCKED",
-        "home_spread_points": 0.0,
-        "favored_style_team": null,
-        "pass_lean_gap": null,
-        "reason": "requires 100+ 2026 offensive plays and non-zero EPA/pass + EPA/rush for both teams (Bowling Green: 0 plays; Iowa State: 0 plays)",
-        "home_tendency": {
-          "team": "Iowa State",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        },
-        "away_tendency": {
-          "team": "Bowling Green",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        }
+        "reason": "forecast or tendency inputs unavailable"
       }
     },
     "401858456": {
@@ -468,10 +429,30 @@
       "kickoff_utc": "2026-09-19T16:00:00+00:00",
       "venue": "Beaver Stadium",
       "indoor": false,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-09-19T16:00Z",
+        "temperature_f": 62.3,
+        "precip_probability_pct": 2.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 4.9,
+        "wind_gust_mph": 7.6,
+        "weather_code": 2,
+        "summary": "Partly cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 40.80201,
+          "longitude": -77.85639,
+          "resolved_name": "University Park",
+          "resolved_admin1": "Pennsylvania",
+          "resolved_country": "United States",
+          "query": "University Park, PA, USA"
+        }
+      },
+      "conditions_line": "62\u00b0F \u00b7 5 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -25.5,
         "total": 53.0
@@ -492,7 +473,26 @@
       },
       "spread_logic": {
         "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": null,
+        "reason": "requires 100+ 2026 offensive plays and non-zero EPA/pass + EPA/rush for both teams (Buffalo: 0 plays; Penn State: 0 plays)",
+        "home_tendency": {
+          "team": "Penn State",
+          "plays": 0,
+          "epa_pass": null,
+          "epa_rush": null,
+          "pass_lean_score": null,
+          "eligible": false
+        },
+        "away_tendency": {
+          "team": "Buffalo",
+          "plays": 0,
+          "epa_pass": null,
+          "epa_rush": null,
+          "pass_lean_score": null,
+          "eligible": false
+        }
       }
     },
     "401856686": {
@@ -574,7 +574,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T16:00Z",
         "temperature_f": 72.3,
-        "precip_probability_pct": 1.0,
+        "precip_probability_pct": 4.0,
         "precipitation_in": 0.071,
         "rain_in": 0.071,
         "snowfall_in": 0.0,
@@ -645,7 +645,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T16:00Z",
         "temperature_f": 87.6,
-        "precip_probability_pct": 3.0,
+        "precip_probability_pct": 2.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -713,30 +713,10 @@
       "kickoff_utc": "2026-09-19T16:00:00+00:00",
       "venue": "UFCU Stadium",
       "indoor": false,
-      "forecast": {
-        "forecast_time_utc": "2026-09-19T16:00Z",
-        "temperature_f": 86.7,
-        "precip_probability_pct": 0.0,
-        "precipitation_in": 0.0,
-        "rain_in": 0.0,
-        "snowfall_in": 0.0,
-        "wind_mph": 6.9,
-        "wind_gust_mph": 8.1,
-        "weather_code": 3,
-        "summary": "Cloudy",
-        "precipitation_label": "Dry",
-        "location": {
-          "latitude": 29.88327,
-          "longitude": -97.94139,
-          "resolved_name": "San Marcos",
-          "resolved_admin1": "Texas",
-          "resolved_country": "United States",
-          "query": "San Marcos, TX, USA"
-        }
-      },
-      "conditions_line": "87\u00b0F \u00b7 7 mph wind \u00b7 Dry",
+      "forecast": null,
+      "conditions_line": "Forecast unavailable",
       "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
+      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
       "baseline": {
         "home_spread": -9.0,
         "total": 56.0
@@ -757,26 +737,7 @@
       },
       "spread_logic": {
         "status": "LOCKED",
-        "home_spread_points": 0.0,
-        "favored_style_team": null,
-        "pass_lean_gap": null,
-        "reason": "requires 100+ 2026 offensive plays and non-zero EPA/pass + EPA/rush for both teams (North Texas: 0 plays; Texas State: 0 plays)",
-        "home_tendency": {
-          "team": "Texas State",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        },
-        "away_tendency": {
-          "team": "North Texas",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        }
+        "reason": "forecast or tendency inputs unavailable"
       }
     },
     "401856792": {
@@ -787,7 +748,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T16:00Z",
         "temperature_f": 87.8,
-        "precip_probability_pct": 4.0,
+        "precip_probability_pct": 3.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -858,7 +819,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T16:00Z",
         "temperature_f": 64.6,
-        "precip_probability_pct": 20.0,
+        "precip_probability_pct": 35.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -926,10 +887,30 @@
       "kickoff_utc": "2026-09-19T16:45:00+00:00",
       "venue": "FirstBank Stadium",
       "indoor": false,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-09-19T17:00Z",
+        "temperature_f": 98.3,
+        "precip_probability_pct": 3.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 4.8,
+        "wind_gust_mph": 8.3,
+        "weather_code": 1,
+        "summary": "Partly cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 36.16589,
+          "longitude": -86.78444,
+          "resolved_name": "Nashville",
+          "resolved_admin1": "Tennessee",
+          "resolved_country": "United States",
+          "query": "Nashville, TN, USA"
+        }
+      },
+      "conditions_line": "98\u00b0F \u00b7 5 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -11.0,
         "total": 54.0
@@ -938,19 +919,38 @@
         "breakdown": {
           "wind": 0.0,
           "precipitation": 0.0,
-          "temperature": 0.0
+          "temperature": -0.5
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -11.0,
-        "total": 54.0
+        "total": 53.5
       },
       "spread_logic": {
         "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": null,
+        "reason": "requires 100+ 2026 offensive plays and non-zero EPA/pass + EPA/rush for both teams (NC State: 49 plays; Vanderbilt: 0 plays)",
+        "home_tendency": {
+          "team": "Vanderbilt",
+          "plays": 0,
+          "epa_pass": null,
+          "epa_rush": null,
+          "pass_lean_score": null,
+          "eligible": false
+        },
+        "away_tendency": {
+          "team": "NC State",
+          "plays": 49,
+          "epa_pass": -0.045,
+          "epa_rush": -0.016,
+          "pass_lean_score": -0.029,
+          "eligible": false
+        }
       }
     },
     "401856689": {
@@ -1029,30 +1029,10 @@
       "kickoff_utc": "2026-09-19T17:00:00+00:00",
       "venue": "Kelly/Shorts Stadium",
       "indoor": false,
-      "forecast": {
-        "forecast_time_utc": "2026-09-19T17:00Z",
-        "temperature_f": 59.1,
-        "precip_probability_pct": 46.0,
-        "precipitation_in": 0.0,
-        "rain_in": 0.0,
-        "snowfall_in": 0.0,
-        "wind_mph": 5.4,
-        "wind_gust_mph": 12.5,
-        "weather_code": 3,
-        "summary": "Cloudy",
-        "precipitation_label": "Dry",
-        "location": {
-          "latitude": 43.59781,
-          "longitude": -84.76751,
-          "resolved_name": "Mount Pleasant",
-          "resolved_admin1": "Michigan",
-          "resolved_country": "United States",
-          "query": "Mount Pleasant, MI, USA"
-        }
-      },
-      "conditions_line": "59\u00b0F \u00b7 5 mph wind \u00b7 gusts 12 \u00b7 Dry",
+      "forecast": null,
+      "conditions_line": "Forecast unavailable",
       "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
+      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
       "baseline": {
         "home_spread": 1.5,
         "total": 52.0
@@ -1073,26 +1053,7 @@
       },
       "spread_logic": {
         "status": "LOCKED",
-        "home_spread_points": 0.0,
-        "favored_style_team": null,
-        "pass_lean_gap": null,
-        "reason": "requires 100+ 2026 offensive plays and non-zero EPA/pass + EPA/rush for both teams (Wyoming: 0 plays; Central Michigan: 0 plays)",
-        "home_tendency": {
-          "team": "Central Michigan",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        },
-        "away_tendency": {
-          "team": "Wyoming",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        }
+        "reason": "forecast or tendency inputs unavailable"
       }
     },
     "401862774": {
@@ -1103,7 +1064,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T19:00Z",
         "temperature_f": 65.0,
-        "precip_probability_pct": 48.0,
+        "precip_probability_pct": 38.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -1316,7 +1277,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T19:00Z",
         "temperature_f": 94.8,
-        "precip_probability_pct": 5.0,
+        "precip_probability_pct": 4.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -1384,88 +1345,56 @@
       "kickoff_utc": "2026-09-19T19:30:00+00:00",
       "venue": "L&N Federal Credit Union Stadium",
       "indoor": false,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
-      "baseline": {
-        "home_spread": -1.5,
-        "total": 54.5
-      },
-      "adjustments": {
-        "breakdown": {
-          "wind": 0.0,
-          "precipitation": 0.0,
-          "temperature": 0.0
-        },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
-        "home_spread_points": 0.0
-      },
-      "adjusted": {
-        "home_spread": -1.5,
-        "total": 54.5
-      },
-      "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
-      }
-    },
-    "401858457": {
-      "game_id": "401858457",
-      "kickoff_utc": "2026-09-19T19:30:00+00:00",
-      "venue": "SHI Stadium",
-      "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-09-19T19:00Z",
-        "temperature_f": 69.9,
-        "precip_probability_pct": 1.0,
+        "temperature_f": 97.3,
+        "precip_probability_pct": 9.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 9.0,
+        "wind_mph": 6.7,
         "wind_gust_mph": 11.2,
-        "weather_code": 3,
-        "summary": "Cloudy",
+        "weather_code": 1,
+        "summary": "Partly cloudy",
         "precipitation_label": "Dry",
         "location": {
-          "latitude": 40.49927,
-          "longitude": -74.39904,
-          "resolved_name": "Piscataway",
-          "resolved_admin1": "New Jersey",
+          "latitude": 38.25424,
+          "longitude": -85.75941,
+          "resolved_name": "Louisville",
+          "resolved_admin1": "Kentucky",
           "resolved_country": "United States",
-          "query": "Piscataway, NJ, USA"
+          "query": "Louisville, KY, USA"
         }
       },
-      "conditions_line": "70\u00b0F \u00b7 9 mph wind \u00b7 Dry",
+      "conditions_line": "97\u00b0F \u00b7 7 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
-        "home_spread": 7.0,
-        "total": 55.5
+        "home_spread": -1.5,
+        "total": 54.5
       },
       "adjustments": {
         "breakdown": {
           "wind": 0.0,
           "precipitation": 0.0,
-          "temperature": 0.0
+          "temperature": -0.5
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
-        "home_spread": 7.0,
-        "total": 55.5
+        "home_spread": -1.5,
+        "total": 54.0
       },
       "spread_logic": {
         "status": "LOCKED",
         "home_spread_points": 0.0,
         "favored_style_team": null,
         "pass_lean_gap": null,
-        "reason": "requires 100+ 2026 offensive plays and non-zero EPA/pass + EPA/rush for both teams (USC: 72 plays; Rutgers: 0 plays)",
+        "reason": "requires 100+ 2026 offensive plays and non-zero EPA/pass + EPA/rush for both teams (SMU: 0 plays; Louisville: 0 plays)",
         "home_tendency": {
-          "team": "Rutgers",
+          "team": "Louisville",
           "plays": 0,
           "epa_pass": null,
           "epa_rush": null,
@@ -1473,13 +1402,45 @@
           "eligible": false
         },
         "away_tendency": {
-          "team": "USC",
-          "plays": 72,
-          "epa_pass": 0.45,
-          "epa_rush": 0.353,
-          "pass_lean_score": 0.097,
+          "team": "SMU",
+          "plays": 0,
+          "epa_pass": null,
+          "epa_rush": null,
+          "pass_lean_score": null,
           "eligible": false
         }
+      }
+    },
+    "401858457": {
+      "game_id": "401858457",
+      "kickoff_utc": "2026-09-19T19:30:00+00:00",
+      "venue": "SHI Stadium",
+      "indoor": false,
+      "forecast": null,
+      "conditions_line": "Forecast unavailable",
+      "impact": "Minimal",
+      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
+      "baseline": {
+        "home_spread": 7.0,
+        "total": 55.5
+      },
+      "adjustments": {
+        "breakdown": {
+          "wind": 0.0,
+          "precipitation": 0.0,
+          "temperature": 0.0
+        },
+        "raw_total_points": 0.0,
+        "total_points": 0.0,
+        "home_spread_points": 0.0
+      },
+      "adjusted": {
+        "home_spread": 7.0,
+        "total": 55.5
+      },
+      "spread_logic": {
+        "status": "LOCKED",
+        "reason": "forecast or tendency inputs unavailable"
       }
     },
     "401858450": {
@@ -1490,7 +1451,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T19:00Z",
         "temperature_f": 63.2,
-        "precip_probability_pct": 35.0,
+        "precip_probability_pct": 48.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -1632,7 +1593,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T20:00Z",
         "temperature_f": 77.3,
-        "precip_probability_pct": 1.0,
+        "precip_probability_pct": 2.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -1771,65 +1732,33 @@
       "kickoff_utc": "2026-09-19T20:00:00+00:00",
       "venue": "Wallace Wade Stadium",
       "indoor": false,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
-      "baseline": {
-        "home_spread": -7.0,
-        "total": 52.5
-      },
-      "adjustments": {
-        "breakdown": {
-          "wind": 0.0,
-          "precipitation": 0.0,
-          "temperature": 0.0
-        },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
-        "home_spread_points": 0.0
-      },
-      "adjusted": {
-        "home_spread": -7.0,
-        "total": 52.5
-      },
-      "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
-      }
-    },
-    "401858449": {
-      "game_id": "401858449",
-      "kickoff_utc": "2026-09-19T20:00:00+00:00",
-      "venue": "Memorial Stadium (Bloomington, IN)",
-      "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-09-19T20:00Z",
-        "temperature_f": 81.0,
-        "precip_probability_pct": 14.0,
+        "temperature_f": 76.7,
+        "precip_probability_pct": 6.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 7.4,
-        "wind_gust_mph": 13.9,
+        "wind_mph": 8.9,
+        "wind_gust_mph": 12.8,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
         "location": {
-          "latitude": 39.16533,
-          "longitude": -86.52639,
-          "resolved_name": "Bloomington",
-          "resolved_admin1": "Indiana",
+          "latitude": 35.99403,
+          "longitude": -78.89862,
+          "resolved_name": "Durham",
+          "resolved_admin1": "North Carolina",
           "resolved_country": "United States",
-          "query": "Bloomington, IN, USA"
+          "query": "Durham, NC, USA"
         }
       },
-      "conditions_line": "81\u00b0F \u00b7 7 mph wind \u00b7 gusts 14 \u00b7 Dry",
+      "conditions_line": "77\u00b0F \u00b7 9 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
-        "home_spread": -28.0,
-        "total": 55.5
+        "home_spread": -7.0,
+        "total": 52.5
       },
       "adjustments": {
         "breakdown": {
@@ -1842,17 +1771,17 @@
         "home_spread_points": 0.0
       },
       "adjusted": {
-        "home_spread": -28.0,
-        "total": 55.5
+        "home_spread": -7.0,
+        "total": 52.5
       },
       "spread_logic": {
         "status": "LOCKED",
         "home_spread_points": 0.0,
         "favored_style_team": null,
         "pass_lean_gap": null,
-        "reason": "requires 100+ 2026 offensive plays and non-zero EPA/pass + EPA/rush for both teams (Western Kentucky: 0 plays; Indiana: 0 plays)",
+        "reason": "requires 100+ 2026 offensive plays and non-zero EPA/pass + EPA/rush for both teams (Stanford: 69 plays; Duke: 0 plays)",
         "home_tendency": {
-          "team": "Indiana",
+          "team": "Duke",
           "plays": 0,
           "epa_pass": null,
           "epa_rush": null,
@@ -1860,13 +1789,45 @@
           "eligible": false
         },
         "away_tendency": {
-          "team": "Western Kentucky",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
+          "team": "Stanford",
+          "plays": 69,
+          "epa_pass": 0.44,
+          "epa_rush": 0.243,
+          "pass_lean_score": 0.197,
           "eligible": false
         }
+      }
+    },
+    "401858449": {
+      "game_id": "401858449",
+      "kickoff_utc": "2026-09-19T20:00:00+00:00",
+      "venue": "Memorial Stadium (Bloomington, IN)",
+      "indoor": false,
+      "forecast": null,
+      "conditions_line": "Forecast unavailable",
+      "impact": "Minimal",
+      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
+      "baseline": {
+        "home_spread": -28.0,
+        "total": 55.5
+      },
+      "adjustments": {
+        "breakdown": {
+          "wind": 0.0,
+          "precipitation": 0.0,
+          "temperature": 0.0
+        },
+        "raw_total_points": 0.0,
+        "total_points": 0.0,
+        "home_spread_points": 0.0
+      },
+      "adjusted": {
+        "home_spread": -28.0,
+        "total": 55.5
+      },
+      "spread_logic": {
+        "status": "LOCKED",
+        "reason": "forecast or tendency inputs unavailable"
       }
     },
     "401856691": {
@@ -1877,7 +1838,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T20:00Z",
         "temperature_f": 94.3,
-        "precip_probability_pct": 14.0,
+        "precip_probability_pct": 13.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -1948,7 +1909,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T22:00Z",
         "temperature_f": 78.2,
-        "precip_probability_pct": 13.0,
+        "precip_probability_pct": 19.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -2019,7 +1980,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T22:00Z",
         "temperature_f": 78.3,
-        "precip_probability_pct": 2.0,
+        "precip_probability_pct": 5.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -2090,7 +2051,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T22:00Z",
         "temperature_f": 80.9,
-        "precip_probability_pct": 28.0,
+        "precip_probability_pct": 20.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -2193,7 +2154,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T23:00Z",
         "temperature_f": 87.4,
-        "precip_probability_pct": 21.0,
+        "precip_probability_pct": 25.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -2264,7 +2225,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T23:00Z",
         "temperature_f": 90.1,
-        "precip_probability_pct": 9.0,
+        "precip_probability_pct": 6.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -2335,7 +2296,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T23:00Z",
         "temperature_f": 78.0,
-        "precip_probability_pct": 20.0,
+        "precip_probability_pct": 15.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -2406,7 +2367,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T23:00Z",
         "temperature_f": 90.9,
-        "precip_probability_pct": 7.0,
+        "precip_probability_pct": 11.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -2474,84 +2435,13 @@
       "kickoff_utc": "2026-09-19T23:00:00+00:00",
       "venue": "Hancock Whitney Stadium",
       "indoor": false,
-      "forecast": {
-        "forecast_time_utc": "2026-09-19T23:00Z",
-        "temperature_f": 91.2,
-        "precip_probability_pct": 5.0,
-        "precipitation_in": 0.0,
-        "rain_in": 0.0,
-        "snowfall_in": 0.0,
-        "wind_mph": 8.4,
-        "wind_gust_mph": 12.5,
-        "weather_code": 0,
-        "summary": "Clear",
-        "precipitation_label": "Dry",
-        "location": {
-          "latitude": 30.69436,
-          "longitude": -88.04305,
-          "resolved_name": "Mobile",
-          "resolved_admin1": "Alabama",
-          "resolved_country": "United States",
-          "query": "Mobile, AL, USA"
-        }
-      },
-      "conditions_line": "91\u00b0F \u00b7 8 mph wind \u00b7 Dry",
-      "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
-      "baseline": {
-        "home_spread": 0.5,
-        "total": 52.5
-      },
-      "adjustments": {
-        "breakdown": {
-          "wind": 0.0,
-          "precipitation": 0.0,
-          "temperature": -0.5
-        },
-        "raw_total_points": -0.5,
-        "total_points": -0.5,
-        "home_spread_points": 0.0
-      },
-      "adjusted": {
-        "home_spread": 0.5,
-        "total": 52.0
-      },
-      "spread_logic": {
-        "status": "LOCKED",
-        "home_spread_points": 0.0,
-        "favored_style_team": null,
-        "pass_lean_gap": null,
-        "reason": "requires 100+ 2026 offensive plays and non-zero EPA/pass + EPA/rush for both teams (Ohio: 0 plays; South Alabama: 0 plays)",
-        "home_tendency": {
-          "team": "South Alabama",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        },
-        "away_tendency": {
-          "team": "Ohio",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        }
-      }
-    },
-    "401861963": {
-      "game_id": "401861963",
-      "kickoff_utc": "2026-09-19T23:00:00+00:00",
-      "venue": "M. M. Roberts Stadium",
-      "indoor": false,
       "forecast": null,
       "conditions_line": "Forecast unavailable",
       "impact": "Minimal",
       "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
       "baseline": {
-        "home_spread": 5.0,
-        "total": 53.5
+        "home_spread": 0.5,
+        "total": 52.5
       },
       "adjustments": {
         "breakdown": {
@@ -2564,12 +2454,83 @@
         "home_spread_points": 0.0
       },
       "adjusted": {
-        "home_spread": 5.0,
-        "total": 53.5
+        "home_spread": 0.5,
+        "total": 52.5
       },
       "spread_logic": {
         "status": "LOCKED",
         "reason": "forecast or tendency inputs unavailable"
+      }
+    },
+    "401861963": {
+      "game_id": "401861963",
+      "kickoff_utc": "2026-09-19T23:00:00+00:00",
+      "venue": "M. M. Roberts Stadium",
+      "indoor": false,
+      "forecast": {
+        "forecast_time_utc": "2026-09-19T23:00Z",
+        "temperature_f": 90.9,
+        "precip_probability_pct": 3.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 7.6,
+        "wind_gust_mph": 11.2,
+        "weather_code": 1,
+        "summary": "Partly cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 31.32712,
+          "longitude": -89.29034,
+          "resolved_name": "Hattiesburg",
+          "resolved_admin1": "Mississippi",
+          "resolved_country": "United States",
+          "query": "Hattiesburg, MS, USA"
+        }
+      },
+      "conditions_line": "91\u00b0F \u00b7 8 mph wind \u00b7 Dry",
+      "impact": "Minimal",
+      "note": "No material weather-driven scoring effect is projected.",
+      "baseline": {
+        "home_spread": 5.0,
+        "total": 53.5
+      },
+      "adjustments": {
+        "breakdown": {
+          "wind": 0.0,
+          "precipitation": 0.0,
+          "temperature": -0.5
+        },
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
+        "home_spread_points": 0.0
+      },
+      "adjusted": {
+        "home_spread": 5.0,
+        "total": 53.0
+      },
+      "spread_logic": {
+        "status": "LOCKED",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": null,
+        "reason": "requires 100+ 2026 offensive plays and non-zero EPA/pass + EPA/rush for both teams (UConn: 0 plays; Southern Miss: 0 plays)",
+        "home_tendency": {
+          "team": "Southern Miss",
+          "plays": 0,
+          "epa_pass": null,
+          "epa_rush": null,
+          "pass_lean_score": null,
+          "eligible": false
+        },
+        "away_tendency": {
+          "team": "UConn",
+          "plays": 0,
+          "epa_pass": null,
+          "epa_rush": null,
+          "pass_lean_score": null,
+          "eligible": false
+        }
       }
     },
     "401862773": {
@@ -2651,7 +2612,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T23:00Z",
         "temperature_f": 74.1,
-        "precip_probability_pct": 17.0,
+        "precip_probability_pct": 19.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -2722,7 +2683,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T23:00Z",
         "temperature_f": 70.0,
-        "precip_probability_pct": 29.0,
+        "precip_probability_pct": 27.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -2790,30 +2751,10 @@
       "kickoff_utc": "2026-09-19T23:30:00+00:00",
       "venue": "Vaught-Hemingway Stadium",
       "indoor": false,
-      "forecast": {
-        "forecast_time_utc": "2026-09-19T23:00Z",
-        "temperature_f": 96.8,
-        "precip_probability_pct": 2.0,
-        "precipitation_in": 0.0,
-        "rain_in": 0.0,
-        "snowfall_in": 0.0,
-        "wind_mph": 2.6,
-        "wind_gust_mph": 3.6,
-        "weather_code": 0,
-        "summary": "Clear",
-        "precipitation_label": "Dry",
-        "location": {
-          "latitude": 34.3665,
-          "longitude": -89.51925,
-          "resolved_name": "Oxford",
-          "resolved_admin1": "Mississippi",
-          "resolved_country": "United States",
-          "query": "Oxford, MS, USA"
-        }
-      },
-      "conditions_line": "97\u00b0F \u00b7 3 mph wind \u00b7 Dry",
+      "forecast": null,
+      "conditions_line": "Forecast unavailable",
       "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
+      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
       "baseline": {
         "home_spread": 0.5,
         "total": 53.5
@@ -2822,38 +2763,19 @@
         "breakdown": {
           "wind": 0.0,
           "precipitation": 0.0,
-          "temperature": -0.5
+          "temperature": 0.0
         },
-        "raw_total_points": -0.5,
-        "total_points": -0.5,
+        "raw_total_points": 0.0,
+        "total_points": 0.0,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 0.5,
-        "total": 53.0
+        "total": 53.5
       },
       "spread_logic": {
         "status": "LOCKED",
-        "home_spread_points": 0.0,
-        "favored_style_team": null,
-        "pass_lean_gap": null,
-        "reason": "requires 100+ 2026 offensive plays and non-zero EPA/pass + EPA/rush for both teams (LSU: 0 plays; Ole Miss: 0 plays)",
-        "home_tendency": {
-          "team": "Ole Miss",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        },
-        "away_tendency": {
-          "team": "LSU",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        }
+        "reason": "forecast or tendency inputs unavailable"
       }
     },
     "401858453": {
@@ -2864,7 +2786,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T23:00Z",
         "temperature_f": 70.0,
-        "precip_probability_pct": 16.0,
+        "precip_probability_pct": 14.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -2932,31 +2854,70 @@
       "kickoff_utc": "2026-09-19T23:30:00+00:00",
       "venue": "Memorial Stadium (Norman, OK)",
       "indoor": false,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-09-19T23:00Z",
+        "temperature_f": 96.3,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 11.5,
+        "wind_gust_mph": 15.7,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 35.22257,
+          "longitude": -97.43948,
+          "resolved_name": "Norman",
+          "resolved_admin1": "Oklahoma",
+          "resolved_country": "United States",
+          "query": "Norman, OK, USA"
+        }
+      },
+      "conditions_line": "96\u00b0F \u00b7 12 mph wind \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": -17.5,
         "total": 52.5
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
-          "temperature": 0.0
+          "temperature": -0.5
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -1.0,
+        "total_points": -1.0,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -17.5,
-        "total": 52.5
+        "total": 51.5
       },
       "spread_logic": {
         "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": null,
+        "reason": "requires 100+ 2026 offensive plays and non-zero EPA/pass + EPA/rush for both teams (New Mexico: 0 plays; Oklahoma: 0 plays)",
+        "home_tendency": {
+          "team": "Oklahoma",
+          "plays": 0,
+          "epa_pass": null,
+          "epa_rush": null,
+          "pass_lean_score": null,
+          "eligible": false
+        },
+        "away_tendency": {
+          "team": "New Mexico",
+          "plays": 0,
+          "epa_pass": null,
+          "epa_rush": null,
+          "pass_lean_score": null,
+          "eligible": false
+        }
       }
     },
     "401858232": {
@@ -2967,7 +2928,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T23:00Z",
         "temperature_f": 75.3,
-        "precip_probability_pct": 7.0,
+        "precip_probability_pct": 4.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -3038,7 +2999,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-19T23:00Z",
         "temperature_f": 85.8,
-        "precip_probability_pct": 11.0,
+        "precip_probability_pct": 10.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -3106,30 +3067,10 @@
       "kickoff_utc": "2026-09-19T23:45:00+00:00",
       "venue": "Neyland Stadium",
       "indoor": false,
-      "forecast": {
-        "forecast_time_utc": "2026-09-20T00:00Z",
-        "temperature_f": 85.2,
-        "precip_probability_pct": 12.0,
-        "precipitation_in": 0.0,
-        "rain_in": 0.0,
-        "snowfall_in": 0.0,
-        "wind_mph": 8.4,
-        "wind_gust_mph": 17.4,
-        "weather_code": 3,
-        "summary": "Cloudy",
-        "precipitation_label": "Dry",
-        "location": {
-          "latitude": 35.96064,
-          "longitude": -83.92074,
-          "resolved_name": "Knoxville",
-          "resolved_admin1": "Tennessee",
-          "resolved_country": "United States",
-          "query": "Knoxville, TN, USA"
-        }
-      },
-      "conditions_line": "85\u00b0F \u00b7 8 mph wind \u00b7 gusts 17 \u00b7 Dry",
+      "forecast": null,
+      "conditions_line": "Forecast unavailable",
       "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
+      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
       "baseline": {
         "home_spread": -26.5,
         "total": 54.5
@@ -3150,26 +3091,7 @@
       },
       "spread_logic": {
         "status": "LOCKED",
-        "home_spread_points": 0.0,
-        "favored_style_team": null,
-        "pass_lean_gap": null,
-        "reason": "requires 100+ 2026 offensive plays and non-zero EPA/pass + EPA/rush for both teams (Kennesaw State: 0 plays; Tennessee: 0 plays)",
-        "home_tendency": {
-          "team": "Tennessee",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        },
-        "away_tendency": {
-          "team": "Kennesaw State",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        }
+        "reason": "forecast or tendency inputs unavailable"
       }
     },
     "401856799": {
@@ -3319,10 +3241,30 @@
       "kickoff_utc": "2026-09-20T00:00:00+00:00",
       "venue": "DKR-Texas Memorial Stadium",
       "indoor": false,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-09-20T00:00Z",
+        "temperature_f": 94.0,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 9.2,
+        "wind_gust_mph": 13.6,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 30.26715,
+          "longitude": -97.74306,
+          "resolved_name": "Austin",
+          "resolved_admin1": "Texas",
+          "resolved_country": "United States",
+          "query": "Austin, TX, USA"
+        }
+      },
+      "conditions_line": "94\u00b0F \u00b7 9 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -21.5,
         "total": 53.5
@@ -3331,19 +3273,38 @@
         "breakdown": {
           "wind": 0.0,
           "precipitation": 0.0,
-          "temperature": 0.0
+          "temperature": -0.5
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -21.5,
-        "total": 53.5
+        "total": 53.0
       },
       "spread_logic": {
         "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": null,
+        "reason": "requires 100+ 2026 offensive plays and non-zero EPA/pass + EPA/rush for both teams (UTSA: 0 plays; Texas: 0 plays)",
+        "home_tendency": {
+          "team": "Texas",
+          "plays": 0,
+          "epa_pass": null,
+          "epa_rush": null,
+          "pass_lean_score": null,
+          "eligible": false
+        },
+        "away_tendency": {
+          "team": "UTSA",
+          "plays": 0,
+          "epa_pass": null,
+          "epa_rush": null,
+          "pass_lean_score": null,
+          "eligible": false
+        }
       }
     },
     "401860887": {
@@ -3422,30 +3383,10 @@
       "kickoff_utc": "2026-09-20T02:30:00+00:00",
       "venue": "Hornet Stadium",
       "indoor": false,
-      "forecast": {
-        "forecast_time_utc": "2026-09-20T02:00Z",
-        "temperature_f": 81.0,
-        "precip_probability_pct": 0.0,
-        "precipitation_in": 0.0,
-        "rain_in": 0.0,
-        "snowfall_in": 0.0,
-        "wind_mph": 7.9,
-        "wind_gust_mph": 17.9,
-        "weather_code": 3,
-        "summary": "Cloudy",
-        "precipitation_label": "Dry",
-        "location": {
-          "latitude": 38.58157,
-          "longitude": -121.4944,
-          "resolved_name": "Sacramento",
-          "resolved_admin1": "California",
-          "resolved_country": "United States",
-          "query": "Sacramento, CA, USA"
-        }
-      },
-      "conditions_line": "81\u00b0F \u00b7 8 mph wind \u00b7 gusts 18 \u00b7 Dry",
+      "forecast": null,
+      "conditions_line": "Forecast unavailable",
       "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
+      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
       "baseline": {
         "home_spread": 15.5,
         "total": 43.5
@@ -3466,26 +3407,7 @@
       },
       "spread_logic": {
         "status": "LOCKED",
-        "home_spread_points": 0.0,
-        "favored_style_team": null,
-        "pass_lean_gap": null,
-        "reason": "requires 100+ 2026 offensive plays and non-zero EPA/pass + EPA/rush for both teams (North Dakota State: 64 plays; Sacramento State: 56 plays)",
-        "home_tendency": {
-          "team": "Sacramento State",
-          "plays": 56,
-          "epa_pass": -0.176,
-          "epa_rush": -0.032,
-          "pass_lean_score": -0.144,
-          "eligible": false
-        },
-        "away_tendency": {
-          "team": "North Dakota State",
-          "plays": 64,
-          "epa_pass": 0.405,
-          "epa_rush": 0.124,
-          "pass_lean_score": 0.281,
-          "eligible": false
-        }
+        "reason": "forecast or tendency inputs unavailable"
       }
     },
     "401856793": {
@@ -3496,7 +3418,7 @@
       "forecast": {
         "forecast_time_utc": "2026-09-20T02:00Z",
         "temperature_f": 86.5,
-        "precip_probability_pct": 1.0,
+        "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -3706,10 +3628,30 @@
       "kickoff_utc": "2026-09-24T23:30:00+00:00",
       "venue": "Brooks Stadium (SC)",
       "indoor": false,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-09-24T23:00Z",
+        "temperature_f": 77.3,
+        "precip_probability_pct": 17.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 5.1,
+        "wind_gust_mph": 8.7,
+        "weather_code": 2,
+        "summary": "Partly cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 33.836,
+          "longitude": -79.04781,
+          "resolved_name": "Conway",
+          "resolved_admin1": "South Carolina",
+          "resolved_country": "United States",
+          "query": "Conway, SC, USA"
+        }
+      },
+      "conditions_line": "77\u00b0F \u00b7 5 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": 5.5,
         "total": 51.0
@@ -3730,7 +3672,26 @@
       },
       "spread_logic": {
         "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": null,
+        "reason": "requires 100+ 2026 offensive plays and non-zero EPA/pass + EPA/rush for both teams (Liberty: 0 plays; Coastal Carolina: 0 plays)",
+        "home_tendency": {
+          "team": "Coastal Carolina",
+          "plays": 0,
+          "epa_pass": null,
+          "epa_rush": null,
+          "pass_lean_score": null,
+          "eligible": false
+        },
+        "away_tendency": {
+          "team": "Liberty",
+          "plays": 0,
+          "epa_pass": null,
+          "epa_rush": null,
+          "pass_lean_score": null,
+          "eligible": false
+        }
       }
     },
     "401862779": {
@@ -3809,30 +3770,10 @@
       "kickoff_utc": "2026-09-25T23:00:00+00:00",
       "venue": "Protective Stadium",
       "indoor": false,
-      "forecast": {
-        "forecast_time_utc": "2026-09-25T23:00Z",
-        "temperature_f": 80.5,
-        "precip_probability_pct": 1.0,
-        "precipitation_in": 0.0,
-        "rain_in": 0.0,
-        "snowfall_in": 0.0,
-        "wind_mph": 6.1,
-        "wind_gust_mph": 13.6,
-        "weather_code": 2,
-        "summary": "Partly cloudy",
-        "precipitation_label": "Dry",
-        "location": {
-          "latitude": 33.52066,
-          "longitude": -86.80249,
-          "resolved_name": "Birmingham",
-          "resolved_admin1": "Alabama",
-          "resolved_country": "United States",
-          "query": "Birmingham, AL, USA"
-        }
-      },
-      "conditions_line": "80\u00b0F \u00b7 6 mph wind \u00b7 gusts 14 \u00b7 Dry",
+      "forecast": null,
+      "conditions_line": "Forecast unavailable",
       "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
+      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
       "baseline": {
         "home_spread": 12.0,
         "total": 53.0
@@ -3853,26 +3794,7 @@
       },
       "spread_logic": {
         "status": "LOCKED",
-        "home_spread_points": 0.0,
-        "favored_style_team": null,
-        "pass_lean_gap": null,
-        "reason": "requires 100+ 2026 offensive plays and non-zero EPA/pass + EPA/rush for both teams (Navy: 0 plays; UAB: 0 plays)",
-        "home_tendency": {
-          "team": "UAB",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        },
-        "away_tendency": {
-          "team": "Navy",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        }
+        "reason": "forecast or tendency inputs unavailable"
       }
     },
     "401858461": {
@@ -4107,7 +4029,7 @@
       "forecast": null,
       "conditions_line": "Forecast unavailable",
       "impact": "Minimal",
-      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
+      "note": "Forecast unavailable; Model A baseline remains unchanged.",
       "baseline": {
         "home_spread": -3.5,
         "total": 48.5
@@ -4128,7 +4050,26 @@
       },
       "spread_logic": {
         "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": null,
+        "reason": "forecast unavailable; directional weather adjustment cannot be evaluated",
+        "home_tendency": {
+          "team": "Kent State",
+          "plays": 0,
+          "epa_pass": null,
+          "epa_rush": null,
+          "pass_lean_score": null,
+          "eligible": false
+        },
+        "away_tendency": {
+          "team": "Ball State",
+          "plays": 0,
+          "epa_pass": null,
+          "epa_rush": null,
+          "pass_lean_score": null,
+          "eligible": false
+        }
       }
     },
     "401860897": {
@@ -4139,7 +4080,7 @@
       "forecast": null,
       "conditions_line": "Forecast unavailable",
       "impact": "Minimal",
-      "note": "Forecast unavailable; Model A baseline remains unchanged.",
+      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
       "baseline": {
         "home_spread": 7.0,
         "total": 53.0
@@ -4160,26 +4101,7 @@
       },
       "spread_logic": {
         "status": "LOCKED",
-        "home_spread_points": 0.0,
-        "favored_style_team": null,
-        "pass_lean_gap": null,
-        "reason": "forecast unavailable; directional weather adjustment cannot be evaluated",
-        "home_tendency": {
-          "team": "Western Michigan",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        },
-        "away_tendency": {
-          "team": "Boise State",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        }
+        "reason": "forecast or tendency inputs unavailable"
       }
     },
     "401856813": {
@@ -4885,7 +4807,7 @@
       "forecast": null,
       "conditions_line": "Forecast unavailable",
       "impact": "Minimal",
-      "note": "Forecast unavailable; Model A baseline remains unchanged.",
+      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
       "baseline": {
         "home_spread": 3.5,
         "total": 52.5
@@ -4906,26 +4828,7 @@
       },
       "spread_logic": {
         "status": "LOCKED",
-        "home_spread_points": 0.0,
-        "favored_style_team": null,
-        "pass_lean_gap": null,
-        "reason": "forecast unavailable; directional weather adjustment cannot be evaluated",
-        "home_tendency": {
-          "team": "Michigan State",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        },
-        "away_tendency": {
-          "team": "Nebraska",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        }
+        "reason": "forecast or tendency inputs unavailable"
       }
     },
     "401864511": {
@@ -4936,7 +4839,7 @@
       "forecast": null,
       "conditions_line": "Forecast unavailable",
       "impact": "Minimal",
-      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
+      "note": "Forecast unavailable; Model A baseline remains unchanged.",
       "baseline": {
         "home_spread": 8.0,
         "total": 49.5
@@ -4957,7 +4860,26 @@
       },
       "spread_logic": {
         "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": null,
+        "reason": "forecast unavailable; directional weather adjustment cannot be evaluated",
+        "home_tendency": {
+          "team": "Georgia State",
+          "plays": 0,
+          "epa_pass": null,
+          "epa_rush": null,
+          "pass_lean_score": null,
+          "eligible": false
+        },
+        "away_tendency": {
+          "team": "Northern Illinois",
+          "plays": 0,
+          "epa_pass": null,
+          "epa_rush": null,
+          "pass_lean_score": null,
+          "eligible": false
+        }
       }
     },
     "401858467": {
@@ -5121,7 +5043,7 @@
       "forecast": null,
       "conditions_line": "Forecast unavailable",
       "impact": "Minimal",
-      "note": "Forecast unavailable; Model A baseline remains unchanged.",
+      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
       "baseline": {
         "home_spread": -2.0,
         "total": 54.0
@@ -5142,26 +5064,7 @@
       },
       "spread_logic": {
         "status": "LOCKED",
-        "home_spread_points": 0.0,
-        "favored_style_team": null,
-        "pass_lean_gap": null,
-        "reason": "forecast unavailable; directional weather adjustment cannot be evaluated",
-        "home_tendency": {
-          "team": "Florida",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        },
-        "away_tendency": {
-          "team": "Ole Miss",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        }
+        "reason": "forecast or tendency inputs unavailable"
       }
     },
     "401858469": {
@@ -5172,7 +5075,7 @@
       "forecast": null,
       "conditions_line": "Forecast unavailable",
       "impact": "Minimal",
-      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
+      "note": "Forecast unavailable; Model A baseline remains unchanged.",
       "baseline": {
         "home_spread": 9.5,
         "total": 57.5
@@ -5193,7 +5096,26 @@
       },
       "spread_logic": {
         "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": null,
+        "reason": "forecast unavailable; directional weather adjustment cannot be evaluated",
+        "home_tendency": {
+          "team": "USC",
+          "plays": 72,
+          "epa_pass": 0.45,
+          "epa_rush": 0.353,
+          "pass_lean_score": 0.097,
+          "eligible": false
+        },
+        "away_tendency": {
+          "team": "Oregon",
+          "plays": 0,
+          "epa_pass": null,
+          "epa_rush": null,
+          "pass_lean_score": null,
+          "eligible": false
+        }
       }
     },
     "401856805": {
@@ -5510,7 +5432,7 @@
       "forecast": null,
       "conditions_line": "Forecast unavailable",
       "impact": "Minimal",
-      "note": "Forecast unavailable; Model A baseline remains unchanged.",
+      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
       "baseline": {
         "home_spread": -3.0,
         "total": 53.0
@@ -5531,26 +5453,7 @@
       },
       "spread_logic": {
         "status": "LOCKED",
-        "home_spread_points": 0.0,
-        "favored_style_team": null,
-        "pass_lean_gap": null,
-        "reason": "forecast unavailable; directional weather adjustment cannot be evaluated",
-        "home_tendency": {
-          "team": "LSU",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        },
-        "away_tendency": {
-          "team": "Texas A&M",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        }
+        "reason": "forecast or tendency inputs unavailable"
       }
     },
     "401858462": {
@@ -5612,7 +5515,7 @@
       "forecast": null,
       "conditions_line": "Forecast unavailable",
       "impact": "Minimal",
-      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
+      "note": "Forecast unavailable; Model A baseline remains unchanged.",
       "baseline": {
         "home_spread": -7.5,
         "total": 53.0
@@ -5633,7 +5536,26 @@
       },
       "spread_logic": {
         "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": null,
+        "reason": "forecast unavailable; directional weather adjustment cannot be evaluated",
+        "home_tendency": {
+          "team": "Miami (OH)",
+          "plays": 0,
+          "epa_pass": null,
+          "epa_rush": null,
+          "pass_lean_score": null,
+          "eligible": false
+        },
+        "away_tendency": {
+          "team": "UConn",
+          "plays": 0,
+          "epa_pass": null,
+          "epa_rush": null,
+          "pass_lean_score": null,
+          "eligible": false
+        }
       }
     },
     "401864512": {
@@ -5797,7 +5719,7 @@
       "forecast": null,
       "conditions_line": "Forecast unavailable",
       "impact": "Minimal",
-      "note": "Forecast unavailable; Model A baseline remains unchanged.",
+      "note": "Weather source unavailable: URLError; Model A baseline remains unchanged.",
       "baseline": {
         "home_spread": 6.0,
         "total": 51.5
@@ -5818,26 +5740,7 @@
       },
       "spread_logic": {
         "status": "LOCKED",
-        "home_spread_points": 0.0,
-        "favored_style_team": null,
-        "pass_lean_gap": null,
-        "reason": "forecast unavailable; directional weather adjustment cannot be evaluated",
-        "home_tendency": {
-          "team": "Boston College",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        },
-        "away_tendency": {
-          "team": "Virginia Tech",
-          "plays": 0,
-          "epa_pass": null,
-          "epa_rush": null,
-          "pass_lean_score": null,
-          "eligible": false
-        }
+        "reason": "forecast or tendency inputs unavailable"
       }
     },
     "401858243": {
