@@ -4,12 +4,17 @@ on:
   workflow_dispatch:
 
   schedule:
-    # During the CFB season, refresh market lines and capture a new
-    # prospective snapshot four times per day.
-    - cron: "15 4,10,16,22 * * *"
+    # One daily audit snapshot Sun-Wed; three snapshots Thu-Sat when the
+    # college market is active. Keeps the 500-credit plan sustainable.
+    - cron: "15 10 * * 0-3"
+    - cron: "15 10,16,22 * * 4-6"
 
 permissions:
   contents: write
+
+concurrency:
+  group: thi-data-writer
+  cancel-in-progress: false
 
 jobs:
   snapshot:
