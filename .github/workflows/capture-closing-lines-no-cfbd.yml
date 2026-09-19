@@ -3,9 +3,13 @@ name: Capture Closing Lines - No CFBD
 on:
   workflow_dispatch:
 
-  # Run hourly, seven days a week.
+  # Spend quota when the college market is most actionable instead of 24/7.
+  # Thu/Fri: 10 AM, 2 PM and 6 PM ET.
+  # Saturday: hourly from 8 AM through 11:20 PM ET.
   schedule:
-    - cron: "20 * * * *"
+    - cron: "20 14,18,22 * * 4,5"
+    - cron: "20 12-23 * * 6"
+    - cron: "20 0-3 * * 0"
 
 permissions:
   contents: write
