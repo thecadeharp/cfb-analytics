@@ -1003,6 +1003,8 @@
         ".team-name"
       )
       .forEach(teamElement => {
+        teamElement.removeAttribute("onclick");
+
         const teamName =
           String(
             teamElement.textContent || ""
