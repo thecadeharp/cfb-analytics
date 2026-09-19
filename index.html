@@ -94,3 +94,1306 @@
       width: 30px;
       height: 30px;
       display: grid;
+      place-items: center;
+      flex: 0 0 30px;
+      border-radius: 8px;
+      background: var(--ink);
+      color: #fff;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .brand-copy {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .brand-name {
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-year {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    .coming-soon-mark {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .coming-soon-icon {
+      font-family: initial;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .tape-controls {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(180px, 0.8fr) auto;
+      gap: 12px;
+      align-items: end;
+      padding: 18px;
+      margin-top: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .tape-field label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .tape-field select,
+    .tape-field input {
+      width: 100%;
+      min-height: 42px;
+      padding: 0 12px;
+      color: var(--text);
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font: inherit;
+    }
+
+    .tape-button {
+      min-height: 42px;
+      padding: 0 18px;
+      color: #fff;
+      background: var(--text);
+      border: 1px solid var(--text);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .tape-button:hover {
+      opacity: 0.88;
+    }
+
+    .tape-result {
+      margin-top: 16px;
+    }
+
+    .tape-scoreboard {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 22px;
+      align-items: center;
+      padding: 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .tape-team:last-child {
+      text-align: right;
+    }
+
+    .tape-team-name {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .tape-team-meta {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .tape-score {
+      font-family: var(--mono);
+      font-size: 42px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .tape-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .tape-summary-card {
+      padding: 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .tape-summary-label {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .tape-summary-value {
+      margin-top: 8px;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .tape-breakdown {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .main-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-item {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 8px 11px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .nav-item:hover {
+      color: var(--text);
+      background: rgba(0, 0, 0, 0.035);
+    }
+
+    .nav-item.active {
+      color: var(--text);
+      background: #e9e9e5;
+    }
+
+    .header-status {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* =========================
+       MAIN
+    ========================== */
+
+    .page {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 28px 24px 60px;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    /* =========================
+       PROJECTIONS HEADER
+    ========================== */
+
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      margin-bottom: 9px;
+    }
+
+    .page-title {
+      font-size: 31px;
+      line-height: 1;
+      letter-spacing: -1.2px;
+      margin: 0;
+      font-weight: 800;
+    }
+
+    .page-subtitle {
+      color: var(--muted);
+      margin-top: 10px;
+      font-size: 13px;
+      line-height: 1.55;
+      max-width: 750px;
+    }
+
+    /* =========================
+       WEEK TABS
+    ========================== */
+
+    .week-tabs {
+      display: flex;
+      gap: 7px;
+      margin: 26px 0 14px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .week-tab {
+      flex: 0 0 auto;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 8px 15px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .week-tab:hover {
+      border-color: var(--border-dark);
+      color: var(--text);
+    }
+
+    .week-tab.active {
+      background: var(--text);
+      border-color: var(--text);
+      color: white;
+    }
+
+    /* =========================
+       CONTROLS
+    ========================== */
+
+    .projection-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .search-wrap {
+      position: relative;
+      width: min(100%, 320px);
+    }
+
+    .search-wrap::before {
+      content: "⌕";
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-52%);
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .team-search {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 9px;
+      padding: 10px 14px 10px 36px;
+      font-size: 13px;
+      outline: none;
+      color: var(--text);
+    }
+
+    .team-search:focus {
+      border-color: #aeb5b0;
+    }
+
+    .projection-summary {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    .projection-summary strong {
+      color: var(--green);
+      font-weight: 500;
+    }
+
+    /* =========================
+       PROJECTION TABLE
+    ========================== */
+
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .ratings-note {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .ratings-note strong {
+      color: var(--ink);
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    .projection-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+    }
+
+    .projection-table thead {
+      background: #f7f7f5;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .projection-table th {
+      padding: 11px 16px;
+      text-align: left;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .projection-table th.align-right {
+      text-align: right;
+    }
+
+    .projection-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e9e9e5;
+      vertical-align: middle;
+    }
+
+    .projection-table tbody tr {
+      transition: background 0.12s ease;
+    }
+
+    .projection-table tbody tr:hover {
+      background: #fafaf8;
+    }
+
+    .projection-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .matchup-cell {
+      min-width: 250px;
+      cursor: pointer;
+    }
+
+    .team-line {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 23px;
+    }
+
+    .team-name {
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .team-name:hover {
+      text-decoration: underline;
+    }
+
+    .team-meta {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .at-symbol {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .line-primary {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .line-secondary {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    .disagreement {
+      text-align: right;
+    }
+
+    .disagreement-number {
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .disagreement-number.play {
+      color: var(--green);
+    }
+
+    .disagreement-number.watch {
+      color: var(--amber);
+    }
+
+    .disagreement-number.inline {
+      color: var(--muted);
+    }
+
+    .disagreement-note {
+      color: var(--muted);
+      font-size: 10px;
+      margin-top: 4px;
+      white-space: nowrap;
+    }
+
+    .status-cell {
+      text-align: right;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 7px 14px;
+      min-width: 66px;
+
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.4px;
+    }
+
+    .status.play {
+      background: var(--green);
+      color: white;
+    }
+
+    .status.watch {
+      background: var(--amber-light);
+      color: var(--amber);
+      border: 1px solid #efd9b8;
+    }
+
+    .status.inline {
+      background: #f4f4f2;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    /* =========================
+       LOADING / EMPTY
+    ========================== */
+
+    .loading-state,
+    .empty-state {
+      padding: 70px 25px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--border);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 14px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* =========================
+       TEAM DOSSIER
+    ========================== */
+
+    .back-button {
+      border: none;
+      background: transparent;
+      padding: 0;
+      margin-bottom: 24px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .back-button:hover {
+      color: var(--text);
+    }
+
+    .dossier-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 30px;
+      margin-bottom: 20px;
+    }
+
+    .team-title-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .team-title {
+      font-size: 31px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .team-dossier-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .sim-wins {
+      text-align: right;
+    }
+
+    .sim-wins-label {
+      font-family: var(--mono);
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 9px;
+    }
+
+    .sim-wins-number {
+      font-size: 30px;
+      color: var(--green);
+      font-weight: 800;
+      line-height: 1;
+      margin-top: 4px;
+    }
+
+    .dossier-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--surface);
+      margin-bottom: 10px;
+    }
+
+    .dossier-stat {
+      padding: 14px;
+      border-right: 1px solid var(--border);
+    }
+
+    .dossier-stat:last-child {
+      border-right: none;
+    }
+
+    .dossier-label {
+      font-family: var(--mono);
+      color: var(--muted);
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+
+    .dossier-value {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .dossier-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .panel-body {
+      padding: 16px;
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 12px;
+      padding: 9px 0;
+      border-bottom: 1px solid #ecece8;
+      align-items: center;
+    }
+
+    .metric-row:last-child {
+      border-bottom: none;
+    }
+
+    .metric-name {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .metric-value {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .metric-rank {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .schedule-panel {
+      grid-column: span 2;
+    }
+
+    /* =========================
+       COMING SOON
+    ========================== */
+
+    .coming-soon {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 60px 30px;
+      text-align: center;
+    }
+
+    .coming-soon h2 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+
+    .coming-soon p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================== */
+
+    @media (max-width: 900px) {
+      .header-inner {
+        height: auto;
+        min-height: 58px;
+        flex-wrap: wrap;
+        padding-top: 10px;
+        padding-bottom: 8px;
+      }
+
+      .main-nav {
+        display: flex;
+        order: 3;
+        width: 100%;
+        overflow-x: auto;
+        padding-top: 5px;
+        scrollbar-width: none;
+      }
+
+      .main-nav::-webkit-scrollbar {
+        display: none;
+      }
+
+      .nav-item {
+        flex: 0 0 auto;
+      }
+
+      .header-status {
+        display: none;
+      }
+
+      .dossier-stat-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .dossier-stat {
+        border-bottom: 1px solid var(--border);
+      }
+
+      .dossier-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .schedule-panel {
+        grid-column: span 1;
+      }
+
+      .tape-controls {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .tape-summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .page {
+        padding: 22px 14px 50px;
+      }
+
+      .header-inner {
+        padding: 0 14px;
+      }
+
+      .page-title {
+        font-size: 27px;
+      }
+
+      .projection-controls {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .search-wrap {
+        width: 100%;
+      }
+
+      .dossier-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .sim-wins {
+        text-align: left;
+      }
+
+      .tape-controls,
+      .tape-summary-grid,
+      .tape-breakdown {
+        grid-template-columns: 1fr;
+      }
+
+      .tape-scoreboard {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .tape-team:last-child {
+        text-align: center;
+      }
+
+      /* =========================
+         MOBILE PROJECTION CARDS
+      ========================== */
+
+      #view-projections .table-card {
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        overflow: visible;
+      }
+
+      #view-projections .table-scroll {
+        overflow: visible;
+      }
+
+      #view-projections .projection-table {
+        display: block;
+        width: 100%;
+        min-width: 0;
+      }
+
+      #view-projections .projection-table thead {
+        display: none;
+      }
+
+      #view-projections .projection-table tbody {
+        display: grid;
+        gap: 12px;
+      }
+
+      #view-projections .projection-table .game-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+
+      #view-projections .projection-table .game-row:hover {
+        background: var(--surface);
+      }
+
+      #view-projections .projection-table .game-row td {
+        display: block;
+        min-width: 0;
+        padding: 13px 14px;
+        text-align: left;
+        border-bottom: 1px solid #e9e9e5;
+      }
+
+      #view-projections .projection-table .matchup-cell {
+        grid-column: 1 / -1;
+        padding: 16px;
+        cursor: pointer;
+      }
+
+      #view-projections .projection-table .matchup-cell .team-name {
+        font-size: 15px;
+      }
+
+      #view-projections .projection-table .game-row td:nth-child(2)::before {
+        content: "OUR LINE";
+      }
+
+      #view-projections .projection-table .game-row td:nth-child(3)::before {
+        content: "MARKET";
+      }
+
+      #view-projections .projection-table .game-row td:nth-child(4)::before {
+        content: "PROJECTED TOTAL";
+      }
+
+      #view-projections .projection-table .game-row td:nth-child(5)::before {
+        content: "MODEL EDGE";
+      }
+
+      #view-projections .projection-table .game-row td:nth-child(2)::before,
+      #view-projections .projection-table .game-row td:nth-child(3)::before,
+      #view-projections .projection-table .game-row td:nth-child(4)::before,
+      #view-projections .projection-table .game-row td:nth-child(5)::before,
+      #view-projections .projection-table .game-row td:nth-child(6)::before,
+      #view-projections .projection-table .game-row td:nth-child(7)::before {
+        display: block;
+        margin-bottom: 7px;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+
+      #view-projections .projection-table .game-row td:nth-child(6),
+      #view-projections .projection-table .game-row td:nth-child(7) {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 10px;
+        text-align: left;
+      }
+
+      #view-projections .projection-table .game-row td:nth-child(6)::before {
+        content: "MODEL SIGNAL";
+        margin-bottom: 0;
+      }
+
+      #view-projections .projection-table .game-row td:nth-child(7)::before {
+        content: "SIGNAL CONFIDENCE";
+        margin-bottom: 0;
+      }
+
+      #view-projections .projection-table .game-row td:nth-child(7) {
+        border-bottom: none;
+      }
+
+      #view-projections .projection-table .game-row .status {
+        justify-self: end;
+      }
+
+      #view-projections .projection-table .game-row .signal-record {
+        grid-column: 1 / -1;
+        justify-self: end;
+        text-align: right;
+        margin-top: 2px;
+      }
+
+      #view-projections .projection-table .disagreement {
+        text-align: left;
+      }
+
+      #view-projections .projection-table .disagreement-note {
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+
+      <div class="brand" onclick="switchView('projections')">
+        <div class="brand-mark" aria-hidden="true">🔨</div>
+        <div class="brand-copy">
+          <div class="brand-name">The Hammer Index</div>
+          <div class="brand-year">BY CADE HARPER</div>
+        </div>
+      </div>
+
+      <nav class="main-nav">
+        <button class="nav-item active" data-view="projections" onclick="switchView('projections')">
+          Projections
+        </button>
+
+        <button class="nav-item" data-view="ratings" onclick="switchView('ratings')">
+          Team Ratings
+        </button>
+
+        <button class="nav-item" data-view="tape" onclick="switchView('tape')">
+          Matchup Analysis
+        </button>
+
+        <button class="nav-item" data-view="variance" onclick="switchView('variance')">
+          Variance Lab
+        </button>
+
+        <button class="nav-item" data-view="portal" onclick="switchView('portal')">
+          Transfer Portal
+        </button>
+      </nav>
+
+      <div class="header-status" id="data-updated">
+        Loading data
+      </div>
+
+    </div>
+  </header>
+
+
+  <main class="page">
+
+    <!-- =====================
+         PROJECTIONS
+    ====================== -->
+
+    <section id="view-projections" class="view active">
+
+      <div class="eyebrow">2026 season projections</div>
+
+      <h1 class="page-title">Game Projections</h1>
+
+      <div class="page-subtitle">
+        Every FBS matchup, sorted by model edge versus the current market.
+        Model Signal measures the size of that separation. Signal Confidence
+        separately measures how much prospective evidence supports each tier.
+      </div>
+
+      <details class="signal-guide">
+        <summary>
+          <span>How Signals Work</span>
+          <span style="font-family:var(--mono);font-size:9px;color:var(--muted);font-weight:500;">
+            METHODOLOGY + CONFIDENCE KEY
+          </span>
+        </summary>
+
+        <div class="signal-guide-body">
+          <div class="signal-guide-copy">
+            <strong>Model Signal</strong> classifies the absolute difference between
+            our fair line and the current market. A larger signal means the model
+            and market are farther apart; it does not automatically mean the bet is
+            more historically reliable. <strong>Signal Confidence</strong> is a
+            separate evidence grade earned prospectively from sample size, ATS
+            performance, closing-line value and beat-close rate.
+          </div>
+
+          <div class="signal-legend-grid">
+            <div class="signal-legend-item">
+              <div class="signal-legend-name" style="color:var(--muted);">ALIGNED</div>
+              <div class="signal-legend-range">0–2.5 pts</div>
+            </div>
+
+            <div class="signal-legend-item">
+              <div class="signal-legend-name" style="color:#355f91;">SMALL EDGE</div>
+              <div class="signal-legend-range">3.0–5.0 pts</div>
+            </div>
+
+            <div class="signal-legend-item">
+              <div class="signal-legend-name" style="color:var(--green);">PLAY</div>
+              <div class="signal-legend-range">5.5–7.0 pts</div>
+            </div>
+
+            <div class="signal-legend-item">
+              <div class="signal-legend-name" style="color:#b86600;">MATERIAL DISAGREEMENT</div>
+              <div class="signal-legend-range">7.5–10.0 pts</div>
+            </div>
+
+            <div class="signal-legend-item">
+              <div class="signal-legend-name" style="color:#9a4d00;">OUTLIER</div>
+              <div class="signal-legend-range">10.5+ pts</div>
+            </div>
+          </div>
+
+          <div class="confidence-legend">
+            <span class="status confidence-developing">DEVELOPING</span>
+            <span class="confidence-legend-note">Evidence accumulating.</span>
+
+            <span class="status confidence-validated">VALIDATED</span>
+            <span class="confidence-legend-note">
+              50+ decisions · ≥52.5% ATS · positive avg CLV · ≥52.5% beat close.
+            </span>
+
+            <span class="status confidence-established">ESTABLISHED</span>
+            <span class="confidence-legend-note">
+              100+ decisions · ≥53.0% ATS · positive avg CLV · ≥55% beat close.
+            </span>
+          </div>
+
+          <div class="signal-guide-copy" style="margin-top:14px;margin-bottom:0;">
+            <strong>How the projected total works:</strong> the total begins with the
+            model's national scoring baseline, then adjusts for both teams' offensive
+            and defensive EPA per play and success rates. The model constrains extreme
+            outputs, rounds to the nearest half-point and then applies any qualifying
+            Weather Engine scoring adjustment. The displayed Over/Under direction is
+            the difference between that adjusted projection and the available market total.
+          </div>
+
+          <div class="signal-guide-copy" style="margin-top:10px;margin-bottom:0;">
+            <strong>Totals testing key:</strong> a 4.0–6.9 point difference is a
+            <strong>Total Lean</strong>; 7.0+ is a <strong>Total Watch</strong>. No totals
+            flag appears when a market total is unavailable. Total flags are tracked
+            separately, do not affect spread signals or board order, and do not receive
+            a confidence grade until prospective results establish a reliable threshold.
+          </div>
+        </div>
+      </details>
+
+      <div class="week-tabs" id="week-tabs">
+        <!-- Built by app.js -->
+      </div>
+
+      <div class="projection-controls">
+
+        <div class="search-wrap">
+          <input
+            class="team-search"
+            id="team-search"
+            type="text"
+            placeholder="Search teams..."
+          >
+        </div>
+
+        <div class="projection-summary" id="projection-summary">
+          Loading games...
+        </div>
+
+      </div>
+
+      <div class="table-card">
+        <div class="table-scroll">
+          <div id="projections-container">
+            <div class="loading-state">
+              <div class="spinner"></div>
+              Loading projections...
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- =====================
+         MATCHUP ANALYSIS
+    ====================== -->
+
+    <section id="view-tape" class="view">
+
+      <div class="eyebrow">Head-to-head analysis</div>
+      <h1 class="page-title">Matchup Analysis</h1>
+
+      <div class="page-subtitle">
+        Compare any two FBS teams using the same rating scale, matchup adjustments,
+        total model and home-field values used by Model A. Hypothetical projections
+        are display-only and are not recorded as official model plays.
+      </div>
+
+      <div id="tape-container">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          Loading matchup tools...
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- =====================
+         TEAM DOSSIER
+    ====================== -->
+
+    <section id="view-dossier" class="view">
+
+      <button class="back-button" onclick="returnFromDetail('projections')">
+        ← Back to projections
+      </button>
+
+      <div id="dossier-container">
+        <div class="empty-state">
+          Select a team to view its dossier.
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- =====================
+         RATINGS
+    ====================== -->
+
+    <section id="view-ratings" class="view">
+
+      <div class="eyebrow">Team database + model foundation</div>
+      <h1 class="page-title">Team Ratings</h1>
+
+      <div class="page-subtitle">
+        Browse every FBS program, compare projected strength and current-season
+        performance, or open a complete Team Dossier.
+      </div>
+
+      <div class="table-card" style="margin-top:24px;">
+        <div id="ratings-container">
+          <div class="loading-state">
+            <div class="spinner"></div>
+            Loading ratings...
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- =====================
+         VARIANCE LAB
+    ====================== -->
+
+    <section id="view-variance" class="view">
+
+      <div class="eyebrow">Historical distributions</div>
+
+      <div class="coming-soon">
+        <h2>Variance Lab</h2>
+        <p>
+          Historical base rates for coaching changes, quarterback transitions,
+          coordinator turnover and full program resets.
+        </p>
+
+        <div class="coming-soon-mark">
+          <span>Coming Soon</span>
+          <span class="coming-soon-icon" aria-hidden="true">🔨</span>
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- =====================
+         TRANSFER PORTAL
+    ====================== -->
+
+    <section id="view-portal" class="view">
+
+      <div class="eyebrow">Roster movement</div>
+
+      <div class="coming-soon">
+        <h2>Transfer Portal</h2>
+
+        <p>
+          Arrivals, departures, net roster impact and projected unit strength.
+        </p>
+
+        <div class="coming-soon-mark">
+          <span>Coming Soon</span>
+          <span class="coming-soon-icon" aria-hidden="true">🔨</span>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="app.js?v=2026-week2-polish"></script>
+  <script src="last-updated-timestamp.js"></script>
+  <script src="dossier-ranks.js"></script>
+  <script src="ux-v2.js?v=2026-week2-polish"></script>
+  <script src="portal-variance.js"></script>
+  <script src="variance-coming-soon.js"></script>
+  <script src="mobile.js"></script>
+  <script src="sort-tables.js"></script>
+  <script src="status-controls.js"></script>
+  <script src="final-matchup.js?v=2026-postgame-data-shape-fix"></script>
+  <script src="fcs-ui.js"></script>
+  <script src="ux-feedback.js"></script>
+  <script src="postgame-analytics.js?v=2026-pgwe-em-owner-fix"></script>
+  <script src="market-layer.js"></script>
+
+  <!-- Cloudflare Web Analytics -->
+  <script
+    type="module"
+    src="https://static.cloudflareinsights.com/beacon.min.js"
+    data-cf-beacon='{"token":"f135a7c7a74f42f4b9238f0fc45aa36a"}'
+  ></script>
+  <!-- End Cloudflare Web Analytics -->
+
+</body>
+</html>
