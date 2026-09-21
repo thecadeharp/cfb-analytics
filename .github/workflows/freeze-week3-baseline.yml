@@ -1,0 +1,55 @@
+name: Freeze Week 3 Model A Baseline
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: freeze-week3-model-a
+  cancel-in-progress: false
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build baseline and integrity audit
+        run: python scripts/freeze_week3_baseline.py
+
+      - name: Verify generated baseline and checksum
+        run: python scripts/freeze_week3_baseline.py --verify
+
+      - name: Verify Model A production files were not modified
+        run: |
+          git diff --exit-code -- \
+            data/projections.json \
+            data/results.json \
+            data/snapshots/projection_market_snapshots.jsonl \
+            data/snapshots/closing_lines.jsonl
+
+      - name: Commit checkpoint
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            data/frozen/2026_week3_modelA_baseline.json \
+            data/frozen/2026_week3_modelA_baseline.sha256 \
+            data/frozen/2026_week3_modelA_baseline_manifest.txt \
+            data/reports/week3_integrity_audit.json
+          if git diff --cached --quiet; then
+            echo "Week 3 baseline is unchanged."
+            exit 0
+          fi
+          git commit -m "Freeze Week 3 Model A baseline"
+          git push
