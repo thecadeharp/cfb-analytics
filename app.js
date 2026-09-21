@@ -423,7 +423,11 @@ function filteredTeamsByConference() {
   );
 }
 
-function conferenceFilterMarkup(idSuffix, label = "Filter teams by conference") {
+function conferenceFilterMarkup(
+  idSuffix,
+  label = "Filter teams by conference",
+  count = filteredTeamsByConference().length
+) {
   const selectId = `conference-team-filter-${idSuffix}`;
   return `
     <div class="conference-filter-bar">
@@ -447,7 +451,7 @@ function conferenceFilterMarkup(idSuffix, label = "Filter teams by conference") 
         `).join("")}
       </select>
       <span class="conference-filter-count">
-        ${filteredTeamsByConference().length} teams
+        ${count} teams
       </span>
     </div>
   `;
@@ -909,7 +913,7 @@ function ensureMatchupView() {
     .edge-outlier { color:#9a4d00; }
 
     .analysis-grid {
-      display:grid; grid-template-columns:repeat(auto-fit,minmax(175px,1fr));
+      display:grid; grid-template-columns:repeat(4,minmax(0,1fr));
       gap:10px; margin-bottom:18px;
     }
 
@@ -1266,15 +1270,6 @@ function ensureMatchupView() {
       border-radius:999px;
       background:linear-gradient(90deg,#d96860,#fff0bd,#f1f2ee,#c9f2dd,#087f5b);
     }
-
-    .thi-projected-score {
-      display:flex;
-      align-items:baseline;
-      gap:7px;
-      flex-wrap:wrap;
-    }
-
-    .thi-projected-score-separator { color:var(--muted); }
 
     .thi-context-grid {
       display:grid;
@@ -2164,18 +2159,6 @@ function scheduleContextMarkup(game) {
   `;
 }
 
-function projectedFinalScore(homeName, awayName, homeSpread, total) {
-  if (!hasValue(homeSpread) || !hasValue(total)) return null;
-  const homeMargin = -Number(homeSpread);
-  const homePoints = (Number(total) + homeMargin) / 2;
-  const awayPoints = Number(total) - homePoints;
-  return {
-    home: Math.max(0, homePoints),
-    away: Math.max(0, awayPoints),
-    text: `${awayName} ${Math.round(Math.max(0, awayPoints))} — ${homeName} ${Math.round(Math.max(0, homePoints))}`,
-  };
-}
-
 function renderMatchup(game) {
   const container = document.getElementById("matchup-container");
   if (!container) return;
@@ -2236,7 +2219,6 @@ function renderMatchup(game) {
 
   const fairLine = favoredLine(homeName, awayName, modelSpread);
   const marketLine = favoredLine(homeName, awayName, marketSpread);
-  const projectedScore = projectedFinalScore(homeName, awayName, modelSpread, modelTotal);
 
   const modelEdgeSide =
     preferred && hasValue(marketSpread)
@@ -2313,16 +2295,6 @@ function renderMatchup(game) {
             ? `Market ${formatNumber(marketTotal, 1)}`
             : "No current market total"}
         </div>
-      </div>
-
-      <div class="analysis-card">
-        <div class="analysis-label">Projected Final</div>
-        <div class="analysis-value thi-projected-score">
-          ${projectedScore
-            ? `<span>${escapeHtml(awayName)} ${Math.round(projectedScore.away)}</span><span class="thi-projected-score-separator">—</span><span>${escapeHtml(homeName)} ${Math.round(projectedScore.home)}</span>`
-            : "—"}
-        </div>
-        <div class="analysis-small">Derived from the frozen THI spread and total</div>
       </div>
 
       <div class="analysis-card">
@@ -2837,7 +2809,7 @@ function renderRatings() {
       underrated/overrated rank.
     </div>
 
-    ${conferenceFilterMarkup("ratings-market")}
+    ${conferenceFilterMarkup("ratings-market", "Filter tracked teams by conference", marketRows.length)}
 
     <div class="table-scroll">
       <table class="projection-table">
