@@ -126,3 +126,35 @@ def main() -> None:
         eligible,
         key=lambda team: float(team["overall"]["average_cover_margin"]),
         reverse=True,
+    )
+    for index, team in enumerate(ordered, 1):
+        team["market_rank"] = index
+        team["market_label"] = (
+            "OUTPERFORMING MARKET"
+            if float(team["overall"]["average_cover_margin"]) >= 3
+            else "UNDERPERFORMING MARKET"
+            if float(team["overall"]["average_cover_margin"]) <= -3
+            else "NEAR MARKET EXPECTATION"
+        )
+
+    output = {
+        "meta": {
+            "season": 2026,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "games": used_games,
+            "minimum_ranked_games": 2,
+            "model_usage": "descriptive_only_not_used_by_model_a",
+            "line_priority": ["near-kickoff closing proxy", "initial prospective snapshot"],
+            "definition": "Average Cover Margin is actual team margin minus the market-implied margin. Positive values indicate market outperformance.",
+            "warning": "Early-season samples are small. This table describes results and is not a betting recommendation.",
+        },
+        "most_underrated": [team["team"] for team in ordered[:10]],
+        "most_overrated": [team["team"] for team in reversed(ordered[-10:])],
+        "teams": teams,
+    }
+    OUTPUT.write_text(json.dumps(output, indent=2) + "\n", encoding="utf-8")
+    print(f"Wrote {OUTPUT.relative_to(ROOT)} for {len(teams)} teams across {used_games} games.")
+
+
+if __name__ == "__main__":
+    main()
