@@ -126,3 +126,75 @@ def team_context(
         flags.append({"type": "off_blowout_win", "label": "Coming off a 21+ point win"})
     if next_rank and next_rank <= 25 and (opponent_rank is None or opponent_rank > 50):
         flags.append({"type": "lookahead_watch", "label": f"Top-25 opponent next: {next_opponent}"})
+
+    return {
+        "team": team,
+        "location": current.get("location"),
+        "rest_days": rest_days,
+        "consecutive_road_games_entering": road_streak,
+        "previous_game": {
+            "opponent": previous.get("opponent") if previous else None,
+            "location": previous.get("location") if previous else None,
+            **(prior_result or {}),
+        },
+        "next_game": {
+            "opponent": next_opponent,
+            "location": following.get("location") if following else None,
+            "opponent_power_rank": next_rank,
+        },
+        "flags": flags,
+    }
+
+
+def main() -> None:
+    schedule_data = load(DATA / "schedule.json")
+    results_data = load(DATA / "results.json")
+    metrics_data = load(DATA / "cfb_metrics.json")
+    results = result_index(results_data)
+    team_schedules = schedule_data.get("team_schedules", {})
+    power_ranks = {
+        name: int(team.get("power_rating_rank"))
+        for name, team in metrics_data.get("teams", {}).items()
+        if team.get("power_rating_rank")
+    }
+
+    contexts: dict[str, Any] = {}
+    for game in schedule_data.get("games", []):
+        game_id = str(game.get("id") or "")
+        if not game_id:
+            continue
+        away = str(game.get("away_team") or "")
+        home = str(game.get("home_team") or "")
+        away_context = team_context(away, home, game, team_schedules.get(away, []), results, power_ranks)
+        home_context = team_context(home, away, game, team_schedules.get(home, []), results, power_ranks)
+        contexts[game_id] = {
+            "game_id": game_id,
+            "week": game.get("week"),
+            "away_team": away,
+            "home_team": home,
+            "conference_game": bool(
+                game.get("away_conference")
+                and game.get("away_conference") == game.get("home_conference")
+            ),
+            "neutral_site": bool(game.get("neutral_site")),
+            "away": away_context,
+            "home": home_context,
+        }
+
+    output = {
+        "meta": {
+            "season": 2026,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "model_usage": "display_only_not_used_by_model_a",
+            "status": "BETA — situational flags are descriptive and historically uncalibrated",
+            "included": ["rest", "road streak", "return home", "previous result", "blowout response", "lookahead watch", "conference familiarity"],
+            "not_yet_included": ["travel distance", "time zones crossed", "injury context"],
+        },
+        "games": contexts,
+    }
+    OUTPUT.write_text(json.dumps(output, indent=2) + "\n", encoding="utf-8")
+    print(f"Wrote {OUTPUT.relative_to(ROOT)} for {len(contexts)} games.")
+
+
+if __name__ == "__main__":
+    main()
