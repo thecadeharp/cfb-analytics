@@ -1,4 +1,4 @@
-name: Schedule Context v1
+name: Schedule Context v2
 
 on:
   workflow_dispatch:
@@ -21,8 +21,34 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Build descriptive schedule context
+      - name: Install dependencies
+        run: python -m pip install requests
+      - name: Protect Model A files
+        run: |
+          sha256sum \
+            data/projections.json \
+            data/cfb_metrics.json \
+            scripts/build_projections.py \
+            > /tmp/model-a-before.sha256
+      - name: Build descriptive schedule context v2
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
         run: python scripts/build_schedule_context.py
+      - name: Validate context output
+        run: |
+          python - <<'PY'
+          import json
+          data = json.load(open("data/schedule_context.json", encoding="utf-8"))
+          meta = data.get("meta", {})
+          assert meta.get("version") == "schedule-context-v2"
+          assert meta.get("model_usage") == "display_only_not_used_by_model_a"
+          assert meta.get("team_locations_loaded", 0) >= 100
+          assert meta.get("team_game_travel_estimates", 0) >= 500
+          assert len(data.get("games", {})) >= 700
+          print("Schedule Context v2 validation passed")
+          PY
+      - name: Verify Model A remained unchanged
+        run: sha256sum --check /tmp/model-a-before.sha256
       - name: Commit context output
         run: |
           git config user.name "github-actions[bot]"
