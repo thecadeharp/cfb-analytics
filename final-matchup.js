@@ -125,3 +125,2115 @@
     if (number === null) {
       return "—";
     }
+
+    return (
+      `${number > 0 ? "+" : ""}${number.toFixed(digits)}`
+    );
+  }
+
+  function fmtPct(value) {
+    const number = numeric(value);
+    return number === null
+      ? "—"
+      : `${number.toFixed(1)}%`;
+  }
+
+  function fmtInt(value) {
+    const number = numeric(value);
+    return number === null
+      ? "—"
+      : String(Math.round(number));
+  }
+
+  // ==========================================================================
+  // STYLES
+  // ==========================================================================
+
+  function installStyles() {
+    if (document.getElementById(STYLE_ID)) {
+      return;
+    }
+
+    const style = document.createElement("style");
+    style.id = STYLE_ID;
+
+    style.textContent = `
+      #matchup-container .projected-score-card.hammer-final-score-card {
+        border-color: var(--border-dark);
+      }
+
+      #matchup-container .hammer-final-score-card .projected-score-title {
+        color: var(--muted);
+      }
+
+      #matchup-container .hammer-final-pregame-block {
+        margin-top:13px;
+        padding-top:12px;
+        border-top:1px solid #eeeeeb;
+      }
+
+      #matchup-container .hammer-final-pregame-heading {
+        margin-bottom:9px;
+        color:var(--muted);
+        font-family:var(--mono);
+        font-size:8px;
+        font-weight:700;
+        letter-spacing:1px;
+        text-transform:uppercase;
+      }
+
+      #matchup-container .hammer-final-pregame-score {
+        display:grid;
+        grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+        gap:12px;
+        align-items:center;
+      }
+
+      #matchup-container .hammer-final-pregame-team {
+        min-width:0;
+      }
+
+      #matchup-container .hammer-final-pregame-team:last-child {
+        text-align:right;
+      }
+
+      #matchup-container .hammer-final-pregame-name {
+        color:var(--muted);
+        font-size:10px;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+
+      #matchup-container .hammer-final-pregame-points {
+        margin-top:3px;
+        color:var(--muted);
+        font-family:var(--mono);
+        font-size:17px;
+        font-weight:700;
+      }
+
+      #matchup-container .hammer-final-pregame-separator {
+        color:var(--muted);
+        font-family:var(--mono);
+        font-size:9px;
+        font-weight:700;
+      }
+
+      #matchup-container .hammer-final-pregame-note {
+        margin-top:9px;
+        color:var(--muted);
+        font-family:var(--mono);
+        font-size:8px;
+        line-height:1.5;
+      }
+
+      /* Hide the retired legacy badge; the canonical status pill below owns
+       * both states: purple for available and yellow for pending. */
+      .hammer-postgame-board-badge {
+        display:none !important;
+      }
+
+      .thi-postgame-status-purple {
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        margin-top:6px;
+        margin-left:6px;
+        padding:4px 7px;
+        border:1px solid #b8a1d8;
+        border-radius:999px;
+        background:#f3eef9;
+        color:#6d4c8f;
+        font-family:var(--mono);
+        font-size:8px;
+        font-weight:900;
+        letter-spacing:.65px;
+        line-height:1;
+        text-transform:uppercase;
+        white-space:nowrap;
+      }
+
+      .thi-postgame-status-purple.pending {
+        border-color:#e1c86c;
+        background:#fff8dd;
+        color:#6f5d1a;
+      }
+
+      #${POSTGAME_SECTION_ID} {
+        margin-top:22px;
+        padding:18px;
+        border:1px solid var(--border-dark);
+        border-radius:var(--radius);
+        background:var(--surface);
+      }
+
+      #${POSTGAME_SECTION_ID}.pending {
+        background:#fafaf8;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-kicker {
+        color:var(--muted);
+        font-family:var(--mono);
+        font-size:8px;
+        font-weight:900;
+        letter-spacing:1.3px;
+        text-transform:uppercase;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-title {
+        margin-top:5px;
+        color:var(--ink);
+        font-size:20px;
+        font-weight:900;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-subtitle {
+        margin-top:5px;
+        color:var(--muted);
+        font-size:11px;
+        line-height:1.55;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-beta {
+        display:inline-flex;
+        margin-top:10px;
+        padding:5px 8px;
+        border:1px solid #e1c86c;
+        border-radius:999px;
+        background:#fff8dd;
+        color:#6f5d1a;
+        font-family:var(--mono);
+        font-size:8px;
+        font-weight:900;
+        letter-spacing:.7px;
+        text-transform:uppercase;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-headlines {
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+        gap:10px;
+        margin-top:16px;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-card {
+        min-width:0;
+        padding:13px;
+        border:1px solid var(--border);
+        border-radius:10px;
+        background:#fafaf8;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-card-label {
+        color:var(--muted);
+        font-family:var(--mono);
+        font-size:8px;
+        font-weight:900;
+        letter-spacing:.7px;
+        text-transform:uppercase;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-card-value {
+        margin-top:6px;
+        color:var(--ink);
+        font-family:var(--mono);
+        font-size:18px;
+        font-weight:900;
+        line-height:1.15;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-card-note {
+        margin-top:6px;
+        color:var(--muted);
+        font-size:9px;
+        line-height:1.45;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-grid {
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:10px;
+        margin-top:14px;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-panel {
+        padding:13px;
+        border:1px solid var(--border);
+        border-radius:10px;
+        background:#fff;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-panel-title {
+        margin-bottom:10px;
+        color:var(--ink);
+        font-family:var(--mono);
+        font-size:9px;
+        font-weight:900;
+        letter-spacing:.65px;
+        text-transform:uppercase;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-team-head,
+      #${POSTGAME_SECTION_ID} .hammer-pg-row {
+        display:grid;
+        grid-template-columns:minmax(0,1fr) minmax(64px,auto) minmax(64px,auto);
+        gap:10px;
+        align-items:center;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-team-head {
+        padding-bottom:6px;
+        color:var(--muted);
+        font-family:var(--mono);
+        font-size:8px;
+        font-weight:900;
+        text-transform:uppercase;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-row {
+        padding:6px 0;
+        border-top:1px solid #f0f0ed;
+        font-size:10px;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-row-label {
+        color:var(--muted);
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-row-away,
+      #${POSTGAME_SECTION_ID} .hammer-pg-row-home,
+      #${POSTGAME_SECTION_ID} .hammer-pg-team-head span:nth-child(2),
+      #${POSTGAME_SECTION_ID} .hammer-pg-team-head span:nth-child(3) {
+        text-align:right;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-row-away,
+      #${POSTGAME_SECTION_ID} .hammer-pg-row-home {
+        color:var(--ink);
+        font-family:var(--mono);
+        font-weight:800;
+        border-radius:5px;
+        padding:5px 6px;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-rank {
+        margin-left:5px;
+        opacity:.72;
+        font-size:8px;
+        white-space:nowrap;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-band-elite { background:#087f5b; color:#fff; }
+      #${POSTGAME_SECTION_ID} .hammer-pg-band-strong { background:#49b783; color:#092d22; }
+      #${POSTGAME_SECTION_ID} .hammer-pg-band-above { background:#c9f2dd; color:#174536; }
+      #${POSTGAME_SECTION_ID} .hammer-pg-band-average { background:#f1f2ee; color:#4c5660; }
+      #${POSTGAME_SECTION_ID} .hammer-pg-band-below { background:#fff0bd; color:#74520a; }
+      #${POSTGAME_SECTION_ID} .hammer-pg-band-poor { background:#f5bd86; color:#713506; }
+      #${POSTGAME_SECTION_ID} .hammer-pg-band-critical { background:#d96860; color:#fff; }
+      #${POSTGAME_SECTION_ID} .hammer-pg-band-missing { background:transparent; color:var(--ink); }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-heat-grid {
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:10px;
+        margin-top:14px;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-heat-card {
+        border:1px solid var(--border);
+        border-radius:10px;
+        padding:13px;
+        background:#fff;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-heat-title {
+        display:flex;
+        justify-content:space-between;
+        gap:12px;
+        margin-bottom:10px;
+        font-family:var(--mono);
+        font-size:9px;
+        font-weight:900;
+        text-transform:uppercase;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-heat-subtitle {
+        margin:11px 0 6px;
+        color:var(--muted);
+        font-family:var(--mono);
+        font-size:8px;
+        font-weight:900;
+        text-transform:uppercase;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-zones {
+        display:grid;
+        grid-template-columns:repeat(3,minmax(0,1fr));
+        gap:5px;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-zone {
+        min-height:76px;
+        border-radius:7px;
+        padding:8px 6px;
+        text-align:center;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-zone-name {
+        font-size:8px;
+        font-weight:900;
+        text-transform:uppercase;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-zone-epa {
+        margin-top:5px;
+        font-family:var(--mono);
+        font-size:14px;
+        font-weight:900;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-zone-detail {
+        margin-top:4px;
+        font-size:8px;
+        line-height:1.35;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-heat-coverage {
+        margin-top:9px;
+        color:var(--muted);
+        font-size:8px;
+        line-height:1.4;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-footer {
+        margin-top:14px;
+        padding-top:12px;
+        border-top:1px solid var(--border);
+        color:var(--muted);
+        font-size:9px;
+        line-height:1.6;
+      }
+
+      #${POSTGAME_SECTION_ID} .hammer-pg-pending {
+        margin-top:12px;
+        padding:12px;
+        border:1px dashed var(--border-dark);
+        border-radius:10px;
+        color:var(--muted);
+        font-size:11px;
+        line-height:1.6;
+      }
+
+      @media (max-width:760px) {
+        #${POSTGAME_SECTION_ID} .hammer-pg-headlines,
+        #${POSTGAME_SECTION_ID} .hammer-pg-grid,
+        #${POSTGAME_SECTION_ID} .hammer-pg-heat-grid {
+          grid-template-columns:1fr;
+        }
+      }
+
+      @media (max-width:600px) {
+        #matchup-container .hammer-final-pregame-score {
+          gap:8px;
+        }
+
+        #matchup-container .hammer-final-pregame-points {
+          font-size:15px;
+        }
+
+        #${POSTGAME_SECTION_ID} {
+          padding:14px;
+        }
+
+        #${POSTGAME_SECTION_ID} .hammer-pg-card-value {
+          font-size:16px;
+        }
+
+        #${POSTGAME_SECTION_ID} .hammer-pg-team-head,
+        #${POSTGAME_SECTION_ID} .hammer-pg-row {
+          grid-template-columns:minmax(0,1fr) 62px 62px;
+          gap:7px;
+        }
+      }
+    `;
+
+    document.head.appendChild(style);
+  }
+
+  // ==========================================================================
+  // DATA
+  // ==========================================================================
+
+  async function fetchJson(url) {
+    const response = await fetch(
+      `${url}?v=${Date.now()}`,
+      {
+        cache: "no-store"
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `${url} returned HTTP ${response.status}`
+      );
+    }
+
+    return response.json();
+  }
+
+  async function loadData() {
+    const [resultsResult, postgameResult] =
+      await Promise.allSettled([
+        fetchJson(RESULTS_URL),
+        fetchJson(POSTGAME_URL)
+      ]);
+
+    if (resultsResult.status === "fulfilled") {
+      const payload = resultsResult.value;
+
+      finalGames = Array.isArray(payload?.games)
+        ? payload.games.filter(game =>
+            ["final", "completed"].includes(
+              String(
+                game?.game_state ||
+                game?.status ||
+                ""
+              ).toLowerCase()
+            )
+          )
+        : [];
+    }
+
+    if (postgameResult.status === "fulfilled") {
+      postgameDataLoaded = true;
+      const games =
+        postgameResult.value?.games;
+
+      /*
+       * Canonical postgame output is keyed by game ID. Continue accepting the
+       * original array shape so older cached files remain harmless.
+       */
+      postgameGames = Array.isArray(games)
+        ? games
+        : (
+            games &&
+            typeof games === "object"
+          )
+          ? Object.values(games)
+          : [];
+      postgameMetricDistributionCache.clear();
+    } else {
+      /*
+       * CRITICAL:
+       * Do not convert every final to PENDING when the entire JSON request fails.
+       * Preserve the last successfully loaded postgame data instead.
+       */
+      console.warn(
+        "[THI Postgame] postgame_analytics.json unavailable:",
+        postgameResult.reason
+      );
+    }
+
+    applyAll();
+  }
+
+  // ==========================================================================
+  // FINAL SCORE CARD
+  // ==========================================================================
+
+  function currentScoreCard() {
+    return document.querySelector(
+      "#matchup-container .projected-score-card"
+    );
+  }
+
+  function scoreCardTeams(card) {
+    if (!card) {
+      return null;
+    }
+
+    const teams = Array.from(
+      card.querySelectorAll(".projected-team")
+    );
+
+    if (teams.length < 2) {
+      return null;
+    }
+
+    const awayName = teams[0]
+      .querySelector(".projected-team-name")
+      ?.textContent
+      ?.trim();
+
+    const homeName = teams[1]
+      .querySelector(".projected-team-name")
+      ?.textContent
+      ?.trim();
+
+    if (!awayName || !homeName) {
+      return null;
+    }
+
+    return {
+      awayName,
+      homeName,
+      awayNode: teams[0],
+      homeNode: teams[1]
+    };
+  }
+
+  function findFinal(away, home) {
+    return matchupFind(
+      finalGames,
+      away,
+      home
+    );
+  }
+
+  function findPostgameByTeams(away, home) {
+    return matchupFind(
+      postgameGames,
+      away,
+      home
+    );
+  }
+
+  function findPostgameForFinal(final) {
+    if (!final) {
+      return null;
+    }
+
+    const finalId = String(final.game_id || "").trim();
+
+    if (finalId) {
+      const byId = postgameGames.find(game =>
+        String(game?.game_id || "").trim() === finalId
+      );
+
+      if (byId) {
+        return byId;
+      }
+    }
+
+    return findPostgameByTeams(
+      final.away_team,
+      final.home_team
+    );
+  }
+
+  function matchupTitleTeams() {
+    const title = document.querySelector(
+      "#matchup-container .matchup-title"
+    );
+
+    const text = String(
+      title?.textContent || ""
+    )
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (!text) {
+      return null;
+    }
+
+    const parts = text.split(/\s+@\s+/);
+
+    if (parts.length !== 2) {
+      return null;
+    }
+
+    const away = parts[0].trim();
+    const home = parts[1].trim();
+
+    return away && home
+      ? { away, home }
+      : null;
+  }
+
+  function currentMatchupTeams() {
+    const fromTitle = matchupTitleTeams();
+
+    if (fromTitle) {
+      return fromTitle;
+    }
+
+    const card = currentScoreCard();
+    const nodes = scoreCardTeams(card);
+
+    if (!nodes) {
+      return null;
+    }
+
+    return {
+      away: nodes.awayName,
+      home: nodes.homeName
+    };
+  }
+
+  function readPregameProjection(nodes) {
+    const awayScore = nodes.awayNode
+      .querySelector(".projected-team-score")
+      ?.textContent
+      ?.trim();
+
+    const homeScore = nodes.homeNode
+      .querySelector(".projected-team-score")
+      ?.textContent
+      ?.trim();
+
+    if (
+      awayScore === undefined ||
+      awayScore === null ||
+      homeScore === undefined ||
+      homeScore === null
+    ) {
+      return null;
+    }
+
+    return {
+      awayName: nodes.awayName,
+      homeName: nodes.homeName,
+      awayScore,
+      homeScore
+    };
+  }
+
+  function pregameMarkup(projection) {
+    return `
+      <div class="hammer-final-pregame-block">
+        <div class="hammer-final-pregame-heading">
+          Pregame Model Projection
+        </div>
+
+        <div class="hammer-final-pregame-score">
+          <div class="hammer-final-pregame-team">
+            <div class="hammer-final-pregame-name">
+              ${escapeHtml(projection.awayName)}
+            </div>
+            <div class="hammer-final-pregame-points">
+              ${escapeHtml(projection.awayScore)}
+            </div>
+          </div>
+
+          <div class="hammer-final-pregame-separator">
+            —
+          </div>
+
+          <div class="hammer-final-pregame-team">
+            <div class="hammer-final-pregame-name">
+              ${escapeHtml(projection.homeName)}
+            </div>
+            <div class="hammer-final-pregame-points">
+              ${escapeHtml(projection.homeScore)}
+            </div>
+          </div>
+        </div>
+
+        <div class="hammer-final-pregame-note">
+          Pregame projection preserved for reference. Actual final score shown above.
+        </div>
+      </div>
+    `;
+  }
+
+  function applyFinalToCurrentMatchup() {
+    const card = currentScoreCard();
+
+    if (!card) {
+      return null;
+    }
+
+    const nodes = scoreCardTeams(card);
+
+    if (!nodes) {
+      return null;
+    }
+
+    const final = findFinal(
+      nodes.awayName,
+      nodes.homeName
+    );
+
+    if (!final) {
+      removePostgameSection();
+      return null;
+    }
+
+    if (
+      card.dataset.hammerFinalApplied
+      !== "true"
+    ) {
+      const projection =
+        readPregameProjection(nodes);
+
+      if (!projection) {
+        return final;
+      }
+
+      const awayPoints =
+        Number(final.away_points);
+
+      const homePoints =
+        Number(final.home_points);
+
+      if (
+        !Number.isFinite(awayPoints) ||
+        !Number.isFinite(homePoints)
+      ) {
+        return final;
+      }
+
+      const title =
+        card.querySelector(
+          ".projected-score-title"
+        );
+
+      const separator =
+        card.querySelector(
+          ".projected-score-separator"
+        );
+
+      const awayNameNode =
+        nodes.awayNode.querySelector(
+          ".projected-team-name"
+        );
+
+      const awayScoreNode =
+        nodes.awayNode.querySelector(
+          ".projected-team-score"
+        );
+
+      const homeNameNode =
+        nodes.homeNode.querySelector(
+          ".projected-team-name"
+        );
+
+      const homeScoreNode =
+        nodes.homeNode.querySelector(
+          ".projected-team-score"
+        );
+
+      if (
+        !title ||
+        !awayNameNode ||
+        !awayScoreNode ||
+        !homeNameNode ||
+        !homeScoreNode
+      ) {
+        return final;
+      }
+
+      card.dataset.hammerFinalApplied =
+        "true";
+
+      title.textContent =
+        "Final Score";
+
+      awayNameNode.textContent =
+        final.away_team ||
+        projection.awayName;
+
+      awayScoreNode.textContent =
+        String(awayPoints);
+
+      homeNameNode.textContent =
+        final.home_team ||
+        projection.homeName;
+
+      homeScoreNode.textContent =
+        String(homePoints);
+
+      if (separator) {
+        separator.textContent =
+          "FINAL";
+      }
+
+      const oldPregame =
+        card.querySelector(
+          ".hammer-final-pregame-block"
+        );
+
+      if (oldPregame) {
+        oldPregame.remove();
+      }
+
+      card.insertAdjacentHTML(
+        "beforeend",
+        pregameMarkup(projection)
+      );
+
+      card.classList.add(
+        "hammer-final-score-card"
+      );
+    }
+
+    return final;
+  }
+
+  // ==========================================================================
+  // POSTGAME PAGE
+  // ==========================================================================
+
+  function removePostgameSection() {
+    document
+      .getElementById(POSTGAME_SECTION_ID)
+      ?.remove();
+  }
+
+  function metricRow(
+    label,
+    awayValue,
+    homeValue,
+    options = {}
+  ) {
+    const awayProfile = postgameMetricProfile(
+      options.path,
+      options.awayRaw,
+      options.higherIsBetter !== false
+    );
+    const homeProfile = postgameMetricProfile(
+      options.path,
+      options.homeRaw,
+      options.higherIsBetter !== false
+    );
+
+    const cell = (value, profile, side) => `
+      <span class="hammer-pg-row-${side} hammer-pg-band-${profile.band}">
+        ${escapeHtml(value)}
+        ${profile.rank ? `<span class="hammer-pg-rank">#${profile.rank}</span>` : ""}
+      </span>
+    `;
+
+    return `
+      <div class="hammer-pg-row">
+        <span class="hammer-pg-row-label">
+          ${escapeHtml(label)}
+        </span>
+        ${cell(awayValue, awayProfile, "away")}
+        ${cell(homeValue, homeProfile, "home")}
+      </div>
+    `;
+  }
+
+  function nestedValue(object, path) {
+    return String(path || "")
+      .split(".")
+      .filter(Boolean)
+      .reduce((value, key) => value?.[key], object);
+  }
+
+  function postgameMetricDistribution(path) {
+    if (!path) return [];
+    if (postgameMetricDistributionCache.has(path)) {
+      return postgameMetricDistributionCache.get(path);
+    }
+
+    const values = [];
+    postgameGames.forEach(game => {
+      [game?.away_metrics, game?.home_metrics].forEach(metrics => {
+        const value = numeric(nestedValue(metrics, path));
+        if (value !== null) values.push(value);
+      });
+    });
+    postgameMetricDistributionCache.set(path, values);
+    return values;
+  }
+
+  function postgameMetricProfile(path, rawValue, higherIsBetter) {
+    const value = numeric(rawValue);
+    const values = postgameMetricDistribution(path);
+    if (!path || value === null || values.length < 20) {
+      return { rank:null, percentile:null, band:"missing" };
+    }
+
+    const better = values.filter(candidate =>
+      higherIsBetter ? candidate > value : candidate < value
+    ).length;
+    const rank = better + 1;
+    const percentile = values.length <= 1
+      ? 50
+      : 100 * (values.length - rank) / (values.length - 1);
+
+    let band = "critical";
+    if (percentile >= 85) band = "elite";
+    else if (percentile >= 70) band = "strong";
+    else if (percentile >= 55) band = "above";
+    else if (percentile >= 45) band = "average";
+    else if (percentile >= 30) band = "below";
+    else if (percentile >= 15) band = "poor";
+
+    return { rank, percentile, band };
+  }
+
+  function panel(
+    title,
+    awayName,
+    homeName,
+    rows
+  ) {
+    return `
+      <div class="hammer-pg-panel">
+        <div class="hammer-pg-panel-title">
+          ${escapeHtml(title)}
+        </div>
+
+        <div class="hammer-pg-team-head">
+          <span>Metric</span>
+          <span>${escapeHtml(awayName)}</span>
+          <span>${escapeHtml(homeName)}</span>
+        </div>
+
+        ${rows.join("")}
+      </div>
+    `;
+  }
+
+  function heatBand(value) {
+    const number = numeric(value);
+    if (number === null) return "missing";
+    if (number >= .30) return "elite";
+    if (number >= .10) return "strong";
+    if (number >= 0) return "above";
+    if (number >= -.10) return "below";
+    if (number >= -.30) return "poor";
+    return "critical";
+  }
+
+  function heatZone(label, zone, passing = false) {
+    const attempts = Number(zone?.attempts || 0);
+    const epa = numeric(zone?.epa_per_play);
+    const detail = passing
+      ? `${Number(zone?.completions || 0)}/${attempts} · ${fmt(zone?.yards, 0)} yds`
+      : `${attempts} carries · ${fmt(zone?.yards, 0)} yds`;
+    return `
+      <div class="hammer-pg-zone hammer-pg-band-${heatBand(epa)}">
+        <div class="hammer-pg-zone-name">${escapeHtml(label)}</div>
+        <div class="hammer-pg-zone-epa">${epa === null ? "—" : fmtSigned(epa, 2)}</div>
+        <div class="hammer-pg-zone-detail">${attempts ? escapeHtml(detail) : "No charted attempts"}</div>
+      </div>
+    `;
+  }
+
+  function directionalHeatmap(teamName, teamMetrics) {
+    const directional = teamMetrics?.directional || {};
+    const passing = directional.passing || {};
+    const rushing = directional.rushing || {};
+    const coverage = directional.coverage || {};
+    const directions = ["left", "middle", "right"];
+    const directionLabel = value => value.charAt(0).toUpperCase() + value.slice(1);
+    return `
+      <div class="hammer-pg-heat-card">
+        <div class="hammer-pg-heat-title">
+          <span>${escapeHtml(teamName)}</span>
+          <span>EPA / Play</span>
+        </div>
+        <div class="hammer-pg-heat-subtitle">Deep passing</div>
+        <div class="hammer-pg-zones">
+          ${directions.map(direction => heatZone(directionLabel(direction), passing?.deep?.[direction], true)).join("")}
+        </div>
+        <div class="hammer-pg-heat-subtitle">Short passing</div>
+        <div class="hammer-pg-zones">
+          ${directions.map(direction => heatZone(directionLabel(direction), passing?.short?.[direction], true)).join("")}
+        </div>
+        <div class="hammer-pg-heat-subtitle">Rushing direction</div>
+        <div class="hammer-pg-zones">
+          ${directions.map(direction => heatZone(directionLabel(direction), rushing?.[direction], false)).join("")}
+        </div>
+        <div class="hammer-pg-heat-coverage">
+          Passing coverage: ${fmtInt(coverage.passing_charted)}/${fmtInt(coverage.passing_total)} attempts ·
+          Rushing coverage: ${fmtInt(coverage.rushing_charted)}/${fmtInt(coverage.rushing_total)} attempts.
+          Unclassified plays are not estimated.
+        </div>
+      </div>
+    `;
+  }
+
+  function pendingPostgameMarkup(postgame) {
+    return `
+      <section
+        id="${POSTGAME_SECTION_ID}"
+        class="pending"
+      >
+        <div class="hammer-pg-kicker">
+          🔨 Postgame Analysis
+        </div>
+
+        <div class="hammer-pg-title">
+          Postgame analysis pending
+        </div>
+
+        <div class="hammer-pg-subtitle">
+          The final score is official. THI is waiting for matching
+          play-by-play before publishing the full retrospective package.
+        </div>
+
+        <div class="hammer-pg-pending">
+          ${escapeHtml(
+            postgame?.source_note ||
+            "The automatic settlement workflow will retry this game. No postgame metric is fabricated while PBP is unavailable."
+          )}
+        </div>
+      </section>
+    `;
+  }
+
+  function availablePostgameMarkup(
+    final,
+    pg
+  ) {
+    const awayName =
+      pg.away_team ||
+      final.away_team;
+
+    const homeName =
+      pg.home_team ||
+      final.home_team;
+
+    const away =
+      pg.away_metrics || {};
+
+    const home =
+      pg.home_metrics || {};
+
+    const headline =
+      pg.headline || {};
+
+    const pwe =
+      headline.postgame_win_expectancy || {};
+
+    const efficiencyMargin =
+      headline.efficiency_margin || {};
+
+    const expectedMargin =
+      headline.expected_margin || {};
+
+    const adjusted =
+      headline.adjusted_final_score || {};
+
+    const reality =
+      headline.reality_check || {};
+
+    const aOverall =
+      away.overall || {};
+
+    const hOverall =
+      home.overall || {};
+
+    const aPass =
+      away.passing || {};
+
+    const hPass =
+      home.passing || {};
+
+    const aRush =
+      away.rushing || {};
+
+    const hRush =
+      home.rushing || {};
+
+    const aStd =
+      away.standard_downs || {};
+
+    const hStd =
+      home.standard_downs || {};
+
+    const aPd =
+      away.passing_downs || {};
+
+    const hPd =
+      home.passing_downs || {};
+
+    const aEarly =
+      away.early_downs || {};
+
+    const hEarly =
+      home.early_downs || {};
+
+    const aMoney =
+      away.third_fourth_downs || {};
+
+    const hMoney =
+      home.third_fourth_downs || {};
+
+    const aFourth =
+      away.fourth_down || {};
+
+    const hFourth =
+      home.fourth_down || {};
+
+    const aExplosive =
+      away.explosiveness || {};
+
+    const hExplosive =
+      home.explosiveness || {};
+
+    const aNeg =
+      away.negative_play_rates || {};
+
+    const hNeg =
+      home.negative_play_rates || {};
+
+    const aDrive =
+      away.drives || {};
+
+    const hDrive =
+      home.drives || {};
+
+    const aOpp =
+      away.scoring_opportunities || {};
+
+    const hOpp =
+      home.scoring_opportunities || {};
+
+    const aRz =
+      away.red_zone || {};
+
+    const hRz =
+      home.red_zone || {};
+
+    const aField =
+      away.field_position || {};
+
+    const hField =
+      home.field_position || {};
+
+    const aTurn =
+      away.turnovers || {};
+
+    const hTurn =
+      home.turnovers || {};
+
+    const context =
+      pg.game_context || {};
+
+    const panels = [
+      panel(
+        "Overall EPA",
+        awayName,
+        homeName,
+        [
+          metricRow(
+            "EPA / Play",
+            fmt(aOverall.epa_per_play, 3),
+            fmt(hOverall.epa_per_play, 3),
+            { path:"overall.epa_per_play", awayRaw:aOverall.epa_per_play, homeRaw:hOverall.epa_per_play }
+          ),
+          metricRow(
+            "Total EPA",
+            fmtSigned(aOverall.epa_total, 2),
+            fmtSigned(hOverall.epa_total, 2)
+          ),
+          metricRow(
+            "Success Rate",
+            fmtPct(aOverall.success_rate),
+            fmtPct(hOverall.success_rate),
+            { path:"overall.success_rate", awayRaw:aOverall.success_rate, homeRaw:hOverall.success_rate }
+          ),
+          metricRow(
+            "EPA Volatility",
+            fmt(away.epa_volatility, 3),
+            fmt(home.epa_volatility, 3)
+          )
+        ]
+      ),
+
+      panel(
+        "Pass + Rush",
+        awayName,
+        homeName,
+        [
+          metricRow(
+            "Pass EPA / Play",
+            fmt(aPass.epa_per_play, 3),
+            fmt(hPass.epa_per_play, 3),
+            { path:"passing.epa_per_play", awayRaw:aPass.epa_per_play, homeRaw:hPass.epa_per_play }
+          ),
+          metricRow(
+            "Pass Total EPA",
+            fmtSigned(aPass.epa_total, 2),
+            fmtSigned(hPass.epa_total, 2)
+          ),
+          metricRow(
+            "Pass Success Rate",
+            fmtPct(aPass.success_rate),
+            fmtPct(hPass.success_rate),
+            { path:"passing.success_rate", awayRaw:aPass.success_rate, homeRaw:hPass.success_rate }
+          ),
+          metricRow(
+            "Rush EPA / Play",
+            fmt(aRush.epa_per_play, 3),
+            fmt(hRush.epa_per_play, 3),
+            { path:"rushing.epa_per_play", awayRaw:aRush.epa_per_play, homeRaw:hRush.epa_per_play }
+          ),
+          metricRow(
+            "Rush Total EPA",
+            fmtSigned(aRush.epa_total, 2),
+            fmtSigned(hRush.epa_total, 2)
+          ),
+          metricRow(
+            "Rush Success Rate",
+            fmtPct(aRush.success_rate),
+            fmtPct(hRush.success_rate),
+            { path:"rushing.success_rate", awayRaw:aRush.success_rate, homeRaw:hRush.success_rate }
+          )
+        ]
+      ),
+
+      panel(
+        "Explosiveness",
+        awayName,
+        homeName,
+        [
+          metricRow(
+            "Explosive Plays",
+            fmtInt(aExplosive.explosive_plays),
+            fmtInt(hExplosive.explosive_plays)
+          ),
+          metricRow(
+            "Explosive-Play Rate",
+            fmtPct(aExplosive.explosive_play_rate),
+            fmtPct(hExplosive.explosive_play_rate),
+            { path:"explosiveness.explosive_play_rate", awayRaw:aExplosive.explosive_play_rate, homeRaw:hExplosive.explosive_play_rate }
+          ),
+          metricRow(
+            "Explosive EPA Dependency",
+            fmtPct(aExplosive.explosive_epa_dependency),
+            fmtPct(hExplosive.explosive_epa_dependency)
+          )
+        ]
+      ),
+
+      panel(
+        "Standard + Passing Downs",
+        awayName,
+        homeName,
+        [
+          metricRow(
+            "Standard Down EPA / Play",
+            fmt(aStd.epa_per_play, 3),
+            fmt(hStd.epa_per_play, 3),
+            { path:"standard_downs.epa_per_play", awayRaw:aStd.epa_per_play, homeRaw:hStd.epa_per_play }
+          ),
+          metricRow(
+            "Standard Down Success",
+            fmtPct(aStd.success_rate),
+            fmtPct(hStd.success_rate),
+            { path:"standard_downs.success_rate", awayRaw:aStd.success_rate, homeRaw:hStd.success_rate }
+          ),
+          metricRow(
+            "Passing Down EPA / Play",
+            fmt(aPd.epa_per_play, 3),
+            fmt(hPd.epa_per_play, 3),
+            { path:"passing_downs.epa_per_play", awayRaw:aPd.epa_per_play, homeRaw:hPd.epa_per_play }
+          ),
+          metricRow(
+            "Passing Down Success",
+            fmtPct(aPd.success_rate),
+            fmtPct(hPd.success_rate),
+            { path:"passing_downs.success_rate", awayRaw:aPd.success_rate, homeRaw:hPd.success_rate }
+          )
+        ]
+      ),
+
+      panel(
+        "Early + Money Downs",
+        awayName,
+        homeName,
+        [
+          metricRow(
+            "Early Down EPA / Play",
+            fmt(aEarly.epa_per_play, 3),
+            fmt(hEarly.epa_per_play, 3),
+            { path:"early_downs.epa_per_play", awayRaw:aEarly.epa_per_play, homeRaw:hEarly.epa_per_play }
+          ),
+          metricRow(
+            "Early Down Success",
+            fmtPct(aEarly.success_rate),
+            fmtPct(hEarly.success_rate),
+            { path:"early_downs.success_rate", awayRaw:aEarly.success_rate, homeRaw:hEarly.success_rate }
+          ),
+          metricRow(
+            "3rd/4th EPA / Play",
+            fmt(aMoney.epa_per_play, 3),
+            fmt(hMoney.epa_per_play, 3),
+            { path:"third_fourth_downs.epa_per_play", awayRaw:aMoney.epa_per_play, homeRaw:hMoney.epa_per_play }
+          ),
+          metricRow(
+            "3rd/4th Success",
+            fmtPct(aMoney.success_rate),
+            fmtPct(hMoney.success_rate),
+            { path:"third_fourth_downs.success_rate", awayRaw:aMoney.success_rate, homeRaw:hMoney.success_rate }
+          )
+        ]
+      ),
+
+      panel(
+        "Fourth Down",
+        awayName,
+        homeName,
+        [
+          metricRow(
+            "Attempts",
+            fmtInt(aFourth.attempts),
+            fmtInt(hFourth.attempts)
+          ),
+          metricRow(
+            "Success Rate",
+            fmtPct(aFourth.success_rate),
+            fmtPct(hFourth.success_rate)
+          ),
+          metricRow(
+            "EPA / Play",
+            fmt(aFourth.epa_per_play, 3),
+            fmt(hFourth.epa_per_play, 3)
+          ),
+          metricRow(
+            "Total EPA",
+            fmtSigned(aFourth.epa_total, 2),
+            fmtSigned(hFourth.epa_total, 2)
+          )
+        ]
+      ),
+
+      panel(
+        "Negative Plays Allowed",
+        awayName,
+        homeName,
+        [
+          metricRow(
+            "Sack Rate Allowed",
+            fmtPct(aNeg.sack_rate_allowed),
+            fmtPct(hNeg.sack_rate_allowed),
+            { path:"negative_play_rates.sack_rate_allowed", awayRaw:aNeg.sack_rate_allowed, homeRaw:hNeg.sack_rate_allowed, higherIsBetter:false }
+          ),
+          metricRow(
+            "Stuff Rate Allowed",
+            fmtPct(aNeg.stuff_rate_allowed),
+            fmtPct(hNeg.stuff_rate_allowed),
+            { path:"negative_play_rates.stuff_rate_allowed", awayRaw:aNeg.stuff_rate_allowed, homeRaw:hNeg.stuff_rate_allowed, higherIsBetter:false }
+          ),
+          metricRow(
+            "TFL Rate Allowed",
+            fmtPct(aNeg.tfl_rate_allowed),
+            fmtPct(hNeg.tfl_rate_allowed),
+            { path:"negative_play_rates.tfl_rate_allowed", awayRaw:aNeg.tfl_rate_allowed, homeRaw:hNeg.tfl_rate_allowed, higherIsBetter:false }
+          )
+        ]
+      ),
+
+      panel(
+        "Drive Efficiency",
+        awayName,
+        homeName,
+        [
+          metricRow(
+            "Drives",
+            fmtInt(aDrive.drives),
+            fmtInt(hDrive.drives)
+          ),
+          metricRow(
+            "Points / Drive",
+            fmt(aDrive.points_per_drive, 2),
+            fmt(hDrive.points_per_drive, 2),
+            { path:"drives.points_per_drive", awayRaw:aDrive.points_per_drive, homeRaw:hDrive.points_per_drive }
+          ),
+          metricRow(
+            "Yards / Drive",
+            fmt(aDrive.yards_per_drive, 1),
+            fmt(hDrive.yards_per_drive, 1),
+            { path:"drives.yards_per_drive", awayRaw:aDrive.yards_per_drive, homeRaw:hDrive.yards_per_drive }
+          ),
+          metricRow(
+            "Drive Success Rate",
+            fmtPct(aDrive.drive_success_rate),
+            fmtPct(hDrive.drive_success_rate),
+            { path:"drives.drive_success_rate", awayRaw:aDrive.drive_success_rate, homeRaw:hDrive.drive_success_rate }
+          ),
+          metricRow(
+            "Three-and-Out Rate",
+            fmtPct(aDrive.three_and_out_rate),
+            fmtPct(hDrive.three_and_out_rate),
+            { path:"drives.three_and_out_rate", awayRaw:aDrive.three_and_out_rate, homeRaw:hDrive.three_and_out_rate, higherIsBetter:false }
+          )
+        ]
+      ),
+
+      panel(
+        "Scoring Opportunities",
+        awayName,
+        homeName,
+        [
+          metricRow(
+            "Opportunities",
+            fmtInt(aOpp.opportunities),
+            fmtInt(hOpp.opportunities)
+          ),
+          metricRow(
+            "Points / Opportunity",
+            fmt(aOpp.points_per_opportunity, 2),
+            fmt(hOpp.points_per_opportunity, 2),
+            { path:"scoring_opportunities.points_per_opportunity", awayRaw:aOpp.points_per_opportunity, homeRaw:hOpp.points_per_opportunity }
+          )
+        ]
+      ),
+
+      panel(
+        "Red Zone",
+        awayName,
+        homeName,
+        [
+          metricRow(
+            "Trips",
+            fmtInt(aRz.trips),
+            fmtInt(hRz.trips)
+          ),
+          metricRow(
+            "Points / Trip",
+            fmt(aRz.points_per_trip, 2),
+            fmt(hRz.points_per_trip, 2),
+            { path:"red_zone.points_per_trip", awayRaw:aRz.points_per_trip, homeRaw:hRz.points_per_trip }
+          ),
+          metricRow(
+            "Overperformance",
+            (
+              numeric(aRz.overperformance_points_per_trip) === null
+                ? "—"
+                : `${fmtSigned(aRz.overperformance_points_per_trip, 2)} pts/trip`
+            ),
+            (
+              numeric(hRz.overperformance_points_per_trip) === null
+                ? "—"
+                : `${fmtSigned(hRz.overperformance_points_per_trip, 2)} pts/trip`
+            )
+          )
+        ]
+      ),
+
+      panel(
+        "Field Position + Turnovers",
+        awayName,
+        homeName,
+        [
+          metricRow(
+            "Avg Start — Yds to Goal",
+            fmt(aField.avg_start_yards_to_goal, 1),
+            fmt(hField.avg_start_yards_to_goal, 1),
+            { path:"field_position.avg_start_yards_to_goal", awayRaw:aField.avg_start_yards_to_goal, homeRaw:hField.avg_start_yards_to_goal, higherIsBetter:false }
+          ),
+          metricRow(
+            "Turnovers",
+            fmtInt(aTurn.turnovers),
+            fmtInt(hTurn.turnovers),
+            { path:"turnovers.turnovers", awayRaw:aTurn.turnovers, homeRaw:hTurn.turnovers, higherIsBetter:false }
+          ),
+          metricRow(
+            "Turnover EPA Impact",
+            fmtSigned(aTurn.turnover_epa_impact, 2),
+            fmtSigned(hTurn.turnover_epa_impact, 2)
+          )
+        ]
+      )
+    ];
+
+    return `
+      <section id="${POSTGAME_SECTION_ID}">
+        <div class="hammer-pg-kicker">
+          🔨 Postgame Analysis
+        </div>
+
+        <div class="hammer-pg-title">
+          Underlying Performance Review
+        </div>
+
+        <div class="hammer-pg-subtitle">
+          Retrospective play-by-play analysis. The frozen pregame THI projection
+          above is never rewritten after the game.
+        </div>
+
+        <div class="hammer-pg-beta">
+          ${escapeHtml(
+            pg.calibration_status ||
+            "BETA — historical calibration pending"
+          )}
+        </div>
+
+        <div class="hammer-pg-headlines">
+          <div class="hammer-pg-card">
+            <div class="hammer-pg-card-label">
+              Postgame Win Expectancy
+            </div>
+            <div class="hammer-pg-card-value">
+              ${escapeHtml(awayName)} ${fmtPct(pwe.away_pct)}
+              ·
+              ${escapeHtml(homeName)} ${fmtPct(pwe.home_pct)}
+            </div>
+            <div class="hammer-pg-card-note">
+              Retrospective process-based probability, not live win probability.
+            </div>
+          </div>
+
+          <div class="hammer-pg-card">
+            <div class="hammer-pg-card-label">
+              Efficiency Margin
+            </div>
+            <div class="hammer-pg-card-value">
+              ${escapeHtml(efficiencyMargin.leader || "—")}
+              ${
+                numeric(efficiencyMargin.home) === null
+                  ? "—"
+                  : `${fmtSigned(Math.abs(Number(efficiencyMargin.home)), 3)} EPA/play`
+              }
+            </div>
+            <div class="hammer-pg-card-note">
+              Non-garbage-time EPA/play advantage over the opponent.
+            </div>
+          </div>
+
+          <div class="hammer-pg-card">
+            <div class="hammer-pg-card-label">
+              Expected Margin
+            </div>
+            <div class="hammer-pg-card-value">
+              ${escapeHtml(expectedMargin.leader || "—")}
+              ${
+                numeric(expectedMargin.home) === null
+                  ? "—"
+                  : `by ${fmt(Math.abs(Number(expectedMargin.home)), 1)}`
+              }
+            </div>
+            <div class="hammer-pg-card-note">
+              Retrospective margin implied by the complete underlying game profile.
+            </div>
+          </div>
+
+          <div class="hammer-pg-card">
+            <div class="hammer-pg-card-label">
+              Adjusted Final Score
+            </div>
+            <div class="hammer-pg-card-value">
+              ${escapeHtml(awayName)} ${fmt(adjusted.away, 1)}
+              —
+              ${escapeHtml(homeName)} ${fmt(adjusted.home, 1)}
+            </div>
+            <div class="hammer-pg-card-note">
+              BETA estimate from the underlying efficiency and possession profile.
+            </div>
+          </div>
+
+          <div class="hammer-pg-card">
+            <div class="hammer-pg-card-label">
+              THI Reality Check
+            </div>
+            <div class="hammer-pg-card-value">
+              ${escapeHtml(reality.label || "—")}
+            </div>
+            <div class="hammer-pg-card-note">
+              ${escapeHtml(reality.note || "")}
+            </div>
+          </div>
+        </div>
+
+        <div class="hammer-pg-grid">
+          ${panels.join("")}
+        </div>
+
+        <div class="hammer-pg-heat-grid">
+          ${directionalHeatmap(awayName, away)}
+          ${directionalHeatmap(homeName, home)}
+        </div>
+
+        <div class="hammer-pg-footer">
+          <strong>Color and rank:</strong>
+          Current 2026 FBS single-game comparison pool; green is stronger and red is weaker after accounting for metric direction. The pool grows each week.
+          <br>
+          <strong>Garbage-time share:</strong>
+          ${fmtInt(context.garbage_time_plays)} of
+          ${fmtInt(context.total_scrimmage_plays)}
+          qualifying scrimmage plays
+          (${fmtPct(context.garbage_time_share)}).
+          <br>
+          <strong>Competitive plays used:</strong>
+          ${fmtInt(context.competitive_scrimmage_plays)}.
+          <br>
+          <strong>Definitions:</strong>
+          Standard downs = 1st down, 2nd-and-7 or less, 3rd/4th-and-4 or less.
+          Passing downs = 2nd-and-8+, 3rd/4th-and-5+.
+          Drive Success Rate = share of drives with positive cumulative EPA.
+          Scoring opportunity = drive reaching the opponent 40.
+          Red-zone trip = drive reaching the opponent 20.
+          <br>
+          <strong>Source:</strong>
+          ${escapeHtml(
+            pg.source ||
+            "SportsDataverse/cfbfastR PBP"
+          )}.
+          PGWE, Expected Margin, Adjusted Final Score, and Red-Zone Overperformance remain beta
+          until the historical calibration work is completed.
+        </div>
+      </section>
+    `;
+  }
+
+  function renderPostgame(final = null) {
+    const container =
+      document.getElementById(
+        "matchup-container"
+      );
+
+    if (!container) {
+      return;
+    }
+
+    const teams = currentMatchupTeams();
+
+    if (!teams) {
+      removePostgameSection();
+      return;
+    }
+
+    /*
+     * Resolve postgame state directly from the matchup currently displayed.
+     * This is intentionally independent of the results-ledger match used to
+     * convert the score card, so the board and matchup page use the SAME
+     * postgame record/status.
+     */
+    let postgame =
+      findPostgameByTeams(
+        teams.away,
+        teams.home
+      );
+
+    /*
+     * ID fallback when exact result context exists.
+     */
+    if (!postgame && final) {
+      postgame =
+        findPostgameForFinal(final);
+    }
+
+    /*
+     * Failed whole-file load is NOT "pending."
+     */
+    if (!postgameDataLoaded) {
+      removePostgameSection();
+      return;
+    }
+
+    /*
+     * Missing matchup record is also NOT "pending."
+     */
+    if (!postgame) {
+      removePostgameSection();
+      return;
+    }
+
+    const renderKey = [
+      postgame.game_id || postgame.matchup_key || "",
+      postgame.analysis_status || "",
+      postgame.generated_at || ""
+    ].join("|");
+
+    const currentSection =
+      document.getElementById(
+        POSTGAME_SECTION_ID
+      );
+
+    /*
+     * The observer sees DOM mutations from other presentation layers. Do not
+     * remove/reinsert our own section when it already represents this exact
+     * game and data revision.
+     */
+    if (
+      currentSection?.dataset
+        ?.postgameRenderKey === renderKey
+    ) {
+      return;
+    }
+
+    removePostgameSection();
+
+    if (
+      postgame.analysis_status
+      === "pending"
+    ) {
+      container.insertAdjacentHTML(
+        "beforeend",
+        pendingPostgameMarkup(
+          postgame
+        )
+      );
+
+      const inserted =
+        document.getElementById(
+          POSTGAME_SECTION_ID
+        );
+
+      if (inserted) {
+        inserted.dataset.postgameRenderKey =
+          renderKey;
+      }
+      return;
+    }
+
+    if (
+      postgame.analysis_status
+      === "available"
+    ) {
+      /*
+       * The full metric renderer only needs team names/scores from the final.
+       * If result matching ever failed, the postgame record itself contains
+       * those exact values, so use it as a safe display fallback.
+       */
+      const displayFinal =
+        final || {
+          away_team: postgame.away_team,
+          home_team: postgame.home_team,
+          away_points: postgame.away_points,
+          home_points: postgame.home_points
+        };
+
+      container.insertAdjacentHTML(
+        "beforeend",
+        availablePostgameMarkup(
+          displayFinal,
+          postgame
+        )
+      );
+
+      const inserted =
+        document.getElementById(
+          POSTGAME_SECTION_ID
+        );
+
+      if (inserted) {
+        inserted.dataset.postgameRenderKey =
+          renderKey;
+      }
+    }
+  }
+
+  // ==========================================================================
+  // PROJECTION BOARD STATUS — ONE PURPLE PILL ONLY
+  // ==========================================================================
+
+  function boardRowTeams(row) {
+    const names = Array.from(
+      row.querySelectorAll(
+        ".matchup-cell .team-name"
+      )
+    )
+      .map(node =>
+        node.textContent?.trim()
+      )
+      .filter(Boolean);
+
+    if (names.length < 2) {
+      return null;
+    }
+
+    return {
+      away: names[0],
+      home: names[1]
+    };
+  }
+
+  function directText(node) {
+    return Array.from(
+      node.childNodes
+    )
+      .filter(child =>
+        child.nodeType
+        === Node.TEXT_NODE
+      )
+      .map(child =>
+        child.textContent || ""
+      )
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toUpperCase();
+  }
+
+  function removeAllPostgameStatusPills(row) {
+    /*
+     * Remove every prior postgame-status implementation, regardless of class.
+     * We inspect the smallest text-bearing elements so unrelated row content
+     * is never removed.
+     */
+    const candidates = Array.from(
+      row.querySelectorAll(
+        "span, div"
+      )
+    );
+
+    candidates.forEach(node => {
+      const text = directText(node);
+
+      if (
+        text === "POSTGAME ANALYSIS COMPLETE" ||
+        text === "POSTGAME ANALYSIS AVAILABLE" ||
+        text === "POSTGAME ANALYSIS PENDING"
+      ) {
+        node.remove();
+      }
+    });
+
+    row
+      .querySelectorAll(
+        ".hammer-postgame-board-badge, .thi-postgame-status-purple"
+      )
+      .forEach(node =>
+        node.remove()
+      );
+  }
+
+  function addPurplePostgamePill(
+    row,
+    status
+  ) {
+    const meta =
+      row.querySelector(
+        ".hammer-game-status-meta"
+      ) ||
+      row.querySelector(
+        ".matchup-cell"
+      );
+
+    if (!meta) {
+      return;
+    }
+
+    const pill =
+      document.createElement(
+        "span"
+      );
+
+    const available =
+      status === "available";
+
+    pill.className =
+      "thi-postgame-status-purple" +
+      (available ? "" : " pending");
+
+    pill.dataset.postgameStatus =
+      status;
+
+    pill.textContent =
+      available
+        ? "POSTGAME ANALYSIS AVAILABLE"
+        : "POSTGAME ANALYSIS PENDING";
+
+    meta.appendChild(pill);
+  }
+
+  function rowIsFinal(row) {
+    return (
+      row.classList.contains(
+        "completed-row"
+      ) ||
+      row.classList.contains(
+        "hammer-final-untracked-row"
+      ) ||
+      row.dataset.hammerGameState
+        === "final"
+    );
+  }
+
+  function decorateBoardPostgameStatus() {
+    const rows =
+      document.querySelectorAll(
+        "#projections-container .projection-table tbody tr.game-row"
+      );
+
+    rows.forEach(row => {
+      if (
+        !postgameDataLoaded ||
+        !rowIsFinal(row)
+      ) {
+        removeAllPostgameStatusPills(
+          row
+        );
+        return;
+      }
+
+      const teams =
+        boardRowTeams(row);
+
+      if (!teams) {
+        removeAllPostgameStatusPills(
+          row
+        );
+        return;
+      }
+
+      /*
+       * Board status comes DIRECTLY from the same postgame record lookup used
+       * by the matchup page. No separate "complete" guess is allowed.
+       */
+      const pg =
+        findPostgameByTeams(
+          teams.away,
+          teams.home
+        );
+
+      if (
+        pg?.analysis_status !== "available" &&
+        pg?.analysis_status !== "pending"
+      ) {
+        removeAllPostgameStatusPills(
+          row
+        );
+        return;
+      }
+
+      const desiredStatus =
+        pg.analysis_status;
+
+      const desiredText =
+        desiredStatus === "available"
+          ? "POSTGAME ANALYSIS AVAILABLE"
+          : "POSTGAME ANALYSIS PENDING";
+
+      const currentPills = Array.from(
+        row.querySelectorAll(
+          ".thi-postgame-status-purple"
+        )
+      );
+
+      const legacyPills =
+        row.querySelectorAll(
+          ".hammer-postgame-board-badge"
+        );
+
+      if (
+        currentPills.length === 1 &&
+        legacyPills.length === 0 &&
+        currentPills[0].dataset
+          .postgameStatus === desiredStatus &&
+        currentPills[0].textContent
+          ?.trim().toUpperCase() === desiredText
+      ) {
+        return;
+      }
+
+      removeAllPostgameStatusPills(
+        row
+      );
+
+      addPurplePostgamePill(
+        row,
+        desiredStatus
+      );
+    });
+  }
+
+  // ==========================================================================
+  // APPLY / OBSERVER
+  // ==========================================================================
+
+  function applyAll() {
+    if (applying) {
+      return;
+    }
+
+    applying = true;
+
+    try {
+      const final =
+        applyFinalToCurrentMatchup();
+
+      /*
+       * Render from the displayed matchup regardless of whether the final-score
+       * ledger matched. The postgame record itself is authoritative for
+       * AVAILABLE vs PENDING.
+       */
+      renderPostgame(final);
+
+      decorateBoardPostgameStatus();
+
+    } finally {
+      applying = false;
+    }
+  }
+
+  function scheduleApply() {
+    requestAnimationFrame(
+      applyAll
+    );
+  }
+
+  function installObserver() {
+    const targets = [
+      document.getElementById(
+        "matchup-container"
+      ),
+      document.getElementById(
+        "projections-container"
+      )
+    ].filter(Boolean);
+
+    if (!targets.length) {
+      setTimeout(
+        installObserver,
+        250
+      );
+      return;
+    }
+
+    if (observer) {
+      observer.disconnect();
+    }
+
+    observer =
+      new MutationObserver(() => {
+        if (!applying) {
+          scheduleApply();
+        }
+      });
+
+    targets.forEach(target => {
+      observer.observe(
+        target,
+        {
+          childList: true,
+          subtree: true
+        }
+      );
+    });
+
+    scheduleApply();
+  }
+
+  // ==========================================================================
+  // START
+  // ==========================================================================
+
+  async function start() {
+    installStyles();
+
+    await loadData();
+
+    installObserver();
+
+    setInterval(
+      loadData,
+      60000
+    );
+  }
+
+  if (
+    document.readyState
+    === "loading"
+  ) {
+    document.addEventListener(
+      "DOMContentLoaded",
+      start,
+      {
+        once: true
+      }
+    );
+  } else {
+    start();
+  }
+})();
