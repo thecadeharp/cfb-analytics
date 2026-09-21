@@ -1,0 +1,37 @@
+name: Schedule Context v1
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Refresh Monday after the prior weekend's results are settled.
+    - cron: "55 11 * * 1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thi-data-writer
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build descriptive schedule context
+        run: python scripts/build_schedule_context.py
+      - name: Commit context output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/schedule_context.json
+          if git diff --cached --quiet; then
+            echo "Schedule context unchanged."
+            exit 0
+          fi
+          git commit -m "Refresh schedule context"
+          git pull --rebase origin main
+          git push
