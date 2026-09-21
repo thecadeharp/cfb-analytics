@@ -1295,7 +1295,7 @@ function ensureMatchupView() {
 
     .thi-context-facts {
       display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
+      grid-template-columns:repeat(4,minmax(0,1fr));
     }
 
     .thi-context-fact {
@@ -1425,6 +1425,7 @@ function ensureMatchupView() {
       .analysis-panel.wide { grid-column:auto; }
 
       .thi-tale-grid { grid-template-columns:1fr 1fr; }
+      .thi-context-facts { grid-template-columns:repeat(2,minmax(0,1fr)); }
       .thi-team-summary:first-child { order:1; }
       .thi-team-summary:last-child { order:2; }
       .thi-unit-matchup:nth-child(2) { order:3; }
@@ -2103,6 +2104,20 @@ function scheduleOpponentText(item, kind) {
   return `${Number.isFinite(rank) && rank > 0 ? `#${rank} ` : ""}${game.opponent}`;
 }
 
+function scheduleTravelText(item) {
+  const travel = item?.travel ?? {};
+  const miles = Number(travel?.miles_from_campus);
+  const timeZones = Number(travel?.timezone_shift_hours);
+  if (item?.location === "home" && Number.isFinite(miles) && miles < 25) {
+    return "Home / local";
+  }
+  if (!Number.isFinite(miles)) return "Unavailable";
+  const zoneText = Number.isFinite(timeZones) && timeZones > 0
+    ? ` · ${formatNumber(timeZones, timeZones % 1 ? 1 : 0)}h TZ`
+    : "";
+  return `${Math.round(miles).toLocaleString("en-US")} mi${zoneText}`;
+}
+
 function scheduleContextCard(item) {
   const flags = Array.isArray(item?.flags) ? item.flags : [];
   const rest = Number(item?.rest_days);
@@ -2113,6 +2128,10 @@ function scheduleContextCard(item) {
         <div class="thi-context-fact">
           <div class="thi-context-label">Rest</div>
           <div class="thi-context-value">${Number.isFinite(rest) ? `${rest} days` : "Season opener"}</div>
+        </div>
+        <div class="thi-context-fact">
+          <div class="thi-context-label">Travel</div>
+          <div class="thi-context-value">${escapeHtml(scheduleTravelText(item))}</div>
         </div>
         <div class="thi-context-fact">
           <div class="thi-context-label">Previous</div>
@@ -2144,10 +2163,10 @@ function scheduleContextMarkup(game) {
       <div class="thi-matchup-section-header">
         <div>
           <div class="eyebrow">Developing · display only</div>
-          <div class="thi-matchup-section-title" id="thi-context-title">Schedule Context</div>
+          <div class="thi-matchup-section-title" id="thi-context-title">Schedule Context v2</div>
         </div>
         <div class="thi-matchup-section-note">
-          Descriptive flags · not applied to frozen Model A
+          Approximate travel + descriptive flags · not applied to Model A
           ${gameFlags.length ? ` · ${escapeHtml(gameFlags.join(" · "))}` : ""}
         </div>
       </div>
