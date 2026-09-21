@@ -126,3 +126,70 @@ def main() -> None:
                 team_output[side][field] = {
                     "value": round(float(value), 4) if finite(value) else None,
                     "rank": metric_rank,
+                    "percentile": round(pct, 1) if pct is not None else None,
+                    "band": color_band(pct),
+                    "eligible": eligible,
+                }
+
+        offense_epa = team_output["offense"]["epa_play"]["value"]
+        defense_epa = team_output["defense"]["epa_play"]["value"]
+        team_output["net_epa_play"] = (
+            round(offense_epa - defense_epa, 4)
+            if finite(offense_epa) and finite(defense_epa)
+            else None
+        )
+        output_teams[name] = team_output
+
+    net_values = [
+        float(team["net_epa_play"])
+        for team in output_teams.values()
+        if finite(team.get("net_epa_play"))
+        and int(team["sample"]["offense_plays"] or 0) >= 35
+        and int(team["sample"]["defense_plays"] or 0) >= 35
+    ]
+    for team in output_teams.values():
+        value = team.get("net_epa_play")
+        eligible = (
+            finite(value)
+            and int(team["sample"]["offense_plays"] or 0) >= 35
+            and int(team["sample"]["defense_plays"] or 0) >= 35
+        )
+        pct = percentile(net_values, float(value), True) if eligible and net_values else None
+        team["net_epa"] = {
+            "value": value,
+            "rank": rank(net_values, float(value), True) if pct is not None else None,
+            "percentile": round(pct, 1) if pct is not None else None,
+            "band": color_band(pct),
+            "eligible": eligible,
+        }
+
+    payload = {
+        "meta": {
+            "season": 2026,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "through_week": advanced.get("meta", {}).get("through_week"),
+            "source": advanced.get("meta", {}).get("source"),
+            "sample": sample_name,
+            "minimum_ranked_plays": 35,
+            "model_usage": "display_only_not_used_by_model_a",
+            "percentile_meaning": "100 is best after accounting for metric direction.",
+            "color_bands": {
+                "elite": "85-100",
+                "strong": "70-84.9",
+                "above": "55-69.9",
+                "average": "45-54.9",
+                "below": "30-44.9",
+                "poor": "15-29.9",
+                "critical": "0-14.9",
+            },
+            "metrics": METRICS,
+        },
+        "teams": output_teams,
+    }
+    OUTPUT.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    eligible = sum(team["net_epa"]["eligible"] for team in output_teams.values())
+    print(f"Wrote {OUTPUT.relative_to(ROOT)} for {len(output_teams)} teams ({eligible} ranked samples).")
+
+
+if __name__ == "__main__":
+    main()
