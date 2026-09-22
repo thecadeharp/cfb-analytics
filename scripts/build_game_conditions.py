@@ -30,6 +30,7 @@ import math
 import sys
 import time
 import urllib.parse
+import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -41,6 +42,8 @@ OUTPUT_PATH = ROOT / "data" / "game_conditions.json"
 
 USER_AGENT = "cfb-analytics-weather-engine-v1/1.0 (+https://github.com/thecadeharp/cfb-analytics)"
 TIMEOUT = 20
+FETCH_ATTEMPTS = 3
+RETRYABLE_HTTP_CODES = {429, 500, 502, 503, 504}
 
 # ---------------------------------------------------------------------------
 # Weather Engine v1 rules
@@ -54,12 +57,29 @@ MIN_PASS_LEAN_GAP = 0.15
 
 
 def fetch_json(url: str) -> dict:
+    """Fetch JSON with bounded retries for temporary provider/network errors."""
     request = urllib.request.Request(
         url,
         headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
     )
-    with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
-        return json.loads(response.read().decode("utf-8"))
+
+    for attempt in range(FETCH_ATTEMPTS):
+        try:
+            with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            retryable = exc.code in RETRYABLE_HTTP_CODES
+            if not retryable or attempt == FETCH_ATTEMPTS - 1:
+                raise
+        except (urllib.error.URLError, TimeoutError):
+            if attempt == FETCH_ATTEMPTS - 1:
+                raise
+
+        # Keep the workflow responsive while giving ESPN/Open-Meteo enough
+        # time to recover from a transient connection or rate-limit response.
+        time.sleep(0.75 * (2 ** attempt))
+
+    raise RuntimeError("weather request retry loop exited unexpectedly")
 
 
 def finite_number(value):
