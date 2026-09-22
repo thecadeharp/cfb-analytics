@@ -650,6 +650,7 @@ function updateDetailBackButton(viewName, returnView) {
   const destinations = {
     projections: "projections",
     ratings: "ratings",
+    dossier: "team dossier",
     matchup: "matchup",
     tape: "matchup analysis"
   };
@@ -1404,8 +1405,59 @@ function ensureMatchupView() {
     .alt-table td:nth-child(2), .alt-table td:nth-child(3),
     .alt-table th:nth-child(2), .alt-table th:nth-child(3),
     .season-schedule-table th:nth-child(4), .season-schedule-table td:nth-child(4),
-    .season-schedule-table th:nth-child(5), .season-schedule-table td:nth-child(5) {
+    .season-schedule-table th:nth-child(5), .season-schedule-table td:nth-child(5),
+    .season-schedule-table th:nth-child(6), .season-schedule-table td:nth-child(6) {
       text-align:right;
+    }
+
+    .season-schedule-table { min-width:1080px; }
+
+    .season-schedule-table tbody tr {
+      transition:background .15s ease;
+    }
+
+    .season-schedule-table tbody tr:hover {
+      background:#fafaf7;
+    }
+
+    .schedule-date, .schedule-secondary {
+      color:var(--muted); font-family:var(--mono); font-size:9px; margin-top:3px;
+    }
+
+    .schedule-opponent {
+      display:flex; align-items:center; gap:6px; font-weight:800;
+    }
+
+    .schedule-result {
+      font-weight:800; white-space:nowrap;
+    }
+
+    .schedule-result.win { color:var(--green); }
+    .schedule-result.loss { color:#b94037; }
+
+    .schedule-context-chips {
+      display:flex; flex-wrap:wrap; gap:4px; min-width:230px;
+    }
+
+    .schedule-context-chip {
+      display:inline-flex; padding:3px 6px; border-radius:999px;
+      border:1px solid #e1c45e; background:#fff8d8; color:#775b00;
+      font-family:var(--mono); font-size:7px; letter-spacing:.35px;
+      text-transform:uppercase; white-space:nowrap;
+    }
+
+    .schedule-context-clear {
+      color:var(--muted); font-size:9px;
+    }
+
+    .schedule-view-button {
+      border:1px solid var(--line); background:#fff; color:var(--ink);
+      border-radius:8px; padding:7px 9px; font-size:9px; font-weight:800;
+      cursor:pointer; white-space:nowrap;
+    }
+
+    .schedule-view-button:hover {
+      border-color:var(--green); color:var(--green);
     }
 
     .alt-strong { font-weight:800; }
@@ -1452,6 +1504,30 @@ function ensureMatchupView() {
       .thi-team-summary:last-child,
       .thi-unit-matchup:nth-child(2),
       .thi-unit-matchup:nth-child(3) { order:initial; }
+
+      .season-schedule-table { min-width:0; }
+      .season-schedule-table thead { display:none; }
+      .season-schedule-table,
+      .season-schedule-table tbody,
+      .season-schedule-table tr,
+      .season-schedule-table td { display:block; width:100%; }
+
+      .season-schedule-table tr {
+        padding:10px 12px; border-bottom:1px solid #e7e7e2;
+      }
+
+      .season-schedule-table td {
+        display:grid; grid-template-columns:88px minmax(0,1fr); gap:10px;
+        padding:6px 0; border:0; text-align:left !important;
+      }
+
+      .season-schedule-table td::before {
+        content:attr(data-label); color:var(--muted); font-family:var(--mono);
+        font-size:8px; letter-spacing:.8px; text-transform:uppercase;
+      }
+
+      .schedule-context-chips { min-width:0; }
+      .schedule-view-button { width:100%; }
     }
   `;
 
@@ -4182,6 +4258,53 @@ function renderMetricRow(
   `;
 }
 
+function scheduleGameRecord(gameId) {
+  return (scheduleData?.games ?? []).find(
+    game => String(game?.id) === String(gameId)
+  ) ?? null;
+}
+
+function scheduleTeamContext(teamName, gameId) {
+  const context = scheduleContextData?.games?.[String(gameId)] ?? null;
+  if (!context) return null;
+  if (context?.away?.team === teamName) return context.away;
+  if (context?.home?.team === teamName) return context.home;
+  return null;
+}
+
+function scheduleResult(teamName, official) {
+  const completed = String(official?.status ?? "").toLowerCase() === "completed";
+  const homePoints = Number(official?.home_points);
+  const awayPoints = Number(official?.away_points);
+
+  if (!completed || !Number.isFinite(homePoints) || !Number.isFinite(awayPoints)) {
+    return { text: "Upcoming", css: "" };
+  }
+
+  const isHome = official?.home_team === teamName;
+  const teamPoints = isHome ? homePoints : awayPoints;
+  const opponentPoints = isHome ? awayPoints : homePoints;
+  const result = teamPoints > opponentPoints ? "W" : teamPoints < opponentPoints ? "L" : "T";
+
+  return {
+    text: `${result} ${teamPoints}-${opponentPoints}`,
+    css: result === "W" ? "win" : result === "L" ? "loss" : "",
+  };
+}
+
+function scheduleContextChips(item) {
+  const flags = Array.isArray(item?.flags) ? item.flags : [];
+  if (!flags.length) {
+    return `<span class="schedule-context-clear">No elevated flag</span>`;
+  }
+
+  return flags.map(flag => `
+    <span class="schedule-context-chip">
+      ${escapeHtml(flag?.label ?? "Context")}
+    </span>
+  `).join("");
+}
+
 function renderSeasonOutlook(team) {
   const season =
     getSeasonProjection(team.team);
@@ -4291,82 +4414,75 @@ function renderSeasonOutlook(team) {
       }
     ).join("");
 
-  const scheduleRows =
-    (season.schedule ?? []).map(
-      game => {
-        const source =
-          game.probability_source;
+  const scheduleRows = (season.schedule ?? []).map(game => {
+    const gameId = String(game?.game_id ?? "");
+    const official = scheduleGameRecord(gameId);
+    const context = scheduleTeamContext(team.team, gameId);
+    const result = scheduleResult(team.team, official);
+    const completed = String(official?.status ?? game?.status ?? "").toLowerCase() === "completed";
+    const fcs = game.opponent_type === "FCS";
+    const opponent = getTeam(game.opponent);
+    const opponentRank = opponent ? powerRank(opponent) : "—";
+    const rest = hasValue(context?.rest_days)
+      ? Number(context.rest_days)
+      : null;
+    const hasGamePage = Boolean(findGame(gameId));
 
-        const completed =
-          source ===
-          "completed_result";
+    return `
+      <tr>
+        <td data-label="Week / Date">
+          <strong>Week ${game.week ?? "—"}</strong>
+          <div class="schedule-date">${escapeHtml(gameDateText(game.start_date))}</div>
+        </td>
 
-        const fcs =
-          game.opponent_type ===
-          "FCS";
+        <td data-label="Opponent">
+          <div class="schedule-opponent">
+            <span>${seasonLocationLabel(game.location)}</span>
+            <span>${escapeHtml(game.opponent)}</span>
+            ${opponentRank !== "—" ? `<span class="team-meta">${escapeHtml(opponentRank)}</span>` : ""}
+            ${fcs ? `<span class="fcs-tag">FCS</span>` : ""}
+          </div>
+          <div class="schedule-secondary">${escapeHtml(official?.venue ?? "Venue TBD")}</div>
+        </td>
 
-        let probabilityText =
-          formatPercent(
-            game.win_probability
-          );
+        <td data-label="Result / Status">
+          <span class="schedule-result ${result.css}">${escapeHtml(result.text)}</span>
+        </td>
 
-        if (completed) {
-          probabilityText =
-            Number(
-              game.win_probability
-            ) >= 99
-              ? "WIN"
-              : "LOSS";
-        }
+        <td data-label="THI Line">
+          ${!completed && hasValue(game.team_line) ? shortSpread(game.team_line) : "—"}
+        </td>
 
-        return `
-          <tr>
-            <td>
-              ${game.week ?? "—"}
-            </td>
+        <td data-label="Win Probability">
+          <strong>${!completed ? formatPercent(game.win_probability) : "—"}</strong>
+        </td>
 
-            <td>
-              ${seasonLocationLabel(
-                game.location
-              )}
-              ${escapeHtml(
-                game.opponent
-              )}
+        <td data-label="Rest">
+          ${Number.isFinite(rest) ? `${rest} days` : "—"}
+        </td>
 
-              ${
-                fcs
-                  ? `<span class="fcs-tag">FCS</span>`
-                  : ""
-              }
-            </td>
+        <td data-label="Travel">
+          ${escapeHtml(scheduleTravelText(context))}
+        </td>
 
-            <td>
-              ${projectionSourceLabel(
-                source
-              )}
-            </td>
+        <td data-label="Schedule Context">
+          <div class="schedule-context-chips">
+            ${scheduleContextChips(context)}
+          </div>
+        </td>
 
-            <td>
-              ${
-                hasValue(
-                  game.team_line
-                )
-                  ? shortSpread(
-                      game.team_line
-                    )
-                  : "—"
-              }
-            </td>
-
-            <td>
-              <strong>
-                ${probabilityText}
-              </strong>
-            </td>
-          </tr>
-        `;
-      }
-    ).join("");
+        <td data-label="Game Page">
+          ${hasGamePage ? `
+            <button
+              type="button"
+              class="schedule-view-button"
+              onclick="openMatchup('${escapeJsString(gameId)}')"
+            >${completed ? "Review" : "Preview"}</button>
+          ` : "—"}
+        </td>
+      </tr>
+    `;
+  }).join("");
 
   return `
     <div class="season-outlook">
@@ -4507,11 +4623,15 @@ function renderSeasonOutlook(team) {
           <table class="season-schedule-table">
             <thead>
               <tr>
-                <th>Week</th>
+                <th>Week / Date</th>
                 <th>Opponent</th>
-                <th>Source</th>
-                <th>Model Line</th>
+                <th>Result / Status</th>
+                <th>THI Line</th>
                 <th>Win Probability</th>
+                <th>Rest</th>
+                <th>Travel</th>
+                <th>Schedule Context</th>
+                <th>Game</th>
               </tr>
             </thead>
 
