@@ -1254,6 +1254,29 @@ function ensureMatchupView() {
     .thi-band-poor { background:#f5bd86; color:#713506; }
     .thi-band-critical { background:#d96860; color:#fff; }
     .thi-band-missing { background:#f5f5f2; color:#92989e; }
+    .thi-band-regression {
+      background:#f2ecff;
+      color:#514080;
+      border-color:#d8cbed !important;
+    }
+
+    .metric-row.thi-graded-metric {
+      margin-bottom:3px;
+      padding:9px 10px;
+      border:1px solid transparent;
+      border-radius:7px;
+    }
+
+    .metric-row.thi-graded-metric .metric-name,
+    .metric-row.thi-graded-metric .metric-value,
+    .metric-row.thi-graded-metric .metric-rank {
+      color:inherit;
+    }
+
+    .metric-row.thi-graded-metric .metric-value,
+    .metric-row.thi-graded-metric .metric-rank {
+      font-weight:800;
+    }
 
     .thi-color-legend {
       display:flex;
@@ -1270,6 +1293,129 @@ function ensureMatchupView() {
       height:6px;
       border-radius:999px;
       background:linear-gradient(90deg,#d96860,#fff0bd,#f1f2ee,#c9f2dd,#087f5b);
+    }
+
+    .thi-metric-guide {
+      margin:10px;
+      border:1px solid var(--border);
+      border-radius:11px;
+      overflow:hidden;
+      background:#fff;
+    }
+
+    .thi-metric-guide > summary {
+      list-style:none;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px 14px;
+      font-size:11px;
+      font-weight:800;
+    }
+
+    .thi-metric-guide > summary::-webkit-details-marker { display:none; }
+    .thi-metric-guide > summary::after {
+      content:"+";
+      font-family:var(--mono);
+      font-size:15px;
+      color:var(--muted);
+    }
+    .thi-metric-guide[open] > summary::after { content:"−"; }
+
+    .thi-metric-guide-subtitle {
+      color:var(--muted);
+      font-family:var(--mono);
+      font-size:8px;
+      font-weight:500;
+      line-height:1.45;
+      text-align:right;
+    }
+
+    .thi-metric-guide-body {
+      padding:0 14px 14px;
+      border-top:1px solid var(--border);
+    }
+
+    .thi-metric-scale {
+      display:grid;
+      grid-template-columns:repeat(7,minmax(0,1fr));
+      gap:4px;
+      padding:12px 0;
+    }
+
+    .thi-metric-scale-item {
+      padding:7px 4px;
+      border-radius:6px;
+      font-family:var(--mono);
+      font-size:7px;
+      font-weight:800;
+      line-height:1.35;
+      text-align:center;
+      text-transform:uppercase;
+    }
+
+    .thi-metric-guide-note {
+      padding:10px 12px;
+      border:1px solid #d8cbed;
+      border-radius:8px;
+      background:#f7f3ff;
+      color:#514080;
+      font-size:10px;
+      line-height:1.55;
+    }
+
+    .thi-metric-guide-category { margin-top:16px; }
+    .thi-metric-guide-category-title {
+      margin-bottom:7px;
+      color:var(--muted);
+      font-family:var(--mono);
+      font-size:8px;
+      font-weight:800;
+      letter-spacing:1px;
+      text-transform:uppercase;
+    }
+
+    .thi-metric-guide-grid {
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:7px;
+    }
+
+    .thi-metric-guide-card {
+      padding:10px 11px;
+      border:1px solid var(--border);
+      border-radius:8px;
+      background:#fbfbf9;
+    }
+
+    .thi-metric-guide-name {
+      margin-bottom:5px;
+      font-size:11px;
+      font-weight:800;
+    }
+
+    .thi-metric-guide-definition,
+    .thi-metric-guide-use {
+      color:var(--muted);
+      font-size:9px;
+      line-height:1.55;
+    }
+
+    .thi-metric-guide-use { margin-top:4px; }
+    .thi-metric-guide-direction {
+      display:inline-flex;
+      margin-top:7px;
+      padding:4px 6px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      background:#fff;
+      color:#4c5660;
+      font-family:var(--mono);
+      font-size:7px;
+      font-weight:800;
+      text-transform:uppercase;
     }
 
     .thi-context-grid {
@@ -1477,6 +1623,7 @@ function ensureMatchupView() {
       .analysis-panel.wide { grid-column:auto; }
 
       .thi-tale-grid { grid-template-columns:1fr 1fr; }
+      .thi-metric-guide-grid { grid-template-columns:1fr; }
       .thi-context-facts { grid-template-columns:repeat(2,minmax(0,1fr)); }
       .thi-team-summary:first-child { order:1; }
       .thi-team-summary:last-child { order:2; }
@@ -1496,6 +1643,12 @@ function ensureMatchupView() {
       .thi-matchup-section-header { flex-direction:column; }
       .thi-matchup-section-note { text-align:left; }
       .thi-tale-grid { grid-template-columns:1fr; }
+      .thi-metric-guide > summary {
+        flex-direction:column;
+        align-items:flex-start;
+      }
+      .thi-metric-guide-subtitle { text-align:left; }
+      .thi-metric-scale { grid-template-columns:repeat(2,minmax(0,1fr)); }
       .thi-context-grid { grid-template-columns:1fr; }
       .thi-context-facts { grid-template-columns:1fr; }
       .thi-context-fact { border-right:none; border-bottom:1px solid #eeeeeb; }
@@ -2004,6 +2157,248 @@ function insightMarkup(insights) {
   `).join("");
 }
 
+const ADVANCED_METRIC_SCALE = [
+  { band: "elite", label: "Elite", range: "85–100th" },
+  { band: "strong", label: "Strong", range: "70–84th" },
+  { band: "above", label: "Above Avg.", range: "55–69th" },
+  { band: "average", label: "Average", range: "45–54th" },
+  { band: "below", label: "Below Avg.", range: "30–44th" },
+  { band: "poor", label: "Poor", range: "15–29th" },
+  { band: "critical", label: "Critical", range: "0–14th" },
+];
+
+const ADVANCED_METRIC_GUIDE = [
+  {
+    category: "Efficiency + Explosiveness",
+    metrics: [
+      {
+        name: "EPA / Play",
+        definition: "Average change in expected points created by each play.",
+        use: "Measures overall down-to-down efficiency while accounting for game situation.",
+        direction: "Offense: higher · Defense: lower allowed",
+      },
+      {
+        name: "Success Rate",
+        definition: "Share of plays gaining 50% of needed yards on first down, 70% on second, or 100% on third/fourth.",
+        use: "Measures consistency and the ability to stay on schedule.",
+        direction: "Offense: higher · Defense: lower allowed",
+      },
+      {
+        name: "IsoPPP",
+        definition: "Average EPA generated only on successful plays.",
+        use: "Separates the damage of successful plays from how often success occurs.",
+        direction: "Offense: higher · Defense: lower allowed",
+      },
+      {
+        name: "Explosive Rate",
+        definition: "Share of plays producing a 15+ yard pass or 10+ yard rush.",
+        use: "Measures chunk-play frequency rather than total efficiency.",
+        direction: "Offense: higher · Defense: lower allowed",
+      },
+    ],
+  },
+  {
+    category: "Down + Distance",
+    metrics: [
+      {
+        name: "Early-Down EPA",
+        definition: "EPA per play on first and second down.",
+        use: "Shows whether a unit creates favorable situations before money downs.",
+        direction: "Offense: higher · Defense: lower allowed",
+      },
+      {
+        name: "Late-Down EPA",
+        definition: "EPA per play on third and fourth down.",
+        use: "Measures performance on possession-deciding downs.",
+        direction: "Offense: higher · Defense: lower allowed",
+      },
+      {
+        name: "Standard Downs",
+        definition: "First downs, second-and-7 or fewer, and third/fourth-and-4 or fewer.",
+        use: "Shows performance when both run and pass remain credible options.",
+        direction: "EPA and success: higher offense · lower allowed defense",
+      },
+      {
+        name: "Passing Downs",
+        definition: "Second-and-8+ or third/fourth-and-5+ situations.",
+        use: "Measures performance when the offense is more likely forced to pass.",
+        direction: "EPA and success: higher offense · lower allowed defense",
+      },
+    ],
+  },
+  {
+    category: "Rushing + Line Play",
+    metrics: [
+      {
+        name: "Stuff Rate",
+        definition: "Share of rushes stopped at or behind the line of scrimmage.",
+        use: "Measures how often the offense loses immediately at the point of attack.",
+        direction: "Offense: lower allowed · Defense: higher created",
+      },
+      {
+        name: "Opportunity Rate",
+        definition: "Share of rushes that gain at least four yards when four are available.",
+        use: "Approximates how often the blocking creates a useful rushing opportunity.",
+        direction: "Offense: higher · Defense: lower allowed",
+      },
+      {
+        name: "Power Success",
+        definition: "Conversion rate on third/fourth down with two or fewer yards to go.",
+        use: "Measures short-yardage execution and resistance.",
+        direction: "Offense: higher · Defense: lower allowed",
+      },
+      {
+        name: "Line / Second-Level / Open-Field Yards",
+        definition: "Rushing yardage split into line-created, second-level and breakaway portions.",
+        use: "Separates blocking value from runner-created gains deeper downfield.",
+        direction: "Offense: higher · Defense: lower allowed",
+      },
+    ],
+  },
+  {
+    category: "Pressure + Disruption",
+    metrics: [
+      {
+        name: "Sack Rate",
+        definition: "Sacks divided by total pass plays, including all charted dropbacks.",
+        use: "Measures the frequency of sacks allowed or created before adjustments.",
+        direction: "Offense: lower allowed · Defense: higher created",
+      },
+      {
+        name: "Adjusted Sack Rate",
+        definition: "Sacks per true pass play with spikes and throwaways removed.",
+        use: "A cleaner view of pass protection and pass-rush production.",
+        direction: "Offense: lower allowed · Defense: higher created",
+      },
+      {
+        name: "TFL Rate",
+        definition: "Share of plays ending in a tackle for loss.",
+        use: "Measures backfield disruption independent of the final score.",
+        direction: "Offense: lower allowed · Defense: higher created",
+      },
+      {
+        name: "Havoc Rate",
+        definition: "Share of plays with a tackle for loss, sack, turnover or pass breakup.",
+        use: "Captures how frequently a unit creates or permits drive-changing disruption.",
+        direction: "Offense: lower allowed · Defense: higher created",
+      },
+      {
+        name: "Front-Seven / Secondary Havoc",
+        definition: "Havoc split by disruption associated with the front seven or secondary.",
+        use: "Identifies where pressure and negative plays are being generated.",
+        direction: "Offense: lower allowed · Defense: higher created",
+      },
+    ],
+  },
+  {
+    category: "Drives + Finishing",
+    metrics: [
+      {
+        name: "Available Yards %",
+        definition: "Yards gained divided by the yards available from each drive's starting field position.",
+        use: "Evaluates drive movement while accounting for field position.",
+        direction: "Offense: higher · Defense: lower allowed",
+      },
+      {
+        name: "Drive Scoring Rate",
+        definition: "Share of non-kneel drives that produce points.",
+        use: "Measures how consistently possessions reach the scoreboard.",
+        direction: "Offense: higher · Defense: lower allowed",
+      },
+      {
+        name: "Points / Opportunity",
+        definition: "Average points scored after reaching a scoring opportunity.",
+        use: "Measures how efficiently a unit converts threatening field position.",
+        direction: "Offense: higher · Defense: lower allowed",
+      },
+      {
+        name: "Red-Zone EPA / Success / TD Rate",
+        definition: "Efficiency, successful-play rate and touchdown conversion inside the opponent's 20.",
+        use: "Shows whether red-zone possessions create value and finish with touchdowns.",
+        direction: "Offense: higher · Defense: lower allowed",
+      },
+    ],
+  },
+  {
+    category: "Turnovers + Regression Watch",
+    metrics: [
+      {
+        name: "Third-Down Conversion Delta",
+        definition: "Actual third-down conversion rate minus the rate expected from early-down performance.",
+        use: "Flags third-down results that may be difficult to sustain as the sample grows.",
+        direction: "Context only · positive is not automatically better",
+      },
+      {
+        name: "Fumble Recovery Delta",
+        definition: "Actual fumble recoveries compared with a 50/50 recovery expectation.",
+        use: "Highlights possible turnover luck and future regression pressure.",
+        direction: "Context only · positive is not automatically better",
+      },
+      {
+        name: "Turnovers",
+        definition: "Possessions lost by the offense or taken away by the defense.",
+        use: "Describes realized turnover production; the underlying repeatability can vary.",
+        direction: "Offense: fewer lost · Defense: more forced",
+      },
+    ],
+  },
+  {
+    category: "Situational Splits",
+    metrics: [
+      {
+        name: "First / Second Half EPA",
+        definition: "EPA per play split before and after halftime.",
+        use: "Provides descriptive timing context without assuming the split is predictive.",
+        direction: "Offense: higher · Defense: lower allowed",
+      },
+      {
+        name: "Home / Away EPA",
+        definition: "EPA per play split by game location.",
+        use: "Shows location-specific performance while keeping small samples visible.",
+        direction: "Offense: higher · Defense: lower allowed",
+      },
+    ],
+  },
+];
+
+function advancedMetricGuideMarkup() {
+  return `
+    <details class="thi-metric-guide">
+      <summary>
+        <span>Advanced Metric Guide</span>
+        <span class="thi-metric-guide-subtitle">Definitions · interpretation · percentile scale</span>
+      </summary>
+      <div class="thi-metric-guide-body">
+        <div class="thi-metric-scale" aria-label="Percentile color scale">
+          ${ADVANCED_METRIC_SCALE.map(item => `
+            <div class="thi-metric-scale-item thi-band-${escapeHtml(item.band)}">
+              ${escapeHtml(item.label)}<br>${escapeHtml(item.range)}
+            </div>
+          `).join("")}
+        </div>
+        <div class="thi-metric-guide-note">
+          Color grades are direction-aware percentiles among teams with a qualifying sample: green always means stronger performance. Purple Regression Watch rows describe possible sustainability—not good or bad performance. Rankings and values remain visible for exact context.
+        </div>
+        ${ADVANCED_METRIC_GUIDE.map(category => `
+          <div class="thi-metric-guide-category">
+            <div class="thi-metric-guide-category-title">${escapeHtml(category.category)}</div>
+            <div class="thi-metric-guide-grid">
+              ${category.metrics.map(metric => `
+                <div class="thi-metric-guide-card">
+                  <div class="thi-metric-guide-name">${escapeHtml(metric.name)}</div>
+                  <div class="thi-metric-guide-definition">${escapeHtml(metric.definition)}</div>
+                  <div class="thi-metric-guide-use"><strong>What it shows:</strong> ${escapeHtml(metric.use)}</div>
+                  <div class="thi-metric-guide-direction">${escapeHtml(metric.direction)}</div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    </details>
+  `;
+}
+
 function teamMetricProfile(teamName) {
   return teamMetricProfilesData?.teams?.[teamName] ?? null;
 }
@@ -2159,6 +2554,7 @@ function taleOfTapeMarkup(awayName, homeName) {
         ${unitMatchupCard(homeName, awayName)}
         ${teamSummaryCard(homeName)}
       </div>
+      ${advancedMetricGuideMarkup()}
     </section>
   `;
 }
@@ -3898,7 +4294,19 @@ function externalMetricRank(field, value) {
   return `#${better + 1} Overall`;
 }
 
-function advancedRank(
+function advancedMetricBand(percentile) {
+  if (!hasValue(percentile)) return "missing";
+  const value = Number(percentile);
+  if (value >= 85) return "elite";
+  if (value >= 70) return "strong";
+  if (value >= 55) return "above";
+  if (value >= 45) return "average";
+  if (value >= 30) return "below";
+  if (value >= 15) return "poor";
+  return "critical";
+}
+
+function advancedStanding(
   teamName,
   side,
   field,
@@ -3907,7 +4315,7 @@ function advancedRank(
   const target =
     advancedSide(teamName, side)?.[field];
 
-  if (!hasValue(target)) return "";
+  if (!hasValue(target)) return null;
 
   const targetNumber = Number(target);
 
@@ -3919,13 +4327,36 @@ function advancedRank(
     .filter(hasValue)
     .map(Number);
 
+  if (!values.length) return null;
+
   const better = values.filter(value =>
     lowerIsBetter
       ? value < targetNumber
       : value > targetNumber
   ).length;
 
-  return `#${better + 1}`;
+  const equal = values.filter(value => value === targetNumber).length;
+  const percentile = Math.max(
+    0,
+    Math.min(100, 100 * (values.length - better - (equal / 2)) / values.length)
+  );
+
+  return {
+    rank: better + 1,
+    total: values.length,
+    percentile,
+    band: advancedMetricBand(percentile),
+  };
+}
+
+function advancedRank(
+  teamName,
+  side,
+  field,
+  lowerIsBetter = false
+) {
+  const standing = advancedStanding(teamName, side, field, lowerIsBetter);
+  return standing ? `#${standing.rank}` : "";
 }
 
 function advancedContext(
@@ -3935,16 +4366,30 @@ function advancedContext(
   sampleText = "",
   lowerIsBetter = false
 ) {
-  const rank = advancedRank(
+  const standing = advancedStanding(
     teamName,
     side,
     field,
     lowerIsBetter
   );
 
-  return [rank, sampleText]
-    .filter(Boolean)
-    .join(" · ");
+  return {
+    text: [standing ? `#${standing.rank}` : "", sampleText]
+      .filter(Boolean)
+      .join(" · "),
+    band: standing?.band || "missing",
+    title: standing
+      ? `${formatNumber(standing.percentile, 0)}th percentile · ${standing.total} qualifying teams`
+      : "Qualifying sample unavailable",
+  };
+}
+
+function regressionContext(text, title) {
+  return {
+    text,
+    band: "regression",
+    title,
+  };
 }
 
 function advancedMetricRows(teamName, side) {
@@ -4045,15 +4490,18 @@ function advancedMetricRows(teamName, side) {
     ${renderMetricRow(
       "Third-Down Conversion" + (offense ? "" : " Allowed"),
       formatRate(data.third_down_conversion_rate),
-      [
-        `${data.third_down_attempts ?? 0} attempts`,
-        hasValue(data.expected_third_down_conversion_rate)
-          ? `${formatRate(data.expected_third_down_conversion_rate)} expected`
-          : "",
-        hasValue(data.third_down_conversion_delta)
-          ? `${formatSigned(data.third_down_conversion_delta, 1)} pts delta`
-          : "",
-      ].filter(Boolean).join(" · ")
+      regressionContext(
+        [
+          `${data.third_down_attempts ?? 0} attempts`,
+          hasValue(data.expected_third_down_conversion_rate)
+            ? `${formatRate(data.expected_third_down_conversion_rate)} expected`
+            : "",
+          hasValue(data.third_down_conversion_delta)
+            ? `${formatSigned(data.third_down_conversion_delta, 1)} pts delta`
+            : "",
+        ].filter(Boolean).join(" · "),
+        "Regression Watch: actual third-down results compared with expectation from early-down performance"
+      )
     )}
 
     ${renderMetricRow(
@@ -4172,7 +4620,10 @@ function advancedMetricRows(teamName, side) {
     ${renderMetricRow(
       "Fumble Recovery Delta",
       formatSigned(data.fumble_recovery_delta, 1),
-      `${data.fumbles ?? 0} fumbles · versus 50/50 expectation`
+      regressionContext(
+        `${data.fumbles ?? 0} fumbles · versus 50/50 expectation`,
+        "Regression Watch: actual recoveries compared with a 50/50 recovery expectation"
+      )
     )}
   `;
 }
@@ -4392,8 +4843,20 @@ function renderMetricRow(
   value,
   rank = ""
 ) {
+  const context = rank && typeof rank === "object"
+    ? rank
+    : null;
+  const contextText = context?.text ?? rank ?? "";
+  const band = context?.band ?? "";
+  const rowClass = band
+    ? `metric-row thi-graded-metric thi-band-${escapeHtml(band)}`
+    : "metric-row";
+  const title = context?.title
+    ? ` title="${escapeHtml(context.title)}"`
+    : "";
+
   return `
-    <div class="metric-row">
+    <div class="${rowClass}"${title}>
       <div class="metric-name">
         ${escapeHtml(name)}
       </div>
@@ -4403,7 +4866,7 @@ function renderMetricRow(
       </div>
 
       <div class="metric-rank">
-        ${rank || ""}
+        ${escapeHtml(contextText)}
       </div>
     </div>
   `;
@@ -5650,6 +6113,8 @@ function renderDossier(team) {
         A dash means the minimum four-play sample
         has not been reached.
       </div>
+
+      ${advancedMetricGuideMarkup()}
 
       <div
         class="dossier-layout"
