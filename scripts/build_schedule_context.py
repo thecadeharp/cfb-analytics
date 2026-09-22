@@ -263,7 +263,14 @@ def team_context(
     following = ordered[current_index + 1] if current_index + 1 < len(ordered) else None
     current_date = parse_date(current.get("start_date"))
     previous_date = parse_date(previous.get("start_date")) if previous else None
-    rest_days = (current_date - previous_date).days if current_date and previous_date else None
+    # Rest is a football calendar concept, not a count of completed 24-hour
+    # periods.  Using timedelta.days floors the value, which incorrectly turns
+    # a normal Saturday-to-Saturday week into six days when kickoff times differ.
+    rest_days = (
+        (current_date.date() - previous_date.date()).days
+        if current_date and previous_date
+        else None
+    )
 
     road_streak = 0
     for prior in reversed(ordered[:current_index]):
