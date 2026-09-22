@@ -1310,8 +1310,8 @@ function ensureMatchupView() {
       align-items:center;
       justify-content:space-between;
       gap:12px;
-      padding:12px 14px;
-      font-size:11px;
+      padding:14px 16px;
+      font-size:14px;
       font-weight:800;
     }
 
@@ -1325,11 +1325,11 @@ function ensureMatchupView() {
     .thi-metric-guide[open] > summary::after { content:"−"; }
 
     .thi-metric-guide-subtitle {
-      color:var(--muted);
+      color:#4c5965;
       font-family:var(--mono);
-      font-size:8px;
-      font-weight:500;
-      line-height:1.45;
+      font-size:13px;
+      font-weight:700;
+      line-height:1.5;
       text-align:right;
     }
 
@@ -1346,15 +1346,106 @@ function ensureMatchupView() {
     }
 
     .thi-metric-scale-item {
-      padding:7px 4px;
+      display:flex;
+      min-height:46px;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:8px 6px;
       border-radius:6px;
       font-family:var(--mono);
-      font-size:7px;
+      font-size:13px;
       font-weight:800;
-      line-height:1.35;
+      line-height:1.45;
       text-align:center;
       text-transform:uppercase;
     }
+
+    .thi-stands-out {
+      margin:0 10px 10px;
+      border:1px solid var(--border);
+      border-radius:11px;
+      background:#fafaf8;
+      overflow:hidden;
+    }
+
+    .thi-stands-out-header {
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      padding:12px 14px;
+      border-bottom:1px solid var(--border);
+      background:#fff;
+    }
+
+    .thi-stands-out-title {
+      margin-top:2px;
+      font-size:15px;
+      font-weight:800;
+    }
+
+    .thi-stands-out-note {
+      max-width:520px;
+      color:var(--muted);
+      font-family:var(--mono);
+      font-size:9px;
+      line-height:1.5;
+      text-align:right;
+      text-transform:uppercase;
+    }
+
+    .thi-stands-out-grid {
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:8px;
+      padding:10px;
+    }
+
+    .thi-standout-card {
+      min-width:0;
+      padding:11px 12px;
+      border:1px solid var(--border);
+      border-left:5px solid #d5a000;
+      border-radius:8px;
+      background:#fff;
+    }
+
+    .thi-standout-card.high { border-left-color:#087f5b; }
+    .thi-standout-card.notable { border-left-color:#49b783; }
+
+    .thi-standout-topline {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:6px;
+    }
+
+    .thi-standout-heading {
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .thi-standout-strength {
+      flex:0 0 auto;
+      padding:3px 6px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      color:#4c5965;
+      font-family:var(--mono);
+      font-size:8px;
+      font-weight:800;
+      text-transform:uppercase;
+    }
+
+    .thi-standout-copy {
+      color:#4c5965;
+      font-size:10px;
+      line-height:1.55;
+    }
+
+    .thi-standout-copy strong { color:var(--ink); }
 
     .thi-metric-guide-note {
       padding:10px 12px;
@@ -1362,8 +1453,9 @@ function ensureMatchupView() {
       border-radius:8px;
       background:#f7f3ff;
       color:#514080;
-      font-size:10px;
-      line-height:1.55;
+      font-size:11px;
+      font-weight:600;
+      line-height:1.6;
     }
 
     .thi-metric-guide-category { margin-top:16px; }
@@ -1371,7 +1463,7 @@ function ensureMatchupView() {
       margin-bottom:7px;
       color:var(--muted);
       font-family:var(--mono);
-      font-size:8px;
+      font-size:10px;
       font-weight:800;
       letter-spacing:1px;
       text-transform:uppercase;
@@ -1392,15 +1484,15 @@ function ensureMatchupView() {
 
     .thi-metric-guide-name {
       margin-bottom:5px;
-      font-size:11px;
+      font-size:13px;
       font-weight:800;
     }
 
     .thi-metric-guide-definition,
     .thi-metric-guide-use {
       color:var(--muted);
-      font-size:9px;
-      line-height:1.55;
+      font-size:11px;
+      line-height:1.6;
     }
 
     .thi-metric-guide-use { margin-top:4px; }
@@ -1413,7 +1505,7 @@ function ensureMatchupView() {
       background:#fff;
       color:#4c5660;
       font-family:var(--mono);
-      font-size:7px;
+      font-size:9px;
       font-weight:800;
       text-transform:uppercase;
     }
@@ -1623,6 +1715,7 @@ function ensureMatchupView() {
       .analysis-panel.wide { grid-column:auto; }
 
       .thi-tale-grid { grid-template-columns:1fr 1fr; }
+      .thi-stands-out-grid { grid-template-columns:1fr; }
       .thi-metric-guide-grid { grid-template-columns:1fr; }
       .thi-context-facts { grid-template-columns:repeat(2,minmax(0,1fr)); }
       .thi-team-summary:first-child { order:1; }
@@ -1643,6 +1736,8 @@ function ensureMatchupView() {
       .thi-matchup-section-header { flex-direction:column; }
       .thi-matchup-section-note { text-align:left; }
       .thi-tale-grid { grid-template-columns:1fr; }
+      .thi-stands-out-header { flex-direction:column; }
+      .thi-stands-out-note { text-align:left; }
       .thi-metric-guide > summary {
         flex-direction:column;
         align-items:flex-start;
@@ -2527,6 +2622,141 @@ function unitMatchupCard(offenseTeam, defenseTeam) {
   `;
 }
 
+const MATCHUP_STANDOUT_METRICS = [
+  {
+    field: "epa_play",
+    label: "Overall efficiency",
+    offenseLabel: "offensive EPA/play",
+    defenseLabel: "defensive EPA/play",
+  },
+  {
+    field: "success_rate",
+    label: "Down-to-down consistency",
+    offenseLabel: "offensive success rate",
+    defenseLabel: "defensive success rate",
+  },
+  {
+    field: "iso_ppp",
+    label: "Explosiveness",
+    offenseLabel: "offensive IsoPPP",
+    defenseLabel: "IsoPPP allowed",
+  },
+  {
+    field: "passing_down_epa",
+    label: "Passing downs",
+    offenseLabel: "passing-down EPA",
+    defenseLabel: "passing-down EPA allowed",
+  },
+  {
+    field: "opportunity_rate",
+    label: "Rushing opportunity",
+    offenseLabel: "rushing opportunity rate",
+    defenseLabel: "opportunity rate allowed",
+  },
+  {
+    field: "points_per_opportunity",
+    label: "Finishing drives",
+    offenseLabel: "points per opportunity",
+    defenseLabel: "points per opportunity allowed",
+  },
+  {
+    field: "havoc_rate",
+    label: "Disruption",
+    offenseLabel: "havoc prevention",
+    defenseLabel: "havoc creation",
+  },
+];
+
+function matchupStandoutCandidates(awayName, homeName) {
+  const candidates = [];
+
+  [
+    [awayName, homeName],
+    [homeName, awayName],
+  ].forEach(([offenseTeam, defenseTeam]) => {
+    MATCHUP_STANDOUT_METRICS.forEach(definition => {
+      const offenseMetric = profileMetric(offenseTeam, "offense", definition.field);
+      const defenseMetric = profileMetric(defenseTeam, "defense", definition.field);
+      if (!hasValue(offenseMetric?.percentile) || !hasValue(defenseMetric?.percentile)) {
+        return;
+      }
+
+      const gap = Number(offenseMetric.percentile) - Number(defenseMetric.percentile);
+      const strength = Math.abs(gap);
+      const offenseFavored = gap >= 0;
+      const favoredTeam = offenseFavored ? offenseTeam : defenseTeam;
+      const tone = strength >= 50 ? "high" : strength >= 32 ? "notable" : "lean";
+      const strengthLabel = strength >= 50 ? "Clear" : strength >= 32 ? "Strong" : "Notable";
+      const offenseRank = hasValue(offenseMetric.rank) ? `#${Number(offenseMetric.rank)}` : "unranked";
+      const defenseRank = hasValue(defenseMetric.rank) ? `#${Number(defenseMetric.rank)}` : "unranked";
+      const offenseValue = profileMetricText(offenseMetric, definition.field);
+      const defenseValue = profileMetricText(defenseMetric, definition.field);
+
+      const copy = offenseFavored
+        ? `<strong>${escapeHtml(offenseTeam)}</strong> ranks ${escapeHtml(offenseRank)} in ${escapeHtml(definition.offenseLabel)} (${escapeHtml(offenseValue)}) against a ${escapeHtml(defenseTeam)} defense ranked ${escapeHtml(defenseRank)} in ${escapeHtml(definition.defenseLabel)} (${escapeHtml(defenseValue)}).`
+        : `<strong>${escapeHtml(defenseTeam)}</strong> ranks ${escapeHtml(defenseRank)} in ${escapeHtml(definition.defenseLabel)} (${escapeHtml(defenseValue)}) against a ${escapeHtml(offenseTeam)} offense ranked ${escapeHtml(offenseRank)} in ${escapeHtml(definition.offenseLabel)} (${escapeHtml(offenseValue)}).`;
+
+      candidates.push({
+        field: definition.field,
+        offenseTeam,
+        favoredTeam,
+        label: definition.label,
+        strength,
+        tone,
+        strengthLabel,
+        copy,
+      });
+    });
+  });
+
+  return candidates.sort((a, b) => b.strength - a.strength);
+}
+
+function matchupStandoutsMarkup(awayName, homeName) {
+  const allCandidates = matchupStandoutCandidates(awayName, homeName);
+  const meaningful = allCandidates.filter(item => item.strength >= 18);
+  const selected = (meaningful.length >= 3 ? meaningful : allCandidates).slice(0, 4);
+
+  if (!selected.length) {
+    return `
+      <section class="thi-stands-out" aria-labelledby="thi-stands-out-title">
+        <div class="thi-stands-out-header">
+          <div>
+            <div class="eyebrow">Matchup interpretation · display only</div>
+            <div class="thi-stands-out-title" id="thi-stands-out-title">What Stands Out</div>
+          </div>
+          <div class="thi-stands-out-note">A qualifying current-season sample is not available for both teams.</div>
+        </div>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="thi-stands-out" aria-labelledby="thi-stands-out-title">
+      <div class="thi-stands-out-header">
+        <div>
+          <div class="eyebrow">Matchup interpretation · display only</div>
+          <div class="thi-stands-out-title" id="thi-stands-out-title">What Stands Out</div>
+        </div>
+        <div class="thi-stands-out-note">
+          Largest direction-aware percentile gaps · descriptive only · not applied to Model A
+        </div>
+      </div>
+      <div class="thi-stands-out-grid">
+        ${selected.map(item => `
+          <article class="thi-standout-card ${escapeHtml(item.tone)}">
+            <div class="thi-standout-topline">
+              <div class="thi-standout-heading">${escapeHtml(item.favoredTeam)} · ${escapeHtml(item.label)}</div>
+              <span class="thi-standout-strength">${escapeHtml(item.strengthLabel)} gap</span>
+            </div>
+            <div class="thi-standout-copy">${item.copy}</div>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
 function taleOfTapeMarkup(awayName, homeName) {
   const throughWeek = teamMetricProfilesData?.meta?.through_week;
   const sample = teamMetricProfilesData?.meta?.sample === "non_garbage"
@@ -2554,6 +2784,7 @@ function taleOfTapeMarkup(awayName, homeName) {
         ${unitMatchupCard(homeName, awayName)}
         ${teamSummaryCard(homeName)}
       </div>
+      ${matchupStandoutsMarkup(awayName, homeName)}
       ${advancedMetricGuideMarkup()}
     </section>
   `;
