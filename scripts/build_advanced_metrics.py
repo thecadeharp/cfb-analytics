@@ -89,7 +89,11 @@ def row_value(row, *columns, default=None):
 def is_garbage_time(period, offense_score, defense_score):
     period = int(number(period, 1))
     margin = abs(number(offense_score, 0) - number(defense_score, 0))
-    return (period >= 4 and margin >= 28) or (period >= 3 and margin >= 38)
+    if period <= 2:
+        return margin >= 38
+    if period == 3:
+        return margin >= 28
+    return margin >= 22
 
 
 def normalize_row(row):
@@ -100,6 +104,9 @@ def normalize_row(row):
     offense_score = row_value(row, "start.pos_team_score", "pos_team_score", default=0)
     defense_score = row_value(row, "start.def_pos_team_score", "def_pos_team_score", default=0)
     period = row_value(row, "period", "period.number", default=1)
+    play_type = str(row_value(row, "type.text", "orig_play_type", default=""))
+    play_text = str(row_value(row, "text", "cleaned_text", default=""))
+    description = f"{play_type} {play_text}".lower()
     yards = number(row_value(row, "statYardage", "yds_rushed", default=0), 0)
     pass_play = boolean(row_value(row, "pass", "pass_attempt", default=False)) or boolean(
         row_value(row, "sack", default=False)
@@ -123,11 +130,22 @@ def normalize_row(row):
 
     return {
         "game_id": str(row_value(row, "game_id", default="")),
+        "drive_id": row_value(row, "drive_id", "drive.id", "driveId"),
         "offense": offense,
         "defense": defense,
         "home": home,
         "away": away,
         "offense_score": number(offense_score, 0),
+        "offense_score_after": number(
+            row_value(
+                row,
+                "end.pos_team_score",
+                "end.pos_team.score",
+                "pos_team_score_after",
+                default=offense_score,
+            ),
+            number(offense_score, 0),
+        ),
         "defense_score": number(defense_score, 0),
         "period": int(number(period, 1)),
         "down": number(row_value(row, "down", "start.down")),
@@ -136,13 +154,24 @@ def normalize_row(row):
             row_value(row, "start.yardsToEndzone", "yardsToGoal")
         ),
         "yards_gained": yards,
-        "play_type": str(row_value(row, "type.text", "orig_play_type", default="")),
-        "play_text": str(row_value(row, "text", "cleaned_text", default="")),
+        "play_type": play_type,
+        "play_text": play_text,
         "epa": number(row_value(row, "EPA", "EPA_scrimmage")),
         "is_pass": pass_play,
         "is_rush": rush_play,
         "success": success,
         "explosive": (pass_play and yards >= 15) or (rush_play and yards >= 10),
+        "sack": boolean(row_value(row, "sack", "is_sack", default=False)) or "sack" in description,
+        "tfl": (
+            boolean(row_value(row, "tackle_for_loss", "tfl", default=False))
+            or "tackle for loss" in description
+            or yards < 0
+        ),
+        "fumble": boolean(row_value(row, "fumble", default=False)) or "fumble" in description,
+        "fumble_lost": boolean(row_value(row, "fumble_lost", "fumbleLost", default=False)) or "fumble lost" in description,
+        "forced_fumble": boolean(row_value(row, "forced_fumble", default=False)) or "forced fumble" in description,
+        "pass_breakup": boolean(row_value(row, "pass_breakup", "pbu", default=False)) or "broken up" in description,
+        "touchdown": boolean(row_value(row, "touchdown", default=False)) or "touchdown" in description,
         "havoc": boolean(row_value(row, "havoc", default=False)),
         "garbage_time": is_garbage_time(period, offense_score, defense_score),
     }
