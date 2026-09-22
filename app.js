@@ -2094,13 +2094,22 @@ function unitMetricCell(teamName, side, field) {
 function unitMatchupCard(offenseTeam, defenseTeam) {
   const fields = [
     "epa_play",
+    "iso_ppp",
     "early_down_epa",
+    "late_down_epa",
     "success_rate",
     "explosive_rate",
+    "standard_down_epa",
     "standard_down_success_rate",
+    "passing_down_epa",
     "passing_down_success_rate",
+    "opportunity_rate",
+    "adjusted_sack_rate",
+    "havoc_rate",
     "line_yards_per_rush",
-    "red_zone_success_rate",
+    "available_yards_pct",
+    "points_per_opportunity",
+    "red_zone_td_rate",
   ];
 
   return `
@@ -3956,6 +3965,12 @@ function advancedMetricRows(teamName, side) {
 
   return `
     ${renderMetricRow(
+      "IsoPPP" + (offense ? "" : " Allowed"),
+      formatEPA(data.iso_ppp),
+      advancedContext(teamName, side, "iso_ppp", "Successful plays only", !offense)
+    )}
+
+    ${renderMetricRow(
       "Early-Down EPA" + (offense ? "" : " Allowed"),
       formatEPA(data.early_down_epa),
       advancedContext(
@@ -3980,6 +3995,18 @@ function advancedMetricRows(teamName, side) {
     )}
 
     ${renderMetricRow(
+      "Standard-Down EPA" + (offense ? "" : " Allowed"),
+      formatEPA(data.standard_down_epa),
+      advancedContext(
+        teamName,
+        side,
+        "standard_down_epa",
+        `${data.standard_down_plays ?? 0} plays`,
+        !offense
+      )
+    )}
+
+    ${renderMetricRow(
       "Standard-Down Success" + (offense ? "" : " Allowed"),
       formatRate(data.standard_down_success_rate),
       advancedContext(
@@ -3987,6 +4014,18 @@ function advancedMetricRows(teamName, side) {
         side,
         "standard_down_success_rate",
         `${data.standard_down_plays ?? 0} plays`,
+        !offense
+      )
+    )}
+
+    ${renderMetricRow(
+      "Passing-Down EPA" + (offense ? "" : " Allowed"),
+      formatEPA(data.passing_down_epa),
+      advancedContext(
+        teamName,
+        side,
+        "passing_down_epa",
+        `${data.passing_down_plays ?? 0} plays`,
         !offense
       )
     )}
@@ -4004,6 +4043,20 @@ function advancedMetricRows(teamName, side) {
     )}
 
     ${renderMetricRow(
+      "Third-Down Conversion" + (offense ? "" : " Allowed"),
+      formatRate(data.third_down_conversion_rate),
+      [
+        `${data.third_down_attempts ?? 0} attempts`,
+        hasValue(data.expected_third_down_conversion_rate)
+          ? `${formatRate(data.expected_third_down_conversion_rate)} expected`
+          : "",
+        hasValue(data.third_down_conversion_delta)
+          ? `${formatSigned(data.third_down_conversion_delta, 1)} pts delta`
+          : "",
+      ].filter(Boolean).join(" · ")
+    )}
+
+    ${renderMetricRow(
       offense
         ? "Stuff Rate Allowed"
         : "Stuff Rate Created",
@@ -4014,6 +4067,18 @@ function advancedMetricRows(teamName, side) {
         "stuff_rate",
         `${data.rush_attempts ?? 0} rushes`,
         offense
+      )
+    )}
+
+    ${renderMetricRow(
+      "Opportunity Rate" + (offense ? "" : " Allowed"),
+      formatRate(data.opportunity_rate),
+      advancedContext(
+        teamName,
+        side,
+        "opportunity_rate",
+        `${data.rush_attempts ?? 0} rushes`,
+        !offense
       )
     )}
 
@@ -4033,6 +4098,20 @@ function advancedMetricRows(teamName, side) {
 
     ${renderMetricRow(
       offense
+        ? "Adjusted Sack Rate Allowed"
+        : "Adjusted Sack Rate Created",
+      formatRate(data.adjusted_sack_rate),
+      advancedContext(
+        teamName,
+        side,
+        "adjusted_sack_rate",
+        "Spikes/throwaways removed",
+        offense
+      )
+    )}
+
+    ${renderMetricRow(
+      offense
         ? "TFL Rate Allowed"
         : "TFL Rate Created",
       formatRate(data.tfl_rate),
@@ -4043,6 +4122,24 @@ function advancedMetricRows(teamName, side) {
         "",
         offense
       )
+    )}
+
+    ${renderMetricRow(
+      offense ? "Havoc Rate Allowed" : "Havoc Rate Created",
+      formatRate(data.havoc_rate),
+      advancedContext(teamName, side, "havoc_rate", "", offense)
+    )}
+
+    ${renderMetricRow(
+      offense ? "Front-Seven Havoc Allowed" : "Front-Seven Havoc Created",
+      formatRate(data.front_seven_havoc_rate),
+      advancedContext(teamName, side, "front_seven_havoc_rate", "", offense)
+    )}
+
+    ${renderMetricRow(
+      offense ? "Secondary Havoc Allowed" : "Secondary Havoc Created",
+      formatRate(data.secondary_havoc_rate),
+      advancedContext(teamName, side, "secondary_havoc_rate", "", offense)
     )}
 
     ${renderMetricRow(
@@ -4070,6 +4167,12 @@ function advancedMetricRows(teamName, side) {
         "",
         offense
       )
+    )}
+
+    ${renderMetricRow(
+      "Fumble Recovery Delta",
+      formatSigned(data.fumble_recovery_delta, 1),
+      `${data.fumbles ?? 0} fumbles · versus 50/50 expectation`
     )}
   `;
 }
@@ -4165,6 +4268,54 @@ function advancedSplitRows(teamName, side) {
         side,
         "red_zone_success_rate",
         "",
+        lowerIsBetter
+      )
+    )}
+
+    ${renderMetricRow(
+      "Red-Zone TD Rate" + allowed,
+      formatRate(data.red_zone_td_rate),
+      advancedContext(
+        teamName,
+        side,
+        "red_zone_td_rate",
+        `${data.red_zone_trips ?? 0} trips`,
+        lowerIsBetter
+      )
+    )}
+
+    ${renderMetricRow(
+      "Available Yards" + allowed,
+      formatRate(data.available_yards_pct),
+      advancedContext(
+        teamName,
+        side,
+        "available_yards_pct",
+        `${data.drives ?? 0} drives`,
+        lowerIsBetter
+      )
+    )}
+
+    ${renderMetricRow(
+      "Drive Scoring Rate" + allowed,
+      formatRate(data.drive_scoring_rate),
+      advancedContext(
+        teamName,
+        side,
+        "drive_scoring_rate",
+        `${data.drives ?? 0} drives`,
+        lowerIsBetter
+      )
+    )}
+
+    ${renderMetricRow(
+      "Points / Opportunity" + allowed,
+      formatNumber(data.points_per_opportunity, 2),
+      advancedContext(
+        teamName,
+        side,
+        "points_per_opportunity",
+        `${data.scoring_opportunities ?? 0} opportunities`,
         lowerIsBetter
       )
     )}
