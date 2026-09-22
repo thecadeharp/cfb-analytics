@@ -1,4 +1,4 @@
-name: Advanced Metrics v1
+name: Advanced Metrics v2
 
 on:
   workflow_dispatch:
@@ -53,6 +53,27 @@ jobs:
               data = json.load(file)
           assert data["meta"]["model_usage"] == "display_only_not_used_by_model_a"
           assert len(data.get("teams", {})) >= 100
+          sample = next(
+              team["non_garbage"]["offense"]
+              for team in data["teams"].values()
+              if team["non_garbage"]["offense"].get("n_plays", 0) >= 35
+          )
+          required = {
+              "iso_ppp",
+              "standard_down_epa",
+              "passing_down_epa",
+              "opportunity_rate",
+              "adjusted_sack_rate",
+              "havoc_rate",
+              "available_yards_pct",
+              "drive_scoring_rate",
+              "points_per_opportunity",
+              "red_zone_td_rate",
+              "fumble_recovery_delta",
+              "third_down_conversion_delta",
+          }
+          missing = required.difference(sample)
+          assert not missing, f"Advanced Metrics v2 fields missing: {sorted(missing)}"
           print("Advanced metrics validation passed")
           PY
 
