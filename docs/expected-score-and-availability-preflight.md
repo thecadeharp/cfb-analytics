@@ -1,0 +1,26 @@
+# Postgame expected score and roster availability: build contract
+
+Status: design only. Do not replace the current beta `postgame_win_expectancy` or `adjusted_final_score` outputs until historical validation passes. This work is separate from Model A and its frozen pregame snapshots.
+
+## Data that exists now
+
+- Historical game, drive, and play records from published play-by-play; current `build_postgame_analytics.py` provides retrospective game summaries.
+- Current advanced team metrics include points per opportunity (a drive reaching the opponent's 40). The accompanying Dossier panel reports EPA and success rate on plays at or inside the 40 with minimum samples, without predicting future improvement.
+- The current postgame win expectancy is `sigmoid(quality_margin / 7.5)`. The current adjusted score blends observed total points and process summaries. Both are heuristic beta outputs, not a Monte Carlo simulation or calibrated win probabilities.
+
+## Inputs not yet available
+
+There is no verified player-by-game defensive snap ledger, dated injury/participation status, or per-player production share joined to the active roster in the site pipeline. Do not publish an injury-adjusted availability percentage, a 14-day defensive workload number, or a depth-based fatigue badge from incomplete records. A future source needs player/team/game IDs, actual snaps or participation, status and report timestamp, source attribution, corrections, and permissions for the intended display.
+
+## Expected score proposal
+
+1. Construct a historical **possession ledger**: game/team/drive IDs, field position at start, opponent, regulation and garbage-time flags, play-level EPA and success, possession result, offensive points, and non-offensive scores. Preserve score and clock at each play.
+2. Define quality features known from the **completed game** and a target of realized offensive points per possession. Keep defensive and special-teams scores in separate channels. Do not train or evaluate a feature on that same game's final score or market line. Distinguish the retrospective task from a pregame forecast.
+3. Fit a regularized scoring distribution on earlier seasons (rather than treating EPA as points). The first baseline is a possession-level expected-points model with opponent and field-position context. Summing expected possession points yields each team's expected offensive score; any special-teams/defensive component requires a separately justified model. Display a score interval alongside a point estimate.
+4. Estimate retrospective win expectancy from the joint game-level scoring distribution, preserving shared pace and possession dependence. A simulation count such as 10,000 controls numerical noise only; it cannot fix a misspecified distribution. Record simulation seed and model version.
+5. Validate on **future held-out seasons/weeks** with no training leakage: scoring MAE and calibration by point bands; win-probability reliability, Brier score, log loss, and coverage of score intervals. Compare against the current beta and simpler baselines. Break results out by FBS/FCS opponent, garbage-time share, and missing PBP.
+6. Publish only after sample and quality gates pass. Show source, build date, sample size, model version, confidence/availability label, and the frozen pregame projection alongside—but never overwrite it. If PBP is delayed or incomplete, show pending rather than a fabricated estimate.
+
+## Next implementation gate
+
+Finish the historical possession ledger and a documented evaluation protocol first. Keep the roster availability feature on hold until actual snap and dated injury inputs exist. No site labels should imply that low PPO is mathematically bound to regress upward or that an expected margin identifies a guaranteed market edge.
