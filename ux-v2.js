@@ -19,6 +19,8 @@
 
   const CONFERENCE_OPTIONS = [
     ["", "All Conferences"],
+    ["P4", "Power 4"],
+    ["G6", "Group of Six"],
     ["AAC", "AAC"],
     ["ACC", "ACC"],
     ["BIG TEN", "Big Ten"],
@@ -257,7 +259,14 @@
     if (!currentConferenceFilter) return true;
     const home = normalizedConference(game?.home?.conference);
     const away = normalizedConference(game?.away?.conference);
-    return home === currentConferenceFilter || away === currentConferenceFilter;
+    const groups = {
+      P4: ["ACC", "BIG TEN", "BIG 12", "SEC"],
+      G6: ["AAC", "CUSA", "MAC", "MOUNTAIN WEST", "PAC-12", "SUN BELT"],
+    };
+    const selected = groups[currentConferenceFilter];
+    return selected
+      ? selected.includes(home) || selected.includes(away)
+      : home === currentConferenceFilter || away === currentConferenceFilter;
   }
 
   function gameMatchesSignal(game) {
