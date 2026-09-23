@@ -22,6 +22,10 @@
   let portalStarFilter = "ANY";
   let portalConfFilter = "ALL";
   let portalSearch    = "";
+  const PORTAL_CONFERENCE_GROUPS = {
+    P4: new Set(["ACC", "Big 12", "Big Ten", "SEC"]),
+    G6: new Set(["American Athletic", "Conference USA", "Mid-American", "Mountain West", "Pac-12", "Sun Belt"]),
+  };
 
   // ── Helpers (scoped — don't conflict with app.js) ──────────────────────────
   function pEsc(v) {
@@ -448,12 +452,14 @@
   function renderPortalClassRankings() {
     const teams = portalData?.teams ?? [];
     const positions = ["ALL","QB","RB","WR","TE","OL","DL","LB","DB"];
-    const conferences = ["ALL",...new Set(teams.map(t=>t.conference||"").filter(Boolean)).values()].sort();
+    const conferences = ["ALL", "P4", "G6", ...new Set(teams.map(t=>t.conference||"").filter(Boolean))].filter((c, i, values) => values.indexOf(c) === i);
 
     // Filter
     let filtered = teams.filter(t => {
       if (portalSearch && !t.team?.toLowerCase().includes(portalSearch.toLowerCase())) return false;
-      if (portalConfFilter !== "ALL" && t.conference !== portalConfFilter) return false;
+      if (portalConfFilter !== "ALL" && !(PORTAL_CONFERENCE_GROUPS[portalConfFilter]
+        ? PORTAL_CONFERENCE_GROUPS[portalConfFilter].has(t.conference)
+        : t.conference === portalConfFilter)) return false;
       return true;
     });
 
@@ -488,7 +494,7 @@
         <div class="pv-filter">
           <div class="pv-filter-label">Conference</div>
           <select onchange="pvPortalConf(this.value)">
-            ${conferences.map(c=>`<option value="${pEsc(c)}" ${portalConfFilter===c?"selected":""}>${pEsc(c==="ALL"?"All Conferences":c)}</option>`).join("")}
+            ${conferences.map(c=>`<option value="${pEsc(c)}" ${portalConfFilter===c?"selected":""}>${pEsc(c==="ALL"?"All Conferences":c==="P4"?"Power 4":c==="G6"?"Group of Six":c)}</option>`).join("")}
           </select>
         </div>
       </div>
@@ -499,7 +505,7 @@
             <th class="r">IN AVG</th><th class="r">OUT AVG</th>
             <th class="r">PORTAL INDEX</th><th class="r">GRADE</th>
           </tr></thead>
-          <tbody>${rows||`<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted)">No teams match.</td></tr>`}</tbody>
+          <tbody>${rows||`<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted)">No teams in this filter in the current portal snapshot.</td></tr>`}</tbody>
         </table>
       </div>`;
   }
@@ -828,6 +834,7 @@
   // ── Public controls (called by onclick) ─────────────────────────────────────
   window.pvPortalTab = function(tab) {
     portalSubTab = tab;
+    if (tab === "conference" && PORTAL_CONFERENCE_GROUPS[portalConfFilter]) portalConfFilter = "ALL";
     portalSearch = "";
     renderPortal();
   };
