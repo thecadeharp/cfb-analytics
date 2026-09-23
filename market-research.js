@@ -13,11 +13,13 @@
     .research-card strong{font-size:24px;color:var(--text,#1d2730)}
     .research-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
     .research-form label{display:grid;gap:5px;font-size:13px;font-weight:600}
+    .research-form [hidden]{display:none!important}
     .research-form input,.research-form select,.research-form textarea{width:100%;padding:11px;border:1px solid var(--border,#ccc);border-radius:7px;font:inherit;background:white;color:#202a32}
     .research-form textarea{min-height:78px;resize:vertical}
     .research-wide{grid-column:1/-1}.research-action{background:#135a48;color:white;border:0;border-radius:8px;padding:11px 16px;cursor:pointer;font:inherit;font-size:13px;font-weight:600}
     .research-row{border-top:1px solid var(--border,#ddd);padding:12px 0;font-size:13px;line-height:1.6}
     .research-delete{background:transparent;color:#a32728;border:1px solid #d9a4a5;border-radius:7px;padding:7px 10px;cursor:pointer;font:inherit;margin-top:8px}
+    .research-preview{grid-column:1/-1;border:1px solid var(--border,#ddd);border-radius:8px;padding:11px;font-size:13px;font-weight:600;background:#f5f8f7}
     .research-row:last-child{padding-bottom:0}.research-stack{display:grid;gap:16px;margin:18px 0}
     .research-error{color:#a32728}.research-positive{color:#116b4a;font-weight:700}
   `;
@@ -93,29 +95,63 @@
       <div class="research-stack"><div><h3>Log a line</h3>
       <form id="research-entry" class="research-form">
       <label class="research-wide">Upcoming game<select name="game_id" required><option value="">Choose game</option>${future.map(g => `<option value="${esc(g.game_id)}">${esc(g.away?.team)} at ${esc(g.home?.team)} · ${esc(time(g.start_date))}</option>`).join('')}</select></label>
-      <label>Market<select name="market"><option value="spread">Spread</option><option value="total">Total</option></select></label>
-      <label>Selection<select name="selection"><option value="home">Home</option><option value="away">Away</option></select></label>
-      <label>Line (signed for spread)<input name="line" type="number" min="-150" max="150" step="0.5" required></label>
+      <label>Market<select name="market"><option value="spread">Spread</option><option value="moneyline">Moneyline</option><option value="total">Total</option></select></label>
+      <label>Selection<select name="selection" required></select></label>
+      <label id="research-line-field">Spread for selected team (− favorite / + underdog)<input name="line" type="number" min="-150" max="150" step="0.5" required></label>
       <label>Sportsbook<input name="sportsbook" maxlength="100" required></label>
-      <label>American odds (optional)<input name="american_odds" type="number" step="1"></label>
+      <label>American odds<input name="american_odds" type="number" min="-10000" max="10000" step="1" placeholder="−110 or +120" required></label>
+      <label>Units risked<input name="units_risked" type="number" min="0.01" max="1000" step="0.01" placeholder="1.00" required></label>
+      <div id="research-preview" class="research-preview" aria-live="polite"></div>
       <label class="research-wide">Private research notes<textarea name="note" maxlength="5000"></textarea></label>
       <button class="research-action" type="submit">Save private entry</button></form><p id="research-message" role="status"></p></div>
       <div><h3>Your entries</h3><div id="research-entries"></div></div></div>`;
     $('#research-logout').onclick = () => client.auth.signOut();
-    $('#research-entry [name="market"]').onchange = ev => {
-      $('#research-entry [name="selection"]').innerHTML = ev.target.value === 'total' ?
-        '<option value="over">Over</option><option value="under">Under</option>' :
-        '<option value="home">Home</option><option value="away">Away</option>';
+    const entry = $('#research-entry');
+    const marketInput = entry.elements.market, sideInput = entry.elements.selection;
+    const lineInput = entry.elements.line, oddsInput = entry.elements.american_odds;
+    const updateEntry = () => {
+      const market = marketInput.value;
+      const selectedGame = future.find(g => String(g.game_id) === entry.elements.game_id.value);
+      const options = market === 'total' ? [['over', 'Over'], ['under', 'Under']] :
+        [['away', selectedGame?.away?.team || 'Away'], ['home', selectedGame?.home?.team || 'Home']];
+      const previous = sideInput.value;
+      sideInput.innerHTML = options.map(([value, label]) => `<option value="${value}">${esc(label)}</option>`).join('');
+      if (options.some(([value]) => value === previous)) sideInput.value = previous;
+      const lineField = $('#research-line-field');
+      lineField.hidden = market === 'moneyline';
+      lineInput.required = market !== 'moneyline';
+      if (market === 'moneyline') lineInput.value = '';
+      else lineField.firstChild.textContent = market === 'total' ? 'Game total (points)' : 'Spread for selected team (− favorite / + underdog)';
+      lineInput.min = market === 'total' ? '0.5' : '-150';
+      oddsInput.required = true;
+      const spread = lineInput.value === '' ? null : Number(lineInput.value);
+      const odds = oddsInput.value === '' ? null : Number(oddsInput.value);
+      const type = market === 'spread' && spread !== null ? (spread < 0 ? 'Favorite' : spread > 0 ? 'Underdog' : 'Pick’em') :
+        market === 'moneyline' && odds !== null ? (odds < 0 ? 'Moneyline favorite' : odds > 0 ? 'Moneyline underdog' : 'Enter American odds') : '';
+      const side = sideInput.selectedOptions[0]?.textContent || 'Choose a side';
+      const priceText = odds === null ? '' : ` · ${odds > 0 ? '+' : ''}${odds} odds`;
+      $('#research-preview').textContent = `${market === 'total' ? side + ' total' : side + (type ? ' · ' + type : '')}${spread !== null && market !== 'moneyline' ? ' ' + (spread > 0 ? '+' : '') + spread : ''}${priceText}`;
     };
+    ['change', 'input'].forEach(eventName => entry.addEventListener(eventName, updateEntry));
+    updateEntry();
     $('#research-entry').onsubmit = async ev => {
       ev.preventDefault(); const form = new FormData(ev.currentTarget);
       const game = future.find(g => String(g.game_id) === form.get('game_id'));
       if (!game || new Date(game.start_date).getTime() <= Date.now()) { $('#research-message').textContent = 'Game is no longer upcoming.'; return; }
-      const price = form.get('american_odds');
+      const market = form.get('market'), selection = form.get('selection');
+      const price = Number(form.get('american_odds'));
+      const units = Number(form.get('units_risked'));
+      const spread = form.get('line') === '' ? null : Number(form.get('line'));
+      if (!Number.isInteger(price) || (price > -100 && price < 100) || Math.abs(price) > 10000 ||
+          !Number.isFinite(units) || units <= 0 || units > 1000 ||
+          (market !== 'moneyline' && (spread === null || !Number.isFinite(spread) ||
+            (market === 'total' && spread <= 0)))) {
+        $('#research-message').textContent = 'Check your odds, line, and units before saving.'; return;
+      }
       const item = {game_id:String(game.game_id), away_team:game.away.team,home_team:game.home.team,
-        kickoff_at:game.start_date, market:form.get('market'),selection:form.get('selection'),
-        line:Number(form.get('line')), sportsbook:String(form.get('sportsbook')).trim(),note:String(form.get('note')).trim(),
-        american_odds: price ? Number(price) : null};
+        kickoff_at:game.start_date, market, selection,
+        line:market === 'moneyline' ? null : spread, sportsbook:String(form.get('sportsbook')).trim(),note:String(form.get('note')).trim(),
+        american_odds:price, units_risked:units};
       const {error: saveError} = await client.from('portfolio_plays').insert(item);
       if (saveError) $('#research-message').textContent = saveError.message;
       else await refresh();
@@ -131,9 +167,13 @@
         qualifies && p.market === 'total' && Number.isFinite(closingTotal) && close?.closing_market?.total != null ?
           (p.selection === 'over' ? closingTotal - Number(p.line) : Number(p.line) - closingTotal) : null;
       const trail = history[p.game_id]?.snapshots || [];
-      return `<div class="research-row"><strong>${esc(p.away_team)} at ${esc(p.home_team)} · ${esc(p.selection)} ${line(p.line)}</strong><br>
-        ${esc(p.sportsbook)} · logged ${esc(time(p.recorded_at))} · ${esc(p.market)}<br>
-        ${comparison === null ? 'No qualifying pre-kickoff closing proxy after entry' : `<span class="${comparison > 0 ? 'research-positive' : ''}">Line difference vs near-kickoff proxy: ${line(comparison)} pts</span>`}
+      const selectedTeam = p.selection === 'home' ? p.home_team : p.selection === 'away' ? p.away_team : p.selection;
+      const ticket = `${selectedTeam}${p.line == null ? '' : ' ' + line(p.line)}`;
+      const priceLabel = p.american_odds == null ? 'odds not logged' : `${p.american_odds > 0 ? '+' : ''}${p.american_odds} odds`;
+      const unitsLabel = p.units_risked == null ? 'units not logged' : `${number(p.units_risked)}u risked`;
+      return `<div class="research-row"><strong>${esc(p.away_team)} at ${esc(p.home_team)} · ${esc(ticket)}</strong><br>
+        ${esc(p.sportsbook)} · logged ${esc(time(p.recorded_at))} · ${esc(p.market)} · ${esc(priceLabel)} · ${esc(unitsLabel)}<br>
+        ${p.market === 'moneyline' ? 'Moneyline closing comparison unavailable with current snapshots' : comparison === null ? 'No qualifying pre-kickoff closing proxy after entry' : `<span class="${comparison > 0 ? 'research-positive' : ''}">Line difference vs near-kickoff proxy: ${line(comparison)} pts</span>`}
         ${comparison !== null ? ` · captured ${esc(time(close.captured_at_utc))} · proxy book: ${esc(close.closing_market?.bookmaker || 'unknown')}` : ''}<br>
         <span class="research-muted">Logged entry is unverified user input. Line difference is descriptive; a different sportsbook may have supplied the proxy.</span>
         <details><summary>Market chronology (${trail.length} captures)</summary>${trail.length ? trail.slice(-30).map(s => `<div>${esc(time(s.captured_at))} · home ${line(s.home_spread)} · ${new Date(s.captured_at) <= new Date(p.recorded_at) ? 'before entry' : 'after entry'}</div>`).join('') : 'No market history captured.'}</details>
