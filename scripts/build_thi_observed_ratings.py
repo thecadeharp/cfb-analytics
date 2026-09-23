@@ -24,8 +24,9 @@ SCHEDULE_PATH = DATA / "schedule.json"
 OUTPUT_PATH = DATA / "thi_observed_ratings.json"
 SNAPSHOT_DIR = DATA / "ratings_snapshots"
 
-VERSION = "0.1.0"
+VERSION = "0.1.2"
 MIN_PLAYS = 35
+MIN_GAMES = 2
 SHRINKAGE_PLAYS = 140
 OPPONENT_ADJUSTMENT_STRENGTH = 0.70
 ITERATIONS = 24
@@ -314,30 +315,32 @@ def main() -> None:
     total_team_games = sum(len(value) for value in opponents.values())
     national_plays = total_all_plays / total_team_games if total_team_games else 68.0
 
-    eligible = {
+    sampled = {
         team
         for team, row in team_rows.items()
         if int(row.get("non_garbage", {}).get("offense", {}).get("n_plays") or 0) >= MIN_PLAYS
         and int(row.get("non_garbage", {}).get("defense", {}).get("n_plays") or 0) >= MIN_PLAYS
-        and len(opponents.get(team, [])) > 0
+        and len(opponents.get(team, [])) >= 1
         and team in epa["adjusted_offense"]
         and team in epa["adjusted_defense"]
     }
+    eligible = {team for team in sampled if len(opponents[team]) >= MIN_GAMES}
+    provisional = sampled - eligible
 
     offense_values = {
         team: national_points
         + (epa["adjusted_offense"][team] - epa["baseline"]) * national_plays
-        for team in eligible
+        for team in sampled
     }
     defense_values = {
         team: national_points
         + (epa["adjusted_defense"][team] - epa["baseline"]) * national_plays
-        for team in eligible
+        for team in sampled
     }
-    net_values = {team: offense_values[team] - defense_values[team] for team in eligible}
+    net_values = {team: offense_values[team] - defense_values[team] for team in sampled}
 
     pace_values: dict[str, float] = {}
-    for team in eligible:
+    for team in sampled:
         games_played = len(opponents.get(team, []))
         all_plays = float(
             team_rows[team].get("all_plays", {}).get("offense", {}).get("n_plays") or 0
@@ -345,10 +348,10 @@ def main() -> None:
         if games_played and national_plays > 0:
             pace_values[team] = (all_plays / games_played) / national_plays
 
-    ranked_offense = ranked(offense_values, True)
-    ranked_defense = ranked(defense_values, False)
-    ranked_net = ranked(net_values, True)
-    ranked_pace = ranked(pace_values, True)
+    ranked_offense = ranked({team: offense_values[team] for team in eligible}, True)
+    ranked_defense = ranked({team: defense_values[team] for team in eligible}, False)
+    ranked_net = ranked({team: net_values[team] for team in eligible}, True)
+    ranked_pace = ranked({team: pace_values[team] for team in eligible}, True)
 
     adjusted_rankings: dict[str, dict[str, dict[str, Any]]] = {}
     for field, result in metric_results.items():
@@ -373,10 +376,19 @@ def main() -> None:
         team_output: dict[str, Any] = {
             "team": team,
             "eligible": team in eligible,
+            "provisional": team in provisional,
             "reliability": reliability(qualifying_plays, games_played),
             "ratings": {},
+            "provisional_ratings": {},
             "metrics": {},
         }
+        if team in provisional:
+            team_output["provisional_ratings"] = {
+                "offense": round(offense_values[team], 2),
+                "defense": round(defense_values[team], 2),
+                "net": round(net_values[team], 2),
+                "pace": round(pace_values[team], 2) if team in pace_values else None,
+            }
         if team in eligible:
             team_output["ratings"] = {
                 "offense": ranked_offense[team],
@@ -422,6 +434,8 @@ def main() -> None:
                 "pace_rating": "Unadjusted scrimmage plays per game indexed to the FBS average of 1.00; affected by opponent tempo and game script.",
                 "opponent_adjustment": "Iterative adjustment from each FBS opponent's season-wide efficiency; one opponent contributes once per game. Aggregate approximation, not a play-level opponent model.",
                 "minimum_plays": MIN_PLAYS,
+                "minimum_games": MIN_GAMES,
+                "provisional_policy": "One qualifying FBS game: show values separately without ranks or percentiles.",
                 "shrinkage_plays": SHRINKAGE_PLAYS,
                 "opponent_adjustment_strength": OPPONENT_ADJUSTMENT_STRENGTH,
                 "iterations": ITERATIONS,
@@ -435,12 +449,14 @@ def main() -> None:
             },
             "qualifying_games": len(games),
             "eligible_teams": len(eligible),
+            "provisional_teams": len(provisional),
             "metrics": METRICS,
         },
         "teams": output_teams,
     }
 
-    if len(output_teams) < 100 or len(eligible) < 80 or len(games) < 50:
+    min_ranked = 80 if through_week >= 3 else 0
+    if len(output_teams) < 100 or len(eligible) < min_ranked or len(games) < 50:
         raise RuntimeError(
             f"THI Ratings safety check failed: {len(output_teams)} teams, {len(eligible)} eligible"
         )
