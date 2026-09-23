@@ -76,6 +76,21 @@ jobs:
           )
           assert int((df["season"] == 2025).sum()) > 0
           assert manifest["sealed_test_season"] == 2025
+          assert manifest["builder_version"] == "historical_training_v5_situational"
+          assert df["season_type"].eq(2).all()
+          assert df["actual_first_half_margin"].notna().sum() > 1000
+          for field in ("off_iso_ppp", "off_script_epa", "off_leverage_epa", "off_red_zone_epa"):
+              assert df[f"home_pregame_{field}"].notna().sum() > 1000
+          PY
+
+      - name: Audit split definitions and leakage
+        run: |
+          python scripts/audit_historical_training_data.py
+          python - <<'PY'
+          import json
+          with open("data/training/historical_training_audit.json") as f:
+              audit = json.load(f)
+          assert audit["status"] == "PASS", audit["hard_failures"]
           PY
 
       - name: Commit generated training data
@@ -85,6 +100,7 @@ jobs:
 
           git add data/training/historical_games.csv
           git add data/training/historical_training_manifest.json
+          git add data/training/historical_training_audit.json
 
           if git diff --cached --quiet; then
             echo "No generated changes to commit."
@@ -92,4 +108,5 @@ jobs:
           fi
 
           git commit -m "Build SportsDataverse historical training data"
+          git pull --rebase origin main
           git push
