@@ -1,0 +1,5825 @@
+{
+  "meta": {
+    "version": "0.1",
+    "season": 2026,
+    "through_week": 3,
+    "generated_at": "2026-09-23T11:58:54.747203+00:00",
+    "status": "DESCRIPTIVE_BETA_NO_POINT_SCALE",
+    "model_usage": "display_only_not_used_by_model_a",
+    "definition": "Regulation FBS rush/pass EPA with valid starting down, distance, clock and pre-play score; garbage time excluded.",
+    "not_a_spread": "Values are EPA per play, not first-half or full-game spread equivalents.",
+    "prior": "Full-game team EPA/play shrunk toward the current FBS play-weighted mean before each split is shrunk toward that team-wide anchor.",
+    "global_prior_plays": 140,
+    "maximum_split_epa_deviation_before_shrinkage": 0.6,
+    "split_prior_plays": {
+      "script": 60,
+      "leverage": 50,
+      "red_zone": 70
+    },
+    "minimum_display_plays": 10,
+    "measured_sample_plays": 30,
+    "national_epa_per_play": {
+      "offense": 0.0826,
+      "defense": 0.0827
+    },
+    "no_opponent_adjustment": true
+  },
+  "teams": {
+    "Air Force": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.116,
+          "sample_plays": 13,
+          "observed_weight": 0.178,
+          "sample_status": "DEVELOPING"
+        },
+        "leverage": {
+          "epa_per_play": 0.152,
+          "sample_plays": 10,
+          "observed_weight": 0.167,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 9,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.172,
+          "sample_plays": 32,
+          "observed_weight": 0.348,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.152,
+          "sample_plays": 10,
+          "observed_weight": 0.167,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 7,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "Akron": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.067,
+          "sample_plays": 45,
+          "observed_weight": 0.429,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.169,
+          "sample_plays": 14,
+          "observed_weight": 0.219,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 5,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.18,
+          "sample_plays": 54,
+          "observed_weight": 0.474,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.184,
+          "sample_plays": 15,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.065,
+          "sample_plays": 24,
+          "observed_weight": 0.255,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Alabama": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.147,
+          "sample_plays": 85,
+          "observed_weight": 0.586,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.336,
+          "sample_plays": 23,
+          "observed_weight": 0.315,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.229,
+          "sample_plays": 36,
+          "observed_weight": 0.34,
+          "sample_status": "MEASURED"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.027,
+          "sample_plays": 65,
+          "observed_weight": 0.52,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.079,
+          "sample_plays": 26,
+          "observed_weight": 0.342,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.113,
+          "sample_plays": 17,
+          "observed_weight": 0.195,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "App State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.011,
+          "sample_plays": 57,
+          "observed_weight": 0.487,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.092,
+          "sample_plays": 27,
+          "observed_weight": 0.351,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.039,
+          "sample_plays": 24,
+          "observed_weight": 0.255,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.045,
+          "sample_plays": 56,
+          "observed_weight": 0.483,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.176,
+          "sample_plays": 26,
+          "observed_weight": 0.342,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.082,
+          "sample_plays": 21,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Arizona": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.236,
+          "sample_plays": 58,
+          "observed_weight": 0.492,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.337,
+          "sample_plays": 18,
+          "observed_weight": 0.265,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.256,
+          "sample_plays": 16,
+          "observed_weight": 0.186,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.135,
+          "sample_plays": 44,
+          "observed_weight": 0.423,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.349,
+          "sample_plays": 23,
+          "observed_weight": 0.315,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.171,
+          "sample_plays": 12,
+          "observed_weight": 0.146,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Arizona State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.066,
+          "sample_plays": 52,
+          "observed_weight": 0.464,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.121,
+          "sample_plays": 23,
+          "observed_weight": 0.315,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 5,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.007,
+          "sample_plays": 44,
+          "observed_weight": 0.423,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.019,
+          "sample_plays": 27,
+          "observed_weight": 0.351,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.08,
+          "sample_plays": 11,
+          "observed_weight": 0.136,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Arkansas": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.111,
+          "sample_plays": 54,
+          "observed_weight": 0.474,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.137,
+          "sample_plays": 14,
+          "observed_weight": 0.219,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 5,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.275,
+          "sample_plays": 51,
+          "observed_weight": 0.459,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": null,
+          "sample_plays": 7,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        },
+        "red_zone": {
+          "epa_per_play": 0.259,
+          "sample_plays": 30,
+          "observed_weight": 0.3,
+          "sample_status": "MEASURED"
+        }
+      }
+    },
+    "Arkansas State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.081,
+          "sample_plays": 45,
+          "observed_weight": 0.429,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.033,
+          "sample_plays": 17,
+          "observed_weight": 0.254,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.098,
+          "sample_plays": 12,
+          "observed_weight": 0.146,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.138,
+          "sample_plays": 54,
+          "observed_weight": 0.474,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.282,
+          "sample_plays": 17,
+          "observed_weight": 0.254,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.255,
+          "sample_plays": 23,
+          "observed_weight": 0.247,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Army": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.176,
+          "sample_plays": 26,
+          "observed_weight": 0.302,
+          "sample_status": "DEVELOPING"
+        },
+        "leverage": {
+          "epa_per_play": null,
+          "sample_plays": 9,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 9,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.168,
+          "sample_plays": 17,
+          "observed_weight": 0.221,
+          "sample_status": "DEVELOPING"
+        },
+        "leverage": {
+          "epa_per_play": 0.247,
+          "sample_plays": 10,
+          "observed_weight": 0.167,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 5,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "Auburn": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.109,
+          "sample_plays": 76,
+          "observed_weight": 0.559,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.252,
+          "sample_plays": 41,
+          "observed_weight": 0.451,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.218,
+          "sample_plays": 29,
+          "observed_weight": 0.293,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.052,
+          "sample_plays": 96,
+          "observed_weight": 0.615,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.197,
+          "sample_plays": 41,
+          "observed_weight": 0.451,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.047,
+          "sample_plays": 38,
+          "observed_weight": 0.352,
+          "sample_status": "MEASURED"
+        }
+      }
+    },
+    "BYU": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.405,
+          "sample_plays": 42,
+          "observed_weight": 0.412,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.319,
+          "sample_plays": 12,
+          "observed_weight": 0.194,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.335,
+          "sample_plays": 15,
+          "observed_weight": 0.176,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.152,
+          "sample_plays": 62,
+          "observed_weight": 0.508,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.03,
+          "sample_plays": 19,
+          "observed_weight": 0.275,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.144,
+          "sample_plays": 10,
+          "observed_weight": 0.125,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Ball State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.004,
+          "sample_plays": 47,
+          "observed_weight": 0.439,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.144,
+          "sample_plays": 15,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 4,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.294,
+          "sample_plays": 59,
+          "observed_weight": 0.496,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.381,
+          "sample_plays": 14,
+          "observed_weight": 0.219,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.371,
+          "sample_plays": 19,
+          "observed_weight": 0.213,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Baylor": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.084,
+          "sample_plays": 62,
+          "observed_weight": 0.508,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.093,
+          "sample_plays": 33,
+          "observed_weight": 0.398,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.035,
+          "sample_plays": 23,
+          "observed_weight": 0.247,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.117,
+          "sample_plays": 55,
+          "observed_weight": 0.478,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.08,
+          "sample_plays": 32,
+          "observed_weight": 0.39,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.008,
+          "sample_plays": 18,
+          "observed_weight": 0.205,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Boise State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.142,
+          "sample_plays": 55,
+          "observed_weight": 0.478,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.041,
+          "sample_plays": 27,
+          "observed_weight": 0.351,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.041,
+          "sample_plays": 20,
+          "observed_weight": 0.222,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.311,
+          "sample_plays": 47,
+          "observed_weight": 0.439,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.027,
+          "sample_plays": 18,
+          "observed_weight": 0.265,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.018,
+          "sample_plays": 20,
+          "observed_weight": 0.222,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Boston College": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.003,
+          "sample_plays": 49,
+          "observed_weight": 0.45,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.029,
+          "sample_plays": 27,
+          "observed_weight": 0.351,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.058,
+          "sample_plays": 19,
+          "observed_weight": 0.213,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.023,
+          "sample_plays": 44,
+          "observed_weight": 0.423,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.018,
+          "sample_plays": 22,
+          "observed_weight": 0.306,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.03,
+          "sample_plays": 25,
+          "observed_weight": 0.263,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Bowling Green": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.066,
+          "sample_plays": 37,
+          "observed_weight": 0.381,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.133,
+          "sample_plays": 10,
+          "observed_weight": 0.167,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 0,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.449,
+          "sample_plays": 60,
+          "observed_weight": 0.5,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": null,
+          "sample_plays": 6,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 9,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "Buffalo": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.195,
+          "sample_plays": 50,
+          "observed_weight": 0.455,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.161,
+          "sample_plays": 30,
+          "observed_weight": 0.375,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 7,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.328,
+          "sample_plays": 59,
+          "observed_weight": 0.496,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.143,
+          "sample_plays": 19,
+          "observed_weight": 0.275,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.181,
+          "sample_plays": 15,
+          "observed_weight": 0.176,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "California": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.057,
+          "sample_plays": 55,
+          "observed_weight": 0.478,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.17,
+          "sample_plays": 33,
+          "observed_weight": 0.398,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.059,
+          "sample_plays": 12,
+          "observed_weight": 0.146,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.174,
+          "sample_plays": 51,
+          "observed_weight": 0.459,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.03,
+          "sample_plays": 24,
+          "observed_weight": 0.324,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.023,
+          "sample_plays": 16,
+          "observed_weight": 0.186,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Central Michigan": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.054,
+          "sample_plays": 43,
+          "observed_weight": 0.417,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.064,
+          "sample_plays": 15,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 6,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.015,
+          "sample_plays": 48,
+          "observed_weight": 0.444,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.136,
+          "sample_plays": 20,
+          "observed_weight": 0.286,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.029,
+          "sample_plays": 22,
+          "observed_weight": 0.239,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Charlotte": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.011,
+          "sample_plays": 46,
+          "observed_weight": 0.434,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.155,
+          "sample_plays": 19,
+          "observed_weight": 0.275,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.017,
+          "sample_plays": 17,
+          "observed_weight": 0.195,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.152,
+          "sample_plays": 60,
+          "observed_weight": 0.5,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.021,
+          "sample_plays": 15,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.083,
+          "sample_plays": 28,
+          "observed_weight": 0.286,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Cincinnati": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.075,
+          "sample_plays": 48,
+          "observed_weight": 0.444,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.042,
+          "sample_plays": 25,
+          "observed_weight": 0.333,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.262,
+          "sample_plays": 23,
+          "observed_weight": 0.247,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.034,
+          "sample_plays": 45,
+          "observed_weight": 0.429,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.053,
+          "sample_plays": 24,
+          "observed_weight": 0.324,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.083,
+          "sample_plays": 21,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Clemson": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.015,
+          "sample_plays": 81,
+          "observed_weight": 0.574,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.24,
+          "sample_plays": 30,
+          "observed_weight": 0.375,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": -0.013,
+          "sample_plays": 23,
+          "observed_weight": 0.247,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.073,
+          "sample_plays": 90,
+          "observed_weight": 0.6,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.202,
+          "sample_plays": 34,
+          "observed_weight": 0.405,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.02,
+          "sample_plays": 29,
+          "observed_weight": 0.293,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Coastal Carolina": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.116,
+          "sample_plays": 44,
+          "observed_weight": 0.423,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.079,
+          "sample_plays": 18,
+          "observed_weight": 0.265,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 9,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.211,
+          "sample_plays": 62,
+          "observed_weight": 0.508,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.033,
+          "sample_plays": 23,
+          "observed_weight": 0.315,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.124,
+          "sample_plays": 13,
+          "observed_weight": 0.157,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Colorado": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.026,
+          "sample_plays": 49,
+          "observed_weight": 0.45,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.051,
+          "sample_plays": 22,
+          "observed_weight": 0.306,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.06,
+          "sample_plays": 11,
+          "observed_weight": 0.136,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.113,
+          "sample_plays": 48,
+          "observed_weight": 0.444,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.03,
+          "sample_plays": 17,
+          "observed_weight": 0.254,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.049,
+          "sample_plays": 17,
+          "observed_weight": 0.195,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Colorado State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.117,
+          "sample_plays": 51,
+          "observed_weight": 0.459,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.188,
+          "sample_plays": 21,
+          "observed_weight": 0.296,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.201,
+          "sample_plays": 16,
+          "observed_weight": 0.186,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.355,
+          "sample_plays": 50,
+          "observed_weight": 0.455,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.027,
+          "sample_plays": 12,
+          "observed_weight": 0.194,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.222,
+          "sample_plays": 13,
+          "observed_weight": 0.157,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Delaware": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.041,
+          "sample_plays": 56,
+          "observed_weight": 0.483,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.092,
+          "sample_plays": 24,
+          "observed_weight": 0.324,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.009,
+          "sample_plays": 11,
+          "observed_weight": 0.136,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.128,
+          "sample_plays": 47,
+          "observed_weight": 0.439,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.041,
+          "sample_plays": 21,
+          "observed_weight": 0.296,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.045,
+          "sample_plays": 13,
+          "observed_weight": 0.157,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Duke": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.218,
+          "sample_plays": 78,
+          "observed_weight": 0.565,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.093,
+          "sample_plays": 34,
+          "observed_weight": 0.405,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.153,
+          "sample_plays": 36,
+          "observed_weight": 0.34,
+          "sample_status": "MEASURED"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.063,
+          "sample_plays": 74,
+          "observed_weight": 0.552,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.251,
+          "sample_plays": 32,
+          "observed_weight": 0.39,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.015,
+          "sample_plays": 10,
+          "observed_weight": 0.125,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "East Carolina": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.006,
+          "sample_plays": 74,
+          "observed_weight": 0.552,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.232,
+          "sample_plays": 26,
+          "observed_weight": 0.342,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.074,
+          "sample_plays": 17,
+          "observed_weight": 0.195,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.046,
+          "sample_plays": 90,
+          "observed_weight": 0.6,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.135,
+          "sample_plays": 35,
+          "observed_weight": 0.412,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.158,
+          "sample_plays": 25,
+          "observed_weight": 0.263,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Eastern Michigan": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.057,
+          "sample_plays": 108,
+          "observed_weight": 0.643,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.234,
+          "sample_plays": 37,
+          "observed_weight": 0.425,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.021,
+          "sample_plays": 14,
+          "observed_weight": 0.167,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.104,
+          "sample_plays": 101,
+          "observed_weight": 0.627,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.064,
+          "sample_plays": 42,
+          "observed_weight": 0.457,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.246,
+          "sample_plays": 30,
+          "observed_weight": 0.3,
+          "sample_status": "MEASURED"
+        }
+      }
+    },
+    "Florida": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.218,
+          "sample_plays": 62,
+          "observed_weight": 0.508,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.367,
+          "sample_plays": 18,
+          "observed_weight": 0.265,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.267,
+          "sample_plays": 24,
+          "observed_weight": 0.255,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.034,
+          "sample_plays": 57,
+          "observed_weight": 0.487,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.339,
+          "sample_plays": 29,
+          "observed_weight": 0.367,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.189,
+          "sample_plays": 21,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Florida Atlantic": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.071,
+          "sample_plays": 96,
+          "observed_weight": 0.615,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.084,
+          "sample_plays": 38,
+          "observed_weight": 0.432,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.072,
+          "sample_plays": 32,
+          "observed_weight": 0.314,
+          "sample_status": "MEASURED"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.155,
+          "sample_plays": 76,
+          "observed_weight": 0.559,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.019,
+          "sample_plays": 37,
+          "observed_weight": 0.425,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.136,
+          "sample_plays": 21,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Florida International": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.076,
+          "sample_plays": 83,
+          "observed_weight": 0.58,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.027,
+          "sample_plays": 49,
+          "observed_weight": 0.495,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": -0.02,
+          "sample_plays": 23,
+          "observed_weight": 0.247,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.096,
+          "sample_plays": 69,
+          "observed_weight": 0.535,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.074,
+          "sample_plays": 46,
+          "observed_weight": 0.479,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": -0.022,
+          "sample_plays": 29,
+          "observed_weight": 0.293,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Florida State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.126,
+          "sample_plays": 73,
+          "observed_weight": 0.549,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.39,
+          "sample_plays": 37,
+          "observed_weight": 0.425,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.255,
+          "sample_plays": 41,
+          "observed_weight": 0.369,
+          "sample_status": "MEASURED"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.075,
+          "sample_plays": 83,
+          "observed_weight": 0.58,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.455,
+          "sample_plays": 38,
+          "observed_weight": 0.432,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.164,
+          "sample_plays": 19,
+          "observed_weight": 0.213,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Fresno State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.144,
+          "sample_plays": 78,
+          "observed_weight": 0.565,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.028,
+          "sample_plays": 24,
+          "observed_weight": 0.324,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.13,
+          "sample_plays": 11,
+          "observed_weight": 0.136,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.038,
+          "sample_plays": 76,
+          "observed_weight": 0.559,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.032,
+          "sample_plays": 24,
+          "observed_weight": 0.324,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.035,
+          "sample_plays": 12,
+          "observed_weight": 0.146,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Georgia": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.264,
+          "sample_plays": 46,
+          "observed_weight": 0.434,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": null,
+          "sample_plays": 6,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        },
+        "red_zone": {
+          "epa_per_play": 0.239,
+          "sample_plays": 23,
+          "observed_weight": 0.247,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.154,
+          "sample_plays": 39,
+          "observed_weight": 0.394,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.043,
+          "sample_plays": 15,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 1,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "Georgia Southern": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.006,
+          "sample_plays": 49,
+          "observed_weight": 0.45,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.161,
+          "sample_plays": 31,
+          "observed_weight": 0.383,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": -0.018,
+          "sample_plays": 24,
+          "observed_weight": 0.255,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.136,
+          "sample_plays": 52,
+          "observed_weight": 0.464,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.079,
+          "sample_plays": 22,
+          "observed_weight": 0.306,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.077,
+          "sample_plays": 21,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Georgia State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.274,
+          "sample_plays": 64,
+          "observed_weight": 0.516,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.271,
+          "sample_plays": 25,
+          "observed_weight": 0.333,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.195,
+          "sample_plays": 24,
+          "observed_weight": 0.255,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.156,
+          "sample_plays": 37,
+          "observed_weight": 0.381,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.039,
+          "sample_plays": 18,
+          "observed_weight": 0.265,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.203,
+          "sample_plays": 19,
+          "observed_weight": 0.213,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Georgia Tech": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.133,
+          "sample_plays": 45,
+          "observed_weight": 0.429,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.038,
+          "sample_plays": 25,
+          "observed_weight": 0.333,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.109,
+          "sample_plays": 20,
+          "observed_weight": 0.222,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.074,
+          "sample_plays": 52,
+          "observed_weight": 0.464,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.116,
+          "sample_plays": 26,
+          "observed_weight": 0.342,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.139,
+          "sample_plays": 17,
+          "observed_weight": 0.195,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Hawai'i": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.003,
+          "sample_plays": 72,
+          "observed_weight": 0.545,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.092,
+          "sample_plays": 42,
+          "observed_weight": 0.457,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": -0.004,
+          "sample_plays": 35,
+          "observed_weight": 0.333,
+          "sample_status": "MEASURED"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.058,
+          "sample_plays": 89,
+          "observed_weight": 0.597,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.064,
+          "sample_plays": 34,
+          "observed_weight": 0.405,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.093,
+          "sample_plays": 24,
+          "observed_weight": 0.255,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Houston": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.134,
+          "sample_plays": 64,
+          "observed_weight": 0.516,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.244,
+          "sample_plays": 19,
+          "observed_weight": 0.275,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.09,
+          "sample_plays": 24,
+          "observed_weight": 0.255,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.112,
+          "sample_plays": 47,
+          "observed_weight": 0.439,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.177,
+          "sample_plays": 27,
+          "observed_weight": 0.351,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.215,
+          "sample_plays": 14,
+          "observed_weight": 0.167,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Illinois": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.317,
+          "sample_plays": 49,
+          "observed_weight": 0.45,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.061,
+          "sample_plays": 11,
+          "observed_weight": 0.18,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.203,
+          "sample_plays": 10,
+          "observed_weight": 0.125,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.236,
+          "sample_plays": 53,
+          "observed_weight": 0.469,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.206,
+          "sample_plays": 22,
+          "observed_weight": 0.306,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.221,
+          "sample_plays": 21,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Indiana": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.216,
+          "sample_plays": 42,
+          "observed_weight": 0.412,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.194,
+          "sample_plays": 12,
+          "observed_weight": 0.194,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.236,
+          "sample_plays": 19,
+          "observed_weight": 0.213,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.007,
+          "sample_plays": 50,
+          "observed_weight": 0.455,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.001,
+          "sample_plays": 20,
+          "observed_weight": 0.286,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.009,
+          "sample_plays": 10,
+          "observed_weight": 0.125,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Iowa": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.189,
+          "sample_plays": 64,
+          "observed_weight": 0.516,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.025,
+          "sample_plays": 16,
+          "observed_weight": 0.242,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.142,
+          "sample_plays": 16,
+          "observed_weight": 0.186,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.128,
+          "sample_plays": 35,
+          "observed_weight": 0.368,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.177,
+          "sample_plays": 17,
+          "observed_weight": 0.254,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 8,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "Iowa State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.194,
+          "sample_plays": 48,
+          "observed_weight": 0.444,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.035,
+          "sample_plays": 14,
+          "observed_weight": 0.219,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.102,
+          "sample_plays": 12,
+          "observed_weight": 0.146,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.02,
+          "sample_plays": 45,
+          "observed_weight": 0.429,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.137,
+          "sample_plays": 15,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 5,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "Jacksonville State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.08,
+          "sample_plays": 52,
+          "observed_weight": 0.464,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.12,
+          "sample_plays": 25,
+          "observed_weight": 0.333,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.078,
+          "sample_plays": 19,
+          "observed_weight": 0.213,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.12,
+          "sample_plays": 81,
+          "observed_weight": 0.574,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.157,
+          "sample_plays": 34,
+          "observed_weight": 0.405,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.148,
+          "sample_plays": 36,
+          "observed_weight": 0.34,
+          "sample_status": "MEASURED"
+        }
+      }
+    },
+    "James Madison": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.18,
+          "sample_plays": 58,
+          "observed_weight": 0.492,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.057,
+          "sample_plays": 22,
+          "observed_weight": 0.306,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.167,
+          "sample_plays": 19,
+          "observed_weight": 0.213,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.104,
+          "sample_plays": 48,
+          "observed_weight": 0.444,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.004,
+          "sample_plays": 32,
+          "observed_weight": 0.39,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": -0.077,
+          "sample_plays": 12,
+          "observed_weight": 0.146,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Kansas": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.003,
+          "sample_plays": 42,
+          "observed_weight": 0.412,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.13,
+          "sample_plays": 31,
+          "observed_weight": 0.383,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 2,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.092,
+          "sample_plays": 52,
+          "observed_weight": 0.464,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.066,
+          "sample_plays": 29,
+          "observed_weight": 0.367,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.076,
+          "sample_plays": 19,
+          "observed_weight": 0.213,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Kansas State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.051,
+          "sample_plays": 61,
+          "observed_weight": 0.504,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.341,
+          "sample_plays": 24,
+          "observed_weight": 0.324,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.17,
+          "sample_plays": 29,
+          "observed_weight": 0.293,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.003,
+          "sample_plays": 40,
+          "observed_weight": 0.4,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.026,
+          "sample_plays": 19,
+          "observed_weight": 0.275,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 2,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "Kennesaw State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.049,
+          "sample_plays": 41,
+          "observed_weight": 0.406,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.096,
+          "sample_plays": 15,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 9,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.262,
+          "sample_plays": 67,
+          "observed_weight": 0.528,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.163,
+          "sample_plays": 13,
+          "observed_weight": 0.206,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.218,
+          "sample_plays": 19,
+          "observed_weight": 0.213,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Kent State": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.107,
+          "sample_plays": 40,
+          "observed_weight": 0.4,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.091,
+          "sample_plays": 17,
+          "observed_weight": 0.254,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 3,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.406,
+          "sample_plays": 65,
+          "observed_weight": 0.52,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": null,
+          "sample_plays": 7,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        },
+        "red_zone": {
+          "epa_per_play": 0.282,
+          "sample_plays": 18,
+          "observed_weight": 0.205,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Kentucky": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.12,
+          "sample_plays": 45,
+          "observed_weight": 0.429,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.164,
+          "sample_plays": 22,
+          "observed_weight": 0.306,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.095,
+          "sample_plays": 10,
+          "observed_weight": 0.125,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.053,
+          "sample_plays": 54,
+          "observed_weight": 0.474,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.155,
+          "sample_plays": 21,
+          "observed_weight": 0.296,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.068,
+          "sample_plays": 30,
+          "observed_weight": 0.3,
+          "sample_status": "MEASURED"
+        }
+      }
+    },
+    "LSU": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.011,
+          "sample_plays": 108,
+          "observed_weight": 0.643,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.064,
+          "sample_plays": 33,
+          "observed_weight": 0.398,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": -0.103,
+          "sample_plays": 43,
+          "observed_weight": 0.381,
+          "sample_status": "MEASURED"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.175,
+          "sample_plays": 60,
+          "observed_weight": 0.5,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.283,
+          "sample_plays": 30,
+          "observed_weight": 0.375,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 7,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "Liberty": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.147,
+          "sample_plays": 48,
+          "observed_weight": 0.444,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.148,
+          "sample_plays": 20,
+          "observed_weight": 0.286,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.133,
+          "sample_plays": 17,
+          "observed_weight": 0.195,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.189,
+          "sample_plays": 45,
+          "observed_weight": 0.429,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.062,
+          "sample_plays": 16,
+          "observed_weight": 0.242,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.12,
+          "sample_plays": 15,
+          "observed_weight": 0.176,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Louisiana": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.136,
+          "sample_plays": 49,
+          "observed_weight": 0.45,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.166,
+          "sample_plays": 23,
+          "observed_weight": 0.315,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.155,
+          "sample_plays": 17,
+          "observed_weight": 0.195,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.029,
+          "sample_plays": 54,
+          "observed_weight": 0.474,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.127,
+          "sample_plays": 25,
+          "observed_weight": 0.333,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.164,
+          "sample_plays": 19,
+          "observed_weight": 0.213,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Louisiana Tech": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.285,
+          "sample_plays": 38,
+          "observed_weight": 0.388,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.211,
+          "sample_plays": 26,
+          "observed_weight": 0.342,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.156,
+          "sample_plays": 13,
+          "observed_weight": 0.157,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.017,
+          "sample_plays": 66,
+          "observed_weight": 0.524,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.123,
+          "sample_plays": 22,
+          "observed_weight": 0.306,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.128,
+          "sample_plays": 32,
+          "observed_weight": 0.314,
+          "sample_status": "MEASURED"
+        }
+      }
+    },
+    "Louisville": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.098,
+          "sample_plays": 43,
+          "observed_weight": 0.417,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.141,
+          "sample_plays": 19,
+          "observed_weight": 0.275,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.261,
+          "sample_plays": 12,
+          "observed_weight": 0.146,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.111,
+          "sample_plays": 55,
+          "observed_weight": 0.478,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.024,
+          "sample_plays": 22,
+          "observed_weight": 0.306,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.218,
+          "sample_plays": 14,
+          "observed_weight": 0.167,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Marshall": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.122,
+          "sample_plays": 78,
+          "observed_weight": 0.565,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.004,
+          "sample_plays": 25,
+          "observed_weight": 0.333,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.1,
+          "sample_plays": 22,
+          "observed_weight": 0.239,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.184,
+          "sample_plays": 75,
+          "observed_weight": 0.556,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.221,
+          "sample_plays": 30,
+          "observed_weight": 0.375,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.167,
+          "sample_plays": 22,
+          "observed_weight": 0.239,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Maryland": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.192,
+          "sample_plays": 56,
+          "observed_weight": 0.483,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.285,
+          "sample_plays": 17,
+          "observed_weight": 0.254,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.221,
+          "sample_plays": 23,
+          "observed_weight": 0.247,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.105,
+          "sample_plays": 58,
+          "observed_weight": 0.492,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.168,
+          "sample_plays": 17,
+          "observed_weight": 0.254,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.207,
+          "sample_plays": 14,
+          "observed_weight": 0.167,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Massachusetts": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.272,
+          "sample_plays": 28,
+          "observed_weight": 0.318,
+          "sample_status": "DEVELOPING"
+        },
+        "leverage": {
+          "epa_per_play": null,
+          "sample_plays": 9,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        },
+        "red_zone": {
+          "epa_per_play": 0.167,
+          "sample_plays": 10,
+          "observed_weight": 0.125,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.1,
+          "sample_plays": 20,
+          "observed_weight": 0.25,
+          "sample_status": "DEVELOPING"
+        },
+        "leverage": {
+          "epa_per_play": null,
+          "sample_plays": 7,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 6,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "Memphis": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.29,
+          "sample_plays": 69,
+          "observed_weight": 0.535,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.02,
+          "sample_plays": 26,
+          "observed_weight": 0.342,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.069,
+          "sample_plays": 30,
+          "observed_weight": 0.3,
+          "sample_status": "MEASURED"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.166,
+          "sample_plays": 85,
+          "observed_weight": 0.586,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.039,
+          "sample_plays": 40,
+          "observed_weight": 0.444,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": -0.074,
+          "sample_plays": 26,
+          "observed_weight": 0.271,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Miami": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.312,
+          "sample_plays": 62,
+          "observed_weight": 0.508,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.271,
+          "sample_plays": 15,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.248,
+          "sample_plays": 20,
+          "observed_weight": 0.222,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.117,
+          "sample_plays": 41,
+          "observed_weight": 0.406,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.087,
+          "sample_plays": 19,
+          "observed_weight": 0.275,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.006,
+          "sample_plays": 15,
+          "observed_weight": 0.176,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Miami (OH)": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.175,
+          "sample_plays": 47,
+          "observed_weight": 0.439,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.151,
+          "sample_plays": 19,
+          "observed_weight": 0.275,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 9,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.145,
+          "sample_plays": 59,
+          "observed_weight": 0.496,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.35,
+          "sample_plays": 23,
+          "observed_weight": 0.315,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.316,
+          "sample_plays": 16,
+          "observed_weight": 0.186,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Michigan": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.106,
+          "sample_plays": 79,
+          "observed_weight": 0.568,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.266,
+          "sample_plays": 25,
+          "observed_weight": 0.333,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.258,
+          "sample_plays": 18,
+          "observed_weight": 0.205,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.102,
+          "sample_plays": 62,
+          "observed_weight": 0.508,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.265,
+          "sample_plays": 35,
+          "observed_weight": 0.412,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 5,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "Michigan State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.053,
+          "sample_plays": 74,
+          "observed_weight": 0.552,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.071,
+          "sample_plays": 32,
+          "observed_weight": 0.39,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.104,
+          "sample_plays": 34,
+          "observed_weight": 0.327,
+          "sample_status": "MEASURED"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.047,
+          "sample_plays": 63,
+          "observed_weight": 0.512,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.001,
+          "sample_plays": 26,
+          "observed_weight": 0.342,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.112,
+          "sample_plays": 21,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Middle Tennessee": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.081,
+          "sample_plays": 47,
+          "observed_weight": 0.439,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.049,
+          "sample_plays": 25,
+          "observed_weight": 0.333,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.183,
+          "sample_plays": 14,
+          "observed_weight": 0.167,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.078,
+          "sample_plays": 46,
+          "observed_weight": 0.434,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.05,
+          "sample_plays": 18,
+          "observed_weight": 0.265,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.091,
+          "sample_plays": 19,
+          "observed_weight": 0.213,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Minnesota": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.04,
+          "sample_plays": 49,
+          "observed_weight": 0.45,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.036,
+          "sample_plays": 16,
+          "observed_weight": 0.242,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.039,
+          "sample_plays": 23,
+          "observed_weight": 0.247,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.095,
+          "sample_plays": 53,
+          "observed_weight": 0.469,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.102,
+          "sample_plays": 14,
+          "observed_weight": 0.219,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 6,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "Mississippi State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.358,
+          "sample_plays": 87,
+          "observed_weight": 0.592,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.408,
+          "sample_plays": 22,
+          "observed_weight": 0.306,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.277,
+          "sample_plays": 22,
+          "observed_weight": 0.239,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.018,
+          "sample_plays": 80,
+          "observed_weight": 0.571,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.007,
+          "sample_plays": 33,
+          "observed_weight": 0.398,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": -0.077,
+          "sample_plays": 23,
+          "observed_weight": 0.247,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Missouri": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.148,
+          "sample_plays": 40,
+          "observed_weight": 0.4,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.133,
+          "sample_plays": 27,
+          "observed_weight": 0.351,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.11,
+          "sample_plays": 25,
+          "observed_weight": 0.263,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.125,
+          "sample_plays": 54,
+          "observed_weight": 0.474,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.161,
+          "sample_plays": 31,
+          "observed_weight": 0.383,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 5,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "Missouri State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.086,
+          "sample_plays": 42,
+          "observed_weight": 0.412,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.04,
+          "sample_plays": 14,
+          "observed_weight": 0.219,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.003,
+          "sample_plays": 13,
+          "observed_weight": 0.157,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.195,
+          "sample_plays": 58,
+          "observed_weight": 0.492,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.28,
+          "sample_plays": 19,
+          "observed_weight": 0.275,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.168,
+          "sample_plays": 27,
+          "observed_weight": 0.278,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "NC State": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.037,
+          "sample_plays": 45,
+          "observed_weight": 0.429,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.083,
+          "sample_plays": 22,
+          "observed_weight": 0.306,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 8,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.23,
+          "sample_plays": 45,
+          "observed_weight": 0.429,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.131,
+          "sample_plays": 15,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.238,
+          "sample_plays": 14,
+          "observed_weight": 0.167,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Navy": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.081,
+          "sample_plays": 20,
+          "observed_weight": 0.25,
+          "sample_status": "DEVELOPING"
+        },
+        "leverage": {
+          "epa_per_play": -0.023,
+          "sample_plays": 10,
+          "observed_weight": 0.167,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 0,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.294,
+          "sample_plays": 33,
+          "observed_weight": 0.355,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.097,
+          "sample_plays": 10,
+          "observed_weight": 0.167,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.128,
+          "sample_plays": 10,
+          "observed_weight": 0.125,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Nebraska": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.351,
+          "sample_plays": 60,
+          "observed_weight": 0.5,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.372,
+          "sample_plays": 14,
+          "observed_weight": 0.219,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.362,
+          "sample_plays": 20,
+          "observed_weight": 0.222,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.017,
+          "sample_plays": 41,
+          "observed_weight": 0.406,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.169,
+          "sample_plays": 18,
+          "observed_weight": 0.265,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 5,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "Nevada": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.093,
+          "sample_plays": 40,
+          "observed_weight": 0.4,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.197,
+          "sample_plays": 18,
+          "observed_weight": 0.265,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.137,
+          "sample_plays": 14,
+          "observed_weight": 0.167,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.1,
+          "sample_plays": 60,
+          "observed_weight": 0.5,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.014,
+          "sample_plays": 21,
+          "observed_weight": 0.296,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.113,
+          "sample_plays": 14,
+          "observed_weight": 0.167,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "New Mexico": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.063,
+          "sample_plays": 55,
+          "observed_weight": 0.478,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.057,
+          "sample_plays": 20,
+          "observed_weight": 0.286,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.038,
+          "sample_plays": 22,
+          "observed_weight": 0.239,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.122,
+          "sample_plays": 40,
+          "observed_weight": 0.4,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.069,
+          "sample_plays": 19,
+          "observed_weight": 0.275,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 0,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "New Mexico State": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.057,
+          "sample_plays": 56,
+          "observed_weight": 0.483,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.283,
+          "sample_plays": 26,
+          "observed_weight": 0.342,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 4,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.196,
+          "sample_plays": 55,
+          "observed_weight": 0.478,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.261,
+          "sample_plays": 26,
+          "observed_weight": 0.342,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.128,
+          "sample_plays": 34,
+          "observed_weight": 0.327,
+          "sample_status": "MEASURED"
+        }
+      }
+    },
+    "North Carolina": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.056,
+          "sample_plays": 51,
+          "observed_weight": 0.459,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.023,
+          "sample_plays": 23,
+          "observed_weight": 0.315,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.013,
+          "sample_plays": 28,
+          "observed_weight": 0.286,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.064,
+          "sample_plays": 50,
+          "observed_weight": 0.455,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.062,
+          "sample_plays": 25,
+          "observed_weight": 0.333,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.058,
+          "sample_plays": 22,
+          "observed_weight": 0.239,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "North Dakota State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.192,
+          "sample_plays": 88,
+          "observed_weight": 0.595,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.109,
+          "sample_plays": 33,
+          "observed_weight": 0.398,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.047,
+          "sample_plays": 11,
+          "observed_weight": 0.136,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.105,
+          "sample_plays": 51,
+          "observed_weight": 0.459,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.091,
+          "sample_plays": 27,
+          "observed_weight": 0.351,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.093,
+          "sample_plays": 18,
+          "observed_weight": 0.205,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "North Texas": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.221,
+          "sample_plays": 78,
+          "observed_weight": 0.565,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.357,
+          "sample_plays": 35,
+          "observed_weight": 0.412,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.177,
+          "sample_plays": 40,
+          "observed_weight": 0.364,
+          "sample_status": "MEASURED"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.19,
+          "sample_plays": 76,
+          "observed_weight": 0.559,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.379,
+          "sample_plays": 22,
+          "observed_weight": 0.306,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.183,
+          "sample_plays": 38,
+          "observed_weight": 0.352,
+          "sample_status": "MEASURED"
+        }
+      }
+    },
+    "Northern Illinois": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.054,
+          "sample_plays": 40,
+          "observed_weight": 0.4,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.078,
+          "sample_plays": 20,
+          "observed_weight": 0.286,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 6,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.255,
+          "sample_plays": 65,
+          "observed_weight": 0.52,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.359,
+          "sample_plays": 14,
+          "observed_weight": 0.219,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.3,
+          "sample_plays": 22,
+          "observed_weight": 0.239,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Northwestern": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.138,
+          "sample_plays": 29,
+          "observed_weight": 0.326,
+          "sample_status": "DEVELOPING"
+        },
+        "leverage": {
+          "epa_per_play": null,
+          "sample_plays": 6,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 8,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.069,
+          "sample_plays": 24,
+          "observed_weight": 0.286,
+          "sample_status": "DEVELOPING"
+        },
+        "leverage": {
+          "epa_per_play": null,
+          "sample_plays": 7,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 1,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "Notre Dame": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.249,
+          "sample_plays": 73,
+          "observed_weight": 0.549,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.124,
+          "sample_plays": 20,
+          "observed_weight": 0.286,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.2,
+          "sample_plays": 33,
+          "observed_weight": 0.32,
+          "sample_status": "MEASURED"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.101,
+          "sample_plays": 59,
+          "observed_weight": 0.496,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.14,
+          "sample_plays": 24,
+          "observed_weight": 0.324,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.111,
+          "sample_plays": 11,
+          "observed_weight": 0.136,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Ohio": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.147,
+          "sample_plays": 68,
+          "observed_weight": 0.531,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.2,
+          "sample_plays": 33,
+          "observed_weight": 0.398,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.263,
+          "sample_plays": 27,
+          "observed_weight": 0.278,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.225,
+          "sample_plays": 72,
+          "observed_weight": 0.545,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.288,
+          "sample_plays": 32,
+          "observed_weight": 0.39,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.249,
+          "sample_plays": 41,
+          "observed_weight": 0.369,
+          "sample_status": "MEASURED"
+        }
+      }
+    },
+    "Ohio State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.313,
+          "sample_plays": 96,
+          "observed_weight": 0.615,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.258,
+          "sample_plays": 24,
+          "observed_weight": 0.324,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.2,
+          "sample_plays": 38,
+          "observed_weight": 0.352,
+          "sample_status": "MEASURED"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.155,
+          "sample_plays": 63,
+          "observed_weight": 0.512,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.083,
+          "sample_plays": 27,
+          "observed_weight": 0.351,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.014,
+          "sample_plays": 16,
+          "observed_weight": 0.186,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Oklahoma": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.03,
+          "sample_plays": 77,
+          "observed_weight": 0.562,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.05,
+          "sample_plays": 31,
+          "observed_weight": 0.383,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.028,
+          "sample_plays": 10,
+          "observed_weight": 0.125,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.074,
+          "sample_plays": 66,
+          "observed_weight": 0.524,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.125,
+          "sample_plays": 29,
+          "observed_weight": 0.367,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.137,
+          "sample_plays": 14,
+          "observed_weight": 0.167,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Oklahoma State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.086,
+          "sample_plays": 57,
+          "observed_weight": 0.487,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.176,
+          "sample_plays": 23,
+          "observed_weight": 0.315,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.211,
+          "sample_plays": 33,
+          "observed_weight": 0.32,
+          "sample_status": "MEASURED"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.018,
+          "sample_plays": 44,
+          "observed_weight": 0.423,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.14,
+          "sample_plays": 26,
+          "observed_weight": 0.342,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 9,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "Old Dominion": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.106,
+          "sample_plays": 40,
+          "observed_weight": 0.4,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.089,
+          "sample_plays": 17,
+          "observed_weight": 0.254,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 6,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.026,
+          "sample_plays": 66,
+          "observed_weight": 0.524,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.04,
+          "sample_plays": 20,
+          "observed_weight": 0.286,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.022,
+          "sample_plays": 18,
+          "observed_weight": 0.205,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Ole Miss": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.212,
+          "sample_plays": 90,
+          "observed_weight": 0.6,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.105,
+          "sample_plays": 28,
+          "observed_weight": 0.359,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.321,
+          "sample_plays": 24,
+          "observed_weight": 0.255,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.085,
+          "sample_plays": 63,
+          "observed_weight": 0.512,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.186,
+          "sample_plays": 37,
+          "observed_weight": 0.425,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.039,
+          "sample_plays": 27,
+          "observed_weight": 0.278,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Oregon": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.047,
+          "sample_plays": 48,
+          "observed_weight": 0.444,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.118,
+          "sample_plays": 22,
+          "observed_weight": 0.306,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 9,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.148,
+          "sample_plays": 54,
+          "observed_weight": 0.474,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.191,
+          "sample_plays": 25,
+          "observed_weight": 0.333,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.139,
+          "sample_plays": 34,
+          "observed_weight": 0.327,
+          "sample_status": "MEASURED"
+        }
+      }
+    },
+    "Oregon State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.066,
+          "sample_plays": 51,
+          "observed_weight": 0.459,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.003,
+          "sample_plays": 34,
+          "observed_weight": 0.405,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.137,
+          "sample_plays": 11,
+          "observed_weight": 0.136,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.121,
+          "sample_plays": 59,
+          "observed_weight": 0.496,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.29,
+          "sample_plays": 22,
+          "observed_weight": 0.306,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.119,
+          "sample_plays": 21,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Penn State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.326,
+          "sample_plays": 76,
+          "observed_weight": 0.559,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.257,
+          "sample_plays": 22,
+          "observed_weight": 0.306,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.146,
+          "sample_plays": 25,
+          "observed_weight": 0.263,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.166,
+          "sample_plays": 74,
+          "observed_weight": 0.552,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.286,
+          "sample_plays": 25,
+          "observed_weight": 0.333,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 9,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "Pittsburgh": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.099,
+          "sample_plays": 91,
+          "observed_weight": 0.603,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.206,
+          "sample_plays": 32,
+          "observed_weight": 0.39,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.132,
+          "sample_plays": 19,
+          "observed_weight": 0.213,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.024,
+          "sample_plays": 70,
+          "observed_weight": 0.538,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.099,
+          "sample_plays": 39,
+          "observed_weight": 0.438,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": -0.031,
+          "sample_plays": 18,
+          "observed_weight": 0.205,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Purdue": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.324,
+          "sample_plays": 45,
+          "observed_weight": 0.429,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.336,
+          "sample_plays": 19,
+          "observed_weight": 0.275,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.213,
+          "sample_plays": 26,
+          "observed_weight": 0.271,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.331,
+          "sample_plays": 63,
+          "observed_weight": 0.512,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.463,
+          "sample_plays": 20,
+          "observed_weight": 0.286,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.334,
+          "sample_plays": 27,
+          "observed_weight": 0.278,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Rice": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.044,
+          "sample_plays": 40,
+          "observed_weight": 0.4,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.137,
+          "sample_plays": 17,
+          "observed_weight": 0.254,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 5,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.239,
+          "sample_plays": 50,
+          "observed_weight": 0.455,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.165,
+          "sample_plays": 14,
+          "observed_weight": 0.219,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.16,
+          "sample_plays": 23,
+          "observed_weight": 0.247,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Rutgers": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.025,
+          "sample_plays": 69,
+          "observed_weight": 0.535,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.147,
+          "sample_plays": 28,
+          "observed_weight": 0.359,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.137,
+          "sample_plays": 30,
+          "observed_weight": 0.3,
+          "sample_status": "MEASURED"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.28,
+          "sample_plays": 79,
+          "observed_weight": 0.568,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.217,
+          "sample_plays": 29,
+          "observed_weight": 0.367,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.15,
+          "sample_plays": 31,
+          "observed_weight": 0.307,
+          "sample_status": "MEASURED"
+        }
+      }
+    },
+    "SMU": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.098,
+          "sample_plays": 58,
+          "observed_weight": 0.492,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.286,
+          "sample_plays": 22,
+          "observed_weight": 0.306,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.131,
+          "sample_plays": 19,
+          "observed_weight": 0.213,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.204,
+          "sample_plays": 45,
+          "observed_weight": 0.429,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.066,
+          "sample_plays": 20,
+          "observed_weight": 0.286,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.229,
+          "sample_plays": 14,
+          "observed_weight": 0.167,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Sacramento State": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.235,
+          "sample_plays": 63,
+          "observed_weight": 0.512,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.291,
+          "sample_plays": 27,
+          "observed_weight": 0.351,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.145,
+          "sample_plays": 10,
+          "observed_weight": 0.125,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.245,
+          "sample_plays": 95,
+          "observed_weight": 0.613,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.021,
+          "sample_plays": 26,
+          "observed_weight": 0.342,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.154,
+          "sample_plays": 17,
+          "observed_weight": 0.195,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Sam Houston": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.175,
+          "sample_plays": 48,
+          "observed_weight": 0.444,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.069,
+          "sample_plays": 23,
+          "observed_weight": 0.315,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.088,
+          "sample_plays": 12,
+          "observed_weight": 0.146,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.02,
+          "sample_plays": 64,
+          "observed_weight": 0.516,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.049,
+          "sample_plays": 31,
+          "observed_weight": 0.383,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.025,
+          "sample_plays": 13,
+          "observed_weight": 0.157,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "San Diego State": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.164,
+          "sample_plays": 45,
+          "observed_weight": 0.429,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.116,
+          "sample_plays": 30,
+          "observed_weight": 0.375,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 7,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.12,
+          "sample_plays": 62,
+          "observed_weight": 0.508,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.097,
+          "sample_plays": 21,
+          "observed_weight": 0.296,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.157,
+          "sample_plays": 19,
+          "observed_weight": 0.213,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "San Jose State": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.011,
+          "sample_plays": 69,
+          "observed_weight": 0.535,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.097,
+          "sample_plays": 36,
+          "observed_weight": 0.419,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": -0.057,
+          "sample_plays": 11,
+          "observed_weight": 0.136,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.129,
+          "sample_plays": 91,
+          "observed_weight": 0.603,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.088,
+          "sample_plays": 35,
+          "observed_weight": 0.412,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.191,
+          "sample_plays": 24,
+          "observed_weight": 0.255,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "South Alabama": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.274,
+          "sample_plays": 49,
+          "observed_weight": 0.45,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.235,
+          "sample_plays": 26,
+          "observed_weight": 0.342,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.205,
+          "sample_plays": 22,
+          "observed_weight": 0.239,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.215,
+          "sample_plays": 47,
+          "observed_weight": 0.439,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.329,
+          "sample_plays": 20,
+          "observed_weight": 0.286,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.309,
+          "sample_plays": 15,
+          "observed_weight": 0.176,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "South Carolina": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.186,
+          "sample_plays": 66,
+          "observed_weight": 0.524,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.254,
+          "sample_plays": 21,
+          "observed_weight": 0.296,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.113,
+          "sample_plays": 17,
+          "observed_weight": 0.195,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.058,
+          "sample_plays": 37,
+          "observed_weight": 0.381,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.181,
+          "sample_plays": 19,
+          "observed_weight": 0.275,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 7,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "South Florida": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.076,
+          "sample_plays": 38,
+          "observed_weight": 0.388,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.194,
+          "sample_plays": 22,
+          "observed_weight": 0.306,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.126,
+          "sample_plays": 17,
+          "observed_weight": 0.195,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.109,
+          "sample_plays": 51,
+          "observed_weight": 0.459,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.124,
+          "sample_plays": 23,
+          "observed_weight": 0.315,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.073,
+          "sample_plays": 12,
+          "observed_weight": 0.146,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Southern Miss": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.136,
+          "sample_plays": 60,
+          "observed_weight": 0.5,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.105,
+          "sample_plays": 16,
+          "observed_weight": 0.242,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.038,
+          "sample_plays": 10,
+          "observed_weight": 0.125,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.201,
+          "sample_plays": 61,
+          "observed_weight": 0.504,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.35,
+          "sample_plays": 18,
+          "observed_weight": 0.265,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.23,
+          "sample_plays": 19,
+          "observed_weight": 0.213,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Stanford": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.047,
+          "sample_plays": 81,
+          "observed_weight": 0.574,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.016,
+          "sample_plays": 28,
+          "observed_weight": 0.359,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.071,
+          "sample_plays": 25,
+          "observed_weight": 0.263,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.175,
+          "sample_plays": 79,
+          "observed_weight": 0.568,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.238,
+          "sample_plays": 26,
+          "observed_weight": 0.342,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.283,
+          "sample_plays": 30,
+          "observed_weight": 0.3,
+          "sample_status": "MEASURED"
+        }
+      }
+    },
+    "Syracuse": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.095,
+          "sample_plays": 57,
+          "observed_weight": 0.487,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.16,
+          "sample_plays": 29,
+          "observed_weight": 0.367,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.148,
+          "sample_plays": 24,
+          "observed_weight": 0.255,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.039,
+          "sample_plays": 51,
+          "observed_weight": 0.459,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.156,
+          "sample_plays": 21,
+          "observed_weight": 0.296,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.065,
+          "sample_plays": 16,
+          "observed_weight": 0.186,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "TCU": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.057,
+          "sample_plays": 51,
+          "observed_weight": 0.459,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.061,
+          "sample_plays": 27,
+          "observed_weight": 0.351,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.005,
+          "sample_plays": 27,
+          "observed_weight": 0.278,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.066,
+          "sample_plays": 47,
+          "observed_weight": 0.439,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.027,
+          "sample_plays": 20,
+          "observed_weight": 0.286,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.08,
+          "sample_plays": 16,
+          "observed_weight": 0.186,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Temple": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.074,
+          "sample_plays": 56,
+          "observed_weight": 0.483,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.16,
+          "sample_plays": 18,
+          "observed_weight": 0.265,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.203,
+          "sample_plays": 27,
+          "observed_weight": 0.278,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.334,
+          "sample_plays": 43,
+          "observed_weight": 0.417,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.273,
+          "sample_plays": 20,
+          "observed_weight": 0.286,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.194,
+          "sample_plays": 27,
+          "observed_weight": 0.278,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Tennessee": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.212,
+          "sample_plays": 63,
+          "observed_weight": 0.512,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.185,
+          "sample_plays": 16,
+          "observed_weight": 0.242,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.201,
+          "sample_plays": 17,
+          "observed_weight": 0.195,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.164,
+          "sample_plays": 49,
+          "observed_weight": 0.45,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.098,
+          "sample_plays": 20,
+          "observed_weight": 0.286,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.069,
+          "sample_plays": 13,
+          "observed_weight": 0.157,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Texas": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.05,
+          "sample_plays": 83,
+          "observed_weight": 0.58,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.084,
+          "sample_plays": 32,
+          "observed_weight": 0.39,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.13,
+          "sample_plays": 38,
+          "observed_weight": 0.352,
+          "sample_status": "MEASURED"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.026,
+          "sample_plays": 75,
+          "observed_weight": 0.556,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.024,
+          "sample_plays": 30,
+          "observed_weight": 0.375,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": -0.054,
+          "sample_plays": 22,
+          "observed_weight": 0.239,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Texas A&M": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.074,
+          "sample_plays": 88,
+          "observed_weight": 0.595,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.158,
+          "sample_plays": 35,
+          "observed_weight": 0.412,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.05,
+          "sample_plays": 40,
+          "observed_weight": 0.364,
+          "sample_status": "MEASURED"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.128,
+          "sample_plays": 56,
+          "observed_weight": 0.483,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.021,
+          "sample_plays": 23,
+          "observed_weight": 0.315,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.079,
+          "sample_plays": 12,
+          "observed_weight": 0.146,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Texas State": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.305,
+          "sample_plays": 92,
+          "observed_weight": 0.605,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.237,
+          "sample_plays": 29,
+          "observed_weight": 0.367,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.134,
+          "sample_plays": 39,
+          "observed_weight": 0.358,
+          "sample_status": "MEASURED"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.207,
+          "sample_plays": 86,
+          "observed_weight": 0.589,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.364,
+          "sample_plays": 38,
+          "observed_weight": 0.432,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.202,
+          "sample_plays": 42,
+          "observed_weight": 0.375,
+          "sample_status": "MEASURED"
+        }
+      }
+    },
+    "Texas Tech": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.05,
+          "sample_plays": 50,
+          "observed_weight": 0.455,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.303,
+          "sample_plays": 24,
+          "observed_weight": 0.324,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.214,
+          "sample_plays": 15,
+          "observed_weight": 0.176,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.026,
+          "sample_plays": 59,
+          "observed_weight": 0.496,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.093,
+          "sample_plays": 28,
+          "observed_weight": 0.359,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.108,
+          "sample_plays": 15,
+          "observed_weight": 0.176,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Toledo": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.216,
+          "sample_plays": 35,
+          "observed_weight": 0.368,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.097,
+          "sample_plays": 18,
+          "observed_weight": 0.265,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.283,
+          "sample_plays": 17,
+          "observed_weight": 0.195,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.138,
+          "sample_plays": 66,
+          "observed_weight": 0.524,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.16,
+          "sample_plays": 24,
+          "observed_weight": 0.324,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.199,
+          "sample_plays": 36,
+          "observed_weight": 0.34,
+          "sample_status": "MEASURED"
+        }
+      }
+    },
+    "Troy": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.056,
+          "sample_plays": 65,
+          "observed_weight": 0.52,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.032,
+          "sample_plays": 30,
+          "observed_weight": 0.375,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 9,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.125,
+          "sample_plays": 43,
+          "observed_weight": 0.417,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.031,
+          "sample_plays": 23,
+          "observed_weight": 0.315,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.096,
+          "sample_plays": 13,
+          "observed_weight": 0.157,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Tulane": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.057,
+          "sample_plays": 64,
+          "observed_weight": 0.516,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.004,
+          "sample_plays": 36,
+          "observed_weight": 0.419,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.101,
+          "sample_plays": 11,
+          "observed_weight": 0.136,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.162,
+          "sample_plays": 79,
+          "observed_weight": 0.568,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.305,
+          "sample_plays": 46,
+          "observed_weight": 0.479,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.179,
+          "sample_plays": 37,
+          "observed_weight": 0.346,
+          "sample_status": "MEASURED"
+        }
+      }
+    },
+    "Tulsa": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.026,
+          "sample_plays": 54,
+          "observed_weight": 0.474,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.026,
+          "sample_plays": 29,
+          "observed_weight": 0.367,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.019,
+          "sample_plays": 15,
+          "observed_weight": 0.176,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.038,
+          "sample_plays": 46,
+          "observed_weight": 0.434,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.002,
+          "sample_plays": 23,
+          "observed_weight": 0.315,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.054,
+          "sample_plays": 17,
+          "observed_weight": 0.195,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "UAB": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.002,
+          "sample_plays": 73,
+          "observed_weight": 0.549,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.011,
+          "sample_plays": 38,
+          "observed_weight": 0.432,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.072,
+          "sample_plays": 18,
+          "observed_weight": 0.205,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.199,
+          "sample_plays": 70,
+          "observed_weight": 0.538,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.103,
+          "sample_plays": 27,
+          "observed_weight": 0.351,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.185,
+          "sample_plays": 26,
+          "observed_weight": 0.271,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "UCF": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.043,
+          "sample_plays": 33,
+          "observed_weight": 0.355,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.089,
+          "sample_plays": 25,
+          "observed_weight": 0.333,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.163,
+          "sample_plays": 15,
+          "observed_weight": 0.176,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.172,
+          "sample_plays": 66,
+          "observed_weight": 0.524,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.084,
+          "sample_plays": 31,
+          "observed_weight": 0.383,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.099,
+          "sample_plays": 20,
+          "observed_weight": 0.222,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "UCLA": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.256,
+          "sample_plays": 83,
+          "observed_weight": 0.58,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.273,
+          "sample_plays": 27,
+          "observed_weight": 0.351,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.345,
+          "sample_plays": 27,
+          "observed_weight": 0.278,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.025,
+          "sample_plays": 70,
+          "observed_weight": 0.538,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.016,
+          "sample_plays": 41,
+          "observed_weight": 0.451,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": 0.084,
+          "sample_plays": 17,
+          "observed_weight": 0.195,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "UConn": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.029,
+          "sample_plays": 57,
+          "observed_weight": 0.487,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.148,
+          "sample_plays": 15,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 9,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.052,
+          "sample_plays": 62,
+          "observed_weight": 0.508,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.187,
+          "sample_plays": 18,
+          "observed_weight": 0.265,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.119,
+          "sample_plays": 15,
+          "observed_weight": 0.176,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "UL Monroe": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.015,
+          "sample_plays": 43,
+          "observed_weight": 0.417,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.043,
+          "sample_plays": 17,
+          "observed_weight": 0.254,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.007,
+          "sample_plays": 11,
+          "observed_weight": 0.136,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.23,
+          "sample_plays": 67,
+          "observed_weight": 0.528,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.226,
+          "sample_plays": 16,
+          "observed_weight": 0.242,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.173,
+          "sample_plays": 14,
+          "observed_weight": 0.167,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "UNLV": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.032,
+          "sample_plays": 88,
+          "observed_weight": 0.595,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.085,
+          "sample_plays": 41,
+          "observed_weight": 0.451,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": -0.071,
+          "sample_plays": 25,
+          "observed_weight": 0.263,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.034,
+          "sample_plays": 64,
+          "observed_weight": 0.516,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.121,
+          "sample_plays": 36,
+          "observed_weight": 0.419,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": -0.025,
+          "sample_plays": 36,
+          "observed_weight": 0.34,
+          "sample_status": "MEASURED"
+        }
+      }
+    },
+    "USC": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.277,
+          "sample_plays": 130,
+          "observed_weight": 0.684,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.47,
+          "sample_plays": 29,
+          "observed_weight": 0.367,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.226,
+          "sample_plays": 56,
+          "observed_weight": 0.444,
+          "sample_status": "MEASURED"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.052,
+          "sample_plays": 77,
+          "observed_weight": 0.562,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.197,
+          "sample_plays": 30,
+          "observed_weight": 0.375,
+          "sample_status": "MEASURED"
+        },
+        "red_zone": {
+          "epa_per_play": -0.011,
+          "sample_plays": 21,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "UTEP": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.02,
+          "sample_plays": 37,
+          "observed_weight": 0.381,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.127,
+          "sample_plays": 13,
+          "observed_weight": 0.206,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 4,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.243,
+          "sample_plays": 57,
+          "observed_weight": 0.487,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.327,
+          "sample_plays": 11,
+          "observed_weight": 0.18,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.24,
+          "sample_plays": 20,
+          "observed_weight": 0.222,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "UTSA": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.044,
+          "sample_plays": 47,
+          "observed_weight": 0.439,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.111,
+          "sample_plays": 25,
+          "observed_weight": 0.333,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.012,
+          "sample_plays": 17,
+          "observed_weight": 0.195,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.149,
+          "sample_plays": 68,
+          "observed_weight": 0.531,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.088,
+          "sample_plays": 29,
+          "observed_weight": 0.367,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.015,
+          "sample_plays": 33,
+          "observed_weight": 0.32,
+          "sample_status": "MEASURED"
+        }
+      }
+    },
+    "Utah": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.231,
+          "sample_plays": 58,
+          "observed_weight": 0.492,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.335,
+          "sample_plays": 13,
+          "observed_weight": 0.206,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.303,
+          "sample_plays": 16,
+          "observed_weight": 0.186,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.156,
+          "sample_plays": 48,
+          "observed_weight": 0.444,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.195,
+          "sample_plays": 17,
+          "observed_weight": 0.254,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 7,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "Utah State": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.104,
+          "sample_plays": 33,
+          "observed_weight": 0.355,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.055,
+          "sample_plays": 21,
+          "observed_weight": 0.296,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 6,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.014,
+          "sample_plays": 64,
+          "observed_weight": 0.516,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.186,
+          "sample_plays": 22,
+          "observed_weight": 0.306,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.061,
+          "sample_plays": 12,
+          "observed_weight": 0.146,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Vanderbilt": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.16,
+          "sample_plays": 41,
+          "observed_weight": 0.406,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.142,
+          "sample_plays": 19,
+          "observed_weight": 0.275,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.192,
+          "sample_plays": 15,
+          "observed_weight": 0.176,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.043,
+          "sample_plays": 53,
+          "observed_weight": 0.469,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.039,
+          "sample_plays": 29,
+          "observed_weight": 0.367,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.008,
+          "sample_plays": 13,
+          "observed_weight": 0.157,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Virginia": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.135,
+          "sample_plays": 52,
+          "observed_weight": 0.464,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.001,
+          "sample_plays": 22,
+          "observed_weight": 0.306,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.151,
+          "sample_plays": 21,
+          "observed_weight": 0.231,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.029,
+          "sample_plays": 48,
+          "observed_weight": 0.444,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.223,
+          "sample_plays": 21,
+          "observed_weight": 0.296,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.127,
+          "sample_plays": 13,
+          "observed_weight": 0.157,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Virginia Tech": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.158,
+          "sample_plays": 70,
+          "observed_weight": 0.538,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.301,
+          "sample_plays": 18,
+          "observed_weight": 0.265,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.228,
+          "sample_plays": 28,
+          "observed_weight": 0.286,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.065,
+          "sample_plays": 40,
+          "observed_weight": 0.4,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.078,
+          "sample_plays": 13,
+          "observed_weight": 0.206,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.09,
+          "sample_plays": 13,
+          "observed_weight": 0.157,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Wake Forest": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.317,
+          "sample_plays": 73,
+          "observed_weight": 0.549,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.135,
+          "sample_plays": 29,
+          "observed_weight": 0.367,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.082,
+          "sample_plays": 36,
+          "observed_weight": 0.34,
+          "sample_status": "MEASURED"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.242,
+          "sample_plays": 79,
+          "observed_weight": 0.568,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.025,
+          "sample_plays": 23,
+          "observed_weight": 0.315,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.162,
+          "sample_plays": 30,
+          "observed_weight": 0.3,
+          "sample_status": "MEASURED"
+        }
+      }
+    },
+    "Washington": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.041,
+          "sample_plays": 60,
+          "observed_weight": 0.5,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.032,
+          "sample_plays": 23,
+          "observed_weight": 0.315,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.129,
+          "sample_plays": 23,
+          "observed_weight": 0.247,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.078,
+          "sample_plays": 35,
+          "observed_weight": 0.368,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.123,
+          "sample_plays": 23,
+          "observed_weight": 0.315,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 7,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      }
+    },
+    "Washington State": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.061,
+          "sample_plays": 33,
+          "observed_weight": 0.355,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.23,
+          "sample_plays": 19,
+          "observed_weight": 0.275,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": null,
+          "sample_plays": 4,
+          "observed_weight": 0.0,
+          "sample_status": "UNAVAILABLE"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.067,
+          "sample_plays": 63,
+          "observed_weight": 0.512,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.189,
+          "sample_plays": 24,
+          "observed_weight": 0.324,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.175,
+          "sample_plays": 24,
+          "observed_weight": 0.255,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "West Virginia": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.187,
+          "sample_plays": 62,
+          "observed_weight": 0.508,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.284,
+          "sample_plays": 27,
+          "observed_weight": 0.351,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.23,
+          "sample_plays": 20,
+          "observed_weight": 0.222,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.054,
+          "sample_plays": 45,
+          "observed_weight": 0.429,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.052,
+          "sample_plays": 23,
+          "observed_weight": 0.315,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.056,
+          "sample_plays": 18,
+          "observed_weight": 0.205,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Western Kentucky": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.084,
+          "sample_plays": 76,
+          "observed_weight": 0.559,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.079,
+          "sample_plays": 26,
+          "observed_weight": 0.342,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.075,
+          "sample_plays": 10,
+          "observed_weight": 0.125,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.317,
+          "sample_plays": 67,
+          "observed_weight": 0.528,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.171,
+          "sample_plays": 16,
+          "observed_weight": 0.242,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.353,
+          "sample_plays": 18,
+          "observed_weight": 0.205,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Western Michigan": {
+      "offense": {
+        "script": {
+          "epa_per_play": -0.004,
+          "sample_plays": 47,
+          "observed_weight": 0.439,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.031,
+          "sample_plays": 25,
+          "observed_weight": 0.333,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.022,
+          "sample_plays": 20,
+          "observed_weight": 0.222,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.08,
+          "sample_plays": 47,
+          "observed_weight": 0.439,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.057,
+          "sample_plays": 20,
+          "observed_weight": 0.286,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.159,
+          "sample_plays": 11,
+          "observed_weight": 0.136,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Wisconsin": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.186,
+          "sample_plays": 55,
+          "observed_weight": 0.478,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.089,
+          "sample_plays": 17,
+          "observed_weight": 0.254,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.114,
+          "sample_plays": 14,
+          "observed_weight": 0.167,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": -0.041,
+          "sample_plays": 48,
+          "observed_weight": 0.444,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.031,
+          "sample_plays": 10,
+          "observed_weight": 0.167,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.095,
+          "sample_plays": 12,
+          "observed_weight": 0.146,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    },
+    "Wyoming": {
+      "offense": {
+        "script": {
+          "epa_per_play": 0.08,
+          "sample_plays": 39,
+          "observed_weight": 0.394,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": -0.157,
+          "sample_plays": 22,
+          "observed_weight": 0.306,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": -0.064,
+          "sample_plays": 13,
+          "observed_weight": 0.157,
+          "sample_status": "DEVELOPING"
+        }
+      },
+      "defense": {
+        "script": {
+          "epa_per_play": 0.214,
+          "sample_plays": 54,
+          "observed_weight": 0.474,
+          "sample_status": "MEASURED"
+        },
+        "leverage": {
+          "epa_per_play": 0.113,
+          "sample_plays": 21,
+          "observed_weight": 0.296,
+          "sample_status": "DEVELOPING"
+        },
+        "red_zone": {
+          "epa_per_play": 0.255,
+          "sample_plays": 17,
+          "observed_weight": 0.195,
+          "sample_status": "DEVELOPING"
+        }
+      }
+    }
+  }
+}
