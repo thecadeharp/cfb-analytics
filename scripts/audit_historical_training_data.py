@@ -38,6 +38,16 @@ REALIZED = [
     "actual_scoring_opportunity_conversion_rate",
 ]
 
+SITUATIONAL = [
+    "off_iso_ppp", "def_iso_ppp_allowed",
+    "off_script_epa", "def_script_epa_allowed",
+    "off_leverage_epa", "def_leverage_epa_allowed",
+    "off_red_zone_epa", "def_red_zone_epa_allowed",
+    "off_script_plays", "def_script_plays",
+    "off_leverage_plays", "def_leverage_plays",
+    "off_red_zone_plays", "def_red_zone_plays",
+]
+
 
 def py(v):
     if pd.isna(v):
@@ -70,6 +80,7 @@ def main():
         "integrity": {},
         "score_diagnostics": {},
         "realized_drive_diagnostics": {},
+        "situational_diagnostics": {},
         "rolling_feature_diagnostics": {},
         "prior_diagnostics": {},
         "market_diagnostics": {},
@@ -230,6 +241,52 @@ def main():
             )
 
     report["realized_drive_diagnostics"] = realized
+
+    # Historical split predictors are calculated from prior weeks only. Keep
+    # raw sample counts so a four-play leverage sample cannot look definitive.
+    expected = [
+        f"{side}_{window}_{metric}"
+        for side in ("home", "away")
+        for window in ("pregame", "prev_season")
+        for metric in SITUATIONAL
+    ]
+    missing = [field for field in expected if field not in df.columns]
+    def numeric_column(column):
+        return (pd.to_numeric(df[column], errors="coerce") if column in df
+                else pd.Series(np.nan, index=df.index))
+
+    half = numeric_column("actual_first_half_margin")
+    first_half_home = numeric_column("home_first_half_score")
+    first_half_away = numeric_column("away_first_half_score")
+    halftime_bad = (
+        half.notna() & first_half_home.notna() & first_half_away.notna()
+        & (half - (first_half_home - first_half_away)).abs().gt(1e-9)
+    )
+    postseason = int(df["season_type"].ne(2).sum())
+    coverage = {
+        field: int(df[field].notna().sum())
+        for field in expected if field in df.columns
+    }
+    report["situational_diagnostics"] = {
+        "missing_feature_columns": missing,
+        "feature_non_null_counts": coverage,
+        "postseason_rows": postseason,
+        "first_half_margin_rows": int(half.notna().sum()),
+        "first_half_margin_mismatch_rows": int(halftime_bad.sum()),
+        "source_seasons": {
+            year: {key: data.get(key) for key in (
+                "situational_competitive_plays", "situational_missing_down_distance",
+                "situational_missing_or_invalid_clock",
+                "situational_overtime_plays", "situational_garbage_plays"
+            )}
+            for year, data in manifest.get("source_assets", {}).items()
+        },
+    }
+    if (missing or postseason or halftime_bad.any()
+            or half.notna().sum() < 1000
+            or any(coverage.get(f"home_pregame_{m}", 0) < 1000
+                   for m in ("off_iso_ppp", "off_script_epa", "off_leverage_epa", "off_red_zone_epa"))):
+        report["hard_failures"].append("situational_integrity")
 
     # ------------------------------------------------------------------
     # ROLLING LEAKAGE-SAFE FEATURES
