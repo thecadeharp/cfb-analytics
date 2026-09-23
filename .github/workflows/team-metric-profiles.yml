@@ -34,5 +34,17 @@ jobs:
             exit 0
           fi
           git commit -m "Refresh team metric profiles"
-          git pull --rebase origin main
-          git push
+          # Other data workflows can push between our fetch and push. Retry
+          # the normal fast-forward path instead of losing the fresh profile.
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              echo "Team metric profiles published."
+              exit 0
+            fi
+            echo "main changed during push (attempt ${attempt}); retrying..."
+            sleep 2
+          done
+          echo "Could not publish team metric profiles after five attempts."
+          exit 1
