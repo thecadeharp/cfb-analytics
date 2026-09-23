@@ -46,6 +46,10 @@ jobs:
         run: |
           python scripts/settle_results.py
 
+      - name: Refresh first-snapshot weekly model scorecard
+        run: |
+          python scripts/build_weekly_model_scorecard.py
+
       - name: Build postgame analytics
         env:
           CFB_SEASON: "2026"
@@ -72,6 +76,7 @@ jobs:
           git add data/live_scores.json
           git add data/postgame_analytics.json
           git add data/reports/settled_results.json
+          git add data/reports/weekly_model_scorecard.json
           git add data/reports/settled_snapshot_rows.csv
           git add data/reports/signal_report.json
           git add data/discord_notification_state.json
