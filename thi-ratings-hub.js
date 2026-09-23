@@ -16,6 +16,7 @@
     .thi-hub-table { width:100%; border-collapse:collapse; }
     .thi-hub-table th, .thi-hub-table td { text-align:left; padding:14px 16px; border-bottom:1px solid var(--border); }
     .thi-hub-table th { font:600 11px var(--mono); letter-spacing:.05em; color:var(--muted); white-space:nowrap; }
+    .thi-hub-sort-arrow { display:inline-block; margin-left:4px; }
     .thi-hub-table tr:last-child td { border-bottom:0; }
     .thi-hub-table tbody tr:hover { background:#f6f8f5; }
     .thi-hub-team { border:0; background:transparent; padding:0; color:var(--text); font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; text-align:left; }
@@ -26,6 +27,9 @@
     .thi-hub-badge { display:inline-block; border:1px solid var(--border); border-radius:40px; padding:4px 8px; font:600 10px var(--mono); }
     .thi-hub-badge.strong { color:#12694d; background:#e8f7ef; }
     .thi-hub-badge.limited { color:#815b08; background:#fff4d6; }
+    .thi-hub-provisional { margin-top:18px; }
+    .thi-hub-provisional summary { cursor:pointer; font-size:14px; font-weight:700; margin-bottom:10px; }
+    .thi-hub-provisional p { color:var(--muted); font-size:12px; line-height:1.55; margin:0 0 12px; }
     .thi-hub-method { margin-top:18px; border:1px solid var(--border); border-radius:10px; padding:16px; color:var(--muted); font-size:13px; line-height:1.6; }
     .thi-hub-method summary { color:var(--text); font-weight:700; cursor:pointer; }
     .thi-situational-panel { border:1px solid var(--border); border-radius:12px; background:var(--surface); margin:8px 0 18px; padding:18px; }
@@ -81,6 +85,7 @@
 
   function renderRows() {
     const target = document.getElementById("thi-ratings-rows");
+    const provisionalTarget = document.getElementById("thi-ratings-provisional");
     if (!target) return;
     const query = search.trim().toLocaleLowerCase();
     const data = Object.values(thiObservedRatingsData?.teams ?? {})
@@ -96,7 +101,7 @@
     });
 
     target.innerHTML = data.length ? `<div class="thi-hub-table-wrap"><table class="thi-hub-table">
-      <thead><tr><th>Team</th><th>Net</th><th>Offense</th><th>Defense ↓</th><th>Pace</th><th>Sample</th></tr></thead>
+      <thead><tr><th>Team</th><th>Net</th><th>Offense</th><th>Defense<span class="thi-hub-sort-arrow" aria-hidden="true">↓</span></th><th>Pace</th><th>Sample</th></tr></thead>
       <tbody>${data.map(profile => {
         const rating = profile.ratings;
         const reliability = profile.reliability ?? {};
@@ -112,7 +117,35 @@
             <span class="thi-hub-muted">${formatNumber(reliability.games, 0)} games · ${formatNumber(reliability.qualifying_plays, 0)} plays</span></td>
         </tr>`;
       }).join("")}</tbody></table></div>` :
-      `<div class="empty-state">No matching teams with a published THI rating.</div>`;
+      `<div class="empty-state">No matching teams in the ranked sample.</div>`;
+
+    if (provisionalTarget) {
+      const provisional = Object.values(thiObservedRatingsData?.teams ?? {})
+        .filter(profile => profile?.provisional && profile?.provisional_ratings &&
+          String(profile.team || "").toLocaleLowerCase().includes(query))
+        .sort((a, b) => String(a.team).localeCompare(String(b.team)));
+      provisionalTarget.hidden = provisional.length === 0;
+      provisionalTarget.innerHTML = provisional.length ? `
+        <details class="thi-hub-provisional"${query ? " open" : ""}>
+          <summary>Provisional · ${provisional.length} team${provisional.length === 1 ? "" : "s"} (unranked)</summary>
+          <p>One qualifying FBS game. Values are displayed for context and receive no FBS ranks until the second qualifying game.</p>
+          <div class="thi-hub-table-wrap"><table class="thi-hub-table">
+            <thead><tr><th>Team</th><th>Net</th><th>Offense</th><th>Defense<span class="thi-hub-sort-arrow" aria-hidden="true">↓</span></th><th>Pace</th><th>Sample</th></tr></thead>
+            <tbody>${provisional.map(profile => {
+              const rating = profile.provisional_ratings;
+              const sample = profile.reliability ?? {};
+              return `<tr>
+                <td><button type="button" class="thi-hub-team" data-thi-team="${escapeHtml(profile.team)}">${escapeHtml(profile.team)}</button></td>
+                <td data-label="Net"><span class="thi-hub-number">${formatSigned(rating.net, 2)}</span></td>
+                <td data-label="Offense"><span class="thi-hub-number">${formatNumber(rating.offense, 2)}</span></td>
+                <td data-label="Defense"><span class="thi-hub-number">${formatNumber(rating.defense, 2)}</span></td>
+                <td data-label="Pace"><span class="thi-hub-number">${formatNumber(rating.pace, 2)}</span></td>
+                <td data-label="Sample"><span class="thi-hub-badge limited">PROVISIONAL</span>
+                  <span class="thi-hub-muted">${formatNumber(sample.games, 0)} game · ${formatNumber(sample.qualifying_plays, 0)} plays</span></td>
+              </tr>`;
+            }).join("")}</tbody></table></div>
+        </details>` : "";
+    }
   }
 
   function renderSituational() {
@@ -171,6 +204,7 @@
       <div id="thi-situational-panel"></div>
       <p class="thi-hub-note">2026 data through Week ${escapeHtml(meta.through_week ?? "—")} · ${escapeHtml(meta.sample ?? "Completed FBS games")} · Beta. Net is offense minus defense; lower defense is better. Values describe performance and do not imply a neutral-field spread.</p>
       <div id="thi-ratings-rows"></div>
+      <div id="thi-ratings-provisional"></div>
       <details class="thi-hub-method"><summary>How to read these ratings</summary>
         <p>${escapeHtml(meta.methodology?.description ?? "Opponent-adjusted current-season performance.")}</p>
         <p>Offense and defense use a scoring-scale index, not projected points for the next game. Pace is indexed to the FBS average of 1.00. The sample badge shows how much game evidence is available. These ratings are separate from Model A.</p>
