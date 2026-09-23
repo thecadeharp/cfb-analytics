@@ -2,7 +2,7 @@
 CFB ANALYTICS
 build_historical_training_data.py
 
-V4 canonical historical training builder using SportsDataverse ESPN CFB PBP.
+V5 canonical historical training builder using SportsDataverse ESPN CFB PBP.
 
 V4 DATA UPGRADE
 ---------------
@@ -121,6 +121,7 @@ def download_season(year, assets, target_dir):
 
 REQUIRED_COLUMNS = [
     "season",
+    "seasonType",
     "game_id",
     "game_play_number",
     "pos_team_id",
@@ -147,8 +148,14 @@ REQUIRED_COLUMNS = [
     "havoc",
 ]
 
+# These fields must exist in every downloaded season; missing values on an
+# individual play are allowed, but cannot be coerced to zero for a split.
+SITUATIONAL_REQUIRED_COLUMNS = [
+    "period", "start.down", "start.distance", "start.yardsToEndzone",
+    "clock.minutes", "clock.seconds", "start.homeScore", "start.awayScore",
+]
+
 OPTIONAL_COLUMNS = [
-    "seasonType",
     "status_type_completed",
     "scrimmage_play",
     "action_play",
@@ -160,14 +167,13 @@ OPTIONAL_COLUMNS = [
     "is_pos_team_turnover",
     "line_yards",
     "scoring_opp",
-    "start.yardsToEndzone",
     "end.homeScore",
     "end.awayScore",
 ]
 
 
 def validate_schema(df, year):
-    missing = [c for c in REQUIRED_COLUMNS if c not in df.columns]
+    missing = [c for c in REQUIRED_COLUMNS + SITUATIONAL_REQUIRED_COLUMNS if c not in df.columns]
     if missing:
         raise RuntimeError(
             f"{year} SportsDataverse schema missing required columns: "
@@ -178,7 +184,7 @@ def validate_schema(df, year):
 def normalize_season(df, year):
     validate_schema(df, year)
 
-    columns = REQUIRED_COLUMNS + [
+    columns = REQUIRED_COLUMNS + SITUATIONAL_REQUIRED_COLUMNS + [
         c for c in OPTIONAL_COLUMNS if c in df.columns
     ]
     work = df[columns].copy()
@@ -198,17 +204,27 @@ def normalize_season(df, year):
     work["offense"] = np.select(
         [pos_id.eq(home_id), pos_id.eq(away_id)],
         [work["home_team"], work["away_team"]],
-        default=np.nan,
+        default=None,
     )
     work["defense"] = np.select(
         [def_id.eq(home_id), def_id.eq(away_id)],
         [work["home_team"], work["away_team"]],
-        default=np.nan,
+        default=None,
     )
 
     work["play_order"] = num(work["game_play_number"])
     work["epa"] = num(work["EPA"])
     work["success"] = boolish(work["EPA_success"]).astype(float)
+    work.loc[work["EPA_success"].isna(), "success"] = np.nan
+    work["period_number"] = num(work["period"])
+    work["down_number"] = num(work["start.down"])
+    work["distance_number"] = num(work["start.distance"])
+    clock_minutes = num(work["clock.minutes"])
+    clock_seconds = num(work["clock.seconds"])
+    work["clock_valid"] = (
+        clock_minutes.between(0, 15) & clock_seconds.between(0, 59)
+        & (~clock_minutes.eq(15) | clock_seconds.eq(0))
+    )
     work["explosive"] = boolish(work["EPA_explosive"]).astype(float)
     work["havoc"] = boolish(work["havoc"]).astype(float)
 
@@ -227,8 +243,10 @@ def normalize_season(df, year):
     if "penalty_no_play" in work.columns:
         work["valid_scrimmage"] &= ~boolish(work["penalty_no_play"])
 
-    work["home_score_play"] = num(work["homeScore"])
-    work["away_score_play"] = num(work["awayScore"])
+    work["home_score_play"] = num(work["start.homeScore"])
+    work["away_score_play"] = num(work["start.awayScore"])
+    work["post_home_score_play"] = num(work["homeScore"])
+    work["post_away_score_play"] = num(work["awayScore"])
     work["end_home_score_play"] = (
         num(work["end.homeScore"])
         if "end.homeScore" in work.columns else np.nan
@@ -260,10 +278,7 @@ def normalize_season(df, year):
     work["drive_id"] = work["drive.id"].astype(str)
     work.loc[work["drive.id"].isna(), "drive_id"] = np.nan
 
-    work["season_type"] = (
-        num(work["seasonType"])
-        if "seasonType" in work.columns else np.nan
-    )
+    work["season_type"] = num(work["seasonType"])
     work["completed"] = (
         boolish(work["status_type_completed"])
         if "status_type_completed" in work.columns else True
@@ -276,9 +291,32 @@ def normalize_season(df, year):
         boolish(work["scoring_opp"]).astype(float)
         if "scoring_opp" in work.columns else np.nan
     )
-    work["yards_to_endzone"] = (
-        num(work["start.yardsToEndzone"])
-        if "start.yardsToEndzone" in work.columns else np.nan
+    work["yards_to_endzone"] = num(work["start.yardsToEndzone"])
+
+    # ESPN homeScore / awayScore are AFTER the play. Only start.homeScore /
+    # start.awayScore can classify the game state before this play. Clock stamps
+    # have different snap/end semantics by era; we validate them for presence
+    # and range, but do not use them for a seconds-remaining cutoff.
+    margin = (work["home_score_play"] - work["away_score_play"]).abs()
+    threshold = np.select(
+        [work["period_number"].le(2), work["period_number"].eq(3), work["period_number"].eq(4)],
+        [38, 28, 22], default=0,
+    )
+    work["competitive_situational"] = (
+        work["period_number"].between(1, 4)
+        & work["down_number"].between(1, 4)
+        & work["distance_number"].notna()
+        & work["clock_valid"]
+        & work["home_score_play"].notna()
+        & work["away_score_play"].notna()
+        & margin.lt(threshold)
+    )
+    work["situational_overtime"] = work["period_number"].ge(5)
+    work["situational_garbage"] = (
+        work["period_number"].between(1, 4)
+        & margin.ge(threshold)
+        & work["home_score_play"].notna()
+        & work["away_score_play"].notna()
     )
 
     return work
@@ -294,8 +332,8 @@ def build_game_metadata(plays):
 
         end_home = ordered["end_home_score_play"].dropna()
         end_away = ordered["end_away_score_play"].dropna()
-        home_scores = ordered["home_score_play"].dropna()
-        away_scores = ordered["away_score_play"].dropna()
+        home_scores = ordered["post_home_score_play"].dropna()
+        away_scores = ordered["post_away_score_play"].dropna()
 
         home_score = (
             float(end_home.iloc[-1])
@@ -307,6 +345,19 @@ def build_game_metadata(plays):
             if not end_away.empty
             else (float(away_scores.iloc[-1]) if not away_scores.empty else np.nan)
         )
+        half = ordered.loc[ordered["period_number"].eq(2)]
+        half_home = half["end_home_score_play"].dropna()
+        half_away = half["end_away_score_play"].dropna()
+        half_home_score = (
+            float(half_home.iloc[-1]) if not half_home.empty
+            else float(half["post_home_score_play"].dropna().iloc[-1])
+            if half["post_home_score_play"].notna().any() else np.nan
+        )
+        half_away_score = (
+            float(half_away.iloc[-1]) if not half_away.empty
+            else float(half["post_away_score_play"].dropna().iloc[-1])
+            if half["post_away_score_play"].notna().any() else np.nan
+        )
 
         rows.append({
             "game_id": game_id,
@@ -317,6 +368,13 @@ def build_game_metadata(plays):
             "away_team": group["away_team"].iloc[0],
             "home_score": home_score,
             "away_score": away_score,
+            "home_first_half_score": half_home_score,
+            "away_first_half_score": half_away_score,
+            "actual_first_half_margin": (
+                half_home_score - half_away_score
+                if not pd.isna(half_home_score) and not pd.isna(half_away_score)
+                else np.nan
+            ),
             "actual_home_margin": (
                 home_score - away_score
                 if not pd.isna(home_score) and not pd.isna(away_score)
@@ -491,6 +549,19 @@ def build_team_game_metrics(plays, drive_metrics):
     ):
         rush = group.loc[group["rush_play"]]
         pas = group.loc[group["pass_play"]]
+        competitive = group.loc[group["competitive_situational"]]
+        successful = competitive.loc[competitive["success"].eq(1)]
+        script = competitive.loc[
+            competitive["period_number"].le(2)
+            & competitive["down_number"].isin([1, 2])
+        ]
+        leverage = competitive.loc[
+            competitive["down_number"].isin([3, 4])
+            & competitive["distance_number"].ge(3)
+        ]
+        red_zone = competitive.loc[
+            competitive["yards_to_endzone"].between(0, 20)
+        ]
 
         rows.append({
             "game_id": game_id,
@@ -502,6 +573,20 @@ def build_team_game_metrics(plays, drive_metrics):
             "off_explosive_rate": safe_mean(group["explosive"]),
             "off_pass_epa": safe_mean(pas["epa"]),
             "off_rush_epa": safe_mean(rush["epa"]),
+            "off_competitive_epa": safe_mean(competitive["epa"]),
+            "off_competitive_success_rate": safe_mean(competitive["success"]),
+            "off_competitive_plays": int(len(competitive)),
+            "off_iso_ppp": safe_mean(successful["epa"]),
+            "off_iso_successful_plays": int(len(successful)),
+            "off_script_epa": safe_mean(script["epa"]),
+            "off_script_success_rate": safe_mean(script["success"]),
+            "off_script_plays": int(len(script)),
+            "off_leverage_epa": safe_mean(leverage["epa"]),
+            "off_leverage_success_rate": safe_mean(leverage["success"]),
+            "off_leverage_plays": int(len(leverage)),
+            "off_red_zone_epa": safe_mean(red_zone["epa"]),
+            "off_red_zone_success_rate": safe_mean(red_zone["success"]),
+            "off_red_zone_plays": int(len(red_zone)),
             "havoc_allowed_rate": safe_mean(group["havoc"]),
             "line_yards_per_rush": safe_mean(rush["line_yards"]),
             "scoring_opp_rate": safe_mean(group["scoring_opp"]),
@@ -530,6 +615,20 @@ def build_team_game_metrics(plays, drive_metrics):
             "off_explosive_rate",
             "off_pass_epa",
             "off_rush_epa",
+            "off_competitive_epa",
+            "off_competitive_success_rate",
+            "off_competitive_plays",
+            "off_iso_ppp",
+            "off_iso_successful_plays",
+            "off_script_epa",
+            "off_script_success_rate",
+            "off_script_plays",
+            "off_leverage_epa",
+            "off_leverage_success_rate",
+            "off_leverage_plays",
+            "off_red_zone_epa",
+            "off_red_zone_success_rate",
+            "off_red_zone_plays",
             "havoc_allowed_rate",
             "line_yards_per_rush",
             "scoring_opp_rate",
@@ -548,7 +647,21 @@ def build_team_game_metrics(plays, drive_metrics):
         "off_success_rate": "def_success_allowed",
         "off_explosive_rate": "def_explosive_allowed",
         "off_pass_epa": "def_pass_epa_allowed",
-        "off_rush_epa": "def_rush_epa_allowed",
+            "off_rush_epa": "def_rush_epa_allowed",
+            "off_competitive_epa": "def_competitive_epa_allowed",
+            "off_competitive_success_rate": "def_competitive_success_allowed",
+            "off_competitive_plays": "def_competitive_plays",
+            "off_iso_ppp": "def_iso_ppp_allowed",
+            "off_iso_successful_plays": "def_iso_successful_plays",
+            "off_script_epa": "def_script_epa_allowed",
+            "off_script_success_rate": "def_script_success_allowed",
+            "off_script_plays": "def_script_plays",
+            "off_leverage_epa": "def_leverage_epa_allowed",
+            "off_leverage_success_rate": "def_leverage_success_allowed",
+            "off_leverage_plays": "def_leverage_plays",
+            "off_red_zone_epa": "def_red_zone_epa_allowed",
+            "off_red_zone_success_rate": "def_red_zone_success_allowed",
+            "off_red_zone_plays": "def_red_zone_plays",
         "havoc_allowed_rate": "def_havoc_created_rate",
         "line_yards_per_rush": "def_line_yards_allowed",
         "scoring_opp_rate": "def_scoring_opp_allowed",
@@ -582,6 +695,20 @@ TEAM_METRICS = [
     "off_explosive_rate",
     "off_pass_epa",
     "off_rush_epa",
+    "off_competitive_epa",
+    "off_competitive_success_rate",
+    "off_competitive_plays",
+    "off_iso_ppp",
+    "off_iso_successful_plays",
+    "off_script_epa",
+    "off_script_success_rate",
+    "off_script_plays",
+    "off_leverage_epa",
+    "off_leverage_success_rate",
+    "off_leverage_plays",
+    "off_red_zone_epa",
+    "off_red_zone_success_rate",
+    "off_red_zone_plays",
     "havoc_allowed_rate",
     "line_yards_per_rush",
     "scoring_opp_rate",
@@ -593,6 +720,20 @@ TEAM_METRICS = [
     "def_explosive_allowed",
     "def_pass_epa_allowed",
     "def_rush_epa_allowed",
+    "def_competitive_epa_allowed",
+    "def_competitive_success_allowed",
+    "def_competitive_plays",
+    "def_iso_ppp_allowed",
+    "def_iso_successful_plays",
+    "def_script_epa_allowed",
+    "def_script_success_allowed",
+    "def_script_plays",
+    "def_leverage_epa_allowed",
+    "def_leverage_success_allowed",
+    "def_leverage_plays",
+    "def_red_zone_epa_allowed",
+    "def_red_zone_success_allowed",
+    "def_red_zone_plays",
     "def_havoc_created_rate",
     "def_line_yards_allowed",
     "def_scoring_opp_allowed",
@@ -609,6 +750,31 @@ TEAM_METRICS = [
     "def_actual_points_per_scoring_opportunity_allowed",
     "def_actual_scoring_opportunity_conversion_rate_allowed",
 ]
+
+SITUATIONAL_WEIGHTS = {
+    f"{side}_{field}{suffix}": f"{side}_{sample}"
+    for side, suffix in (("off", ""), ("def", "_allowed"))
+    for field, sample in (
+        ("competitive_epa", "competitive_plays"),
+        ("script_epa", "script_plays"),
+        ("leverage_epa", "leverage_plays"),
+        ("red_zone_epa", "red_zone_plays"),
+    )
+}
+SITUATIONAL_WEIGHTS.update({
+    "off_competitive_success_rate": "off_competitive_plays",
+    "off_iso_ppp": "off_iso_successful_plays",
+    "off_script_success_rate": "off_script_plays",
+    "off_leverage_success_rate": "off_leverage_plays",
+    "off_red_zone_success_rate": "off_red_zone_plays",
+    "def_competitive_success_allowed": "def_competitive_plays",
+    "def_iso_ppp_allowed": "def_iso_successful_plays",
+    "def_script_success_allowed": "def_script_plays",
+    "def_leverage_success_allowed": "def_leverage_plays",
+    "def_red_zone_success_allowed": "def_red_zone_plays",
+})
+# Defense EPA column spellings use *_epa_allowed, already covered above.
+SITUATIONAL_COUNTS = sorted(set(SITUATIONAL_WEIGHTS.values()))
 
 
 def build_team_games(meta, metrics):
@@ -654,6 +820,23 @@ def add_previous_season_features(team_games):
         .groupby(["season", "team"], as_index=False)[TEAM_METRICS]
         .mean(numeric_only=True)
     )
+    keys = ["season", "team"]
+    grouped = team_games.groupby(keys, sort=False)
+    idx = season_summary.set_index(keys).index
+    for count in SITUATIONAL_COUNTS:
+        season_summary[count] = grouped[count].sum().reindex(idx).to_numpy()
+    for metric, count in SITUATIONAL_WEIGHTS.items():
+        valid = team_games[metric].notna()
+        weights = team_games[count].where(valid, 0).fillna(0)
+        numerator = (team_games[metric].fillna(0) * weights).groupby(
+            [team_games[key] for key in keys]
+        ).sum().reindex(idx).fillna(0).to_numpy()
+        denominator = weights.groupby(
+            [team_games[key] for key in keys]
+        ).sum().reindex(idx).fillna(0).to_numpy()
+        season_summary[metric] = np.divide(
+            numerator, denominator, out=np.full(len(idx), np.nan), where=denominator > 0
+        )
 
     season_summary["season"] = season_summary["season"] + 1
     season_summary = season_summary.rename(columns={
@@ -680,12 +863,41 @@ def add_prior_week_features(team_games):
     weekly["prior_weeks"] = (
         weekly.groupby(["season", "team"]).cumcount()
     )
+    keys = ["season", "team", "week"]
+    idx = weekly.set_index(keys).index
+    for count in SITUATIONAL_COUNTS:
+        weekly[count] = team_games.groupby(keys)[count].sum().reindex(idx).to_numpy()
 
     for metric in TEAM_METRICS:
         weekly[f"pregame_{metric}"] = (
             weekly
             .groupby(["season", "team"], sort=False)[metric]
             .transform(lambda s: s.expanding().mean().shift(1))
+        )
+
+    # New splits use pooled-play numerators and exact prior-week counts. An
+    # eight-play game cannot have the same weight as a 70-play game, and no
+    # row can include a current-week play in its pregame feature.
+    for metric, count in SITUATIONAL_WEIGHTS.items():
+        valid = team_games[metric].notna()
+        weights = team_games[count].where(valid, 0).fillna(0)
+        numerator = (team_games[metric].fillna(0) * weights).groupby(
+            [team_games[key] for key in keys]
+        ).sum().reindex(idx).fillna(0).to_numpy()
+        denominator = weights.groupby(
+            [team_games[key] for key in keys]
+        ).sum().reindex(idx).fillna(0).to_numpy()
+        numerator = pd.Series(numerator, index=weekly.index)
+        denominator = pd.Series(denominator, index=weekly.index)
+        grouping = [weekly["season"], weekly["team"]]
+        previous_num = numerator.groupby(grouping).cumsum().groupby(grouping).shift(1)
+        previous_den = denominator.groupby(grouping).cumsum().groupby(grouping).shift(1)
+        weekly[f"pregame_{metric}"] = previous_num / previous_den.where(previous_den.gt(0))
+
+    for count in SITUATIONAL_COUNTS:
+        grouping = [weekly["season"], weekly["team"]]
+        weekly[f"pregame_{count}"] = (
+            weekly[count].groupby(grouping).cumsum().groupby(grouping).shift(1)
         )
 
     feature_columns = [
@@ -781,6 +993,14 @@ def validate_output(games):
         raise RuntimeError(
             f"Historical game table unexpectedly small: {len(games)}"
         )
+    if not games["season_type"].eq(2).all():
+        raise RuntimeError("Postseason games entered the regular-season training table")
+    if games["actual_first_half_margin"].notna().sum() < 1000:
+        raise RuntimeError("First-half scores missing for most training games")
+    for metric in ("off_iso_ppp", "off_script_epa", "off_leverage_epa", "off_red_zone_epa"):
+        col = f"home_pregame_{metric}"
+        if col not in games or games[col].notna().sum() < 1000:
+            raise RuntimeError(f"Historical situational feature missing or sparse: {col}")
 
     target_cols = [
         f"{side}_{metric}"
@@ -822,6 +1042,17 @@ def main():
                 "raw_rows": int(len(raw)),
                 "standardized_rows": int(len(standard)),
                 "raw_columns": int(len(raw.columns)),
+                "required_situational_columns": SITUATIONAL_REQUIRED_COLUMNS,
+                "situational_competitive_plays": int(standard["competitive_situational"].sum()),
+                "situational_missing_down_distance": int(
+                    (standard["valid_scrimmage"] & standard["down_number"].notna()
+                     & standard["distance_number"].isna()).sum()
+                ),
+                "situational_missing_or_invalid_clock": int(
+                    (standard["valid_scrimmage"] & ~standard["clock_valid"]).sum()
+                ),
+                "situational_overtime_plays": int(standard["situational_overtime"].sum()),
+                "situational_garbage_plays": int(standard["situational_garbage"].sum()),
             }
 
             print(
@@ -831,6 +1062,10 @@ def main():
             del raw
 
     plays = pd.concat(all_plays, ignore_index=True)
+    # ESPN postseason week numbers restart at 1; keep the canonical rolling
+    # table regular-season only to prevent postseason data contaminating Week 1.
+    excluded_postseason = int((~plays["season_type"].eq(2)).sum())
+    plays = plays.loc[plays["season_type"].eq(2)].copy()
 
     print(f"Total standardized plays: {len(plays):,}", flush=True)
 
@@ -878,7 +1113,15 @@ def main():
 
     manifest = {
         "generated": datetime.now(timezone.utc).isoformat(),
-        "builder_version": "historical_training_v4_realized_drives",
+        "builder_version": "historical_training_v5_situational",
+        "excluded_postseason_plays": excluded_postseason,
+        "situational_filter": (
+            "Regular season; rush/pass with EPA; regulation periods 1-4; "
+            "valid start down and distance, clock, and pre-play score; "
+            "clock stamp may reflect the end of play in some source years; "
+            "garbage excluded at "
+            "38+ points in the first half, 28+ in third, 22+ in fourth."
+        ),
         "source": "SportsDataverse espn_cfb_pbp GitHub release",
         "source_release_api": RELEASE_API,
         "seasons": SEASONS,
