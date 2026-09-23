@@ -49,28 +49,39 @@ jobs:
           meta = payload["meta"]
           teams = payload["teams"]
 
-          assert meta["version"] == "0.1.0"
+          assert meta["version"] == "0.1.2"
           assert meta["status"] == "PUBLIC_BETA"
           assert meta["model_usage"] == "display_only_not_used_by_model_a"
           assert meta["methodology"]["market_inputs"] is False
           assert meta["methodology"]["preseason_inputs"] is False
-          assert meta["eligible_teams"] >= 80
+          assert meta["eligible_teams"] >= (80 if meta["through_week"] >= 3 else 0)
+          assert meta["methodology"]["minimum_games"] == 2
+          assert meta["eligible_teams"] + meta["provisional_teams"] <= len(teams)
           assert meta["qualifying_games"] >= 50
           assert len(teams) >= 100
 
           eligible = [team for team in teams.values() if team.get("eligible")]
-          assert eligible
+          assert len(eligible) == meta["eligible_teams"]
           for team in eligible:
               ratings = team["ratings"]
               assert all(ratings.get(key) for key in ("offense", "defense", "net", "pace"))
-              assert team["reliability"]["games"] > 0
+              assert team["reliability"]["games"] >= 2
+
+          provisional = [team for team in teams.values() if team.get("provisional")]
+          assert len(provisional) == meta["provisional_teams"]
+          for team in provisional:
+              assert not team["eligible"]
+              assert team["reliability"]["games"] == 1
+              assert not team["ratings"]
+              assert all(isinstance(team["provisional_ratings"].get(key), (int, float))
+                         for key in ("offense", "defense", "net", "pace"))
 
           enriched = sum(
               all(team["metrics"][key]["offense"] and team["metrics"][key]["defense"]
                   for key in ("yards_per_play", "yards_per_rush", "yards_per_pass_play"))
               for team in eligible
           )
-          assert enriched >= 80, f"Yardage metrics missing for too many teams: {enriched}"
+          assert enriched >= min(80, len(eligible)), f"Yardage metrics missing for too many teams: {enriched}"
 
           print(
               f"Validated THI Observed Ratings v{meta['version']} "
