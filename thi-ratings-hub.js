@@ -21,6 +21,8 @@
     .thi-hub-table tbody tr:hover { background:#f6f8f5; }
     .thi-hub-team { border:0; background:transparent; padding:0; color:var(--text); font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; text-align:left; }
     .thi-hub-team:hover { text-decoration:underline; }
+    .thi-hub-team-wrap { display:inline-flex; align-items:center; gap:8px; vertical-align:middle; }
+    .thi-hub-team-wrap .team-logo { flex:0 0 auto; }
     .thi-hub-number { font:700 14px var(--mono); white-space:nowrap; }
     .thi-hub-muted { color:var(--muted); font-size:11px; white-space:nowrap; }
     .thi-hub-rank { color:var(--muted); font:600 11px var(--mono); }
@@ -108,7 +110,8 @@
         const band = reliability.games >= 2 ? "strong" : "limited";
         return `<tr>
           <td><span class="thi-hub-rank">#${rating[sort]?.rank ?? "—"}</span> &nbsp;
-            <button type="button" class="thi-hub-team" data-thi-team="${escapeHtml(profile.team)}">${escapeHtml(profile.team)}</button></td>
+            <span class="thi-hub-team-wrap">${teamLogoMarkup(profile.team, "projection")}
+              <button type="button" class="thi-hub-team" data-thi-team="${escapeHtml(profile.team)}">${escapeHtml(profile.team)}</button></span></td>
           <td data-label="Net"><span class="thi-hub-number">${formatSigned(rating.net?.value, 2)}</span> <span class="thi-hub-rank">#${rating.net?.rank ?? "—"}</span></td>
           <td data-label="Offense"><span class="thi-hub-number">${formatNumber(rating.offense?.value, 2)}</span> <span class="thi-hub-rank">#${rating.offense?.rank ?? "—"}</span></td>
           <td data-label="Defense"><span class="thi-hub-number">${formatNumber(rating.defense?.value, 2)}</span> <span class="thi-hub-rank">#${rating.defense?.rank ?? "—"}</span></td>
@@ -135,7 +138,8 @@
               const rating = profile.provisional_ratings;
               const sample = profile.reliability ?? {};
               return `<tr>
-                <td><button type="button" class="thi-hub-team" data-thi-team="${escapeHtml(profile.team)}">${escapeHtml(profile.team)}</button></td>
+                <td><span class="thi-hub-team-wrap">${teamLogoMarkup(profile.team, "projection")}
+                  <button type="button" class="thi-hub-team" data-thi-team="${escapeHtml(profile.team)}">${escapeHtml(profile.team)}</button></span></td>
                 <td data-label="Net"><span class="thi-hub-number">${formatSigned(rating.net, 2)}</span></td>
                 <td data-label="Offense"><span class="thi-hub-number">${formatNumber(rating.offense, 2)}</span></td>
                 <td data-label="Defense"><span class="thi-hub-number">${formatNumber(rating.defense, 2)}</span></td>
