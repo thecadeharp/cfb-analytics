@@ -285,6 +285,11 @@ def _side_metrics(plays, team=None, side="offense"):
         if (_number(play.get("yards_to_goal")) is not None)
         and _number(play.get("yards_to_goal")) <= 20
     ]
+    inside_40 = [
+        play for play in plays
+        if (_number(play.get("yards_to_goal")) is not None)
+        and 0 <= _number(play.get("yards_to_goal")) <= 40
+    ]
     first_half = [play for play in plays if int(_number(play.get("period")) or 0) <= 2]
     second_half = [play for play in plays if int(_number(play.get("period")) or 0) >= 3]
     situational = [
@@ -399,6 +404,9 @@ def _side_metrics(plays, team=None, side="offense"):
         "red_zone_epa": _mean(play.get("epa") for play in red_zone),
         "red_zone_success_rate": _rate(play.get("success") for play in red_zone),
         "red_zone_plays": len(red_zone),
+        "inside_40_epa": _mean(play.get("epa") for play in inside_40),
+        "inside_40_success_rate": _rate(play.get("success") for play in inside_40),
+        "inside_40_plays": len(inside_40),
         "first_half_epa": _mean(play.get("epa") for play in first_half),
         "first_half_plays": len(first_half),
         "second_half_epa": _mean(play.get("epa") for play in second_half),
