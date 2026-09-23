@@ -1,0 +1,64 @@
+name: THI Situational Profiles
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Advanced Metrics v2"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thi-situational-profiles
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest data
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Protect Model A files
+        run: |
+          sha256sum data/projections.json data/cfb_metrics.json data/hfa_2026.json scripts/build_projections.py > /tmp/model-a-before.sha256
+
+      - name: Build descriptive profiles
+        run: python scripts/build_thi_situational_profiles.py
+
+      - name: Validate output
+        run: |
+          python - <<'PY'
+          import json
+          with open('data/thi_situational_profiles.json') as f:
+              data = json.load(f)
+          assert data['meta']['model_usage'] == 'display_only_not_used_by_model_a'
+          assert data['meta']['status'] == 'DESCRIPTIVE_BETA_NO_POINT_SCALE'
+          assert len(data['teams']) >= 100
+          assert sum(row['offense']['script']['sample_plays'] >= 10 for row in data['teams'].values()) >= 80
+          assert all(row['offense']['script']['epa_per_play'] is None
+                     for row in data['teams'].values() if row['offense']['script']['sample_plays'] < 10)
+          PY
+          sha256sum --check /tmp/model-a-before.sha256
+
+      - name: Commit descriptive profiles
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/thi_situational_profiles.json
+          if git diff --cached --quiet; then
+            echo "No data changes."
+            exit 0
+          fi
+          git commit -m "Refresh THI descriptive situational profiles"
+          git pull --rebase origin main
+          git push
