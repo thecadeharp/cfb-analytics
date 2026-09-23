@@ -1,0 +1,95 @@
+name: THI Observed Ratings v0.1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Build Team Metric Profiles"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thi-data-writer
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Protect Model A files
+        run: |
+          sha256sum \
+            data/projections.json \
+            data/cfb_metrics.json \
+            data/hfa_2026.json \
+            scripts/build_projections.py \
+            > /tmp/model-a-before.sha256
+
+      - name: Build THI Observed Ratings
+        run: python scripts/build_thi_observed_ratings.py
+
+      - name: Validate ratings output
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("data/thi_observed_ratings.json").read_text())
+          meta = payload["meta"]
+          teams = payload["teams"]
+
+          assert meta["version"] == "0.1.0"
+          assert meta["status"] == "PUBLIC_BETA"
+          assert meta["model_usage"] == "display_only_not_used_by_model_a"
+          assert meta["methodology"]["market_inputs"] is False
+          assert meta["methodology"]["preseason_inputs"] is False
+          assert meta["eligible_teams"] >= 80
+          assert meta["qualifying_games"] >= 50
+          assert len(teams) >= 100
+
+          eligible = [team for team in teams.values() if team.get("eligible")]
+          assert eligible
+          for team in eligible:
+              ratings = team["ratings"]
+              assert all(ratings.get(key) for key in ("offense", "defense", "net", "pace"))
+              assert team["reliability"]["games"] > 0
+
+          enriched = sum(
+              all(team["metrics"][key]["offense"] and team["metrics"][key]["defense"]
+                  for key in ("yards_per_play", "yards_per_rush", "yards_per_pass_play"))
+              for team in eligible
+          )
+          assert enriched >= 80, f"Yardage metrics missing for too many teams: {enriched}"
+
+          print(
+              f"Validated THI Observed Ratings v{meta['version']} "
+              f"for {meta['eligible_teams']} teams"
+          )
+          PY
+
+      - name: Verify Model A remained unchanged
+        run: sha256sum --check /tmp/model-a-before.sha256
+
+      - name: Commit ratings and frozen weekly snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/thi_observed_ratings.json data/ratings_snapshots/
+          if git diff --cached --quiet; then
+            echo "THI Observed Ratings unchanged."
+            exit 0
+          fi
+          git commit -m "Refresh THI Observed Ratings v0.1"
+          git pull --rebase origin main
+          git push
