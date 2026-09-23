@@ -19,6 +19,7 @@ const DATA_URLS = {
   teamMetricProfiles: "./data/team_metric_profiles.json",
   teamMarketPerformance: "./data/team_market_performance.json",
   scheduleContext: "./data/schedule_context.json",
+  thiObservedRatings: "./data/thi_observed_ratings.json",
 };
 
 let metricsData = null;
@@ -36,6 +37,7 @@ let openWeeklyRatingsData = null;
 let teamMetricProfilesData = null;
 let teamMarketPerformanceData = null;
 let scheduleContextData = null;
+let thiObservedRatingsData = null;
 
 let teams = {};
 let projections = [];
@@ -1278,6 +1280,173 @@ function ensureMatchupView() {
       font-weight:800;
     }
 
+    .thi-observed-ratings {
+      margin-top:12px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#fff;
+      overflow:hidden;
+    }
+
+    .thi-observed-header {
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      padding:16px;
+      border-bottom:1px solid var(--border);
+      background:linear-gradient(135deg,#fff 0%,#fafaf7 100%);
+    }
+
+    .thi-observed-title {
+      margin-top:3px;
+      color:var(--ink);
+      font-size:22px;
+      font-weight:900;
+      letter-spacing:-.4px;
+    }
+
+    .thi-observed-description {
+      max-width:760px;
+      margin-top:5px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.55;
+    }
+
+    .thi-observed-beta {
+      flex:0 0 auto;
+      padding:6px 9px;
+      border:1px solid #e1b83f;
+      border-radius:999px;
+      background:#fff4bf;
+      color:#6f5200;
+      font-family:var(--mono);
+      font-size:9px;
+      font-weight:800;
+      letter-spacing:.8px;
+      text-transform:uppercase;
+    }
+
+    .thi-rating-card-grid {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+      padding:14px 16px;
+    }
+
+    .thi-rating-card {
+      min-width:0;
+      padding:13px;
+      border:1px solid var(--border);
+      border-radius:9px;
+    }
+
+    .thi-rating-card-label {
+      color:var(--muted);
+      font-family:var(--mono);
+      font-size:9px;
+      font-weight:800;
+      letter-spacing:.8px;
+      text-transform:uppercase;
+    }
+
+    .thi-rating-card-value {
+      margin-top:5px;
+      font-size:27px;
+      font-weight:900;
+      letter-spacing:-.7px;
+      line-height:1;
+    }
+
+    .thi-rating-card-rank {
+      margin-top:6px;
+      font-family:var(--mono);
+      font-size:9px;
+      font-weight:800;
+      letter-spacing:.6px;
+      text-transform:uppercase;
+    }
+
+    .thi-rating-profile-grid {
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+      padding:0 16px 16px;
+    }
+
+    .thi-rating-table-wrap {
+      overflow:hidden;
+      border:1px solid var(--border);
+      border-radius:9px;
+    }
+
+    .thi-rating-table-title {
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      background:#f7f7f4;
+      font-size:13px;
+      font-weight:900;
+      text-transform:uppercase;
+    }
+
+    .thi-rating-table {
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    .thi-rating-table th,
+    .thi-rating-table td {
+      padding:9px 11px;
+      border-bottom:1px solid var(--border);
+      text-align:left;
+    }
+
+    .thi-rating-table tr:last-child td { border-bottom:0; }
+    .thi-rating-table th {
+      color:var(--muted);
+      font-family:var(--mono);
+      font-size:8px;
+      letter-spacing:.7px;
+      text-transform:uppercase;
+    }
+
+    .thi-rating-table th:nth-child(2),
+    .thi-rating-table th:nth-child(3),
+    .thi-rating-table td:nth-child(2),
+    .thi-rating-table td:nth-child(3) { text-align:right; }
+
+    .thi-rating-table td {
+      font-size:11px;
+      font-weight:700;
+    }
+
+    .thi-rating-table-value {
+      display:inline-block;
+      min-width:66px;
+      padding:5px 7px;
+      border-radius:5px;
+      font-family:var(--mono);
+      font-weight:900;
+      text-align:center;
+    }
+
+    .thi-rating-reliability {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:11px 16px;
+      border-top:1px solid var(--border);
+      background:#fafaf8;
+      color:var(--muted);
+      font-family:var(--mono);
+      font-size:9px;
+      line-height:1.5;
+    }
+
+    .thi-rating-reliability strong { color:var(--ink); }
+
     .thi-color-legend {
       display:flex;
       align-items:center;
@@ -1776,6 +1945,11 @@ function ensureMatchupView() {
 
       .schedule-context-chips { min-width:0; }
       .schedule-view-button { width:100%; }
+
+      .thi-observed-header { flex-direction:column; }
+      .thi-rating-card-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .thi-rating-profile-grid { grid-template-columns:1fr; }
+      .thi-rating-reliability { align-items:flex-start; flex-direction:column; }
     }
   `;
 
@@ -1812,7 +1986,8 @@ async function init() {
       openWeeklyRatingsData,
       teamMetricProfilesData,
       teamMarketPerformanceData,
-      scheduleContextData
+      scheduleContextData,
+      thiObservedRatingsData
     ] = await Promise.all([
       loadJson(DATA_URLS.metrics),
       loadJson(DATA_URLS.schedule),
@@ -1829,6 +2004,7 @@ async function init() {
       loadJson(DATA_URLS.teamMetricProfiles).catch(() => null),
       loadJson(DATA_URLS.teamMarketPerformance).catch(() => null),
       loadJson(DATA_URLS.scheduleContext).catch(() => null),
+      loadJson(DATA_URLS.thiObservedRatings).catch(() => null),
     ]);
 
     teams = metricsData?.teams ?? {};
@@ -2279,6 +2455,18 @@ const ADVANCED_METRIC_GUIDE = [
         direction: "Offense: higher · Defense: lower allowed",
       },
       {
+        name: "Yards / Play",
+        definition: "Average scrimmage yards gained or allowed per qualifying play.",
+        use: "Provides an intuitive efficiency companion to EPA without game-state weighting.",
+        direction: "Offense: higher · Defense: lower allowed",
+      },
+      {
+        name: "Yards / Carry + Pass Play",
+        definition: "Average rushing yards per carry and passing yards per charted pass play, including sacks.",
+        use: "Separates ground-game efficiency from dropback efficiency.",
+        direction: "Offense: higher · Defense: lower allowed",
+      },
+      {
         name: "IsoPPP",
         definition: "Average EPA generated only on successful plays.",
         use: "Separates the damage of successful plays from how often success occurs.",
@@ -2410,6 +2598,12 @@ const ADVANCED_METRIC_GUIDE = [
         name: "Red-Zone EPA / Success / TD Rate",
         definition: "Efficiency, successful-play rate and touchdown conversion inside the opponent's 20.",
         use: "Shows whether red-zone possessions create value and finish with touchdowns.",
+        direction: "Offense: higher · Defense: lower allowed",
+      },
+      {
+        name: "Red-Zone Scoring Rate",
+        definition: "Share of drives reaching the opponent's 20 that produce any points.",
+        use: "Separates overall scoring conversion from touchdown-only finishing.",
         direction: "Offense: higher · Defense: lower allowed",
       },
     ],
@@ -3530,6 +3724,70 @@ function renderRatings() {
     </div>
   `;
 
+  const observedRows = data
+    .map(team => ({ team, observed: thiObservedTeam(team.team) }))
+    .filter(row => row.observed?.eligible)
+    .sort(
+      (a, b) =>
+        Number(a.observed?.ratings?.net?.rank ?? 999) -
+        Number(b.observed?.ratings?.net?.rank ?? 999)
+    );
+
+  const observedTable = `
+    <div class="ratings-note">
+      <strong>THI Observed Ratings v${escapeHtml(thiObservedRatingsData?.meta?.version ?? "0.1.0")} — public beta:</strong>
+      THI-adjusted ${escapeHtml(thiObservedRatingsData?.meta?.season ?? "2026")} on-field performance
+      through Week ${escapeHtml(thiObservedRatingsData?.meta?.through_week ?? "—")}.
+      Ratings use no preseason or market inputs and do not affect Model A.
+      Scoring-scale ratings summarize EPA against an average FBS opponent;
+      they are not game score forecasts. Lower is better on defense.
+    </div>
+
+    ${conferenceFilterMarkup("ratings-thi", "Filter THI ratings by conference", observedRows.length)}
+
+    <div class="table-scroll">
+      <table class="projection-table">
+        <thead>
+          <tr>
+            <th>THI Rank</th>
+            <th>Team</th>
+            <th>Conference</th>
+            <th>Offensive Rating</th>
+            <th>Defensive Rating</th>
+            <th>Net Rating</th>
+            <th>Pace Index</th>
+            <th>Reliability</th>
+            <th>Games</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${observedRows.map(row => {
+            const ratings = row.observed.ratings ?? {};
+            const reliability = row.observed.reliability ?? {};
+            return `
+              <tr style="cursor:pointer" onclick="openDossier('${escapeJsString(row.team.team)}')">
+                <td class="line-primary">#${formatNumber(ratings.net?.rank, 0)}</td>
+                <td>
+                  <span class="team-with-logo">
+                    ${teamLogoMarkup(row.team.team)}
+                    <strong>${escapeHtml(row.team.team)}</strong>
+                  </span>
+                </td>
+                <td class="team-meta">${escapeHtml(row.team.conference ?? "—")}</td>
+                <td><span class="thi-metric-rank thi-band-${escapeHtml(ratings.offense?.band ?? "missing")}">${formatNumber(ratings.offense?.value, 2)} · #${formatNumber(ratings.offense?.rank, 0)}</span></td>
+                <td><span class="thi-metric-rank thi-band-${escapeHtml(ratings.defense?.band ?? "missing")}">${formatNumber(ratings.defense?.value, 2)} · #${formatNumber(ratings.defense?.rank, 0)}</span></td>
+                <td><span class="thi-metric-rank thi-band-${escapeHtml(ratings.net?.band ?? "missing")}">${formatSigned(ratings.net?.value, 2)}</span></td>
+                <td class="team-meta">${formatNumber(ratings.pace?.value, 2)} · #${formatNumber(ratings.pace?.rank, 0)}</td>
+                <td class="team-meta">${escapeHtml(reliability.label ?? "LIMITED")}</td>
+                <td class="team-meta">${formatNumber(reliability.games, 0)}</td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+
   const marketTable = `
     <div class="ratings-note">
       <strong>Market Performance — developing sample:</strong>
@@ -3621,6 +3879,12 @@ function renderRatings() {
       >Overview</button>
 
       <button
+        class="ratings-toggle-button ${currentRatingsMode === "thi" ? "active" : ""}"
+        type="button"
+        onclick="setRatingsMode('thi')"
+      >THI Ratings · Beta</button>
+
+      <button
         class="ratings-toggle-button ${currentRatingsMode === "advanced" ? "active" : ""}"
         type="button"
         onclick="setRatingsMode('advanced')"
@@ -3644,6 +3908,8 @@ function renderRatings() {
         ? conferenceTable
         : currentRatingsMode === "market"
           ? marketTable
+        : currentRatingsMode === "thi"
+          ? observedTable
         : currentRatingsMode === "advanced"
           ? `${conferenceFilterMarkup("ratings")}${teamTable}`
           : overviewTable
@@ -3652,7 +3918,7 @@ function renderRatings() {
 }
 
 function setRatingsMode(mode) {
-  currentRatingsMode = ["overview", "advanced", "conferences", "market"].includes(mode)
+  currentRatingsMode = ["overview", "thi", "advanced", "conferences", "market"].includes(mode)
     ? mode
     : "overview";
 
@@ -5490,6 +5756,145 @@ function renderSeasonOutlook(team) {
   `;
 }
 
+function thiObservedTeam(teamName) {
+  return thiObservedRatingsData?.teams?.[teamName] ?? null;
+}
+
+function thiObservedValue(value, format = "decimal") {
+  if (!hasValue(value)) return "—";
+  if (format === "percent") return formatPercent(value, 1);
+  if (format === "epa") return formatEPA(value);
+  return formatNumber(value, 2);
+}
+
+function thiObservedCard(label, rating, note = "") {
+  if (!rating) {
+    return `
+      <div class="thi-rating-card thi-band-missing">
+        <div class="thi-rating-card-label">${escapeHtml(label)}</div>
+        <div class="thi-rating-card-value">—</div>
+        <div class="thi-rating-card-rank">Sample unavailable</div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="thi-rating-card thi-band-${escapeHtml(rating.band ?? "missing")}">
+      <div class="thi-rating-card-label">${escapeHtml(label)}</div>
+      <div class="thi-rating-card-value">${formatNumber(rating.value, 2)}</div>
+      <div class="thi-rating-card-rank">
+        #${formatNumber(rating.rank, 0)} FBS${note ? ` · ${escapeHtml(note)}` : ""}
+      </div>
+    </div>
+  `;
+}
+
+function thiObservedMetricRows(profile, side) {
+  const order = [
+    "epa_play",
+    "yards_per_play",
+    "success_rate",
+    "yards_per_rush",
+    "yards_per_pass_play",
+    "red_zone_scoring_rate"
+  ];
+
+  return order.map(field => {
+    const metric = profile?.metrics?.[field];
+    const standing = metric?.[side];
+    const label = metric?.label ??
+      thiObservedRatingsData?.meta?.metrics?.[field]?.label ??
+      field;
+    const format = metric?.format ??
+      thiObservedRatingsData?.meta?.metrics?.[field]?.format ??
+      "decimal";
+
+    return `
+      <tr>
+        <td>${escapeHtml(label)}</td>
+        <td>
+          <span class="thi-rating-table-value thi-band-${escapeHtml(standing?.band ?? "missing")}">
+            ${thiObservedValue(standing?.value, format)}
+          </span>
+        </td>
+        <td>${standing?.rank ? `#${formatNumber(standing.rank, 0)}` : "—"}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function renderThiObservedRatings(teamName) {
+  const profile = thiObservedTeam(teamName);
+  if (!profile) return "";
+
+  const meta = thiObservedRatingsData?.meta ?? {};
+  const reliability = profile?.reliability ?? {};
+  const ratings = profile?.ratings ?? {};
+
+  return `
+    <section class="thi-observed-ratings">
+      <div class="thi-observed-header">
+        <div>
+          <div class="eyebrow">THI calculated performance layer</div>
+          <div class="thi-observed-title">THI Observed Ratings</div>
+          <div class="thi-observed-description">
+            THI-adjusted ${escapeHtml(meta.season ?? "2026")} on-field performance
+            through Week ${escapeHtml(meta.through_week ?? "—")}.
+            FBS-vs-FBS scrimmage plays only, garbage time excluded and early samples
+            regressed toward the national average. Scoring-scale ratings summarize
+            EPA; they are not projected final scores or inputs to Model A.
+          </div>
+        </div>
+
+        <div class="thi-observed-beta">
+          Beta · v${escapeHtml(meta.version ?? "0.1.0")}
+        </div>
+      </div>
+
+      <div class="thi-rating-card-grid">
+        ${thiObservedCard("Offensive Rating", ratings.offense)}
+        ${thiObservedCard("Defensive Rating", ratings.defense)}
+        ${thiObservedCard("Net Rating", ratings.net)}
+        ${thiObservedCard("Pace Index", ratings.pace)}
+      </div>
+
+      <div class="thi-rating-profile-grid">
+        <div class="thi-rating-table-wrap">
+          <div class="thi-rating-table-title">Opponent-Adjusted Offense</div>
+          <table class="thi-rating-table">
+            <thead>
+              <tr><th>Metric</th><th>Value</th><th>FBS Rank</th></tr>
+            </thead>
+            <tbody>${thiObservedMetricRows(profile, "offense")}</tbody>
+          </table>
+        </div>
+
+        <div class="thi-rating-table-wrap">
+          <div class="thi-rating-table-title">Opponent-Adjusted Defense</div>
+          <table class="thi-rating-table">
+            <thead>
+              <tr><th>Metric Allowed</th><th>Value</th><th>FBS Rank</th></tr>
+            </thead>
+            <tbody>${thiObservedMetricRows(profile, "defense")}</tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="thi-rating-reliability">
+        <span>
+          Reliability:
+          <strong>${escapeHtml(reliability.label ?? "LIMITED")}</strong>
+          · ${formatNumber(reliability.games, 0)} qualifying games
+          · ${formatNumber(reliability.qualifying_plays, 0)} two-way sample plays
+        </span>
+        <span>
+          Lower defensive rating is better · Pace reflects plays per game
+        </span>
+      </div>
+    </section>
+  `;
+}
+
 function renderDossier(team) {
   const container =
     document.getElementById(
@@ -5732,6 +6137,8 @@ function renderDossier(team) {
         </div>
       </div>
     </div>
+
+    ${renderThiObservedRatings(team.team)}
 
     ${renderSeasonOutlook(team)}
 
