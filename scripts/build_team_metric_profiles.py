@@ -15,6 +15,9 @@ DATA = ROOT / "data"
 OUTPUT = DATA / "team_metric_profiles.json"
 
 METRICS = {
+    "yards_per_play": {"label": "Yards / Play", "format": "decimal", "offense_high": True, "defense_high": False},
+    "yards_per_rush": {"label": "Yards / Carry", "format": "decimal", "offense_high": True, "defense_high": False},
+    "yards_per_pass_play": {"label": "Yards / Pass Play", "format": "decimal", "offense_high": True, "defense_high": False},
     "epa_play": {"label": "EPA / Play", "format": "epa", "offense_high": True, "defense_high": False},
     "success_rate": {"label": "Success Rate", "format": "percent", "offense_high": True, "defense_high": False},
     "iso_ppp": {"label": "IsoPPP", "format": "epa", "offense_high": True, "defense_high": False},
@@ -41,6 +44,7 @@ METRICS = {
     "drive_scoring_rate": {"label": "Drive Scoring Rate", "format": "percent", "offense_high": True, "defense_high": False},
     "points_per_opportunity": {"label": "Points / Opportunity", "format": "decimal", "offense_high": True, "defense_high": False},
     "red_zone_td_rate": {"label": "Red-Zone TD Rate", "format": "percent", "offense_high": True, "defense_high": False},
+    "red_zone_scoring_rate": {"label": "Red-Zone Scoring Rate", "format": "percent", "offense_high": True, "defense_high": False},
     "red_zone_epa": {"label": "Red-Zone EPA", "format": "epa", "offense_high": True, "defense_high": False},
     "red_zone_success_rate": {"label": "Red-Zone Success", "format": "percent", "offense_high": True, "defense_high": False},
 }
