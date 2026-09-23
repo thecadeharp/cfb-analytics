@@ -75,10 +75,24 @@ jobs:
               "red_zone_scoring_rate",
               "fumble_recovery_delta",
               "third_down_conversion_delta",
+              "situational_iso_ppp",
+              "situational_iso_successful_plays",
+              "script_early_epa",
+              "script_early_success_rate",
+              "script_early_plays",
+              "leverage_epa",
+              "leverage_success_rate",
+              "leverage_plays",
+              "situational_red_zone_epa",
+              "situational_red_zone_plays",
           }
           missing = required.difference(sample)
           assert not missing, f"Advanced Metrics v2 fields missing: {sorted(missing)}"
           assert len(data["meta"].get("game_ids", [])) >= 50
+          assert sum(
+              team["non_garbage"]["offense"].get("script_early_plays", 0) >= 10
+              for team in data["teams"].values()
+          ) >= 80, "Historical-aligned first-half split has insufficient coverage"
           print("Advanced metrics validation passed")
           PY
 
