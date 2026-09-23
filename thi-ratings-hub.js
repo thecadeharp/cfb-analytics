@@ -16,6 +16,8 @@
     .thi-hub-table { width:100%; border-collapse:collapse; }
     .thi-hub-table th, .thi-hub-table td { text-align:left; padding:14px 16px; border-bottom:1px solid var(--border); }
     .thi-hub-table th { font:600 11px var(--mono); letter-spacing:.05em; color:var(--muted); white-space:nowrap; }
+    .thi-hub-sort-button { border:0; padding:0; background:transparent; color:inherit; font:inherit; letter-spacing:inherit; cursor:pointer; }
+    .thi-hub-sort-button:hover, .thi-hub-sort-button:focus-visible { color:var(--text); text-decoration:underline; }
     .thi-hub-sort-arrow { display:inline-block; margin-left:4px; }
     .thi-hub-table tr:last-child td { border-bottom:0; }
     .thi-hub-table tbody tr:hover { background:#f6f8f5; }
@@ -85,6 +87,16 @@
     return Number.isFinite(value) ? value : null;
   }
 
+  function sortHeader(key, label) {
+    const active = sort === key;
+    const direction = key === "defense" ? "ascending" : "descending";
+    const arrow = key === "defense" ? "↑" : "↓";
+    return `<th aria-sort="${active ? direction : "none"}">
+      <button type="button" class="thi-hub-sort-button" data-thi-sort="${key}"
+        aria-label="Sort by ${label.toLowerCase()} (${key === "defense" ? "lowest" : "highest"} first)">${label}${active ? `<span class="thi-hub-sort-arrow" aria-hidden="true">${arrow}</span>` : ""}</button>
+    </th>`;
+  }
+
   function renderRows() {
     const target = document.getElementById("thi-ratings-rows");
     const provisionalTarget = document.getElementById("thi-ratings-provisional");
@@ -103,7 +115,7 @@
     });
 
     target.innerHTML = data.length ? `<div class="thi-hub-table-wrap"><table class="thi-hub-table">
-      <thead><tr><th>Team</th><th>Net</th><th>Offense</th><th>Defense<span class="thi-hub-sort-arrow" aria-hidden="true">↓</span></th><th>Pace</th><th>Sample</th></tr></thead>
+      <thead><tr><th>Team</th>${sortHeader("net", "Net")}${sortHeader("offense", "Offense")}${sortHeader("defense", "Defense")}${sortHeader("pace", "Pace")}<th>Sample</th></tr></thead>
       <tbody>${data.map(profile => {
         const rating = profile.ratings;
         const reliability = profile.reliability ?? {};
@@ -126,14 +138,19 @@
       const provisional = Object.values(thiObservedRatingsData?.teams ?? {})
         .filter(profile => profile?.provisional && profile?.provisional_ratings &&
           String(profile.team || "").toLocaleLowerCase().includes(query))
-        .sort((a, b) => String(a.team).localeCompare(String(b.team)));
+        .sort((a, b) => {
+          const av = Number(a.provisional_ratings?.[sort]);
+          const bv = Number(b.provisional_ratings?.[sort]);
+          return (sort === "defense" ? av - bv : bv - av) ||
+            String(a.team).localeCompare(String(b.team));
+        });
       provisionalTarget.hidden = provisional.length === 0;
       provisionalTarget.innerHTML = provisional.length ? `
         <details class="thi-hub-provisional"${query ? " open" : ""}>
           <summary>Provisional · ${provisional.length} team${provisional.length === 1 ? "" : "s"} (unranked)</summary>
           <p>One qualifying FBS game. Values are displayed for context and receive no FBS ranks until the second qualifying game.</p>
           <div class="thi-hub-table-wrap"><table class="thi-hub-table">
-            <thead><tr><th>Team</th><th>Net</th><th>Offense</th><th>Defense<span class="thi-hub-sort-arrow" aria-hidden="true">↓</span></th><th>Pace</th><th>Sample</th></tr></thead>
+            <thead><tr><th>Team</th>${sortHeader("net", "Net")}${sortHeader("offense", "Offense")}${sortHeader("defense", "Defense")}${sortHeader("pace", "Pace")}<th>Sample</th></tr></thead>
             <tbody>${provisional.map(profile => {
               const rating = profile.provisional_ratings;
               const sample = profile.reliability ?? {};
@@ -230,6 +247,14 @@
   }
 
   view.addEventListener("click", event => {
+    const sortButton = event.target.closest("[data-thi-sort]");
+    if (sortButton) {
+      sort = sortButton.dataset.thiSort;
+      const select = document.getElementById("thi-ratings-sort");
+      if (select) select.value = sort;
+      renderRows();
+      return;
+    }
     const team = event.target.closest("[data-thi-team]");
     if (team) openDossier(team.dataset.thiTeam);
   });
