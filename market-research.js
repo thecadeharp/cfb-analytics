@@ -22,6 +22,11 @@
     .research-preview{grid-column:1/-1;border:1px solid var(--border,#ddd);border-radius:8px;padding:11px;font-size:13px;font-weight:600;background:#f5f8f7}
     .research-row:last-child{padding-bottom:0}.research-stack{display:grid;gap:16px;margin:18px 0}
     .research-error{color:#a32728}.research-positive{color:#116b4a;font-weight:700}
+    .research-summary{margin:18px 0;padding:16px;border:1px solid var(--border,#ddd);border-radius:10px;background:var(--surface,#fff)}
+    .research-summary h3{margin:0 0 6px;color:var(--text,#1d2730)}
+    .research-summary .research-grid{margin:12px 0}
+    .research-summary .research-card{padding:13px}
+    .research-summary .research-card strong{display:block;font-size:21px}
   `;
   document.head.appendChild(style);
   const button = document.createElement('button');
@@ -41,7 +46,53 @@
   const number = value => Number.isFinite(Number(value)) && value !== null ? Number(value).toFixed(2) : '—';
   const time = value => value ? new Date(value).toLocaleString() : '—';
   const line = value => Number(value) > 0 ? `+${number(value)}` : number(value);
+  const finiteNumber = value => value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value)) ? Number(value) : null;
   let client, games = [], history = {}, closings = {};
+
+  function comparisonFor(play) {
+    if (play.market !== 'spread' && play.market !== 'total') return null;
+    const ownLine = finiteNumber(play.line);
+    if (ownLine === null) return null;
+    const entryTime = new Date(play.recorded_at).getTime();
+    const close = (closings[String(play.game_id)] || []).find(item => {
+      const captured = new Date(item.captured_at_utc).getTime();
+      const kickoff = new Date(item.scheduled_kickoff_utc).getTime();
+      return Number.isFinite(entryTime) && Number.isFinite(captured) && Number.isFinite(kickoff) &&
+        entryTime <= captured && captured < kickoff;
+    });
+    if (!close) return null;
+    const market = close.closing_market || {};
+    let points = null;
+    if (play.market === 'spread' && (play.selection === 'home' || play.selection === 'away')) {
+      const homeSpread = finiteNumber(market.home_spread);
+      if (homeSpread !== null) points = ownLine - (play.selection === 'home' ? homeSpread : -homeSpread);
+    } else if (play.market === 'total' && (play.selection === 'over' || play.selection === 'under')) {
+      const total = finiteNumber(market.total);
+      if (total !== null) points = play.selection === 'over' ? total - ownLine : ownLine - total;
+    }
+    return points === null ? null : {points, close};
+  }
+
+  function portfolioSummary(plays) {
+    const eligible = plays.filter(p => p.market === 'spread' || p.market === 'total');
+    const compared = eligible.map(p => ({market:p.market, result:comparisonFor(p)})).filter(p => p.result);
+    const mean = rows => rows.length ? line(rows.reduce((sum, row) => sum + row.result.points, 0) / rows.length) : '—';
+    const spread = compared.filter(p => p.market === 'spread');
+    const totals = compared.filter(p => p.market === 'total');
+    const beat = compared.filter(p => p.result.points > 0).length;
+    const tied = compared.filter(p => p.result.points === 0).length;
+    return `<section class="research-summary" aria-label="Private market edge capture">
+      <h3>Market Edge Capture</h3>
+      <p class="research-muted">Your logged spread and total compared with a later, pre-kickoff market snapshot. Positive points mean your number was better.</p>
+      <div class="research-grid">
+        <div class="research-card"><span>Beat near-kickoff proxy</span><strong>${compared.length ? number(100 * beat / compared.length) + '%' : '—'}</strong><span>${beat} better · ${tied} tied · ${compared.length} compared</span></div>
+        <div class="research-card"><span>Average line advantage</span><strong>${mean(compared)}${compared.length ? ' pts' : ''}</strong><span>Across comparable spread and total entries</span></div>
+        <div class="research-card"><span>Comparison coverage</span><strong>${compared.length} / ${eligible.length}</strong><span>Logged spread and total entries</span></div>
+      </div>
+      <p class="research-muted">Spread: ${mean(spread)} pts (${spread.length}) · Totals: ${mean(totals)} pts (${totals.length}). Moneylines (${plays.filter(p => p.market === 'moneyline').length}) have no price-based closing comparison. Each entry counts once; units risked do not change these averages.</p>
+      <p class="research-muted">The proxy may be from a different sportsbook. Entries made after its capture, missing lines, and games without a later pre-kickoff capture are excluded. Refresh the page after kickoff for newly captured lines.</p>
+    </section>`;
+  }
 
   fetch('./data/reports/weekly_model_scorecard.json', {cache:'no-store'}).then(r => {
     if (!r.ok) throw Error('Scorecard not published yet'); return r.json();
@@ -52,7 +103,7 @@
       <strong>${esc(w.settled_games)} settled</strong>
       <p>Margin MAE: ${number(w.margin_mae_points)} pts (${esc(w.margin_sample)} games)<br>
       Total MAE: ${number(w.total_mae_points)} pts (${esc(w.total_sample)} games)<br>
-      Unsettled or unmatched: ${esc(w.unsettled_or_unmatched)} of ${esc(w.games_with_frozen_snapshots)} captured.</p></div>`).join('')}</div>
+      Not yet settled: ${esc(w.unsettled_or_unmatched)} of ${esc(w.games_with_frozen_snapshots)} captured.</p></div>`).join('')}</div>
       <p class="research-muted">Latest included kickoff: ${esc(time(data.latest_settled_kickoff_utc))}. Metrics use the first captured prospective projection for each game.</p>`;
   }).catch(() => { $('#research-scorecard').innerHTML = '<p class="research-muted">Weekly scorecard pending its first settlement run.</p>'; });
 
@@ -93,6 +144,7 @@
       .sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
     privateBox.innerHTML = `<p class="research-muted">Signed in as ${esc(user.email)}. These entries are self-reported; the server timestamp records when you logged them, not when a sportsbook accepted a wager.</p>
       <button type="button" id="research-logout">Sign out</button>
+      ${portfolioSummary(plays)}
       <div class="research-stack"><div><h3>Log a line</h3>
       <form id="research-entry" class="research-form">
       <label class="research-wide">Find a game by team<input id="research-game-search" type="search" placeholder="Type either team (or both)" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
@@ -174,15 +226,9 @@
       else await refresh();
     };
     $('#research-entries').innerHTML = plays.length ? plays.map(p => {
-      const close = closings[p.game_id];
-      const closingSpread = Number(close?.closing_market?.home_spread);
-      const closingTotal = Number(close?.closing_market?.total);
-      const qualifies = close && new Date(p.recorded_at) <= new Date(close.captured_at_utc) &&
-        new Date(close.captured_at_utc) < new Date(close.scheduled_kickoff_utc);
-      const comparison = qualifies && p.market === 'spread' && Number.isFinite(closingSpread) && close?.closing_market?.home_spread != null ?
-        Number(p.line) - (p.selection === 'home' ? closingSpread : -closingSpread) :
-        qualifies && p.market === 'total' && Number.isFinite(closingTotal) && close?.closing_market?.total != null ?
-          (p.selection === 'over' ? closingTotal - Number(p.line) : Number(p.line) - closingTotal) : null;
+      const result = comparisonFor(p);
+      const comparison = result?.points ?? null;
+      const close = result?.close;
       const trail = history[p.game_id]?.snapshots || [];
       const selectedTeam = p.selection === 'home' ? p.home_team : p.selection === 'away' ? p.away_team : p.selection;
       const ticket = `${selectedTeam}${p.line == null ? '' : ' ' + line(p.line)}`;
@@ -228,8 +274,14 @@
       const response = await fetch('./data/snapshots/closing_lines.jsonl');
       if (response.ok) for (const raw of (await response.text()).split('\n')) {
         if (!raw.trim()) continue;
-        try { const item = JSON.parse(raw); if (item.game_key) closings[String(item.game_key)] = item; } catch (_) { /* Skip incomplete line. */ }
+        try {
+          const item = JSON.parse(raw);
+          if (item.game_key && item.capture_type === 'near_kickoff_closing_proxy')
+            (closings[String(item.game_key)] ||= []).push(item);
+        } catch (_) { /* Skip incomplete line. */ }
       }
+      for (const captures of Object.values(closings))
+        captures.sort((a, b) => new Date(b.captured_at_utc) - new Date(a.captured_at_utc));
     }
   }
 })();
