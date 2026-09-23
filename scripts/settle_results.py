@@ -65,6 +65,18 @@ REPORT_CSV = REPORT_DIR / "settled_snapshot_rows.csv"
 # Conservative provider-name aliases only. Do not use broad transformations
 # such as deleting "state", which can create false matches.
 TEAM_ALIASES = {
+ # Exact NCAA scoreboard abbreviations observed against 2026 FBS snapshots.
+    "niu": "northernillinois",
+    "fiu": "floridainternational",
+    "southfla": "southflorida",
+    "ulm": "ulmonroe",
+    "mississippist": "mississippistate",
+    "flaatlantic": "floridaatlantic",
+    "westernky": "westernkentucky",
+    "armywestpoint": "army",
+    "middletenn": "middletennessee",
+    "gasouthern": "georgiasouthern",
+    "jacksonvillest": "jacksonvillestate",
     "miamifla": "miamifl",
     "miamiflorida": "miamifl",
     "olemiss": "mississippi",
