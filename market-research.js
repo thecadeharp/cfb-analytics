@@ -27,6 +27,7 @@
     .research-summary .research-grid{margin:12px 0}
     .research-summary .research-card{padding:13px}
     .research-summary .research-card strong{display:block;font-size:21px}
+    .research-capture{margin:5px 0 7px;color:var(--text,#1d2730);font-size:13px;font-weight:650}
   `;
   document.head.appendChild(style);
   const button = document.createElement('button');
@@ -100,7 +101,7 @@
     $('#research-scorecard').innerHTML = `<h2>Weekly Model A scorecard</h2>
       <p class="research-muted">${esc(data.definition)}</p><div class="research-grid">${data.weeks.filter(w => w.settled_games || w.week <= Math.max(0, ...data.weeks.filter(s => s.settled_games).map(s => s.week)) + 1).map(w => `
       <div class="research-card"><h2>Week ${esc(w.week)}</h2>
-      <strong>${esc(w.settled_games)} settled</strong>
+      <strong>${esc(w.settled_games)} of ${esc(w.games_with_frozen_snapshots)} settled</strong>
       <p>Margin MAE: ${number(w.margin_mae_points)} pts (${esc(w.margin_sample)} games)<br>
       Total MAE: ${number(w.total_mae_points)} pts (${esc(w.total_sample)} games)<br>
       Not yet settled: ${esc(w.unsettled_or_unmatched)} of ${esc(w.games_with_frozen_snapshots)} captured.</p></div>`).join('')}</div>
@@ -237,7 +238,7 @@
       return `<div class="research-row"><strong>${esc(p.away_team)} at ${esc(p.home_team)} · ${esc(ticket)}</strong><br>
         ${esc(p.sportsbook)} · logged ${esc(time(p.recorded_at))} · ${esc(p.market)} · ${esc(priceLabel)} · ${esc(unitsLabel)}<br>
         ${p.market === 'moneyline' ? 'Moneyline closing comparison unavailable with current snapshots' : comparison === null ? 'No qualifying pre-kickoff closing proxy after entry' : `<span class="${comparison > 0 ? 'research-positive' : ''}">Line difference vs near-kickoff proxy: ${line(comparison)} pts</span>`}
-        ${comparison !== null ? ` · captured ${esc(time(close.captured_at_utc))} · proxy book: ${esc(close.closing_market?.bookmaker || 'unknown')}` : ''}<br>
+        ${comparison !== null ? `<div class="research-capture">Near-kickoff capture: ${esc(time(close.captured_at_utc))} · ${esc(close.closing_market?.bookmaker || 'unknown')} · ${Math.round((new Date(close.scheduled_kickoff_utc) - new Date(close.captured_at_utc)) / 60000)} min before kickoff</div>` : '<br>'}
         <span class="research-muted">Logged entry is unverified user input. Line difference is descriptive; a different sportsbook may have supplied the proxy.</span>
         <details><summary>Market chronology (${trail.length} captures)</summary>${trail.length ? trail.slice(-30).map(s => `<div>${esc(time(s.captured_at))} · home ${line(s.home_spread)} · ${new Date(s.captured_at) <= new Date(p.recorded_at) ? 'before entry' : 'after entry'}</div>`).join('') : 'No market history captured.'}</details>
         <details><summary>Private research note</summary><textarea data-note="${esc(p.id)}" maxlength="5000">${esc(p.note)}</textarea><button type="button" data-save="${esc(p.id)}">Save note</button></details>
