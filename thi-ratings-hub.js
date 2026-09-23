@@ -2,6 +2,18 @@
 (() => {
   let search = "";
   let sort = "net";
+  let conferenceFilter = "ALL";
+  const RATING_CONFERENCE_GROUPS = {
+    P4: new Set(["ACC", "Big 12", "Big Ten", "SEC"]),
+    G6: new Set(["American Athletic", "Conference USA", "Mid-American", "Mountain West", "Pac-12", "Sun Belt"]),
+  };
+
+  function matchesRatingConference(profile) {
+    const conference = profile.conference || teams[profile.team]?.conference || "FBS Independents";
+    return conferenceFilter === "ALL" || (RATING_CONFERENCE_GROUPS[conferenceFilter]
+      ? RATING_CONFERENCE_GROUPS[conferenceFilter].has(conference)
+      : conference === conferenceFilter);
+  }
   let situationalData = null;
   let selectedTeam = "";
 
@@ -103,7 +115,7 @@
     if (!target) return;
     const query = search.trim().toLocaleLowerCase();
     const data = Object.values(thiObservedRatingsData?.teams ?? {})
-      .filter(profile => profile?.eligible && profile?.ratings &&
+      .filter(profile => profile?.eligible && profile?.ratings && matchesRatingConference(profile) &&
         String(profile.team || "").toLocaleLowerCase().includes(query));
     data.sort((a, b) => {
       const av = ratingValue(a, sort);
@@ -136,7 +148,7 @@
 
     if (provisionalTarget) {
       const provisional = Object.values(thiObservedRatingsData?.teams ?? {})
-        .filter(profile => profile?.provisional && profile?.provisional_ratings &&
+        .filter(profile => profile?.provisional && profile?.provisional_ratings && matchesRatingConference(profile) &&
           String(profile.team || "").toLocaleLowerCase().includes(query))
         .sort((a, b) => {
           const av = Number(a.provisional_ratings?.[sort]);
@@ -216,6 +228,14 @@
           <option value="net">Rank by net</option><option value="offense">Rank by offense</option>
           <option value="defense">Rank by defense</option><option value="pace">Rank by pace</option>
         </select>
+        <select id="thi-ratings-conference" aria-label="Filter THI ratings by conference">
+          <option value="ALL">All Conferences</option>
+          <option value="P4">Power 4</option>
+          <option value="G6">Group of Six</option>
+          ${[...new Set(Object.values(teams).map(team => team.conference || "FBS Independents"))]
+            .sort((a, b) => a.localeCompare(b)).map(name =>
+              `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("")}
+        </select>
         <select id="thi-situational-team" aria-label="Select team for situational EPA">
           <option value="">Situational profile · select team</option>
           ${Object.keys(thiObservedRatingsData.teams).sort().map(name =>
@@ -236,6 +256,12 @@
     const select = document.getElementById("thi-ratings-sort");
     select.value = sort;
     select.addEventListener("change", () => { sort = select.value; renderRows(); });
+    const conferenceSelect = document.getElementById("thi-ratings-conference");
+    conferenceSelect.value = conferenceFilter;
+    conferenceSelect.addEventListener("change", () => {
+      conferenceFilter = conferenceSelect.value;
+      renderRows();
+    });
     const teamSelect = document.getElementById("thi-situational-team");
     teamSelect.value = selectedTeam;
     teamSelect.addEventListener("change", () => {
