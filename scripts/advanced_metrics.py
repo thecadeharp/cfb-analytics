@@ -287,6 +287,27 @@ def _side_metrics(plays, team=None, side="offense"):
     ]
     first_half = [play for play in plays if int(_number(play.get("period")) or 0) <= 2]
     second_half = [play for play in plays if int(_number(play.get("period")) or 0) >= 3]
+    situational = [
+        play for play in plays
+        if play.get("situational_valid") and not play.get("situational_garbage_time")
+    ]
+    situational_success = [play for play in situational if play.get("situational_success") is True]
+    script_early = [
+        play for play in situational
+        if int(_number(play.get("period")) or 0) <= 2
+        and int(_number(play.get("situational_down")) or 0) in (1, 2)
+    ]
+    leverage = [
+        play for play in situational
+        if int(_number(play.get("situational_down")) or 0) in (3, 4)
+        and _number(play.get("situational_distance")) is not None
+        and _number(play.get("situational_distance")) >= 3
+    ]
+    situational_red_zone = [
+        play for play in situational
+        if _number(play.get("yards_to_goal")) is not None
+        and 0 <= _number(play.get("yards_to_goal")) <= 20
+    ]
     team_field = "offense" if side == "offense" else "defense"
     home = [
         play for play in plays
@@ -314,6 +335,21 @@ def _side_metrics(plays, team=None, side="offense"):
         "epa_play": _mean(play.get("epa") for play in plays),
         "success_rate": _rate(play.get("success") for play in plays),
         "iso_ppp": _mean(play.get("epa") for play in successful),
+        "situational_iso_ppp": _mean(play.get("epa") for play in situational_success),
+        "situational_iso_successful_plays": len(situational_success),
+        "situational_plays": len(situational),
+        "script_early_epa": _mean(play.get("epa") for play in script_early),
+        "script_early_success_rate": _rate(play.get("situational_success") for play in script_early
+                                             if play.get("situational_success") is not None),
+        "script_early_plays": len(script_early),
+        "leverage_epa": _mean(play.get("epa") for play in leverage),
+        "leverage_success_rate": _rate(play.get("situational_success") for play in leverage
+                                        if play.get("situational_success") is not None),
+        "leverage_plays": len(leverage),
+        "situational_red_zone_epa": _mean(play.get("epa") for play in situational_red_zone),
+        "situational_red_zone_success_rate": _rate(play.get("situational_success") for play in situational_red_zone
+                                                   if play.get("situational_success") is not None),
+        "situational_red_zone_plays": len(situational_red_zone),
         "explosive_rate": _rate(play.get("explosive") for play in plays),
         "early_down_epa": _mean(play.get("epa") for play in early),
         "early_down_success_rate": _rate(play.get("success") for play in early),
@@ -450,6 +486,9 @@ def build_advanced_metrics(plays, teams, through_week, completed_games):
                 "standard_downs": "First down, second-and-7 or less, third/fourth-and-4 or less",
                 "passing_downs": "All other scrimmage-down situations",
                 "iso_ppp": "Mean EPA on successful plays",
+                "situational_splits": "Historical-aligned regulation rush/pass EPA plays with valid start down, distance, clock, pre-play score; 38/28/22-point garbage cutoffs. Red-zone and leverage remain separate metrics and can overlap; never sum their counts.",
+                "script_early": "First-half first/second-down regulation EPA plays outside garbage time; descriptive EPA per play, not a first-half spread.",
+                "leverage": "Third/fourth down with 3+ yards to go in regulation outside garbage time; descriptive EPA per play.",
                 "stuff_rate": "Share of rushes gaining zero or fewer yards",
                 "opportunity_rate": "Share of rushes gaining at least four yards",
                 "line_yards": "120% of losses, 100% through 4 yards, 50% from 5-10, capped after 10",
