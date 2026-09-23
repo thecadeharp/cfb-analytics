@@ -89,12 +89,14 @@
     catch (_) { privateBox.innerHTML = '<p class="research-error">Game or market data unavailable. Try again shortly.</p>'; return; }
     const {data: plays, error: readError} = await client.from('portfolio_plays').select('*').order('recorded_at', {ascending:false}).limit(100);
     if (readError) { privateBox.innerHTML = `<p class="research-error">Portfolio unavailable: ${esc(readError.message)}</p>`; return; }
-    const future = games.filter(g => g.game_id != null && new Date(g.start_date).getTime() > Date.now());
+    const future = games.filter(g => g.game_id != null && new Date(g.start_date).getTime() > Date.now())
+      .sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
     privateBox.innerHTML = `<p class="research-muted">Signed in as ${esc(user.email)}. These entries are self-reported; the server timestamp records when you logged them, not when a sportsbook accepted a wager.</p>
       <button type="button" id="research-logout">Sign out</button>
       <div class="research-stack"><div><h3>Log a line</h3>
       <form id="research-entry" class="research-form">
-      <label class="research-wide">Upcoming game<select name="game_id" required><option value="">Choose game</option>${future.map(g => `<option value="${esc(g.game_id)}">${esc(g.away?.team)} at ${esc(g.home?.team)} · ${esc(time(g.start_date))}</option>`).join('')}</select></label>
+      <label class="research-wide">Find a game by team<input id="research-game-search" type="search" placeholder="Type either team (or both)" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+      <label class="research-wide">Upcoming game<select name="game_id" required></select><span id="research-game-count" class="research-muted"></span></label>
       <label>Market<select name="market"><option value="spread">Spread</option><option value="moneyline">Moneyline</option><option value="total">Total</option></select></label>
       <label>Selection<select name="selection" required></select></label>
       <label id="research-line-field">Spread for selected team (− favorite / + underdog)<input name="line" type="number" min="-150" max="150" step="0.5" required></label>
@@ -109,6 +111,20 @@
     const entry = $('#research-entry');
     const marketInput = entry.elements.market, sideInput = entry.elements.selection;
     const lineInput = entry.elements.line, oddsInput = entry.elements.american_odds;
+    const gameSearch = $('#research-game-search');
+    const updateGameOptions = () => {
+      const terms = gameSearch.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      const matches = future.filter(g => {
+        const teams = `${g.away?.team || ''} ${g.home?.team || ''}`.toLowerCase();
+        return terms.every(term => teams.includes(term));
+      });
+      entry.elements.game_id.innerHTML = '<option value="">Choose a game</option>' +
+        matches.slice(0, 20).map(g => `<option value="${esc(g.game_id)}">${esc(g.away?.team)} at ${esc(g.home?.team)} · ${esc(time(g.start_date))}</option>`).join('');
+      $('#research-game-count').textContent = matches.length ?
+        `Showing ${Math.min(matches.length, 20)} of ${matches.length} matches. Type more to narrow the list.` :
+        'No upcoming games match those teams.';
+    };
+    gameSearch.addEventListener('input', () => { updateGameOptions(); updateEntry(); });
     const updateEntry = () => {
       const market = marketInput.value;
       const selectedGame = future.find(g => String(g.game_id) === entry.elements.game_id.value);
@@ -133,6 +149,7 @@
       $('#research-preview').textContent = `${market === 'total' ? side + ' total' : side + (type ? ' · ' + type : '')}${spread !== null && market !== 'moneyline' ? ' ' + (spread > 0 ? '+' : '') + spread : ''}${priceText}`;
     };
     ['change', 'input'].forEach(eventName => entry.addEventListener(eventName, updateEntry));
+    updateGameOptions();
     updateEntry();
     $('#research-entry').onsubmit = async ev => {
       ev.preventDefault(); const form = new FormData(ev.currentTarget);
