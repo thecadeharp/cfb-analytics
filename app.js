@@ -417,12 +417,24 @@ function conferenceNames() {
   )].sort((a, b) => a.localeCompare(b));
 }
 
+const CONFERENCE_GROUPS = {
+  P4: new Set(["ACC", "Big 12", "Big Ten", "SEC"]),
+  G6: new Set(["American Athletic", "Conference USA", "Mid-American", "Mountain West", "Pac-12", "Sun Belt"]),
+};
+
+function matchesTeamConference(conference, filter) {
+  if (filter === "ALL") return true;
+  return CONFERENCE_GROUPS[filter]
+    ? CONFERENCE_GROUPS[filter].has(conference)
+    : conference === filter;
+}
+
 function filteredTeamsByConference() {
   const data = sortedTeams();
   if (currentTeamConference === "ALL") return data;
-  return data.filter(
-    team => (team.conference || "FBS Independents") === currentTeamConference
-  );
+  return data.filter(team => matchesTeamConference(
+    team.conference || "FBS Independents", currentTeamConference
+  ));
 }
 
 function conferenceFilterMarkup(
@@ -445,6 +457,8 @@ function conferenceFilterMarkup(
         <option value="ALL" ${currentTeamConference === "ALL" ? "selected" : ""}>
           All Conferences
         </option>
+        <option value="P4" ${currentTeamConference === "P4" ? "selected" : ""}>Power 4</option>
+        <option value="G6" ${currentTeamConference === "G6" ? "selected" : ""}>Group of Six</option>
         ${conferenceNames().map(conference => `
           <option
             value="${escapeHtml(conference)}"
@@ -2764,6 +2778,39 @@ function teamSummaryCard(teamName) {
   `;
 }
 
+function renderScoringOpportunityProfile(teamName) {
+  const source = advancedMetricsData?.teams?.[teamName]?.non_garbage;
+  if (!source) return "";
+  const throughWeek = advancedMetricsData?.meta?.through_week;
+  const rows = [
+    ["Offense", source.offense],
+    ["Defense allowed", source.defense],
+  ];
+  const cell = (value, sample, minimum, format) =>
+    Number(sample || 0) >= minimum && hasValue(value) ? format(value) : "—";
+  return `
+    <details class="panel" style="margin:12px 0;overflow:hidden;">
+      <summary class="panel-header" style="cursor:pointer;list-style:none;">
+        <span class="panel-title">Scoring opportunity profile</span>
+        <span class="team-meta">Inside opponent 40 · through Week ${escapeHtml(throughWeek ?? "—")} · expand</span>
+      </summary>
+      <div class="panel-body">
+        <p class="team-meta">Descriptive 2026, non-garbage-time play quality inside the opponent's 40 and points per drive reaching that area. These measures use different units; no score or regression claim is inferred. Lower defense allowed is better.</p>
+        <div class="table-scroll"><table class="projection-table">
+          <thead><tr><th>Unit</th><th>Inside-40 EPA/play</th><th>Inside-40 success</th><th>Points/opportunity</th><th>Sample</th></tr></thead>
+          <tbody>${rows.map(([label, stats]) => `<tr>
+            <td><strong>${escapeHtml(label)}</strong></td>
+            <td>${cell(stats?.inside_40_epa, stats?.inside_40_plays, 20, v => formatSigned(v, 3))}</td>
+            <td>${cell(stats?.inside_40_success_rate, stats?.inside_40_plays, 20, v => formatPercent(v, 1))}</td>
+            <td>${cell(stats?.points_per_opportunity, stats?.scoring_opportunities, 5, v => formatNumber(v, 2))}</td>
+            <td class="team-meta">${escapeHtml(stats?.inside_40_plays ?? 0)} plays · ${escapeHtml(stats?.scoring_opportunities ?? 0)} opportunities</td>
+          </tr>`).join("")}</tbody>
+        </table></div>
+        <p class="team-meta">At least 20 inside-40 plays or 5 scoring opportunities are required to display each measure. A blank measure means its sample is developing.</p>
+      </div>
+    </details>`;
+}
+
 function unitMetricCell(teamName, side, field) {
   const metric = profileMetric(teamName, side, field);
   const band = metric?.band || "missing";
@@ -3506,7 +3553,7 @@ function renderRatings() {
       <table class="projection-table">
         <thead>
           <tr>
-            <th>${isConferenceView ? "Conference Rank" : "Power Rank"}</th>
+            <th>${isConferenceView ? "Filtered Rank" : "Power Rank"}</th>
             <th>Team</th>
             <th>Conference</th>
             <th>Record</th>
@@ -3926,7 +3973,7 @@ function setRatingsMode(mode) {
 }
 
 function setTeamConference(conference) {
-  currentTeamConference = conferenceNames().includes(conference)
+  currentTeamConference = (conferenceNames().includes(conference) || conference in CONFERENCE_GROUPS)
     ? conference
     : "ALL";
 
@@ -6139,6 +6186,8 @@ function renderDossier(team) {
     </div>
 
     ${renderThiObservedRatings(team.team)}
+
+    ${renderScoringOpportunityProfile(team.team)}
 
     ${renderSeasonOutlook(team)}
 
