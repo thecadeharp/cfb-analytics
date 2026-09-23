@@ -115,6 +115,30 @@ def normalize_row(row):
         row_value(row, "sack", default=False)
     )
 
+    # New situational research uses the same play-start fields as the
+    # historical builder. Missing values must never become a 0-0 game or a
+    # first-and-10 play merely because older display metrics have fallbacks.
+    start_down = number(row_value(row, "start.down"))
+    start_distance = number(row_value(row, "start.distance"))
+    start_home_score = number(row_value(row, "start.homeScore"))
+    start_away_score = number(row_value(row, "start.awayScore"))
+    clock_minute = number(row_value(row, "clock.minutes"))
+    clock_second = number(row_value(row, "clock.seconds"))
+    period_number = number(period)
+    situational_valid = (
+        period_number is not None and period_number in (1, 2, 3, 4)
+        and number(row_value(row, "seasonType")) == 2
+        and start_down in (1, 2, 3, 4) and start_distance is not None
+        and start_home_score is not None and start_away_score is not None
+        and clock_minute is not None and clock_second is not None
+        and 0 <= clock_minute <= 15 and 0 <= clock_second <= 59
+        and (clock_minute != 15 or clock_second == 0)
+        and boolean(row_value(row, "scrimmage_play", default=True))
+        and boolean(row_value(row, "action_play", default=True))
+        and not boolean(row_value(row, "kneel_down", default=False))
+        and not boolean(row_value(row, "penalty_no_play", default=False))
+    )
+
     success_value = row_value(row, "EPA_success", default=None)
     if success_value is None:
         down = int(number(row_value(row, "down", "start.down", default=1), 1))
@@ -150,6 +174,8 @@ def normalize_row(row):
         "period": int(number(period, 1)),
         "down": number(row_value(row, "down", "start.down")),
         "distance": number(row_value(row, "distance", "start.distance")),
+        "situational_down": start_down,
+        "situational_distance": start_distance,
         "yards_to_goal": number(
             row_value(row, "start.yardsToEndzone", "yardsToGoal")
         ),
@@ -160,6 +186,7 @@ def normalize_row(row):
         "is_pass": pass_play,
         "is_rush": rush_play,
         "success": success,
+        "situational_success": boolean(success_value) if success_value is not None else None,
         "explosive": (pass_play and yards >= 15) or (rush_play and yards >= 10),
         "sack": boolean(row_value(row, "sack", "is_sack", default=False)) or "sack" in description,
         "tfl": (
@@ -174,6 +201,11 @@ def normalize_row(row):
         "touchdown": boolean(row_value(row, "touchdown", default=False)) or "touchdown" in description,
         "havoc": boolean(row_value(row, "havoc", default=False)),
         "garbage_time": is_garbage_time(period, offense_score, defense_score),
+        "situational_valid": situational_valid,
+        "situational_garbage_time": (
+            is_garbage_time(period, start_home_score, start_away_score)
+            if situational_valid else True
+        ),
     }
 
 
@@ -188,6 +220,10 @@ def main():
 
     frame = download_dataset()
     required = {"game_id", "pos_team", "def_pos_team", "EPA"}
+    required.update({
+        "seasonType", "period", "start.down", "start.distance", "start.yardsToEndzone",
+        "start.homeScore", "start.awayScore", "clock.minutes", "clock.seconds",
+    })
     missing = required.difference(frame.columns)
     if missing:
         raise RuntimeError(f"SportsDataverse schema missing columns: {sorted(missing)}")
