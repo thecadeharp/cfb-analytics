@@ -183,6 +183,7 @@ def _drive_metrics(plays):
     opportunity_points = 0.0
     red_zone_trips = 0
     red_zone_touchdowns = 0
+    red_zone_scores = 0
 
     for drive in grouped.values():
         start_yards_to_goal = next(
@@ -228,6 +229,8 @@ def _drive_metrics(plays):
             opportunity_points += points
         if yards_to_goal and min(yards_to_goal) <= 20:
             red_zone_trips += 1
+            if points > 0:
+                red_zone_scores += 1
             if any(play.get("touchdown") for play in drive):
                 red_zone_touchdowns += 1
 
@@ -247,6 +250,7 @@ def _drive_metrics(plays):
             else None
         ),
         "red_zone_trips": red_zone_trips,
+        "red_zone_scoring_rate": _ratio(red_zone_scores, red_zone_trips),
         "red_zone_td_rate": _ratio(red_zone_touchdowns, red_zone_trips),
     }
 
@@ -304,6 +308,9 @@ def _side_metrics(plays, team=None, side="offense"):
 
     metrics = {
         "n_plays": len(plays),
+        "yards_per_play": _mean((play.get("yards_gained") for play in plays), 2),
+        "yards_per_rush": _mean((play.get("yards_gained") for play in rush_plays), 2),
+        "yards_per_pass_play": _mean((play.get("yards_gained") for play in pass_plays), 2),
         "epa_play": _mean(play.get("epa") for play in plays),
         "success_rate": _rate(play.get("success") for play in plays),
         "iso_ppp": _mean(play.get("epa") for play in successful),
@@ -425,6 +432,13 @@ def build_advanced_metrics(plays, teams, through_week, completed_games):
             "generated": datetime.now().isoformat(),
             "through_week": int(through_week),
             "completed_games": int(completed_games),
+            "game_ids": sorted(
+                {
+                    str(play.get("game_id"))
+                    for play in plays
+                    if play.get("game_id") not in (None, "")
+                }
+            ),
             "source": "SportsDataverse cfbfastR ESPN-derived play-by-play",
             "epa_source": "open cfbfastR expected-points model",
             "model_usage": "display_only_not_used_by_model_a",
@@ -440,6 +454,7 @@ def build_advanced_metrics(plays, teams, through_week, completed_games):
                 "opportunity_rate": "Share of rushes gaining at least four yards",
                 "line_yards": "120% of losses, 100% through 4 yards, 50% from 5-10, capped after 10",
                 "red_zone": "Scrimmage plays at the opponent 20-yard line or closer",
+                "red_zone_scoring_rate": "Share of red-zone drives producing any points",
                 "adjusted_sack_rate": "Sacks per qualifying dropback after removing spikes and throwaways",
                 "available_yards": "Share of starting drive field space gained, capped from 0% to 100%",
                 "scoring_opportunity": "Drive reaching the opponent 40-yard line",
