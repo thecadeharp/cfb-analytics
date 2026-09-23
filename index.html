@@ -1075,6 +1075,16 @@
         white-space: normal;
       }
     }
+    /* Keep dossier rating labels legible on every rank color. */
+    .thi-observed-ratings .thi-rating-card .thi-rating-card-label {
+      color: inherit;
+      font-size: 11px;
+      line-height: 1.35;
+      letter-spacing: .45px;
+    }
+    .thi-observed-ratings .thi-rating-card.thi-band-missing .thi-rating-card-label {
+      color: #4c5660;
+    }
   </style>
 </head>
 
@@ -1373,7 +1383,7 @@
   </main>
 
   <script src="app.js?v=2026-thi-ratings-v01"></script>
-  <script src="thi-ratings-hub.js?v=2026-hub-v03"></script>
+  <script src="thi-ratings-hub.js?v=2026-hub-v04"></script>
   <script src="last-updated-timestamp.js"></script>
   <script src="dossier-ranks.js"></script>
   <script src="ux-v2.js?v=2026-week2-polish"></script>
