@@ -59,6 +59,9 @@ jobs:
               if team["non_garbage"]["offense"].get("n_plays", 0) >= 35
           )
           required = {
+              "yards_per_play",
+              "yards_per_rush",
+              "yards_per_pass_play",
               "iso_ppp",
               "standard_down_epa",
               "passing_down_epa",
@@ -69,11 +72,13 @@ jobs:
               "drive_scoring_rate",
               "points_per_opportunity",
               "red_zone_td_rate",
+              "red_zone_scoring_rate",
               "fumble_recovery_delta",
               "third_down_conversion_delta",
           }
           missing = required.difference(sample)
           assert not missing, f"Advanced Metrics v2 fields missing: {sorted(missing)}"
+          assert len(data["meta"].get("game_ids", [])) >= 50
           print("Advanced metrics validation passed")
           PY
 
