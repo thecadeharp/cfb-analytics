@@ -17,6 +17,7 @@
     .research-form textarea{min-height:78px;resize:vertical}
     .research-wide{grid-column:1/-1}.research-action{background:#135a48;color:white;border:0;border-radius:8px;padding:11px 16px;cursor:pointer;font:inherit;font-size:13px;font-weight:600}
     .research-row{border-top:1px solid var(--border,#ddd);padding:12px 0;font-size:13px;line-height:1.6}
+    .research-delete{background:transparent;color:#a32728;border:1px solid #d9a4a5;border-radius:7px;padding:7px 10px;cursor:pointer;font:inherit;margin-top:8px}
     .research-row:last-child{padding-bottom:0}.research-stack{display:grid;gap:16px;margin:18px 0}
     .research-error{color:#a32728}.research-positive{color:#116b4a;font-weight:700}
   `;
@@ -136,9 +137,19 @@
         ${comparison !== null ? ` · captured ${esc(time(close.captured_at_utc))} · proxy book: ${esc(close.closing_market?.bookmaker || 'unknown')}` : ''}<br>
         <span class="research-muted">Logged entry is unverified user input. Line difference is descriptive; a different sportsbook may have supplied the proxy.</span>
         <details><summary>Market chronology (${trail.length} captures)</summary>${trail.length ? trail.slice(-30).map(s => `<div>${esc(time(s.captured_at))} · home ${line(s.home_spread)} · ${new Date(s.captured_at) <= new Date(p.recorded_at) ? 'before entry' : 'after entry'}</div>`).join('') : 'No market history captured.'}</details>
-        <details><summary>Private research note</summary><textarea data-note="${esc(p.id)}" maxlength="5000">${esc(p.note)}</textarea><button type="button" data-save="${esc(p.id)}">Save note</button></details></div>`;
+        <details><summary>Private research note</summary><textarea data-note="${esc(p.id)}" maxlength="5000">${esc(p.note)}</textarea><button type="button" data-save="${esc(p.id)}">Save note</button></details>
+        <button type="button" class="research-delete" data-delete="${esc(p.id)}">Delete entry</button></div>`;
     }).join('') : '<p class="research-muted">No plays logged yet.</p>';
     $('#research-entries').onclick = async ev => {
+      const deleteId = ev.target.dataset.delete;
+      if (deleteId) {
+        if (!confirm('Delete this private entry permanently?')) return;
+        ev.target.disabled = true;
+        const {error: deleteError} = await client.from('portfolio_plays').delete().eq('id', deleteId);
+        if (deleteError) { alert(deleteError.message); ev.target.disabled = false; }
+        else await refresh();
+        return;
+      }
       const id = ev.target.dataset.save; if (!id) return;
       const note = [...$('#research-entries').querySelectorAll('textarea[data-note]')].find(el => el.dataset.note === id)?.value;
       const {error: updateError} = await client.from('portfolio_plays').update({note}).eq('id', id);
