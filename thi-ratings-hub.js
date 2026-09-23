@@ -2,6 +2,8 @@
 (() => {
   let search = "";
   let sort = "net";
+  let situationalData = null;
+  let selectedTeam = "";
 
   const style = document.createElement("style");
   style.textContent = `
@@ -26,6 +28,17 @@
     .thi-hub-badge.limited { color:#815b08; background:#fff4d6; }
     .thi-hub-method { margin-top:18px; border:1px solid var(--border); border-radius:10px; padding:16px; color:var(--muted); font-size:13px; line-height:1.6; }
     .thi-hub-method summary { color:var(--text); font-weight:700; cursor:pointer; }
+    .thi-situational-panel { border:1px solid var(--border); border-radius:12px; background:var(--surface); margin:8px 0 18px; padding:18px; }
+    .thi-situational-header { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:baseline; }
+    .thi-situational-header h2 { margin:0; font-size:19px; }
+    .thi-situational-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:14px; }
+    .thi-situational-card { border:1px solid var(--border); border-radius:9px; padding:14px; min-width:0; }
+    .thi-situational-card h3 { font-size:13px; margin:0 0 12px; }
+    .thi-situational-line { display:flex; align-items:baseline; justify-content:space-between; gap:6px; padding:6px 0; border-top:1px solid var(--border); }
+    .thi-situational-line strong { font:700 15px var(--mono); }
+    .thi-situational-line span { color:var(--muted); font-size:12px; }
+    .thi-situational-sample { color:var(--muted); font-size:11px; line-height:1.5; margin-top:4px; }
+    .thi-situational-explainer { margin:12px 0 0; color:var(--muted); font-size:12px; line-height:1.55; }
     @media (max-width:700px) {
       .thi-hub-table thead { display:none; }
       .thi-hub-table tbody tr { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); padding:14px; gap:10px 16px; border-bottom:1px solid var(--border); }
@@ -33,6 +46,7 @@
       .thi-hub-table td:first-child { grid-column:1/-1; }
       .thi-hub-table td[data-label]::before { content:attr(data-label); display:block; color:var(--muted); font:600 10px var(--mono); margin-bottom:3px; }
       .thi-hub-controls select { flex:1 1 150px; }
+      .thi-situational-grid { grid-template-columns:1fr; }
     }
   `;
   document.head.appendChild(style);
@@ -101,6 +115,39 @@
       `<div class="empty-state">No matching teams with a published THI rating.</div>`;
   }
 
+  function renderSituational() {
+    const target = document.getElementById("thi-situational-panel");
+    if (!target) return;
+    if (!selectedTeam) { target.innerHTML = ""; return; }
+    const currentWeek = Number(thiObservedRatingsData?.meta?.through_week);
+    const sourceWeek = Number(situationalData?.meta?.through_week);
+    if (!situationalData || !Number.isFinite(currentWeek) || sourceWeek !== currentWeek) {
+      target.innerHTML = `<div class="thi-situational-panel">Situational profiles are updating for this week.</div>`;
+      return;
+    }
+    const team = situationalData.teams?.[selectedTeam];
+    if (!team) { target.innerHTML = ""; return; }
+    const labels = {
+      script: "First-half early downs",
+      leverage: "3rd/4th and 3+",
+      red_zone: "Red-zone plays"
+    };
+    target.innerHTML = `<div class="thi-situational-panel">
+      <div class="thi-situational-header"><h2>${escapeHtml(selectedTeam)} · Situational EPA</h2>
+        <span class="thi-hub-muted">Through Week ${escapeHtml(sourceWeek)} · Regulation only</span></div>
+      <div class="thi-situational-grid">${Object.entries(labels).map(([key, label]) => {
+        const off = team.offense?.[key] ?? {};
+        const def = team.defense?.[key] ?? {};
+        const line = (name, entry) => `<div class="thi-situational-line"><span>${name}</span>
+          <strong>${entry.epa_per_play === null || entry.epa_per_play === undefined ? "—" : formatSigned(entry.epa_per_play, 3)}</strong></div>
+          <div class="thi-situational-sample">${escapeHtml(entry.sample_plays ?? 0)} plays · ${escapeHtml(entry.sample_status === "UNAVAILABLE" ? "Insufficient sample" : entry.sample_status === "MEASURED" ? "30+ play sample" : "Developing sample")}</div>`;
+        return `<section class="thi-situational-card"><h3>${escapeHtml(label)}</h3>
+          ${line("Offense", off)}${line("Defense allowed", def)}</section>`;
+      }).join("")}</div>
+      <p class="thi-situational-explainer">EPA per play; lower defense allowed is better. Small samples are pulled toward each team’s overall performance and the FBS average. These splits are descriptive, not opponent-adjusted, and are not first-half or full-game projected spreads. Red-zone and late-down samples can overlap.</p>
+    </div>`;
+  }
+
   function render() {
     const container = document.getElementById("thi-ratings-container");
     const meta = thiObservedRatingsData?.meta;
@@ -115,7 +162,13 @@
           <option value="net">Rank by net</option><option value="offense">Rank by offense</option>
           <option value="defense">Rank by defense</option><option value="pace">Rank by pace</option>
         </select>
+        <select id="thi-situational-team" aria-label="Select team for situational EPA">
+          <option value="">Situational profile · select team</option>
+          ${Object.keys(thiObservedRatingsData.teams).sort().map(name =>
+            `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("")}
+        </select>
       </div>
+      <div id="thi-situational-panel"></div>
       <p class="thi-hub-note">2026 data through Week ${escapeHtml(meta.through_week ?? "—")} · ${escapeHtml(meta.sample ?? "Completed FBS games")} · Beta. Net is offense minus defense; lower defense is better. Values describe performance and do not imply a neutral-field spread.</p>
       <div id="thi-ratings-rows"></div>
       <details class="thi-hub-method"><summary>How to read these ratings</summary>
@@ -128,6 +181,13 @@
     const select = document.getElementById("thi-ratings-sort");
     select.value = sort;
     select.addEventListener("change", () => { sort = select.value; renderRows(); });
+    const teamSelect = document.getElementById("thi-situational-team");
+    teamSelect.value = selectedTeam;
+    teamSelect.addEventListener("change", () => {
+      selectedTeam = teamSelect.value;
+      renderSituational();
+    });
+    renderSituational();
     renderRows();
   }
 
@@ -135,5 +195,13 @@
     const team = event.target.closest("[data-thi-team]");
     if (team) openDossier(team.dataset.thiTeam);
   });
-  document.addEventListener("hammer:data-ready", render);
+  document.addEventListener("hammer:data-ready", () => {
+    render();
+    loadJson("./data/thi_situational_profiles.json").then(data => {
+      if (data?.meta?.status === "DESCRIPTIVE_BETA_NO_POINT_SCALE") {
+        situationalData = data;
+        renderSituational();
+      }
+    }).catch(() => { /* Profile generation has not run yet. */ });
+  });
 })();
