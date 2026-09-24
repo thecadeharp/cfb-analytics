@@ -1,0 +1,91 @@
+name: Build Verified Possession Ledger
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thi-verified-possession-ledger
+  cancel-in-progress: false
+
+jobs:
+  ledger:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install research dependencies
+        run: pip install pandas numpy requests pyarrow
+      - name: Check syntax and ledger regressions
+        run: |
+          python -m py_compile scripts/build_verified_possession_ledger.py scripts/test_verified_possession_ledger.py
+          python -m unittest discover -s scripts -p test_verified_possession_ledger.py -v
+      - name: Preserve Model A and published outputs
+        run: |
+          sha256sum data/projections.json data/cfb_metrics.json scripts/build_projections.py index.html app.js postgame-analytics.js > /tmp/thi-ledger-before.sha256
+      - name: Build observed possession ledger
+        run: python scripts/build_verified_possession_ledger.py
+      - name: Check report, artifacts and production files
+        run: |
+          sha256sum --check /tmp/thi-ledger-before.sha256
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          import pandas as pd
+          report = json.loads(Path('data/research/verified_possession_ledger_2025.json').read_text())
+          prior = json.loads(Path('data/research/independent_score_audit_2025.json').read_text())
+          assert report['meta']['status'] == 'research_only_observed_possession_ledger'
+          assert report['meta']['training_ready'] is False
+          assert report['counts']['verified_games'] == prior['comparison']['independently_confirmed_and_reconciled']
+          assert report['counts']['observed_regulation_possessions'] > 0
+          assert report['counts']['training_eligible_possessions'] == 0
+          root = Path('research_artifacts/verified_possession_ledger_2025')
+          for name, expected in report['artifacts'].items():
+              path = root / name
+              assert hashlib.sha256(path.read_bytes()).hexdigest() == expected['sha256']
+              assert len(pd.read_csv(path)) == expected['rows']
+          ledger = pd.read_csv(root / 'possessions.csv')
+          assert not ledger.duplicated(['game_id', 'drive_id']).any()
+          assert ledger.loc[~ledger.label_check_passed, 'offensive_points'].isna().all()
+          assert not ledger.training_eligible.any()
+          PY
+          changed=$(git diff --name-only)
+          if [ "$changed" != '' ] && [ "$changed" != 'data/research/verified_possession_ledger_2025.json' ]; then
+            echo 'Unexpected tracked files changed during research build'
+            git diff --stat
+            exit 1
+          fi
+      - name: Save ledger and full review queue
+        uses: actions/upload-artifact@v4
+        with:
+          name: verified-possession-ledger-2025-${{ github.run_id }}
+          path: research_artifacts/verified_possession_ledger_2025/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Commit research report only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/research/verified_possession_ledger_2025.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Audit complete observed possession ledger for verified 2025 games'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            if ! git diff --quiet "$GITHUB_SHA" origin/main -- scripts/build_verified_possession_ledger.py scripts/test_verified_possession_ledger.py scripts/audit_verified_possession_points.py scripts/reconstruct_scoring_events.py scripts/verify_historical_scores_ncaa.py scripts/build_historical_training_data.py data/research/independent_score_audit_2025.json .github/workflows/build-verified-possession-ledger.yml; then
+              echo 'Research inputs changed during the run; start a fresh workflow.'
+              exit 1
+            fi
+            git rebase origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 2
+          done
+          exit 1
