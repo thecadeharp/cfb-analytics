@@ -1,0 +1,69 @@
+{
+  "meta": {
+    "generated_at": "2026-09-24T15:29:35.380455+00:00",
+    "status": "research_only_clean_game_expected_points_rolling_validation",
+    "scope": "locked folds 2019-2021\u21922022, 2019-2022\u21922023, 2019-2023\u21922024; 2025 excluded/sealed",
+    "production_use": "none; Model A, projections, and site untouched",
+    "training_ready": false
+  },
+  "folds": [
+    {
+      "train_through": 2021,
+      "test_year": 2022,
+      "train_rows": 5329,
+      "test_rows": 4910,
+      "ridge": {
+        "mae": 2.600030276115809,
+        "rmse": 2.911864482596574,
+        "bias": 0.1974560060537488
+      },
+      "league_mean": {
+        "mae": 2.7319103594481104,
+        "rmse": 2.998747751223831,
+        "bias": 0.2013944374610885
+      },
+      "mae_improvement": 0.13188008333230128,
+      "rmse_improvement": 0.08688326862725715,
+      "passed": true
+    },
+    {
+      "train_through": 2022,
+      "test_year": 2023,
+      "train_rows": 10239,
+      "test_rows": 5741,
+      "ridge": {
+        "mae": 2.6385239352434997,
+        "rmse": 2.9825009456814056,
+        "bias": 0.00829680392661893
+      },
+      "league_mean": {
+        "mae": 2.76752866548709,
+        "rmse": 3.061774213877413,
+        "bias": -0.006139964481363403
+      },
+      "mae_improvement": 0.12900473024359016,
+      "rmse_improvement": 0.07927326819600733,
+      "passed": true
+    },
+    {
+      "train_through": 2023,
+      "test_year": 2024,
+      "train_rows": 15980,
+      "test_rows": 3974,
+      "ridge": {
+        "mae": 2.6523175473860547,
+        "rmse": 3.008147066543454,
+        "bias": -0.09253240278171997
+      },
+      "league_mean": {
+        "mae": 2.789298462534635,
+        "rmse": 3.088563381138379,
+        "bias": -0.10037490244788898
+      },
+      "mae_improvement": 0.13698091514858035,
+      "rmse_improvement": 0.08041631459492482,
+      "passed": true
+    }
+  ],
+  "all_folds_passed": true
+}
