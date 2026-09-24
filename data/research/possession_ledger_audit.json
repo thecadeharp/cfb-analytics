@@ -1,0 +1,145 @@
+{
+  "meta": {
+    "generated_at": "2026-09-24T03:17:44.035513+00:00",
+    "status": "research_only_possession_ledger_quality_audit",
+    "source": "SportsDataverse ESPN CFB play-by-play annual release",
+    "source_schema": "scripts/build_historical_training_data.py normalize_season",
+    "point_rule": "Possessing-team score delta is a proxy, not validated offensive points; opponent scores and uncaptured scores require attribution before modeling.",
+    "output_rule": "Possession CSVs remain temporary; only this aggregate audit is committed."
+  },
+  "seasons": [
+    {
+      "season": 2019,
+      "drives": 21380,
+      "games": 847,
+      "valid_score_drives": 21331,
+      "missing_or_implausible_score_drives": 49,
+      "opponent_scored_on_drive": 477,
+      "missing_start_field_position": 0,
+      "drives_with_no_scrimmage_epa": 506,
+      "scoring_opportunity_drives": 9820,
+      "garbage_affected_drives": 2734,
+      "score_reconciliation": {
+        "games_with_score_comparison": 847,
+        "games_without_score_comparison": 0,
+        "games_fully_reconciled": 533,
+        "mean_absolute_unassigned_points_per_game": 3.41,
+        "interpretation": "Unassigned points may reflect returns, special teams, missing drives, or scoring-stamp problems; investigate before labeling offensive points."
+      }
+    },
+    {
+      "season": 2020,
+      "drives": 13422,
+      "games": 537,
+      "valid_score_drives": 13398,
+      "missing_or_implausible_score_drives": 24,
+      "opponent_scored_on_drive": 332,
+      "missing_start_field_position": 0,
+      "drives_with_no_scrimmage_epa": 308,
+      "scoring_opportunity_drives": 6346,
+      "garbage_affected_drives": 1379,
+      "score_reconciliation": {
+        "games_with_score_comparison": 537,
+        "games_without_score_comparison": 0,
+        "games_fully_reconciled": 314,
+        "mean_absolute_unassigned_points_per_game": 3.89,
+        "interpretation": "Unassigned points may reflect returns, special teams, missing drives, or scoring-stamp problems; investigate before labeling offensive points."
+      }
+    },
+    {
+      "season": 2021,
+      "drives": 20065,
+      "games": 801,
+      "valid_score_drives": 19562,
+      "missing_or_implausible_score_drives": 503,
+      "opponent_scored_on_drive": 962,
+      "missing_start_field_position": 0,
+      "drives_with_no_scrimmage_epa": 782,
+      "scoring_opportunity_drives": 9198,
+      "garbage_affected_drives": 2315,
+      "score_reconciliation": {
+        "games_with_score_comparison": 801,
+        "games_without_score_comparison": 0,
+        "games_fully_reconciled": 346,
+        "mean_absolute_unassigned_points_per_game": 6.01,
+        "interpretation": "Unassigned points may reflect returns, special teams, missing drives, or scoring-stamp problems; investigate before labeling offensive points."
+      }
+    },
+    {
+      "season": 2022,
+      "drives": 20613,
+      "games": 815,
+      "valid_score_drives": 19924,
+      "missing_or_implausible_score_drives": 689,
+      "opponent_scored_on_drive": 996,
+      "missing_start_field_position": 0,
+      "drives_with_no_scrimmage_epa": 1118,
+      "scoring_opportunity_drives": 9443,
+      "garbage_affected_drives": 2281,
+      "score_reconciliation": {
+        "games_with_score_comparison": 815,
+        "games_without_score_comparison": 0,
+        "games_fully_reconciled": 364,
+        "mean_absolute_unassigned_points_per_game": 6.19,
+        "interpretation": "Unassigned points may reflect returns, special teams, missing drives, or scoring-stamp problems; investigate before labeling offensive points."
+      }
+    },
+    {
+      "season": 2023,
+      "drives": 21706,
+      "games": 860,
+      "valid_score_drives": 21331,
+      "missing_or_implausible_score_drives": 375,
+      "opponent_scored_on_drive": 917,
+      "missing_start_field_position": 0,
+      "drives_with_no_scrimmage_epa": 1543,
+      "scoring_opportunity_drives": 9676,
+      "garbage_affected_drives": 2302,
+      "score_reconciliation": {
+        "games_with_score_comparison": 860,
+        "games_without_score_comparison": 0,
+        "games_fully_reconciled": 452,
+        "mean_absolute_unassigned_points_per_game": 4.67,
+        "interpretation": "Unassigned points may reflect returns, special teams, missing drives, or scoring-stamp problems; investigate before labeling offensive points."
+      }
+    },
+    {
+      "season": 2024,
+      "drives": 22673,
+      "games": 898,
+      "valid_score_drives": 22303,
+      "missing_or_implausible_score_drives": 370,
+      "opponent_scored_on_drive": 1075,
+      "missing_start_field_position": 0,
+      "drives_with_no_scrimmage_epa": 1978,
+      "scoring_opportunity_drives": 10186,
+      "garbage_affected_drives": 2545,
+      "score_reconciliation": {
+        "games_with_score_comparison": 898,
+        "games_without_score_comparison": 0,
+        "games_fully_reconciled": 405,
+        "mean_absolute_unassigned_points_per_game": 5.51,
+        "interpretation": "Unassigned points may reflect returns, special teams, missing drives, or scoring-stamp problems; investigate before labeling offensive points."
+      }
+    },
+    {
+      "season": 2025,
+      "drives": 23247,
+      "games": 911,
+      "valid_score_drives": 22504,
+      "missing_or_implausible_score_drives": 743,
+      "opponent_scored_on_drive": 1405,
+      "missing_start_field_position": 0,
+      "drives_with_no_scrimmage_epa": 2406,
+      "scoring_opportunity_drives": 10572,
+      "garbage_affected_drives": 2766,
+      "score_reconciliation": {
+        "games_with_score_comparison": 911,
+        "games_without_score_comparison": 0,
+        "games_fully_reconciled": 395,
+        "mean_absolute_unassigned_points_per_game": 5.43,
+        "interpretation": "Unassigned points may reflect returns, special teams, missing drives, or scoring-stamp problems; investigate before labeling offensive points."
+      }
+    }
+  ]
+}
