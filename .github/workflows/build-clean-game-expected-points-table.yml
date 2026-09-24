@@ -1,0 +1,48 @@
+name: Build Clean Game Expected Points Table
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas numpy requests pyarrow
+      - name: Preserve production surfaces and sealed holdout
+        run: |
+          sha256sum data/projections.json data/cfb_metrics.json scripts/build_projections.py index.html app.js postgame-analytics.js > /tmp/thi-expected-points-before.sha256
+      - run: python scripts/build_clean_game_expected_points_table.py
+      - name: Validate research-only table
+        run: |
+          sha256sum --check /tmp/thi-expected-points-before.sha256
+          python - <<'PY'
+          import gzip, json
+          import pandas as pd
+          from pathlib import Path
+          report=json.loads(Path('data/research/expected_points_clean_games_2019_2024.json').read_text())
+          table=pd.read_csv(gzip.open('data/research/expected_points_clean_games_2019_2024.csv.gz','rt'))
+          assert report['meta']['training_ready'] is False
+          assert set(table.season) == set(range(2019, 2025))
+          assert 2025 not in set(table.season)
+          assert set(table.partition) == {'development', 'validation'}
+          assert table.target_offensive_points.between(0, 8).all()
+          assert not table.duplicated(['season','game_id','drive_id']).any()
+          PY
+      - name: Commit research artifacts only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/research/expected_points_clean_games_2019_2024.csv.gz data/research/expected_points_clean_games_2019_2024.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Build clean-game expected-points target table'
+          git pull --rebase origin main
+          git push origin HEAD:main
