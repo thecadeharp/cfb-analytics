@@ -1,0 +1,54 @@
+name: Forensic Reappearing Drives
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thi-reappearing-drive-forensics
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install research dependencies
+        run: pip install pandas numpy requests pyarrow
+      - name: Preserve production surfaces and sealed holdout
+        run: |
+          sha256sum data/projections.json data/cfb_metrics.json scripts/build_projections.py index.html app.js postgame-analytics.js > /tmp/thi-forensics-before.sha256
+      - name: Run 2022 read-only forensic audit
+        run: python scripts/forensic_reappearing_drives.py
+      - name: Validate research-only report and production protection
+        run: |
+          sha256sum --check /tmp/thi-forensics-before.sha256
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('data/research/reappearing_drive_forensics_2022.json').read_text())
+          assert report['meta']['status'] == 'research_only_reappearing_drive_forensic_audit'
+          assert report['meta']['training_ready'] is False
+          assert report['season'] == 2022
+          assert report['verified_games'] > 0
+          assert report['reappearing_drive_cases'] > 0
+          assert sum(report['classification_counts'].values()) == report['reappearing_drive_cases']
+          assert sum(report['evidence_counts'].values()) == report['reappearing_drive_cases']
+          assert 0 < len(report['sample_cases']) <= 20
+          PY
+      - name: Commit forensic report only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/research/reappearing_drive_forensics_2022.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Audit 2022 reappearing drive IDs'
+          git pull --rebase origin main
+          git push origin HEAD:main
