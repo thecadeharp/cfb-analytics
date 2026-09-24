@@ -1,0 +1,3355 @@
+{
+  "meta": {
+    "generated_at": "2026-09-24T13:31:42.722616+00:00",
+    "status": "research_only_reappearing_drive_forensic_audit",
+    "scope": "2022 independently score-verified games only; 2025 excluded and sealed",
+    "production_use": "none; does not alter Model A, projections, site files, or ledger eligibility",
+    "training_ready": false,
+    "method": "Compares contiguous core-play drive-ID blocks in ESPN sequenceNumber order with the ledger's chronological clock order. Classifications describe evidence; they do not authorize repairs."
+  },
+  "season": 2022,
+  "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2022.parquet",
+  "verified_games": 564,
+  "cross_source_rejections": {
+    "unmatched_or_ambiguous_ncaa": 179,
+    "tagged_scores_not_reconciled": 41,
+    "feed_final_mismatch": 30,
+    "unknown_scoring_event": 1
+  },
+  "reappearing_drive_cases": 507,
+  "classification_counts": {
+    "source_order_reappearance": 505,
+    "clock_order_only": 2
+  },
+  "evidence_counts": {
+    "opponent_interruption": 284,
+    "multi_timestamp_source_split": 214,
+    "clock_order_anomaly": 2,
+    "same_clock_correction_cluster": 7
+  },
+  "sample_cases": [
+    {
+      "game_id": "401404064",
+      "drive_id": "4014040647",
+      "classification": "clock_order_only",
+      "evidence": "clock_order_anomaly",
+      "clock_block_count": 2,
+      "source_block_count": 1,
+      "clock_blocks": [
+        {
+          "drive_id": "4014040647",
+          "plays": 1,
+          "sequence_start": 101996603,
+          "sequence_end": 101996603,
+          "start": {
+            "period": 1,
+            "minutes": 0,
+            "seconds": 33
+          },
+          "end": {
+            "period": 1,
+            "minutes": 0,
+            "seconds": 33
+          },
+          "possession_teams": [
+            "66"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401404064101996603"
+          ]
+        },
+        {
+          "drive_id": "4014040647",
+          "plays": 6,
+          "sequence_start": 101999903,
+          "sequence_end": 102878201,
+          "start": {
+            "period": 1,
+            "minutes": 0,
+            "seconds": 0
+          },
+          "end": {
+            "period": 2,
+            "minutes": 12,
+            "seconds": 17
+          },
+          "possession_teams": [
+            "66"
+          ],
+          "first_type": "Pass Reception",
+          "last_type": "Fumble Recovery (Opponent)",
+          "play_ids": [
+            "401404064101999903",
+            "401404064102849902",
+            "401404064102849903",
+            "401404064102849904",
+            "401404064102849907",
+            "401404064102878201"
+          ]
+        }
+      ],
+      "source_blocks": [
+        {
+          "drive_id": "4014040647",
+          "plays": 7,
+          "sequence_start": 101996603,
+          "sequence_end": 102878201,
+          "start": {
+            "period": 1,
+            "minutes": 0,
+            "seconds": 33
+          },
+          "end": {
+            "period": 2,
+            "minutes": 12,
+            "seconds": 17
+          },
+          "possession_teams": [
+            "66"
+          ],
+          "first_type": "Rush",
+          "last_type": "Fumble Recovery (Opponent)",
+          "play_ids": [
+            "401404064101996603",
+            "401404064101999903",
+            "401404064102849902",
+            "401404064102849903",
+            "401404064102849904",
+            "401404064102849907",
+            "401404064102878201"
+          ]
+        }
+      ],
+      "intervening_source_blocks": []
+    },
+    {
+      "game_id": "401415237",
+      "drive_id": "40141523712",
+      "classification": "clock_order_only",
+      "evidence": "clock_order_anomaly",
+      "clock_block_count": 2,
+      "source_block_count": 1,
+      "clock_blocks": [
+        {
+          "drive_id": "40141523712",
+          "plays": 1,
+          "sequence_start": 103918301,
+          "sequence_end": 103918301,
+          "start": {
+            "period": 3,
+            "minutes": 8,
+            "seconds": 16
+          },
+          "end": {
+            "period": 3,
+            "minutes": 8,
+            "seconds": 16
+          },
+          "possession_teams": [
+            "2005"
+          ],
+          "first_type": "Rushing Touchdown",
+          "last_type": "Rushing Touchdown",
+          "play_ids": [
+            "401415237103918301"
+          ]
+        },
+        {
+          "drive_id": "40141523712",
+          "plays": 2,
+          "sequence_start": 103000005,
+          "sequence_end": 103000006,
+          "start": {
+            "period": 3,
+            "minutes": 0,
+            "seconds": 0
+          },
+          "end": {
+            "period": 3,
+            "minutes": 0,
+            "seconds": 0
+          },
+          "possession_teams": [
+            "2005"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401415237103000005",
+            "401415237103000006"
+          ]
+        }
+      ],
+      "source_blocks": [
+        {
+          "drive_id": "40141523712",
+          "plays": 3,
+          "sequence_start": 103000005,
+          "sequence_end": 103918301,
+          "start": {
+            "period": 3,
+            "minutes": 0,
+            "seconds": 0
+          },
+          "end": {
+            "period": 3,
+            "minutes": 8,
+            "seconds": 16
+          },
+          "possession_teams": [
+            "2005"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rushing Touchdown",
+          "play_ids": [
+            "401415237103000005",
+            "401415237103000006",
+            "401415237103918301"
+          ]
+        }
+      ],
+      "intervening_source_blocks": []
+    },
+    {
+      "game_id": "401403910",
+      "drive_id": "4014039102",
+      "classification": "source_order_reappearance",
+      "evidence": "multi_timestamp_source_split",
+      "clock_block_count": 3,
+      "source_block_count": 3,
+      "clock_blocks": [
+        {
+          "drive_id": "4014039102",
+          "plays": 4,
+          "sequence_start": 101904902,
+          "sequence_end": 101904905,
+          "start": {
+            "period": 1,
+            "minutes": 9,
+            "seconds": 50
+          },
+          "end": {
+            "period": 1,
+            "minutes": 9,
+            "seconds": 50
+          },
+          "possession_teams": [
+            "57"
+          ],
+          "first_type": "Pass Reception",
+          "last_type": "Pass Reception",
+          "play_ids": [
+            "401403910101904902",
+            "401403910101904903",
+            "401403910101904904",
+            "401403910101904905"
+          ]
+        },
+        {
+          "drive_id": "4014039102",
+          "plays": 1,
+          "sequence_start": 101925101,
+          "sequence_end": 101925101,
+          "start": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 48
+          },
+          "end": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 48
+          },
+          "possession_teams": [
+            "57"
+          ],
+          "first_type": "Punt",
+          "last_type": "Punt",
+          "play_ids": [
+            "401403910101925101"
+          ]
+        },
+        {
+          "drive_id": "4014039102",
+          "plays": 1,
+          "sequence_start": 101925104,
+          "sequence_end": 101925104,
+          "start": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 48
+          },
+          "end": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 48
+          },
+          "possession_teams": [
+            "57"
+          ],
+          "first_type": "Punt",
+          "last_type": "Punt",
+          "play_ids": [
+            "401403910101925104"
+          ]
+        }
+      ],
+      "source_blocks": [
+        {
+          "drive_id": "4014039102",
+          "plays": 4,
+          "sequence_start": 101904902,
+          "sequence_end": 101904905,
+          "start": {
+            "period": 1,
+            "minutes": 9,
+            "seconds": 50
+          },
+          "end": {
+            "period": 1,
+            "minutes": 9,
+            "seconds": 50
+          },
+          "possession_teams": [
+            "57"
+          ],
+          "first_type": "Pass Reception",
+          "last_type": "Pass Reception",
+          "play_ids": [
+            "401403910101904902",
+            "401403910101904903",
+            "401403910101904904",
+            "401403910101904905"
+          ]
+        },
+        {
+          "drive_id": "4014039102",
+          "plays": 1,
+          "sequence_start": 101925101,
+          "sequence_end": 101925101,
+          "start": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 48
+          },
+          "end": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 48
+          },
+          "possession_teams": [
+            "57"
+          ],
+          "first_type": "Punt",
+          "last_type": "Punt",
+          "play_ids": [
+            "401403910101925101"
+          ]
+        },
+        {
+          "drive_id": "4014039102",
+          "plays": 1,
+          "sequence_start": 101925104,
+          "sequence_end": 101925104,
+          "start": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 48
+          },
+          "end": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 48
+          },
+          "possession_teams": [
+            "57"
+          ],
+          "first_type": "Punt",
+          "last_type": "Punt",
+          "play_ids": [
+            "401403910101925104"
+          ]
+        }
+      ],
+      "intervening_source_blocks": [
+        {
+          "drive_id": "4014039101",
+          "plays": 1,
+          "sequence_start": 101904906,
+          "sequence_end": 101904906,
+          "start": {
+            "period": 1,
+            "minutes": 9,
+            "seconds": 50
+          },
+          "end": {
+            "period": 1,
+            "minutes": 9,
+            "seconds": 50
+          },
+          "possession_teams": [
+            "142"
+          ],
+          "first_type": "Punt",
+          "last_type": "Punt",
+          "play_ids": [
+            "401403910101904906"
+          ]
+        },
+        {
+          "drive_id": "4014039102",
+          "plays": 1,
+          "sequence_start": 101925101,
+          "sequence_end": 101925101,
+          "start": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 48
+          },
+          "end": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 48
+          },
+          "possession_teams": [
+            "57"
+          ],
+          "first_type": "Punt",
+          "last_type": "Punt",
+          "play_ids": [
+            "401403910101925101"
+          ]
+        },
+        {
+          "drive_id": "4014039103",
+          "plays": 1,
+          "sequence_start": 101925102,
+          "sequence_end": 101925102,
+          "start": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 48
+          },
+          "end": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 48
+          },
+          "possession_teams": [
+            "142"
+          ],
+          "first_type": "Pass Reception",
+          "last_type": "Pass Reception",
+          "play_ids": [
+            "401403910101925102"
+          ]
+        }
+      ]
+    },
+    {
+      "game_id": "401403910",
+      "drive_id": "4014039107",
+      "classification": "source_order_reappearance",
+      "evidence": "multi_timestamp_source_split",
+      "clock_block_count": 3,
+      "source_block_count": 3,
+      "clock_blocks": [
+        {
+          "drive_id": "4014039107",
+          "plays": 7,
+          "sequence_start": 102865202,
+          "sequence_end": 102865210,
+          "start": {
+            "period": 2,
+            "minutes": 13,
+            "seconds": 47
+          },
+          "end": {
+            "period": 2,
+            "minutes": 13,
+            "seconds": 47
+          },
+          "possession_teams": [
+            "57"
+          ],
+          "first_type": "Pass Reception",
+          "last_type": "Rush",
+          "play_ids": [
+            "401403910102865202",
+            "401403910102865204",
+            "401403910102865205",
+            "401403910102865206",
+            "401403910102865208",
+            "401403910102865209",
+            "401403910102865210"
+          ]
+        },
+        {
+          "drive_id": "4014039107",
+          "plays": 1,
+          "sequence_start": 102906801,
+          "sequence_end": 102906801,
+          "start": {
+            "period": 2,
+            "minutes": 9,
+            "seconds": 31
+          },
+          "end": {
+            "period": 2,
+            "minutes": 9,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "57"
+          ],
+          "first_type": "Field Goal Missed",
+          "last_type": "Field Goal Missed",
+          "play_ids": [
+            "401403910102906801"
+          ]
+        },
+        {
+          "drive_id": "4014039107",
+          "plays": 1,
+          "sequence_start": 102906812,
+          "sequence_end": 102906812,
+          "start": {
+            "period": 2,
+            "minutes": 9,
+            "seconds": 31
+          },
+          "end": {
+            "period": 2,
+            "minutes": 9,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "57"
+          ],
+          "first_type": "Field Goal Missed",
+          "last_type": "Field Goal Missed",
+          "play_ids": [
+            "401403910102906812"
+          ]
+        }
+      ],
+      "source_blocks": [
+        {
+          "drive_id": "4014039107",
+          "plays": 7,
+          "sequence_start": 102865202,
+          "sequence_end": 102865210,
+          "start": {
+            "period": 2,
+            "minutes": 13,
+            "seconds": 47
+          },
+          "end": {
+            "period": 2,
+            "minutes": 13,
+            "seconds": 47
+          },
+          "possession_teams": [
+            "57"
+          ],
+          "first_type": "Pass Reception",
+          "last_type": "Rush",
+          "play_ids": [
+            "401403910102865202",
+            "401403910102865204",
+            "401403910102865205",
+            "401403910102865206",
+            "401403910102865208",
+            "401403910102865209",
+            "401403910102865210"
+          ]
+        },
+        {
+          "drive_id": "4014039107",
+          "plays": 1,
+          "sequence_start": 102906801,
+          "sequence_end": 102906801,
+          "start": {
+            "period": 2,
+            "minutes": 9,
+            "seconds": 31
+          },
+          "end": {
+            "period": 2,
+            "minutes": 9,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "57"
+          ],
+          "first_type": "Field Goal Missed",
+          "last_type": "Field Goal Missed",
+          "play_ids": [
+            "401403910102906801"
+          ]
+        },
+        {
+          "drive_id": "4014039107",
+          "plays": 1,
+          "sequence_start": 102906812,
+          "sequence_end": 102906812,
+          "start": {
+            "period": 2,
+            "minutes": 9,
+            "seconds": 31
+          },
+          "end": {
+            "period": 2,
+            "minutes": 9,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "57"
+          ],
+          "first_type": "Field Goal Missed",
+          "last_type": "Field Goal Missed",
+          "play_ids": [
+            "401403910102906812"
+          ]
+        }
+      ],
+      "intervening_source_blocks": [
+        {
+          "drive_id": "4014039106",
+          "plays": 1,
+          "sequence_start": 102865211,
+          "sequence_end": 102865211,
+          "start": {
+            "period": 2,
+            "minutes": 13,
+            "seconds": 47
+          },
+          "end": {
+            "period": 2,
+            "minutes": 13,
+            "seconds": 47
+          },
+          "possession_teams": [
+            "142"
+          ],
+          "first_type": "Punt",
+          "last_type": "Punt",
+          "play_ids": [
+            "401403910102865211"
+          ]
+        },
+        {
+          "drive_id": "4014039107",
+          "plays": 1,
+          "sequence_start": 102906801,
+          "sequence_end": 102906801,
+          "start": {
+            "period": 2,
+            "minutes": 9,
+            "seconds": 31
+          },
+          "end": {
+            "period": 2,
+            "minutes": 9,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "57"
+          ],
+          "first_type": "Field Goal Missed",
+          "last_type": "Field Goal Missed",
+          "play_ids": [
+            "401403910102906801"
+          ]
+        },
+        {
+          "drive_id": "4014039108",
+          "plays": 10,
+          "sequence_start": 102906802,
+          "sequence_end": 102906811,
+          "start": {
+            "period": 2,
+            "minutes": 9,
+            "seconds": 31
+          },
+          "end": {
+            "period": 2,
+            "minutes": 9,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "142"
+          ],
+          "first_type": "Rush",
+          "last_type": "Pass Reception",
+          "play_ids": [
+            "401403910102906802",
+            "401403910102906803",
+            "401403910102906804",
+            "401403910102906805",
+            "401403910102906806",
+            "401403910102906807",
+            "401403910102906808",
+            "401403910102906809",
+            "401403910102906810",
+            "401403910102906811"
+          ]
+        }
+      ]
+    },
+    {
+      "game_id": "401403952",
+      "drive_id": "4014039525",
+      "classification": "source_order_reappearance",
+      "evidence": "multi_timestamp_source_split",
+      "clock_block_count": 2,
+      "source_block_count": 2,
+      "clock_blocks": [
+        {
+          "drive_id": "4014039525",
+          "plays": 7,
+          "sequence_start": 102879709,
+          "sequence_end": 102919201,
+          "start": {
+            "period": 2,
+            "minutes": 12,
+            "seconds": 2
+          },
+          "end": {
+            "period": 2,
+            "minutes": 8,
+            "seconds": 7
+          },
+          "possession_teams": [
+            "166"
+          ],
+          "first_type": "Rush",
+          "last_type": "Punt",
+          "play_ids": [
+            "401403952102879709",
+            "401403952102879710",
+            "401403952102879711",
+            "401403952102879712",
+            "401403952102879720",
+            "401403952102879721",
+            "401403952102919201"
+          ]
+        },
+        {
+          "drive_id": "4014039525",
+          "plays": 1,
+          "sequence_start": 102996102,
+          "sequence_end": 102996102,
+          "start": {
+            "period": 2,
+            "minutes": 0,
+            "seconds": 38
+          },
+          "end": {
+            "period": 2,
+            "minutes": 0,
+            "seconds": 38
+          },
+          "possession_teams": [
+            "166"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401403952102996102"
+          ]
+        }
+      ],
+      "source_blocks": [
+        {
+          "drive_id": "4014039525",
+          "plays": 7,
+          "sequence_start": 102879709,
+          "sequence_end": 102919201,
+          "start": {
+            "period": 2,
+            "minutes": 12,
+            "seconds": 2
+          },
+          "end": {
+            "period": 2,
+            "minutes": 8,
+            "seconds": 7
+          },
+          "possession_teams": [
+            "166"
+          ],
+          "first_type": "Rush",
+          "last_type": "Punt",
+          "play_ids": [
+            "401403952102879709",
+            "401403952102879710",
+            "401403952102879711",
+            "401403952102879712",
+            "401403952102879720",
+            "401403952102879721",
+            "401403952102919201"
+          ]
+        },
+        {
+          "drive_id": "4014039525",
+          "plays": 1,
+          "sequence_start": 102996102,
+          "sequence_end": 102996102,
+          "start": {
+            "period": 2,
+            "minutes": 0,
+            "seconds": 38
+          },
+          "end": {
+            "period": 2,
+            "minutes": 0,
+            "seconds": 38
+          },
+          "possession_teams": [
+            "166"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401403952102996102"
+          ]
+        }
+      ],
+      "intervening_source_blocks": [
+        {
+          "drive_id": "4014039526",
+          "plays": 7,
+          "sequence_start": 102919203,
+          "sequence_end": 102957101,
+          "start": {
+            "period": 2,
+            "minutes": 8,
+            "seconds": 7
+          },
+          "end": {
+            "period": 2,
+            "minutes": 4,
+            "seconds": 28
+          },
+          "possession_teams": [
+            "142"
+          ],
+          "first_type": "Rush",
+          "last_type": "Passing Touchdown",
+          "play_ids": [
+            "401403952102919203",
+            "401403952102919204",
+            "401403952102919205",
+            "401403952102919206",
+            "401403952102919207",
+            "401403952102919208",
+            "401403952102957101"
+          ]
+        },
+        {
+          "drive_id": "4014039527",
+          "plays": 10,
+          "sequence_start": 102957105,
+          "sequence_end": 102996101,
+          "start": {
+            "period": 2,
+            "minutes": 4,
+            "seconds": 28
+          },
+          "end": {
+            "period": 2,
+            "minutes": 0,
+            "seconds": 38
+          },
+          "possession_teams": [
+            "166"
+          ],
+          "first_type": "Rush",
+          "last_type": "Punt",
+          "play_ids": [
+            "401403952102957105",
+            "401403952102969402",
+            "401403952102969403",
+            "401403952102969404",
+            "401403952102969405",
+            "401403952102969406",
+            "401403952102969407",
+            "401403952102969408",
+            "401403952102969409",
+            "401403952102996101"
+          ]
+        }
+      ]
+    },
+    {
+      "game_id": "401403967",
+      "drive_id": "4014039677",
+      "classification": "source_order_reappearance",
+      "evidence": "multi_timestamp_source_split",
+      "clock_block_count": 3,
+      "source_block_count": 3,
+      "clock_blocks": [
+        {
+          "drive_id": "4014039677",
+          "plays": 1,
+          "sequence_start": 102898014,
+          "sequence_end": 102898014,
+          "start": {
+            "period": 2,
+            "minutes": 10,
+            "seconds": 19
+          },
+          "end": {
+            "period": 2,
+            "minutes": 10,
+            "seconds": 19
+          },
+          "possession_teams": [
+            "21"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401403967102898014"
+          ]
+        },
+        {
+          "drive_id": "4014039677",
+          "plays": 1,
+          "sequence_start": 102908701,
+          "sequence_end": 102908701,
+          "start": {
+            "period": 2,
+            "minutes": 9,
+            "seconds": 12
+          },
+          "end": {
+            "period": 2,
+            "minutes": 9,
+            "seconds": 12
+          },
+          "possession_teams": [
+            "21"
+          ],
+          "first_type": "Punt",
+          "last_type": "Punt",
+          "play_ids": [
+            "401403967102908701"
+          ]
+        },
+        {
+          "drive_id": "4014039677",
+          "plays": 2,
+          "sequence_start": 102999911,
+          "sequence_end": 102999914,
+          "start": {
+            "period": 2,
+            "minutes": 0,
+            "seconds": 0
+          },
+          "end": {
+            "period": 2,
+            "minutes": 0,
+            "seconds": 0
+          },
+          "possession_teams": [
+            "21"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401403967102999911",
+            "401403967102999914"
+          ]
+        }
+      ],
+      "source_blocks": [
+        {
+          "drive_id": "4014039677",
+          "plays": 1,
+          "sequence_start": 102898014,
+          "sequence_end": 102898014,
+          "start": {
+            "period": 2,
+            "minutes": 10,
+            "seconds": 19
+          },
+          "end": {
+            "period": 2,
+            "minutes": 10,
+            "seconds": 19
+          },
+          "possession_teams": [
+            "21"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401403967102898014"
+          ]
+        },
+        {
+          "drive_id": "4014039677",
+          "plays": 1,
+          "sequence_start": 102908701,
+          "sequence_end": 102908701,
+          "start": {
+            "period": 2,
+            "minutes": 9,
+            "seconds": 12
+          },
+          "end": {
+            "period": 2,
+            "minutes": 9,
+            "seconds": 12
+          },
+          "possession_teams": [
+            "21"
+          ],
+          "first_type": "Punt",
+          "last_type": "Punt",
+          "play_ids": [
+            "401403967102908701"
+          ]
+        },
+        {
+          "drive_id": "4014039677",
+          "plays": 2,
+          "sequence_start": 102999911,
+          "sequence_end": 102999914,
+          "start": {
+            "period": 2,
+            "minutes": 0,
+            "seconds": 0
+          },
+          "end": {
+            "period": 2,
+            "minutes": 0,
+            "seconds": 0
+          },
+          "possession_teams": [
+            "21"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401403967102999911",
+            "401403967102999914"
+          ]
+        }
+      ],
+      "intervening_source_blocks": [
+        {
+          "drive_id": "4014039678",
+          "plays": 1,
+          "sequence_start": 102898016,
+          "sequence_end": 102898016,
+          "start": {
+            "period": 2,
+            "minutes": 10,
+            "seconds": 19
+          },
+          "end": {
+            "period": 2,
+            "minutes": 10,
+            "seconds": 19
+          },
+          "possession_teams": [
+            "12"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401403967102898016"
+          ]
+        },
+        {
+          "drive_id": "4014039677",
+          "plays": 1,
+          "sequence_start": 102908701,
+          "sequence_end": 102908701,
+          "start": {
+            "period": 2,
+            "minutes": 9,
+            "seconds": 12
+          },
+          "end": {
+            "period": 2,
+            "minutes": 9,
+            "seconds": 12
+          },
+          "possession_teams": [
+            "21"
+          ],
+          "first_type": "Punt",
+          "last_type": "Punt",
+          "play_ids": [
+            "401403967102908701"
+          ]
+        },
+        {
+          "drive_id": "4014039678",
+          "plays": 1,
+          "sequence_start": 102917301,
+          "sequence_end": 102917301,
+          "start": {
+            "period": 2,
+            "minutes": 8,
+            "seconds": 26
+          },
+          "end": {
+            "period": 2,
+            "minutes": 8,
+            "seconds": 26
+          },
+          "possession_teams": [
+            "12"
+          ],
+          "first_type": "Fumble Recovery (Opponent)",
+          "last_type": "Fumble Recovery (Opponent)",
+          "play_ids": [
+            "401403967102917301"
+          ]
+        },
+        {
+          "drive_id": "4014039679",
+          "plays": 7,
+          "sequence_start": 102917303,
+          "sequence_end": 102955001,
+          "start": {
+            "period": 2,
+            "minutes": 8,
+            "seconds": 26
+          },
+          "end": {
+            "period": 2,
+            "minutes": 4,
+            "seconds": 49
+          },
+          "possession_teams": [
+            "21"
+          ],
+          "first_type": "Rush",
+          "last_type": "Passing Touchdown",
+          "play_ids": [
+            "401403967102917303",
+            "401403967102917304",
+            "401403967102917305",
+            "401403967102917306",
+            "401403967102917307",
+            "401403967102917308",
+            "401403967102955001"
+          ]
+        },
+        {
+          "drive_id": "40140396710",
+          "plays": 3,
+          "sequence_start": 102955005,
+          "sequence_end": 102969501,
+          "start": {
+            "period": 2,
+            "minutes": 4,
+            "seconds": 49
+          },
+          "end": {
+            "period": 2,
+            "minutes": 3,
+            "seconds": 4
+          },
+          "possession_teams": [
+            "12"
+          ],
+          "first_type": "Rush",
+          "last_type": "Interception Return",
+          "play_ids": [
+            "401403967102955005",
+            "401403967102955006",
+            "401403967102969501"
+          ]
+        },
+        {
+          "drive_id": "40140396711",
+          "plays": 2,
+          "sequence_start": 102969503,
+          "sequence_end": 102976401,
+          "start": {
+            "period": 2,
+            "minutes": 3,
+            "seconds": 4
+          },
+          "end": {
+            "period": 2,
+            "minutes": 2,
+            "seconds": 35
+          },
+          "possession_teams": [
+            "21"
+          ],
+          "first_type": "Pass Reception",
+          "last_type": "Interception Return",
+          "play_ids": [
+            "401403967102969503",
+            "401403967102976401"
+          ]
+        },
+        {
+          "drive_id": "40140396712",
+          "plays": 6,
+          "sequence_start": 102976403,
+          "sequence_end": 102997101,
+          "start": {
+            "period": 2,
+            "minutes": 2,
+            "seconds": 35
+          },
+          "end": {
+            "period": 2,
+            "minutes": 0,
+            "seconds": 28
+          },
+          "possession_teams": [
+            "12"
+          ],
+          "first_type": "Pass Reception",
+          "last_type": "Passing Touchdown",
+          "play_ids": [
+            "401403967102976403",
+            "401403967102976404",
+            "401403967102976405",
+            "401403967102976406",
+            "401403967102976407",
+            "401403967102997101"
+          ]
+        }
+      ]
+    },
+    {
+      "game_id": "401403981",
+      "drive_id": "40140398115",
+      "classification": "source_order_reappearance",
+      "evidence": "multi_timestamp_source_split",
+      "clock_block_count": 3,
+      "source_block_count": 3,
+      "clock_blocks": [
+        {
+          "drive_id": "40140398115",
+          "plays": 3,
+          "sequence_start": 103877605,
+          "sequence_end": 103877617,
+          "start": {
+            "period": 3,
+            "minutes": 12,
+            "seconds": 23
+          },
+          "end": {
+            "period": 3,
+            "minutes": 12,
+            "seconds": 23
+          },
+          "possession_teams": [
+            "2011"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Rush",
+          "play_ids": [
+            "401403981103877605",
+            "401403981103877614",
+            "401403981103877617"
+          ]
+        },
+        {
+          "drive_id": "40140398115",
+          "plays": 1,
+          "sequence_start": 103896801,
+          "sequence_end": 103896801,
+          "start": {
+            "period": 3,
+            "minutes": 10,
+            "seconds": 31
+          },
+          "end": {
+            "period": 3,
+            "minutes": 10,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2011"
+          ],
+          "first_type": "Interception Return",
+          "last_type": "Interception Return",
+          "play_ids": [
+            "401403981103896801"
+          ]
+        },
+        {
+          "drive_id": "40140398115",
+          "plays": 1,
+          "sequence_start": 103896805,
+          "sequence_end": 103896805,
+          "start": {
+            "period": 3,
+            "minutes": 10,
+            "seconds": 31
+          },
+          "end": {
+            "period": 3,
+            "minutes": 10,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2011"
+          ],
+          "first_type": "Interception Return",
+          "last_type": "Interception Return",
+          "play_ids": [
+            "401403981103896805"
+          ]
+        }
+      ],
+      "source_blocks": [
+        {
+          "drive_id": "40140398115",
+          "plays": 3,
+          "sequence_start": 103877605,
+          "sequence_end": 103877617,
+          "start": {
+            "period": 3,
+            "minutes": 12,
+            "seconds": 23
+          },
+          "end": {
+            "period": 3,
+            "minutes": 12,
+            "seconds": 23
+          },
+          "possession_teams": [
+            "2011"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Rush",
+          "play_ids": [
+            "401403981103877605",
+            "401403981103877614",
+            "401403981103877617"
+          ]
+        },
+        {
+          "drive_id": "40140398115",
+          "plays": 1,
+          "sequence_start": 103896801,
+          "sequence_end": 103896801,
+          "start": {
+            "period": 3,
+            "minutes": 10,
+            "seconds": 31
+          },
+          "end": {
+            "period": 3,
+            "minutes": 10,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2011"
+          ],
+          "first_type": "Interception Return",
+          "last_type": "Interception Return",
+          "play_ids": [
+            "401403981103896801"
+          ]
+        },
+        {
+          "drive_id": "40140398115",
+          "plays": 1,
+          "sequence_start": 103896805,
+          "sequence_end": 103896805,
+          "start": {
+            "period": 3,
+            "minutes": 10,
+            "seconds": 31
+          },
+          "end": {
+            "period": 3,
+            "minutes": 10,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2011"
+          ],
+          "first_type": "Interception Return",
+          "last_type": "Interception Return",
+          "play_ids": [
+            "401403981103896805"
+          ]
+        }
+      ],
+      "intervening_source_blocks": [
+        {
+          "drive_id": "40140398114",
+          "plays": 1,
+          "sequence_start": 103877618,
+          "sequence_end": 103877618,
+          "start": {
+            "period": 3,
+            "minutes": 12,
+            "seconds": 23
+          },
+          "end": {
+            "period": 3,
+            "minutes": 12,
+            "seconds": 23
+          },
+          "possession_teams": [
+            "26"
+          ],
+          "first_type": "Rushing Touchdown",
+          "last_type": "Rushing Touchdown",
+          "play_ids": [
+            "401403981103877618"
+          ]
+        },
+        {
+          "drive_id": "40140398115",
+          "plays": 1,
+          "sequence_start": 103896801,
+          "sequence_end": 103896801,
+          "start": {
+            "period": 3,
+            "minutes": 10,
+            "seconds": 31
+          },
+          "end": {
+            "period": 3,
+            "minutes": 10,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2011"
+          ],
+          "first_type": "Interception Return",
+          "last_type": "Interception Return",
+          "play_ids": [
+            "401403981103896801"
+          ]
+        },
+        {
+          "drive_id": "40140398116",
+          "plays": 2,
+          "sequence_start": 103896803,
+          "sequence_end": 103896804,
+          "start": {
+            "period": 3,
+            "minutes": 10,
+            "seconds": 31
+          },
+          "end": {
+            "period": 3,
+            "minutes": 10,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "26"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401403981103896803",
+            "401403981103896804"
+          ]
+        }
+      ]
+    },
+    {
+      "game_id": "401403859",
+      "drive_id": "40140385911",
+      "classification": "source_order_reappearance",
+      "evidence": "opponent_interruption",
+      "clock_block_count": 2,
+      "source_block_count": 2,
+      "clock_blocks": [
+        {
+          "drive_id": "40140385911",
+          "plays": 2,
+          "sequence_start": 103855205,
+          "sequence_end": 103859701,
+          "start": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 47
+          },
+          "end": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 2
+          },
+          "possession_teams": [
+            "193"
+          ],
+          "first_type": "Rush",
+          "last_type": "Fumble Recovery (Opponent)",
+          "play_ids": [
+            "401403859103855205",
+            "401403859103859701"
+          ]
+        },
+        {
+          "drive_id": "40140385911",
+          "plays": 1,
+          "sequence_start": 103859703,
+          "sequence_end": 103859703,
+          "start": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 2
+          },
+          "end": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 2
+          },
+          "possession_teams": [
+            "193"
+          ],
+          "first_type": "Fumble Recovery (Opponent)",
+          "last_type": "Fumble Recovery (Opponent)",
+          "play_ids": [
+            "401403859103859703"
+          ]
+        }
+      ],
+      "source_blocks": [
+        {
+          "drive_id": "40140385911",
+          "plays": 2,
+          "sequence_start": 103855205,
+          "sequence_end": 103859701,
+          "start": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 47
+          },
+          "end": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 2
+          },
+          "possession_teams": [
+            "193"
+          ],
+          "first_type": "Rush",
+          "last_type": "Fumble Recovery (Opponent)",
+          "play_ids": [
+            "401403859103855205",
+            "401403859103859701"
+          ]
+        },
+        {
+          "drive_id": "40140385911",
+          "plays": 1,
+          "sequence_start": 103859703,
+          "sequence_end": 103859703,
+          "start": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 2
+          },
+          "end": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 2
+          },
+          "possession_teams": [
+            "193"
+          ],
+          "first_type": "Fumble Recovery (Opponent)",
+          "last_type": "Fumble Recovery (Opponent)",
+          "play_ids": [
+            "401403859103859703"
+          ]
+        }
+      ],
+      "intervening_source_blocks": [
+        {
+          "drive_id": "40140385912",
+          "plays": 1,
+          "sequence_start": 103859702,
+          "sequence_end": 103859702,
+          "start": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 2
+          },
+          "end": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 2
+          },
+          "possession_teams": [
+            "96"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401403859103859702"
+          ]
+        }
+      ]
+    },
+    {
+      "game_id": "401403859",
+      "drive_id": "40140385912",
+      "classification": "source_order_reappearance",
+      "evidence": "opponent_interruption",
+      "clock_block_count": 2,
+      "source_block_count": 2,
+      "clock_blocks": [
+        {
+          "drive_id": "40140385912",
+          "plays": 1,
+          "sequence_start": 103859702,
+          "sequence_end": 103859702,
+          "start": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 2
+          },
+          "end": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 2
+          },
+          "possession_teams": [
+            "96"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401403859103859702"
+          ]
+        },
+        {
+          "drive_id": "40140385912",
+          "plays": 1,
+          "sequence_start": 103864101,
+          "sequence_end": 103864101,
+          "start": {
+            "period": 3,
+            "minutes": 13,
+            "seconds": 58
+          },
+          "end": {
+            "period": 3,
+            "minutes": 13,
+            "seconds": 58
+          },
+          "possession_teams": [
+            "96"
+          ],
+          "first_type": "Passing Touchdown",
+          "last_type": "Passing Touchdown",
+          "play_ids": [
+            "401403859103864101"
+          ]
+        }
+      ],
+      "source_blocks": [
+        {
+          "drive_id": "40140385912",
+          "plays": 1,
+          "sequence_start": 103859702,
+          "sequence_end": 103859702,
+          "start": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 2
+          },
+          "end": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 2
+          },
+          "possession_teams": [
+            "96"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401403859103859702"
+          ]
+        },
+        {
+          "drive_id": "40140385912",
+          "plays": 1,
+          "sequence_start": 103864101,
+          "sequence_end": 103864101,
+          "start": {
+            "period": 3,
+            "minutes": 13,
+            "seconds": 58
+          },
+          "end": {
+            "period": 3,
+            "minutes": 13,
+            "seconds": 58
+          },
+          "possession_teams": [
+            "96"
+          ],
+          "first_type": "Passing Touchdown",
+          "last_type": "Passing Touchdown",
+          "play_ids": [
+            "401403859103864101"
+          ]
+        }
+      ],
+      "intervening_source_blocks": [
+        {
+          "drive_id": "40140385911",
+          "plays": 1,
+          "sequence_start": 103859703,
+          "sequence_end": 103859703,
+          "start": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 2
+          },
+          "end": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 2
+          },
+          "possession_teams": [
+            "193"
+          ],
+          "first_type": "Fumble Recovery (Opponent)",
+          "last_type": "Fumble Recovery (Opponent)",
+          "play_ids": [
+            "401403859103859703"
+          ]
+        }
+      ]
+    },
+    {
+      "game_id": "401403885",
+      "drive_id": "40140388519",
+      "classification": "source_order_reappearance",
+      "evidence": "opponent_interruption",
+      "clock_block_count": 2,
+      "source_block_count": 2,
+      "clock_blocks": [
+        {
+          "drive_id": "40140388519",
+          "plays": 5,
+          "sequence_start": 103937401,
+          "sequence_end": 103956901,
+          "start": {
+            "period": 3,
+            "minutes": 6,
+            "seconds": 25
+          },
+          "end": {
+            "period": 3,
+            "minutes": 4,
+            "seconds": 30
+          },
+          "possession_teams": [
+            "99"
+          ],
+          "first_type": "Pass Reception",
+          "last_type": "Pass Reception",
+          "play_ids": [
+            "401403885103937401",
+            "401403885103946901",
+            "401403885103948101",
+            "401403885103948401",
+            "401403885103956901"
+          ]
+        },
+        {
+          "drive_id": "40140388519",
+          "plays": 1,
+          "sequence_start": 103965403,
+          "sequence_end": 103965403,
+          "start": {
+            "period": 3,
+            "minutes": 3,
+            "seconds": 45
+          },
+          "end": {
+            "period": 3,
+            "minutes": 3,
+            "seconds": 45
+          },
+          "possession_teams": [
+            "99"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401403885103965403"
+          ]
+        }
+      ],
+      "source_blocks": [
+        {
+          "drive_id": "40140388519",
+          "plays": 5,
+          "sequence_start": 103937401,
+          "sequence_end": 103956901,
+          "start": {
+            "period": 3,
+            "minutes": 6,
+            "seconds": 25
+          },
+          "end": {
+            "period": 3,
+            "minutes": 4,
+            "seconds": 30
+          },
+          "possession_teams": [
+            "99"
+          ],
+          "first_type": "Pass Reception",
+          "last_type": "Pass Reception",
+          "play_ids": [
+            "401403885103937401",
+            "401403885103946901",
+            "401403885103948101",
+            "401403885103948401",
+            "401403885103956901"
+          ]
+        },
+        {
+          "drive_id": "40140388519",
+          "plays": 1,
+          "sequence_start": 103965403,
+          "sequence_end": 103965403,
+          "start": {
+            "period": 3,
+            "minutes": 3,
+            "seconds": 45
+          },
+          "end": {
+            "period": 3,
+            "minutes": 3,
+            "seconds": 45
+          },
+          "possession_teams": [
+            "99"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401403885103965403"
+          ]
+        }
+      ],
+      "intervening_source_blocks": [
+        {
+          "drive_id": "40140388520",
+          "plays": 1,
+          "sequence_start": 103965402,
+          "sequence_end": 103965402,
+          "start": {
+            "period": 3,
+            "minutes": 3,
+            "seconds": 45
+          },
+          "end": {
+            "period": 3,
+            "minutes": 3,
+            "seconds": 45
+          },
+          "possession_teams": [
+            "344"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401403885103965402"
+          ]
+        }
+      ]
+    },
+    {
+      "game_id": "401403885",
+      "drive_id": "40140388520",
+      "classification": "source_order_reappearance",
+      "evidence": "opponent_interruption",
+      "clock_block_count": 2,
+      "source_block_count": 2,
+      "clock_blocks": [
+        {
+          "drive_id": "40140388520",
+          "plays": 1,
+          "sequence_start": 103965402,
+          "sequence_end": 103965402,
+          "start": {
+            "period": 3,
+            "minutes": 3,
+            "seconds": 45
+          },
+          "end": {
+            "period": 3,
+            "minutes": 3,
+            "seconds": 45
+          },
+          "possession_teams": [
+            "344"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401403885103965402"
+          ]
+        },
+        {
+          "drive_id": "40140388520",
+          "plays": 3,
+          "sequence_start": 103965901,
+          "sequence_end": 103978201,
+          "start": {
+            "period": 3,
+            "minutes": 3,
+            "seconds": 40
+          },
+          "end": {
+            "period": 3,
+            "minutes": 2,
+            "seconds": 17
+          },
+          "possession_teams": [
+            "344"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401403885103965901",
+            "401403885103969901",
+            "401403885103978201"
+          ]
+        }
+      ],
+      "source_blocks": [
+        {
+          "drive_id": "40140388520",
+          "plays": 1,
+          "sequence_start": 103965402,
+          "sequence_end": 103965402,
+          "start": {
+            "period": 3,
+            "minutes": 3,
+            "seconds": 45
+          },
+          "end": {
+            "period": 3,
+            "minutes": 3,
+            "seconds": 45
+          },
+          "possession_teams": [
+            "344"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401403885103965402"
+          ]
+        },
+        {
+          "drive_id": "40140388520",
+          "plays": 3,
+          "sequence_start": 103965901,
+          "sequence_end": 103978201,
+          "start": {
+            "period": 3,
+            "minutes": 3,
+            "seconds": 40
+          },
+          "end": {
+            "period": 3,
+            "minutes": 2,
+            "seconds": 17
+          },
+          "possession_teams": [
+            "344"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401403885103965901",
+            "401403885103969901",
+            "401403885103978201"
+          ]
+        }
+      ],
+      "intervening_source_blocks": [
+        {
+          "drive_id": "40140388519",
+          "plays": 1,
+          "sequence_start": 103965403,
+          "sequence_end": 103965403,
+          "start": {
+            "period": 3,
+            "minutes": 3,
+            "seconds": 45
+          },
+          "end": {
+            "period": 3,
+            "minutes": 3,
+            "seconds": 45
+          },
+          "possession_teams": [
+            "99"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401403885103965403"
+          ]
+        }
+      ]
+    },
+    {
+      "game_id": "401403897",
+      "drive_id": "40140389710",
+      "classification": "source_order_reappearance",
+      "evidence": "opponent_interruption",
+      "clock_block_count": 2,
+      "source_block_count": 2,
+      "clock_blocks": [
+        {
+          "drive_id": "40140389710",
+          "plays": 6,
+          "sequence_start": 103854703,
+          "sequence_end": 103854708,
+          "start": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 52
+          },
+          "end": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 52
+          },
+          "possession_teams": [
+            "99"
+          ],
+          "first_type": "Pass Reception",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401403897103854703",
+            "401403897103854704",
+            "401403897103854705",
+            "401403897103854706",
+            "401403897103854707",
+            "401403897103854708"
+          ]
+        },
+        {
+          "drive_id": "40140389710",
+          "plays": 1,
+          "sequence_start": 103875901,
+          "sequence_end": 103875901,
+          "start": {
+            "period": 3,
+            "minutes": 12,
+            "seconds": 40
+          },
+          "end": {
+            "period": 3,
+            "minutes": 12,
+            "seconds": 40
+          },
+          "possession_teams": [
+            "99"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401403897103875901"
+          ]
+        }
+      ],
+      "source_blocks": [
+        {
+          "drive_id": "40140389710",
+          "plays": 6,
+          "sequence_start": 103854703,
+          "sequence_end": 103854708,
+          "start": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 52
+          },
+          "end": {
+            "period": 3,
+            "minutes": 14,
+            "seconds": 52
+          },
+          "possession_teams": [
+            "99"
+          ],
+          "first_type": "Pass Reception",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401403897103854703",
+            "401403897103854704",
+            "401403897103854705",
+            "401403897103854706",
+            "401403897103854707",
+            "401403897103854708"
+          ]
+        },
+        {
+          "drive_id": "40140389710",
+          "plays": 1,
+          "sequence_start": 103875901,
+          "sequence_end": 103875901,
+          "start": {
+            "period": 3,
+            "minutes": 12,
+            "seconds": 40
+          },
+          "end": {
+            "period": 3,
+            "minutes": 12,
+            "seconds": 40
+          },
+          "possession_teams": [
+            "99"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401403897103875901"
+          ]
+        }
+      ],
+      "intervening_source_blocks": [
+        {
+          "drive_id": "40140389711",
+          "plays": 3,
+          "sequence_start": 103875601,
+          "sequence_end": 103875603,
+          "start": {
+            "period": 3,
+            "minutes": 12,
+            "seconds": 43
+          },
+          "end": {
+            "period": 3,
+            "minutes": 12,
+            "seconds": 43
+          },
+          "possession_teams": [
+            "167"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Rush",
+          "play_ids": [
+            "401403897103875601",
+            "401403897103875602",
+            "401403897103875603"
+          ]
+        }
+      ]
+    },
+    {
+      "game_id": "401404164",
+      "drive_id": "4014041641",
+      "classification": "source_order_reappearance",
+      "evidence": "same_clock_correction_cluster",
+      "clock_block_count": 2,
+      "source_block_count": 2,
+      "clock_blocks": [
+        {
+          "drive_id": "4014041641",
+          "plays": 5,
+          "sequence_start": 101854003,
+          "sequence_end": 101854007,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 59
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 59
+          },
+          "possession_teams": [
+            "113"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401404164101854003",
+            "401404164101854004",
+            "401404164101854005",
+            "401404164101854006",
+            "401404164101854007"
+          ]
+        },
+        {
+          "drive_id": "4014041641",
+          "plays": 1,
+          "sequence_start": 101854034,
+          "sequence_end": 101854034,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 59
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 59
+          },
+          "possession_teams": [
+            "113"
+          ],
+          "first_type": "Punt",
+          "last_type": "Punt",
+          "play_ids": [
+            "401404164101854034"
+          ]
+        }
+      ],
+      "source_blocks": [
+        {
+          "drive_id": "4014041641",
+          "plays": 5,
+          "sequence_start": 101854003,
+          "sequence_end": 101854007,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 59
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 59
+          },
+          "possession_teams": [
+            "113"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401404164101854003",
+            "401404164101854004",
+            "401404164101854005",
+            "401404164101854006",
+            "401404164101854007"
+          ]
+        },
+        {
+          "drive_id": "4014041641",
+          "plays": 1,
+          "sequence_start": 101854034,
+          "sequence_end": 101854034,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 59
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 59
+          },
+          "possession_teams": [
+            "113"
+          ],
+          "first_type": "Punt",
+          "last_type": "Punt",
+          "play_ids": [
+            "401404164101854034"
+          ]
+        }
+      ],
+      "intervening_source_blocks": [
+        {
+          "drive_id": "4014041643",
+          "plays": 2,
+          "sequence_start": 101854015,
+          "sequence_end": 101854016,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 59
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 59
+          },
+          "possession_teams": [
+            "113"
+          ],
+          "first_type": "Sack",
+          "last_type": "Sack",
+          "play_ids": [
+            "401404164101854015",
+            "401404164101854016"
+          ]
+        },
+        {
+          "drive_id": "4014041644",
+          "plays": 4,
+          "sequence_start": 101854018,
+          "sequence_end": 101854021,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 59
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 59
+          },
+          "possession_teams": [
+            "2335"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Rush",
+          "play_ids": [
+            "401404164101854018",
+            "401404164101854019",
+            "401404164101854020",
+            "401404164101854021"
+          ]
+        },
+        {
+          "drive_id": "4014041645",
+          "plays": 1,
+          "sequence_start": 101854023,
+          "sequence_end": 101854023,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 59
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 59
+          },
+          "possession_teams": [
+            "113"
+          ],
+          "first_type": "Pass Reception",
+          "last_type": "Pass Reception",
+          "play_ids": [
+            "401404164101854023"
+          ]
+        },
+        {
+          "drive_id": "4014041646",
+          "plays": 5,
+          "sequence_start": 101854028,
+          "sequence_end": 101854032,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 59
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 59
+          },
+          "possession_teams": [
+            "2335"
+          ],
+          "first_type": "Rush",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401404164101854028",
+            "401404164101854029",
+            "401404164101854030",
+            "401404164101854031",
+            "401404164101854032"
+          ]
+        }
+      ]
+    },
+    {
+      "game_id": "401415229",
+      "drive_id": "4014152294",
+      "classification": "source_order_reappearance",
+      "evidence": "same_clock_correction_cluster",
+      "clock_block_count": 2,
+      "source_block_count": 2,
+      "clock_blocks": [
+        {
+          "drive_id": "4014152294",
+          "plays": 1,
+          "sequence_start": 101935301,
+          "sequence_end": 101935301,
+          "start": {
+            "period": 1,
+            "minutes": 6,
+            "seconds": 46
+          },
+          "end": {
+            "period": 1,
+            "minutes": 6,
+            "seconds": 46
+          },
+          "possession_teams": [
+            "2439"
+          ],
+          "first_type": "Fumble Recovery (Opponent)",
+          "last_type": "Fumble Recovery (Opponent)",
+          "play_ids": [
+            "401415229101935301"
+          ]
+        },
+        {
+          "drive_id": "4014152294",
+          "plays": 1,
+          "sequence_start": 101935307,
+          "sequence_end": 101935307,
+          "start": {
+            "period": 1,
+            "minutes": 6,
+            "seconds": 46
+          },
+          "end": {
+            "period": 1,
+            "minutes": 6,
+            "seconds": 46
+          },
+          "possession_teams": [
+            "2439"
+          ],
+          "first_type": "Fumble Recovery (Opponent)",
+          "last_type": "Fumble Recovery (Opponent)",
+          "play_ids": [
+            "401415229101935307"
+          ]
+        }
+      ],
+      "source_blocks": [
+        {
+          "drive_id": "4014152294",
+          "plays": 1,
+          "sequence_start": 101935301,
+          "sequence_end": 101935301,
+          "start": {
+            "period": 1,
+            "minutes": 6,
+            "seconds": 46
+          },
+          "end": {
+            "period": 1,
+            "minutes": 6,
+            "seconds": 46
+          },
+          "possession_teams": [
+            "2439"
+          ],
+          "first_type": "Fumble Recovery (Opponent)",
+          "last_type": "Fumble Recovery (Opponent)",
+          "play_ids": [
+            "401415229101935301"
+          ]
+        },
+        {
+          "drive_id": "4014152294",
+          "plays": 1,
+          "sequence_start": 101935307,
+          "sequence_end": 101935307,
+          "start": {
+            "period": 1,
+            "minutes": 6,
+            "seconds": 46
+          },
+          "end": {
+            "period": 1,
+            "minutes": 6,
+            "seconds": 46
+          },
+          "possession_teams": [
+            "2439"
+          ],
+          "first_type": "Fumble Recovery (Opponent)",
+          "last_type": "Fumble Recovery (Opponent)",
+          "play_ids": [
+            "401415229101935307"
+          ]
+        }
+      ],
+      "intervening_source_blocks": [
+        {
+          "drive_id": "4014152295",
+          "plays": 5,
+          "sequence_start": 101935302,
+          "sequence_end": 101935306,
+          "start": {
+            "period": 1,
+            "minutes": 6,
+            "seconds": 46
+          },
+          "end": {
+            "period": 1,
+            "minutes": 6,
+            "seconds": 46
+          },
+          "possession_teams": [
+            "167"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401415229101935302",
+            "401415229101935303",
+            "401415229101935304",
+            "401415229101935305",
+            "401415229101935306"
+          ]
+        }
+      ]
+    },
+    {
+      "game_id": "401415241",
+      "drive_id": "40141524115",
+      "classification": "source_order_reappearance",
+      "evidence": "same_clock_correction_cluster",
+      "clock_block_count": 2,
+      "source_block_count": 2,
+      "clock_blocks": [
+        {
+          "drive_id": "40141524115",
+          "plays": 1,
+          "sequence_start": 103939001,
+          "sequence_end": 103939001,
+          "start": {
+            "period": 3,
+            "minutes": 6,
+            "seconds": 9
+          },
+          "end": {
+            "period": 3,
+            "minutes": 6,
+            "seconds": 9
+          },
+          "possession_teams": [
+            "2005"
+          ],
+          "first_type": "Punt",
+          "last_type": "Punt",
+          "play_ids": [
+            "401415241103939001"
+          ]
+        },
+        {
+          "drive_id": "40141524115",
+          "plays": 5,
+          "sequence_start": 103939022,
+          "sequence_end": 103939026,
+          "start": {
+            "period": 3,
+            "minutes": 6,
+            "seconds": 9
+          },
+          "end": {
+            "period": 3,
+            "minutes": 6,
+            "seconds": 9
+          },
+          "possession_teams": [
+            "2005"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401415241103939022",
+            "401415241103939023",
+            "401415241103939024",
+            "401415241103939025",
+            "401415241103939026"
+          ]
+        }
+      ],
+      "source_blocks": [
+        {
+          "drive_id": "40141524115",
+          "plays": 1,
+          "sequence_start": 103939001,
+          "sequence_end": 103939001,
+          "start": {
+            "period": 3,
+            "minutes": 6,
+            "seconds": 9
+          },
+          "end": {
+            "period": 3,
+            "minutes": 6,
+            "seconds": 9
+          },
+          "possession_teams": [
+            "2005"
+          ],
+          "first_type": "Punt",
+          "last_type": "Punt",
+          "play_ids": [
+            "401415241103939001"
+          ]
+        },
+        {
+          "drive_id": "40141524115",
+          "plays": 5,
+          "sequence_start": 103939022,
+          "sequence_end": 103939026,
+          "start": {
+            "period": 3,
+            "minutes": 6,
+            "seconds": 9
+          },
+          "end": {
+            "period": 3,
+            "minutes": 6,
+            "seconds": 9
+          },
+          "possession_teams": [
+            "2005"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401415241103939022",
+            "401415241103939023",
+            "401415241103939024",
+            "401415241103939025",
+            "401415241103939026"
+          ]
+        }
+      ],
+      "intervening_source_blocks": [
+        {
+          "drive_id": "40141524116",
+          "plays": 9,
+          "sequence_start": 103939003,
+          "sequence_end": 103939019,
+          "start": {
+            "period": 3,
+            "minutes": 6,
+            "seconds": 9
+          },
+          "end": {
+            "period": 3,
+            "minutes": 6,
+            "seconds": 9
+          },
+          "possession_teams": [
+            "68"
+          ],
+          "first_type": "Rush",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401415241103939003",
+            "401415241103939004",
+            "401415241103939005",
+            "401415241103939006",
+            "401415241103939009",
+            "401415241103939010",
+            "401415241103939011",
+            "401415241103939012",
+            "401415241103939019"
+          ]
+        },
+        {
+          "drive_id": "40141524114",
+          "plays": 1,
+          "sequence_start": 103939020,
+          "sequence_end": 103939020,
+          "start": {
+            "period": 3,
+            "minutes": 6,
+            "seconds": 9
+          },
+          "end": {
+            "period": 3,
+            "minutes": 6,
+            "seconds": 9
+          },
+          "possession_teams": [
+            "68"
+          ],
+          "first_type": "Interception Return",
+          "last_type": "Interception Return",
+          "play_ids": [
+            "401415241103939020"
+          ]
+        }
+      ]
+    },
+    {
+      "game_id": "401415243",
+      "drive_id": "4014152432",
+      "classification": "source_order_reappearance",
+      "evidence": "same_clock_correction_cluster",
+      "clock_block_count": 2,
+      "source_block_count": 2,
+      "clock_blocks": [
+        {
+          "drive_id": "4014152432",
+          "plays": 4,
+          "sequence_start": 101927317,
+          "sequence_end": 101927320,
+          "start": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 26
+          },
+          "end": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 26
+          },
+          "possession_teams": [
+            "167"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401415243101927317",
+            "401415243101927318",
+            "401415243101927319",
+            "401415243101927320"
+          ]
+        },
+        {
+          "drive_id": "4014152432",
+          "plays": 1,
+          "sequence_start": 101927343,
+          "sequence_end": 101927343,
+          "start": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 26
+          },
+          "end": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 26
+          },
+          "possession_teams": [
+            "167"
+          ],
+          "first_type": "Field Goal Good",
+          "last_type": "Field Goal Good",
+          "play_ids": [
+            "401415243101927343"
+          ]
+        }
+      ],
+      "source_blocks": [
+        {
+          "drive_id": "4014152432",
+          "plays": 4,
+          "sequence_start": 101927317,
+          "sequence_end": 101927320,
+          "start": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 26
+          },
+          "end": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 26
+          },
+          "possession_teams": [
+            "167"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401415243101927317",
+            "401415243101927318",
+            "401415243101927319",
+            "401415243101927320"
+          ]
+        },
+        {
+          "drive_id": "4014152432",
+          "plays": 1,
+          "sequence_start": 101927343,
+          "sequence_end": 101927343,
+          "start": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 26
+          },
+          "end": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 26
+          },
+          "possession_teams": [
+            "167"
+          ],
+          "first_type": "Field Goal Good",
+          "last_type": "Field Goal Good",
+          "play_ids": [
+            "401415243101927343"
+          ]
+        }
+      ],
+      "intervening_source_blocks": [
+        {
+          "drive_id": "4014152433",
+          "plays": 12,
+          "sequence_start": 101927324,
+          "sequence_end": 101927337,
+          "start": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 26
+          },
+          "end": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 26
+          },
+          "possession_teams": [
+            "278"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401415243101927324",
+            "401415243101927325",
+            "401415243101927326",
+            "401415243101927327",
+            "401415243101927328",
+            "401415243101927329",
+            "401415243101927330",
+            "401415243101927331",
+            "401415243101927332",
+            "401415243101927333",
+            "401415243101927334",
+            "401415243101927337"
+          ]
+        },
+        {
+          "drive_id": "4014152434",
+          "plays": 1,
+          "sequence_start": 101927342,
+          "sequence_end": 101927342,
+          "start": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 26
+          },
+          "end": {
+            "period": 1,
+            "minutes": 7,
+            "seconds": 26
+          },
+          "possession_teams": [
+            "167"
+          ],
+          "first_type": "Pass Reception",
+          "last_type": "Pass Reception",
+          "play_ids": [
+            "401415243101927342"
+          ]
+        }
+      ]
+    },
+    {
+      "game_id": "401415616",
+      "drive_id": "4014156162",
+      "classification": "source_order_reappearance",
+      "evidence": "same_clock_correction_cluster",
+      "clock_block_count": 3,
+      "source_block_count": 3,
+      "clock_blocks": [
+        {
+          "drive_id": "4014156162",
+          "plays": 2,
+          "sequence_start": 101856815,
+          "sequence_end": 101856817,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2567"
+          ],
+          "first_type": "Pass Reception",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401415616101856815",
+            "401415616101856817"
+          ]
+        },
+        {
+          "drive_id": "4014156162",
+          "plays": 1,
+          "sequence_start": 101856862,
+          "sequence_end": 101856862,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2567"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401415616101856862"
+          ]
+        },
+        {
+          "drive_id": "4014156162",
+          "plays": 1,
+          "sequence_start": 101856893,
+          "sequence_end": 101856893,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2567"
+          ],
+          "first_type": "Punt",
+          "last_type": "Punt",
+          "play_ids": [
+            "401415616101856893"
+          ]
+        }
+      ],
+      "source_blocks": [
+        {
+          "drive_id": "4014156162",
+          "plays": 2,
+          "sequence_start": 101856815,
+          "sequence_end": 101856817,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2567"
+          ],
+          "first_type": "Pass Reception",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401415616101856815",
+            "401415616101856817"
+          ]
+        },
+        {
+          "drive_id": "4014156162",
+          "plays": 1,
+          "sequence_start": 101856862,
+          "sequence_end": 101856862,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2567"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401415616101856862"
+          ]
+        },
+        {
+          "drive_id": "4014156162",
+          "plays": 1,
+          "sequence_start": 101856893,
+          "sequence_end": 101856893,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2567"
+          ],
+          "first_type": "Punt",
+          "last_type": "Punt",
+          "play_ids": [
+            "401415616101856893"
+          ]
+        }
+      ],
+      "intervening_source_blocks": [
+        {
+          "drive_id": "4014156163",
+          "plays": 2,
+          "sequence_start": 101856821,
+          "sequence_end": 101856823,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2320"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Interception Return",
+          "play_ids": [
+            "401415616101856821",
+            "401415616101856823"
+          ]
+        },
+        {
+          "drive_id": "4014156164",
+          "plays": 3,
+          "sequence_start": 101856826,
+          "sequence_end": 101856829,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2567"
+          ],
+          "first_type": "Rush",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401415616101856826",
+            "401415616101856828",
+            "401415616101856829"
+          ]
+        },
+        {
+          "drive_id": "4014156167",
+          "plays": 2,
+          "sequence_start": 101856836,
+          "sequence_end": 101856838,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2320"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Rush",
+          "play_ids": [
+            "401415616101856836",
+            "401415616101856838"
+          ]
+        },
+        {
+          "drive_id": "4014156166",
+          "plays": 1,
+          "sequence_start": 101856842,
+          "sequence_end": 101856842,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2567"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401415616101856842"
+          ]
+        },
+        {
+          "drive_id": "4014156168",
+          "plays": 1,
+          "sequence_start": 101856861,
+          "sequence_end": 101856861,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2567"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401415616101856861"
+          ]
+        },
+        {
+          "drive_id": "4014156162",
+          "plays": 1,
+          "sequence_start": 101856862,
+          "sequence_end": 101856862,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2567"
+          ],
+          "first_type": "Rush",
+          "last_type": "Rush",
+          "play_ids": [
+            "401415616101856862"
+          ]
+        },
+        {
+          "drive_id": "4014156164",
+          "plays": 2,
+          "sequence_start": 101856866,
+          "sequence_end": 101856867,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2567"
+          ],
+          "first_type": "Pass Reception",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401415616101856866",
+            "401415616101856867"
+          ]
+        },
+        {
+          "drive_id": "4014156166",
+          "plays": 2,
+          "sequence_start": 101856870,
+          "sequence_end": 101856872,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2567"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Rush",
+          "play_ids": [
+            "401415616101856870",
+            "401415616101856872"
+          ]
+        },
+        {
+          "drive_id": "4014156167",
+          "plays": 1,
+          "sequence_start": 101856875,
+          "sequence_end": 101856875,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2320"
+          ],
+          "first_type": "Punt",
+          "last_type": "Punt",
+          "play_ids": [
+            "401415616101856875"
+          ]
+        },
+        {
+          "drive_id": "4014156168",
+          "plays": 5,
+          "sequence_start": 101856878,
+          "sequence_end": 101856882,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2567"
+          ],
+          "first_type": "Pass Reception",
+          "last_type": "Pass Incompletion",
+          "play_ids": [
+            "401415616101856878",
+            "401415616101856879",
+            "401415616101856880",
+            "401415616101856881",
+            "401415616101856882"
+          ]
+        },
+        {
+          "drive_id": "4014156161",
+          "plays": 2,
+          "sequence_start": 101856884,
+          "sequence_end": 101856885,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2320"
+          ],
+          "first_type": "Pass Incompletion",
+          "last_type": "Punt",
+          "play_ids": [
+            "401415616101856884",
+            "401415616101856885"
+          ]
+        },
+        {
+          "drive_id": "4014156163",
+          "plays": 1,
+          "sequence_start": 101856886,
+          "sequence_end": 101856886,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2320"
+          ],
+          "first_type": "Interception Return",
+          "last_type": "Interception Return",
+          "play_ids": [
+            "401415616101856886"
+          ]
+        },
+        {
+          "drive_id": "4014156165",
+          "plays": 3,
+          "sequence_start": 101856888,
+          "sequence_end": 101856890,
+          "start": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "end": {
+            "period": 1,
+            "minutes": 14,
+            "seconds": 31
+          },
+          "possession_teams": [
+            "2320"
+          ],
+          "first_type": "Rush",
+          "last_type": "Fumble Recovery (Opponent)",
+          "play_ids": [
+            "401415616101856888",
+            "401415616101856889",
+            "401415616101856890"
+          ]
+        }
+      ]
+    }
+  ]
+}
