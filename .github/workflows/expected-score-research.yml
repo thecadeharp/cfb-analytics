@@ -1,0 +1,57 @@
+name: Expected Score Research
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thi-expected-score-research
+  cancel-in-progress: false
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install numeric dependency
+        run: pip install numpy
+      - name: Preserve Model A checksums
+        run: |
+          sha256sum data/projections.json data/cfb_metrics.json scripts/build_projections.py > /tmp/thi-model-a-before.sha256
+      - name: Evaluate historical expected-score baseline
+        run: python scripts/research_expected_score.py
+      - name: Verify research-only output
+        run: |
+          sha256sum --check /tmp/thi-model-a-before.sha256
+          python - <<'PY'
+          import json
+          with open('data/research/expected_score_holdout_2025.json', encoding='utf-8') as f:
+              report = json.load(f)
+          assert report['meta']['status'] == 'research_only_not_for_public_scores_or_model_a'
+          assert report['meta']['sealed_test_season'] == 2025
+          assert report['meta']['test_games'] >= 500
+          assert len(report['holdout']['calibration_bins']) == 5
+          PY
+      - name: Publish research report only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/research/expected_score_holdout_2025.json
+          if git diff --cached --quiet; then
+            echo "Research report unchanged."
+            exit 0
+          fi
+          git commit -m "Refresh expected score research benchmark"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            echo "main moved; retrying (${attempt})"
+            sleep 2
+          done
+          exit 1
