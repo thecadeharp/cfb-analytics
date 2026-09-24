@@ -1,0 +1,413 @@
+{
+  "meta": {
+    "generated_at": "2026-09-24T14:45:03.267697+00:00",
+    "status": "research_only_historical_ledger_game_quality_audit",
+    "scope": "2019-2024 score-verified observed regulation possessions; 2025 excluded and sealed",
+    "production_use": "none; no Model A, projections, site, row-repair, or eligibility changes",
+    "training_ready": false,
+    "interpretation": "Game tiers quantify feed quality and selection risk; they do not authorize fitting or automatic exclusions."
+  },
+  "seasons": [
+    {
+      "season": 2019,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2019.parquet",
+      "verified_games": 611,
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 196,
+        "feed_final_mismatch": 7,
+        "tagged_scores_not_reconciled": 19,
+        "unknown_scoring_event": 14
+      },
+      "quality": {
+        "games": 611,
+        "tier_counts": {
+          "isolated": 436,
+          "material": 92,
+          "clean": 51,
+          "corrupt": 32
+        },
+        "by_tier": [
+          {
+            "tier": "isolated",
+            "games": 436,
+            "possessions": 10979,
+            "passed": 10243,
+            "mean_unresolved_rate": 0.0673897379290423,
+            "mean_scoring_rate": 0.3544585140594727,
+            "mean_core_plays": 6.053248904813396,
+            "mean_q4_share": 0.22354146329504604
+          },
+          {
+            "tier": "corrupt",
+            "games": 32,
+            "possessions": 820,
+            "passed": 0,
+            "mean_unresolved_rate": 1.0,
+            "mean_scoring_rate": 0.32625434453867685,
+            "mean_core_plays": 5.955240421012708,
+            "mean_q4_share": 0.25758549230724326
+          },
+          {
+            "tier": "clean",
+            "games": 51,
+            "possessions": 1275,
+            "passed": 1275,
+            "mean_unresolved_rate": 0.0,
+            "mean_scoring_rate": 0.3661221504879412,
+            "mean_core_plays": 6.12588598381777,
+            "mean_q4_share": 0.2210659491069153
+          },
+          {
+            "tier": "material",
+            "games": 92,
+            "possessions": 2180,
+            "passed": 1899,
+            "mean_unresolved_rate": 0.12907076600226847,
+            "mean_scoring_rate": 0.36279799167755145,
+            "mean_core_plays": 6.222602778008059,
+            "mean_q4_share": 0.22440420666380365
+          }
+        ],
+        "clean_game_retention": {
+          "games": 51,
+          "possessions": 1275,
+          "passed": 1275
+        }
+      }
+    },
+    {
+      "season": 2020,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2020.parquet",
+      "verified_games": 377,
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 136,
+        "tagged_scores_not_reconciled": 15,
+        "unknown_scoring_event": 6,
+        "feed_final_mismatch": 3
+      },
+      "quality": {
+        "games": 377,
+        "tier_counts": {
+          "isolated": 269,
+          "material": 52,
+          "clean": 36,
+          "corrupt": 20
+        },
+        "by_tier": [
+          {
+            "tier": "isolated",
+            "games": 269,
+            "possessions": 6729,
+            "passed": 6289,
+            "mean_unresolved_rate": 0.0657934333669004,
+            "mean_scoring_rate": 0.3643351847006177,
+            "mean_core_plays": 6.163996115850829,
+            "mean_q4_share": 0.23015414369456658
+          },
+          {
+            "tier": "material",
+            "games": 52,
+            "possessions": 1201,
+            "passed": 1048,
+            "mean_unresolved_rate": 0.1274570213292812,
+            "mean_scoring_rate": 0.3853677059927629,
+            "mean_core_plays": 6.418501737252705,
+            "mean_q4_share": 0.24240863105469446
+          },
+          {
+            "tier": "clean",
+            "games": 36,
+            "possessions": 933,
+            "passed": 933,
+            "mean_unresolved_rate": 0.0,
+            "mean_scoring_rate": 0.3882516706377353,
+            "mean_core_plays": 6.032967223853448,
+            "mean_q4_share": 0.23098133847558197
+          },
+          {
+            "tier": "corrupt",
+            "games": 20,
+            "possessions": 545,
+            "passed": 0,
+            "mean_unresolved_rate": 1.0,
+            "mean_scoring_rate": 0.3673051167653732,
+            "mean_core_plays": 5.882763617350589,
+            "mean_q4_share": 0.19983031767335183
+          }
+        ],
+        "clean_game_retention": {
+          "games": 36,
+          "possessions": 933,
+          "passed": 933
+        }
+      }
+    },
+    {
+      "season": 2021,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2021.parquet",
+      "verified_games": 544,
+      "cross_source_rejections": {
+        "unknown_scoring_event": 25,
+        "unmatched_or_ambiguous_ncaa": 164,
+        "tagged_scores_not_reconciled": 28,
+        "feed_final_mismatch": 40
+      },
+      "quality": {
+        "games": 544,
+        "tier_counts": {
+          "isolated": 288,
+          "clean": 133,
+          "corrupt": 70,
+          "material": 53
+        },
+        "by_tier": [
+          {
+            "tier": "isolated",
+            "games": 288,
+            "possessions": 7071,
+            "passed": 6643,
+            "mean_unresolved_rate": 0.06138059036518458,
+            "mean_scoring_rate": 0.3564253743336799,
+            "mean_core_plays": 6.084545161489093,
+            "mean_q4_share": 0.22791693391764195
+          },
+          {
+            "tier": "material",
+            "games": 53,
+            "possessions": 1281,
+            "passed": 1108,
+            "mean_unresolved_rate": 0.13470923812967978,
+            "mean_scoring_rate": 0.3329521186129546,
+            "mean_core_plays": 5.941859518683942,
+            "mean_q4_share": 0.22646724423561743
+          },
+          {
+            "tier": "corrupt",
+            "games": 70,
+            "possessions": 1654,
+            "passed": 18,
+            "mean_unresolved_rate": 0.9911330049261083,
+            "mean_scoring_rate": 0.3475333291475089,
+            "mean_core_plays": 6.201121386188763,
+            "mean_q4_share": 0.22695343897551065
+          },
+          {
+            "tier": "clean",
+            "games": 133,
+            "possessions": 3121,
+            "passed": 3121,
+            "mean_unresolved_rate": 0.0,
+            "mean_scoring_rate": 0.3929455699438502,
+            "mean_core_plays": 6.307034263094607,
+            "mean_q4_share": 0.22740063910876732
+          }
+        ],
+        "clean_game_retention": {
+          "games": 133,
+          "possessions": 3121,
+          "passed": 3121
+        }
+      }
+    },
+    {
+      "season": 2022,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2022.parquet",
+      "verified_games": 564,
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 179,
+        "tagged_scores_not_reconciled": 41,
+        "feed_final_mismatch": 30,
+        "unknown_scoring_event": 1
+      },
+      "quality": {
+        "games": 564,
+        "tier_counts": {
+          "isolated": 233,
+          "clean": 204,
+          "corrupt": 100,
+          "material": 27
+        },
+        "by_tier": [
+          {
+            "tier": "clean",
+            "games": 204,
+            "possessions": 4910,
+            "passed": 4910,
+            "mean_unresolved_rate": 0.0,
+            "mean_scoring_rate": 0.3631811626248053,
+            "mean_core_plays": 6.222923039374106,
+            "mean_q4_share": 0.2364695926438406
+          },
+          {
+            "tier": "isolated",
+            "games": 233,
+            "possessions": 5739,
+            "passed": 5407,
+            "mean_unresolved_rate": 0.058220451262600184,
+            "mean_scoring_rate": 0.35481248717546415,
+            "mean_core_plays": 6.07089976221082,
+            "mean_q4_share": 0.23733714632613964
+          },
+          {
+            "tier": "corrupt",
+            "games": 100,
+            "possessions": 2449,
+            "passed": 0,
+            "mean_unresolved_rate": 1.0,
+            "mean_scoring_rate": 0.34138597315229513,
+            "mean_core_plays": 6.057307750412539,
+            "mean_q4_share": 0.2244860707565461
+          },
+          {
+            "tier": "material",
+            "games": 27,
+            "possessions": 615,
+            "passed": 535,
+            "mean_unresolved_rate": 0.12973121306460225,
+            "mean_scoring_rate": 0.40007706017864,
+            "mean_core_plays": 6.167858914930752,
+            "mean_q4_share": 0.2217204121862796
+          }
+        ],
+        "clean_game_retention": {
+          "games": 204,
+          "possessions": 4910,
+          "passed": 4910
+        }
+      }
+    },
+    {
+      "season": 2023,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2023.parquet",
+      "verified_games": 626,
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 185,
+        "tagged_scores_not_reconciled": 27,
+        "feed_final_mismatch": 18,
+        "unknown_scoring_event": 4
+      },
+      "quality": {
+        "games": 626,
+        "tier_counts": {
+          "isolated": 256,
+          "clean": 242,
+          "corrupt": 96,
+          "material": 32
+        },
+        "by_tier": [
+          {
+            "tier": "isolated",
+            "games": 256,
+            "possessions": 6166,
+            "passed": 5824,
+            "mean_unresolved_rate": 0.05622167718612821,
+            "mean_scoring_rate": 0.35766652625391776,
+            "mean_core_plays": 6.0247615651194035,
+            "mean_q4_share": 0.23582919880670808
+          },
+          {
+            "tier": "clean",
+            "games": 242,
+            "possessions": 5741,
+            "passed": 5741,
+            "mean_unresolved_rate": 0.0,
+            "mean_scoring_rate": 0.3700258586794125,
+            "mean_core_plays": 6.0937827977936125,
+            "mean_q4_share": 0.23523743349627194
+          },
+          {
+            "tier": "corrupt",
+            "games": 96,
+            "possessions": 2281,
+            "passed": 0,
+            "mean_unresolved_rate": 1.0,
+            "mean_scoring_rate": 0.3471705328405601,
+            "mean_core_plays": 6.035701062867461,
+            "mean_q4_share": 0.23400024718045942
+          },
+          {
+            "tier": "material",
+            "games": 32,
+            "possessions": 752,
+            "passed": 658,
+            "mean_unresolved_rate": 0.1256894397828865,
+            "mean_scoring_rate": 0.3264771622132744,
+            "mean_core_plays": 6.067191605283279,
+            "mean_q4_share": 0.23853492634877027
+          }
+        ],
+        "clean_game_retention": {
+          "games": 242,
+          "possessions": 5741,
+          "passed": 5741
+        }
+      }
+    },
+    {
+      "season": 2024,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2024.parquet",
+      "verified_games": 655,
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 184,
+        "feed_final_mismatch": 14,
+        "tagged_scores_not_reconciled": 45
+      },
+      "quality": {
+        "games": 655,
+        "tier_counts": {
+          "isolated": 316,
+          "clean": 172,
+          "corrupt": 113,
+          "material": 54
+        },
+        "by_tier": [
+          {
+            "tier": "isolated",
+            "games": 316,
+            "possessions": 7525,
+            "passed": 7051,
+            "mean_unresolved_rate": 0.06364744744664835,
+            "mean_scoring_rate": 0.370965360580839,
+            "mean_core_plays": 6.084017287482245,
+            "mean_q4_share": 0.23514873881413267
+          },
+          {
+            "tier": "clean",
+            "games": 172,
+            "possessions": 3974,
+            "passed": 3974,
+            "mean_unresolved_rate": 0.0,
+            "mean_scoring_rate": 0.3884405308237814,
+            "mean_core_plays": 6.213454200240078,
+            "mean_q4_share": 0.22819771359464683
+          },
+          {
+            "tier": "material",
+            "games": 54,
+            "possessions": 1179,
+            "passed": 1030,
+            "mean_unresolved_rate": 0.12672291522117252,
+            "mean_scoring_rate": 0.3685400659189077,
+            "mean_core_plays": 6.413486130253201,
+            "mean_q4_share": 0.22485372465123968
+          },
+          {
+            "tier": "corrupt",
+            "games": 113,
+            "possessions": 2777,
+            "passed": 0,
+            "mean_unresolved_rate": 1.0,
+            "mean_scoring_rate": 0.3497420726043519,
+            "mean_core_plays": 6.002703633671654,
+            "mean_q4_share": 0.23203111832184817
+          }
+        ],
+        "clean_game_retention": {
+          "games": 172,
+          "possessions": 3974,
+          "passed": 3974
+        }
+      }
+    }
+  ]
+}
