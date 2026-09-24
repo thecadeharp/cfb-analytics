@@ -1,0 +1,58 @@
+name: Audit Historical Ledger Coverage
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thi-historical-ledger-coverage
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install research dependencies
+        run: pip install pandas numpy requests pyarrow
+      - name: Check syntax and existing ledger regressions
+        run: |
+          python -m py_compile scripts/audit_historical_ledger_coverage.py scripts/build_verified_possession_ledger.py
+          python -m unittest discover -s scripts -p test_verified_possession_ledger.py -v
+      - name: Preserve Model A and published outputs
+        run: |
+          sha256sum data/projections.json data/cfb_metrics.json scripts/build_projections.py index.html app.js postgame-analytics.js > /tmp/thi-ledger-before.sha256
+      - name: Audit 2019-2024 ledger coverage
+        run: python scripts/audit_historical_ledger_coverage.py
+      - name: Validate coverage-only output and production protection
+        run: |
+          sha256sum --check /tmp/thi-ledger-before.sha256
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('data/research/ledger_coverage_2019_2024.json').read_text())
+          assert report['meta']['status'] == 'research_only_historical_ledger_coverage_audit'
+          assert report['meta']['training_ready'] is False
+          assert [row['season'] for row in report['seasons']] == list(range(2019, 2025))
+          for row in report['seasons']:
+              assert row['coverage']['verified_games'] > 0
+              assert row['counts']['training_eligible_possessions'] == 0
+          PY
+      - name: Commit coverage report only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/research/ledger_coverage_2019_2024.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Audit 2019-2024 verified possession-ledger coverage'
+          git pull --rebase origin main
+          git push origin HEAD:main
