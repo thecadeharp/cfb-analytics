@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "generated_at": "2026-09-24T15:13:33.991502+00:00",
+    "status": "research_only_clean_game_expected_points_target_table",
+    "scope": "2019-2024 clean score-verified regulation possessions; 2025 excluded and sealed",
+    "production_use": "none; no model fit, Model A, projection, site, or postgame changes",
+    "training_ready": false,
+    "target": "offensive points assigned by the verified scoring-event ledger; zero only after all checks pass",
+    "features": "possession-start context only; EPA, success, drive length, terminal play, and future-drive information excluded",
+    "partitions": "development=2019-2022; validation=2023-2024; no 2025 rows"
+  },
+  "table": {
+    "path": "data/research/expected_points_clean_games_2019_2024.csv.gz",
+    "rows": 19954,
+    "sha256": "ce26fbafe7bd5798a51eda812330e83221ca75af736bb3b732643f1d508297c8"
+  },
+  "by_season": [
+    {
+      "season": 2019,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2019.parquet",
+      "verified_games": 611,
+      "clean_games": 51,
+      "clean_possessions": 1275,
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 196,
+        "feed_final_mismatch": 7,
+        "tagged_scores_not_reconciled": 19,
+        "unknown_scoring_event": 14
+      }
+    },
+    {
+      "season": 2020,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2020.parquet",
+      "verified_games": 377,
+      "clean_games": 36,
+      "clean_possessions": 933,
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 136,
+        "tagged_scores_not_reconciled": 15,
+        "unknown_scoring_event": 6,
+        "feed_final_mismatch": 3
+      }
+    },
+    {
+      "season": 2021,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2021.parquet",
+      "verified_games": 544,
+      "clean_games": 133,
+      "clean_possessions": 3121,
+      "cross_source_rejections": {
+        "unknown_scoring_event": 25,
+        "unmatched_or_ambiguous_ncaa": 164,
+        "tagged_scores_not_reconciled": 28,
+        "feed_final_mismatch": 40
+      }
+    },
+    {
+      "season": 2022,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2022.parquet",
+      "verified_games": 564,
+      "clean_games": 204,
+      "clean_possessions": 4910,
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 179,
+        "tagged_scores_not_reconciled": 41,
+        "feed_final_mismatch": 30,
+        "unknown_scoring_event": 1
+      }
+    },
+    {
+      "season": 2023,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2023.parquet",
+      "verified_games": 626,
+      "clean_games": 242,
+      "clean_possessions": 5741,
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 185,
+        "tagged_scores_not_reconciled": 27,
+        "feed_final_mismatch": 18,
+        "unknown_scoring_event": 4
+      }
+    },
+    {
+      "season": 2024,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2024.parquet",
+      "verified_games": 655,
+      "clean_games": 172,
+      "clean_possessions": 3974,
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 184,
+        "feed_final_mismatch": 14,
+        "tagged_scores_not_reconciled": 45
+      }
+    }
+  ],
+  "by_partition": {
+    "development": 10239,
+    "validation": 9715
+  },
+  "target_distribution": {
+    "0": 12524,
+    "3": 1953,
+    "6": 336,
+    "7": 5000,
+    "8": 141
+  }
+}
