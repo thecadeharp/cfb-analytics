@@ -78,8 +78,16 @@ def audit(plays, events, ids):
 
     # A drive key must be unique within its game and map to exactly one
     # possession team. Never assign a score to an ambiguous or absent drive.
-    drive_rows = plays.loc[plays["drive.id"].notna() & plays.pos_team_id.notna(),
-                           ["game_id", "drive.id", "pos_team_id"]]
+    possession_types = {
+    "Rush", "Pass Reception", "Pass Incompletion", "Pass Completion", "Sack",
+    "Rushing Touchdown", "Passing Touchdown", "Field Goal Good",
+    "Field Goal Missed", "Punt",
+}
+drive_rows = plays.loc[
+    plays["drive.id"].notna() & plays.pos_team_id.notna()
+    & plays["type.text"].isin(possession_types),
+    ["game_id", "drive.id", "pos_team_id"],
+]
     drive_teams = drive_rows.groupby(["game_id", "drive.id"]).pos_team_id.agg(
         lambda values: frozenset(values)
     )
