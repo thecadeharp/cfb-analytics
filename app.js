@@ -3826,11 +3826,11 @@ function renderRatings() {
       <table class="projection-table">
         <thead>
           <tr>
-            <th>THI Rank</th>
+            <th>THI Net Rank</th>
             <th>Team</th>
             <th>Conference</th>
             <th>Offensive Rating</th>
-            <th>Defensive Rating</th>
+            <th data-sort-default="asc">Defensive Rating</th>
             <th>Net Rating</th>
             <th>Pace Index</th>
             <th>Reliability</th>
