@@ -95,7 +95,9 @@
   section.after(view);
 
   function ratingValue(profile, key) {
-    const value = Number(profile.ratings?.[key]?.value);
+    const raw = profile.ratings?.[key]?.value;
+    if (raw === null || raw === undefined || raw === "") return null;
+    const value = Number(raw);
     return Number.isFinite(value) ? value : null;
   }
 
@@ -118,8 +120,16 @@
       .filter(profile => profile?.eligible && profile?.ratings && matchesRatingConference(profile) &&
         String(profile.team || "").toLocaleLowerCase().includes(query));
     data.sort((a, b) => {
+      // Published ranks retain precision lost when displayed values are rounded.
+      const ar = Number(a.ratings?.[sort]?.rank);
+      const br = Number(b.ratings?.[sort]?.rank);
+      const aRanked = Number.isFinite(ar) && ar > 0;
+      const bRanked = Number.isFinite(br) && br > 0;
+      if (aRanked && bRanked && ar !== br) return ar - br;
+      if (aRanked !== bRanked) return aRanked ? -1 : 1;
       const av = ratingValue(a, sort);
       const bv = ratingValue(b, sort);
+      if (av === null && bv === null) return String(a.team).localeCompare(String(b.team));
       if (av === null) return 1;
       if (bv === null) return -1;
       return (sort === "defense" ? av - bv : bv - av) ||
