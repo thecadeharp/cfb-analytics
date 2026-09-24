@@ -1,0 +1,396 @@
+{
+  "meta": {
+    "generated_at": "2026-09-24T04:08:57.916577+00:00",
+    "status": "research_only_cross_source_score_check",
+    "source": "NCAA scoreboard final versus SportsDataverse ESPN play-by-play tagged events",
+    "scope": "2025 completed regular-season PBP; NCAA FBS scoreboard only; exact team-name pair, unique matchup",
+    "production_use": "none; does not retrain or alter Model A, scores, projections, or site",
+    "limitations": "Unmatched games, ambiguous rematches, and failures are not independently verified. Cross-source score agreement does not establish correct possession attribution or unbiased sample coverage."
+  },
+  "weeks": [
+    {
+      "week": 1,
+      "contests": 98,
+      "final": 98
+    },
+    {
+      "week": 2,
+      "contests": 84,
+      "final": 84
+    },
+    {
+      "week": 3,
+      "contests": 72,
+      "final": 72
+    },
+    {
+      "week": 4,
+      "contests": 63,
+      "final": 63
+    },
+    {
+      "week": 5,
+      "contests": 55,
+      "final": 55
+    },
+    {
+      "week": 6,
+      "contests": 52,
+      "final": 52
+    },
+    {
+      "week": 7,
+      "contests": 58,
+      "final": 58
+    },
+    {
+      "week": 8,
+      "contests": 62,
+      "final": 62
+    },
+    {
+      "week": 9,
+      "contests": 55,
+      "final": 55
+    },
+    {
+      "week": 10,
+      "contests": 54,
+      "final": 54
+    },
+    {
+      "week": 11,
+      "contests": 54,
+      "final": 54
+    },
+    {
+      "week": 12,
+      "contests": 61,
+      "final": 61
+    },
+    {
+      "week": 13,
+      "contests": 66,
+      "final": 66
+    },
+    {
+      "week": 14,
+      "contests": 67,
+      "final": 67
+    },
+    {
+      "week": 15,
+      "contests": 10,
+      "final": 10
+    }
+  ],
+  "comparison": {
+    "pbp_completed_regular_games": 911,
+    "matched_official_final": 723,
+    "independently_confirmed_and_reconciled": 654,
+    "unmatched_or_ambiguous": 188,
+    "feed_final_mismatch": 17,
+    "official_score_matches_but_events_not_reconciled": 52,
+    "mismatch_samples": [
+      {
+        "game_id": "401752678",
+        "ncaa_id": "6459066",
+        "away": "UTSA",
+        "home": "Texas A&M",
+        "feed_final": [
+          25,
+          42
+        ],
+        "ncaa_final": [
+          24,
+          42
+        ],
+        "tagged_events_reconcile_to_feed": false
+      },
+      {
+        "game_id": "401752682",
+        "ncaa_id": "6459246",
+        "away": "Arkansas State",
+        "home": "Arkansas",
+        "feed_final": [
+          21,
+          56
+        ],
+        "ncaa_final": [
+          14,
+          56
+        ],
+        "tagged_events_reconcile_to_feed": false
+      },
+      {
+        "game_id": "401752730",
+        "ncaa_id": "6459070",
+        "away": "Mississippi State",
+        "home": "Texas A&M",
+        "feed_final": [
+          9,
+          34
+        ],
+        "ncaa_final": [
+          9,
+          31
+        ],
+        "tagged_events_reconcile_to_feed": false
+      },
+      {
+        "game_id": "401752739",
+        "ncaa_id": "6459071",
+        "away": "Texas A&M",
+        "home": "Arkansas",
+        "feed_final": [
+          45,
+          35
+        ],
+        "ncaa_final": [
+          45,
+          42
+        ],
+        "tagged_events_reconcile_to_feed": false
+      },
+      {
+        "game_id": "401752794",
+        "ncaa_id": "6459538",
+        "away": "Ohio",
+        "home": "Rutgers",
+        "feed_final": [
+          31,
+          37
+        ],
+        "ncaa_final": [
+          31,
+          34
+        ],
+        "tagged_events_reconcile_to_feed": false
+      },
+      {
+        "game_id": "401752863",
+        "ncaa_id": "6459659",
+        "away": "UCLA",
+        "home": "Michigan State",
+        "feed_final": [
+          38,
+          19
+        ],
+        "ncaa_final": [
+          38,
+          13
+        ],
+        "tagged_events_reconcile_to_feed": false
+      },
+      {
+        "game_id": "401754525",
+        "ncaa_id": "6459096",
+        "away": "Baylor",
+        "home": "SMU",
+        "feed_final": [
+          45,
+          45
+        ],
+        "ncaa_final": [
+          48,
+          45
+        ],
+        "tagged_events_reconcile_to_feed": false
+      },
+      {
+        "game_id": "401754582",
+        "ncaa_id": "6459497",
+        "away": "Pittsburgh",
+        "home": "Stanford",
+        "feed_final": [
+          35,
+          19
+        ],
+        "ncaa_final": [
+          35,
+          20
+        ],
+        "tagged_events_reconcile_to_feed": false
+      },
+      {
+        "game_id": "401756906",
+        "ncaa_id": "6458932",
+        "away": "UCF",
+        "home": "Kansas State",
+        "feed_final": [
+          20,
+          37
+        ],
+        "ncaa_final": [
+          20,
+          34
+        ],
+        "tagged_events_reconcile_to_feed": false
+      },
+      {
+        "game_id": "401757170",
+        "ncaa_id": "6459229",
+        "away": "UConn",
+        "home": "Buffalo",
+        "feed_final": [
+          23,
+          17
+        ],
+        "ncaa_final": [
+          20,
+          17
+        ],
+        "tagged_events_reconcile_to_feed": false
+      },
+      {
+        "game_id": "401757173",
+        "ncaa_id": "6459233",
+        "away": "UAB",
+        "home": "UConn",
+        "feed_final": [
+          20,
+          38
+        ],
+        "ncaa_final": [
+          19,
+          38
+        ],
+        "tagged_events_reconcile_to_feed": false
+      },
+      {
+        "game_id": "401757224",
+        "ncaa_id": "6459406",
+        "away": "UNLV",
+        "home": "Sam Houston",
+        "feed_final": [
+          42,
+          21
+        ],
+        "ncaa_final": [
+          38,
+          21
+        ],
+        "tagged_events_reconcile_to_feed": false
+      },
+      {
+        "game_id": "401757310",
+        "ncaa_id": "6459330",
+        "away": "UTEP",
+        "home": "Delaware",
+        "feed_final": [
+          31,
+          58
+        ],
+        "ncaa_final": [
+          31,
+          61
+        ],
+        "tagged_events_reconcile_to_feed": false
+      },
+      {
+        "game_id": "401760397",
+        "ncaa_id": "6459393",
+        "away": "Boise State",
+        "home": "Nevada",
+        "feed_final": [
+          17,
+          3
+        ],
+        "ncaa_final": [
+          24,
+          3
+        ],
+        "tagged_events_reconcile_to_feed": false
+      },
+      {
+        "game_id": "401761621",
+        "ncaa_id": "6459620",
+        "away": "South Alabama",
+        "home": "Troy",
+        "feed_final": [
+          24,
+          32
+        ],
+        "ncaa_final": [
+          24,
+          31
+        ],
+        "tagged_events_reconcile_to_feed": false
+      }
+    ],
+    "unmatched_samples": [
+      {
+        "game_id": "401752668",
+        "away": "Long Island University",
+        "home": "Florida",
+        "candidate_count": 0
+      },
+      {
+        "game_id": "401752674",
+        "away": "Central Arkansas",
+        "home": "Missouri",
+        "candidate_count": 0
+      },
+      {
+        "game_id": "401752679",
+        "away": "Charleston Southern",
+        "home": "Vanderbilt",
+        "candidate_count": 0
+      },
+      {
+        "game_id": "401752681",
+        "away": "UL Monroe",
+        "home": "Alabama",
+        "candidate_count": 0
+      },
+      {
+        "game_id": "401752684",
+        "away": "South Florida",
+        "home": "Florida",
+        "candidate_count": 0
+      },
+      {
+        "game_id": "401752692",
+        "away": "East Tennessee State",
+        "home": "Tennessee",
+        "candidate_count": 0
+      },
+      {
+        "game_id": "401752693",
+        "away": "San Jos\u00e9 State",
+        "home": "Texas",
+        "candidate_count": 0
+      },
+      {
+        "game_id": "401752698",
+        "away": "Eastern Michigan",
+        "home": "Kentucky",
+        "candidate_count": 0
+      },
+      {
+        "game_id": "401752701",
+        "away": "Alcorn State",
+        "home": "Mississippi State",
+        "candidate_count": 0
+      },
+      {
+        "game_id": "401752710",
+        "away": "SE Louisiana",
+        "home": "LSU",
+        "candidate_count": 0
+      },
+      {
+        "game_id": "401752712",
+        "away": "Northern Illinois",
+        "home": "Mississippi State",
+        "candidate_count": 0
+      },
+      {
+        "game_id": "401752755",
+        "away": "Georgia",
+        "home": "Florida",
+        "candidate_count": 0
+      }
+    ]
+  }
+}
