@@ -255,6 +255,11 @@ def build_ledger(plays, events):
     return result, event_frame, pd.DataFrame(issues, columns=["game_id", "drive_id", "play_id", "reason"]), summary
 
 
+def review_records(frame):
+    """Keep missing review identifiers as JSON null across pandas dtypes."""
+    return frame.astype(object).where(frame.notna(), None).to_dict(orient="records")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--local-parquet", type=Path)
@@ -294,7 +299,7 @@ def main():
                             "limits": "Observed drive IDs cannot prove absent possessions do not exist. Clock and sequence conflicts, duplicate IDs, unassigned scoring and incomplete drive boundaries are flagged. Raw score stamps and EPA are diagnostic, not approved predictors. Special-teams channel labels are inherited from the prior reconstruction and still require review. 2025 remains held out; this is data-quality work only.",
                             "zero_rule": "Zero only when drive and game checks pass; unresolved labels are null, never zero."},
                   "counts": summary, "artifacts": outputs,
-                  "review_samples": review.head(30).to_dict(orient="records")}
+                  "review_samples": review_records(review.head(30))}
         REPORT.parent.mkdir(parents=True, exist_ok=True)
         REPORT.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
         (args.output_dir / "report.json").write_text(REPORT.read_text())
