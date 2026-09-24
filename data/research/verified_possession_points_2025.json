@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "generated_at": "2026-09-24T04:14:42.426676+00:00",
+    "status": "research_only_verified_possession_points_audit",
+    "eligibility": "2025 games with unique NCAA final and complete scoring-event reconciliation",
+    "limits": "Only tagged scoring events with an unambiguous possession team are assigned. Overtime and nonoffensive scores are separate. Completeness, duplicate scores, and drive chronology need further inspection before model training.",
+    "production_use": "none; Model A and site unchanged"
+  },
+  "counts": {
+    "verified_games": 654,
+    "tagged_scoring_events": 5781,
+    "overtime_scoring_events_kept_separate": 37,
+    "offensive_events_assigned": 4806,
+    "offensive_events_ambiguous_drive": 675,
+    "regulation_possessions_with_assigned_points": 4806,
+    "regulation_offensive_points_assigned": 28353,
+    "regulation_offensive_points_unassigned": 3810,
+    "regulation_nonoffensive_or_unknown_events": 263,
+    "regulation_nonoffensive_or_unknown_points": 1666
+  },
+  "points_by_channel_all_periods": {
+    "defense": 1442,
+    "field_goal": 4623,
+    "offense": 27749,
+    "special_teams": 195,
+    "unclassified": 29
+  },
+  "points_by_channel_regulation": {
+    "defense": 1442,
+    "field_goal": 4596,
+    "offense": 27567,
+    "special_teams": 195,
+    "unclassified": 29
+  }
+}
