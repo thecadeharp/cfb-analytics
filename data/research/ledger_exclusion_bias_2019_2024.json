@@ -1,0 +1,791 @@
+{
+  "meta": {
+    "generated_at": "2026-09-24T14:18:37.769315+00:00",
+    "status": "research_only_historical_ledger_exclusion_bias_audit",
+    "scope": "2019-2024 independently score-verified observed regulation possessions only; 2025 excluded and sealed",
+    "production_use": "none; no Model A, projection, postgame, site, or ledger-eligibility changes",
+    "training_ready": false,
+    "interpretation": "Differences identify potential selection bias to investigate; they do not authorize row repair or model fitting."
+  },
+  "seasons": [
+    {
+      "season": 2019,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2019.parquet",
+      "verified_games": 611,
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 196,
+        "feed_final_mismatch": 7,
+        "tagged_scores_not_reconciled": 19,
+        "unknown_scoring_event": 14
+      },
+      "bias": {
+        "observed_possessions": 15254,
+        "passed": 13417,
+        "unresolved": 1837,
+        "unresolved_rate": 0.12042742887111578,
+        "by_start_period": [
+          {
+            "stratum": "Q1",
+            "observed": 3928,
+            "passed": 3674,
+            "unresolved": 254,
+            "unresolved_rate": 0.06466395112016293
+          },
+          {
+            "stratum": "Q2",
+            "observed": 4014,
+            "passed": 3392,
+            "unresolved": 622,
+            "unresolved_rate": 0.15495764823119082
+          },
+          {
+            "stratum": "Q3",
+            "observed": 3882,
+            "passed": 3645,
+            "unresolved": 237,
+            "unresolved_rate": 0.061051004636785165
+          },
+          {
+            "stratum": "Q4",
+            "observed": 3430,
+            "passed": 2706,
+            "unresolved": 724,
+            "unresolved_rate": 0.2110787172011662
+          }
+        ],
+        "by_scoring_status": [
+          {
+            "stratum": "scoreless",
+            "observed": 9880,
+            "passed": 8327,
+            "unresolved": 1553,
+            "unresolved_rate": 0.15718623481781377
+          },
+          {
+            "stratum": "scoring",
+            "observed": 5374,
+            "passed": 5090,
+            "unresolved": 284,
+            "unresolved_rate": 0.05284704131001117
+          }
+        ],
+        "by_first_observed_down": [
+          {
+            "stratum": "first_down",
+            "observed": 15216,
+            "passed": 13417,
+            "unresolved": 1799,
+            "unresolved_rate": 0.11823080967402734
+          },
+          {
+            "stratum": "later_down",
+            "observed": 38,
+            "passed": 0,
+            "unresolved": 38,
+            "unresolved_rate": 1.0
+          }
+        ],
+        "by_core_plays": [
+          {
+            "stratum": "1",
+            "observed": 817,
+            "passed": 440,
+            "unresolved": 377,
+            "unresolved_rate": 0.4614443084455324
+          },
+          {
+            "stratum": "2-4",
+            "observed": 5693,
+            "passed": 4992,
+            "unresolved": 701,
+            "unresolved_rate": 0.12313367293167048
+          },
+          {
+            "stratum": "5-8",
+            "observed": 5611,
+            "passed": 5076,
+            "unresolved": 535,
+            "unresolved_rate": 0.09534842274104438
+          },
+          {
+            "stratum": "9+",
+            "observed": 3133,
+            "passed": 2909,
+            "unresolved": 224,
+            "unresolved_rate": 0.07149696776252792
+          }
+        ],
+        "by_terminal_status": [
+          {
+            "stratum": "terminal_missing",
+            "observed": 1046,
+            "passed": 0,
+            "unresolved": 1046,
+            "unresolved_rate": 1.0
+          },
+          {
+            "stratum": "terminal_observed",
+            "observed": 14208,
+            "passed": 13417,
+            "unresolved": 791,
+            "unresolved_rate": 0.05567286036036036
+          }
+        ],
+        "game_unresolved_rate": {
+          "median": 0.07692307692307687,
+          "p90": 0.13043478260869568,
+          "games_over_25pct": 32
+        }
+      }
+    },
+    {
+      "season": 2020,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2020.parquet",
+      "verified_games": 377,
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 136,
+        "tagged_scores_not_reconciled": 15,
+        "unknown_scoring_event": 6,
+        "feed_final_mismatch": 3
+      },
+      "bias": {
+        "observed_possessions": 9408,
+        "passed": 8270,
+        "unresolved": 1138,
+        "unresolved_rate": 0.1209608843537415,
+        "by_start_period": [
+          {
+            "stratum": "Q1",
+            "observed": 2408,
+            "passed": 2235,
+            "unresolved": 173,
+            "unresolved_rate": 0.071843853820598
+          },
+          {
+            "stratum": "Q2",
+            "observed": 2446,
+            "passed": 2051,
+            "unresolved": 395,
+            "unresolved_rate": 0.16148814390842192
+          },
+          {
+            "stratum": "Q3",
+            "observed": 2389,
+            "passed": 2228,
+            "unresolved": 161,
+            "unresolved_rate": 0.06739221431561322
+          },
+          {
+            "stratum": "Q4",
+            "observed": 2165,
+            "passed": 1756,
+            "unresolved": 409,
+            "unresolved_rate": 0.18891454965357968
+          }
+        ],
+        "by_scoring_status": [
+          {
+            "stratum": "scoreless",
+            "observed": 5976,
+            "passed": 5039,
+            "unresolved": 937,
+            "unresolved_rate": 0.1567938420348059
+          },
+          {
+            "stratum": "scoring",
+            "observed": 3432,
+            "passed": 3231,
+            "unresolved": 201,
+            "unresolved_rate": 0.05856643356643357
+          }
+        ],
+        "by_first_observed_down": [
+          {
+            "stratum": "first_down",
+            "observed": 9381,
+            "passed": 8270,
+            "unresolved": 1111,
+            "unresolved_rate": 0.11843087090928472
+          },
+          {
+            "stratum": "later_down",
+            "observed": 27,
+            "passed": 0,
+            "unresolved": 27,
+            "unresolved_rate": 1.0
+          }
+        ],
+        "by_core_plays": [
+          {
+            "stratum": "1",
+            "observed": 501,
+            "passed": 283,
+            "unresolved": 218,
+            "unresolved_rate": 0.4351297405189621
+          },
+          {
+            "stratum": "2-4",
+            "observed": 3457,
+            "passed": 3004,
+            "unresolved": 453,
+            "unresolved_rate": 0.1310384726641597
+          },
+          {
+            "stratum": "5-8",
+            "observed": 3450,
+            "passed": 3125,
+            "unresolved": 325,
+            "unresolved_rate": 0.09420289855072464
+          },
+          {
+            "stratum": "9+",
+            "observed": 2000,
+            "passed": 1858,
+            "unresolved": 142,
+            "unresolved_rate": 0.071
+          }
+        ],
+        "by_terminal_status": [
+          {
+            "stratum": "terminal_missing",
+            "observed": 618,
+            "passed": 0,
+            "unresolved": 618,
+            "unresolved_rate": 1.0
+          },
+          {
+            "stratum": "terminal_observed",
+            "observed": 8790,
+            "passed": 8270,
+            "unresolved": 520,
+            "unresolved_rate": 0.05915813424345848
+          }
+        ],
+        "game_unresolved_rate": {
+          "median": 0.07407407407407407,
+          "p90": 0.13454545454545463,
+          "games_over_25pct": 20
+        }
+      }
+    },
+    {
+      "season": 2021,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2021.parquet",
+      "verified_games": 544,
+      "cross_source_rejections": {
+        "unknown_scoring_event": 25,
+        "unmatched_or_ambiguous_ncaa": 164,
+        "tagged_scores_not_reconciled": 28,
+        "feed_final_mismatch": 40
+      },
+      "bias": {
+        "observed_possessions": 13127,
+        "passed": 10890,
+        "unresolved": 2237,
+        "unresolved_rate": 0.17041212767578273,
+        "by_start_period": [
+          {
+            "stratum": "Q1",
+            "observed": 3329,
+            "passed": 2831,
+            "unresolved": 498,
+            "unresolved_rate": 0.14959447281465907
+          },
+          {
+            "stratum": "Q2",
+            "observed": 3447,
+            "passed": 2836,
+            "unresolved": 611,
+            "unresolved_rate": 0.17725558456628954
+          },
+          {
+            "stratum": "Q3",
+            "observed": 3359,
+            "passed": 2870,
+            "unresolved": 489,
+            "unresolved_rate": 0.1455790413813635
+          },
+          {
+            "stratum": "Q4",
+            "observed": 2992,
+            "passed": 2353,
+            "unresolved": 639,
+            "unresolved_rate": 0.21356951871657753
+          }
+        ],
+        "by_scoring_status": [
+          {
+            "stratum": "scoreless",
+            "observed": 8430,
+            "passed": 6789,
+            "unresolved": 1641,
+            "unresolved_rate": 0.19466192170818505
+          },
+          {
+            "stratum": "scoring",
+            "observed": 4697,
+            "passed": 4101,
+            "unresolved": 596,
+            "unresolved_rate": 0.12688950393868426
+          }
+        ],
+        "by_first_observed_down": [
+          {
+            "stratum": "first_down",
+            "observed": 13010,
+            "passed": 10890,
+            "unresolved": 2120,
+            "unresolved_rate": 0.16295157571099156
+          },
+          {
+            "stratum": "later_down",
+            "observed": 117,
+            "passed": 0,
+            "unresolved": 117,
+            "unresolved_rate": 1.0
+          }
+        ],
+        "by_core_plays": [
+          {
+            "stratum": "1",
+            "observed": 655,
+            "passed": 436,
+            "unresolved": 219,
+            "unresolved_rate": 0.33435114503816793
+          },
+          {
+            "stratum": "2-4",
+            "observed": 4845,
+            "passed": 4018,
+            "unresolved": 827,
+            "unresolved_rate": 0.17069143446852425
+          },
+          {
+            "stratum": "5-8",
+            "observed": 4841,
+            "passed": 4077,
+            "unresolved": 764,
+            "unresolved_rate": 0.1578186325139434
+          },
+          {
+            "stratum": "9+",
+            "observed": 2786,
+            "passed": 2359,
+            "unresolved": 427,
+            "unresolved_rate": 0.15326633165829145
+          }
+        ],
+        "by_terminal_status": [
+          {
+            "stratum": "terminal_missing",
+            "observed": 645,
+            "passed": 0,
+            "unresolved": 645,
+            "unresolved_rate": 1.0
+          },
+          {
+            "stratum": "terminal_observed",
+            "observed": 12482,
+            "passed": 10890,
+            "unresolved": 1592,
+            "unresolved_rate": 0.12754366287453933
+          }
+        ],
+        "game_unresolved_rate": {
+          "median": 0.05555555555555558,
+          "p90": 1.0,
+          "games_over_25pct": 70
+        }
+      }
+    },
+    {
+      "season": 2022,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2022.parquet",
+      "verified_games": 564,
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 179,
+        "tagged_scores_not_reconciled": 41,
+        "feed_final_mismatch": 30,
+        "unknown_scoring_event": 1
+      },
+      "bias": {
+        "observed_possessions": 13713,
+        "passed": 10852,
+        "unresolved": 2861,
+        "unresolved_rate": 0.20863414278421935,
+        "by_start_period": [
+          {
+            "stratum": "Q1",
+            "observed": 3468,
+            "passed": 2809,
+            "unresolved": 659,
+            "unresolved_rate": 0.1900230680507497
+          },
+          {
+            "stratum": "Q2",
+            "observed": 3529,
+            "passed": 2746,
+            "unresolved": 783,
+            "unresolved_rate": 0.22187588551997733
+          },
+          {
+            "stratum": "Q3",
+            "observed": 3505,
+            "passed": 2821,
+            "unresolved": 684,
+            "unresolved_rate": 0.19514978601997146
+          },
+          {
+            "stratum": "Q4",
+            "observed": 3211,
+            "passed": 2476,
+            "unresolved": 735,
+            "unresolved_rate": 0.22890065400186857
+          }
+        ],
+        "by_scoring_status": [
+          {
+            "stratum": "scoreless",
+            "observed": 8891,
+            "passed": 6863,
+            "unresolved": 2028,
+            "unresolved_rate": 0.22809582724103025
+          },
+          {
+            "stratum": "scoring",
+            "observed": 4822,
+            "passed": 3989,
+            "unresolved": 833,
+            "unresolved_rate": 0.17274989630858564
+          }
+        ],
+        "by_first_observed_down": [
+          {
+            "stratum": "first_down",
+            "observed": 13534,
+            "passed": 10852,
+            "unresolved": 2682,
+            "unresolved_rate": 0.19816757795182505
+          },
+          {
+            "stratum": "later_down",
+            "observed": 179,
+            "passed": 0,
+            "unresolved": 179,
+            "unresolved_rate": 1.0
+          }
+        ],
+        "by_core_plays": [
+          {
+            "stratum": "1",
+            "observed": 688,
+            "passed": 455,
+            "unresolved": 233,
+            "unresolved_rate": 0.3386627906976744
+          },
+          {
+            "stratum": "2-4",
+            "observed": 5138,
+            "passed": 4033,
+            "unresolved": 1105,
+            "unresolved_rate": 0.2150642273258077
+          },
+          {
+            "stratum": "5-8",
+            "observed": 5075,
+            "passed": 4074,
+            "unresolved": 1001,
+            "unresolved_rate": 0.19724137931034483
+          },
+          {
+            "stratum": "9+",
+            "observed": 2812,
+            "passed": 2290,
+            "unresolved": 522,
+            "unresolved_rate": 0.1856330014224751
+          }
+        ],
+        "by_terminal_status": [
+          {
+            "stratum": "terminal_missing",
+            "observed": 507,
+            "passed": 0,
+            "unresolved": 507,
+            "unresolved_rate": 1.0
+          },
+          {
+            "stratum": "terminal_observed",
+            "observed": 13206,
+            "passed": 10852,
+            "unresolved": 2354,
+            "unresolved_rate": 0.1782523095562623
+          }
+        ],
+        "game_unresolved_rate": {
+          "median": 0.04347826086956519,
+          "p90": 1.0,
+          "games_over_25pct": 100
+        }
+      }
+    },
+    {
+      "season": 2023,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2023.parquet",
+      "verified_games": 626,
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 185,
+        "tagged_scores_not_reconciled": 27,
+        "feed_final_mismatch": 18,
+        "unknown_scoring_event": 4
+      },
+      "bias": {
+        "observed_possessions": 14940,
+        "passed": 12223,
+        "unresolved": 2717,
+        "unresolved_rate": 0.18186077643908968,
+        "by_start_period": [
+          {
+            "stratum": "Q1",
+            "observed": 3820,
+            "passed": 3192,
+            "unresolved": 628,
+            "unresolved_rate": 0.1643979057591623
+          },
+          {
+            "stratum": "Q2",
+            "observed": 3860,
+            "passed": 3137,
+            "unresolved": 723,
+            "unresolved_rate": 0.1873056994818653
+          },
+          {
+            "stratum": "Q3",
+            "observed": 3735,
+            "passed": 3092,
+            "unresolved": 643,
+            "unresolved_rate": 0.17215528781793843
+          },
+          {
+            "stratum": "Q4",
+            "observed": 3525,
+            "passed": 2802,
+            "unresolved": 723,
+            "unresolved_rate": 0.2051063829787234
+          }
+        ],
+        "by_scoring_status": [
+          {
+            "stratum": "scoreless",
+            "observed": 9624,
+            "passed": 7704,
+            "unresolved": 1920,
+            "unresolved_rate": 0.19950124688279303
+          },
+          {
+            "stratum": "scoring",
+            "observed": 5316,
+            "passed": 4519,
+            "unresolved": 797,
+            "unresolved_rate": 0.14992475545522949
+          }
+        ],
+        "by_first_observed_down": [
+          {
+            "stratum": "first_down",
+            "observed": 14809,
+            "passed": 12223,
+            "unresolved": 2586,
+            "unresolved_rate": 0.1746235397393477
+          },
+          {
+            "stratum": "later_down",
+            "observed": 131,
+            "passed": 0,
+            "unresolved": 131,
+            "unresolved_rate": 1.0
+          }
+        ],
+        "by_core_plays": [
+          {
+            "stratum": "1",
+            "observed": 784,
+            "passed": 571,
+            "unresolved": 213,
+            "unresolved_rate": 0.27168367346938777
+          },
+          {
+            "stratum": "2-4",
+            "observed": 5641,
+            "passed": 4572,
+            "unresolved": 1069,
+            "unresolved_rate": 0.18950540684275838
+          },
+          {
+            "stratum": "5-8",
+            "observed": 5465,
+            "passed": 4548,
+            "unresolved": 917,
+            "unresolved_rate": 0.16779505946935042
+          },
+          {
+            "stratum": "9+",
+            "observed": 3050,
+            "passed": 2532,
+            "unresolved": 518,
+            "unresolved_rate": 0.16983606557377048
+          }
+        ],
+        "by_terminal_status": [
+          {
+            "stratum": "terminal_missing",
+            "observed": 525,
+            "passed": 0,
+            "unresolved": 525,
+            "unresolved_rate": 1.0
+          },
+          {
+            "stratum": "terminal_observed",
+            "observed": 14415,
+            "passed": 12223,
+            "unresolved": 2192,
+            "unresolved_rate": 0.1520638224072147
+          }
+        ],
+        "game_unresolved_rate": {
+          "median": 0.040000000000000036,
+          "p90": 1.0,
+          "games_over_25pct": 96
+        }
+      }
+    },
+    {
+      "season": 2024,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2024.parquet",
+      "verified_games": 655,
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 184,
+        "feed_final_mismatch": 14,
+        "tagged_scores_not_reconciled": 45
+      },
+      "bias": {
+        "observed_possessions": 15455,
+        "passed": 12055,
+        "unresolved": 3400,
+        "unresolved_rate": 0.21999352960207053,
+        "by_start_period": [
+          {
+            "stratum": "Q1",
+            "observed": 3869,
+            "passed": 3131,
+            "unresolved": 738,
+            "unresolved_rate": 0.1907469630395451
+          },
+          {
+            "stratum": "Q2",
+            "observed": 4172,
+            "passed": 3172,
+            "unresolved": 1000,
+            "unresolved_rate": 0.23969319271332695
+          },
+          {
+            "stratum": "Q3",
+            "observed": 3825,
+            "passed": 3097,
+            "unresolved": 728,
+            "unresolved_rate": 0.19032679738562092
+          },
+          {
+            "stratum": "Q4",
+            "observed": 3589,
+            "passed": 2655,
+            "unresolved": 934,
+            "unresolved_rate": 0.2602396210643633
+          }
+        ],
+        "by_scoring_status": [
+          {
+            "stratum": "scoreless",
+            "observed": 9783,
+            "passed": 7353,
+            "unresolved": 2430,
+            "unresolved_rate": 0.24839006439742412
+          },
+          {
+            "stratum": "scoring",
+            "observed": 5672,
+            "passed": 4702,
+            "unresolved": 970,
+            "unresolved_rate": 0.17101551480959098
+          }
+        ],
+        "by_first_observed_down": [
+          {
+            "stratum": "first_down",
+            "observed": 15369,
+            "passed": 12055,
+            "unresolved": 3314,
+            "unresolved_rate": 0.2156288632962457
+          },
+          {
+            "stratum": "later_down",
+            "observed": 86,
+            "passed": 0,
+            "unresolved": 86,
+            "unresolved_rate": 1.0
+          }
+        ],
+        "by_core_plays": [
+          {
+            "stratum": "1",
+            "observed": 890,
+            "passed": 546,
+            "unresolved": 344,
+            "unresolved_rate": 0.3865168539325843
+          },
+          {
+            "stratum": "2-4",
+            "observed": 5673,
+            "passed": 4321,
+            "unresolved": 1352,
+            "unresolved_rate": 0.23832187555085493
+          },
+          {
+            "stratum": "5-8",
+            "observed": 5607,
+            "passed": 4519,
+            "unresolved": 1088,
+            "unresolved_rate": 0.19404316033529517
+          },
+          {
+            "stratum": "9+",
+            "observed": 3285,
+            "passed": 2669,
+            "unresolved": 616,
+            "unresolved_rate": 0.18751902587519026
+          }
+        ],
+        "by_terminal_status": [
+          {
+            "stratum": "terminal_missing",
+            "observed": 814,
+            "passed": 0,
+            "unresolved": 814,
+            "unresolved_rate": 1.0
+          },
+          {
+            "stratum": "terminal_observed",
+            "observed": 14641,
+            "passed": 12055,
+            "unresolved": 2586,
+            "unresolved_rate": 0.17662727955740729
+          }
+        ],
+        "game_unresolved_rate": {
+          "median": 0.05882352941176472,
+          "p90": 1.0,
+          "games_over_25pct": 113
+        }
+      }
+    }
+  ]
+}
