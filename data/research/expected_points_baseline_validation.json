@@ -1,0 +1,71 @@
+{
+  "meta": {
+    "generated_at": "2026-09-24T15:20:26.343089+00:00",
+    "status": "research_only_clean_game_expected_points_ridge_baseline",
+    "production_use": "none; does not modify Model A, projections, site, postgame, or table",
+    "training_ready": false,
+    "scope": "development=2019-2022; validation=2023-2024; 2025 sealed and excluded",
+    "features": "start yards-to-endzone quadratic plus period indicators; no EPA, drive outcome context, market, or team strength",
+    "ridge_penalty": 10.0
+  },
+  "development_rows": 10239,
+  "validation_rows": 9715,
+  "league_mean_baseline": 2.1830256861021584,
+  "coefficients": [
+    5.192472942354589,
+    -3.701709958054859,
+    -0.3520785367821667,
+    -0.3009340153053288,
+    0.09130413963426716,
+    -0.5814052304403481
+  ],
+  "validation_metrics": {
+    "ridge": {
+      "mae": 2.644282674195624,
+      "rmse": 2.992896522830224,
+      "bias": -0.03181391038333144
+    },
+    "league_mean": {
+      "mae": 2.7762257948565066,
+      "rmse": 3.0727905690380815,
+      "bias": -0.04558985687262264
+    }
+  },
+  "field_position_calibration": [
+    {
+      "field_position_bucket": "(-0.001, 20.0]",
+      "rows": 140,
+      "actual_mean": 4.7,
+      "predicted_mean": 4.470880452177059,
+      "bias": -0.22911954782294167
+    },
+    {
+      "field_position_bucket": "(20.0, 40.0]",
+      "rows": 436,
+      "actual_mean": 3.8922018348623855,
+      "predicted_mean": 3.7361390985536103,
+      "bias": -0.156062736308775
+    },
+    {
+      "field_position_bucket": "(40.0, 60.0]",
+      "rows": 1271,
+      "actual_mean": 2.973249409913454,
+      "predicted_mean": 2.9261610118179355,
+      "bias": -0.04708839809551823
+    },
+    {
+      "field_position_bucket": "(60.0, 80.0]",
+      "rows": 5983,
+      "actual_mean": 2.0792244693297675,
+      "predicted_mean": 2.1077034235459475,
+      "bias": 0.028478954216179783
+    },
+    {
+      "field_position_bucket": "(80.0, 100.0]",
+      "rows": 1885,
+      "actual_mean": 1.6323607427055702,
+      "predicted_mean": 1.4628688176423197,
+      "bias": -0.16949192506325042
+    }
+  ]
+}
