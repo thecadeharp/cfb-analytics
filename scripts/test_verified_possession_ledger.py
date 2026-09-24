@@ -1,9 +1,10 @@
 """Regression cases for missing labels, transitions and duplicate/corrected plays."""
 import unittest
+import json
 
 import pandas as pd
 
-from build_verified_possession_ledger import build_ledger
+from build_verified_possession_ledger import build_ledger, review_records
 from reconstruct_scoring_events import reconstructed_events
 
 
@@ -34,6 +35,26 @@ def run(rows):
 
 
 class LedgerTests(unittest.TestCase):
+    def test_review_missing_values_are_json_null(self):
+        review = pd.DataFrame({
+            "game_id": ["g", "g"],
+            "drive_id": pd.Series(["a", float("nan")], dtype="str"),
+            "play_id": [123.0, float("nan")],
+            "reason": ["duplicate_play_id", "clock_reversal_in_source_sequence"],
+        })
+        result = json.loads(json.dumps(review_records(review), allow_nan=False))
+        self.assertIsNone(result[1]["drive_id"])
+        self.assertIsNone(result[1]["play_id"])
+        self.assertEqual(result[0]["drive_id"], "a")
+        self.assertEqual(result[0]["play_id"], 123)
+
+    def test_nullable_and_empty_review_records(self):
+        review = pd.DataFrame({"drive_id": pd.Series([pd.NA], dtype="string"),
+                               "play_id": pd.Series([pd.NA], dtype="Int64")})
+        self.assertEqual(json.loads(json.dumps(review_records(review), allow_nan=False)),
+                         [{"drive_id": None, "play_id": None}])
+        self.assertEqual(review_records(review.head(0)), [])
+
     def base(self):
         return [play(1), play(2, kind="Punt"), play(3, "b", "2"),
                 play(4, "b", "2", "Rushing Touchdown")]
