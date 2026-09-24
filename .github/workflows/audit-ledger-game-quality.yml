@@ -1,30 +1,53 @@
 name: Audit Ledger Game Quality
-on: {workflow_dispatch:}
-permissions: {contents: write}
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
 jobs:
   audit:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 60
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
-        with: {python-version: '3.12'}
+        with:
+          python-version: '3.12'
+
       - run: pip install pandas numpy requests pyarrow
+
       - name: Preserve production surfaces
-        run: sha256sum data/projections.json data/cfb_metrics.json scripts/build_projections.py index.html app.js postgame-analytics.js > /tmp/thi-quality-before.sha256
-      - run: python scripts/audit_ledger_game_quality.py
+        run: |
+          sha256sum data/projections.json data/cfb_metrics.json scripts/build_projections.py index.html app.js postgame-analytics.js > /tmp/thi-quality-before.sha256
+
+      - name: Run game-quality audit
+        run: python scripts/audit_ledger_game_quality.py
+
       - name: Validate research-only output
         run: |
           sha256sum --check /tmp/thi-quality-before.sha256
           python - <<'PY'
           import json
           from pathlib import Path
-          report=json.loads(Path('data/research/ledger_game_quality_2019_2024.json').read_text())
+
+          report = json.loads(
+              Path(
+                  'data/research/ledger_game_quality_2019_2024.json'
+              ).read_text()
+          )
           assert report['meta']['training_ready'] is False
-          assert [x['season'] for x in report['seasons']] == list(range(2019,2025))
-          assert all(x['quality']['games'] > 0 for x in report['seasons'])
+          assert [x['season'] for x in report['seasons']] == list(range(2019, 2025))
+          assert all(
+              x['quality']['games'] > 0
+              for x in report['seasons']
+          )
           PY
+
       - name: Commit report only
         run: |
           git config user.name 'github-actions[bot]'
