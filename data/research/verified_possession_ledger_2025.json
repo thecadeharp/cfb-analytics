@@ -1,0 +1,256 @@
+{
+  "meta": {
+    "generated_at": "2026-09-24T05:12:15.840723+00:00",
+    "status": "research_only_observed_possession_ledger",
+    "builder_version": "verified_ledger_v1",
+    "source_commit": "aee236dd45b14cbd95fa84a954314d8b1dc26abb",
+    "source_parquet_sha256": "740566c0d034fa767008a40797dd491acb91dee47934cefb4225494f71c42853",
+    "script_sha256": "83bca439458983ce4e92bf4905cdcf3f93194ef9db217820ec8de43d25f68c9c",
+    "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2025.parquet",
+    "production_use": "none; no model fit or site changes",
+    "training_ready": false,
+    "scope": "2025 independently verified games; regulation ledger; all scoring events retained separately",
+    "limits": "Observed drive IDs cannot prove absent possessions do not exist. Clock and sequence conflicts, duplicate IDs, unassigned scoring and incomplete drive boundaries are flagged. Raw score stamps and EPA are diagnostic, not approved predictors. Special-teams channel labels are inherited from the prior reconstruction and still require review. 2025 remains held out; this is data-quality work only.",
+    "zero_rule": "Zero only when drive and game checks pass; unresolved labels are null, never zero."
+  },
+  "counts": {
+    "verified_games": 654,
+    "observed_drive_keys": 15209,
+    "observed_regulation_possessions": 15165,
+    "keys_without_possession_evidence": 44,
+    "label_checks_passed": 10408,
+    "checked_scoreless_possessions": 6511,
+    "unresolved_possessions": 4757,
+    "scoring_events": 5781,
+    "assigned_offensive_events": 5473,
+    "assigned_offensive_points": 32124,
+    "unassigned_offensive_events": 8,
+    "unassigned_offensive_points": 39,
+    "event_status_counts": {
+      "assigned": 5473,
+      "nonoffensive_separate": 263,
+      "unassigned": 8,
+      "overtime_separate": 37
+    },
+    "games_with_review_flags": 184,
+    "issue_counts": {
+      "clock_reversal_in_source_sequence": 83,
+      "drive_reappears_after_other_drive": 246,
+      "unrecognized_play_type": 17,
+      "duplicate_core_sequence": 67,
+      "ambiguous_possession_team": 28,
+      "drive_without_possession_evidence": 9,
+      "drive_crosses_halftime": 1,
+      "unassigned_offensive_scoring_event": 8
+    },
+    "possession_flag_counts": {
+      "terminal_not_observed": 750,
+      "first_observed_down_not_one": 83,
+      "drive_reappears_after_other_drive": 246,
+      "no_possession_evidence": 44,
+      "ambiguous_possession_team": 28,
+      "drive_crosses_halftime": 1
+    },
+    "training_eligible_possessions": 0
+  },
+  "artifacts": {
+    "possessions.csv": {
+      "rows": 15209,
+      "sha256": "082a7d965be150d3124b6f4bd7f519b9c539264cb28f49d2d0bb3ae7a180fc7b"
+    },
+    "scoring_events.csv": {
+      "rows": 5781,
+      "sha256": "cba752b6d08e25e94353a015e4053229c73e5e37c921df6655201b0b0c700728"
+    },
+    "review_queue.csv": {
+      "rows": 459,
+      "sha256": "de7ae716d8715c89fab5d2ba6c13b78ee16feb2a8e346d574cc9da2d91736683"
+    },
+    "verified_game_ids.csv": {
+      "rows": 654,
+      "sha256": "9c828fcb1233375a44f5bf490149b477baa20fc8546bd24062e2f763415d5f1f"
+    }
+  },
+  "review_samples": [
+    {
+      "game_id": "401752673",
+      "drive_id": null,
+      "play_id": null,
+      "reason": "clock_reversal_in_source_sequence"
+    },
+    {
+      "game_id": "401752680",
+      "drive_id": "4017526807",
+      "play_id": null,
+      "reason": "drive_reappears_after_other_drive"
+    },
+    {
+      "game_id": "401752680",
+      "drive_id": "4017526806",
+      "play_id": null,
+      "reason": "drive_reappears_after_other_drive"
+    },
+    {
+      "game_id": "401752689",
+      "drive_id": "40175268922",
+      "play_id": null,
+      "reason": "drive_reappears_after_other_drive"
+    },
+    {
+      "game_id": "401752689",
+      "drive_id": "40175268921",
+      "play_id": null,
+      "reason": "drive_reappears_after_other_drive"
+    },
+    {
+      "game_id": "401752724",
+      "drive_id": "40175272425",
+      "play_id": "401752724104895801",
+      "reason": "unrecognized_play_type"
+    },
+    {
+      "game_id": "401752749",
+      "drive_id": null,
+      "play_id": null,
+      "reason": "clock_reversal_in_source_sequence"
+    },
+    {
+      "game_id": "401752752",
+      "drive_id": null,
+      "play_id": null,
+      "reason": "clock_reversal_in_source_sequence"
+    },
+    {
+      "game_id": "401752753",
+      "drive_id": null,
+      "play_id": null,
+      "reason": "clock_reversal_in_source_sequence"
+    },
+    {
+      "game_id": "401752753",
+      "drive_id": "40175275337",
+      "play_id": null,
+      "reason": "drive_reappears_after_other_drive"
+    },
+    {
+      "game_id": "401752757",
+      "drive_id": null,
+      "play_id": null,
+      "reason": "duplicate_core_sequence"
+    },
+    {
+      "game_id": "401752764",
+      "drive_id": null,
+      "play_id": null,
+      "reason": "clock_reversal_in_source_sequence"
+    },
+    {
+      "game_id": "401752765",
+      "drive_id": null,
+      "play_id": null,
+      "reason": "duplicate_core_sequence"
+    },
+    {
+      "game_id": "401752766",
+      "drive_id": null,
+      "play_id": null,
+      "reason": "clock_reversal_in_source_sequence"
+    },
+    {
+      "game_id": "401752772",
+      "drive_id": null,
+      "play_id": null,
+      "reason": "duplicate_core_sequence"
+    },
+    {
+      "game_id": "401752775",
+      "drive_id": null,
+      "play_id": null,
+      "reason": "duplicate_core_sequence"
+    },
+    {
+      "game_id": "401752776",
+      "drive_id": null,
+      "play_id": null,
+      "reason": "clock_reversal_in_source_sequence"
+    },
+    {
+      "game_id": "401752776",
+      "drive_id": "40175277626",
+      "play_id": null,
+      "reason": "drive_reappears_after_other_drive"
+    },
+    {
+      "game_id": "401752776",
+      "drive_id": "40175277625",
+      "play_id": null,
+      "reason": "drive_reappears_after_other_drive"
+    },
+    {
+      "game_id": "401752778",
+      "drive_id": null,
+      "play_id": null,
+      "reason": "clock_reversal_in_source_sequence"
+    },
+    {
+      "game_id": "401752779",
+      "drive_id": null,
+      "play_id": null,
+      "reason": "duplicate_core_sequence"
+    },
+    {
+      "game_id": "401752780",
+      "drive_id": null,
+      "play_id": null,
+      "reason": "clock_reversal_in_source_sequence"
+    },
+    {
+      "game_id": "401752780",
+      "drive_id": null,
+      "play_id": null,
+      "reason": "duplicate_core_sequence"
+    },
+    {
+      "game_id": "401752780",
+      "drive_id": "40175278010",
+      "play_id": null,
+      "reason": "drive_reappears_after_other_drive"
+    },
+    {
+      "game_id": "401752783",
+      "drive_id": null,
+      "play_id": null,
+      "reason": "clock_reversal_in_source_sequence"
+    },
+    {
+      "game_id": "401752785",
+      "drive_id": null,
+      "play_id": null,
+      "reason": "clock_reversal_in_source_sequence"
+    },
+    {
+      "game_id": "401752785",
+      "drive_id": null,
+      "play_id": null,
+      "reason": "duplicate_core_sequence"
+    },
+    {
+      "game_id": "401752785",
+      "drive_id": "40175278512",
+      "play_id": null,
+      "reason": "drive_reappears_after_other_drive"
+    },
+    {
+      "game_id": "401752785",
+      "drive_id": "40175278513",
+      "play_id": null,
+      "reason": "drive_reappears_after_other_drive"
+    },
+    {
+      "game_id": "401752785",
+      "drive_id": "40175278514",
+      "play_id": null,
+      "reason": "drive_reappears_after_other_drive"
+    }
+  ]
+}
