@@ -1,0 +1,59 @@
+name: Audit Ledger Exclusion Bias
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install pandas numpy requests pyarrow
+
+      - name: Preserve Model A and published outputs
+        run: |
+          sha256sum data/projections.json data/cfb_metrics.json scripts/build_projections.py index.html app.js postgame-analytics.js > /tmp/thi-bias-before.sha256
+
+      - name: Run exclusion-bias audit
+        run: python scripts/audit_ledger_exclusion_bias.py
+
+      - name: Validate research-only result
+        run: |
+          sha256sum --check /tmp/thi-bias-before.sha256
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(
+              Path(
+                  'data/research/ledger_exclusion_bias_2019_2024.json'
+              ).read_text()
+          )
+          assert report['meta']['training_ready'] is False
+          assert [x['season'] for x in report['seasons']] == list(range(2019, 2025))
+          assert all(
+              x['bias']['observed_possessions'] > 0
+              for x in report['seasons']
+          )
+          PY
+
+      - name: Commit report only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/research/ledger_exclusion_bias_2019_2024.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Audit historical ledger exclusion bias'
+          git pull --rebase origin main
+          git push origin HEAD:main
