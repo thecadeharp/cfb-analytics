@@ -1,0 +1,53 @@
+name: Reconstruct Historical Scoring
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thi-historical-scoring-reconstruction
+  cancel-in-progress: false
+
+jobs:
+  reconstruct:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install historical PBP dependencies
+        run: pip install pandas numpy requests pyarrow
+      - name: Preserve Model A files
+        run: sha256sum data/projections.json data/cfb_metrics.json scripts/build_projections.py > /tmp/thi-model-a-before.sha256
+      - name: Reconstruct tagged scoring events for historical seasons
+        run: python scripts/reconstruct_scoring_events.py
+      - name: Verify research report and Model A checksums
+        run: |
+          sha256sum --check /tmp/thi-model-a-before.sha256
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('data/research/scoring_reconstruction_audit.json').read_text())
+          assert report['meta']['status'] == 'research_only_scoring_reconstruction_audit'
+          assert [s['season'] for s in report['seasons']] == list(range(2019, 2026))
+          assert all(s['completed_regular_season_games'] >= 500 for s in report['seasons'])
+          assert all(s['reconciled_games'] <= s['completed_regular_season_games'] for s in report['seasons'])
+          PY
+      - name: Commit research audit only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/research/scoring_reconstruction_audit.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Audit reconstructed historical scoring events"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 2
+          done
+          exit 1
