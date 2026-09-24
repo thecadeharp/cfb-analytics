@@ -19,8 +19,6 @@ const DATA_URLS = {
   teamMetricProfiles: "./data/team_metric_profiles.json",
   teamMarketPerformance: "./data/team_market_performance.json",
   scheduleContext: "./data/schedule_context.json",
-  gameConditions: "./data/game_conditions.json",
-  weeklyModelScorecard: "./data/reports/weekly_model_scorecard.json",
   thiObservedRatings: "./data/thi_observed_ratings.json",
   rosterNotes: "./data/roster_notes.json",
 };
@@ -40,8 +38,6 @@ let openWeeklyRatingsData = null;
 let teamMetricProfilesData = null;
 let teamMarketPerformanceData = null;
 let scheduleContextData = null;
-let gameConditionsData = null;
-let weeklyModelScorecardData = null;
 let thiObservedRatingsData = null;
 let rosterNotesData = null;
 
@@ -2007,8 +2003,6 @@ async function init() {
       teamMetricProfilesData,
       teamMarketPerformanceData,
       scheduleContextData,
-      gameConditionsData,
-      weeklyModelScorecardData,
       thiObservedRatingsData,
       rosterNotesData
     ] = await Promise.all([
@@ -2027,8 +2021,6 @@ async function init() {
       loadJson(DATA_URLS.teamMetricProfiles).catch(() => null),
       loadJson(DATA_URLS.teamMarketPerformance).catch(() => null),
       loadJson(DATA_URLS.scheduleContext).catch(() => null),
-      loadJson(DATA_URLS.gameConditions).catch(() => null),
-      loadJson(DATA_URLS.weeklyModelScorecard).catch(() => null),
       loadJson(DATA_URLS.thiObservedRatings).catch(() => null),
       loadJson(DATA_URLS.rosterNotes).catch(() => null),
     ]);
@@ -2236,47 +2228,6 @@ function statusCount(games, ...statuses) {
   return games.filter(game => statuses.includes(game?.comparison?.status)).length;
 }
 
-function projectionAccountabilityMarkup() {
-  const season = weeklyModelScorecardData?.season;
-  if (!season) return "";
-  const modelMargin = Number(season.model_margin_mae_points);
-  const marketMargin = Number(season.market_snapshot_margin_mae_points);
-  const modelTotal = Number(season.model_total_mae_points);
-  const marginDifference = Number.isFinite(modelMargin) && Number.isFinite(marketMargin)
-    ? modelMargin - marketMargin : null;
-  const comparison = marginDifference === null
-    ? "Same-snapshot market comparison developing"
-    : Math.abs(marginDifference) < 0.05
-      ? "Level with the same-snapshot market"
-      : `Model ${marginDifference < 0 ? "lower" : "higher"} by ${formatNumber(Math.abs(marginDifference), 2)} points`;
-
-  return `
-    <section class="season-summary-grid" aria-label="Season-to-date projection accountability" style="padding:16px 16px 0;">
-      <div class="season-summary-card">
-        <div class="season-summary-label">Model margin MAE</div>
-        <div class="analysis-value">${Number.isFinite(modelMargin) ? formatNumber(modelMargin, 2) : "—"}</div>
-        <div class="season-summary-note">${escapeHtml(String(season.model_margin_sample ?? 0))} settled, frozen forecasts</div>
-      </div>
-      <div class="season-summary-card">
-        <div class="season-summary-label">Market margin MAE</div>
-        <div class="analysis-value">${Number.isFinite(marketMargin) ? formatNumber(marketMargin, 2) : "—"}</div>
-        <div class="season-summary-note">${escapeHtml(comparison)}</div>
-      </div>
-      <div class="season-summary-card">
-        <div class="season-summary-label">Model total MAE</div>
-        <div class="analysis-value">${Number.isFinite(modelTotal) ? formatNumber(modelTotal, 2) : "—"}</div>
-        <div class="season-summary-note">${escapeHtml(String(season.model_total_sample ?? 0))} settled totals</div>
-      </div>
-      <div class="season-summary-card">
-        <div class="season-summary-label">Accountability sample</div>
-        <div class="analysis-value">${escapeHtml(String(season.settled_games ?? 0))}</div>
-        <div class="season-summary-note">${escapeHtml(String(season.unsettled_or_unmatched ?? 0))} frozen snapshots not yet settled or matched</div>
-      </div>
-      <div class="season-summary-note" style="grid-column:1 / -1; margin:0 0 2px;">First prospective Model A snapshot only. ${escapeHtml(season.market_comparison_definition ?? "The market comparison uses the same frozen snapshot.")}</div>
-    </section>
-  `;
-}
-
 function renderProjections() {
   const container = document.getElementById("projections-container");
   const summary = document.getElementById("projection-summary");
@@ -2311,7 +2262,6 @@ function renderProjections() {
   }
 
   container.innerHTML = `
-    ${projectionAccountabilityMarkup()}
     <table class="projection-table">
       <thead>
         <tr>
@@ -2791,110 +2741,6 @@ function profileRankBadge(metric) {
   `;
 }
 
-function identityPercentile(teamName, side, field) {
-  const raw = profileMetric(teamName, side, field)?.percentile;
-  if (raw === null || raw === undefined || raw === "") return null;
-  const value = Number(raw);
-  return Number.isFinite(value) ? value : null;
-}
-
-function identityAverage(values) {
-  const usable = values.filter(Number.isFinite);
-  return usable.length
-    ? usable.reduce((sum, value) => sum + value, 0) / usable.length
-    : null;
-}
-
-function identityBand(value) {
-  if (!Number.isFinite(value)) return "missing";
-  if (value >= 70) return "strong";
-  if (value <= 30) return "poor";
-  return "average";
-}
-
-function identityCard(title, label, detail, strength) {
-  return `
-    <div class="thi-identity-card thi-identity-${escapeHtml(identityBand(strength))}">
-      <div class="thi-identity-card-title">${escapeHtml(title)}</div>
-      <div class="thi-identity-card-label">${escapeHtml(label)}</div>
-      <div class="thi-identity-card-detail">${escapeHtml(detail)}</div>
-    </div>
-  `;
-}
-
-function teamIdentityMarkup(teamName) {
-  const profile = teamMetricProfile(teamName);
-  if (!profile) return "";
-
-  const offensePlays = Number(profile?.sample?.offense_plays) || 0;
-  const defensePlays = Number(profile?.sample?.defense_plays) || 0;
-  if (offensePlays < 35 && defensePlays < 35) return "";
-
-  const offSuccess = identityPercentile(teamName, "offense", "success_rate");
-  const offExplosive = identityPercentile(teamName, "offense", "explosive_rate");
-  const finishing = identityAverage([
-    identityPercentile(teamName, "offense", "points_per_opportunity"),
-    identityPercentile(teamName, "offense", "red_zone_td_rate"),
-  ]);
-  const defHavoc = identityAverage([
-    identityPercentile(teamName, "defense", "havoc_rate"),
-    identityPercentile(teamName, "defense", "front_seven_havoc_rate"),
-    identityPercentile(teamName, "defense", "secondary_havoc_rate"),
-  ]);
-  const defSuccess = identityPercentile(teamName, "defense", "success_rate");
-  const defExplosive = identityPercentile(teamName, "defense", "explosive_rate");
-
-  let offenseLabel = "Balanced offense";
-  if (Number.isFinite(offSuccess) && Number.isFinite(offExplosive)) {
-    if (offSuccess >= 70 && offExplosive >= 70) offenseLabel = "Explosive + efficient";
-    else if (offExplosive - offSuccess >= 18) offenseLabel = "Explosive-leaning";
-    else if (offSuccess - offExplosive >= 18) offenseLabel = "Methodical";
-  }
-
-  let finishingLabel = "Average finishing";
-  if (Number.isFinite(finishing)) {
-    if (finishing >= 70) finishingLabel = "Finishes drives";
-    else if (finishing <= 30) finishingLabel = "Finishing pressure point";
-  }
-
-  let havocLabel = "Balanced disruption";
-  if (Number.isFinite(defHavoc)) {
-    if (defHavoc >= 70) havocLabel = "Havoc-led defense";
-    else if (defHavoc <= 30) havocLabel = "Low-havoc defense";
-  }
-
-  const prevention = identityAverage([defSuccess, defExplosive]);
-  let preventionLabel = "Balanced prevention";
-  if (Number.isFinite(defSuccess) && Number.isFinite(defExplosive)) {
-    if (defSuccess >= 70 && defExplosive >= 70) preventionLabel = "Clamps down";
-    else if (defExplosive - defSuccess >= 18) preventionLabel = "Limits explosives";
-    else if (defSuccess - defExplosive >= 18) preventionLabel = "Wins down to down";
-  }
-
-  const percentileText = value => Number.isFinite(value)
-    ? `${formatNumber(value, 0)}th percentile`
-    : "sample developing";
-
-  return `
-    <section class="thi-identity-panel" aria-label="Team identity">
-      <div class="thi-identity-heading">
-        <div>
-          <div class="eyebrow">Team Identity</div>
-          <div class="thi-identity-subtitle">Descriptive profile · not a prediction or Model A input</div>
-        </div>
-        <div class="team-meta">${formatNumber(offensePlays, 0)} O plays · ${formatNumber(defensePlays, 0)} D plays</div>
-      </div>
-      <div class="thi-identity-grid">
-        ${identityCard("Offensive style", offenseLabel, `Success ${percentileText(offSuccess)} · Explosives ${percentileText(offExplosive)}`, identityAverage([offSuccess, offExplosive]))}
-        ${identityCard("Drive finishing", finishingLabel, `Points/opportunity + red-zone TD rate: ${percentileText(finishing)}`, finishing)}
-        ${identityCard("Defensive style", havocLabel, `Havoc composite: ${percentileText(defHavoc)}`, defHavoc)}
-        ${identityCard("Prevention", preventionLabel, `Success allowed ${percentileText(defSuccess)} · Explosives allowed ${percentileText(defExplosive)}`, prevention)}
-      </div>
-      <div class="thi-identity-note">Percentiles are direction-aware among qualifying FBS samples; early-season labels can move as the sample grows.</div>
-    </section>
-  `;
-}
-
 function teamSummaryMetric(label, metric, field) {
   return `
     <div class="thi-profile-stat">
@@ -3205,89 +3051,6 @@ function scheduleContextForGame(game) {
   ) ?? null;
 }
 
-function gameConditionsForGame(game) {
-  const gameId = String(game?.game_id ?? game?.id ?? "");
-  if (gameId && gameConditionsData?.games?.[gameId]) {
-    return gameConditionsData.games[gameId];
-  }
-  return null;
-}
-
-function watchabilityProfile(game) {
-  const homeWin = Number(game?.projection?.win_probability?.home);
-  const total = Number(game?.projection?.total);
-  const context = scheduleContextForGame(game);
-  const pace = teamName => Number(thiObservedRatingsData?.teams?.[teamName]?.ratings?.pace?.value);
-  const awayPace = pace(game?.away?.team);
-  const homePace = pace(game?.home?.team);
-  const closeness = Number.isFinite(homeWin) ? Math.max(0, 100 - Math.abs(homeWin - 50) * 2) : null;
-  const scoring = Number.isFinite(total) ? Math.max(0, Math.min(100, (total - 35) * 2.5)) : null;
-  const paceScore = Number.isFinite(awayPace) && Number.isFinite(homePace)
-    ? Math.max(0, Math.min(100, ((awayPace + homePace) / 2 - 0.78) * 220))
-    : null;
-  const parts = [closeness, scoring, paceScore].filter(Number.isFinite);
-  const score = parts.length ? Math.round(parts.reduce((sum, value) => sum + value, 0) / parts.length) : null;
-  const label = score === null ? "Developing" : score >= 75 ? "Can't-miss" : score >= 60 ? "Strong watch" : score >= 45 ? "Solid watch" : "Niche watch";
-  const awayRest = context?.away?.rest_days === null || context?.away?.rest_days === undefined
-    ? null : Number(context.away.rest_days);
-  const homeRest = context?.home?.rest_days === null || context?.home?.rest_days === undefined
-    ? null : Number(context.home.rest_days);
-  const restGap = Number.isFinite(awayRest) && Number.isFinite(homeRest)
-    ? Math.abs(awayRest - homeRest) : null;
-  return { score, label, closeness, scoring, paceScore, restGap };
-}
-
-function gameEnvironmentMarkup(game) {
-  const conditions = gameConditionsForGame(game);
-  const watchability = watchabilityProfile(game);
-  const weather = conditions?.forecast;
-  const pace = teamName => Number(thiObservedRatingsData?.teams?.[teamName]?.ratings?.pace?.value);
-  const awayPace = pace(game?.away?.team);
-  const homePace = pace(game?.home?.team);
-  const paceText = Number.isFinite(awayPace) && Number.isFinite(homePace)
-    ? `${formatNumber((awayPace + homePace) / 2, 2)}× combined pace`
-    : "Pace sample developing";
-  const conditionText = conditions?.conditions_line ?? (game?.neutral_site ? "Neutral-site conditions unavailable" : "Forecast unavailable");
-  const impact = conditions?.impact ?? "Developing";
-  const competitiveness = watchability.closeness === null ? "—" : `${formatNumber(watchability.closeness, 0)}/100`;
-  const scoring = watchability.scoring === null ? "—" : `${formatNumber(watchability.scoring, 0)}/100`;
-
-  return `
-    <section class="thi-matchup-section" aria-labelledby="thi-environment-title">
-      <div class="thi-matchup-section-header">
-        <div>
-          <div class="eyebrow">Descriptive game guide · not a Model A input</div>
-          <div class="thi-matchup-section-title" id="thi-environment-title">Game Environment + THI Watchability</div>
-        </div>
-        <div class="thi-matchup-section-note">Environment describes the football setting; Watchability is a fan-facing guide, not a betting signal.</div>
-      </div>
-      <div class="analysis-grid">
-        <div class="analysis-card">
-          <div class="analysis-label">Conditions</div>
-          <div class="analysis-value" style="font-size:18px;">${escapeHtml(impact)}</div>
-          <div class="analysis-small">${escapeHtml(conditionText)}${weather?.summary ? ` · ${escapeHtml(weather.summary)}` : ""}</div>
-        </div>
-        <div class="analysis-card">
-          <div class="analysis-label">Game pace</div>
-          <div class="analysis-value" style="font-size:18px;">${escapeHtml(paceText)}</div>
-          <div class="analysis-small">${escapeHtml(game?.away?.team ?? "Away")} ${Number.isFinite(awayPace) ? formatNumber(awayPace, 2) + "×" : "—"} · ${escapeHtml(game?.home?.team ?? "Home")} ${Number.isFinite(homePace) ? formatNumber(homePace, 2) + "×" : "—"}</div>
-        </div>
-        <div class="analysis-card">
-          <div class="analysis-label">THI Watchability</div>
-          <div class="analysis-value" style="font-size:18px;">${escapeHtml(watchability.label)}${watchability.score === null ? "" : ` · ${watchability.score}`}</div>
-          <div class="analysis-small">Competitiveness ${competitiveness} · scoring appeal ${scoring}</div>
-        </div>
-        <div class="analysis-card">
-          <div class="analysis-label">What moves it</div>
-          <div class="analysis-value" style="font-size:18px;">${watchability.restGap === null ? "—" : watchability.restGap + " rest-day gap"}</div>
-          <div class="analysis-small">Watchability weights projected competitiveness, scoring and combined pace equally. No rivalry, player, or market factor is used.</div>
-        </div>
-      </div>
-      <p class="team-meta" style="margin:0;">${escapeHtml(conditions?.note ?? "Weather detail appears when a current forecast is available. Conditions are shown separately from the production projection model.")}</p>
-    </section>
-  `;
-}
-
 function scheduleOpponentText(item, kind) {
   const game = item?.[kind];
   if (!game?.opponent) return "—";
@@ -3555,8 +3318,6 @@ function renderMatchup(game) {
     ${taleOfTapeMarkup(awayName, homeName)}
 
     ${scheduleContextMarkup(game)}
-
-    ${gameEnvironmentMarkup(game)}
 
     <div class="analysis-layout">
       <div class="analysis-panel">
@@ -6485,8 +6246,6 @@ function renderDossier(team) {
     </div>
 
     ${renderThiObservedRatings(team.team)}
-
-    ${teamIdentityMarkup(team.team)}
 
     ${renderScoringOpportunityProfile(team.team)}
 
