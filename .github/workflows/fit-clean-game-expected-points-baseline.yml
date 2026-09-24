@@ -1,0 +1,41 @@
+name: Fit Clean Game Expected Points Baseline
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fit:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas numpy
+      - name: Preserve production surfaces
+        run: sha256sum data/projections.json data/cfb_metrics.json scripts/build_projections.py index.html app.js postgame-analytics.js > /tmp/thi-ep-before.sha256
+      - run: python scripts/fit_clean_game_expected_points_baseline.py
+      - name: Validate private baseline
+        run: |
+          sha256sum --check /tmp/thi-ep-before.sha256
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('data/research/expected_points_baseline_validation.json').read_text())
+          assert r['meta']['training_ready'] is False
+          assert r['development_rows'] > 0 and r['validation_rows'] > 0
+          assert r['validation_metrics']['ridge']['mae'] < r['validation_metrics']['league_mean']['mae']
+          PY
+      - name: Commit report only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/research/expected_points_baseline_validation.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Evaluate clean-game expected-points baseline'
+          git pull --rebase origin main
+          git push origin HEAD:main
