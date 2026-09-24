@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "generated_at": "2026-09-24T00:45:12.483324+00:00",
+    "status": "research_only_not_for_public_scores_or_model_a",
+    "dataset": "data/training/historical_games.csv",
+    "train_seasons": [
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024
+    ],
+    "sealed_test_season": 2025,
+    "training_games": 4758,
+    "test_games": 911,
+    "features": [
+      "home_actual_drives",
+      "away_actual_drives",
+      "home_actual_scoring_opportunities",
+      "away_actual_scoring_opportunities"
+    ],
+    "target": "Actual final team points. Non-offensive scores are not modeled separately.",
+    "method": "Ridge game-level baseline; empirical training margin residual CDF, no Monte Carlo.",
+    "limitation": "Uses completed-game drive and scoring-opportunity counts, not a possession ledger or play-level quality. Game-script dependence and defense/special-teams scores remain. Do not publish as calibrated expected scores or a pregame forecast."
+  },
+  "holdout": {
+    "team_score_mae": 8.418,
+    "league_average_team_score_mae": 11.505,
+    "home_score_mae": 9.103,
+    "away_score_mae": 7.733,
+    "margin_mae": 11.774,
+    "league_average_margin_mae": 17.89,
+    "win_probability_brier": 0.1502,
+    "historical_home_win_rate_brier": 0.2296,
+    "win_probability_log_loss": 0.4545,
+    "non_tied_games_for_probability": 906,
+    "calibration_bins": [
+      {
+        "from": 0.0,
+        "to": 0.2,
+        "count": 107,
+        "mean_prediction": 0.109,
+        "actual_home_win_rate": 0.14
+      },
+      {
+        "from": 0.2,
+        "to": 0.4,
+        "count": 124,
+        "mean_prediction": 0.303,
+        "actual_home_win_rate": 0.339
+      },
+      {
+        "from": 0.4,
+        "to": 0.6,
+        "count": 156,
+        "mean_prediction": 0.504,
+        "actual_home_win_rate": 0.564
+      },
+      {
+        "from": 0.6,
+        "to": 0.8,
+        "count": 165,
+        "mean_prediction": 0.699,
+        "actual_home_win_rate": 0.661
+      },
+      {
+        "from": 0.8,
+        "to": 1.0,
+        "count": 354,
+        "mean_prediction": 0.929,
+        "actual_home_win_rate": 0.929
+      }
+    ]
+  }
+}
