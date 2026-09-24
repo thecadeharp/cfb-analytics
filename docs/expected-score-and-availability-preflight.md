@@ -4,6 +4,8 @@ Status: research and source-link presentation are in progress. Do not replace th
 
 First research stage implemented: `scripts/research_expected_score.py` consumes the existing game-level historical table, fits a ridge baseline on 2019–2024 using *realized* drives and scoring-opportunity counts (no actual scores as inputs), and tests on sealed 2025 games. The manually dispatched `Expected Score Research` workflow writes a private-to-the-product research report at `data/research/expected_score_holdout_2025.json`; the repository is public, so this report is publicly inspectable but **not rendered on the site**. It does not yet extract a possession ledger or separate non-offensive scoring. Its MAE and calibration bins are diagnostics, not clearance to publish adjusted scores.
 
+Second research stage: `scripts/research_possession_ledger.py` downloads the same historical annual play-by-play assets, maps possession drives using the historical builder's team-ID logic, and checks score stamps, field position, EPA samples, and opponent scores on possession drives. The manual `Possession Ledger Audit` workflow keeps the drive CSVs temporary and commits only `data/research/possession_ledger_audit.json`. The possession team's score change is a **proxy**, not yet a clean offensive-points label; this audit must be inspected before fitting a possession-level expected-score model. This stage does not change Model A or any visible postgame scores.
+
 ## Data that exists now
 
 - Historical game, drive, and play records from published play-by-play; current `build_postgame_analytics.py` provides retrospective game summaries.
