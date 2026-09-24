@@ -20,6 +20,7 @@ const DATA_URLS = {
   teamMarketPerformance: "./data/team_market_performance.json",
   scheduleContext: "./data/schedule_context.json",
   thiObservedRatings: "./data/thi_observed_ratings.json",
+  rosterNotes: "./data/roster_notes.json",
 };
 
 let metricsData = null;
@@ -38,6 +39,7 @@ let teamMetricProfilesData = null;
 let teamMarketPerformanceData = null;
 let scheduleContextData = null;
 let thiObservedRatingsData = null;
+let rosterNotesData = null;
 
 let teams = {};
 let projections = [];
@@ -2001,7 +2003,8 @@ async function init() {
       teamMetricProfilesData,
       teamMarketPerformanceData,
       scheduleContextData,
-      thiObservedRatingsData
+      thiObservedRatingsData,
+      rosterNotesData
     ] = await Promise.all([
       loadJson(DATA_URLS.metrics),
       loadJson(DATA_URLS.schedule),
@@ -2019,6 +2022,7 @@ async function init() {
       loadJson(DATA_URLS.teamMarketPerformance).catch(() => null),
       loadJson(DATA_URLS.scheduleContext).catch(() => null),
       loadJson(DATA_URLS.thiObservedRatings).catch(() => null),
+      loadJson(DATA_URLS.rosterNotes).catch(() => null),
     ]);
 
     teams = metricsData?.teams ?? {};
@@ -3111,6 +3115,20 @@ function scheduleContextMarkup(game) {
     context?.conference_game ? "Conference matchup" : null,
     context?.neutral_site ? "Neutral site" : null,
   ].filter(Boolean);
+  const pace = teamName => {
+    const profile = thiObservedRatingsData?.teams?.[teamName];
+    const value = Number(profile?.ratings?.pace?.value);
+    return profile?.eligible && Number.isFinite(value) ? value : null;
+  };
+  const awayPace = pace(context.away?.team);
+  const homePace = pace(context.home?.team);
+  const rest = side => side?.rest_days === null || side?.rest_days === undefined
+    ? null : Number(side.rest_days);
+  const awayRest = rest(context.away);
+  const homeRest = rest(context.home);
+  const restGap = Number.isFinite(awayRest) && Number.isFinite(homeRest)
+    ? Math.abs(awayRest - homeRest) : null;
+  const paceWeek = thiObservedRatingsData?.meta?.through_week;
   return `
     <section class="thi-matchup-section" aria-labelledby="thi-context-title">
       <div class="thi-matchup-section-header">
@@ -3126,6 +3144,18 @@ function scheduleContextMarkup(game) {
       <div class="thi-context-grid">
         ${scheduleContextCard(context.away)}
         ${scheduleContextCard(context.home)}
+      </div>
+      <div class="thi-context-card" style="margin-top:12px;">
+        <div class="thi-context-team">Tempo + rest comparison</div>
+        <div class="thi-context-facts">
+          <div class="thi-context-fact"><div class="thi-context-label">${escapeHtml(context.away?.team ?? "Away")} pace / rest</div>
+            <div class="thi-context-value">${awayPace === null ? "—" : formatNumber(awayPace, 2) + "×"} · ${awayRest === null ? "—" : awayRest + " days"}</div></div>
+          <div class="thi-context-fact"><div class="thi-context-label">${escapeHtml(context.home?.team ?? "Home")} pace / rest</div>
+            <div class="thi-context-value">${homePace === null ? "—" : formatNumber(homePace, 2) + "×"} · ${homeRest === null ? "—" : homeRest + " days"}</div></div>
+          <div class="thi-context-fact"><div class="thi-context-label">Rest difference</div>
+            <div class="thi-context-value">${restGap === null ? "—" : restGap + " days"}</div></div>
+        </div>
+        <p class="team-meta" style="margin:10px 0 0;">Pace is 2026 scrimmage plays per game relative to the FBS average (1.00), through Week ${escapeHtml(paceWeek ?? "—")}; affected by opponents and game script. Rest is calendar days since the prior game. No snap counts, player fatigue estimate, or Model A adjustment is implied.</p>
       </div>
     </section>
   `;
@@ -5942,6 +5972,36 @@ function renderThiObservedRatings(teamName) {
   `;
 }
 
+function rosterNotesMarkup(team) {
+  const source = rosterNotesData?.conference_sources?.[team.conference];
+  const officialUrl = String(source?.url ?? "");
+  const officialLink = /^https:\/\//i.test(officialUrl)
+    ? `<a href="${escapeHtml(officialUrl)}" target="_blank" rel="noopener noreferrer">Open ${escapeHtml(team.conference)} report ↗</a>`
+    : "No conference report index listed";
+  const now = Date.now();
+  const notes = Array.isArray(rosterNotesData?.teams?.[team.team])
+    ? rosterNotesData.teams[team.team] : [];
+  const currentNotes = notes.filter(note => {
+    const verified = Date.parse(note?.verified_at_utc ?? "");
+    const expires = Date.parse(note?.valid_until_utc ?? "");
+    return Boolean(String(note?.text ?? "").trim())
+      && /^https:\/\//i.test(String(note?.source_url ?? ""))
+      && Number.isFinite(verified) && verified <= now
+      && Number.isFinite(expires) && expires > now
+      && expires - verified <= 7 * 86400000;
+  });
+  return `
+    <details class="panel" style="margin-top:12px; padding:16px;">
+      <summary style="cursor:pointer; font-weight:700;">Roster Notes · sourced updates</summary>
+      <p class="team-meta" style="margin:12px 0;">${officialLink} · Conference reports may cover only eligible matchups. Check the latest source before relying on a status.</p>
+      ${currentNotes.length
+        ? `<ul style="margin:0 0 12px; padding-left:22px;">${currentNotes.map(note => `<li style="margin:8px 0;">${escapeHtml(note.text)} <span class="team-meta">· Verified ${escapeHtml(new Date(note.verified_at_utc).toLocaleString())} · <a href="${escapeHtml(note.source_url)}" target="_blank" rel="noopener noreferrer">Source ↗</a></span></li>`).join("")}</ul>`
+        : `<p style="margin:0 0 12px;">No current player-status note verified for this team. This does not mean its roster is fully available.</p>`}
+      <p class="team-meta" style="margin:0;">Research context only · no player availability percentage or Model A adjustment.</p>
+    </details>
+  `;
+}
+
 function renderDossier(team) {
   const container =
     document.getElementById(
@@ -6188,6 +6248,8 @@ function renderDossier(team) {
     ${renderThiObservedRatings(team.team)}
 
     ${renderScoringOpportunityProfile(team.team)}
+
+    ${rosterNotesMarkup(team)}
 
     ${renderSeasonOutlook(team)}
 
