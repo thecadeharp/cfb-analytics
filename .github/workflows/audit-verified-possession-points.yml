@@ -1,0 +1,52 @@
+name: Audit Verified Possession Points
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thi-verified-possession-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install research dependencies
+        run: pip install pandas numpy requests pyarrow
+      - name: Preserve Model A files
+        run: sha256sum data/projections.json data/cfb_metrics.json scripts/build_projections.py > /tmp/thi-model-a-before.sha256
+      - name: Audit tagged points on independently verified games
+        run: python scripts/audit_verified_possession_points.py
+      - name: Verify research report and Model A
+        run: |
+          sha256sum --check /tmp/thi-model-a-before.sha256
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('data/research/verified_possession_points_2025.json').read_text())
+          assert data['meta']['status'] == 'research_only_verified_possession_points_audit'
+          assert data['counts']['verified_games'] == json.loads(Path('data/research/independent_score_audit_2025.json').read_text())['comparison']['independently_confirmed_and_reconciled']
+          assert data['counts']['offensive_events_assigned'] >= 1000
+          PY
+      - name: Commit research audit only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/research/verified_possession_points_2025.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Audit possession attribution for verified 2025 scores"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 2
+          done
+          exit 1
