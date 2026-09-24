@@ -1,6 +1,8 @@
 # Postgame expected score and roster availability: build contract
 
-Status: design only. Do not replace the current beta `postgame_win_expectancy` or `adjusted_final_score` outputs until historical validation passes. This work is separate from Model A and its frozen pregame snapshots.
+Status: research and source-link presentation are in progress. Do not replace the current beta `postgame_win_expectancy` or `adjusted_final_score` outputs until historical validation passes. This work is separate from Model A and its frozen pregame snapshots.
+
+First research stage implemented: `scripts/research_expected_score.py` consumes the existing game-level historical table, fits a ridge baseline on 2019–2024 using *realized* drives and scoring-opportunity counts (no actual scores as inputs), and tests on sealed 2025 games. The manually dispatched `Expected Score Research` workflow writes a private-to-the-product research report at `data/research/expected_score_holdout_2025.json`; the repository is public, so this report is publicly inspectable but **not rendered on the site**. It does not yet extract a possession ledger or separate non-offensive scoring. Its MAE and calibration bins are diagnostics, not clearance to publish adjusted scores.
 
 ## Data that exists now
 
@@ -20,6 +22,12 @@ There is no verified player-by-game defensive snap ledger, dated injury/particip
 4. Estimate retrospective win expectancy from the joint game-level scoring distribution, preserving shared pace and possession dependence. A simulation count such as 10,000 controls numerical noise only; it cannot fix a misspecified distribution. Record simulation seed and model version.
 5. Validate on **future held-out seasons/weeks** with no training leakage: scoring MAE and calibration by point bands; win-probability reliability, Brier score, log loss, and coverage of score intervals. Compare against the current beta and simpler baselines. Break results out by FBS/FCS opponent, garbage-time share, and missing PBP.
 6. Publish only after sample and quality gates pass. Show source, build date, sample size, model version, confidence/availability label, and the frozen pregame projection alongside—but never overwrite it. If PBP is delayed or incomplete, show pending rather than a fabricated estimate.
+
+## Roster Notes v0.1
+
+`data/roster_notes.json` stores official conference report index links for ACC, Big Ten, Big 12, SEC, and Pac-12 and optional team notes written by THI. The Dossier panel displays only notes with text, HTTPS source URL, verification UTC timestamp, and expiration UTC timestamp; notes older than seven days or past expiration do not display. An empty list means no verified note, never healthy. The index links do not imply all games are covered. No automated scraping, player-by-game joins, fatigue estimates, injury-adjusted availability, Model A changes, or per-player production shares are implemented.
+
+Example note entry, after independent verification: `"Team Name": [{"text":"THI-written summary of the report", "source_url":"https://official-source.example/report", "verified_at_utc":"2026-09-23T18:00:00Z", "valid_until_utc":"2026-09-26T18:00:00Z"}]`. Only add a specific player status after inspecting the source and confirming display rights; do not paste or republish report tables.
 
 ## Next implementation gate
 
