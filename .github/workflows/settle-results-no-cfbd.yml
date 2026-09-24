@@ -87,5 +87,19 @@ jobs:
           fi
 
           git commit -m "Refresh live scores, settlements, postgame analytics, and signal records"
-          git pull --rebase origin main
-          git push origin HEAD:main
+
+          # Another generated-data workflow can commit between rebase and push.
+          # Retry safely without rerunning settlement or changing projections.
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git rebase origin/main
+
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            echo "Push race on attempt ${attempt}; retrying."
+          done
+
+          echo "Unable to publish generated outputs after three safe retries."
+          exit 1
