@@ -1,0 +1,838 @@
+{
+  "meta": {
+    "generated_at": "2026-09-24T12:56:29.533347+00:00",
+    "status": "research_only_historical_ledger_coverage_audit",
+    "scope": "2019-2024 only; independently score-verified observed regulation drives",
+    "sealed_holdout": "2025 is excluded and remains untouched.",
+    "production_use": "none; no Model A, projection, postgame, or site changes",
+    "training_ready": false,
+    "limits": "Coverage is a gate, not a training clearance. Drive rows are observed, exclusions may be biased, and no possession labels are promoted."
+  },
+  "seasons": [
+    {
+      "season": 2019,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2019.parquet",
+      "ncaa_weeks": [
+        {
+          "week": 1,
+          "contests": 91,
+          "final": 91
+        },
+        {
+          "week": 2,
+          "contests": 79,
+          "final": 79
+        },
+        {
+          "week": 3,
+          "contests": 74,
+          "final": 74
+        },
+        {
+          "week": 4,
+          "contests": 64,
+          "final": 64
+        },
+        {
+          "week": 5,
+          "contests": 59,
+          "final": 59
+        },
+        {
+          "week": 6,
+          "contests": 54,
+          "final": 54
+        },
+        {
+          "week": 7,
+          "contests": 61,
+          "final": 61
+        },
+        {
+          "week": 8,
+          "contests": 69,
+          "final": 69
+        },
+        {
+          "week": 9,
+          "contests": 63,
+          "final": 63
+        },
+        {
+          "week": 10,
+          "contests": 54,
+          "final": 54
+        },
+        {
+          "week": 11,
+          "contests": 57,
+          "final": 56
+        },
+        {
+          "week": 12,
+          "contests": 62,
+          "final": 62
+        },
+        {
+          "week": 13,
+          "contests": 72,
+          "final": 72
+        },
+        {
+          "week": 14,
+          "contests": 65,
+          "final": 65
+        },
+        {
+          "week": 15,
+          "contests": 14,
+          "final": 14
+        }
+      ],
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 196,
+        "feed_final_mismatch": 7,
+        "tagged_scores_not_reconciled": 19,
+        "unknown_scoring_event": 14
+      },
+      "counts": {
+        "verified_games": 611,
+        "observed_drive_keys": 15349,
+        "observed_regulation_possessions": 15254,
+        "keys_without_possession_evidence": 95,
+        "label_checks_passed": 13417,
+        "checked_scoreless_possessions": 8327,
+        "unresolved_possessions": 1837,
+        "scoring_events": 5647,
+        "assigned_offensive_events": 5374,
+        "assigned_offensive_points": 31993,
+        "unassigned_offensive_events": 6,
+        "unassigned_offensive_points": 33,
+        "event_status_counts": {
+          "assigned": 5374,
+          "nonoffensive_separate": 234,
+          "unassigned": 6,
+          "overtime_separate": 33
+        },
+        "games_with_review_flags": 32,
+        "issue_counts": {
+          "ambiguous_possession_team": 12,
+          "drive_reappears_after_other_drive": 23,
+          "drive_without_possession_evidence": 7,
+          "unrecognized_play_type": 11,
+          "duplicate_core_sequence": 1,
+          "unassigned_offensive_scoring_event": 6
+        },
+        "possession_flag_counts": {
+          "terminal_not_observed": 1046,
+          "ambiguous_possession_team": 12,
+          "first_observed_down_not_one": 38,
+          "no_possession_evidence": 95,
+          "drive_reappears_after_other_drive": 23
+        },
+        "training_eligible_possessions": 0
+      },
+      "review_issue_counts": {
+        "ambiguous_possession_team": 12,
+        "drive_reappears_after_other_drive": 23,
+        "drive_without_possession_evidence": 7,
+        "unrecognized_play_type": 11,
+        "duplicate_core_sequence": 1,
+        "unassigned_offensive_scoring_event": 6
+      },
+      "coverage": {
+        "verified_games": 611,
+        "label_check_rate": 0.8795725711288842,
+        "unresolved_possession_rate": 0.12042742887111578
+      }
+    },
+    {
+      "season": 2020,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2020.parquet",
+      "ncaa_weeks": [
+        {
+          "week": 1,
+          "contests": 10,
+          "final": 9
+        },
+        {
+          "week": 2,
+          "contests": 25,
+          "final": 20
+        },
+        {
+          "week": 3,
+          "contests": 26,
+          "final": 20
+        },
+        {
+          "week": 4,
+          "contests": 37,
+          "final": 31
+        },
+        {
+          "week": 5,
+          "contests": 35,
+          "final": 33
+        },
+        {
+          "week": 6,
+          "contests": 36,
+          "final": 30
+        },
+        {
+          "week": 7,
+          "contests": 38,
+          "final": 30
+        },
+        {
+          "week": 8,
+          "contests": 49,
+          "final": 47
+        },
+        {
+          "week": 9,
+          "contests": 47,
+          "final": 43
+        },
+        {
+          "week": 10,
+          "contests": 56,
+          "final": 49
+        },
+        {
+          "week": 11,
+          "contests": 56,
+          "final": 45
+        },
+        {
+          "week": 12,
+          "contests": 51,
+          "final": 44
+        },
+        {
+          "week": 13,
+          "contests": 53,
+          "final": 44
+        },
+        {
+          "week": 14,
+          "contests": 57,
+          "final": 46
+        },
+        {
+          "week": 15,
+          "contests": 44,
+          "final": 37
+        }
+      ],
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 136,
+        "tagged_scores_not_reconciled": 15,
+        "unknown_scoring_event": 6,
+        "feed_final_mismatch": 3
+      },
+      "counts": {
+        "verified_games": 377,
+        "observed_drive_keys": 9459,
+        "observed_regulation_possessions": 9408,
+        "keys_without_possession_evidence": 51,
+        "label_checks_passed": 8270,
+        "checked_scoreless_possessions": 5039,
+        "unresolved_possessions": 1138,
+        "scoring_events": 3626,
+        "assigned_offensive_events": 3432,
+        "assigned_offensive_points": 20552,
+        "unassigned_offensive_events": 0,
+        "unassigned_offensive_points": 0,
+        "event_status_counts": {
+          "assigned": 3432,
+          "nonoffensive_separate": 163,
+          "overtime_separate": 31
+        },
+        "games_with_review_flags": 20,
+        "issue_counts": {
+          "ambiguous_possession_team": 7,
+          "drive_reappears_after_other_drive": 6,
+          "drive_without_possession_evidence": 6,
+          "unrecognized_play_type": 7
+        },
+        "possession_flag_counts": {
+          "terminal_not_observed": 618,
+          "no_possession_evidence": 51,
+          "ambiguous_possession_team": 7,
+          "drive_reappears_after_other_drive": 6,
+          "first_observed_down_not_one": 27
+        },
+        "training_eligible_possessions": 0
+      },
+      "review_issue_counts": {
+        "ambiguous_possession_team": 7,
+        "drive_reappears_after_other_drive": 6,
+        "drive_without_possession_evidence": 6,
+        "unrecognized_play_type": 7
+      },
+      "coverage": {
+        "verified_games": 377,
+        "label_check_rate": 0.8790391156462585,
+        "unresolved_possession_rate": 0.1209608843537415
+      }
+    },
+    {
+      "season": 2021,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2021.parquet",
+      "ncaa_weeks": [
+        {
+          "week": 1,
+          "contests": 95,
+          "final": 95
+        },
+        {
+          "week": 2,
+          "contests": 89,
+          "final": 89
+        },
+        {
+          "week": 3,
+          "contests": 78,
+          "final": 77
+        },
+        {
+          "week": 4,
+          "contests": 71,
+          "final": 71
+        },
+        {
+          "week": 5,
+          "contests": 68,
+          "final": 68
+        },
+        {
+          "week": 6,
+          "contests": 59,
+          "final": 59
+        },
+        {
+          "week": 7,
+          "contests": 58,
+          "final": 58
+        },
+        {
+          "week": 8,
+          "contests": 59,
+          "final": 59
+        },
+        {
+          "week": 9,
+          "contests": 61,
+          "final": 61
+        },
+        {
+          "week": 10,
+          "contests": 69,
+          "final": 69
+        },
+        {
+          "week": 11,
+          "contests": 71,
+          "final": 71
+        },
+        {
+          "week": 12,
+          "contests": 74,
+          "final": 74
+        },
+        {
+          "week": 13,
+          "contests": 67,
+          "final": 67
+        },
+        {
+          "week": 14,
+          "contests": 16,
+          "final": 16
+        },
+        {
+          "week": 15,
+          "contests": 4,
+          "final": 4
+        }
+      ],
+      "cross_source_rejections": {
+        "unknown_scoring_event": 25,
+        "unmatched_or_ambiguous_ncaa": 164,
+        "tagged_scores_not_reconciled": 28,
+        "feed_final_mismatch": 40
+      },
+      "counts": {
+        "verified_games": 544,
+        "observed_drive_keys": 13190,
+        "observed_regulation_possessions": 13127,
+        "keys_without_possession_evidence": 63,
+        "label_checks_passed": 10890,
+        "checked_scoreless_possessions": 6789,
+        "unresolved_possessions": 2237,
+        "scoring_events": 4971,
+        "assigned_offensive_events": 4697,
+        "assigned_offensive_points": 27882,
+        "unassigned_offensive_events": 11,
+        "unassigned_offensive_points": 77,
+        "event_status_counts": {
+          "nonoffensive_separate": 246,
+          "assigned": 4697,
+          "unassigned": 11,
+          "overtime_separate": 17
+        },
+        "games_with_review_flags": 69,
+        "issue_counts": {
+          "drive_reappears_after_other_drive": 161,
+          "ambiguous_possession_team": 31,
+          "clock_reversal_in_source_sequence": 5,
+          "drive_without_possession_evidence": 7,
+          "unrecognized_play_type": 2,
+          "drive_crosses_halftime": 2,
+          "unassigned_offensive_scoring_event": 11
+        },
+        "possession_flag_counts": {
+          "terminal_not_observed": 645,
+          "drive_reappears_after_other_drive": 161,
+          "first_observed_down_not_one": 117,
+          "no_possession_evidence": 63,
+          "ambiguous_possession_team": 31,
+          "drive_crosses_halftime": 2
+        },
+        "training_eligible_possessions": 0
+      },
+      "review_issue_counts": {
+        "drive_reappears_after_other_drive": 161,
+        "ambiguous_possession_team": 31,
+        "clock_reversal_in_source_sequence": 5,
+        "drive_without_possession_evidence": 7,
+        "unrecognized_play_type": 2,
+        "drive_crosses_halftime": 2,
+        "unassigned_offensive_scoring_event": 11
+      },
+      "coverage": {
+        "verified_games": 544,
+        "label_check_rate": 0.8295878723242173,
+        "unresolved_possession_rate": 0.17041212767578273
+      }
+    },
+    {
+      "season": 2022,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2022.parquet",
+      "ncaa_weeks": [
+        {
+          "week": 1,
+          "contests": 100,
+          "final": 100
+        },
+        {
+          "week": 2,
+          "contests": 90,
+          "final": 90
+        },
+        {
+          "week": 3,
+          "contests": 75,
+          "final": 75
+        },
+        {
+          "week": 4,
+          "contests": 71,
+          "final": 71
+        },
+        {
+          "week": 5,
+          "contests": 68,
+          "final": 68
+        },
+        {
+          "week": 6,
+          "contests": 62,
+          "final": 62
+        },
+        {
+          "week": 7,
+          "contests": 59,
+          "final": 59
+        },
+        {
+          "week": 8,
+          "contests": 60,
+          "final": 59
+        },
+        {
+          "week": 9,
+          "contests": 55,
+          "final": 55
+        },
+        {
+          "week": 10,
+          "contests": 65,
+          "final": 65
+        },
+        {
+          "week": 11,
+          "contests": 72,
+          "final": 72
+        },
+        {
+          "week": 12,
+          "contests": 72,
+          "final": 72
+        },
+        {
+          "week": 13,
+          "contests": 64,
+          "final": 64
+        },
+        {
+          "week": 14,
+          "contests": 15,
+          "final": 15
+        },
+        {
+          "week": 15,
+          "contests": 3,
+          "final": 3
+        }
+      ],
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 179,
+        "tagged_scores_not_reconciled": 41,
+        "feed_final_mismatch": 30,
+        "unknown_scoring_event": 1
+      },
+      "counts": {
+        "verified_games": 564,
+        "observed_drive_keys": 13745,
+        "observed_regulation_possessions": 13713,
+        "keys_without_possession_evidence": 32,
+        "label_checks_passed": 10852,
+        "checked_scoreless_possessions": 6863,
+        "unresolved_possessions": 2861,
+        "scoring_events": 5069,
+        "assigned_offensive_events": 4822,
+        "assigned_offensive_points": 28470,
+        "unassigned_offensive_events": 4,
+        "unassigned_offensive_points": 24,
+        "event_status_counts": {
+          "assigned": 4822,
+          "nonoffensive_separate": 211,
+          "overtime_separate": 32,
+          "unassigned": 4
+        },
+        "games_with_review_flags": 100,
+        "issue_counts": {
+          "drive_reappears_after_other_drive": 507,
+          "clock_reversal_in_source_sequence": 12,
+          "drive_without_possession_evidence": 5,
+          "ambiguous_possession_team": 8,
+          "unrecognized_play_type": 6,
+          "duplicate_core_sequence": 1,
+          "unassigned_offensive_scoring_event": 4
+        },
+        "possession_flag_counts": {
+          "terminal_not_observed": 507,
+          "first_observed_down_not_one": 179,
+          "drive_reappears_after_other_drive": 507,
+          "no_possession_evidence": 32,
+          "ambiguous_possession_team": 8
+        },
+        "training_eligible_possessions": 0
+      },
+      "review_issue_counts": {
+        "drive_reappears_after_other_drive": 507,
+        "clock_reversal_in_source_sequence": 12,
+        "drive_without_possession_evidence": 5,
+        "ambiguous_possession_team": 8,
+        "unrecognized_play_type": 6,
+        "duplicate_core_sequence": 1,
+        "unassigned_offensive_scoring_event": 4
+      },
+      "coverage": {
+        "verified_games": 564,
+        "label_check_rate": 0.7913658572157807,
+        "unresolved_possession_rate": 0.20863414278421935
+      }
+    },
+    {
+      "season": 2023,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2023.parquet",
+      "ncaa_weeks": [
+        {
+          "week": 1,
+          "contests": 98,
+          "final": 98
+        },
+        {
+          "week": 2,
+          "contests": 89,
+          "final": 89
+        },
+        {
+          "week": 3,
+          "contests": 78,
+          "final": 78
+        },
+        {
+          "week": 4,
+          "contests": 71,
+          "final": 71
+        },
+        {
+          "week": 5,
+          "contests": 63,
+          "final": 63
+        },
+        {
+          "week": 6,
+          "contests": 54,
+          "final": 54
+        },
+        {
+          "week": 7,
+          "contests": 59,
+          "final": 59
+        },
+        {
+          "week": 8,
+          "contests": 58,
+          "final": 58
+        },
+        {
+          "week": 9,
+          "contests": 58,
+          "final": 58
+        },
+        {
+          "week": 10,
+          "contests": 69,
+          "final": 69
+        },
+        {
+          "week": 11,
+          "contests": 70,
+          "final": 70
+        },
+        {
+          "week": 12,
+          "contests": 72,
+          "final": 72
+        },
+        {
+          "week": 13,
+          "contests": 68,
+          "final": 68
+        },
+        {
+          "week": 14,
+          "contests": 13,
+          "final": 13
+        },
+        {
+          "week": 15,
+          "contests": 2,
+          "final": 2
+        }
+      ],
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 185,
+        "tagged_scores_not_reconciled": 27,
+        "feed_final_mismatch": 18,
+        "unknown_scoring_event": 4
+      },
+      "counts": {
+        "verified_games": 626,
+        "observed_drive_keys": 14961,
+        "observed_regulation_possessions": 14940,
+        "keys_without_possession_evidence": 21,
+        "label_checks_passed": 12223,
+        "checked_scoreless_possessions": 7704,
+        "unresolved_possessions": 2717,
+        "scoring_events": 5608,
+        "assigned_offensive_events": 5316,
+        "assigned_offensive_points": 31325,
+        "unassigned_offensive_events": 5,
+        "unassigned_offensive_points": 31,
+        "event_status_counts": {
+          "assigned": 5316,
+          "nonoffensive_separate": 255,
+          "overtime_separate": 32,
+          "unassigned": 5
+        },
+        "games_with_review_flags": 96,
+        "issue_counts": {
+          "drive_reappears_after_other_drive": 256,
+          "duplicate_core_sequence": 1,
+          "ambiguous_possession_team": 11,
+          "drive_without_possession_evidence": 2,
+          "clock_reversal_in_source_sequence": 6,
+          "unrecognized_play_type": 4,
+          "unassigned_offensive_scoring_event": 5
+        },
+        "possession_flag_counts": {
+          "terminal_not_observed": 525,
+          "first_observed_down_not_one": 131,
+          "drive_reappears_after_other_drive": 256,
+          "no_possession_evidence": 21,
+          "ambiguous_possession_team": 11
+        },
+        "training_eligible_possessions": 0
+      },
+      "review_issue_counts": {
+        "drive_reappears_after_other_drive": 256,
+        "duplicate_core_sequence": 1,
+        "ambiguous_possession_team": 11,
+        "drive_without_possession_evidence": 2,
+        "clock_reversal_in_source_sequence": 6,
+        "unrecognized_play_type": 4,
+        "unassigned_offensive_scoring_event": 5
+      },
+      "coverage": {
+        "verified_games": 626,
+        "label_check_rate": 0.8181392235609103,
+        "unresolved_possession_rate": 0.18186077643908968
+      }
+    },
+    {
+      "season": 2024,
+      "source_asset": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_cfb_pbp/play_by_play_2024.parquet",
+      "ncaa_weeks": [
+        {
+          "week": 1,
+          "contests": 102,
+          "final": 102
+        },
+        {
+          "week": 2,
+          "contests": 79,
+          "final": 79
+        },
+        {
+          "week": 3,
+          "contests": 67,
+          "final": 67
+        },
+        {
+          "week": 4,
+          "contests": 68,
+          "final": 68
+        },
+        {
+          "week": 5,
+          "contests": 59,
+          "final": 59
+        },
+        {
+          "week": 6,
+          "contests": 51,
+          "final": 51
+        },
+        {
+          "week": 7,
+          "contests": 56,
+          "final": 56
+        },
+        {
+          "week": 8,
+          "contests": 63,
+          "final": 63
+        },
+        {
+          "week": 9,
+          "contests": 61,
+          "final": 61
+        },
+        {
+          "week": 10,
+          "contests": 52,
+          "final": 52
+        },
+        {
+          "week": 11,
+          "contests": 53,
+          "final": 53
+        },
+        {
+          "week": 12,
+          "contests": 58,
+          "final": 58
+        },
+        {
+          "week": 13,
+          "contests": 69,
+          "final": 69
+        },
+        {
+          "week": 14,
+          "contests": 67,
+          "final": 67
+        },
+        {
+          "week": 15,
+          "contests": 10,
+          "final": 10
+        }
+      ],
+      "cross_source_rejections": {
+        "unmatched_or_ambiguous_ncaa": 184,
+        "feed_final_mismatch": 14,
+        "tagged_scores_not_reconciled": 45
+      },
+      "counts": {
+        "verified_games": 655,
+        "observed_drive_keys": 15470,
+        "observed_regulation_possessions": 15455,
+        "keys_without_possession_evidence": 15,
+        "label_checks_passed": 12055,
+        "checked_scoreless_possessions": 7353,
+        "unresolved_possessions": 3400,
+        "scoring_events": 5980,
+        "assigned_offensive_events": 5672,
+        "assigned_offensive_points": 33487,
+        "unassigned_offensive_events": 5,
+        "unassigned_offensive_points": 27,
+        "event_status_counts": {
+          "assigned": 5672,
+          "nonoffensive_separate": 267,
+          "overtime_separate": 36,
+          "unassigned": 5
+        },
+        "games_with_review_flags": 113,
+        "issue_counts": {
+          "ambiguous_possession_team": 10,
+          "drive_reappears_after_other_drive": 264,
+          "drive_without_possession_evidence": 7,
+          "clock_reversal_in_source_sequence": 2,
+          "duplicate_core_sequence": 2,
+          "unrecognized_play_type": 3,
+          "unassigned_offensive_scoring_event": 5
+        },
+        "possession_flag_counts": {
+          "terminal_not_observed": 814,
+          "first_observed_down_not_one": 86,
+          "ambiguous_possession_team": 10,
+          "drive_reappears_after_other_drive": 264,
+          "no_possession_evidence": 15
+        },
+        "training_eligible_possessions": 0
+      },
+      "review_issue_counts": {
+        "ambiguous_possession_team": 10,
+        "drive_reappears_after_other_drive": 264,
+        "drive_without_possession_evidence": 7,
+        "clock_reversal_in_source_sequence": 2,
+        "duplicate_core_sequence": 2,
+        "unrecognized_play_type": 3,
+        "unassigned_offensive_scoring_event": 5
+      },
+      "coverage": {
+        "verified_games": 655,
+        "label_check_rate": 0.7800064703979295,
+        "unresolved_possession_rate": 0.21999352960207053
+      }
+    }
+  ]
+}
