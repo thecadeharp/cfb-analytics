@@ -295,7 +295,7 @@
     const text = cleanText(value);
     if (isMissing(text)) return null;
 
-    const match = text.match(/[+-]?(?:\d+(?:,\d{3})*|\d*\.\d+)/);
+    const match = text.replace(/\u2212/g, "-").match(/[+-]?(?:\d+(?:,\d{3})*(?:\.\d+)?|\.\d+)/);
     if (!match) return null;
 
     const number = Number(match[0].replace(/,/g, ""));
@@ -405,19 +405,24 @@
     };
 
     const numeric = columnLooksNumeric(rows, columnIndex);
+    const header = table.tHead?.rows?.[0]?.cells?.[columnIndex];
+    const label = cleanText(header?.querySelector(".hammer-sort-title")?.textContent ?? header?.textContent);
+    const preferredDirection = header?.dataset.sortDefault ||
+      (/rank/i.test(label) ? "asc" : numeric ? "desc" : "asc");
 
     let direction;
     if (currentState.column === columnIndex) {
       direction =
         currentState.direction === "desc" ? "asc" : "desc";
     } else {
-      direction = numeric ? "desc" : "asc";
+      direction = preferredDirection;
     }
 
     const decoratedRows = rows.map((row, originalIndex) => ({
       row,
       originalIndex,
-      value: row.cells[columnIndex]?.textContent ?? ""
+      value: row.cells[columnIndex]?.textContent ?? "",
+      publishedRank: Number((row.cells[columnIndex]?.textContent ?? "").match(/#\s*(\d+)/)?.[1])
     }));
 
     decoratedRows.sort((a, b) => {
@@ -426,6 +431,11 @@
         : compareText(a.value, b.value, direction);
 
       if (result === 0) {
+        // Rounded metric values may tie even though their published ranks do not.
+        if (numeric && Number.isFinite(a.publishedRank) && Number.isFinite(b.publishedRank)) {
+          const rankDifference = a.publishedRank - b.publishedRank;
+          if (rankDifference) return direction === preferredDirection ? rankDifference : -rankDifference;
+        }
         return a.originalIndex - b.originalIndex;
       }
 
@@ -436,7 +446,6 @@
     decoratedRows.forEach(item => fragment.appendChild(item.row));
     tbody.appendChild(fragment);
 
-    const header = table.tHead?.rows?.[0]?.cells?.[columnIndex];
     if (header) {
       resetHeaders(table, header);
       updateActiveHeader(header, direction);
