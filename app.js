@@ -3816,12 +3816,14 @@ function renderRatings() {
 
   const observedTable = `
     <div class="ratings-note">
-      <strong>THI Observed Ratings v${escapeHtml(thiObservedRatingsData?.meta?.version ?? "0.1.0")} — public beta:</strong>
+      <strong>THI Observed Diagnostics v${escapeHtml(thiObservedRatingsData?.meta?.version ?? "0.1.0")} — public beta:</strong>
       THI-adjusted ${escapeHtml(thiObservedRatingsData?.meta?.season ?? "2026")} on-field performance
       through Week ${escapeHtml(thiObservedRatingsData?.meta?.through_week ?? "—")}.
       Ratings use no preseason or market inputs and do not affect Model A.
       Scoring-scale ratings summarize EPA against an average FBS opponent;
-      they are not game score forecasts. Lower is better on defense.
+      they are not game score forecasts. Lower is better on defense. The separate
+      THI Ratings tab contains the predictive Power Rating and retains these
+      diagnostics for comparison.
     </div>
 
     ${conferenceFilterMarkup("ratings-thi", "Filter THI ratings by conference", observedRows.length)}
@@ -3960,12 +3962,6 @@ function renderRatings() {
       >Overview</button>
 
       <button
-        class="ratings-toggle-button ${currentRatingsMode === "thi" ? "active" : ""}"
-        type="button"
-        onclick="setRatingsMode('thi')"
-      >THI Ratings · Beta</button>
-
-      <button
         class="ratings-toggle-button ${currentRatingsMode === "advanced" ? "active" : ""}"
         type="button"
         onclick="setRatingsMode('advanced')"
@@ -3989,8 +3985,6 @@ function renderRatings() {
         ? conferenceTable
         : currentRatingsMode === "market"
           ? marketTable
-        : currentRatingsMode === "thi"
-          ? observedTable
         : currentRatingsMode === "advanced"
           ? `${conferenceFilterMarkup("ratings")}${teamTable}`
           : overviewTable
@@ -3999,7 +3993,7 @@ function renderRatings() {
 }
 
 function setRatingsMode(mode) {
-  currentRatingsMode = ["overview", "thi", "advanced", "conferences", "market"].includes(mode)
+  currentRatingsMode = ["overview", "advanced", "conferences", "market"].includes(mode)
     ? mode
     : "overview";
 
