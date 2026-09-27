@@ -358,6 +358,8 @@ def main():
                      'performance_only_weekly_change': float(scores[i] - previous_scores[i]),
                      'qualifying_games': int(data.games), 'missing_prior_fields': missing,
                      'prior_contribution': float(contributions[i, :len(PRIOR)].sum()),
+                     'result_elo_contribution': float(contributions[i, 0]),
+                     'roster_contribution': float(contributions[i, 1:len(PRIOR)].sum()),
                      'performance_contribution': float(contributions[i, len(PRIOR):len(FEATURES)].sum()),
                      'missingness_contribution': float(contributions[i, len(FEATURES):].sum()),
                      'centering_offset': float(center)})
