@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch
 from pathlib import Path
+import tempfile
 import numpy as np
 import pandas as pd
 import research_thi_power as m
@@ -64,6 +65,13 @@ class PowerTests(unittest.TestCase):
     def test_sealed_elo_snapshot_rejected_before_request(self):
         with self.assertRaises(ValueError):
             m.fetch_elo_snapshot(Path('/missing'), 2025, 4, 'never-used')
+
+    def test_missing_historical_preseason_elo_remains_missing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = m.elo_cache_path(Path(tmp), 2019, 0)
+            path.write_text('[]\n')
+            result = m.fetch_elo_snapshot(Path(tmp), 2019, 0, token=None)
+        self.assertTrue(result.empty)
 
     def test_swapping_teams_reverses_neutral_margin(self):
         t = training(); model = m.fit(t, m.FEATURES)
