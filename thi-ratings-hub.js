@@ -1,7 +1,8 @@
 /* THI's independent research surface. Reads the existing display-only ratings. */
 (() => {
   let search = "";
-  let sort = "net";
+  let sort = "power_rank";
+  let sortDirection = "asc";
   let conferenceFilter = "ALL";
   const RATING_CONFERENCE_GROUPS = {
     P4: new Set(["ACC", "Big 12", "Big Ten", "SEC"]),
@@ -101,94 +102,63 @@
     return Number.isFinite(value) ? value : null;
   }
 
-  function sortHeader(key, label) {
+  function sortHeader(key, label, defaultDirection = "desc") {
     const active = sort === key;
-    const direction = key === "defense" ? "ascending" : "descending";
-    const arrow = key === "defense" ? "↑" : "↓";
-    return `<th aria-sort="${active ? direction : "none"}">
+    const direction = active ? sortDirection : defaultDirection;
+    const arrow = direction === "asc" ? "↑" : "↓";
+    return `<th aria-sort="${active ? (direction === "asc" ? "ascending" : "descending") : "none"}">
       <button type="button" class="thi-hub-sort-button" data-thi-sort="${key}"
-        aria-label="Sort by ${label.toLowerCase()} (${key === "defense" ? "lowest" : "highest"} first)">${label}${active ? `<span class="thi-hub-sort-arrow" aria-hidden="true">${arrow}</span>` : ""}</button>
+        data-thi-direction="${defaultDirection}" aria-label="Sort by ${label.toLowerCase()}">${label}${active ? `<span class="thi-hub-sort-arrow" aria-hidden="true">${arrow}</span>` : ""}</button>
     </th>`;
   }
 
   function renderRows() {
     const target = document.getElementById("thi-ratings-rows");
-    const provisionalTarget = document.getElementById("thi-ratings-provisional");
     if (!target) return;
     const query = search.trim().toLocaleLowerCase();
-    const data = Object.values(thiObservedRatingsData?.teams ?? {})
-      .filter(profile => profile?.eligible && profile?.ratings && matchesRatingConference(profile) &&
-        String(profile.team || "").toLocaleLowerCase().includes(query));
+    const observed = thiObservedRatingsData?.teams ?? {};
+    const data = (thiPowerRatingsData?.teams ?? []).map(power => {
+      const profile = observed[power.team] ?? {};
+      return { power, profile, team: power.team, conference: profile.conference || teams[power.team]?.conference || "FBS Independents" };
+    }).filter(row => matchesRatingConference(row) && String(row.team).toLocaleLowerCase().includes(query));
     data.sort((a, b) => {
-      // Published ranks retain precision lost when displayed values are rounded.
-      const ar = Number(a.ratings?.[sort]?.rank);
-      const br = Number(b.ratings?.[sort]?.rank);
-      const aRanked = Number.isFinite(ar) && ar > 0;
-      const bRanked = Number.isFinite(br) && br > 0;
-      if (aRanked && bRanked && ar !== br) return ar - br;
-      if (aRanked !== bRanked) return aRanked ? -1 : 1;
-      const av = ratingValue(a, sort);
-      const bv = ratingValue(b, sort);
-      if (av === null && bv === null) return String(a.team).localeCompare(String(b.team));
-      if (av === null) return 1;
-      if (bv === null) return -1;
-      return (sort === "defense" ? av - bv : bv - av) ||
-        String(a.team).localeCompare(String(b.team));
+      const value = row => {
+        if (sort === "team") return row.team;
+        if (sort === "power_rank") return Number(row.power.rank);
+        if (sort === "observed_rank") return Number(row.profile.ratings?.net?.rank);
+        if (["offense", "defense", "net", "pace"].includes(sort)) return ratingValue(row.profile, sort);
+        return Number(row.power[sort]);
+      };
+      const av = value(a), bv = value(b);
+      if (typeof av === "string" || typeof bv === "string") return String(av).localeCompare(String(bv)) * (sortDirection === "asc" ? 1 : -1);
+      const aValid = Number.isFinite(av), bValid = Number.isFinite(bv);
+      if (aValid !== bValid) return aValid ? -1 : 1;
+      if (!aValid) return a.team.localeCompare(b.team);
+      return (av - bv) * (sortDirection === "asc" ? 1 : -1) || a.team.localeCompare(b.team);
     });
 
     target.innerHTML = data.length ? `<div class="thi-hub-table-wrap"><table class="thi-hub-table">
-      <thead><tr><th>Team</th>${sortHeader("net", "Net")}${sortHeader("offense", "Offense")}${sortHeader("defense", "Defense")}${sortHeader("pace", "Pace")}<th>Sample</th></tr></thead>
-      <tbody>${data.map(profile => {
-        const rating = profile.ratings;
-        const reliability = profile.reliability ?? {};
-        const band = reliability.games >= 2 ? "strong" : "limited";
+      <thead><tr>${sortHeader("power_rank", "Rank", "asc")}${sortHeader("team", "Team", "asc")}${sortHeader("rating", "Rating")}${sortHeader("roster_contribution", "Roster")}${sortHeader("performance_contribution", "Performance")}${sortHeader("performance_only_weekly_change", "Weekly Δ")}${sortHeader("qualifying_games", "FBS Games")}${sortHeader("observed_rank", "Observed Rank", "asc")}${sortHeader("offense", "Off")}${sortHeader("defense", "Def", "asc")}${sortHeader("net", "Net")}${sortHeader("pace", "Pace")}</tr></thead>
+      <tbody>${data.map(row => {
+        const { power, profile } = row;
+        const rating = profile.ratings ?? {};
         return `<tr>
-          <td><span class="thi-hub-rank">#${rating[sort]?.rank ?? "—"}</span> &nbsp;
-            <span class="thi-hub-team-wrap">${teamLogoMarkup(profile.team, "projection")}
-              <button type="button" class="thi-hub-team" data-thi-team="${escapeHtml(profile.team)}">${escapeHtml(profile.team)}</button></span></td>
-          <td data-label="Net"><span class="thi-hub-number">${formatSigned(rating.net?.value, 2)}</span> <span class="thi-hub-rank">#${rating.net?.rank ?? "—"}</span></td>
-          <td data-label="Offense"><span class="thi-hub-number">${formatNumber(rating.offense?.value, 2)}</span> <span class="thi-hub-rank">#${rating.offense?.rank ?? "—"}</span></td>
-          <td data-label="Defense"><span class="thi-hub-number">${formatNumber(rating.defense?.value, 2)}</span> <span class="thi-hub-rank">#${rating.defense?.rank ?? "—"}</span></td>
-          <td data-label="Pace"><span class="thi-hub-number">${formatNumber(rating.pace?.value, 2)}</span> <span class="thi-hub-rank">#${rating.pace?.rank ?? "—"}</span></td>
-          <td data-label="Sample"><span class="thi-hub-badge ${band}">${escapeHtml(reliability.label ?? "LIMITED")}</span>
-            <span class="thi-hub-muted">${formatNumber(reliability.games, 0)} games · ${formatNumber(reliability.qualifying_plays, 0)} plays</span></td>
+          <td data-label="Rank"><span class="thi-hub-number">#${formatNumber(power.rank, 0)}</span></td>
+          <td data-label="Team"><span class="thi-hub-team-wrap">${teamLogoMarkup(row.team, "projection")}
+              <button type="button" class="thi-hub-team" data-thi-team="${escapeHtml(row.team)}">${escapeHtml(row.team)}</button></span></td>
+          <td data-label="Rating"><span class="thi-hub-number">${formatSigned(power.rating, 2)}</span></td>
+          <td data-label="Roster"><span class="thi-hub-number">${formatSigned(power.roster_contribution, 2)}</span></td>
+          <td data-label="Performance"><span class="thi-hub-number">${formatSigned(power.performance_contribution, 2)}</span></td>
+          <td data-label="Weekly Δ"><span class="thi-hub-number">${formatSigned(power.performance_only_weekly_change, 2)}</span></td>
+          <td data-label="FBS Games"><span class="thi-hub-number">${formatNumber(power.qualifying_games, 0)}</span></td>
+          <td data-label="Observed Rank"><span class="thi-hub-rank">#${formatNumber(rating.net?.rank, 0)}</span></td>
+          <td data-label="Off"><span class="thi-hub-number">${formatNumber(rating.offense?.value, 2)}</span></td>
+          <td data-label="Def"><span class="thi-hub-number">${formatNumber(rating.defense?.value, 2)}</span></td>
+          <td data-label="Net"><span class="thi-hub-number">${formatSigned(rating.net?.value, 2)}</span></td>
+          <td data-label="Pace"><span class="thi-hub-number">${formatNumber(rating.pace?.value, 2)}</span></td>
         </tr>`;
       }).join("")}</tbody></table></div>` :
       `<div class="empty-state">No matching teams in the ranked sample.</div>`;
-
-    if (provisionalTarget) {
-      const provisional = Object.values(thiObservedRatingsData?.teams ?? {})
-        .filter(profile => profile?.provisional && profile?.provisional_ratings && matchesRatingConference(profile) &&
-          String(profile.team || "").toLocaleLowerCase().includes(query))
-        .sort((a, b) => {
-          const av = Number(a.provisional_ratings?.[sort]);
-          const bv = Number(b.provisional_ratings?.[sort]);
-          return (sort === "defense" ? av - bv : bv - av) ||
-            String(a.team).localeCompare(String(b.team));
-        });
-      provisionalTarget.hidden = provisional.length === 0;
-      provisionalTarget.innerHTML = provisional.length ? `
-        <details class="thi-hub-provisional"${query ? " open" : ""}>
-          <summary>Provisional · ${provisional.length} team${provisional.length === 1 ? "" : "s"} (unranked)</summary>
-          <p>One qualifying FBS game. Values are displayed for context and receive no FBS ranks until the second qualifying game.</p>
-          <div class="thi-hub-table-wrap"><table class="thi-hub-table">
-            <thead><tr><th>Team</th>${sortHeader("net", "Net")}${sortHeader("offense", "Offense")}${sortHeader("defense", "Defense")}${sortHeader("pace", "Pace")}<th>Sample</th></tr></thead>
-            <tbody>${provisional.map(profile => {
-              const rating = profile.provisional_ratings;
-              const sample = profile.reliability ?? {};
-              return `<tr>
-                <td><span class="thi-hub-team-wrap">${teamLogoMarkup(profile.team, "projection")}
-                  <button type="button" class="thi-hub-team" data-thi-team="${escapeHtml(profile.team)}">${escapeHtml(profile.team)}</button></span></td>
-                <td data-label="Net"><span class="thi-hub-number">${formatSigned(rating.net, 2)}</span></td>
-                <td data-label="Offense"><span class="thi-hub-number">${formatNumber(rating.offense, 2)}</span></td>
-                <td data-label="Defense"><span class="thi-hub-number">${formatNumber(rating.defense, 2)}</span></td>
-                <td data-label="Pace"><span class="thi-hub-number">${formatNumber(rating.pace, 2)}</span></td>
-                <td data-label="Sample"><span class="thi-hub-badge limited">PROVISIONAL</span>
-                  <span class="thi-hub-muted">${formatNumber(sample.games, 0)} game · ${formatNumber(sample.qualifying_plays, 0)} plays</span></td>
-              </tr>`;
-            }).join("")}</tbody></table></div>
-        </details>` : "";
-    }
   }
 
   function renderSituational() {
@@ -227,17 +197,14 @@
   function render() {
     const container = document.getElementById("thi-ratings-container");
     const meta = thiObservedRatingsData?.meta;
-    if (!meta || !thiObservedRatingsData?.teams) {
-      container.innerHTML = `<div class="empty-state">THI Observed Ratings are awaiting their next data refresh.</div>`;
+    const powerMeta = thiPowerRatingsData?.meta;
+    if (!meta || !thiObservedRatingsData?.teams || !powerMeta || !Array.isArray(thiPowerRatingsData?.teams)) {
+      container.innerHTML = `<div class="empty-state">THI power and observed ratings are awaiting their next matching refresh.</div>`;
       return;
     }
     container.innerHTML = `
       <div class="thi-hub-controls">
         <input type="search" id="thi-ratings-search" aria-label="Search THI ratings by team" placeholder="Search teams">
-        <select id="thi-ratings-sort" aria-label="Order THI ratings">
-          <option value="net">Rank by net</option><option value="offense">Rank by offense</option>
-          <option value="defense">Rank by defense</option><option value="pace">Rank by pace</option>
-        </select>
         <select id="thi-ratings-conference" aria-label="Filter THI ratings by conference">
           <option value="ALL">All Conferences</option>
           <option value="P4">Power 4</option>
@@ -253,19 +220,16 @@
         </select>
       </div>
       <div id="thi-situational-panel"></div>
-      <p class="thi-hub-note">2026 data through Week ${escapeHtml(meta.through_week ?? "—")} · ${escapeHtml(meta.sample ?? "Completed FBS games")} · Beta. Net is offense minus defense; lower defense is better. Values describe performance and do not imply a neutral-field spread.</p>
+      <p class="thi-hub-note">Predictive Power Rating through Week ${escapeHtml(powerMeta.through_week ?? "—")} · observed diagnostics through Week ${escapeHtml(meta.through_week ?? "—")}. Click any column header to sort; click again to reverse it. Roster is the talent and returning-production contribution. Performance is the opponent-adjusted rate contribution. Observed values remain descriptive context; lower defense is better.</p>
       <div id="thi-ratings-rows"></div>
-      <div id="thi-ratings-provisional"></div>
       <details class="thi-hub-method"><summary>How to read these ratings</summary>
-        <p>${escapeHtml(meta.methodology?.description ?? "Opponent-adjusted current-season performance.")}</p>
-        <p>Offense and defense use a scoring-scale index, not projected points for the next game. Pace is indexed to the FBS average of 1.00. The sample badge shows how much game evidence is available. These ratings are separate from Model A.</p>
+        <p>Power Rating is a research scoring-margin scale that combines roster foundation, completed-game result Elo, and opponent-adjusted rate performance. It is separate from Model A and does not change any projection.</p>
+        <p>${escapeHtml(meta.methodology?.description ?? "Observed ratings describe current on-field performance.")}</p>
+        <p>Offense and defense use a scoring-scale index. Pace is indexed to the FBS average of 1.00. Observed Rank is the old net observed rank, retained for comparison.</p>
       </details>`;
     const input = document.getElementById("thi-ratings-search");
     input.value = search;
     input.addEventListener("input", () => { search = input.value; renderRows(); });
-    const select = document.getElementById("thi-ratings-sort");
-    select.value = sort;
-    select.addEventListener("change", () => { sort = select.value; renderRows(); });
     const conferenceSelect = document.getElementById("thi-ratings-conference");
     conferenceSelect.value = conferenceFilter;
     conferenceSelect.addEventListener("change", () => {
@@ -285,9 +249,9 @@
   view.addEventListener("click", event => {
     const sortButton = event.target.closest("[data-thi-sort]");
     if (sortButton) {
-      sort = sortButton.dataset.thiSort;
-      const select = document.getElementById("thi-ratings-sort");
-      if (select) select.value = sort;
+      const nextSort = sortButton.dataset.thiSort;
+      sortDirection = sort === nextSort ? (sortDirection === "asc" ? "desc" : "asc") : sortButton.dataset.thiDirection;
+      sort = nextSort;
       renderRows();
       return;
     }
