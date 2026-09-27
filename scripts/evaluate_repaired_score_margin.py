@@ -36,10 +36,7 @@ def repaired_rows(targets, game_audit, raw_game):
     return enriched
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--source-dir", type=Path, required=True)
-    args = parser.parse_args()
+def build_repaired_table(source_dir):
     audit = json.loads(AUDIT.read_text())
     recoverable = {(int(g["season"]), str(g["game_id"])): g for g in audit["games"] if g["recoverable"]}
     frozen = pd.read_csv(base.TABLE, dtype={"game_id": str, "drive_id": str, "possession_team_id": str})
@@ -49,7 +46,7 @@ def main():
     frames, coverage = [], []
     for year in base.YEARS:
         season = frozen.loc[frozen.season.eq(year)].copy()
-        raw = pd.read_parquet(args.source_dir / f"thi-pbp-{year}.parquet", columns=base.COLUMNS)
+        raw = pd.read_parquet(source_dir / f"thi-pbp-{year}.parquet", columns=base.COLUMNS)
         raw["game_id"] = normalized_ids(raw.game_id)
         groups = {game: frame for game, frame in raw.loc[raw.game_id.isin(season.game_id)].groupby("game_id")}
         accepted, repaired = [], 0
@@ -68,7 +65,14 @@ def main():
         coverage.append({"season": year, "eligible_games": int(frame.game_id.nunique()),
                          "eligible_rows": len(frame), "repaired_games": repaired})
         print(json.dumps(coverage[-1]), flush=True)
-    table = pd.concat(frames, ignore_index=True)
+    return pd.concat(frames, ignore_index=True), coverage
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source-dir", type=Path, required=True)
+    args = parser.parse_args()
+    table, coverage = build_repaired_table(args.source_dir)
     folds = base.evaluate(table)
     report = {"meta": {"generated_at": datetime.now(timezone.utc).isoformat(),
               "status": "research_only_repaired_score_margin_challenger",
