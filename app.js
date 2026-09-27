@@ -20,6 +20,7 @@ const DATA_URLS = {
   teamMarketPerformance: "./data/team_market_performance.json",
   scheduleContext: "./data/schedule_context.json",
   thiObservedRatings: "./data/thi_observed_ratings.json",
+  thiPowerRatings: "./data/thi_power_ratings.json",
   rosterNotes: "./data/roster_notes.json",
 };
 
@@ -39,6 +40,7 @@ let teamMetricProfilesData = null;
 let teamMarketPerformanceData = null;
 let scheduleContextData = null;
 let thiObservedRatingsData = null;
+let thiPowerRatingsData = null;
 let rosterNotesData = null;
 
 let teams = {};
@@ -2004,6 +2006,7 @@ async function init() {
       teamMarketPerformanceData,
       scheduleContextData,
       thiObservedRatingsData,
+      thiPowerRatingsData,
       rosterNotesData
     ] = await Promise.all([
       loadJson(DATA_URLS.metrics),
@@ -2022,6 +2025,7 @@ async function init() {
       loadJson(DATA_URLS.teamMarketPerformance).catch(() => null),
       loadJson(DATA_URLS.scheduleContext).catch(() => null),
       loadJson(DATA_URLS.thiObservedRatings).catch(() => null),
+      loadJson(DATA_URLS.thiPowerRatings).catch(() => null),
       loadJson(DATA_URLS.rosterNotes).catch(() => null),
     ]);
 
