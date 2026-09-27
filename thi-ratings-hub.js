@@ -94,7 +94,7 @@
   view.innerHTML = `
     <div class="eyebrow">Calculated by The Hammer Index</div>
     <h1 class="page-title">THI Ratings</h1>
-    <p class="page-subtitle thi-hub-intro">Our opponent-adjusted view of on-field performance. Compare teams here; open a Team Dossier for the complete offensive and defensive breakdown.</p>
+    <p class="page-subtitle thi-hub-intro">An independent power rating combining roster strength, completed-game results and opponent-adjusted performance. Compare teams here or open a Team Dossier for the complete breakdown. THI Ratings are separate from Model A and do not affect game projections.</p>
     <div id="thi-ratings-container" aria-live="polite"></div>`;
   section.after(view);
 
@@ -233,7 +233,7 @@
         <span class="conference-filter-count">${escapeHtml(thiPowerRatingsData.teams.length)} teams</span>
       </div>
       <div id="thi-situational-panel"></div>
-      <p class="thi-hub-note">Predictive Power Rating through Week ${escapeHtml(powerMeta.through_week ?? "—")} · observed diagnostics through Week ${escapeHtml(meta.through_week ?? "—")}. Click any column header to sort; click again to reverse it. Roster is the talent and returning-production contribution. Performance is the opponent-adjusted rate contribution. Observed values remain descriptive context; lower defense is better.</p>
+      <p class="thi-hub-note">Power Ratings through Week ${escapeHtml(powerMeta.through_week ?? "—")} · Observed diagnostics through Week ${escapeHtml(meta.through_week ?? "—")}. Click any column heading to sort; click again to reverse. Roster measures the talent and returning-production contribution. Performance measures opponent-adjusted on-field efficiency. Offense, defense, net and pace are descriptive diagnostics; lower is better on defense.</p>
       <div id="thi-ratings-rows"></div>
       <details class="thi-hub-method"><summary>How to read these ratings</summary>
         <p>Power Rating is a research scoring-margin scale that combines roster foundation, completed-game result Elo, and opponent-adjusted rate performance. It is separate from Model A and does not change any projection.</p>
