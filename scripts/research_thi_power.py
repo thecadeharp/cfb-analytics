@@ -7,9 +7,11 @@ retrospective roster sources are not point-in-time certified for deployment.
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 from datetime import datetime, timezone
-from urllib.request import urlopen
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 
 import numpy as np
 import pandas as pd
@@ -20,7 +22,9 @@ BASE = 'https://raw.githubusercontent.com/sportsdataverse/cfbfastR-cfb-data/main
 METRICS = {'epa': 'plays', 'success': 'plays', 'ypp': 'plays',
            'explosive': 'plays', 'sack': 'dropbacks', 'stuff': 'rushes',
            'opportunity': 'rushes', 'havoc': 'plays'}
-PRIOR = ['talent_composite', 'blue_chip_ratio', 'off_returning', 'def_returning']
+ROSTER_PRIOR = ['talent_composite', 'blue_chip_ratio', 'off_returning', 'def_returning']
+ELO_PRIOR = 'cfbd_elo'
+PRIOR = [ELO_PRIOR] + ROSTER_PRIOR
 FEATURES = PRIOR + ['net_' + m for m in METRICS]
 ALIASES = {'San José State': 'San Jose State', 'Appalachian State': 'App State',
            'Connecticut': 'UConn', 'Louisiana Monroe': 'UL Monroe',
@@ -33,6 +37,48 @@ def flag(s):
 
 def ids(s):
     return pd.to_numeric(s, errors='raise').astype('int64').astype(str)
+
+
+def elo_cache_path(root, year, through_week):
+    return root / f'cfbd_elo_{year}_through_week_{through_week}.json'
+
+
+def fetch_elo_snapshot(root, year, through_week, token, refresh=False):
+    """Return the pregame Elo snapshot available after `through_week`.
+
+    `through_week=0` requests the provider's preseason opening snapshot.  The
+    endpoint's 2026 response is used as an opaque external prior; this code
+    never requests 2025 ratings, play data, or Model A inputs.
+    """
+    if year == 2025:
+        raise ValueError('2025 is sealed')
+    path = elo_cache_path(root, year, through_week)
+    if not path.exists() or refresh:
+        if not token:
+            raise ValueError('CFBD_API_KEY is required for the separate Elo prior')
+        params = {'year': year, 'seasonType': 'regular'}
+        if through_week:
+            params['week'] = through_week
+        else:
+            params['preseason'] = 'true'
+        request = Request('https://api.collegefootballdata.com/ratings/elo?' + urlencode(params),
+                          headers={'Authorization': f'Bearer {token}', 'Accept': 'application/json'})
+        with urlopen(request, timeout=60) as response:
+            payload = json.load(response)
+        if not isinstance(payload, list):
+            raise ValueError('Unexpected CFBD Elo response')
+        path.write_text(json.dumps(payload, sort_keys=True) + '\n')
+    payload = json.loads(path.read_text())
+    frame = pd.DataFrame(payload)
+    required = {'team', 'elo'}
+    if not required.issubset(frame.columns):
+        raise ValueError('CFBD Elo response missing team or elo')
+    frame = frame.loc[frame.team.notna(), ['team', 'elo']].copy()
+    frame.team = frame.team.map(lambda value: ALIASES.get(value, value))
+    frame.elo = pd.to_numeric(frame.elo, errors='coerce')
+    if frame.team.duplicated().any() or frame.elo.notna().sum() < 100:
+        raise ValueError('CFBD Elo response has ambiguous or incomplete team coverage')
+    return frame.set_index('team').elo
 
 
 def fetch_inputs(root, download=False):
@@ -69,14 +115,15 @@ def read_season(root, year):
         raise ValueError('Ambiguous team reference')
     names = {r.team_id: ALIASES.get(r.school, r.school) for r in teams.itertuples()}
     roster = teams.set_index('team_id').drop(columns='school')
-    for kind, fields in [('cfb_team_talent', PRIOR[:2]), ('cfb_returning_production', PRIOR[2:])]:
+    for kind, fields in [('cfb_team_talent', ROSTER_PRIOR[:2]),
+                         ('cfb_returning_production', ROSTER_PRIOR[2:])]:
         frame = pd.read_parquet(root / f'{kind}_{year}.parquet')
         frame = frame.loc[frame.season.eq(year)].copy()
         frame.team_id = ids(frame.team_id)
         if frame.team_id.duplicated().any():
             raise ValueError('Duplicate roster record')
         roster = roster.join(frame.set_index('team_id')[fields].apply(pd.to_numeric, errors='coerce'))
-    for field in PRIOR[1:]:
+    for field in ROSTER_PRIOR[1:]:
         roster.loc[~roster[field].between(0, 1), field] = np.nan
     roster.loc[roster.talent_composite.le(0), 'talent_composite'] = np.nan
 
@@ -162,7 +209,7 @@ def read_season(root, year):
     return names, roster, schedule, games, audit
 
 
-def state(roster, games, before_week, shrinkage=200.0):
+def state(roster, games, before_week, elo=None, shrinkage=200.0):
     """Only weeks strictly before forecast cutoff; retain exact denominators."""
     prior = games.loc[games.week.lt(before_week)]
     result = roster.copy()
@@ -187,13 +234,17 @@ def state(roster, games, before_week, shrinkage=200.0):
             defense = .5 * defense + .5 * target_def
         result['net_' + metric] = off - defense
     result['games'] = prior.groupby('offense').game_id.nunique().reindex(result.index, fill_value=0)
+    if elo is None:
+        result[ELO_PRIOR] = np.nan
+    else:
+        result[ELO_PRIOR] = pd.Series(result.index, index=result.index).map(elo)
     return result
 
 
-def examples(roster, schedule, games):
+def examples(roster, schedule, games, elo_by_cutoff):
     frames = []
     for week in sorted(schedule.week.unique()):
-        s = state(roster, games, week)
+        s = state(roster, games, week, elo=elo_by_cutoff[week - 1])
         sample = schedule.loc[schedule.week.eq(week)]
         left = s.loc[sample.home_id, FEATURES].reset_index(drop=True)
         right = s.loc[sample.away_id, FEATURES].reset_index(drop=True)
@@ -276,6 +327,8 @@ def main():
     p.add_argument('--input-dir', type=Path, required=True)
     p.add_argument('--output-dir', type=Path, required=True)
     p.add_argument('--download', action='store_true')
+    p.add_argument('--cfbd-api-key', default=os.environ.get('CFBD_API_KEY'),
+                   help='Server-side token for CFBD Elo snapshots; never store in the repository')
     p.add_argument('--through-week', type=int, default=0,
                    help='0 selects latest covered source week; report remains research-only')
     args = p.parse_args()
@@ -283,33 +336,59 @@ def main():
         raise ValueError('Explicit completed-week cutoff required')
     args.input_dir.mkdir(parents=True, exist_ok=True)
     provenance = fetch_inputs(args.input_dir, args.download)
-    histories, audits = [], []
+    seasons, audits = {}, []
     for year in YEARS:
         names, roster, schedule, games, audit = read_season(args.input_dir, year)
         audits.append(audit)
-        if year == 2026:
-            current = (names, roster, schedule, games)
-        else:
-            sample = examples(roster, schedule, games)
-            sample['season'] = year
-            histories.append(sample)
+        seasons[year] = (names, roster, schedule, games)
         print(f'{year}: {audit["games"]} usable FBS games', flush=True)
+    current = seasons[2026]
+    _, _, current_schedule, _ = current
+    if args.through_week == 0:
+        args.through_week = int(current_schedule.week.max())
+    expected = current_schedule.loc[current_schedule.week.eq(args.through_week)]
+    if expected.empty:
+        raise ValueError('Requested current week unavailable; refusing stale relabel')
+    elo_by_season = {}
+    elo_provenance = []
+    for year, (_, _, schedule, _) in seasons.items():
+        cutoffs = set(int(week) - 1 for week in schedule.week.unique())
+        if year == 2026:
+            cutoffs.update({args.through_week, max(args.through_week - 1, 0)})
+        elo_by_season[year] = {
+            cutoff: fetch_elo_snapshot(args.input_dir, year, cutoff, args.cfbd_api_key,
+                                       refresh=args.download and year == 2026 and cutoff == args.through_week)
+            for cutoff in sorted(cutoffs)
+        }
+        for cutoff in sorted(cutoffs):
+            path = elo_cache_path(args.input_dir, year, cutoff)
+            elo_provenance.append({
+                'name': path.name,
+                'url': 'https://api.collegefootballdata.com/ratings/elo',
+                'year': year,
+                'through_week': cutoff,
+                'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+            })
+    histories = []
+    for year in YEARS:
+        if year == 2026:
+            continue
+        _, roster, schedule, games = seasons[year]
+        sample = examples(roster, schedule, games, elo_by_season[year])
+        sample['season'] = year
+        histories.append(sample)
     history = pd.concat(histories, ignore_index=True)
     folds = evaluate(history)
     model = fit(history, FEATURES)
     names, roster, schedule, games = current
-    if args.through_week == 0:
-        args.through_week = int(schedule.week.max())
-    expected = schedule.loc[schedule.week.eq(args.through_week)]
-    if expected.empty:
-        raise ValueError('Requested current week unavailable; refusing stale relabel')
-    latest = state(roster, games, args.through_week + 1)
+    latest = state(roster, games, args.through_week + 1, elo=elo_by_season[2026][args.through_week])
     x = encode(latest[FEATURES], model)
     contributions = x * np.array(model['coefficients'][:-1])
     scores = contributions.sum(axis=1)
     center = scores.mean()
     scores -= center
-    previous_state = state(roster, games, args.through_week)
+    previous_state = state(roster, games, args.through_week,
+                           elo=elo_by_season[2026][max(args.through_week - 1, 0)])
     previous_scores = encode(previous_state[FEATURES], model) @ model['coefficients'][:-1]
     previous_scores -= previous_scores.mean()
     rows = []
@@ -319,23 +398,24 @@ def main():
                      'previous_week_same_model_rating': float(previous_scores[i]),
                      'performance_only_weekly_change': float(scores[i] - previous_scores[i]),
                      'qualifying_games': int(data.games), 'missing_prior_fields': missing,
-                     'prior_contribution': float(contributions[i, :4].sum()),
-                     'performance_contribution': float(contributions[i, 4:len(FEATURES)].sum()),
+                     'prior_contribution': float(contributions[i, :len(PRIOR)].sum()),
+                     'performance_contribution': float(contributions[i, len(PRIOR):len(FEATURES)].sum()),
                      'missingness_contribution': float(contributions[i, len(FEATURES):].sum()),
                      'centering_offset': float(center)})
     rows.sort(key=lambda r: (-r['rating'], r['team']))
     for rank, row in enumerate(rows, 1):
         row['rank'] = rank
         row['rating'] = round(row['rating'], 3)
-    report = {'meta': {'version': 'thi_power_research_v0.1', 'status': 'RESEARCH_ONLY',
+    report = {'meta': {'version': 'thi_power_research_v0.2', 'status': 'RESEARCH_ONLY',
                        'generated_at': datetime.now(timezone.utc).isoformat(), 'season': 2026,
                        'through_week': args.through_week, 'model_a_touched': False,
-                       'weekly_change_definition': 'Recomputed previous-week performance with the same fitted model and roster file; not a frozen historical rating',
+                       'weekly_change_definition': 'Recomputed the prior cutoff with the same model, roster file, and CFBD Elo snapshot; not a frozen historical rating',
                        'production_ready': False, 'sealed_2025_used': False,
                        'scale': 'Fitted scoring-margin points relative to candidate FBS mean; unvalidated current-season forecasts',
-                       'prior': 'Talent/blue-chip and returning-production proxies; not TARP or a prior-season performance model',
+                       'prior': 'CFBD Elo snapshot through the completed week, plus talent/blue-chip and returning-production proxies. Elo is a distinct external strength prior, not Model A.',
                        'limitations': ['Historical roster files lack verified pregame publication timestamps; retrospective results are exploratory.',
-                                       'No previous-season performance prior, coaching, injury/news, verified drive finishing, or special-teams features.',
+                                       'CFBD Elo is an opaque external rating. This candidate does not infer or claim its own 2025 raw-data component, and never requests 2025 data.',
+                                       'No verified TARP, coaching/injury/news, verified drive finishing, or special-teams features.',
                                        'All eligible scrimmage situations, including garbage time; no fragile start-score filtering.',
                                        'Overtime is included in training final-margin targets.',
                                        'Fixed 200-exposure shrinkage and ridge 100 are design choices, not tuned optimal values.',
@@ -347,7 +427,8 @@ def main():
                                        'stuff': 'Rushes gaining zero or fewer yards per eligible rush',
                                        'havoc': 'Source havoc flag per eligible scrimmage play',
                                        'opponent_adjustment': 'Regularized additive offense/defense effects, weighted by each rate denominator; prior weeks only'}},
-              'validation': folds, 'input_audit': audits, 'provenance': provenance,
+              'validation': folds, 'input_audit': audits,
+              'provenance': provenance + elo_provenance,
               'model': model, 'teams': rows}
     args.output_dir.mkdir(parents=True, exist_ok=True)
     target = args.output_dir / 'thi_power_candidate.json'
