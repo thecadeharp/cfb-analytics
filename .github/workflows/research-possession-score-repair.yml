@@ -1,0 +1,56 @@
+name: Research Possession Score Repair (2019-2024 Only)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas numpy pyarrow requests
+      - name: Record protected production and frozen research files
+        run: |
+          sha256sum data/projections.json data/cfb_metrics.json scripts/build_projections.py index.html app.js data/research/expected_points_clean_games_2019_2024.csv.gz > /tmp/thi-repair-protected.sha256
+      - name: Test chronology, leakage protection and repair rules
+        run: |
+          python -m py_compile scripts/research_expected_points_score_margin.py scripts/audit_all_possession_start_scores.py scripts/evaluate_repaired_score_margin.py
+          python -m unittest discover -s scripts -p 'test_expected_points_score_margin.py' -v
+          python -m unittest discover -s scripts -p 'test_possession_start_score_repair.py' -v
+      - name: Download 2019-2024 sources and reproduce strict comparison
+        run: python scripts/research_expected_points_score_margin.py --source-dir /tmp/thi-pbp --download
+      - name: Audit every rejected possession and evaluate repaired sample
+        run: |
+          python scripts/audit_all_possession_start_scores.py --source-dir /tmp/thi-pbp
+          python scripts/evaluate_repaired_score_margin.py --source-dir /tmp/thi-pbp
+      - name: Verify isolation and research gates
+        run: |
+          sha256sum --check /tmp/thi-repair-protected.sha256
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          audit=json.loads(Path('data/research/all_possession_start_score_audit.json').read_text())
+          result=json.loads(Path('data/research/repaired_score_margin_challenger.json').read_text())
+          assert audit['counts']['recoverable_games'] == 111
+          assert audit['counts']['quarantined_games'] == 180
+          assert result['meta']['training_ready'] is False
+          assert result['all_folds_improve_both'] is True
+          assert [fold['test_year'] for fold in result['folds']] == [2022, 2023, 2024]
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: research-possession-score-repair
+          path: |
+            data/research/expected_points_score_margin_challenger.json
+            data/research/all_possession_start_score_audit.json
+            data/research/repaired_score_margin_challenger.json
+          if-no-files-found: error
+          retention-days: 30
