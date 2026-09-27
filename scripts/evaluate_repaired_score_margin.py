@@ -9,6 +9,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 import research_expected_points_score_margin as base  # noqa: E402
+from audit_all_possession_start_scores import normalized_ids  # noqa: E402
 
 AUDIT = ROOT / "data/research/all_possession_start_score_audit.json"
 OUT = ROOT / "data/research/repaired_score_margin_challenger.json"
@@ -42,14 +43,18 @@ def main():
     audit = json.loads(AUDIT.read_text())
     recoverable = {(int(g["season"]), str(g["game_id"])): g for g in audit["games"] if g["recoverable"]}
     frozen = pd.read_csv(base.TABLE, dtype={"game_id": str, "drive_id": str, "possession_team_id": str})
+    frozen["season"] = pd.to_numeric(frozen["season"], errors="raise").astype(int)
+    for name in ["game_id", "drive_id", "possession_team_id"]:
+        frozen[name] = normalized_ids(frozen[name])
     frames, coverage = [], []
     for year in base.YEARS:
         season = frozen.loc[frozen.season.eq(year)].copy()
         raw = pd.read_parquet(args.source_dir / f"thi-pbp-{year}.parquet", columns=base.COLUMNS)
-        raw["game_id"] = raw.game_id.map(base.identifier)
+        raw["game_id"] = normalized_ids(raw.game_id)
         groups = {game: frame for game, frame in raw.loc[raw.game_id.isin(season.game_id)].groupby("game_id")}
         accepted, repaired = [], 0
         for game_id, targets in season.groupby("game_id"):
+            game_id = str(game_id)
             margins, reason = base.game_margins(groups.get(game_id, raw.iloc[:0]), targets)
             if reason is None:
                 rows = targets.copy()
