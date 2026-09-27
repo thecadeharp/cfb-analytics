@@ -22,15 +22,17 @@ jobs:
           sha256sum data/projections.json data/cfb_metrics.json scripts/build_projections.py index.html app.js data/research/expected_points_clean_games_2019_2024.csv.gz > /tmp/thi-repair-protected.sha256
       - name: Test chronology, leakage protection and repair rules
         run: |
-          python -m py_compile scripts/research_expected_points_score_margin.py scripts/audit_all_possession_start_scores.py scripts/evaluate_repaired_score_margin.py
+          python -m py_compile scripts/research_expected_points_score_margin.py scripts/audit_all_possession_start_scores.py scripts/evaluate_repaired_score_margin.py scripts/audit_repaired_sample_bias.py
           python -m unittest discover -s scripts -p 'test_expected_points_score_margin.py' -v
           python -m unittest discover -s scripts -p 'test_possession_start_score_repair.py' -v
+          python -m unittest discover -s scripts -p 'test_repaired_sample_bias.py' -v
       - name: Download 2019-2024 sources and reproduce strict comparison
         run: python scripts/research_expected_points_score_margin.py --source-dir /tmp/thi-pbp --download
       - name: Audit every rejected possession and evaluate repaired sample
         run: |
           python scripts/audit_all_possession_start_scores.py --source-dir /tmp/thi-pbp
           python scripts/evaluate_repaired_score_margin.py --source-dir /tmp/thi-pbp
+          python scripts/audit_repaired_sample_bias.py
       - name: Verify isolation and research gates
         run: |
           sha256sum --check /tmp/thi-repair-protected.sha256
@@ -39,11 +41,15 @@ jobs:
           from pathlib import Path
           audit=json.loads(Path('data/research/all_possession_start_score_audit.json').read_text())
           result=json.loads(Path('data/research/repaired_score_margin_challenger.json').read_text())
+          bias=json.loads(Path('data/research/repaired_sample_bias_audit.json').read_text())
           assert audit['counts']['recoverable_games'] == 111
           assert audit['counts']['quarantined_games'] == 180
           assert result['meta']['training_ready'] is False
           assert result['all_folds_improve_both'] is True
           assert [fold['test_year'] for fold in result['folds']] == [2022, 2023, 2024]
+          assert bias['full_sample']['games'] == 838
+          assert bias['cohorts']['repaired']['games'] == 111
+          assert bias['cohorts']['quarantined']['games'] == 180
           PY
       - uses: actions/upload-artifact@v4
         with:
@@ -52,5 +58,6 @@ jobs:
             data/research/expected_points_score_margin_challenger.json
             data/research/all_possession_start_score_audit.json
             data/research/repaired_score_margin_challenger.json
+            data/research/repaired_sample_bias_audit.json
           if-no-files-found: error
           retention-days: 30
