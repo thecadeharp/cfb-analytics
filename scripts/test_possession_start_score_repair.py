@@ -3,11 +3,17 @@ import unittest
 
 import pandas as pd
 
-from audit_all_possession_start_scores import audit_game
+from audit_all_possession_start_scores import audit_game, normalized_ids
 from test_expected_points_score_margin import play, target
 
 
 class StartScoreRepairTests(unittest.TestCase):
+    def test_arrow_string_ids_are_normalized_to_object_strings(self):
+        values = pd.Series([401110776, 401110777], dtype="int64").astype("string[pyarrow]")
+        normalized = normalized_ids(values)
+        self.assertEqual(normalized.dtype, object)
+        self.assertEqual(normalized.tolist(), ["401110776", "401110777"])
+
     def test_repair_requires_next_core_play_corroboration(self):
         raw = pd.DataFrame([
             play(1, "d1", "h", 15, points=True),
