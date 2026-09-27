@@ -21,17 +21,18 @@
   const style = document.createElement("style");
   style.textContent = `
     .thi-hub-intro { max-width:850px; line-height:1.6; }
-    .thi-hub-controls { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:22px 0 12px; }
-    .thi-hub-controls input, .thi-hub-controls select { font:inherit; min-height:42px; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:8px 12px; }
-    .thi-hub-controls input { flex:1 1 240px; min-width:0; }
+    .thi-hub-controls { flex-wrap:wrap; }
+    .thi-hub-control-group { display:flex; align-items:center; gap:10px; }
+    .thi-hub-search { min-width:210px; }
     .thi-hub-note { font-size:12px; line-height:1.55; color:var(--muted); margin:0 0 18px; }
     .thi-hub-table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
     .thi-hub-table { width:100%; border-collapse:collapse; }
     .thi-hub-table th, .thi-hub-table td { text-align:left; padding:14px 16px; border-bottom:1px solid var(--border); }
     .thi-hub-table th { font:600 11px var(--mono); letter-spacing:.05em; color:var(--muted); white-space:nowrap; }
-    .thi-hub-sort-button { border:0; padding:0; background:transparent; color:inherit; font:inherit; letter-spacing:inherit; cursor:pointer; }
+    .thi-hub-sort-button { display:inline-flex; align-items:center; gap:6px; border:0; padding:0; background:transparent; color:inherit; font:inherit; letter-spacing:inherit; cursor:pointer; }
     .thi-hub-sort-button:hover, .thi-hub-sort-button:focus-visible { color:var(--text); text-decoration:underline; }
-    .thi-hub-sort-arrow { display:inline-block; margin-left:4px; }
+    .thi-hub-sort-arrow { display:inline-flex; align-items:center; justify-content:center; width:13px; height:13px; color:var(--muted-light); font-family:var(--mono); font-size:10px; font-weight:700; opacity:.55; }
+    .thi-hub-sort-button.active .thi-hub-sort-arrow { color:var(--green); opacity:1; }
     .thi-hub-table tr:last-child td { border-bottom:0; }
     .thi-hub-table tbody tr:hover { background:#f6f8f5; }
     .thi-hub-team { border:0; background:transparent; padding:0; color:var(--text); font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; text-align:left; }
@@ -66,7 +67,9 @@
       .thi-hub-table td { padding:0; border:0; min-width:0; }
       .thi-hub-table td:first-child { grid-column:1/-1; }
       .thi-hub-table td[data-label]::before { content:attr(data-label); display:block; color:var(--muted); font:600 10px var(--mono); margin-bottom:3px; }
-      .thi-hub-controls select { flex:1 1 150px; }
+      .thi-hub-controls { align-items:stretch; }
+      .thi-hub-control-group { width:100%; }
+      .thi-hub-control-group .conference-filter-select { flex:1 1 auto; min-width:0; }
       .thi-situational-grid { grid-template-columns:1fr; }
     }
   `;
@@ -105,9 +108,9 @@
   function sortHeader(key, label, defaultDirection = "desc") {
     const active = sort === key;
     const direction = active ? sortDirection : defaultDirection;
-    const arrow = direction === "asc" ? "↑" : "↓";
+    const arrow = active ? (direction === "asc" ? "↑" : "↓") : "↕";
     return `<th aria-sort="${active ? (direction === "asc" ? "ascending" : "descending") : "none"}">
-      <button type="button" class="thi-hub-sort-button" data-thi-sort="${key}"
+      <button type="button" class="thi-hub-sort-button ${active ? "active" : ""}" data-thi-sort="${key}"
         data-thi-direction="${defaultDirection}" aria-label="Sort by ${label.toLowerCase()}">${label}${active ? `<span class="thi-hub-sort-arrow" aria-hidden="true">${arrow}</span>` : ""}</button>
     </th>`;
   }
@@ -203,21 +206,31 @@
       return;
     }
     container.innerHTML = `
-      <div class="thi-hub-controls">
-        <input type="search" id="thi-ratings-search" aria-label="Search THI ratings by team" placeholder="Search teams">
-        <select id="thi-ratings-conference" aria-label="Filter THI ratings by conference">
+      <div class="conference-filter-bar thi-hub-controls">
+        <div class="thi-hub-control-group">
+          <label class="conference-filter-label" for="thi-ratings-search">Team</label>
+          <input class="conference-filter-select thi-hub-search" type="search" id="thi-ratings-search" aria-label="Search THI ratings by team" placeholder="Search teams">
+        </div>
+        <div class="thi-hub-control-group">
+          <label class="conference-filter-label" for="thi-ratings-conference">Conference</label>
+          <select class="conference-filter-select" id="thi-ratings-conference" aria-label="Filter THI ratings by conference">
           <option value="ALL">All Conferences</option>
           <option value="P4">Power 4</option>
           <option value="G6">Group of Six</option>
           ${[...new Set(Object.values(teams).map(team => team.conference || "FBS Independents"))]
             .sort((a, b) => a.localeCompare(b)).map(name =>
               `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("")}
-        </select>
-        <select id="thi-situational-team" aria-label="Select team for situational EPA">
+          </select>
+        </div>
+        <div class="thi-hub-control-group">
+          <label class="conference-filter-label" for="thi-situational-team">Profile</label>
+          <select class="conference-filter-select" id="thi-situational-team" aria-label="Select team for situational EPA">
           <option value="">Situational profile · select team</option>
           ${Object.keys(thiObservedRatingsData.teams).sort().map(name =>
             `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("")}
-        </select>
+          </select>
+        </div>
+        <span class="conference-filter-count">${escapeHtml(thiPowerRatingsData.teams.length)} teams</span>
       </div>
       <div id="thi-situational-panel"></div>
       <p class="thi-hub-note">Predictive Power Rating through Week ${escapeHtml(powerMeta.through_week ?? "—")} · observed diagnostics through Week ${escapeHtml(meta.through_week ?? "—")}. Click any column header to sort; click again to reverse it. Roster is the talent and returning-production contribution. Performance is the opponent-adjusted rate contribution. Observed values remain descriptive context; lower defense is better.</p>
