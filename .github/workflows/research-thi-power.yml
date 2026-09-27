@@ -1,4 +1,4 @@
-name: THI Power Candidate - Research Only
+name: THI Power Candidate v0.2 - Research Only
 
 on:
   workflow_dispatch:
@@ -36,12 +36,13 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: /tmp/thi-power-inputs
-          key: thi-power-public-inputs-v1
+          key: thi-power-public-inputs-v2
       - name: Test chronology, symmetry and missing-input handling
         run: python -m unittest discover -s scripts -p test_research_thi_power.py
       - name: Fit and evaluate independent candidate
         env:
           THROUGH_WEEK: ${{ inputs.through_week || '0' }}
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
         run: |
           python scripts/research_thi_power.py --input-dir /tmp/thi-power-inputs --output-dir /tmp/thi-power-report --download --through-week "$THROUGH_WEEK"
       - name: Verify protected files unchanged
@@ -53,3 +54,4 @@ jobs:
           path: /tmp/thi-power-report/thi_power_candidate.json
           if-no-files-found: error
           retention-days: 90
+
