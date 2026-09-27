@@ -70,14 +70,21 @@ def fetch_elo_snapshot(root, year, through_week, token, refresh=False):
         path.write_text(json.dumps(payload, sort_keys=True) + '\n')
     payload = json.loads(path.read_text())
     frame = pd.DataFrame(payload)
+    if frame.empty:
+        # Some historical preseason snapshots have no published opening Elo.
+        # Retain that absence as missing input instead of aborting or zeroing it.
+        return pd.Series(dtype=float)
     required = {'team', 'elo'}
     if not required.issubset(frame.columns):
         raise ValueError('CFBD Elo response missing team or elo')
     frame = frame.loc[frame.team.notna(), ['team', 'elo']].copy()
     frame.team = frame.team.map(lambda value: ALIASES.get(value, value))
     frame.elo = pd.to_numeric(frame.elo, errors='coerce')
-    if frame.team.duplicated().any() or frame.elo.notna().sum() < 100:
-        raise ValueError('CFBD Elo response has ambiguous or incomplete team coverage')
+    # CFBD documents that opening Elo values can be omitted.  That is normal
+    # historical source coverage, not permission to manufacture a zero rating.
+    # Missing values flow through the candidate's explicit missingness feature.
+    if frame.team.duplicated().any():
+        raise ValueError('CFBD Elo response has ambiguous team coverage')
     return frame.set_index('team').elo
 
 
