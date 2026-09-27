@@ -36,6 +36,7 @@
   let completedGames = [];
 
   let statusRefreshTimer = null;
+  let statusRefreshInFlight = false;
   let decorationQueued = false;
   let decorating = false;
 
@@ -941,44 +942,52 @@
     const separator =
       url.includes("?") ? "&" : "?";
 
-    const response = await fetch(
-      `${url}${separator}t=${Date.now()}`,
-      {
-        cache: "no-store"
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 15_000);
+    try {
+      const response = await fetch(`${url}${separator}t=${Date.now()}`, {
+        cache: "no-store",
+        signal: controller.signal
+      });
+      if (!response.ok) {
+        throw new Error(`${url} returned ${response.status}`);
       }
-    );
-
-    if (!response.ok) {
-      throw new Error(`${url} returned ${response.status}`);
+      return await response.json();
+    } finally {
+      window.clearTimeout(timeout);
     }
-
-    return response.json();
   }
 
   async function refreshGameStatusData() {
-    const [liveResult, finalResult] =
-      await Promise.allSettled([
-        fetchJson(LIVE_URL),
-        fetchJson(RESULTS_URL)
-      ]);
+    if (document.hidden || statusRefreshInFlight) return;
+    statusRefreshInFlight = true;
+    try {
+      const [liveResult, finalResult] =
+        await Promise.allSettled([
+          fetchJson(LIVE_URL),
+          fetchJson(RESULTS_URL)
+        ]);
 
-    if (liveResult.status === "fulfilled") {
-      liveGames = Array.isArray(
-        liveResult.value?.games
-      )
-        ? liveResult.value.games
-        : [];
+      if (liveResult.status === "fulfilled") {
+        liveGames = Array.isArray(
+          liveResult.value?.games
+        )
+          ? liveResult.value.games
+          : [];
+      }
+
+      if (finalResult.status === "fulfilled") {
+        completedGames = Array.isArray(
+          finalResult.value?.games
+        )
+          ? finalResult.value.games
+          : [];
+      }
+
+      queueProjectionDecoration();
+    } finally {
+      statusRefreshInFlight = false;
     }
-
-    if (finalResult.status === "fulfilled") {
-      completedGames = Array.isArray(
-        finalResult.value?.games
-      )
-        ? finalResult.value.games
-        : [];
-    }
-
-    queueProjectionDecoration();
   }
 
   function observeProjectionRows() {
@@ -1063,8 +1072,11 @@
         () => {
           refreshGameStatusData().catch(() => {});
         },
-        60_000
+        30_000
       );
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) refreshGameStatusData().catch(() => {});
+    });
   }
 
   function start() {
