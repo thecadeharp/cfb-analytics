@@ -8,8 +8,10 @@ import argparse
 import hashlib
 import json
 import os
+import time
 from pathlib import Path
 from datetime import datetime, timezone
+from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -29,6 +31,8 @@ FEATURES = PRIOR + ['net_' + m for m in METRICS]
 ALIASES = {'San José State': 'San Jose State', 'Appalachian State': 'App State',
            'Connecticut': 'UConn', 'Louisiana Monroe': 'UL Monroe',
            'Southern Mississippi': 'Southern Miss', 'UT San Antonio': 'UTSA'}
+ELO_REQUEST_INTERVAL_SECONDS = 1.1
+_last_elo_request_at = 0.0
 
 
 def flag(s):
@@ -63,8 +67,28 @@ def fetch_elo_snapshot(root, year, through_week, token, refresh=False):
             params['preseason'] = 'true'
         request = Request('https://api.collegefootballdata.com/ratings/elo?' + urlencode(params),
                           headers={'Authorization': f'Bearer {token}', 'Accept': 'application/json'})
-        with urlopen(request, timeout=60) as response:
-            payload = json.load(response)
+        global _last_elo_request_at
+        for attempt in range(6):
+            delay = ELO_REQUEST_INTERVAL_SECONDS - (time.monotonic() - _last_elo_request_at)
+            if delay > 0:
+                time.sleep(delay)
+            try:
+                with urlopen(request, timeout=60) as response:
+                    payload = json.load(response)
+                _last_elo_request_at = time.monotonic()
+                break
+            except HTTPError as error:
+                _last_elo_request_at = time.monotonic()
+                if error.code != 429 or attempt == 5:
+                    raise
+                retry_after = error.headers.get('Retry-After')
+                try:
+                    pause = float(retry_after) if retry_after else 5.0 * (attempt + 1)
+                except ValueError:
+                    pause = 5.0 * (attempt + 1)
+                time.sleep(pause)
+        else:  # pragma: no cover - loop either breaks or raises
+            raise RuntimeError('Unable to retrieve CFBD Elo snapshot')
         if not isinstance(payload, list):
             raise ValueError('Unexpected CFBD Elo response')
         path.write_text(json.dumps(payload, sort_keys=True) + '\n')
