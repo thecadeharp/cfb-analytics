@@ -90,6 +90,24 @@
           display: none !important;
         }
 
+        #view-ratings .ratings-toggle {
+          flex-wrap: wrap;
+          width: 100%;
+          min-width: 0;
+          padding: 12px;
+        }
+
+        #view-ratings .ratings-toggle-button {
+          flex: 0 0 auto;
+          max-width: 100%;
+        }
+        #view-ratings .ratings-toggle-button.active {
+          background: var(--ink, #17212b);
+          border-color: var(--ink, #17212b);
+          color: #fff;
+        }
+
+
 
         #mobile-projection-cards {
           display: grid;
@@ -1150,12 +1168,22 @@
   // SOURCE SIGNATURE
   // ==========================================================================
 
+  function dayDividerFor(row) {
+    let sibling = row.previousElementSibling;
+    while (sibling) {
+      if (sibling.classList.contains("hammer-day-divider-row")) return sibling;
+      sibling = sibling.previousElementSibling;
+    }
+    return null;
+  }
+
   function sourceSignature(rows) {
     return rows
       .map(row => [
         gameIdFromRow(row),
         row.className,
         row.dataset.hammerGameState || "",
+        dayDividerFor(row)?.textContent || "",
         row.hidden ? "1" : "0",
         row.innerHTML
       ].join("|"))
@@ -1278,6 +1306,7 @@
     const fragment =
       document.createDocumentFragment();
 
+    let previousDivider = null;
     rows.forEach(sourceRow => {
       const cells =
         Array.from(
@@ -1291,6 +1320,13 @@
       ) {
         return;
       }
+
+      const divider = dayDividerFor(sourceRow);
+      if (divider && divider !== previousDivider) {
+        const box = divider.querySelector(".hammer-day-divider-box");
+        if (box) fragment.appendChild(box.cloneNode(true));
+      }
+      previousDivider = divider;
 
       const completed =
         sourceRow.classList.contains(
