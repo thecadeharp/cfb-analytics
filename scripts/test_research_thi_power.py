@@ -52,9 +52,18 @@ class PowerTests(unittest.TestCase):
 
     def test_no_games_means_prior_only_not_fake_observations(self):
         s = m.state(roster(), games(), 1)
-        self.assertTrue(s[m.FEATURES[4:]].eq(0).all().all())
+        self.assertTrue(s[m.FEATURES[len(m.PRIOR):]].eq(0).all().all())
         self.assertTrue(s.games.eq(0).all())
         self.assertTrue(pd.isna(s.loc['B', 'def_returning']))
+
+    def test_elo_snapshot_is_joined_by_team_without_zero_fill(self):
+        s = m.state(roster(), games(), 1, elo=pd.Series({'A': 1700.}))
+        self.assertEqual(s.loc['A', m.ELO_PRIOR], 1700.)
+        self.assertTrue(pd.isna(s.loc['B', m.ELO_PRIOR]))
+
+    def test_sealed_elo_snapshot_rejected_before_request(self):
+        with self.assertRaises(ValueError):
+            m.fetch_elo_snapshot(Path('/missing'), 2025, 4, 'never-used')
 
     def test_swapping_teams_reverses_neutral_margin(self):
         t = training(); model = m.fit(t, m.FEATURES)
