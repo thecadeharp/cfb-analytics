@@ -19,10 +19,15 @@ from build_historical_training_data import boolish  # noqa: E402
 OUT = ROOT / "data/research/all_possession_start_score_audit.json"
 
 
+def normalized_ids(series):
+    """Return object-backed string IDs across pandas/pyarrow versions."""
+    return series.map(base.identifier).astype(object)
+
+
 def audit_game(raw, frozen):
     raw = raw.copy()
     for name in ["game_id", "drive.id", "id", "pos_team_id", "homeTeamId", "awayTeamId"]:
-        raw[name] = raw[name].map(base.identifier)
+        raw[name] = normalized_ids(raw[name])
     for name in base.ORDER + ["start.homeScore", "start.awayScore"]:
         raw[name] = pd.to_numeric(raw[name], errors="coerce")
     raw = raw.loc[raw.period.between(1, 4)].sort_values(
@@ -96,6 +101,9 @@ def main():
     parser.add_argument("--source-dir", type=Path, required=True)
     args = parser.parse_args()
     frozen = pd.read_csv(base.TABLE, dtype={"game_id": str, "drive_id": str, "possession_team_id": str})
+    frozen["season"] = pd.to_numeric(frozen["season"], errors="raise").astype(int)
+    for name in ["game_id", "drive_id", "possession_team_id"]:
+        frozen[name] = normalized_ids(frozen[name])
     strict_report = json.loads(base.REPORT.read_text())
     rejected_ids = {
         (int(row["season"]), str(row["game_id"]))
@@ -107,8 +115,9 @@ def main():
         season = frozen.loc[frozen.season.eq(year)]
         wanted = {game for y, game in rejected_ids if y == year}
         raw = pd.read_parquet(args.source_dir / f"thi-pbp-{year}.parquet", columns=base.COLUMNS)
-        raw["game_id"] = raw.game_id.map(base.identifier)
+        raw["game_id"] = normalized_ids(raw.game_id)
         for game_id, targets in season.loc[season.game_id.isin(wanted)].groupby("game_id"):
+            game_id = str(game_id)
             findings = audit_game(raw.loc[raw.game_id.eq(game_id)], targets)
             counts = Counter(item["status"] for item in findings)
             totals.update(counts)
