@@ -1,7 +1,6 @@
 import unittest
 from unittest.mock import patch
 from pathlib import Path
-import tempfile
 import numpy as np
 import pandas as pd
 import research_thi_power as m
@@ -62,16 +61,15 @@ class PowerTests(unittest.TestCase):
         self.assertEqual(s.loc['A', m.ELO_PRIOR], 1700.)
         self.assertTrue(pd.isna(s.loc['B', m.ELO_PRIOR]))
 
-    def test_sealed_elo_snapshot_rejected_before_request(self):
-        with self.assertRaises(ValueError):
-            m.fetch_elo_snapshot(Path('/missing'), 2025, 4, 'never-used')
-
-    def test_missing_historical_preseason_elo_remains_missing(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            path = m.elo_cache_path(Path(tmp), 2019, 0)
-            path.write_text('[]\n')
-            result = m.fetch_elo_snapshot(Path(tmp), 2019, 0, token=None)
-        self.assertTrue(result.empty)
+    def test_result_elo_uses_only_completed_prior_weeks(self):
+        schedule = pd.DataFrame([
+            {'week': 1, 'home_id': 'A', 'away_id': 'B', 'margin': 7},
+            {'week': 2, 'home_id': 'A', 'away_id': 'B', 'margin': -7},
+        ])
+        snapshots = m.result_elo_snapshots(pd.Index(['A', 'B']), schedule)
+        self.assertEqual(snapshots[0].loc['A'], 1500.)
+        self.assertGreater(snapshots[1].loc['A'], 1500.)
+        self.assertLess(snapshots[2].loc['A'], snapshots[1].loc['A'])
 
     def test_swapping_teams_reverses_neutral_margin(self):
         t = training(); model = m.fit(t, m.FEATURES)
