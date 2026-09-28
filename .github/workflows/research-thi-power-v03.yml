@@ -90,10 +90,32 @@ jobs:
               ).read_text()
           )
 
+          expected_fields = {
+              "team_id",
+              "team",
+              "rating",
+              "previous_week_same_model_rating",
+              "performance_only_weekly_change",
+              "qualifying_games",
+              "missing_prior_fields",
+              "prior_contribution",
+              "result_elo_contribution",
+              "roster_contribution",
+              "performance_contribution",
+              "missingness_contribution",
+              "centering_offset",
+              "rank"
+          }
+
           assert report["meta"]["model_a_touched"] is False
           assert report["meta"]["sealed_2025_used"] is False
           assert report["meta"]["selected_decay_rate"] == 0.15
+          assert report["meta"]["season"] == 2026
           assert len(report["teams"]) == 138
+          assert all(
+              set(team) == expected_fields
+              for team in report["teams"]
+          )
           PY
 
       - uses: actions/upload-artifact@v4
