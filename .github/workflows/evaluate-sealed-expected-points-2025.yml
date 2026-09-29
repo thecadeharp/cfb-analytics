@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install research dependencies
-        run: pip install pandas numpy
+        run: pip install pandas numpy requests
       - name: Preserve Model A, site and frozen candidate inputs
         run: |
           sha256sum data/projections.json data/cfb_metrics.json scripts/build_projections.py index.html app.js postgame-analytics.js data/research/expected_points_clean_games_2019_2024.csv.gz data/research/repaired_expected_points_candidate.json data/research/all_possession_start_score_audit.json data/research/sealed_expected_points_holdout_input_2025.csv.gz > /tmp/thi-sealed-before.sha256
