@@ -5,39 +5,37 @@ import numpy as np
 import pandas as pd
 
 from evaluate_sealed_expected_points_2025 import (
-    context_rows,
+    EXPECTED_HOLDOUT_GAMES,
+    EXPECTED_HOLDOUT_POSSESSIONS,
     fit_baseline,
     game_bootstrap_interval,
+    load_locked_candidate,
+    load_matched_historical,
+    load_sealed_holdout,
     predict_baseline,
 )
 
 
 class SealedHoldoutTests(unittest.TestCase):
-    def test_context_uses_possession_team_perspective(self):
-        targets = pd.DataFrame({
-            "game_id": ["g", "g"],
-            "drive_id": ["d1", "d2"],
-            "possession_team_id": ["home", "away"],
-        })
-        raw = pd.DataFrame({"homeTeamId": ["home"], "awayTeamId": ["away"]})
-        findings = [
-            {"drive_id": "d1", "status": "raw_confirmed",
-             "reconstructed_home": 14, "reconstructed_away": 7},
-            {"drive_id": "d2", "status": "repairable_stale_stamp",
-             "reconstructed_home": 14, "reconstructed_away": 10},
-        ]
-        result, repaired = context_rows(targets, findings, raw)
-        self.assertEqual(result.start_score_margin.tolist(), [7.0, -4.0])
-        self.assertEqual(repaired, 1)
+    def test_locked_inputs_recover_exact_frozen_samples(self):
+        candidate, _ = load_locked_candidate()
+        historical, coverage = load_matched_historical(candidate)
+        holdout = load_sealed_holdout()
+        self.assertEqual(len(historical), candidate["approved_sample"]["possessions"])
+        self.assertEqual(historical.game_id.nunique(), candidate["approved_sample"]["games"])
+        self.assertEqual(coverage, candidate["approved_sample"]["coverage"])
+        self.assertEqual(len(holdout), EXPECTED_HOLDOUT_POSSESSIONS)
+        self.assertEqual(holdout.game_id.nunique(), EXPECTED_HOLDOUT_GAMES)
 
-    def test_unresolved_context_quarantines_game(self):
-        targets = pd.DataFrame({"game_id": ["g"], "drive_id": ["d1"],
-                                "possession_team_id": ["home"]})
-        raw = pd.DataFrame({"homeTeamId": ["home"], "awayTeamId": ["away"]})
-        findings = [{"drive_id": "d1", "status": "unresolved_score_contradiction",
-                     "reconstructed_home": 0, "reconstructed_away": 0}]
-        with self.assertRaisesRegex(ValueError, "unresolved_score_context"):
-            context_rows(targets, findings, raw)
+    def test_holdout_contains_only_model_inputs_identity_and_target(self):
+        holdout = load_sealed_holdout()
+        self.assertEqual(set(holdout), {
+            "game_id", "drive_id", "start_yards_to_endzone", "start_period",
+            "start_score_margin", "target_offensive_points",
+        })
+        self.assertFalse(holdout.duplicated(["game_id", "drive_id"]).any())
+        self.assertTrue(holdout.start_period.between(1, 4).all())
+        self.assertTrue(holdout.target_offensive_points.between(0, 8).all())
 
     def test_baseline_bounds_and_game_bootstrap(self):
         frame = pd.DataFrame({
