@@ -1,0 +1,171 @@
+{
+  "meta": {
+    "generated_at": "2026-09-27T23:21:54.940924+00:00",
+    "status": "research_only_repaired_expected_points_candidate_v1",
+    "training_ready": false,
+    "production_use": "none; no Model A, projections, site, or 2025 access",
+    "scope": "2019-2024 strict plus fully corroborated repaired games; rolling OOS calibration uses 2022-2024",
+    "ridge_penalty": 10.0,
+    "prediction_range": [
+      0,
+      8
+    ]
+  },
+  "features": [
+    "intercept",
+    "yards_to_endzone_0_1",
+    "yards_to_endzone_squared",
+    "period_2",
+    "period_3",
+    "period_4",
+    "possession_score_margin_div_28"
+  ],
+  "coefficients_fit_on_all_approved_2019_2024_rows": [
+    4.927826984096817,
+    -3.1802470492169617,
+    -0.45837940946391453,
+    -0.38499149758954665,
+    0.00047878307759055403,
+    -0.6149220960142782,
+    0.5706763166387
+  ],
+  "approved_sample": {
+    "games": 658,
+    "possessions": 15599,
+    "coverage": [
+      {
+        "season": 2019,
+        "eligible_games": 46,
+        "eligible_rows": 1145,
+        "repaired_games": 2
+      },
+      {
+        "season": 2020,
+        "eligible_games": 33,
+        "eligible_rows": 855,
+        "repaired_games": 2
+      },
+      {
+        "season": 2021,
+        "eligible_games": 93,
+        "eligible_rows": 2184,
+        "repaired_games": 18
+      },
+      {
+        "season": 2022,
+        "eligible_games": 163,
+        "eligible_rows": 3874,
+        "repaired_games": 29
+      },
+      {
+        "season": 2023,
+        "eligible_games": 187,
+        "eligible_rows": 4425,
+        "repaired_games": 30
+      },
+      {
+        "season": 2024,
+        "eligible_games": 136,
+        "eligible_rows": 3116,
+        "repaired_games": 30
+      }
+    ]
+  },
+  "rolling_oos": {
+    "games": 486,
+    "possessions": 11415,
+    "metrics": {
+      "mae": 2.57872611132731,
+      "rmse": 2.934273852047071,
+      "bias": 0.03988691611781794
+    },
+    "field_position_calibration": [
+      {
+        "bucket": "(-0.001, 20.0]",
+        "rows": 138,
+        "actual_mean": 4.449275362318841,
+        "predicted_mean": 4.297277706047489,
+        "bias": -0.151997656271351
+      },
+      {
+        "bucket": "(20.0, 40.0]",
+        "rows": 494,
+        "actual_mean": 3.8704453441295548,
+        "predicted_mean": 3.654046910710336,
+        "bias": -0.21639843341921827
+      },
+      {
+        "bucket": "(40.0, 60.0]",
+        "rows": 1479,
+        "actual_mean": 2.9019607843137254,
+        "predicted_mean": 2.932666144892109,
+        "bias": 0.03070536057838395
+      },
+      {
+        "bucket": "(60.0, 80.0]",
+        "rows": 7093,
+        "actual_mean": 2.0008459044128015,
+        "predicted_mean": 2.074877153940922,
+        "bias": 0.07403124952812049
+      },
+      {
+        "bucket": "(80.0, 100.0]",
+        "rows": 2211,
+        "actual_mean": 1.5223880597014925,
+        "predicted_mean": 1.5281179416377402,
+        "bias": 0.005729881936247663
+      }
+    ],
+    "score_margin_calibration": [
+      {
+        "bucket": "(-100.001, -15.0]",
+        "rows": 1661,
+        "actual_mean": 1.3419626730885008,
+        "predicted_mean": 1.6008360048212178,
+        "bias": 0.2588733317327169
+      },
+      {
+        "bucket": "(-15.0, -8.0]",
+        "rows": 1231,
+        "actual_mean": 1.7928513403736799,
+        "predicted_mean": 1.8716096997788427,
+        "bias": 0.07875835940516303
+      },
+      {
+        "bucket": "(-8.0, -1.0]",
+        "rows": 2315,
+        "actual_mean": 2.0825053995680345,
+        "predicted_mean": 2.076711334389289,
+        "bias": -0.0057940651787457
+      },
+      {
+        "bucket": "(-1.0, 0.0]",
+        "rows": 1951,
+        "actual_mean": 2.3244490005125575,
+        "predicted_mean": 2.257153410649529,
+        "bias": -0.06729558986302885
+      },
+      {
+        "bucket": "(0.0, 7.0]",
+        "rows": 1857,
+        "actual_mean": 2.241249326871298,
+        "predicted_mean": 2.3217584600527514,
+        "bias": 0.08050913318145346
+      },
+      {
+        "bucket": "(7.0, 14.0]",
+        "rows": 1046,
+        "actual_mean": 2.5277246653919696,
+        "predicted_mean": 2.5234557776788047,
+        "bias": -0.0042688877131647285
+      },
+      {
+        "bucket": "(14.0, 100.0]",
+        "rows": 1354,
+        "actual_mean": 2.790251107828656,
+        "predicted_mean": 2.737101740022651,
+        "bias": -0.053149367806004266
+      }
+    ]
+  }
+}
