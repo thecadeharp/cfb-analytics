@@ -257,7 +257,7 @@
     const container = document.getElementById('dossier-container');
     if (!container) return;
     const panels = Array.from(container.querySelectorAll(':scope > .panel'));
-    const target = panels.find(panel => panel.querySelector('.panel-title')?.textContent.trim() === 'External Ratings & Resume');
+    const target = panels.find(panel => ['External Ratings & Resume', 'Schedule & Resume Context'].includes(panel.querySelector('.panel-title')?.textContent.trim()));
     if (!target) return;
     const resume = externalRatingsData?.teams?.[teamName] ?? {};
     const projected = projectedRecordFor(teamName);
