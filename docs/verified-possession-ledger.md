@@ -46,10 +46,12 @@ Source parquet SHA-256: `740566c0d034fa767008a40797dd491acb91dee47934cefb4225494
 
 The earlier scoring-only audit assigned 5,475 events and left 6 events / 33 points unassigned. The two additional exclusions are field goals in games `401760414` (drive `40176041429`) and `401754610` (drive `4017546104`). Both drive IDs include an earlier fumble row belonging to the other team. The broader ownership check detects this conflicting evidence and withholds the field goals rather than assuming the drive boundary is correct. The original six unresolved events remain unresolved.
 
-## Next gate
+## Sealed result and current extension
 
 All rows explicitly have `training_eligible=false`. Passing these checks does not prove that entirely absent possessions do not exist, that source EPA is usable, or that a sample is representative.
 
 The 2019–2024 repair stage subsequently audited every possession in the 291 score-context rejections. It admitted 111 fully corroborated games, quarantined 180 games and froze a research-only expected-points candidate after that candidate improved MAE and RMSE in every 2022–2024 rolling fold. The candidate remains separate from Model A and is not production-ready.
 
-The next gate is the manual **Evaluate Sealed Expected Points 2025** workflow. It checksum-locks the candidate, historical target and repair evidence, plus a compact holdout built from the frozen verified 2025 ledger. The compact holdout admits a game only when every regulation drive-start score exactly reconciles to the frozen scoring-event sequence; it performs no 2025 repair or imputation. This avoids depending on mutable annual source downloads while comparing the frozen candidate with its matched field-position baseline. The workflow may run only once: after its report is committed, repeat evaluation is refused. A pass does not authorize Model A integration; a failure must be reported without tuning this candidate against 2025.
+The manual **Evaluate Sealed Expected Points 2025** workflow passed. On 213 games and 4,696 exact-context possessions, the frozen candidate improved MAE from 2.5777 to 2.5352 and RMSE from 2.9268 to 2.8972. The game-bootstrap 95% interval for MAE improvement was +0.0295 to +0.0559. The result remains research-only and does not authorize Model A integration.
+
+The current extension is the separate 2026 **Situational Profiles** pipeline documented in `docs/situational-profiles.md`. It applies the frozen candidate descriptively to independently verified completed games, publishes team possession-value summaries with explicit sample reliability and preserves whole-game quarantine. It does not feed projections, ratings, wagers or live scores.
