@@ -1,0 +1,175 @@
+{
+  "meta": {
+    "generated_at": "2026-09-29T18:35:14.305510+00:00",
+    "status": "research_only_sealed_expected_points_holdout_2025",
+    "training_ready": false,
+    "production_use": "none; Model A, projections, ratings, and site untouched",
+    "evaluation_policy": "One sealed 2025 evaluation of the checksum-locked candidate; no tuning after results.",
+    "candidate_sha256": "ab525744fee8d093ad73fe7612a4ab4f0006187e006ff63c2ceb7d3db753372a",
+    "historical_repair_audit_sha256": "fcc491a08ba1a64eb4411308c4c343fe9edc4b6cf91a54d95576c9e5caea899a",
+    "historical_target_sha256": "983f967620d63173e2c105defc9e537d6c32789bf23c56f9d608cb289598c141",
+    "holdout_input_sha256": "df29d003dc215b71b3619b3cf97a28b110e892590c5a40c840dc9b2eb6369928",
+    "candidate_status": "research_only_repaired_expected_points_candidate_v1"
+  },
+  "input_provenance": {
+    "historical": "Frozen 2019-2024 target table filtered by the frozen all-game repair audit.",
+    "holdout": "Frozen 2025 verified possession ledger; whole-game admission required exact regulation drive-start score reconciliation.",
+    "remote_downloads": false
+  },
+  "historical_training_coverage": [
+    {
+      "season": 2019,
+      "eligible_games": 46,
+      "eligible_rows": 1145,
+      "repaired_games": 2
+    },
+    {
+      "season": 2020,
+      "eligible_games": 33,
+      "eligible_rows": 855,
+      "repaired_games": 2
+    },
+    {
+      "season": 2021,
+      "eligible_games": 93,
+      "eligible_rows": 2184,
+      "repaired_games": 18
+    },
+    {
+      "season": 2022,
+      "eligible_games": 163,
+      "eligible_rows": 3874,
+      "repaired_games": 29
+    },
+    {
+      "season": 2023,
+      "eligible_games": 187,
+      "eligible_rows": 4425,
+      "repaired_games": 30
+    },
+    {
+      "season": 2024,
+      "eligible_games": 136,
+      "eligible_rows": 3116,
+      "repaired_games": 30
+    }
+  ],
+  "holdout_coverage": {
+    "context_eligible_games": 213,
+    "context_eligible_possessions": 4696,
+    "context_quarantined_games": 257,
+    "context_quarantined_possessions": 5712,
+    "context_rule": "Every regulation drive start in the game exactly matched the accumulated frozen scoring-event ledger; no 2025 score repair or imputation."
+  },
+  "matched_baseline": {
+    "mae": 2.577688090312029,
+    "rmse": 2.926798120945195,
+    "bias": 0.04889928761774801
+  },
+  "frozen_candidate": {
+    "mae": 2.5351718148254334,
+    "rmse": 2.8971552343494174,
+    "bias": 0.04768433226297241
+  },
+  "mae_improvement": 0.042516275486595756,
+  "rmse_improvement": 0.02964288659577763,
+  "mae_improvement_game_bootstrap_95_interval": [
+    0.02949851196276842,
+    0.055927237926608024
+  ],
+  "holdout_gate_passed": true,
+  "field_position_calibration": [
+    {
+      "bucket": "(-0.001, 20.0]",
+      "rows": 71,
+      "actual_mean": 5.112676056338028,
+      "predicted_mean": 4.426164143952472,
+      "bias": -0.6865119123855568
+    },
+    {
+      "bucket": "(20.0, 40.0]",
+      "rows": 230,
+      "actual_mean": 4.021739130434782,
+      "predicted_mean": 3.6828585022537728,
+      "bias": -0.33888062818100945
+    },
+    {
+      "bucket": "(40.0, 60.0]",
+      "rows": 569,
+      "actual_mean": 2.854130052724077,
+      "predicted_mean": 2.970947126788793,
+      "bias": 0.11681707406471578
+    },
+    {
+      "bucket": "(60.0, 80.0]",
+      "rows": 2921,
+      "actual_mean": 1.983224922971585,
+      "predicted_mean": 2.058992441829846,
+      "bias": 0.07576751885826079
+    },
+    {
+      "bucket": "(80.0, 100.0]",
+      "rows": 905,
+      "actual_mean": 1.419889502762431,
+      "predicted_mean": 1.4893090351824554,
+      "bias": 0.06941953242002438
+    }
+  ],
+  "score_margin_calibration": [
+    {
+      "bucket": "(-100.001, -15.0]",
+      "rows": 747,
+      "actual_mean": 1.1954484605087015,
+      "predicted_mean": 1.4738117811814622,
+      "bias": 0.27836332067276065
+    },
+    {
+      "bucket": "(-15.0, -8.0]",
+      "rows": 463,
+      "actual_mean": 1.7343412526997841,
+      "predicted_mean": 1.8192503866716738,
+      "bias": 0.08490913397188989
+    },
+    {
+      "bucket": "(-8.0, -1.0]",
+      "rows": 936,
+      "actual_mean": 1.9497863247863247,
+      "predicted_mean": 2.046476540075777,
+      "bias": 0.0966902152894526
+    },
+    {
+      "bucket": "(-1.0, 0.0]",
+      "rows": 797,
+      "actual_mean": 2.2936010037641155,
+      "predicted_mean": 2.344612431132029,
+      "bias": 0.05101142736791366
+    },
+    {
+      "bucket": "(0.0, 7.0]",
+      "rows": 758,
+      "actual_mean": 2.203166226912929,
+      "predicted_mean": 2.3531216118332545,
+      "bias": 0.14995538492032584
+    },
+    {
+      "bucket": "(7.0, 14.0]",
+      "rows": 381,
+      "actual_mean": 3.0813648293963256,
+      "predicted_mean": 2.5674927470187603,
+      "bias": -0.5138720823775653
+    },
+    {
+      "bucket": "(14.0, 100.0]",
+      "rows": 614,
+      "actual_mean": 2.92671009771987,
+      "predicted_mean": 2.808853790274384,
+      "bias": -0.11785630744548581
+    }
+  ],
+  "limitations": [
+    "Results apply only to games with fully reconciled frozen score context and verified possession labels.",
+    "Whole-game quarantine reduces coverage and may leave selection bias.",
+    "A passed holdout gate does not authorize production use or changes to Model A.",
+    "A failed holdout gate must be reported as-is; 2025 may not be used to retune this candidate."
+  ]
+}
