@@ -1,0 +1,136 @@
+name: Build 2026 Situational Profiles
+
+on:
+  workflow_dispatch:
+    inputs:
+      through_week:
+        description: 'Last completed 2026 week to include (1-15)'
+        required: true
+        default: '4'
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thi-situational-profiles-2026
+  cancel-in-progress: false
+
+jobs:
+  profiles:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PYTHONPYCACHEPREFIX: /tmp/thi-situational-pycache
+      OPENBLAS_NUM_THREADS: '1'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install research dependencies
+        run: python -m pip install numpy==2.3.5 pandas==2.2.3 pyarrow==25.0.1 requests
+
+      - name: Protect Model A, ratings and site files
+        run: |
+          sha256sum \
+            scripts/build_projections.py \
+            data/cfb_metrics.json \
+            data/projections.json \
+            app.js \
+            index.html \
+            thi-ratings-hub.js \
+            data/thi_power_ratings.json \
+            data/thi_observed_ratings.json \
+            data/research/repaired_expected_points_candidate.json \
+            > /tmp/thi-situational-protected.sha256
+
+      - name: Test situational profile contract
+        run: |
+          python -m py_compile \
+            scripts/build_situational_profiles.py \
+            scripts/test_situational_profiles.py
+          python -m unittest discover \
+            -s scripts \
+            -p 'test_situational_profiles.py' \
+            -v
+
+      - name: Build independently verified profiles
+        env:
+          THROUGH_WEEK: ${{ inputs.through_week }}
+        run: |
+          python scripts/build_situational_profiles.py \
+            --season 2026 \
+            --through-week "$THROUGH_WEEK" \
+            --output data/research/situational_profiles_2026.json
+
+      - name: Verify isolation and output contract
+        run: |
+          sha256sum --check /tmp/thi-situational-protected.sha256
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(
+              Path('data/research/situational_profiles_2026.json').read_text()
+          )
+          assert report['meta']['status'] == 'research_only_situational_profiles_v1'
+          assert report['meta']['season'] == 2026
+          assert report['meta']['model_a_touched'] is False
+          assert report['coverage']['independently_verified_games'] > 0
+          assert report['coverage']['context_eligible_games'] > 0
+          assert report['coverage']['context_eligible_possessions'] > 0
+          assert report['coverage']['teams_profiled'] == len(report['teams'])
+          assert len(report['teams']) > 0
+          assert all('net_possession_rank' not in team for team in report['teams'])
+          assert all(team['reliability'] in {'limited', 'developing', 'established'}
+                     for team in report['teams'])
+          PY
+          changed=$(git status --porcelain --untracked-files=all | grep -vE '^\?\? .*/__pycache__/' || true)
+          case "$changed" in
+            '?? data/research/situational_profiles_2026.json'|' M data/research/situational_profiles_2026.json') ;;
+            *)
+              echo 'Unexpected files changed during situational-profile build'
+              git status --short
+              exit 1
+              ;;
+          esac
+
+      - name: Save weekly research artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: situational-profiles-2026-week-${{ inputs.through_week }}
+          path: data/research/situational_profiles_2026.json
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Commit research profiles only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/research/situational_profiles_2026.json
+          git commit -m "Update 2026 situational profiles through Week ${{ inputs.through_week }}"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            if ! git diff --quiet "$GITHUB_SHA" origin/main -- \
+              scripts/build_situational_profiles.py \
+              scripts/test_situational_profiles.py \
+              scripts/build_verified_possession_ledger.py \
+              scripts/reconstruct_scoring_events.py \
+              scripts/research_expected_points_score_margin.py \
+              data/research/repaired_expected_points_candidate.json \
+              .github/workflows/build-situational-profiles.yml; then
+              echo 'Profile inputs changed during the run; start a fresh workflow.'
+              exit 1
+            fi
+            git rebase origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 2
+          done
+          exit 1
