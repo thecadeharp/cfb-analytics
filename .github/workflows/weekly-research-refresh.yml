@@ -1,0 +1,211 @@
+name: Weekly THI Research Refresh
+
+on:
+  workflow_dispatch:
+    inputs:
+      through_week:
+        description: "Completed 2026 week (0 = latest source coverage)"
+        required: true
+        default: "0"
+        type: string
+  schedule:
+    - cron: "15 17 * * 2"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thi-data-writer
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      OPENBLAS_NUM_THREADS: "1"
+      PYTHONPYCACHEPREFIX: /tmp/thi-weekly-pycache
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install research dependencies
+        run: python -m pip install numpy==2.3.5 pandas==2.2.3 pyarrow==25.0.1 requests
+
+      - name: Protect Model A, site and independent research inputs
+        run: |
+          sha256sum \
+            scripts/build_projections.py \
+            data/cfb_metrics.json \
+            data/projections.json \
+            app.js \
+            index.html \
+            thi-ratings-hub.js \
+            playoff-projection.js \
+            data/thi_observed_ratings.json \
+            data/research/repaired_expected_points_candidate.json \
+            > /tmp/thi-weekly-protected.sha256
+
+      - uses: actions/cache@v4
+        with:
+          path: /tmp/thi-power-inputs
+          key: thi-power-public-inputs-v3
+
+      - name: Test weekly research contracts
+        run: |
+          python -m py_compile \
+            scripts/research_thi_power.py \
+            scripts/research_thi_power_v03.py \
+            scripts/build_situational_profiles.py
+          python -m unittest discover -s scripts -p 'test_research_thi_power.py' -v
+          python -m unittest discover -s scripts -p 'test_research_thi_power_v03.py' -v
+          python -m unittest discover -s scripts -p 'test_situational_profiles.py' -v
+
+      - name: Resolve latest completed week and build THI Power
+        id: cutoff
+        env:
+          REQUESTED_WEEK: ${{ inputs.through_week || '0' }}
+        run: |
+          python scripts/research_thi_power.py \
+            --input-dir /tmp/thi-power-inputs \
+            --output-dir /tmp/thi-power-v02 \
+            --download \
+            --through-week "$REQUESTED_WEEK"
+
+          RESOLVED_WEEK=$(python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(
+              Path('/tmp/thi-power-v02/thi_power_candidate.json').read_text()
+          )
+          print(int(report['meta']['through_week']))
+          PY
+          )
+
+          echo "week=$RESOLVED_WEEK" >> "$GITHUB_OUTPUT"
+
+          python scripts/research_thi_power_v03.py \
+            --input-dir /tmp/thi-power-inputs \
+            --output-dir /tmp/thi-power-v03 \
+            --through-week "$RESOLVED_WEEK"
+
+          cp \
+            /tmp/thi-power-v03/thi_power_candidate_v03.json \
+            data/thi_power_ratings.json
+
+      - name: Build verified situational profiles
+        env:
+          RESOLVED_WEEK: ${{ steps.cutoff.outputs.week }}
+        run: |
+          python scripts/build_situational_profiles.py \
+            --season 2026 \
+            --through-week "$RESOLVED_WEEK" \
+            --output data/research/situational_profiles_2026.json
+
+      - name: Verify output and isolation contracts
+        env:
+          RESOLVED_WEEK: ${{ steps.cutoff.outputs.week }}
+        run: |
+          sha256sum --check /tmp/thi-weekly-protected.sha256
+
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          week = int(os.environ['RESOLVED_WEEK'])
+          power = json.loads(Path('data/thi_power_ratings.json').read_text())
+          profiles = json.loads(
+              Path('data/research/situational_profiles_2026.json').read_text()
+          )
+
+          assert power['meta']['version'] == 'thi_power_research_v0.3'
+          assert power['meta']['status'] == 'RESEARCH_ONLY'
+          assert power['meta']['season'] == 2026
+          assert power['meta']['through_week'] == week
+          assert power['meta']['model_a_touched'] is False
+          assert power['meta']['sealed_2025_used'] is False
+          assert power['meta']['selected_decay_rate'] == 0.15
+          assert len(power['teams']) == 138
+          assert [row['rank'] for row in power['teams']] == list(range(1, 139))
+
+          assert profiles['meta']['status'] == 'research_only_situational_profiles_v1'
+          assert profiles['meta']['season'] == 2026
+          assert profiles['meta']['through_week'] == week
+          assert profiles['meta']['model_a_touched'] is False
+          assert profiles['coverage']['independently_verified_games'] > 0
+          assert profiles['coverage']['context_eligible_games'] > 0
+          assert profiles['coverage']['context_eligible_possessions'] > 0
+          assert profiles['coverage']['teams_profiled'] == len(profiles['teams'])
+          assert len(profiles['teams']) > 0
+          assert all(
+              row['reliability'] in {'limited', 'developing', 'established'}
+              for row in profiles['teams']
+          )
+          PY
+
+          changed=$(git status --porcelain --untracked-files=all | grep -vE '^\?\? .*/__pycache__/' || true)
+          unexpected=$(printf '%s\n' "$changed" | grep -vE '^( M|\?\?) (data/thi_power_ratings.json|data/research/situational_profiles_2026.json)$' || true)
+          if [ -n "$unexpected" ]; then
+            echo 'Unexpected files changed during weekly research refresh'
+            printf '%s\n' "$unexpected"
+            exit 1
+          fi
+
+      - name: Save weekly research artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: thi-research-week-${{ steps.cutoff.outputs.week }}
+          path: |
+            data/thi_power_ratings.json
+            data/research/situational_profiles_2026.json
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Commit research outputs only
+        env:
+          RESOLVED_WEEK: ${{ steps.cutoff.outputs.week }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            data/thi_power_ratings.json \
+            data/research/situational_profiles_2026.json
+
+          if git diff --staged --quiet; then
+            echo 'No weekly research changes to commit.'
+            exit 0
+          fi
+
+          git commit -m "Refresh THI research through Week $RESOLVED_WEEK"
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            if ! git diff --quiet "$GITHUB_SHA" origin/main -- \
+              scripts/research_thi_power.py \
+              scripts/research_thi_power_v03.py \
+              scripts/build_situational_profiles.py \
+              scripts/build_verified_possession_ledger.py \
+              scripts/reconstruct_scoring_events.py \
+              scripts/research_expected_points_score_margin.py \
+              data/research/repaired_expected_points_candidate.json \
+              .github/workflows/weekly-research-refresh.yml; then
+              echo 'Research inputs changed during the run; start a fresh workflow.'
+              exit 1
+            fi
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            sleep 2
+          done
+          exit 1
