@@ -1,10 +1,9 @@
 name: Update CFB Analytics
 
-# TEMPORARILY MANUAL-ONLY.
-# The scheduled version calls CFBD and currently fails because the monthly
-# quota is exhausted. Do not silently substitute a different source for Model A.
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 10 * * 1"
 
 permissions:
   contents: write
