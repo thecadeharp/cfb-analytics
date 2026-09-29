@@ -48,4 +48,8 @@ The earlier scoring-only audit assigned 5,475 events and left 6 events / 33 poin
 
 ## Next gate
 
-All rows explicitly have `training_eligible=false`. Passing these checks does not prove that entirely absent possessions do not exist, that source EPA is usable, or that a sample is representative. Review the flagged games and reconcile possession boundaries to an additional source before promoting labels. Preserve the 2025 holdout: extend independent score and ledger verification to 2019–2024 before model fitting, and do not tune model choices against 2025 outcomes. Report exclusion coverage and bias before evaluation or publication.
+All rows explicitly have `training_eligible=false`. Passing these checks does not prove that entirely absent possessions do not exist, that source EPA is usable, or that a sample is representative.
+
+The 2019–2024 repair stage subsequently audited every possession in the 291 score-context rejections. It admitted 111 fully corroborated games, quarantined 180 games and froze a research-only expected-points candidate after that candidate improved MAE and RMSE in every 2022–2024 rolling fold. The candidate remains separate from Model A and is not production-ready.
+
+The next gate is the manual **Evaluate Sealed Expected Points 2025** workflow. It checksum-locks the candidate, historical repair evidence, independent 2025 score audit and every annual source file before opening the holdout. It reconstructs the score before each admitted possession, permits only independently corroborated stale-stamp repairs, quarantines unresolved games and compares the frozen candidate with its matched field-position baseline. The workflow may run only once: after its report is committed, repeat evaluation is refused. A pass does not authorize Model A integration; a failure must be reported without tuning this candidate against 2025.
