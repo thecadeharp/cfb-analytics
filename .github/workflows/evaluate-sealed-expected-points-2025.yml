@@ -15,6 +15,8 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      PYTHONPYCACHEPREFIX: /tmp/thi-sealed-pycache
     steps:
       - uses: actions/checkout@v4
         with:
@@ -50,7 +52,7 @@ jobs:
           assert isinstance(report['holdout_gate_passed'], bool)
           assert len(report['mae_improvement_game_bootstrap_95_interval']) == 2
           PY
-          changed=$(git status --porcelain --untracked-files=all)
+          changed=$(git status --porcelain --untracked-files=all | grep -vE '^\?\? .*/__pycache__/' || true)
           if [ "$changed" != '?? data/research/sealed_expected_points_holdout_2025.json' ]; then
             echo 'Unexpected files changed during sealed evaluation'
             git status --short
