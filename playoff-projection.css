@@ -1,0 +1,76 @@
+.thi-cfp-ratings-link {
+  width: 100%; margin: 18px 0 4px; padding: 15px 18px; display: flex;
+  align-items: center; justify-content: space-between; gap: 18px; text-align: left;
+  color: var(--text); background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; cursor: pointer;
+}
+.thi-cfp-ratings-link:hover, .thi-cfp-inline-link:hover { border-color: var(--green); }
+.thi-cfp-ratings-link span:first-child { display: grid; gap: 4px; }
+.thi-cfp-ratings-link strong { font-size: 13px; }
+.thi-cfp-ratings-link small { color: var(--muted); font-size: 11px; }
+.thi-cfp-ratings-link span:last-child, .thi-cfp-inline-link { color: var(--green); font: 600 10px var(--mono); white-space: nowrap; }
+.thi-cfp-inline-link { padding: 8px 10px; background: transparent; border: 1px solid var(--border); border-radius: 7px; cursor: pointer; }
+
+.thi-resume-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; padding: 14px 16px 16px; }
+.thi-resume-item { min-width: 0; padding: 14px; background: var(--surface-soft); border: 1px solid var(--border); border-radius: 9px; }
+.thi-resume-item span { display: block; min-height: 28px; color: var(--muted); font: 600 9px var(--mono); letter-spacing: .05em; text-transform: uppercase; }
+.thi-resume-item strong { display: block; margin-top: 8px; font: 700 20px var(--mono); }
+.thi-resume-item small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+.thi-resume-item.featured { border-color: #b9d4ca; background: #f1f8f5; }
+
+.thi-cfp-summary { display: flex; align-items: end; justify-content: space-between; gap: 28px; margin: 24px 0 14px; }
+.thi-cfp-summary h2 { margin: 5px 0 0; font-size: 24px; }
+.thi-cfp-summary-copy { max-width: 650px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.thi-cfp-layout { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 14px; align-items: stretch; }
+.thi-cfp-field, .thi-cfp-champion { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+.thi-cfp-field { padding: 16px; }
+.thi-cfp-field h3, .thi-cfp-round h3 { margin: 0 0 12px; color: var(--muted); font: 600 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.thi-cfp-field-row { display: grid; grid-template-columns: 28px minmax(150px, 1fr) 88px minmax(145px, .8fr); align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--border); }
+.thi-cfp-field-seed { color: var(--muted); font: 700 12px var(--mono); }
+.thi-cfp-field-team { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.thi-cfp-field-team .team-logo { flex: 0 0 auto; }
+.thi-cfp-field-record { color: var(--text); font: 600 11px var(--mono); }
+.thi-cfp-field-label { color: var(--muted); font: 600 8px var(--mono); letter-spacing: .04em; }
+.thi-cfp-bubble { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.thi-cfp-bubble div { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px; background: var(--surface-soft); border-radius: 8px; }
+.thi-cfp-bubble span, .thi-cfp-champion span { color: var(--muted); font: 600 8px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+.thi-cfp-bubble strong { font-size: 12px; }
+.thi-cfp-champion { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center; background: var(--text); color: #fff; }
+.thi-cfp-champion span, .thi-cfp-champion small { color: #b9c2ca; }
+.thi-cfp-champion strong { font-size: 20px; }
+.thi-cfp-champion small { line-height: 1.45; }
+.thi-cfp-champion .team-logo { width: 46px; height: 46px; }
+
+.thi-cfp-bracket { display: grid; grid-template-columns: repeat(4, minmax(245px, 1fr)); gap: 14px; align-items: start; margin-top: 14px; overflow-x: auto; padding-bottom: 8px; }
+.thi-cfp-round { min-width: 245px; padding: 14px; background: #eef0f2; border: 1px solid var(--border); border-radius: 12px; }
+.thi-cfp-game { overflow: hidden; margin-bottom: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 9px; }
+.thi-cfp-game:last-child { margin-bottom: 0; }
+.thi-cfp-team { display: grid; grid-template-columns: 22px minmax(0, 1fr) 36px; align-items: center; gap: 7px; min-height: 42px; padding: 7px 9px; color: var(--muted); border-bottom: 1px solid var(--border); }
+.thi-cfp-team.projected-winner { color: var(--text); box-shadow: inset 3px 0 0 var(--green); }
+.thi-cfp-seed, .thi-cfp-probability { font: 600 10px var(--mono); }
+.thi-cfp-team-name { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.thi-cfp-team-name strong { overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.thi-cfp-team-name .team-logo { width: 19px; height: 19px; flex: 0 0 19px; }
+.thi-cfp-probability { text-align: right; }
+.thi-cfp-game-meta { display: flex; justify-content: space-between; gap: 8px; padding: 7px 9px; color: var(--muted); background: var(--surface-soft); font: 500 8px var(--mono); }
+.thi-cfp-method { margin: 8px 0 24px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+.thi-cfp-method summary { cursor: pointer; font-weight: 700; }
+.thi-cfp-method p { margin: 10px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+
+@media (max-width: 900px) {
+  .thi-resume-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .thi-resume-item.featured { grid-column: 1 / -1; }
+  .thi-cfp-layout { grid-template-columns: 1fr; }
+  .thi-cfp-champion { min-height: 190px; }
+}
+
+@media (max-width: 620px) {
+  .thi-cfp-ratings-link { align-items: flex-start; flex-direction: column; }
+  .thi-cfp-summary { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .thi-cfp-field-row { grid-template-columns: 24px minmax(0, 1fr) 72px; }
+  .thi-cfp-field-label { grid-column: 2 / -1; }
+  .thi-cfp-bubble { grid-template-columns: 1fr; }
+  .thi-cfp-bracket { grid-template-columns: repeat(4, 82vw); scroll-snap-type: x proximity; }
+  .thi-cfp-round { min-width: 0; scroll-snap-align: start; }
+  .thi-resume-context > .panel-header { align-items: flex-start; flex-direction: column; }
+}
