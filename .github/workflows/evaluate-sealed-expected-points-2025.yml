@@ -50,10 +50,10 @@ jobs:
           assert isinstance(report['holdout_gate_passed'], bool)
           assert len(report['mae_improvement_game_bootstrap_95_interval']) == 2
           PY
-          changed=$(git diff --name-only)
-          if [ "$changed" != 'data/research/sealed_expected_points_holdout_2025.json' ]; then
-            echo 'Unexpected tracked files changed during sealed evaluation'
-            git diff --stat
+          changed=$(git status --porcelain --untracked-files=all)
+          if [ "$changed" != '?? data/research/sealed_expected_points_holdout_2025.json' ]; then
+            echo 'Unexpected files changed during sealed evaluation'
+            git status --short
             exit 1
           fi
       - name: Save sealed evaluation report
