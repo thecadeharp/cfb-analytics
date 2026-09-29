@@ -404,9 +404,6 @@ function conferenceStandings() {
       modelRating: average(members.map(team => team.power_rating)),
       openRating: average(members.map(team => openWeeklyRating(team.team))),
       spPlus: average(members.map(team => team?.sp_plus?.overall)),
-      specialTeams: average(members.map(team =>
-        externalRatingsData?.teams?.[team.team]?.fpi_special_teams
-      )),
       netEpa: average(liveMembers.map(team => liveNet(team, "epa_play"))),
       netSuccess: average(liveMembers.map(team => liveNet(team, "success_rate"))),
       offExplosive: average(liveMembers.map(team => liveValue(team, "offense", "explosive_rate"))),
@@ -3566,8 +3563,8 @@ function renderRatings() {
     : "Open Rating is awaiting its first refresh.";
 
   const externalLabel = externalRatingsData
-    ? `ESPN FPI snapshot: Week ${externalWeek ?? "—"}.`
-    : "External ratings are awaiting their first refresh.";
+    ? `Schedule and résumé context: Week ${externalWeek ?? "—"}.`
+    : "Schedule and résumé context is awaiting its first refresh.";
 
   const marketRows = data
     .map(team => ({
@@ -3594,8 +3591,6 @@ function renderRatings() {
             <th>Model Rating</th>
             <th>Open Rating</th>
             <th>SP+</th>
-            <th>ESPN FPI</th>
-            <th>Special Teams</th>
           </tr>
         </thead>
 
@@ -3629,20 +3624,6 @@ function renderRatings() {
                 </td>
                 <td class="team-meta">${formatSigned(team?.sp_plus?.overall, 1)}</td>
 
-                <td class="team-meta">
-                  ${hasValue(external.fpi)
-                    ? `${formatSigned(external.fpi, 1)} (${externalRank(external.fpi_rank)})`
-                    : "—"}
-                </td>
-
-                <td class="team-meta">
-                  ${hasValue(external.fpi_special_teams)
-                    ? `${formatSigned(external.fpi_special_teams, 3)} (${externalMetricRank(
-                        "fpi_special_teams",
-                        external.fpi_special_teams
-                      )})`
-                    : "—"}
-                </td>
               </tr>
             `;
           }).join("")}
@@ -3661,8 +3642,6 @@ function renderRatings() {
             <th>Model Rating</th>
             <th>Open Rating</th>
             <th>Preseason SP+</th>
-            <th>ESPN FPI</th>
-            <th>Special Teams</th>
             <th>Team Talent</th>
             <th>Returning Production</th>
             <th>SOR Rank</th>
@@ -3711,20 +3690,6 @@ function renderRatings() {
                 </td>
                 <td class="team-meta">${formatSigned(team?.sp_plus?.overall, 1)}</td>
 
-                <td class="team-meta">
-                  ${hasValue(external.fpi)
-                    ? `${formatSigned(external.fpi, 1)} (#${external.fpi_rank})`
-                    : "—"}
-                </td>
-
-                <td class="team-meta">
-                  ${hasValue(external.fpi_special_teams)
-                    ? `${formatSigned(external.fpi_special_teams, 3)} (${externalMetricRank(
-                        "fpi_special_teams",
-                        external.fpi_special_teams
-                      )})`
-                    : "—"}
-                </td>
 
                 <td class="team-meta">
                   ${hasValue(roster.talent_rank) ? `#${roster.talent_rank}` : "—"}
@@ -3767,7 +3732,6 @@ function renderRatings() {
             <th>Avg Model Rating</th>
             <th>Avg Open Rating</th>
             <th>Avg SP+</th>
-            <th>Avg Special Teams</th>
             <th>2026 Net EPA</th>
             <th>2026 Net Success</th>
             <th>2026 Off Explosive</th>
@@ -3785,7 +3749,6 @@ function renderRatings() {
               <td class="line-primary">${formatSigned(conference.modelRating, 3)}</td>
               <td class="team-meta">${formatSigned(conference.openRating, 3)}</td>
               <td class="team-meta">${formatSigned(conference.spPlus, 1)}</td>
-              <td class="team-meta">${formatSigned(conference.specialTeams, 3)}</td>
               <td class="team-meta">${formatEPA(conference.netEpa)}</td>
               <td class="team-meta">${formatPercent(conference.netSuccess)}</td>
               <td class="team-meta">${formatRate(conference.offExplosive)}</td>
@@ -3950,8 +3913,8 @@ function renderRatings() {
       fallback feed. Open Rating blends the frozen preseason foundation with
       the complete public play-by-play sample and is display-only.
       ${openLabel} Production status: ${weightLabel} ${weekLabel} ${externalLabel}
-      Special Teams is ESPN's FPI component and is display-only; it is not used
-      by Model A.
+      Strength of Record, schedule strength, remaining schedule strength and
+      Game Control remain available in each Team Dossier.
     </div>
 
     <div class="ratings-toggle" role="group" aria-label="Ratings view">
@@ -6203,44 +6166,6 @@ function renderDossier(team) {
         </div>
       </div>
 
-      <div class="dossier-stat">
-        <div class="dossier-label">
-          ESPN FPI
-        </div>
-
-        <div class="dossier-value">
-          ${formatSigned(
-            external?.fpi,
-            1
-          )}
-
-          <span class="dossier-rank-inline">
-            (${externalRank(
-              external?.fpi_rank
-            )} Overall)
-          </span>
-        </div>
-      </div>
-
-      <div class="dossier-stat">
-        <div class="dossier-label">
-          ESPN Special Teams
-        </div>
-
-        <div class="dossier-value">
-          ${formatSigned(
-            external?.fpi_special_teams,
-            3
-          )}
-
-          <span class="dossier-rank-inline">
-            (${externalMetricRank(
-              "fpi_special_teams",
-              external?.fpi_special_teams
-            )})
-          </span>
-        </div>
-      </div>
     </div>
 
     ${renderThiObservedRatings(team.team)}
@@ -6629,14 +6554,14 @@ function renderDossier(team) {
       <div class="panel-header">
         <div>
           <div class="panel-title">
-            External Ratings & Resume
+            Schedule & Resume Context
           </div>
 
           <div
             class="team-meta"
             style="margin-top:5px;"
           >
-            ESPN FPI Week
+            Resume measures through ESPN Week
             ${externalRatingsData?.meta?.week ?? "—"}
             · display-only
             · not used by Model A
@@ -6656,17 +6581,6 @@ function renderDossier(team) {
           </div>
 
           <div class="panel-body">
-            ${renderMetricRow(
-              "FPI",
-              formatSigned(
-                external?.fpi,
-                1
-              ),
-              externalRank(
-                external?.fpi_rank
-              )
-            )}
-
             ${renderMetricRow(
               "Strength of Record",
               externalRank(
@@ -6697,58 +6611,6 @@ function renderDossier(team) {
           </div>
         </div>
 
-        <div class="panel">
-          <div class="panel-header">
-            <div class="panel-title">
-              FPI Components
-            </div>
-          </div>
-
-          <div class="panel-body">
-            ${renderMetricRow(
-              "Offensive Component",
-              formatSigned(
-                external?.fpi_offense,
-                3
-              )
-            )}
-
-            ${renderMetricRow(
-              "Defensive Component",
-              formatSigned(
-                external?.fpi_defense,
-                3
-              )
-            )}
-
-            ${renderMetricRow(
-              "Special Teams Component",
-              formatSigned(
-                external?.fpi_special_teams,
-                3
-              ),
-              externalMetricRank(
-                "fpi_special_teams",
-                external?.fpi_special_teams
-              )
-            )}
-
-            ${renderMetricRow(
-              "Projected Record",
-              hasValue(
-                external?.projected_wins
-              )
-                ? `${formatNumber(
-                    external.projected_wins,
-                    1
-                  )}–${formatNumber(
-                    external.projected_losses,
-                    1
-                  )}`
-                : "—"
-            )}
-          </div>
-        </div>
 
         <div class="panel">
           <div class="panel-header">
