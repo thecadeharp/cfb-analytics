@@ -1,0 +1,80 @@
+name: Evaluate Sealed Expected Points 2025
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thi-sealed-expected-points-2025
+  cancel-in-progress: false
+
+jobs:
+  holdout:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install research dependencies
+        run: pip install pandas numpy requests pyarrow
+      - name: Preserve Model A, site and frozen candidate inputs
+        run: |
+          sha256sum data/projections.json data/cfb_metrics.json scripts/build_projections.py index.html app.js postgame-analytics.js data/research/expected_points_clean_games_2019_2024.csv.gz data/research/repaired_expected_points_candidate.json data/research/all_possession_start_score_audit.json data/research/independent_score_audit_2025.json > /tmp/thi-sealed-before.sha256
+      - name: Test sealed evaluation contract
+        run: |
+          python -m py_compile scripts/evaluate_sealed_expected_points_2025.py scripts/test_sealed_expected_points_2025.py
+          python -m unittest discover -s scripts -p test_sealed_expected_points_2025.py -v
+      - name: Evaluate checksum-locked candidate once on sealed 2025
+        run: python scripts/evaluate_sealed_expected_points_2025.py --source-dir /tmp/thi-pbp --download
+      - name: Verify isolation and report contract
+        run: |
+          sha256sum --check /tmp/thi-sealed-before.sha256
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('data/research/sealed_expected_points_holdout_2025.json').read_text())
+          assert report['meta']['status'] == 'research_only_sealed_expected_points_holdout_2025'
+          assert report['meta']['training_ready'] is False
+          assert report['holdout_coverage']['context_eligible_games'] > 0
+          assert report['holdout_coverage']['context_eligible_possessions'] > 0
+          assert set(report['source_hashes']) == {str(year) for year in range(2019, 2026)}
+          assert isinstance(report['holdout_gate_passed'], bool)
+          assert len(report['mae_improvement_game_bootstrap_95_interval']) == 2
+          PY
+          changed=$(git diff --name-only)
+          if [ "$changed" != 'data/research/sealed_expected_points_holdout_2025.json' ]; then
+            echo 'Unexpected tracked files changed during sealed evaluation'
+            git diff --stat
+            exit 1
+          fi
+      - name: Save sealed evaluation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sealed-expected-points-holdout-2025
+          path: data/research/sealed_expected_points_holdout_2025.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Commit research report only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/research/sealed_expected_points_holdout_2025.json
+          git commit -m 'Evaluate frozen expected-points candidate on sealed 2025 holdout'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            if ! git diff --quiet "$GITHUB_SHA" origin/main -- scripts/evaluate_sealed_expected_points_2025.py scripts/test_sealed_expected_points_2025.py scripts/fit_repaired_expected_points_candidate.py scripts/evaluate_repaired_score_margin.py scripts/audit_all_possession_start_scores.py scripts/research_expected_points_score_margin.py scripts/build_verified_possession_ledger.py scripts/audit_verified_possession_points.py scripts/reconstruct_scoring_events.py scripts/verify_historical_scores_ncaa.py data/research/expected_points_clean_games_2019_2024.csv.gz data/research/repaired_expected_points_candidate.json data/research/all_possession_start_score_audit.json data/research/independent_score_audit_2025.json .github/workflows/evaluate-sealed-expected-points-2025.yml; then
+              echo 'Evaluation inputs changed during the run; start a fresh workflow.'
+              exit 1
+            fi
+            git rebase origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 2
+          done
+          exit 1
