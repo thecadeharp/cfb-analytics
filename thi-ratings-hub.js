@@ -141,7 +141,7 @@
     });
 
     target.innerHTML = data.length ? `<div class="thi-hub-table-wrap"><table class="thi-hub-table">
-      <thead><tr>${sortHeader("power_rank", "Rank", "asc")}${sortHeader("team", "Team", "asc")}${sortHeader("rating", "Rating")}${sortHeader("roster_contribution", "Roster")}${sortHeader("performance_contribution", "Performance")}${sortHeader("performance_only_weekly_change", "Weekly Δ")}${sortHeader("qualifying_games", "FBS Games")}${sortHeader("observed_rank", "Observed Rank", "asc")}${sortHeader("offense", "Off")}${sortHeader("defense", "Def", "asc")}${sortHeader("net", "Net")}${sortHeader("pace", "Pace")}</tr></thead>
+      <thead><tr>${sortHeader("power_rank", "Rank", "asc")}${sortHeader("team", "Team", "asc")}${sortHeader("rating", "Rating")}${sortHeader("roster_contribution", "Roster")}${sortHeader("performance_contribution", "Performance")}${sortHeader("performance_only_weekly_change", "Weekly Change")}${sortHeader("qualifying_games", "FBS Games")}${sortHeader("observed_rank", "Observed Rank", "asc")}${sortHeader("offense", "Off")}${sortHeader("defense", "Def", "asc")}${sortHeader("net", "Net")}${sortHeader("pace", "Pace")}</tr></thead>
       <tbody>${data.map(row => {
         const { power, profile } = row;
         const rating = profile.ratings ?? {};
@@ -152,7 +152,7 @@
           <td data-label="Rating"><span class="thi-hub-number">${formatSigned(power.rating, 2)}</span></td>
           <td data-label="Roster"><span class="thi-hub-number">${formatSigned(power.roster_contribution, 2)}</span></td>
           <td data-label="Performance"><span class="thi-hub-number">${formatSigned(power.performance_contribution, 2)}</span></td>
-          <td data-label="Weekly Δ"><span class="thi-hub-number">${formatSigned(power.performance_only_weekly_change, 2)}</span></td>
+          <td data-label="Weekly Change"><span class="thi-hub-number">${formatSigned(power.performance_only_weekly_change, 2)}</span></td>
           <td data-label="FBS Games"><span class="thi-hub-number">${formatNumber(power.qualifying_games, 0)}</span></td>
           <td data-label="Observed Rank"><span class="thi-hub-rank">#${formatNumber(rating.net?.rank, 0)}</span></td>
           <td data-label="Off"><span class="thi-hub-number">${formatNumber(rating.offense?.value, 2)}</span></td>
@@ -233,7 +233,7 @@
         <span class="conference-filter-count">${escapeHtml(thiPowerRatingsData.teams.length)} teams</span>
       </div>
       <div id="thi-situational-panel"></div>
-      <p class="thi-hub-note">Power Ratings through Week ${escapeHtml(powerMeta.through_week ?? "—")} · Observed diagnostics through Week ${escapeHtml(meta.through_week ?? "—")}. Click any column heading to sort; click again to reverse. Roster measures the talent and returning-production contribution. Performance measures opponent-adjusted on-field efficiency. Offense, defense, net and pace are descriptive diagnostics; lower is better on defense.</p>
+      <p class="thi-hub-note">Power Ratings through Week ${escapeHtml(powerMeta.through_week ?? "—")} · Observed diagnostics through Week ${escapeHtml(meta.through_week ?? "—")}. Click any column heading to sort; click again to reverse. Roster measures the talent and returning-production contribution. Performance measures opponent-adjusted on-field efficiency. Weekly Change is the difference in rating points from the previous week using the same model. Offense, defense, net and pace are descriptive diagnostics; lower is better on defense.</p>
       <div id="thi-ratings-rows"></div>
       <details class="thi-hub-method"><summary>How to read these ratings</summary>
         <p>Power Rating is a research scoring-margin scale that combines roster foundation, completed-game result Elo, and opponent-adjusted rate performance. It is separate from Model A and does not change any projection.</p>
