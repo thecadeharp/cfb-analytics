@@ -1,18 +1,918 @@
-            "model_beats_snapshot_market": (
-                abs(model_error) < abs(market_error)
-                if model_error is not None and market_error is not None
-                else None
-            ),
-            "result_settled": result is not None,
-        })
+"""
+CFB ANALYTICS
+settle_results.py
 
-    # Earliest prospective snapshot per provider game key is the clean reference.
+Settles prospective Model A snapshots against completed game results.
+
+NO CFBD CALLS.
+NO ODDS API CALLS.
+NO MODEL REBUILD.
+"""
+
+from __future__ import annotations
+
+import csv
+import json
+import math
+import re
+from collections import defaultdict
+from datetime import datetime, timezone
+from difflib import SequenceMatcher
+from pathlib import Path
+from statistics import mean
+
+
+ROOT = Path(__file__).resolve().parents[1]
+SNAPSHOT_LEDGER = ROOT / "data" / "snapshots" / "projection_market_snapshots.jsonl"
+CLOSING_LEDGER = ROOT / "data" / "snapshots" / "closing_lines.jsonl"
+
+RESULT_SOURCES = [
+    ROOT / "data" / "results.json",
+    ROOT / "data" / "completed_games.json",
+    ROOT / "data" / "schedule.json",
+    ROOT / "data" / "projections.json",
+]
+
+REPORT_DIR = ROOT / "data" / "reports"
+REPORT_JSON = REPORT_DIR / "settled_results.json"
+REPORT_CSV = REPORT_DIR / "settled_snapshot_rows.csv"
+
+TEAM_ALIASES = {
+    "niu": "northernillinois",
+    "fiu": "floridainternational",
+    "southfla": "southflorida",
+    "ulm": "ulmonroe",
+    "mississippist": "mississippistate",
+    "flaatlantic": "floridaatlantic",
+    "westernky": "westernkentucky",
+    "armywestpoint": "army",
+    "middletenn": "middletennessee",
+    "gasouthern": "georgiasouthern",
+    "jacksonvillest": "jacksonvillestate",
+    "miamifla": "miamifl",
+    "miamiflorida": "miamifl",
+    "olemiss": "mississippi",
+    "southernmiss": "southernmississippi",
+    "utsa": "texassanantonio",
+    "utep": "texaselpaso",
+    "ucf": "centralflorida",
+    "byu": "brighamyoung",
+    "lsu": "louisianastate",
+    "smu": "southernmethodist",
+    "tcu": "texaschristian",
+    "usc": "southerncalifornia",
+}
+
+
+def load_json(path):
+    if not path.exists():
+        return None
+    with path.open("r", encoding="utf-8") as file:
+        return json.load(file)
+
+
+def load_jsonl(path):
+    if not path.exists():
+        return []
+
+    rows = []
+    with path.open("r", encoding="utf-8") as file:
+        for line_number, line in enumerate(file, 1):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rows.append(json.loads(line))
+            except json.JSONDecodeError as error:
+                raise RuntimeError(
+                    f"Invalid JSONL: {path.relative_to(ROOT)} line {line_number}"
+                ) from error
+    return rows
+
+
+def first_value(obj, keys):
+    for key in keys:
+        if isinstance(obj, dict) and obj.get(key) is not None:
+            return obj.get(key)
+    return None
+
+
+def as_number(value):
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def as_int(value):
+    number = as_number(value)
+    return int(number) if number is not None else None
+
+
+def flatten_records(obj):
+    if isinstance(obj, list):
+        for item in obj:
+            yield from flatten_records(item)
+        return
+
+    if not isinstance(obj, dict):
+        return
+
+    home = first_value(obj, ["home_team", "homeTeam", "home"])
+    away = first_value(obj, ["away_team", "awayTeam", "away"])
+    game_id = first_value(obj, ["game_id", "gameId", "id"])
+
+    if game_id is not None or (home is not None and away is not None):
+        yield obj
+
+    for key, value in obj.items():
+        if key in {
+            "model",
+            "market",
+            "market_at_snapshot",
+            "comparison_at_snapshot",
+            "clv",
+            "result",
+            "team",
+            "home",
+            "away",
+        }:
+            continue
+        if isinstance(value, (list, dict)):
+            yield from flatten_records(value)
+
+
+def normalize_team(value):
+    if isinstance(value, dict):
+        return first_value(value, ["school", "team", "name", "displayName"])
+    return value
+
+
+def canonical_team(value):
+    value = normalize_team(value)
+    if value is None:
+        return None
+
+    text = str(value).strip().lower()
+    text = text.replace("&", "and")
+    text = re.sub(r"\buniversity\b", "", text)
+    text = re.sub(r"[^a-z0-9]+", "", text)
+    return TEAM_ALIASES.get(text, text) or None
+
+
+def extract_datetime(row):
+    raw = first_value(
+        row,
+        [
+            "start_date",
+            "startDate",
+            "scheduled_kickoff_utc",
+            "kickoff",
+            "kickoff_utc",
+            "date",
+            "start_time",
+            "startTime",
+        ],
+    )
+    if raw is None:
+        return None
+
+    text = str(raw).strip()
+    if not text:
+        return None
+
+    try:
+        date_time = datetime.fromisoformat(text.replace("Z", "+00:00"))
+        if date_time.tzinfo is None:
+            date_time = date_time.replace(tzinfo=timezone.utc)
+        return date_time.astimezone(timezone.utc)
+    except ValueError:
+        return None
+
+
+def date_key(row):
+    date_time = extract_datetime(row)
+    return date_time.date().isoformat() if date_time else None
+
+
+def row_week(row):
+    return as_int(first_value(row, ["week", "week_number", "weekNumber"]))
+
+
+def row_game_id(row):
+    game_id = first_value(row, ["game_id", "gameId", "id"])
+    return str(game_id) if game_id is not None else None
+
+
+def matchup_key(row):
+    home = canonical_team(first_value(row, ["home_team", "homeTeam", "home"]))
+    away = canonical_team(first_value(row, ["away_team", "awayTeam", "away"]))
+    if not home or not away:
+        return None
+    return away, home
+
+
+def game_key(row):
+    game_id = row_game_id(row)
+    if game_id is not None:
+        return game_id
+
+    matchup = matchup_key(row)
+    week = row_week(row)
+    day = date_key(row)
+
+    if matchup:
+        away, home = matchup
+        return f"{away}@{home}|w{week}|{day}"
+
+    return f"unknown|w{week}|{day}"
+
+
+def extract_score(row, side):
+    direct = first_value(
+        row,
+        [
+            f"{side}_points",
+            f"{side}Points",
+            f"{side}_score",
+            f"{side}Score",
+            f"{side}_final",
+        ],
+    )
+    number = as_number(direct)
+    if number is not None:
+        return number
+
+    nested = row.get(side)
+    if isinstance(nested, dict):
+        number = as_number(
+            first_value(nested, ["points", "score", "final", "total"])
+        )
+        if number is not None:
+            return number
+
+    result = row.get("result")
+    if isinstance(result, dict):
+        number = as_number(
+            first_value(
+                result,
+                [
+                    f"{side}_points",
+                    f"{side}Points",
+                    f"{side}_score",
+                    f"{side}Score",
+                ],
+            )
+        )
+        if number is not None:
+            return number
+
+    return None
+
+
+def is_completed(row, home_points, away_points):
+    if home_points is None or away_points is None:
+        return False
+
+    completed = first_value(
+        row,
+        ["completed", "is_completed", "isCompleted", "final"],
+    )
+    if completed is True:
+        return True
+
+    status = str(
+        first_value(row, ["status", "game_status", "state", "status_type"])
+        or ""
+    ).lower()
+
+    if any(word in status for word in ["final", "completed", "complete", "post"]):
+        return True
+
+    return True
+
+
+def normalize_result(row):
+    home = normalize_team(first_value(row, ["home_team", "homeTeam", "home"]))
+    away = normalize_team(first_value(row, ["away_team", "awayTeam", "away"]))
+    home_points = extract_score(row, "home")
+    away_points = extract_score(row, "away")
+
+    if not home or not away or not is_completed(row, home_points, away_points):
+        return None
+
+    return {
+        "game_key": game_key(row),
+        "game_id": row_game_id(row),
+        "week": row_week(row),
+        "start_date": first_value(
+            row,
+            ["start_date", "startDate", "scheduled_kickoff_utc", "date"],
+        ),
+        "date_key": date_key(row),
+        "home_team": home,
+        "away_team": away,
+        "home_canonical": canonical_team(home),
+        "away_canonical": canonical_team(away),
+        "home_points": home_points,
+        "away_points": away_points,
+        "actual_home_margin": home_points - away_points,
+    }
+
+
+def load_completed_results():
+    for path in RESULT_SOURCES:
+        data = load_json(path)
+        if data is None:
+            continue
+
+        results = []
+        seen = set()
+
+        for row in flatten_records(data):
+            normalized = normalize_result(row)
+            if normalized is None:
+                continue
+
+            dedupe_key = (
+                normalized.get("game_id"),
+                normalized.get("week"),
+                normalized.get("away_canonical"),
+                normalized.get("home_canonical"),
+                normalized.get("home_points"),
+                normalized.get("away_points"),
+            )
+            if dedupe_key in seen:
+                continue
+
+            seen.add(dedupe_key)
+            results.append(normalized)
+
+        return path, results
+
+    return None, []
+
+
+def build_result_indexes(results):
+    by_id = {}
+    by_matchup_week = defaultdict(list)
+    by_matchup_date = defaultdict(list)
+
+    for result in results:
+        game_id = result.get("game_id")
+        if game_id:
+            by_id[str(game_id)] = result
+
+        matchup = (
+            result.get("away_canonical"),
+            result.get("home_canonical"),
+        )
+        if all(matchup):
+            week = result.get("week")
+            if week is not None:
+                by_matchup_week[(matchup[0], matchup[1], week)].append(result)
+
+            day = result.get("date_key")
+            if day:
+                by_matchup_date[(matchup[0], matchup[1], day)].append(result)
+
+    return by_id, by_matchup_week, by_matchup_date
+
+
+def similarity(first, second):
+    if not first or not second:
+        return 0.0
+    if first == second:
+        return 1.0
+    return SequenceMatcher(None, first, second).ratio()
+
+
+def match_result(snapshot, result_indexes, results):
+    by_id, by_matchup_week, by_matchup_date = result_indexes
+
+    game_id = row_game_id(snapshot)
+    if game_id and game_id in by_id:
+        return by_id[game_id], "exact_game_id"
+
+    matchup = matchup_key(snapshot)
+    week = row_week(snapshot)
+    day = date_key(snapshot)
+
+    if matchup and week is not None:
+        candidates = by_matchup_week.get((matchup[0], matchup[1], week), [])
+        if len(candidates) == 1:
+            return candidates[0], "exact_teams_week"
+
+    if matchup and day:
+        candidates = by_matchup_date.get((matchup[0], matchup[1], day), [])
+        if len(candidates) == 1:
+            return candidates[0], "exact_teams_date"
+
+    if matchup and week is not None:
+        away, home = matchup
+        scored = []
+
+        for result in results:
+            if result.get("week") != week:
+                continue
+
+            away_score = similarity(away, result.get("away_canonical"))
+            home_score = similarity(home, result.get("home_canonical"))
+
+            if away_score >= 0.92 and home_score >= 0.92:
+                scored.append(
+                    (
+                        min(away_score, home_score),
+                        away_score + home_score,
+                        result,
+                    )
+                )
+
+        scored.sort(key=lambda item: (item[0], item[1]), reverse=True)
+
+        if len(scored) == 1:
+            return scored[0][2], "fuzzy_teams_week"
+
+        if len(scored) >= 2:
+            best, second = scored[0], scored[1]
+            if best[0] >= 0.94 and (best[1] - second[1]) >= 0.08:
+                return best[2], "fuzzy_teams_week_unique"
+
+    return None, "unmatched"
+
+
+def preferred_side(snapshot):
+    return (snapshot.get("comparison_at_snapshot") or {}).get("preferred_side")
+
+
+def ats_result(snapshot, result):
+    market_home = as_number(
+        (snapshot.get("market_at_snapshot") or {}).get("home_spread")
+    )
+    if market_home is None:
+        return None
+
+    home_cover_margin = result["actual_home_margin"] + market_home
+    preferred = preferred_side(snapshot)
+
+    if preferred == snapshot.get("home_team"):
+        cover_margin = home_cover_margin
+    elif preferred == snapshot.get("away_team"):
+        cover_margin = -home_cover_margin
+    else:
+        return None
+
+    if cover_margin > 0:
+        return "W"
+    if cover_margin < 0:
+        return "L"
+    return "P"
+
+
+def total_result(snapshot, result):
+    public_total = as_number(
+        (snapshot.get("public_projection") or {}).get("total")
+    )
+    market_total = as_number(
+        (snapshot.get("market_at_snapshot") or {}).get("total")
+    )
+
+    if public_total is None or market_total is None:
+        return {
+            "direction": None,
+            "edge": None,
+            "tier": None,
+            "result": None,
+        }
+
+    difference = public_total - market_total
+    edge = abs(difference)
+    direction = "OVER" if difference > 0 else "UNDER" if difference < 0 else None
+    tier = "TOTAL WATCH" if edge >= 7 else "TOTAL LEAN" if edge >= 4 else None
+
+    if not direction or not tier:
+        return {
+            "direction": direction,
+            "edge": edge,
+            "tier": tier,
+            "result": None,
+        }
+
+    actual_total = result["home_points"] + result["away_points"]
+    market_margin = actual_total - market_total
+    graded_margin = market_margin if direction == "OVER" else -market_margin
+
+    grade = "W" if graded_margin > 0 else "L" if graded_margin < 0 else "P"
+
+    return {
+        "direction": direction,
+        "edge": edge,
+        "tier": tier,
+        "result": grade,
+    }
+
+
+def model_margin_error(snapshot, result):
+    model_home_spread = as_number(
+        (snapshot.get("model") or {}).get("home_spread")
+    )
+    if model_home_spread is None:
+        return None
+
+    projected_home_margin = -model_home_spread
+    return result["actual_home_margin"] - projected_home_margin
+
+
+def market_margin_error(snapshot, result):
+    market_home_spread = as_number(
+        (snapshot.get("market_at_snapshot") or {}).get("home_spread")
+    )
+    if market_home_spread is None:
+        return None
+
+    projected_home_margin = -market_home_spread
+    return result["actual_home_margin"] - projected_home_margin
+
+
+def closing_margin_error(closing, result):
+    if not closing:
+        return None
+
+    close_home = as_number(
+        (closing.get("closing_market") or {}).get("home_spread")
+    )
+    if close_home is None:
+        return None
+
+    projected_home_margin = -close_home
+    return result["actual_home_margin"] - projected_home_margin
+
+
+def calc_clv(snapshot, closing):
+    if not closing:
+        return None
+
+    snapshot_home = as_number(
+        (snapshot.get("market_at_snapshot") or {}).get("home_spread")
+    )
+    closing_home = as_number(
+        (closing.get("closing_market") or {}).get("home_spread")
+    )
+
+    if snapshot_home is None or closing_home is None:
+        return None
+
+    preferred = preferred_side(snapshot)
+
+    if preferred == snapshot.get("home_team"):
+        return snapshot_home - closing_home
+    if preferred == snapshot.get("away_team"):
+        return closing_home - snapshot_home
+
+    return None
+
+
+def calc_total_clv(total_grade, snapshot, closing):
+    """Positive CLV means the snapshot total beat the closing proxy."""
+    if not closing or not total_grade.get("tier"):
+        return None
+
+    snapshot_total = as_number(
+        (snapshot.get("market_at_snapshot") or {}).get("total")
+    )
+    closing_total = as_number(
+        (closing.get("closing_market") or {}).get("total")
+    )
+
+    if snapshot_total is None or closing_total is None:
+        return None
+
+    if total_grade.get("direction") == "OVER":
+        return closing_total - snapshot_total
+    if total_grade.get("direction") == "UNDER":
+        return snapshot_total - closing_total
+
+    return None
+
+
+def classify_beat_close(value):
+    if value is None or value == 0:
+        return None
+    return value > 0
+
+
+def rmse(values):
+    if not values:
+        return None
+    return math.sqrt(mean(value * value for value in values))
+
+
+def round_or_none(value, digits=3):
+    return None if value is None else round(float(value), digits)
+
+
+def summarize(rows):
+    settled = [row for row in rows if row.get("result_settled")]
+
+    model_errors = [
+        row["model_margin_error"]
+        for row in settled
+        if row.get("model_margin_error") is not None
+    ]
+    market_errors = [
+        row["market_margin_error"]
+        for row in settled
+        if row.get("market_margin_error") is not None
+    ]
+    closing_errors = [
+        row["closing_margin_error"]
+        for row in settled
+        if row.get("closing_margin_error") is not None
+    ]
+    ats = [row["ats_result"] for row in settled if row.get("ats_result")]
+    total_grades = [
+        row["total_result"]
+        for row in settled
+        if row.get("total_result")
+    ]
+
+    wins = ats.count("W")
+    losses = ats.count("L")
+    pushes = ats.count("P")
+    decisions = wins + losses
+
+    total_decisions = total_grades.count("W") + total_grades.count("L")
+
+    return {
+        "rows": len(rows),
+        "settled_rows": len(settled),
+        "model_mae": (
+            round_or_none(mean(abs(value) for value in model_errors))
+            if model_errors
+            else None
+        ),
+        "model_rmse": round_or_none(rmse(model_errors)),
+        "market_snapshot_mae": (
+            round_or_none(mean(abs(value) for value in market_errors))
+            if market_errors
+            else None
+        ),
+        "market_snapshot_rmse": round_or_none(rmse(market_errors)),
+        "closing_proxy_mae": (
+            round_or_none(mean(abs(value) for value in closing_errors))
+            if closing_errors
+            else None
+        ),
+        "closing_proxy_rmse": round_or_none(rmse(closing_errors)),
+        "model_beats_snapshot_market_count": sum(
+            1
+            for row in settled
+            if row.get("model_abs_error") is not None
+            and row.get("market_abs_error") is not None
+            and row["model_abs_error"] < row["market_abs_error"]
+        ),
+        "snapshot_market_beats_model_count": sum(
+            1
+            for row in settled
+            if row.get("model_abs_error") is not None
+            and row.get("market_abs_error") is not None
+            and row["market_abs_error"] < row["model_abs_error"]
+        ),
+        "prediction_error_ties": sum(
+            1
+            for row in settled
+            if row.get("model_abs_error") is not None
+            and row.get("market_abs_error") is not None
+            and row["market_abs_error"] == row["model_abs_error"]
+        ),
+        "ats_wins": wins,
+        "ats_losses": losses,
+        "ats_pushes": pushes,
+        "ats_win_pct_ex_pushes": (
+            round_or_none(100.0 * wins / decisions, 1)
+            if decisions
+            else None
+        ),
+        "total_wins": total_grades.count("W"),
+        "total_losses": total_grades.count("L"),
+        "total_pushes": total_grades.count("P"),
+        "total_win_pct_ex_pushes": (
+            round_or_none(100.0 * total_grades.count("W") / total_decisions, 1)
+            if total_decisions
+            else None
+        ),
+    }
+
+
+def build_closing_index(closings):
+    by_id = {}
+    by_matchup_week = {}
+
+    for row in closings:
+        game_id = row_game_id(row)
+        matchup = matchup_key(row)
+        week = row_week(row)
+
+        def better(current, candidate):
+            if current is None:
+                return candidate
+
+            old_minutes = abs(
+                as_number(current.get("minutes_to_kickoff")) or 999999
+            )
+            new_minutes = abs(
+                as_number(candidate.get("minutes_to_kickoff")) or 999999
+            )
+
+            return candidate if new_minutes < old_minutes else current
+
+        if game_id:
+            by_id[game_id] = better(by_id.get(game_id), row)
+
+        if matchup and week is not None:
+            key = (matchup[0], matchup[1], week)
+            by_matchup_week[key] = better(by_matchup_week.get(key), row)
+
+    return by_id, by_matchup_week
+
+
+def match_closing(snapshot, closing_index):
+    by_id, by_matchup_week = closing_index
+
+    game_id = row_game_id(snapshot)
+    if game_id and game_id in by_id:
+        return by_id[game_id]
+
+    matchup = matchup_key(snapshot)
+    week = row_week(snapshot)
+
+    if matchup and week is not None:
+        return by_matchup_week.get((matchup[0], matchup[1], week))
+
+    return None
+
+
+def main():
+    snapshots = load_jsonl(SNAPSHOT_LEDGER)
+    closings = load_jsonl(CLOSING_LEDGER)
+
+    results_source, results = load_completed_results()
+    result_indexes = build_result_indexes(results)
+    closing_index = build_closing_index(closings)
+
+    rows = []
+    match_method_counts = defaultdict(int)
+
+    for snapshot in snapshots:
+        key = game_key(snapshot)
+
+        result, match_method = match_result(
+            snapshot,
+            result_indexes,
+            results,
+        )
+        closing = match_closing(snapshot, closing_index)
+
+        comparison = snapshot.get("comparison_at_snapshot") or {}
+        market = snapshot.get("market_at_snapshot") or {}
+        model = snapshot.get("model") or {}
+        public_projection = snapshot.get("public_projection") or {}
+        weather_snapshot = snapshot.get("weather_at_snapshot") or {}
+
+        match_method_counts[match_method] += 1
+
+        model_error = model_margin_error(snapshot, result) if result else None
+        market_error = market_margin_error(snapshot, result) if result else None
+        close_error = closing_margin_error(closing, result) if result else None
+        clv = calc_clv(snapshot, closing)
+
+        public_spread = as_number(public_projection.get("home_spread"))
+        public_error = (
+            result["actual_home_margin"] - (-public_spread)
+            if result and public_spread is not None
+            else None
+        )
+
+        total_grade = (
+            total_result(snapshot, result)
+            if result
+            else {
+                "direction": None,
+                "edge": None,
+                "tier": None,
+                "result": None,
+            }
+        )
+        total_clv = calc_total_clv(total_grade, snapshot, closing)
+
+        actual_total = (
+            result["home_points"] + result["away_points"]
+            if result
+            else None
+        )
+        public_total = as_number(public_projection.get("total"))
+
+        rows.append(
+            {
+                "snapshot_id": snapshot.get("snapshot_id"),
+                "game_key": key,
+                "result_game_id": result.get("game_id") if result else None,
+                "result_match_method": match_method,
+                "captured_at_utc": snapshot.get("captured_at_utc"),
+                "model_version": snapshot.get("model_version"),
+                "week": snapshot.get("week"),
+                "start_date": snapshot.get("start_date"),
+                "away_team": snapshot.get("away_team"),
+                "home_team": snapshot.get("home_team"),
+                "preferred_side": preferred_side(snapshot),
+                "signal": (
+                    comparison.get("signal")
+                    or comparison.get("market_disagreement_status")
+                ),
+                "model_home_spread": model.get("home_spread"),
+                "model_total": model.get("total"),
+                "model_home_win_probability": model.get("home_win_probability"),
+                "public_home_spread": public_projection.get("home_spread"),
+                "public_total": public_projection.get("total"),
+                "weather_applied": public_projection.get("weather_applied"),
+                "weather_conditions_line": weather_snapshot.get("conditions_line"),
+                "weather_impact": weather_snapshot.get("impact"),
+                "weather_total_adjustment": weather_snapshot.get("total_adjustment"),
+                "weather_spread_adjustment": weather_snapshot.get("spread_adjustment"),
+                "weather_spread_status": weather_snapshot.get("spread_status"),
+                "public_margin_error": round_or_none(public_error),
+                "public_abs_error": (
+                    round_or_none(abs(public_error))
+                    if public_error is not None
+                    else None
+                ),
+                "snapshot_home_spread": market.get("home_spread"),
+                "snapshot_total": market.get("total"),
+                "snapshot_bookmaker": market.get("bookmaker"),
+                "total_direction": total_grade["direction"],
+                "total_edge": round_or_none(total_grade["edge"]),
+                "total_tier": total_grade["tier"],
+                "total_result": total_grade["result"],
+                "total_clv_points": round_or_none(total_clv),
+                "total_beat_close": classify_beat_close(total_clv),
+                "actual_total": actual_total,
+                "total_projection_error": (
+                    round_or_none(actual_total - public_total)
+                    if actual_total is not None and public_total is not None
+                    else None
+                ),
+                "closing_home_spread": (
+                    (closing.get("closing_market") or {}).get("home_spread")
+                    if closing
+                    else None
+                ),
+                "closing_total": (
+                    (closing.get("closing_market") or {}).get("total")
+                    if closing
+                    else None
+                ),
+                "clv_points": round_or_none(clv),
+                "home_points": result.get("home_points") if result else None,
+                "away_points": result.get("away_points") if result else None,
+                "actual_home_margin": (
+                    result.get("actual_home_margin") if result else None
+                ),
+                "ats_result": ats_result(snapshot, result) if result else None,
+                "model_margin_error": round_or_none(model_error),
+                "model_abs_error": (
+                    round_or_none(abs(model_error))
+                    if model_error is not None
+                    else None
+                ),
+                "market_margin_error": round_or_none(market_error),
+                "market_abs_error": (
+                    round_or_none(abs(market_error))
+                    if market_error is not None
+                    else None
+                ),
+                "closing_margin_error": round_or_none(close_error),
+                "closing_abs_error": (
+                    round_or_none(abs(close_error))
+                    if close_error is not None
+                    else None
+                ),
+                "model_beats_snapshot_market": (
+                    abs(model_error) < abs(market_error)
+                    if model_error is not None and market_error is not None
+                    else None
+                ),
+                "result_settled": result is not None,
+            }
+        )
+
     first_by_game = {}
     for row in sorted(
         rows,
-        key=lambda r: (
-            str(r.get("captured_at_utc") or ""),
-            str(r.get("snapshot_id") or ""),
+        key=lambda row: (
+            str(row.get("captured_at_utc") or ""),
+            str(row.get("snapshot_id") or ""),
         ),
     ):
         first_by_game.setdefault(row["game_key"], row)
@@ -35,7 +935,9 @@
     report = {
         "report_version": "prospective-settlement-v2-provider-independent-matching",
         "methodology": {
-            "primary_reference": "Earliest timestamped prospective snapshot for each game.",
+            "primary_reference": (
+                "Earliest timestamped prospective snapshot for each game."
+            ),
             "result_match_hierarchy": [
                 "exact game ID",
                 "exact normalized home/away teams + week",
@@ -43,34 +945,51 @@
                 "unique high-confidence fuzzy home/away team match within same week",
             ],
             "fuzzy_match_floor": 0.92,
-            "model_error": "Actual home margin minus Model A projected home margin.",
-            "market_error": "Actual home margin minus market-implied home margin at snapshot.",
+            "model_error": (
+                "Actual home margin minus Model A projected home margin."
+            ),
+            "market_error": (
+                "Actual home margin minus market-implied home margin at snapshot."
+            ),
             "ats_result": (
                 "Result for the model-preferred side using the market spread "
                 "captured in that prospective snapshot."
             ),
             "totals_result": (
                 "Result for weather-adjusted projected-total direction when the "
-                "prospective edge was at least four points. Total Watch begins at seven."
+                "prospective edge was at least four points. Total Watch begins "
+                "at seven."
             ),
             "total_clv": (
                 "For flagged totals only, positive value means the prospective "
                 "total was better than the near-kickoff closing proxy for the "
                 "stated Over/Under direction."
             ),
-            "closing_line": "Near-kickoff closing proxy, not asserted to be the canonical close.",
+            "closing_line": (
+                "Near-kickoff closing proxy, not asserted to be the canonical close."
+            ),
             "no_retroactive_model_changes": True,
         },
-        "results_source": str(results_source.relative_to(ROOT)) if results_source else None,
+        "results_source": (
+            str(results_source.relative_to(ROOT))
+            if results_source
+            else None
+        ),
         "counts": {
             "total_snapshot_rows": len(rows),
             "unique_snapshot_games": len(first_by_game),
             "completed_games_found": len(results),
-            "initial_snapshots_settled": sum(1 for r in initial_rows if r["result_settled"]),
-            "initial_snapshots_unmatched": sum(1 for r in initial_rows if not r["result_settled"]),
+            "initial_snapshots_settled": sum(
+                1 for row in initial_rows if row["result_settled"]
+            ),
+            "initial_snapshots_unmatched": sum(
+                1 for row in initial_rows if not row["result_settled"]
+            ),
         },
         "result_match_methods_initial": dict(sorted(initial_match_counts.items())),
-        "result_match_methods_all_snapshots": dict(sorted(match_method_counts.items())),
+        "result_match_methods_all_snapshots": dict(
+            sorted(match_method_counts.items())
+        ),
         "initial_snapshot_summary": summarize(initial_rows),
         "initial_snapshot_by_signal": by_signal,
         "all_snapshot_summary": summarize(rows),
@@ -78,30 +997,68 @@
     }
 
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
-    REPORT_JSON.write_text(json.dumps(report, indent=2), encoding="utf-8")
+
+    REPORT_JSON.write_text(
+        json.dumps(report, indent=2),
+        encoding="utf-8",
+    )
 
     fields = [
-        "snapshot_id", "game_key", "result_game_id", "result_match_method",
-        "captured_at_utc", "model_version", "week", "start_date",
-        "away_team", "home_team", "preferred_side", "signal",
-        "model_home_spread", "model_total", "model_home_win_probability",
-        "public_home_spread", "public_total", "weather_applied",
-        "weather_conditions_line", "weather_impact", "weather_total_adjustment",
-        "weather_spread_adjustment", "weather_spread_status",
-        "public_margin_error", "public_abs_error",
-        "snapshot_home_spread", "snapshot_total", "snapshot_bookmaker",
-        "total_direction", "total_edge", "total_tier", "total_result",
-        "total_clv_points", "total_beat_close",
-        "actual_total", "total_projection_error",
-        "closing_home_spread", "closing_total", "clv_points", "home_points", "away_points",
-        "actual_home_margin", "ats_result", "model_margin_error",
-        "model_abs_error", "market_margin_error", "market_abs_error",
-        "closing_margin_error", "closing_abs_error",
-        "model_beats_snapshot_market", "result_settled",
+        "snapshot_id",
+        "game_key",
+        "result_game_id",
+        "result_match_method",
+        "captured_at_utc",
+        "model_version",
+        "week",
+        "start_date",
+        "away_team",
+        "home_team",
+        "preferred_side",
+        "signal",
+        "model_home_spread",
+        "model_total",
+        "model_home_win_probability",
+        "public_home_spread",
+        "public_total",
+        "weather_applied",
+        "weather_conditions_line",
+        "weather_impact",
+        "weather_total_adjustment",
+        "weather_spread_adjustment",
+        "weather_spread_status",
+        "public_margin_error",
+        "public_abs_error",
+        "snapshot_home_spread",
+        "snapshot_total",
+        "snapshot_bookmaker",
+        "total_direction",
+        "total_edge",
+        "total_tier",
+        "total_result",
+        "total_clv_points",
+        "total_beat_close",
+        "actual_total",
+        "total_projection_error",
+        "closing_home_spread",
+        "closing_total",
+        "clv_points",
+        "home_points",
+        "away_points",
+        "actual_home_margin",
+        "ats_result",
+        "model_margin_error",
+        "model_abs_error",
+        "market_margin_error",
+        "market_abs_error",
+        "closing_margin_error",
+        "closing_abs_error",
+        "model_beats_snapshot_market",
+        "result_settled",
     ]
 
-    with REPORT_CSV.open("w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fields)
+    with REPORT_CSV.open("w", encoding="utf-8", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=fields)
         writer.writeheader()
         writer.writerows(rows)
 
@@ -110,10 +1067,16 @@
     print("=" * 72)
     print("Snapshots:", len(rows))
     print("Unique games:", len(first_by_game))
-    print("Results source:", report["results_source"] or "NONE — waiting for completed-game data")
+    print(
+        "Results source:",
+        report["results_source"] or "NONE — waiting for completed-game data",
+    )
     print("Completed results found:", len(results))
     print("Initial snapshots settled:", report["counts"]["initial_snapshots_settled"])
-    print("Initial snapshots unmatched:", report["counts"]["initial_snapshots_unmatched"])
+    print(
+        "Initial snapshots unmatched:",
+        report["counts"]["initial_snapshots_unmatched"],
+    )
     print("Initial match methods:", dict(sorted(initial_match_counts.items())))
     print("JSON:", REPORT_JSON.relative_to(ROOT))
     print("CSV:", REPORT_CSV.relative_to(ROOT))
