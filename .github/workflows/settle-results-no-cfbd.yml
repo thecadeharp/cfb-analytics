@@ -42,24 +42,6 @@ jobs:
         run: |
           python scripts/fetch_results_no_cfbd.py
 
-      # Publish the scoreboard before expensive postgame/report work. The later
-      # commit still owns grading and analytics; this does not change Model A.
-      - name: Publish fresh scoreboard immediately
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- data/results.json data/live_scores.json
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m "Refresh live scoreboard before postgame processing"
-          for attempt in 1 2 3; do
-            git fetch origin main
-            git rebase origin/main
-            if git push origin HEAD:main; then exit 0; fi
-            echo "Scoreboard push race on attempt ${attempt}; retrying."
-          done
-          echo "Unable to publish scoreboard after three retries."
-          exit 1
-
       - name: Settle prospective projections
         run: |
           python scripts/settle_results.py
@@ -106,8 +88,9 @@ jobs:
 
           git commit -m "Refresh live scores, settlements, postgame analytics, and signal records"
 
-          # Another generated-data workflow can commit between rebase and push.
-          # Retry safely without rerunning settlement or changing projections.
+          # Another generated-data workflow can still finish between a
+          # successful rebase and push. Retry the small race window without
+          # rerunning any settlement or rewriting frozen projections.
           for attempt in 1 2 3; do
             git fetch origin main
             git rebase origin/main
