@@ -811,6 +811,80 @@
       grid-column: span 2;
     }
 
+    .thi-identity-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-top: 12px;
+      overflow: hidden;
+    }
+
+    .thi-identity-heading {
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      padding: 13px 16px;
+    }
+
+    .thi-identity-subtitle {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .thi-identity-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .thi-identity-card {
+      border-right: 1px solid var(--border);
+      min-height: 108px;
+      padding: 15px;
+    }
+
+    .thi-identity-card:last-child {
+      border-right: none;
+    }
+
+    .thi-identity-card-title {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .thi-identity-card-label {
+      font-size: 14px;
+      font-weight: 750;
+      line-height: 1.25;
+      margin: 9px 0 7px;
+    }
+
+    .thi-identity-card-detail,
+    .thi-identity-note {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    .thi-identity-strong .thi-identity-card-label {
+      color: var(--green);
+    }
+
+    .thi-identity-poor .thi-identity-card-label {
+      color: var(--amber);
+    }
+
+    .thi-identity-note {
+      background: var(--surface-2);
+      border-top: 1px solid var(--border);
+      padding: 9px 16px;
+    }
+
     /* =========================
        COMING SOON
     ========================== */
@@ -878,6 +952,18 @@
 
       .dossier-layout {
         grid-template-columns: 1fr;
+      }
+
+      .thi-identity-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .thi-identity-card:nth-child(2) {
+        border-right: none;
+      }
+
+      .thi-identity-card:nth-child(-n + 2) {
+        border-bottom: 1px solid var(--border);
       }
 
       .schedule-panel {
@@ -1382,8 +1468,8 @@
 
   </main>
 
-  <script src="app.js?v=2026-thi-power-v02"></script>
-  <script src="thi-ratings-hub.js?v=2026-thi-power-v02"></script>
+  <script src="app.js?v=2026-team-identity-v01"></script>
+  <script src="thi-ratings-hub.js?v=2026-rank-sort-v01"></script>
   <script src="portfolio-config.js"></script>
   <script src="market-research.js?v=2026-private-research-v05"></script>
   <script src="last-updated-timestamp.js"></script>
@@ -1397,16 +1483,8 @@
   <script src="final-matchup.js?v=2026-postgame-data-shape-fix"></script>
   <script src="fcs-ui.js"></script>
   <script src="ux-feedback.js"></script>
-  <script src="postgame-analytics.js?v=2026-totals-ytd-clv-v02"></script>
+  <script src="postgame-analytics.js?v=2026-pgwe-em-owner-fix"></script>
   <script src="market-layer.js"></script>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap">
-  <link rel="stylesheet" href="research-assets.css?v=2026-assets-v01">
-  <script src="market-distribution-core.js?v=2026-assets-v01"></script>
-  <script src="research-assets.js?v=2026-assets-v01"></script>
-  <link rel="stylesheet" href="situational-profiles.css?v=2026-situational-v01">
-  <script src="situational-profiles.js?v=2026-situational-v01"></script>
-  <link rel="stylesheet" href="playoff-projection.css?v=2026-playoff-v01">
-  <script src="playoff-projection.js?v=2026-playoff-v01"></script>
 
   <!-- Cloudflare Web Analytics -->
   <script
