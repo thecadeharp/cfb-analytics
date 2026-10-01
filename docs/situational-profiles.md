@@ -2,6 +2,9 @@
 
 Situational Profiles are a research-only, postgame view of possession value.
 They do not feed Model A, THI Power Ratings, projections, wagers or live scores.
+The same admitted possessions now also publish a per-game **Game Efficiency
+Log** and retrospective **THI Excitement Score** inside completed-game postgame
+analysis.
 
 Run **Build 2026 Situational Profiles** manually after a week is complete. Enter
 the last completed week as an integer from 1 through 15. The workflow downloads
@@ -42,6 +45,21 @@ profile compares actual offensive points with those expected start points.
   the end zone and their actual points per possession.
 - **Score-state and half splits:** the same value comparison while leading, tied
   or trailing and in each half.
+
+## Game Efficiency Log
+
+Every fully admitted game includes a side-by-side possession summary for both
+offenses: possessions, points per possession, expected points at the possession
+start, value over expected, scoring and empty-possession rates, average starting
+field position and short-field production. A game is omitted as a whole when
+either team's possession record fails the existing admission rules.
+
+The THI Excitement Score is a retrospective 0–100 viewing index. Its 100 points
+are split across final-score tension (35), fourth-quarter one-score possession
+share (25), verified lead exchanges and tied possession starts (20), and scoring
+activity (20). Labels are Routine, Competitive, High Drama, Must Rewatch and
+Instant Classic. This score describes the completed game; it is not a pregame
+watchability forecast and is never used by Model A or THI Power Ratings.
 
 Reliability is based on the smaller of a team's admitted offensive and defensive
 samples: `limited` below 25 possessions, `developing` from 25–49 and
