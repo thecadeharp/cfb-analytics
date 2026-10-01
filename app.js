@@ -1555,6 +1555,65 @@ function ensureMatchupView() {
       line-height:1.55;
     }
 
+    .thi-availability-report {
+      margin:0 0 18px;
+      overflow:hidden;
+      border:1px solid var(--border-dark);
+      border-radius:12px;
+      background:var(--surface);
+    }
+    .thi-availability-head {
+      display:flex; align-items:flex-start; justify-content:space-between;
+      gap:18px; padding:15px 17px; border-bottom:1px solid var(--border);
+    }
+    .thi-availability-head h3 { margin:4px 0 0; font-size:17px; }
+    .thi-availability-disclosure, .thi-availability-foot {
+      color:var(--muted); font-family:var(--mono); font-size:8px;
+      line-height:1.55; text-transform:uppercase;
+    }
+    .thi-availability-disclosure { text-align:right; }
+    .thi-availability-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .thi-availability-team { min-width:0; padding:14px 16px 16px; }
+    .thi-availability-team + .thi-availability-team { border-left:1px solid var(--border); }
+    .thi-availability-team-head, .thi-availability-item-top {
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .thi-availability-team-head strong { font-size:12px; }
+    .thi-availability-source {
+      color:var(--green); font-family:var(--mono); font-size:8px;
+      font-weight:700; text-decoration:none; text-align:right;
+    }
+    .thi-availability-source:hover { text-decoration:underline; }
+    .thi-availability-source.muted { color:var(--muted); }
+    .thi-availability-list { margin-top:12px; }
+    .thi-availability-item { padding:11px 0; border-top:1px solid var(--border); }
+    .thi-availability-item-top { justify-content:flex-start; }
+    .thi-availability-item-top strong { font-size:11px; }
+    .thi-availability-status {
+      display:inline-flex; padding:4px 7px; border:1px solid var(--border);
+      border-radius:999px; font-family:var(--mono); font-size:7px;
+      font-weight:800; letter-spacing:.35px; text-transform:uppercase;
+    }
+    .thi-availability-status.out { color:#9f2d25; border-color:#e6b7b3; background:#fff0ee; }
+    .thi-availability-status.doubtful { color:#9a4d00; border-color:#e6b77d; background:#fff0df; }
+    .thi-availability-status.questionable { color:#775b00; border-color:#e1c45e; background:#fff8d8; }
+    .thi-availability-status.available { color:#12694d; border-color:#9fcbbb; background:#e8f3ef; }
+    .thi-availability-status.unknown { color:var(--muted); background:var(--surface-soft); }
+    .thi-availability-copy { margin-top:8px; font-size:11px; line-height:1.55; }
+    .thi-availability-meta {
+      margin-top:7px; color:var(--muted); font-family:var(--mono);
+      font-size:8px; line-height:1.5;
+    }
+    .thi-availability-meta a { color:var(--green); }
+    .thi-availability-empty {
+      margin-top:12px; padding:12px; border:1px dashed var(--border-dark);
+      border-radius:8px; background:var(--surface-soft); color:var(--muted);
+      font-size:10px; line-height:1.55;
+    }
+    .thi-availability-foot {
+      padding:10px 16px; border-top:1px solid var(--border); background:var(--surface-soft);
+    }
+
     .thi-color-legend {
       display:flex;
       align-items:center;
@@ -2003,6 +2062,8 @@ function ensureMatchupView() {
       .matchup-header, .model-edge-banner {
         flex-direction:column; align-items:flex-start;
       }
+      .thi-availability-head { flex-direction:column; }
+      .thi-availability-disclosure { text-align:left; }
     }
 
     @media (max-width:520px) {
@@ -2013,6 +2074,10 @@ function ensureMatchupView() {
       .thi-matchup-section-header { flex-direction:column; }
       .thi-matchup-section-note { text-align:left; }
       .thi-tale-grid { grid-template-columns:1fr; }
+      .thi-availability-grid { grid-template-columns:1fr; }
+      .thi-availability-team + .thi-availability-team {
+        border-top:1px solid var(--border); border-left:none;
+      }
       .thi-stands-out-header { flex-direction:column; }
       .thi-stands-out-note { text-align:left; }
       .thi-metric-guide > summary {
@@ -3417,6 +3482,8 @@ function renderMatchup(game) {
         </div>
       </div>
     </div>
+
+    ${availabilityReportMarkup(awayName, homeName)}
 
     ${taleOfTapeMarkup(awayName, homeName)}
 
@@ -6173,6 +6240,97 @@ function rosterNotesMarkup(team) {
       <p class="team-meta" style="margin:0;">Research context only · no player availability percentage or Model A adjustment.</p>
     </details>
   `;
+}
+
+function currentAvailabilityNotes(teamName) {
+  const now = Date.now();
+  const notes = Array.isArray(rosterNotesData?.teams?.[teamName])
+    ? rosterNotesData.teams[teamName]
+    : [];
+  return notes.filter(note => {
+    const verified = Date.parse(note?.verified_at_utc ?? "");
+    const expires = Date.parse(note?.valid_until_utc ?? "");
+    return Boolean(String(note?.text ?? "").trim())
+      && /^https:\/\//i.test(String(note?.source_url ?? ""))
+      && Number.isFinite(verified) && verified <= now
+      && Number.isFinite(expires) && expires > now
+      && expires - verified <= 7 * 86400000;
+  });
+}
+
+function availabilityStatusClass(status) {
+  const value = String(status ?? "").toLowerCase();
+  if (/out|unavailable/.test(value)) return "out";
+  if (/doubtful/.test(value)) return "doubtful";
+  if (/questionable|game.?time|limited/.test(value)) return "questionable";
+  if (/probable|available|active/.test(value)) return "available";
+  return "unknown";
+}
+
+function availabilityTeamMarkup(teamName) {
+  const team = getTeam(teamName) ?? {};
+  const conference = team?.conference ?? "Independent";
+  const source = rosterNotesData?.conference_sources?.[conference];
+  const officialUrl = String(source?.url ?? "");
+  const notes = currentAvailabilityNotes(teamName);
+  const sourceLink = /^https:\/\//i.test(officialUrl)
+    ? `<a class="thi-availability-source" href="${escapeHtml(officialUrl)}" target="_blank" rel="noopener noreferrer">Official ${escapeHtml(conference)} reports ↗</a>`
+    : `<span class="thi-availability-source muted">No official conference index listed</span>`;
+  return `
+    <article class="thi-availability-team">
+      <div class="thi-availability-team-head">
+        <div class="team-with-logo">
+          ${teamLogoMarkup(teamName, "table")}
+          <strong>${escapeHtml(teamName)}</strong>
+        </div>
+        ${sourceLink}
+      </div>
+      ${notes.length ? `
+        <div class="thi-availability-list">
+          ${notes.map(note => {
+            const status = String(note?.status ?? "Update");
+            const player = String(note?.player ?? "").trim();
+            const position = String(note?.position ?? "").trim();
+            const adjustment = Number(note?.availability_adjustment_points);
+            return `
+              <div class="thi-availability-item">
+                <div class="thi-availability-item-top">
+                  <span class="thi-availability-status ${availabilityStatusClass(status)}">${escapeHtml(status)}</span>
+                  ${player ? `<strong>${escapeHtml(player)}${position ? ` · ${escapeHtml(position)}` : ""}</strong>` : ""}
+                </div>
+                <div class="thi-availability-copy">${escapeHtml(note.text)}</div>
+                <div class="thi-availability-meta">
+                  Verified ${escapeHtml(new Date(note.verified_at_utc).toLocaleString())}
+                  · <a href="${escapeHtml(note.source_url)}" target="_blank" rel="noopener noreferrer">Source ↗</a>
+                  ${Number.isFinite(adjustment) ? ` · Research scenario ${formatSigned(adjustment, 1)} pts` : ""}
+                </div>
+              </div>`;
+          }).join("")}
+        </div>` : `
+        <div class="thi-availability-empty">
+          No current player-status report has been verified for this team. Status is unknown, not fully healthy.
+        </div>`}
+    </article>`;
+}
+
+function availabilityReportMarkup(awayName, homeName) {
+  return `
+    <section class="thi-availability-report" aria-label="Matchup availability report">
+      <div class="thi-availability-head">
+        <div>
+          <div class="eyebrow">Verified player status</div>
+          <h3>Availability Report</h3>
+        </div>
+        <div class="thi-availability-disclosure">Display and research context only · Model A unchanged</div>
+      </div>
+      <div class="thi-availability-grid">
+        ${availabilityTeamMarkup(awayName)}
+        ${availabilityTeamMarkup(homeName)}
+      </div>
+      <div class="thi-availability-foot">
+        Reports expire after seven days. Any listed point value is a separate THI research scenario and is never inserted into the published Model A projection.
+      </div>
+    </section>`;
 }
 
 function renderDossier(team) {
