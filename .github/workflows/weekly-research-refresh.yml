@@ -48,6 +48,9 @@ jobs:
             data/projections.json \
             app.js \
             index.html \
+            final-matchup.js \
+            situational-profiles.js \
+            situational-profiles.css \
             thi-ratings-hub.js \
             playoff-projection.js \
             data/thi_observed_ratings.json \
@@ -68,6 +71,7 @@ jobs:
           python -m unittest discover -s scripts -p 'test_research_thi_power.py' -v
           python -m unittest discover -s scripts -p 'test_research_thi_power_v03.py' -v
           python -m unittest discover -s scripts -p 'test_situational_profiles.py' -v
+          node scripts/test_situational_profiles_ui.cjs
 
       - name: Resolve latest completed week and build THI Power
         id: cutoff
@@ -146,7 +150,12 @@ jobs:
           assert profiles['coverage']['context_eligible_games'] > 0
           assert profiles['coverage']['context_eligible_possessions'] > 0
           assert profiles['coverage']['teams_profiled'] == len(profiles['teams'])
+          assert profiles['coverage']['game_efficiency_logs'] == len(profiles['games'])
           assert len(profiles['teams']) > 0
+          assert len(profiles['games']) > 0
+          assert all(0 <= row['excitement']['score'] <= 100 for row in profiles['games'])
+          assert all(row['away']['possessions'] > 0 and row['home']['possessions'] > 0
+                     for row in profiles['games'])
           assert all(
               row['reliability'] in {'limited', 'developing', 'established'}
               for row in profiles['teams']
