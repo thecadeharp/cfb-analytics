@@ -1316,7 +1316,7 @@
         );
 
       if (
-        cells.length < 7
+        cells.length < 8
       ) {
         return;
       }
@@ -1401,50 +1401,62 @@
       if (completed) {
         addGridStat(
           grid,
-          "FROZEN LINE",
+          "POSTGAME VIEW",
           cells[1]
+        );
+
+        addGridStat(
+          grid,
+          "FROZEN LINE",
+          cells[2]
         );
 
         addGridStat(
           grid,
           "CLOSING LINE",
-          cells[2]
+          cells[3]
         );
 
         addGridStat(
           grid,
           "PROJECTED SCORE",
-          cells[3]
+          cells[4]
         );
 
         addGridStat(
           grid,
           "ATS RESULT",
-          cells[4]
+          cells[5]
         );
       } else {
         addGridStat(
           grid,
-          "FAIR LINE",
+          "THI WATCH",
           cells[1]
         );
 
         addGridStat(
           grid,
-          "MARKET",
+          "FAIR LINE",
           cells[2]
         );
 
         addGridStat(
           grid,
-          "PROJECTED TOTAL",
+          "MARKET",
           cells[3]
         );
 
         addGridStat(
           grid,
-          "MODEL EDGE",
+          "PROJECTED TOTAL",
           cells[4]
+        );
+
+        addGridStat(
+          grid,
+          "MODEL EDGE",
+          cells[5]
         );
       }
 
@@ -1455,13 +1467,13 @@
       addWideStat(
         card,
         "MODEL SIGNAL",
-        cells[5]
+        cells[6]
       );
 
       addWideStat(
         card,
         "SIGNAL CONFIDENCE",
-        cells[6],
+        cells[7],
         "mobile-card-confidence"
       );
 
