@@ -4,6 +4,7 @@
   const DATA_URL = "./data/postgame_analytics.json";
   const SETTLED_URL = "./data/reports/settled_results.json";
   const SIGNAL_URL = "./data/reports/signal_report.json";
+  const CLV_URL = "./data/reports/clv_report.json";
   const STYLE_ID = "hammer-postgame-analytics-styles";
   const PANEL_ID = "hammer-postgame-analysis";
   const SCORECARD_ID = "hammer-performance-scorecard";
@@ -283,12 +284,27 @@
     return `${value.wins}-${value.losses}${value.pushes ? `-${value.pushes}` : ""}`;
   }
 
+  function totalClvPoints(result, closing) {
+    const direction = String(result?.total_direction || "").toUpperCase();
+    const snapshotRaw = result?.snapshot_total ?? closing?.snapshot_total;
+    const closeRaw = closing?.closing_total;
+    if (!["OVER", "UNDER"].includes(direction) || !hasValue(snapshotRaw) || !hasValue(closeRaw)) return null;
+    const snapshot = Number(snapshotRaw);
+    const close = Number(closeRaw);
+    return direction === "OVER" ? close - snapshot : snapshot - close;
+  }
+
   function performanceStats(rows) {
     const ats = record(rows);
     const playRows = rows.filter(row => canonicalSignalName(row.signal) === "PLAY");
     const play = record(playRows);
     const totalRows = rows.filter(row => row.total_tier && ["W", "L", "P"].includes(String(row.total_result || "").toUpperCase()));
     const totals = record(totalRows, "total_result");
+    const totalClvRows = totalRows.filter(row => hasValue(row.total_clv_points));
+    const totalClv = mean(totalClvRows, "total_clv_points");
+    const totalBeatDecisions = totalClvRows.filter(row => Math.abs(Number(row.total_clv_points)) > 0.001);
+    const totalBeatWins = totalBeatDecisions.filter(row => Number(row.total_clv_points) > 0).length;
+    const totalBeatPct = totalBeatDecisions.length ? 100 * totalBeatWins / totalBeatDecisions.length : null;
     const winnerRows = rows.filter(row => hasValue(row.actual_home_margin) && hasValue(row.public_home_spread ?? row.model_home_spread) && Math.abs(Number(row.public_home_spread ?? row.model_home_spread)) > 0.001);
     let winnerCorrect = 0;
     winnerRows.forEach(row => {
@@ -299,7 +315,9 @@
     const postgame = rows.filter(row => gameData(row.game_key)).length;
     const su = { wins:winnerCorrect, losses:Math.max(0, winnerRows.length - winnerCorrect), pushes:0, decisions:winnerRows.length,
       pct:winnerRows.length ? 100 * winnerCorrect / winnerRows.length : null };
-    return { rows, ats, play, totals, totalRows, su, winnerCorrect, winnerDecisions:winnerRows.length, postgame,
+    return { rows, ats, play, totals, totalRows, totalClv, totalClvSamples:totalClvRows.length,
+      totalBeatPct, totalBeatDecisions:totalBeatDecisions.length,
+      su, winnerCorrect, winnerDecisions:winnerRows.length, postgame,
       error:mean(rows, "public_abs_error") ?? mean(rows, "model_abs_error"), clv:mean(rows, "clv_points") };
   }
 
@@ -320,7 +338,8 @@
     });
     const totalRows = ["TOTAL WATCH", "TOTAL LEAN"].map(tier => {
       const subset = rows.filter(row => String(row.total_tier || "").toUpperCase() === tier);
-      return { label:tier, sample:subset.length, rec:record(subset,"total_result"), clv:null, beatPct:null, confidence:"TESTING" };
+      const stats = performanceStats(subset);
+      return { label:tier, sample:subset.length, rec:record(subset,"total_result"), clv:stats.totalClv, beatPct:stats.totalBeatPct, confidence:"TESTING" };
     });
     return [...spreadRows, ...totalRows];
   }
@@ -339,7 +358,7 @@
     const periodButtons = ["ALL", ...weeks].map(value => `<button type="button" class="perf-period ${String(value) === String(period) ? "active" : ""}" data-tracking-week="${value}">${value === "ALL" ? "Season" : `Week ${value}`}</button>`).join("");
     const weeklyBody = weeks.map(week => {
       const stats = performanceStats(ytdRows.filter(row => Number(row.week) === week));
-      return `<tr><td>Week ${week}</td><td>${stats.rows.length}</td><td>${recordText(stats.su)}</td><td>${recordText(stats.ats)}</td><td>${recordText(stats.totals)}</td><td>${hasValue(stats.error) ? `${stats.error.toFixed(1)} pts` : "—"}</td><td>${hasValue(stats.clv) ? formatSigned(stats.clv,1," pts") : "—"}</td></tr>`;
+      return `<tr><td>Week ${week}</td><td>${stats.rows.length}</td><td>${recordText(stats.su)}</td><td>${recordText(stats.ats)}</td><td>${recordText(stats.totals)}</td><td>${hasValue(stats.totalClv) ? formatSigned(stats.totalClv,1," pts") : "—"}</td><td>${hasValue(stats.totalBeatPct) ? `${stats.totalBeatPct.toFixed(1)}%` : "—"}</td><td>${hasValue(stats.error) ? `${stats.error.toFixed(1)} pts` : "—"}</td><td>${hasValue(stats.clv) ? formatSigned(stats.clv,1," pts") : "—"}</td></tr>`;
     }).join("");
     return `<div class="perf-shell">
       <div class="perf-header"><div><div class="perf-kicker">🔨 Transparent Model Tracking</div><div class="perf-title">${weekLabel} Performance</div></div>
@@ -351,6 +370,8 @@
         ${perfStat("Straight Up",recordText(selected.su),hasValue(selected.su.pct) ? `${selected.su.pct.toFixed(1)}% correct` : "No decisions")}
         ${perfStat("Overall ATS",recordText(selected.ats),hasValue(selected.ats.pct) ? `${selected.ats.pct.toFixed(1)}%` : "No decisions")}
         ${perfStat("Tracked Totals",recordText(selected.totals),hasValue(selected.totals.pct) ? `${selected.totals.pct.toFixed(1)}%` : "No decisions")}
+        ${perfStat("Totals Average CLV",hasValue(selected.totalClv) ? formatSigned(selected.totalClv,1," pts") : "—",`${selected.totalClvSamples} tracked totals with a close`)}
+        ${perfStat("Totals Beat Close",hasValue(selected.totalBeatPct) ? `${selected.totalBeatPct.toFixed(1)}%` : "—",`${selected.totalBeatDecisions} directional decisions`)}
         ${perfStat("Play Tier ATS",recordText(selected.play),hasValue(selected.play.pct) ? `${selected.play.pct.toFixed(1)}%` : "No decisions")}
         ${perfStat("Average Margin Error",hasValue(selected.error) ? `${selected.error.toFixed(1)} pts` : "—","Absolute THI projection error")}
         ${perfStat("Average CLV",hasValue(selected.clv) ? formatSigned(selected.clv,1," pts") : "—","Preferred-side closing value")}
@@ -360,9 +381,11 @@
         ${perfStat("SU YTD",recordText(ytd.su),hasValue(ytd.su.pct) ? `${ytd.su.pct.toFixed(1)}% correct` : "No decisions")}
         ${perfStat("ATS YTD",recordText(ytd.ats),hasValue(ytd.ats.pct) ? `${ytd.ats.pct.toFixed(1)}%` : "No decisions")}
         ${perfStat("Totals YTD",recordText(ytd.totals),hasValue(ytd.totals.pct) ? `${ytd.totals.pct.toFixed(1)}%` : "No decisions")}
+        ${perfStat("Totals CLV YTD",hasValue(ytd.totalClv) ? formatSigned(ytd.totalClv,1," pts") : "—",`${ytd.totalClvSamples} tracked totals with a close`)}
+        ${perfStat("Totals Beat Close YTD",hasValue(ytd.totalBeatPct) ? `${ytd.totalBeatPct.toFixed(1)}%` : "—",`${ytd.totalBeatDecisions} directional decisions`)}
         ${perfStat("Play Tier YTD",recordText(ytd.play),hasValue(ytd.play.pct) ? `${ytd.play.pct.toFixed(1)}%` : "No decisions")}
       </div>
-      <div class="perf-week-table"><div class="perf-ytd-title">Weekly Ledger</div><div class="perf-table-wrap"><table><thead><tr><th>Week</th><th>Finals</th><th>SU</th><th>ATS</th><th>Totals</th><th>Margin Error</th><th>Avg CLV</th></tr></thead><tbody>${weeklyBody}</tbody></table></div></div>
+      <div class="perf-week-table"><div class="perf-ytd-title">Weekly Ledger</div><div class="perf-table-wrap"><table><thead><tr><th>Week</th><th>Finals</th><th>SU</th><th>ATS</th><th>Totals</th><th>Total CLV</th><th>Total Beat Close</th><th>Margin Error</th><th>Spread CLV</th></tr></thead><tbody>${weeklyBody}</tbody></table></div></div>
       <div class="perf-ytd"><div class="perf-ytd-title">Season-to-Date · Every Signal and Testing Key</div>
         <div class="perf-table-wrap"><table><thead><tr><th>Signal / Key</th><th>Games</th><th>Record</th><th>Win %</th><th>Avg CLV</th><th>Beat Close</th><th>Confidence</th></tr></thead><tbody>${body}</tbody></table></div>
       </div></div>`;
@@ -702,10 +725,11 @@
   async function load() {
     try {
       const stamp = Date.now();
-      const [analyticsResponse, settledResponse, signalResponse] = await Promise.all([
+      const [analyticsResponse, settledResponse, signalResponse, clvResponse] = await Promise.all([
         fetch(`${DATA_URL}?v=${stamp}`, { cache: "no-store" }),
         fetch(`${SETTLED_URL}?v=${stamp}`, { cache: "no-store" }),
         fetch(`${SIGNAL_URL}?v=${stamp}`, { cache: "no-store" }),
+        fetch(`${CLV_URL}?v=${stamp}`, { cache: "no-store" }),
       ]);
       if (!analyticsResponse.ok) throw new Error(`Postgame HTTP ${analyticsResponse.status}`);
       const parsed = await analyticsResponse.json();
@@ -715,12 +739,22 @@
       if (settledResponse.ok) {
         const settled = await settledResponse.json();
         const rows = (settled?.rows || []).filter(row => row?.result_settled);
+        const clv = clvResponse.ok ? await clvResponse.json() : { rows: [] };
+        const closingBySnapshot = new Map((clv?.rows || []).map(row => [String(row.snapshot_id || ""), row]));
         const earliest = new Map();
         rows.forEach(row => {
           const id = String(row.game_key || "");
           if (!id) return;
           const current = earliest.get(id);
-          if (!current || String(row.captured_at_utc || "") < String(current.captured_at_utc || "")) earliest.set(id, row);
+          if (!current || String(row.captured_at_utc || "") < String(current.captured_at_utc || "")) {
+            const closing = closingBySnapshot.get(String(row.snapshot_id || ""));
+            const totalClv = totalClvPoints(row, closing);
+            earliest.set(id, {
+              ...row,
+              closing_total: closing?.closing_total ?? null,
+              total_clv_points: Number.isFinite(totalClv) ? totalClv : null,
+            });
+          }
         });
         settledByGame = earliest;
         if (trackingWeek === "LATEST") {
