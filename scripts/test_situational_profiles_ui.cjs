@@ -26,5 +26,8 @@ assert.strictEqual(ui.signed(0.125), '+0.125');
 assert.strictEqual(ui.signed(-0.125), '-0.125');
 assert.strictEqual(ui.percent(0.425), '42.5%');
 assert.strictEqual(ui.number(null), '—');
+assert(source.includes('Game Efficiency Log'));
+assert(source.includes('THI Excitement Score'));
+assert(source.includes("document.getElementById('thi-game-efficiency-log')"));
 
 console.log('situational profile UI contract passed');
