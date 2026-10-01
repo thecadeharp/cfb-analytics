@@ -42,6 +42,20 @@
     .thi-hub-number { font:700 14px var(--mono); white-space:nowrap; }
     .thi-hub-muted { color:var(--muted); font-size:11px; white-space:nowrap; }
     .thi-hub-rank { color:var(--muted); font:600 11px var(--mono); }
+    .thi-hub-heat { transition:background-color .18s ease; }
+    .thi-hub-heat.positive { background:rgba(31,158,92,var(--heat-alpha,.10)); }
+    .thi-hub-heat.negative { background:rgba(214,74,67,var(--heat-alpha,.10)); }
+    .thi-hub-heat.context { background:rgba(61,126,176,var(--heat-alpha,.10)); }
+    .thi-hub-rank-move { display:inline-flex; margin-left:6px; font:700 10px var(--mono); }
+    .thi-hub-rank-move.up { color:#16734f; }
+    .thi-hub-rank-move.down { color:#a44842; }
+    .thi-weekly-pulse { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:4px 0 16px; }
+    .thi-weekly-pulse-card { min-width:0; border:1px solid var(--border); border-radius:11px; padding:14px 15px; background:var(--surface); }
+    .thi-weekly-pulse-label { color:var(--muted); font:700 9px var(--mono); letter-spacing:.8px; text-transform:uppercase; }
+    .thi-weekly-pulse-team { display:flex; align-items:center; gap:8px; margin-top:9px; font-size:15px; font-weight:800; }
+    .thi-weekly-pulse-value { margin-top:6px; color:var(--muted); font:700 11px var(--mono); }
+    .thi-weekly-pulse-card.riser .thi-weekly-pulse-value { color:#16734f; }
+    .thi-weekly-pulse-card.faller .thi-weekly-pulse-value { color:#a44842; }
     .thi-hub-badge { display:inline-block; border:1px solid var(--border); border-radius:40px; padding:4px 8px; font:600 10px var(--mono); }
     .thi-hub-badge.strong { color:#12694d; background:#e8f7ef; }
     .thi-hub-badge.limited { color:#815b08; background:#fff4d6; }
@@ -71,6 +85,7 @@
       .thi-hub-control-group { width:100%; }
       .thi-hub-control-group .conference-filter-select { flex:1 1 auto; min-width:0; }
       .thi-situational-grid { grid-template-columns:1fr; }
+      .thi-weekly-pulse { grid-template-columns:1fr; }
     }
   `;
   document.head.appendChild(style);
@@ -80,11 +95,12 @@
   const section = document.getElementById("view-ratings");
   if (!nav || !section || !ratingsButton) return;
 
+  ratingsButton.textContent = "Team Data";
   const button = document.createElement("button");
   button.type = "button";
   button.className = "nav-item";
-  button.dataset.view = "thi-ratings";
   button.textContent = "THI Ratings";
+  button.dataset.view = "thi-ratings";
   button.addEventListener("click", () => switchView("thi-ratings"));
   ratingsButton.after(button);
 
@@ -105,6 +121,101 @@
     return Number.isFinite(value) ? value : null;
   }
 
+  function priorRankMap() {
+    const rows = (thiPowerRatingsData?.teams ?? [])
+      .filter(row => Number.isFinite(Number(row.previous_week_same_model_rating)))
+      .slice()
+      .sort((a, b) => Number(b.previous_week_same_model_rating) - Number(a.previous_week_same_model_rating) || a.team.localeCompare(b.team));
+    return new Map(rows.map((row, index) => [row.team, index + 1]));
+  }
+
+  function weeklyPulseMarkup() {
+    const power = thiPowerRatingsData?.teams ?? [];
+    const previous = priorRankMap();
+    const movement = power.map(row => ({
+      ...row,
+      priorRank: previous.get(row.team),
+      spots: Number(previous.get(row.team)) - Number(row.rank),
+    })).filter(row => Number.isFinite(row.spots));
+    const riser = movement.slice().sort((a, b) => b.spots - a.spots || a.rank - b.rank)[0];
+    const faller = movement.slice().sort((a, b) => a.spots - b.spots || a.rank - b.rank)[0];
+    const schedule = power.map(row => ({
+      ...row,
+      sosRank: Number(externalRatingsData?.teams?.[row.team]?.sos_rank),
+    })).filter(row => Number.isFinite(row.sosRank)).sort((a, b) => a.sosRank - b.sosRank || a.rank - b.rank)[0];
+    const card = (kind, label, row, value) => `<article class="thi-weekly-pulse-card ${kind}">
+      <div class="thi-weekly-pulse-label">${escapeHtml(label)}</div>
+      <div class="thi-weekly-pulse-team">${row ? teamLogoMarkup(row.team, "projection") : ""}<span>${escapeHtml(row?.team ?? "Awaiting data")}</span></div>
+      <div class="thi-weekly-pulse-value">${escapeHtml(value)}</div>
+    </article>`;
+    return `<div class="thi-weekly-pulse" aria-label="Weekly THI ratings movement">
+      ${card("riser", "Biggest Riser", riser, riser ? `${riser.spots > 0 ? "+" : ""}${riser.spots} spots · now #${riser.rank}` : "—")}
+      ${card("schedule", "Toughest Schedule", schedule, schedule ? `SOS #${schedule.sosRank} · THI #${schedule.rank}` : "—")}
+      ${card("faller", "Biggest Faller", faller, faller ? `${faller.spots > 0 ? "+" : ""}${faller.spots} spots · now #${faller.rank}` : "—")}
+    </div>`;
+  }
+
+  function heatStyle(values, value, direction = "higher") {
+    const clean = values.map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+    const numeric = Number(value);
+    if (!clean.length || !Number.isFinite(numeric)) return { className: "", style: "" };
+    const below = clean.filter(item => item < numeric).length;
+    const equal = clean.filter(item => item === numeric).length;
+    let percentile = clean.length === 1 ? .5 : (below + Math.max(0, equal - 1) / 2) / (clean.length - 1);
+    if (direction === "lower") percentile = 1 - percentile;
+    if (direction === "context") {
+      const alpha = (.06 + .18 * percentile).toFixed(3);
+      return { className: "thi-hub-heat context", style: `--heat-alpha:${alpha}` };
+    }
+    const positive = percentile >= .5;
+    const strength = Math.abs(percentile - .5) * 2;
+    const alpha = (.035 + .22 * strength).toFixed(3);
+    return { className: `thi-hub-heat ${positive ? "positive" : "negative"}`, style: `--heat-alpha:${alpha}` };
+  }
+
+  function metricCell(label, display, value, values, direction = "higher") {
+    const heat = heatStyle(values, value, direction);
+    return `<td data-label="${escapeHtml(label)}" class="${heat.className}" style="${heat.style}"><span class="thi-hub-number">${display}</span></td>`;
+  }
+
+  function numericCellValue(cell) {
+    const match = String(cell?.textContent ?? "").replaceAll(",", "").match(/[+-]?\d+(?:\.\d+)?/);
+    return match ? Number(match[0]) : null;
+  }
+
+  function applyTeamDataExperience() {
+    const container = document.getElementById("ratings-container");
+    if (!container || !thiPowerRatingsData?.teams?.length) return;
+    if (!container.querySelector(".thi-weekly-pulse")) {
+      container.insertAdjacentHTML("afterbegin", weeklyPulseMarkup());
+    }
+    container.querySelectorAll("table").forEach(table => {
+      const headers = Array.from(table.querySelectorAll("thead th")).map(cell => cell.textContent.trim());
+      const rows = Array.from(table.querySelectorAll("tbody tr"));
+      headers.forEach((header, column) => {
+        if (/team|conference|record|read|status|home|away|favorite|underdog|tier|signal/i.test(header)) return;
+        const cells = rows.map(row => row.children[column]).filter(Boolean);
+        const values = cells.map(numericCellValue).filter(Number.isFinite);
+        if (values.length < Math.max(3, Math.ceil(cells.length * .6))) return;
+        const direction = /pace|plays|games|sample|schedule|sos/i.test(header)
+          ? "context"
+          : /rank|defensive rating|def rating/i.test(header) ? "lower" : "higher";
+        cells.forEach(cell => {
+          const heat = heatStyle(values, numericCellValue(cell), direction);
+          cell.classList.remove("thi-hub-heat", "positive", "negative", "context");
+          if (heat.className) cell.classList.add(...heat.className.split(" "));
+          if (heat.style) cell.style.setProperty("--heat-alpha", heat.style.split(":")[1]);
+        });
+      });
+    });
+  }
+
+  const teamDataContainer = document.getElementById("ratings-container");
+  if (teamDataContainer) {
+    new MutationObserver(() => requestAnimationFrame(applyTeamDataExperience))
+      .observe(teamDataContainer, { childList: true, subtree: true });
+  }
+
   function sortHeader(key, label, defaultDirection = "desc") {
     const active = sort === key;
     const direction = active ? sortDirection : defaultDirection;
@@ -120,10 +231,11 @@
     if (!target) return;
     const query = search.trim().toLocaleLowerCase();
     const observed = thiObservedRatingsData?.teams ?? {};
-    const data = (thiPowerRatingsData?.teams ?? []).map(power => {
+    const sourceData = (thiPowerRatingsData?.teams ?? []).map(power => {
       const profile = observed[power.team] ?? {};
       return { power, profile, team: power.team, conference: profile.conference || teams[power.team]?.conference || "FBS Independents" };
-    }).filter(row => matchesRatingConference(row) && String(row.team).toLocaleLowerCase().includes(query));
+    });
+    const data = sourceData.filter(row => matchesRatingConference(row) && String(row.team).toLocaleLowerCase().includes(query));
     data.sort((a, b) => {
       const value = row => {
         if (sort === "team") return row.team;
@@ -140,25 +252,31 @@
       return (av - bv) * (sortDirection === "asc" ? 1 : -1) || a.team.localeCompare(b.team);
     });
 
+    const allValues = key => sourceData.map(row => {
+      if (["offense", "defense", "net", "pace"].includes(key)) return ratingValue(row.profile, key);
+      return row.power[key];
+    });
+    const priorRanks = priorRankMap();
+
     target.innerHTML = data.length ? `<div class="thi-hub-table-wrap"><table class="thi-hub-table">
       <thead><tr>${sortHeader("power_rank", "Rank", "asc")}${sortHeader("team", "Team", "asc")}${sortHeader("rating", "Rating")}${sortHeader("roster_contribution", "Roster")}${sortHeader("performance_contribution", "Performance")}${sortHeader("performance_only_weekly_change", "Weekly Change")}${sortHeader("qualifying_games", "FBS Games")}${sortHeader("observed_rank", "Observed Rank", "asc")}${sortHeader("offense", "Off")}${sortHeader("defense", "Def", "asc")}${sortHeader("net", "Net")}${sortHeader("pace", "Pace")}</tr></thead>
       <tbody>${data.map(row => {
         const { power, profile } = row;
         const rating = profile.ratings ?? {};
         return `<tr>
-          <td data-label="Rank"><span class="thi-hub-number">#${formatNumber(power.rank, 0)}</span></td>
+          <td data-label="Rank"><span class="thi-hub-number">#${formatNumber(power.rank, 0)}</span>${(() => { const move = Number(priorRanks.get(row.team)) - Number(power.rank); return move ? `<span class="thi-hub-rank-move ${move > 0 ? "up" : "down"}">${move > 0 ? "▲" : "▼"}${Math.abs(move)}</span>` : ""; })()}</td>
           <td data-label="Team"><span class="thi-hub-team-wrap">${teamLogoMarkup(row.team, "projection")}
               <button type="button" class="thi-hub-team" data-thi-team="${escapeHtml(row.team)}">${escapeHtml(row.team)}</button></span></td>
-          <td data-label="Rating"><span class="thi-hub-number">${formatSigned(power.rating, 2)}</span></td>
-          <td data-label="Roster"><span class="thi-hub-number">${formatSigned(power.roster_contribution, 2)}</span></td>
-          <td data-label="Performance"><span class="thi-hub-number">${formatSigned(power.performance_contribution, 2)}</span></td>
-          <td data-label="Weekly Change"><span class="thi-hub-number">${formatSigned(power.performance_only_weekly_change, 2)}</span></td>
-          <td data-label="FBS Games"><span class="thi-hub-number">${formatNumber(power.qualifying_games, 0)}</span></td>
+          ${metricCell("Rating", formatSigned(power.rating, 2), power.rating, allValues("rating"))}
+          ${metricCell("Roster", formatSigned(power.roster_contribution, 2), power.roster_contribution, allValues("roster_contribution"))}
+          ${metricCell("Performance", formatSigned(power.performance_contribution, 2), power.performance_contribution, allValues("performance_contribution"))}
+          ${metricCell("Weekly Change", formatSigned(power.performance_only_weekly_change, 2), power.performance_only_weekly_change, allValues("performance_only_weekly_change"))}
+          ${metricCell("FBS Games", formatNumber(power.qualifying_games, 0), power.qualifying_games, allValues("qualifying_games"), "context")}
           <td data-label="Observed Rank"><span class="thi-hub-rank">#${formatNumber(rating.net?.rank, 0)}</span></td>
-          <td data-label="Off"><span class="thi-hub-number">${formatNumber(rating.offense?.value, 2)}</span></td>
-          <td data-label="Def"><span class="thi-hub-number">${formatNumber(rating.defense?.value, 2)}</span></td>
-          <td data-label="Net"><span class="thi-hub-number">${formatSigned(rating.net?.value, 2)}</span></td>
-          <td data-label="Pace"><span class="thi-hub-number">${formatNumber(rating.pace?.value, 2)}</span></td>
+          ${metricCell("Off", formatNumber(rating.offense?.value, 2), rating.offense?.value, allValues("offense"))}
+          ${metricCell("Def", formatNumber(rating.defense?.value, 2), rating.defense?.value, allValues("defense"), "lower")}
+          ${metricCell("Net", formatSigned(rating.net?.value, 2), rating.net?.value, allValues("net"))}
+          ${metricCell("Pace", formatNumber(rating.pace?.value, 2), rating.pace?.value, allValues("pace"), "context")}
         </tr>`;
       }).join("")}</tbody></table></div>` :
       `<div class="empty-state">No matching teams in the ranked sample.</div>`;
@@ -206,6 +324,7 @@
       return;
     }
     container.innerHTML = `
+      ${weeklyPulseMarkup()}
       <div class="conference-filter-bar thi-hub-controls">
         <div class="thi-hub-control-group">
           <label class="conference-filter-label" for="thi-ratings-search">Team</label>
@@ -273,6 +392,7 @@
   });
   document.addEventListener("hammer:data-ready", () => {
     render();
+    applyTeamDataExperience();
     loadJson("./data/thi_situational_profiles.json").then(data => {
       if (data?.meta?.status === "DESCRIPTIVE_BETA_NO_POINT_SCALE") {
         situationalData = data;
