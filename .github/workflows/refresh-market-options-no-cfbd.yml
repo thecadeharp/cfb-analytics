@@ -2,15 +2,6 @@ name: Refresh THI Market Options - No CFBD
 
 on:
   workflow_dispatch:
-    inputs:
-      lookahead_hours:
-        description: "Only refresh games starting within this many hours"
-        required: false
-        default: "24"
-      max_games:
-        description: "Maximum event-level alternate-spread requests this run"
-        required: false
-        default: "80"
 
 permissions:
   contents: write
@@ -131,12 +122,7 @@ jobs:
           )
           PY
 
-      - name: Build market history + preferred-side alternate spreads
-        env:
-          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
-          FETCH_ALT_LINES: "1"
-          ALT_LOOKAHEAD_HOURS: ${{ inputs.lookahead_hours }}
-          ALT_MAX_GAMES: ${{ inputs.max_games }}
+      - name: Build market history
         run: |
           python scripts/build_market_layer.py
 
@@ -148,7 +134,6 @@ jobs:
           git add data/odds.json
           git add data/projections.json
           git add data/market_history.json
-          git add data/alternate_spreads.json
 
           if git diff --cached --quiet; then
             echo "No THI market-layer changes to commit."
