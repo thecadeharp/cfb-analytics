@@ -45,6 +45,9 @@ jobs:
             data/projections.json \
             app.js \
             index.html \
+            final-matchup.js \
+            situational-profiles.js \
+            situational-profiles.css \
             thi-ratings-hub.js \
             data/thi_power_ratings.json \
             data/thi_observed_ratings.json \
@@ -60,6 +63,7 @@ jobs:
             -s scripts \
             -p 'test_situational_profiles.py' \
             -v
+          node scripts/test_situational_profiles_ui.cjs
 
       - name: Build independently verified profiles
         env:
@@ -87,7 +91,13 @@ jobs:
           assert report['coverage']['context_eligible_games'] > 0
           assert report['coverage']['context_eligible_possessions'] > 0
           assert report['coverage']['teams_profiled'] == len(report['teams'])
+          assert report['coverage']['game_efficiency_logs'] == len(report['games'])
           assert len(report['teams']) > 0
+          assert len(report['games']) > 0
+          assert all(0 <= game['excitement']['score'] <= 100
+                     for game in report['games'])
+          assert all(game['away']['possessions'] > 0 and game['home']['possessions'] > 0
+                     for game in report['games'])
           assert all('net_possession_rank' not in team for team in report['teams'])
           assert all(team['reliability'] in {'limited', 'developing', 'established'}
                      for team in report['teams'])
