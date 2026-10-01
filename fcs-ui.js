@@ -233,15 +233,15 @@
 
     const cells = Array.from(row.querySelectorAll(":scope > td"));
 
-    if (cells.length >= 7) {
-      cells[5].innerHTML = `
+    if (cells.length >= 8) {
+      cells[6].innerHTML = `
         <span class="hammer-fcs-badge">FCS FALLBACK</span>
         <div class="hammer-fcs-subtext">
           Preliminary cross-division model
         </div>
       `;
 
-      cells[6].innerHTML = `
+      cells[7].innerHTML = `
         <span class="hammer-fcs-untracked-badge">UNTRACKED</span>
         <div class="signal-record hammer-fcs-subtext">
           FCS fallback
