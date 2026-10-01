@@ -6,6 +6,19 @@
 
   <title>The Hammer Index | CFB Analytics</title>
 
+  <script>
+    (() => {
+      try {
+        const saved = localStorage.getItem("thi-color-theme");
+        const theme = saved === "dark" || saved === "light"
+          ? saved
+          : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+      } catch (_error) {}
+    })();
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1498,6 +1511,8 @@
   <script src="playoff-projection.js?v=2026-playoff-v01"></script>
   <link rel="stylesheet" href="thi-intelligence.css?v=2026-intelligence-v01">
   <script src="thi-intelligence.js?v=2026-intelligence-v01"></script>
+  <link rel="stylesheet" href="dark-mode.css?v=2026-dark-v01">
+  <script src="dark-mode.js?v=2026-dark-v01"></script>
 
   <!-- Cloudflare Web Analytics -->
   <script
