@@ -45,6 +45,32 @@ jobs:
         run: |
           python scripts/build_projections.py
 
+      - name: Build display-only THI season outlook
+        run: |
+          sha256sum \
+            scripts/build_projections.py \
+            data/cfb_metrics.json \
+            data/schedule.json \
+            data/projections.json \
+            > /tmp/thi-outlook-source.sha256
+          python -m unittest discover \
+            -s scripts \
+            -p 'test_build_thi_season_outlook.py' \
+            -v
+          python scripts/build_thi_season_outlook.py
+          sha256sum --check /tmp/thi-outlook-source.sha256
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path('data/thi_season_outlook.json').read_text())
+          assert report['meta']['status'] == 'DISPLAY_ONLY'
+          assert report['meta']['model_a_touched'] is False
+          assert len(report['teams']) == 138
+          assert report['history']
+          PY
+
       - name: Commit updated analytics
         run: |
           git config --global user.name "github-actions[bot]"
@@ -54,6 +80,7 @@ jobs:
           git add data/schedule.json
           git add data/odds.json
           git add data/projections.json
+          git add data/thi_season_outlook.json
 
           if git diff --staged --quiet; then
             echo "No CFB analytics changes to commit."
