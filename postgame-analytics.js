@@ -12,6 +12,7 @@
   let settledByGame = new Map();
   let signalReport = { signals: {} };
   let selectedGameId = null;
+  let trackingWeek = "LATEST";
   let observer = null;
 
   function hasValue(value) {
@@ -79,6 +80,13 @@
       #${SCORECARD_ID} th:first-child, #${SCORECARD_ID} td:first-child { text-align:left; }
       #${SCORECARD_ID} tr:last-child td { border-bottom:0; }
       #${SCORECARD_ID} .perf-confidence { display:inline-flex; padding:3px 6px; border:1px solid var(--border); border-radius:999px; font-family:var(--mono); font-size:7px; }
+      #${SCORECARD_ID} .perf-periods { display:flex; flex-wrap:wrap; gap:7px; padding:12px 12px 0; }
+      #${SCORECARD_ID} .perf-period { border:1px solid var(--border); border-radius:999px; padding:7px 11px; background:#fff; color:var(--muted); font:800 8px var(--mono); letter-spacing:.45px; cursor:pointer; }
+      #${SCORECARD_ID} .perf-period.active { border-color:#76526f; background:#f7f1f6; color:#76526f; }
+      #${SCORECARD_ID} .perf-section-label { padding:13px 13px 0; color:var(--muted); font:800 8px var(--mono); letter-spacing:.85px; text-transform:uppercase; }
+      #${SCORECARD_ID} .perf-week-table { padding:0 12px 13px; }
+      #${SCORECARD_ID} .perf-positive { color:#16734f; }
+      #${SCORECARD_ID} .perf-negative { color:#a44842; }
       #${PANEL_ID} { margin-top:18px; }
       #${PANEL_ID} .pg-shell {
         border:1px solid var(--border); border-radius:13px; background:var(--surface);
@@ -289,7 +297,9 @@
       if ((line < 0 && margin > 0) || (line > 0 && margin < 0)) winnerCorrect += 1;
     });
     const postgame = rows.filter(row => gameData(row.game_key)).length;
-    return { rows, ats, play, totals, totalRows, winnerCorrect, winnerDecisions:winnerRows.length, postgame,
+    const su = { wins:winnerCorrect, losses:Math.max(0, winnerRows.length - winnerCorrect), pushes:0, decisions:winnerRows.length,
+      pct:winnerRows.length ? 100 * winnerCorrect / winnerRows.length : null };
+    return { rows, ats, play, totals, totalRows, su, winnerCorrect, winnerDecisions:winnerRows.length, postgame,
       error:mean(rows, "public_abs_error") ?? mean(rows, "model_abs_error"), clv:mean(rows, "clv_points") };
   }
 
@@ -315,8 +325,8 @@
     return [...spreadRows, ...totalRows];
   }
 
-  function scorecardMarkup(week, weeklyRows, ytdRows) {
-    const weekly = performanceStats(weeklyRows);
+  function scorecardMarkup(period, selectedRows, ytdRows) {
+    const selected = performanceStats(selectedRows);
     const ytd = performanceStats(ytdRows);
     const body = signalRows(ytdRows).map(item => `<tr>
       <td>${escapeHtml(item.label)}</td><td>${item.sample}</td><td>${escapeHtml(recordText(item.rec))}</td>
@@ -324,37 +334,81 @@
       <td>${hasValue(item.clv) ? formatSigned(item.clv,1," pts") : "—"}</td>
       <td>${hasValue(item.beatPct) ? `${Number(item.beatPct).toFixed(1)}%` : "—"}</td>
       <td><span class="perf-confidence">${escapeHtml(item.confidence)}</span></td></tr>`).join("");
-    const weekLabel = week === null ? "Selected Week" : `Week ${week}`;
+    const weeks = [...new Set(ytdRows.map(row => Number(row.week)).filter(Number.isFinite))].sort((a, b) => a - b);
+    const weekLabel = period === "ALL" ? "Season to Date" : `Week ${period}`;
+    const periodButtons = ["ALL", ...weeks].map(value => `<button type="button" class="perf-period ${String(value) === String(period) ? "active" : ""}" data-tracking-week="${value}">${value === "ALL" ? "Season" : `Week ${value}`}</button>`).join("");
+    const weeklyBody = weeks.map(week => {
+      const stats = performanceStats(ytdRows.filter(row => Number(row.week) === week));
+      return `<tr><td>Week ${week}</td><td>${stats.rows.length}</td><td>${recordText(stats.su)}</td><td>${recordText(stats.ats)}</td><td>${recordText(stats.totals)}</td><td>${hasValue(stats.error) ? `${stats.error.toFixed(1)} pts` : "—"}</td><td>${hasValue(stats.clv) ? formatSigned(stats.clv,1," pts") : "—"}</td></tr>`;
+    }).join("");
     return `<div class="perf-shell">
       <div class="perf-header"><div><div class="perf-kicker">🔨 Transparent Model Tracking</div><div class="perf-title">${weekLabel} Performance</div></div>
-      <div class="perf-note">Live prospective results. Small samples are descriptive—not proof of future performance. Pushes are excluded from win percentages.</div></div>
+      <div class="perf-note">Frozen pregame projections graded against final scores and closing markets. Pushes are excluded from win percentages.</div></div>
+      <div class="perf-periods" aria-label="Model tracking period">${periodButtons}</div>
+      <div class="perf-section-label">${weekLabel}</div>
       <div class="perf-grid">
-        ${perfStat("Games Final",weekly.rows.length,`${weekly.postgame} postgame analyses available`)}
-        ${perfStat("Predicted Winners",`${weekly.winnerCorrect}-${Math.max(0,weekly.winnerDecisions-weekly.winnerCorrect)}`,hasValue(weekly.winnerDecisions) && weekly.winnerDecisions ? `${(100*weekly.winnerCorrect/weekly.winnerDecisions).toFixed(1)}% correct` : "No decisions")}
-        ${perfStat("Overall ATS",recordText(weekly.ats),hasValue(weekly.ats.pct) ? `${weekly.ats.pct.toFixed(1)}%` : "No decisions")}
-        ${perfStat("Play Tier ATS",recordText(weekly.play),hasValue(weekly.play.pct) ? `${weekly.play.pct.toFixed(1)}%` : "No decisions")}
-        ${perfStat("Flagged Totals",recordText(weekly.totals),hasValue(weekly.totals.pct) ? `${weekly.totals.pct.toFixed(1)}%` : "No decisions")}
-        ${perfStat("Average Margin Error",hasValue(weekly.error) ? `${weekly.error.toFixed(1)} pts` : "—","Absolute THI projection error")}
-        ${perfStat("Average CLV",hasValue(weekly.clv) ? formatSigned(weekly.clv,1," pts") : "—","Preferred-side closing value")}
-        ${perfStat("Season ATS",recordText(ytd.ats),hasValue(ytd.ats.pct) ? `${ytd.ats.pct.toFixed(1)}% YTD` : "No decisions")}
+        ${perfStat("Games Final",selected.rows.length,`${selected.postgame} postgame analyses available`)}
+        ${perfStat("Straight Up",recordText(selected.su),hasValue(selected.su.pct) ? `${selected.su.pct.toFixed(1)}% correct` : "No decisions")}
+        ${perfStat("Overall ATS",recordText(selected.ats),hasValue(selected.ats.pct) ? `${selected.ats.pct.toFixed(1)}%` : "No decisions")}
+        ${perfStat("Tracked Totals",recordText(selected.totals),hasValue(selected.totals.pct) ? `${selected.totals.pct.toFixed(1)}%` : "No decisions")}
+        ${perfStat("Play Tier ATS",recordText(selected.play),hasValue(selected.play.pct) ? `${selected.play.pct.toFixed(1)}%` : "No decisions")}
+        ${perfStat("Average Margin Error",hasValue(selected.error) ? `${selected.error.toFixed(1)} pts` : "—","Absolute THI projection error")}
+        ${perfStat("Average CLV",hasValue(selected.clv) ? formatSigned(selected.clv,1," pts") : "—","Preferred-side closing value")}
       </div>
+      <div class="perf-section-label">Season-to-Date Records</div>
+      <div class="perf-grid">
+        ${perfStat("SU YTD",recordText(ytd.su),hasValue(ytd.su.pct) ? `${ytd.su.pct.toFixed(1)}% correct` : "No decisions")}
+        ${perfStat("ATS YTD",recordText(ytd.ats),hasValue(ytd.ats.pct) ? `${ytd.ats.pct.toFixed(1)}%` : "No decisions")}
+        ${perfStat("Totals YTD",recordText(ytd.totals),hasValue(ytd.totals.pct) ? `${ytd.totals.pct.toFixed(1)}%` : "No decisions")}
+        ${perfStat("Play Tier YTD",recordText(ytd.play),hasValue(ytd.play.pct) ? `${ytd.play.pct.toFixed(1)}%` : "No decisions")}
+      </div>
+      <div class="perf-week-table"><div class="perf-ytd-title">Weekly Ledger</div><div class="perf-table-wrap"><table><thead><tr><th>Week</th><th>Finals</th><th>SU</th><th>ATS</th><th>Totals</th><th>Margin Error</th><th>Avg CLV</th></tr></thead><tbody>${weeklyBody}</tbody></table></div></div>
       <div class="perf-ytd"><div class="perf-ytd-title">Season-to-Date · Every Signal and Testing Key</div>
         <div class="perf-table-wrap"><table><thead><tr><th>Signal / Key</th><th>Games</th><th>Record</th><th>Win %</th><th>Avg CLV</th><th>Beat Close</th><th>Confidence</th></tr></thead><tbody>${body}</tbody></table></div>
       </div></div>`;
   }
 
   function applyPerformanceScorecard() {
-    const tabs = document.getElementById("week-tabs");
-    if (!tabs || !settledByGame.size) return;
-    const week = activeProjectionWeek();
+    const target = document.getElementById("model-tracking-container");
+    if (!target || !settledByGame.size) return;
     const ytdRows = Array.from(settledByGame.values()).filter(row => row.result_settled);
-    const weeklyRows = ytdRows.filter(row => week === null || Number(row.week) === Number(week));
-    const signature = `${week}|${weeklyRows.length}|${ytdRows.length}|${payload?.meta?.generated_at_utc || ""}|${signalReport?.generated_at_utc || ""}`;
+    const selectedRows = ytdRows.filter(row => trackingWeek === "ALL" || Number(row.week) === Number(trackingWeek));
+    const signature = `${trackingWeek}|${selectedRows.length}|${ytdRows.length}|${payload?.meta?.generated_at_utc || ""}|${signalReport?.generated_at_utc || ""}`;
     let card = document.getElementById(SCORECARD_ID);
-    if (!card) { card = document.createElement("section"); card.id = SCORECARD_ID; tabs.insertAdjacentElement("afterend",card); }
+    if (!card) { target.innerHTML = ""; card = document.createElement("section"); card.id = SCORECARD_ID; target.appendChild(card); }
     if (card.dataset.signature === signature) return;
     card.dataset.signature = signature;
-    card.innerHTML = scorecardMarkup(week,weeklyRows,ytdRows);
+    card.innerHTML = scorecardMarkup(trackingWeek,selectedRows,ytdRows);
+  }
+
+  function mountTrackingView() {
+    const nav = document.querySelector(".main-nav");
+    const main = document.querySelector("main.page");
+    if (!nav || !main) return;
+    if (!nav.querySelector('[data-view="model-tracking"]')) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "nav-item";
+      button.dataset.view = "model-tracking";
+      button.textContent = "Model Tracking";
+      button.addEventListener("click", () => { switchView("model-tracking"); applyPerformanceScorecard(); });
+      const anchor = nav.querySelector('[data-view="projections"]');
+      anchor?.after(button);
+    }
+    if (!document.getElementById("view-model-tracking")) {
+      const view = document.createElement("section");
+      view.id = "view-model-tracking";
+      view.className = "view";
+      view.innerHTML = `<div class="eyebrow">Prospective accountability</div><h1 class="page-title">Model Tracking</h1><p class="page-subtitle">Every frozen THI projection graded after the final: straight-up winners, ATS results, tracked totals, closing-line value and projection error.</p><div id="model-tracking-container"><div class="loading-state"><div class="spinner"></div>Loading settled results…</div></div>`;
+      const projections = document.getElementById("view-projections");
+      projections?.after(view);
+    }
+    document.getElementById("view-model-tracking")?.addEventListener("click", event => {
+      const control = event.target.closest("[data-tracking-week]");
+      if (!control) return;
+      trackingWeek = control.dataset.trackingWeek || "ALL";
+      applyPerformanceScorecard();
+    });
   }
 
   function settledData(gameId) {
@@ -669,6 +723,10 @@
           if (!current || String(row.captured_at_utc || "") < String(current.captured_at_utc || "")) earliest.set(id, row);
         });
         settledByGame = earliest;
+        if (trackingWeek === "LATEST") {
+          const weeks = Array.from(earliest.values()).map(row => Number(row.week)).filter(Number.isFinite);
+          trackingWeek = weeks.length ? String(Math.max(...weeks)) : "ALL";
+        }
       }
       if (signalResponse.ok) signalReport = await signalResponse.json();
     } catch (error) {
@@ -681,6 +739,7 @@
 
   async function start() {
     installStyles();
+    mountTrackingView();
     wrapSelectWeek();
     await load();
   }
