@@ -193,13 +193,13 @@
       const headers = Array.from(table.querySelectorAll("thead th")).map(cell => cell.textContent.trim());
       const rows = Array.from(table.querySelectorAll("tbody tr"));
       headers.forEach((header, column) => {
-        if (/team|conference|record|read|status|home|away|favorite|underdog|tier|signal/i.test(header)) return;
+        if (/rank|team|conference|record|read|status|home|away|favorite|underdog|tier|signal/i.test(header)) return;
         const cells = rows.map(row => row.children[column]).filter(Boolean);
         const values = cells.map(numericCellValue).filter(Number.isFinite);
         if (values.length < Math.max(3, Math.ceil(cells.length * .6))) return;
         const direction = /pace|plays|games|sample|schedule|sos/i.test(header)
           ? "context"
-          : /rank|defensive rating|def rating/i.test(header) ? "lower" : "higher";
+          : /defensive rating|def rating/i.test(header) ? "lower" : "higher";
         cells.forEach(cell => {
           const heat = heatStyle(values, numericCellValue(cell), direction);
           cell.classList.remove("thi-hub-heat", "positive", "negative", "context");
