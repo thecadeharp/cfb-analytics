@@ -1305,6 +1305,7 @@
           </div>
           <span class="final-label">FINAL</span>
         </td>
+        <td><div class="line-secondary">Postgame viewing score follows the verified ledger.</div></td>
         <td>
           <div class="line-primary">${escapeHtml(shortSpread(result.public_home_spread ?? result.model_home_spread))}</div>
           <div class="line-secondary">Frozen public line</div>
@@ -1394,6 +1395,8 @@
             ${escapeHtml(gameDateText(game.start_date))}
           </div>
         </td>
+
+        <td>${window.THIIntelligence?.watchMarkup?.(game) ?? "—"}</td>
 
         <td>
           <div class="line-primary">
@@ -1486,6 +1489,7 @@
         <thead>
           <tr>
             <th>Matchup</th>
+            <th>THI Watch</th>
             <th>Fair Line</th>
             <th>Market</th>
             <th>Total</th>
@@ -1513,6 +1517,8 @@
     const comparison = effectiveComparison(game);
     const adjustedSpread = effectiveModelSpread(game);
     const adjustedTotal = effectiveModelTotal(game);
+
+    if (settled) container.querySelector('.thi-watch-detail')?.remove();
 
     // Total weather adjustments are independent of the directional spread gate.
     // Keep the headline total in sync whenever Weather Engine data is available.
