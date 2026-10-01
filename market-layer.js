@@ -6,8 +6,6 @@
   //
   // Performance + presentation pass:
   // - Keeps directional movement relative to THI.
-  // - Collapses long alt ladders to a compact 8-row default.
-  // - Keeps MAIN + THI-nearby lines prioritized in the compact view.
   // - Avoids destroying/rebuilding the market layer when nothing changed.
   // - Ignores its own DOM mutations.
   // - Lazy-loads market JSON only when a matchup is actually present.
@@ -16,16 +14,13 @@
   // ==========================================================================
 
   const PROJECTIONS_URL = "./data/projections.json";
-  const ALTS_URL = "./data/alternate_spreads.json";
   const HISTORY_URL = "./data/market_history.json";
 
   const ROOT_ID = "thi-market-story";
   const STYLE_ID = "thi-market-layer-styles-v2";
-  const COMPACT_ALT_ROWS = 8;
   const REFRESH_MS = 5 * 60 * 1000;
 
   let projectionGames = [];
-  let altGames = {};
   let historyGames = {};
 
   let containerObserver = null;
@@ -37,19 +32,6 @@
   let dataLoading = null;
   let lastRenderSignature = "";
   let lastMatchupKey = "";
-  let expandedGameKey = null;
-
-  const BOOK_CLASS = {
-    draftkings: "book-dk",
-    fanduel: "book-fd",
-    betmgm: "book-mgm",
-    caesars: "book-czr",
-    betrivers: "book-br",
-    fanatics: "book-fan",
-    espnbet: "book-espn",
-    hardrockbet: "book-hr",
-  };
-
   function esc(value) {
     return String(value ?? "")
       .replaceAll("&", "&amp;")
@@ -91,12 +73,6 @@
     return `${n > 0 ? "+" : ""}${n.toFixed(1)}`;
   }
 
-  function fmtPrice(value) {
-    const n = num(value);
-    if (n === null) return "—";
-    return n > 0 ? `+${Math.round(n)}` : String(Math.round(n));
-  }
-
   function payloadGames(payload) {
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload?.games)) return payload.games;
@@ -118,21 +94,13 @@
     if (dataLoaded && !force) return;
 
     dataLoading = (async () => {
-      const [p, a, h] = await Promise.allSettled([
+      const [p, h] = await Promise.allSettled([
         fetchJson(PROJECTIONS_URL),
-        fetchJson(ALTS_URL),
         fetchJson(HISTORY_URL),
       ]);
 
       if (p.status === "fulfilled") {
         projectionGames = payloadGames(p.value);
-      }
-
-      if (a.status === "fulfilled") {
-        altGames =
-          a.value?.games && typeof a.value.games === "object"
-            ? a.value.games
-            : {};
       }
 
       if (h.status === "fulfilled") {
@@ -257,7 +225,7 @@
 
       #${ROOT_ID} .thi-market-grid {
         display: grid;
-        grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr);
+        grid-template-columns: minmax(0, 1fr);
         gap: 12px;
         align-items: start;
       }
@@ -563,198 +531,6 @@
     document.head.appendChild(style);
   }
 
-  function bookBadge(row) {
-    const key = String(row?.bookmaker_key || "");
-    const abbr = String(
-      row?.book_abbr || row?.bookmaker || "BOOK"
-    )
-      .slice(0, 5)
-      .toUpperCase();
-
-    const css = BOOK_CLASS[key] || "";
-    return `<span class="thi-book ${esc(css)}" title="${esc(
-      row?.bookmaker || abbr
-    )}">${esc(abbr)}</span>`;
-  }
-
-  function linePoint(row) {
-    return num(row?.point);
-  }
-
-  function compactAltLines(lines, modelSide) {
-    if (!Array.isArray(lines) || lines.length <= COMPACT_ALT_ROWS) {
-      return lines || [];
-    }
-
-    const main = lines.find((row) => row?.is_main) || null;
-    const mainPoint = linePoint(main);
-
-    const ranked = lines
-      .map((row, index) => {
-        const point = linePoint(row);
-
-        const modelDistance =
-          point === null || modelSide === null
-            ? Number.POSITIVE_INFINITY
-            : Math.abs(point - modelSide);
-
-        const mainDistance =
-          point === null || mainPoint === null
-            ? Number.POSITIVE_INFINITY
-            : Math.abs(point - mainPoint);
-
-        return {
-          row,
-          index,
-          score: Math.min(modelDistance, mainDistance),
-          mustKeep: Boolean(row?.is_main),
-        };
-      })
-      .sort((a, b) => {
-        if (a.mustKeep !== b.mustKeep) return a.mustKeep ? -1 : 1;
-        if (a.score !== b.score) return a.score - b.score;
-        return a.index - b.index;
-      })
-      .slice(0, COMPACT_ALT_ROWS)
-      .sort((a, b) => a.index - b.index);
-
-    return ranked.map((item) => item.row);
-  }
-
-  function altRowsHtml(lines, preferred) {
-    return lines
-      .map((row) => {
-        const distance = num(row.distance_from_thi);
-        const inside = distance !== null && distance >= 0;
-
-        const label =
-          row.distance_label ||
-          (distance === null
-            ? "—"
-            : `${Math.abs(distance).toFixed(1)} pts ${
-                inside ? "inside" : "beyond"
-              } THI`);
-
-        return `
-          <tr class="${row.is_main ? "main" : ""}">
-            <td>
-              <span class="thi-alt-line">${esc(preferred)} ${esc(
-          fmtSpread(row.point)
-        )}</span>
-              ${
-                row.is_main
-                  ? `<span class="thi-main-pill">Main</span>`
-                  : ""
-              }
-            </td>
-            <td class="thi-alt-price">${esc(fmtPrice(row.price))}</td>
-            <td>${bookBadge(row)}</td>
-            <td class="thi-alt-distance ${inside ? "inside" : ""}">
-              ${esc(label)}
-            </td>
-          </tr>
-        `;
-      })
-      .join("");
-  }
-
-  function altPanel(game, altRow, preferred, home, away, expanded) {
-    const modelSide = sideSpread(
-      modelHomeSpread(game),
-      preferred,
-      home,
-      away
-    );
-
-    if (!altRow || !Array.isArray(altRow.lines) || !altRow.lines.length) {
-      return `
-        <div class="thi-market-panel">
-          <div class="thi-market-head">
-            <div>
-              <div class="thi-market-kicker">Market options</div>
-              <div class="thi-market-title">Alternate spreads — ${esc(
-                preferred || "THI preferred side"
-              )}</div>
-            </div>
-            <div class="thi-market-reference">
-              <div class="thi-market-reference-label">THI Spread</div>
-              <div class="thi-market-reference-value">
-                ${
-                  preferred && modelSide !== null
-                    ? `${esc(preferred)} ${esc(fmtSpread(modelSide))}`
-                    : "—"
-                }
-              </div>
-            </div>
-          </div>
-          <div class="thi-market-empty">
-            Alternate prices have not been refreshed for this matchup yet.
-            Main THI analysis is unaffected.
-          </div>
-        </div>
-      `;
-    }
-
-    const allLines = altRow.lines;
-    const visibleLines = expanded
-      ? allLines
-      : compactAltLines(allLines, modelSide);
-
-    const hiddenCount = Math.max(0, allLines.length - visibleLines.length);
-
-    return `
-      <div class="thi-market-panel" data-thi-alt-panel>
-        <div class="thi-market-head">
-          <div>
-            <div class="thi-market-kicker">What the market offers on THI's side</div>
-            <div class="thi-market-title">Alternate spreads — ${esc(
-              preferred
-            )}</div>
-          </div>
-          <div class="thi-market-reference">
-            <div class="thi-market-reference-label">THI Spread</div>
-            <div class="thi-market-reference-value">${esc(
-              preferred
-            )} ${esc(fmtSpread(modelSide))}</div>
-          </div>
-        </div>
-
-        <table class="thi-alt-table">
-          <thead>
-            <tr>
-              <th>Line</th>
-              <th>Price</th>
-              <th>Book</th>
-              <th>Distance From THI</th>
-            </tr>
-          </thead>
-          <tbody>${altRowsHtml(visibleLines, preferred)}</tbody>
-        </table>
-
-        ${
-          allLines.length > COMPACT_ALT_ROWS
-            ? `
-          <div class="thi-alt-toggle-wrap">
-            <button
-              type="button"
-              class="thi-alt-toggle"
-              data-thi-alt-toggle
-              aria-expanded="${expanded ? "true" : "false"}"
-            >
-              ${
-                expanded
-                  ? "Show compact alternate spreads"
-                  : `Show all alternate spreads (${allLines.length}) · ${hiddenCount} more`
-              }
-            </button>
-          </div>
-        `
-            : ""
-        }
-      </div>
-    `;
-  }
-
   function movementState(firstCaptured, current, model) {
     if (
       firstCaptured === null ||
@@ -943,17 +719,7 @@
     );
   }
 
-  function renderSignature(game, historyRow, altRow, preferred, expanded) {
-    const altLines = Array.isArray(altRow?.lines)
-      ? altRow.lines.map((row) => [
-          row?.point,
-          row?.price,
-          row?.bookmaker_key,
-          row?.is_main,
-          row?.distance_from_thi,
-        ])
-      : [];
-
+  function renderSignature(game, historyRow, preferred) {
     return JSON.stringify({
       game: gameId(game),
       preferred,
@@ -965,8 +731,6 @@
         null,
       current: historyRow?.current_home_spread ?? null,
       close: historyRow?.close_home_spread ?? null,
-      alt: altLines,
-      expanded,
     });
   }
 
@@ -985,25 +749,10 @@
       teams.home
     );
 
-    const altRow =
-      regularMarketGame && preferred
-        ? findDataRow(
-            altGames,
-            game,
-            teams.away,
-            teams.home
-          )
-        : null;
-
-    const key = gameId(game) || matchupKey(teams);
-    const expanded = expandedGameKey === key;
-
     const signature = renderSignature(
       game,
       historyRow,
-      altRow,
-      preferred,
-      expanded
+      preferred
     );
 
     const analysisGrid = container.querySelector(".analysis-grid");
@@ -1047,14 +796,6 @@
     if (regularMarketGame && preferred) {
       marketHtml = `
         <div class="thi-market-grid">
-          ${altPanel(
-            game,
-            altRow,
-            preferred,
-            teams.home,
-            teams.away,
-            expanded
-          )}
           ${movementPanel(
             game,
             historyRow,
@@ -1102,7 +843,6 @@
     if (key !== lastMatchupKey) {
       lastMatchupKey = key;
       lastRenderSignature = "";
-      expandedGameKey = null;
     }
 
     await loadData(forceDataRefresh);
@@ -1178,29 +918,8 @@
     bindTitleObserver();
   }
 
-  function bindRootEvents() {
-    document.addEventListener("click", (event) => {
-      const button = event.target.closest("[data-thi-alt-toggle]");
-      if (!button) return;
-
-      const teams = currentMatchupTeams();
-      if (!teams) return;
-
-      const game = findProjection(teams.away, teams.home);
-      if (!game) return;
-
-      const key = gameId(game) || matchupKey(teams);
-      expandedGameKey =
-        expandedGameKey === key ? null : key;
-
-      lastRenderSignature = "";
-      renderMarketLayer(game, teams);
-    });
-  }
-
   async function init() {
     installStyles();
-    bindRootEvents();
     bindContainerObserver();
 
     // Lazy: if there is no matchup open, do not download market-layer data yet.
