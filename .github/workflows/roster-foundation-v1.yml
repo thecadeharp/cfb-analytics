@@ -2,6 +2,11 @@ name: Roster Foundation v1
 
 on:
   workflow_dispatch:
+    inputs:
+      through_week:
+        description: "Completed week for player usage; 0 detects latest completed week"
+        required: false
+        default: "0"
 
   schedule:
     # Preseason roster data only needs a weekly refresh.
@@ -45,6 +50,13 @@ jobs:
         run: |
           python scripts/build_roster_foundation.py
 
+      - name: Build roster and usage assets
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+          THROUGH_WEEK: ${{ inputs.through_week || '0' }}
+        run: |
+          python scripts/build_roster_assets.py
+
       - name: Verify Model A remained unchanged
         run: |
           sha256sum --check /tmp/model-a-before.sha256
@@ -68,6 +80,12 @@ jobs:
               team.get("talent_composite") is not None
               for team in data["teams"].values()
           ) >= 130
+          with open("data/roster_assets.json", encoding="utf-8") as file:
+              assets = json.load(file)
+          assert assets["meta"]["model_usage"] == "display_only_not_used_by_model_a"
+          assert assets["meta"]["official_depth_chart"] is False
+          assert len(assets.get("teams", {})) >= 125
+          assert assets["meta"]["player_count"] >= 5000
           print("Roster foundation validation passed")
           PY
 
@@ -76,5 +94,6 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/roster_foundation.json
+          git add data/roster_assets.json
           git diff --staged --quiet || git commit -m "Refresh roster foundation"
           git push
