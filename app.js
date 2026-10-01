@@ -2267,6 +2267,7 @@ function renderProjections() {
       <thead>
         <tr>
           <th>Matchup</th>
+          <th>THI Watch</th>
           <th>Our Line</th>
           <th>Market</th>
           <th>Total</th>
@@ -2339,6 +2340,10 @@ function renderProjectionRow(game) {
         <div class="team-meta" style="margin-top:5px;">
           ${escapeHtml(gameDateText(game.start_date))}
         </div>
+      </td>
+
+      <td>
+        ${window.THIIntelligence?.watchMarkup?.(game) ?? "—"}
       </td>
 
       <td>
@@ -3252,6 +3257,8 @@ function renderMatchup(game) {
       </div>
     </div>
 
+    ${window.THIIntelligence?.matchupWatchMarkup?.(game) ?? ""}
+
     <div class="model-edge-banner">
       <div>
         <div class="model-edge-title">Model Signal</div>
@@ -3565,6 +3572,9 @@ function renderRatings() {
   const externalLabel = externalRatingsData
     ? `Schedule and résumé context: Week ${externalWeek ?? "—"}.`
     : "Schedule and résumé context is awaiting its first refresh.";
+
+  const conferenceStrength = window.THIIntelligence?.conferenceStrengthMarkup?.()
+    ?? '<div class="empty-state">Conference Landscape is loading.</div>';
 
   const marketRows = data
     .map(team => ({
@@ -3937,6 +3947,12 @@ function renderRatings() {
       >Conference Standings</button>
 
       <button
+        class="ratings-toggle-button ${currentRatingsMode === "strength" ? "active" : ""}"
+        type="button"
+        onclick="setRatingsMode('strength')"
+      >Conference Landscape</button>
+
+      <button
         class="ratings-toggle-button ${currentRatingsMode === "market" ? "active" : ""}"
         type="button"
         onclick="setRatingsMode('market')"
@@ -3946,6 +3962,8 @@ function renderRatings() {
     ${
       currentRatingsMode === "conferences"
         ? conferenceTable
+        : currentRatingsMode === "strength"
+          ? conferenceStrength
         : currentRatingsMode === "market"
           ? marketTable
         : currentRatingsMode === "advanced"
@@ -3956,7 +3974,7 @@ function renderRatings() {
 }
 
 function setRatingsMode(mode) {
-  currentRatingsMode = ["overview", "advanced", "conferences", "market"].includes(mode)
+  currentRatingsMode = ["overview", "advanced", "conferences", "strength", "market"].includes(mode)
     ? mode
     : "overview";
 
