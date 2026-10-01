@@ -199,6 +199,7 @@ def prepare_possessions(raw: pd.DataFrame, ledger: pd.DataFrame, coefficients: n
             exclusions["missing_verified_source_game"] += 1
             continue
         target = targets[["game_id", "drive_id", "possession_team_id", "start_period",
+                          "start_clock_minutes", "start_clock_seconds",
                           "start_yards_to_endzone", "offensive_points"]].copy()
         target = target.rename(columns={"offensive_points": "target_offensive_points"})
         margins, reason = game_margins(raw_game, target)
@@ -336,11 +337,138 @@ def build_profiles(possessions: pd.DataFrame):
     return sorted(teams, key=lambda item: item["team"])
 
 
-def run(raw: pd.DataFrame, season: int, through_week: int, coefficients: np.ndarray):
+def excitement_label(score: int):
+    if score >= 90:
+        return "Instant Classic"
+    if score >= 80:
+        return "Must Rewatch"
+    if score >= 70:
+        return "High Drama"
+    if score >= 55:
+        return "Competitive"
+    return "Routine"
+
+
+def excitement_profile(game: pd.DataFrame, final_margin: int, total_points: int):
+    """Describe how compelling an admitted completed game was.
+
+    This is deliberately retrospective. It uses final-score closeness and the
+    verified possession sequence; it is never a pregame prediction or a model
+    feature.
+    """
+    ordered = game.sort_values(
+        ["start_period", "start_clock_minutes", "start_clock_seconds"],
+        ascending=[True, False, False], kind="stable",
+    ).copy()
+    home_id = str(ordered.home_team_id.iloc[0])
+    ordered["home_start_margin"] = np.where(
+        ordered.team_id.astype(str).eq(home_id),
+        ordered.start_score_margin,
+        -ordered.start_score_margin,
+    )
+    fourth = ordered.loc[ordered.start_period.eq(4)]
+    late_one_score = int(fourth.home_start_margin.abs().le(8).sum())
+    late_share = late_one_score / len(fourth) if len(fourth) else 0.0
+
+    signs = np.sign(ordered.home_start_margin.to_numpy(float))
+    non_tied = signs[signs != 0]
+    lead_changes = int(np.sum(non_tied[1:] != non_tied[:-1])) if len(non_tied) > 1 else 0
+    tied_starts = int(ordered.home_start_margin.eq(0).sum())
+    scoring_rate = float(ordered.target_offensive_points.gt(0).mean())
+
+    components = {
+        "final_score_tension": round(max(0.0, 1.0 - final_margin / 28.0) * 35.0, 1),
+        "late_game_pressure": round(min(1.0, late_share) * 25.0, 1),
+        "lead_exchange": round(min(1.0, (lead_changes + 0.5 * tied_starts) / 4.0) * 20.0, 1),
+        "scoring_activity": round(
+            min(1.0, total_points / 70.0) * 10.0
+            + min(1.0, scoring_rate / 0.45) * 10.0,
+            1,
+        ),
+    }
+    score = int(round(min(100.0, sum(components.values()))))
+    return {
+        "score": score,
+        "label": excitement_label(score),
+        "components": components,
+        "lead_changes": lead_changes,
+        "tied_possession_starts": tied_starts,
+        "fourth_quarter_one_score_possessions": late_one_score,
+        "fourth_quarter_possessions": int(len(fourth)),
+        "definition": (
+            "Retrospective 0-100 score from final-score tension, verified fourth-quarter "
+            "one-score possession share, lead exchanges and scoring activity."
+        ),
+    }
+
+
+def game_side_summary(group: pd.DataFrame):
+    short = group.loc[group.start_yards_to_endzone.le(40)]
+    return {
+        "possessions": int(len(group)),
+        "points_per_possession": rounded(group.target_offensive_points.mean()),
+        "expected_start_points_per_possession": rounded(group.expected_points.mean()),
+        "points_over_expected_per_possession": rounded(group.points_over_expected.mean()),
+        "scoring_possession_rate": rounded(group.target_offensive_points.gt(0).mean()),
+        "empty_possession_rate": rounded(group.target_offensive_points.eq(0).mean()),
+        "average_start_field_position": rounded((100 - group.start_yards_to_endzone).mean()),
+        "short_field_possessions": int(len(short)),
+        "short_field_points_per_possession": (
+            rounded(short.target_offensive_points.mean()) if len(short) else None
+        ),
+    }
+
+
+def build_game_logs(possessions: pd.DataFrame, verified: pd.DataFrame):
+    final = final_score_by_period(verified)
+    final.index = final.index.map(identifier)
+    games = []
+    for game_id, game in possessions.groupby("game_id", sort=True):
+        game_id = str(game_id)
+        source = final.loc[game_id]
+        home_id = identifier(source.homeTeamId)
+        away_id = identifier(source.awayTeamId)
+        home = game.loc[game.team_id.astype(str).eq(str(home_id))]
+        away = game.loc[game.team_id.astype(str).eq(str(away_id))]
+        if home.empty or away.empty:
+            continue
+        home_points = int(source.homeScore)
+        away_points = int(source.awayScore)
+        home_summary = game_side_summary(home)
+        away_summary = game_side_summary(away)
+        game = game.copy()
+        game["home_team_id"] = home_id
+        games.append({
+            "game_id": game_id,
+            "week": int(game.week.iloc[0]),
+            "away_team_id": away_id,
+            "away_team": str(source.awayTeamName),
+            "away_points": away_points,
+            "home_team_id": home_id,
+            "home_team": str(source.homeTeamName),
+            "home_points": home_points,
+            "winner": (str(source.homeTeamName) if home_points > away_points
+                       else str(source.awayTeamName) if away_points > home_points else "Tie"),
+            "possession_value_edge": rounded(
+                home_summary["points_over_expected_per_possession"]
+                - away_summary["points_over_expected_per_possession"]
+            ),
+            "away": away_summary,
+            "home": home_summary,
+            "excitement": excitement_profile(
+                game, abs(home_points - away_points), home_points + away_points
+            ),
+        })
+    return sorted(games, key=lambda row: (row["week"], row["game_id"]))
+
+
+def run_detailed(raw: pd.DataFrame, season: int, through_week: int,
+                 coefficients: np.ndarray):
     verified, events, ids, verification = verified_inputs(raw, season, through_week)
     ledger, scoring, review, ledger_counts = build_ledger(verified, events)
     possessions, context_exclusions = prepare_possessions(verified, ledger, coefficients)
     profiles = build_profiles(possessions)
+    games = build_game_logs(possessions, verified)
     coverage = {
         **verification,
         "independently_verified_games": len(ids),
@@ -349,10 +477,16 @@ def run(raw: pd.DataFrame, season: int, through_week: int, coefficients: np.ndar
         "context_eligible_games": int(possessions.game_id.nunique()),
         "context_eligible_possessions": len(possessions),
         "teams_profiled": len(profiles),
+        "game_efficiency_logs": len(games),
         "context_exclusions": context_exclusions,
         "review_queue_rows": len(review),
         "scoring_event_rows": len(scoring),
     }
+    return profiles, games, coverage
+
+
+def run(raw: pd.DataFrame, season: int, through_week: int, coefficients: np.ndarray):
+    profiles, _games, coverage = run_detailed(raw, season, through_week, coefficients)
     return profiles, coverage
 
 
@@ -382,7 +516,9 @@ def main():
             source_sha = digest(path)
     if args.local_parquet:
         source_sha = digest(path)
-    profiles, coverage = run(raw, args.season, args.through_week, coefficients)
+    profiles, games, coverage = run_detailed(
+        raw, args.season, args.through_week, coefficients
+    )
     report = {
         "meta": {
             "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -393,13 +529,14 @@ def main():
             "source_parquet_sha256": source_sha,
             "source_asset": asset["browser_download_url"] if asset else "local_parquet",
             "model_a_touched": False,
-            "production_use": "descriptive postgame research only; no projection, rating, or wager input",
+            "production_use": "descriptive team profiles, game efficiency logs and retrospective excitement only; no projection, rating, or wager input",
             "update_policy": "Completed games only; independently verified finals; whole-game quarantine for unresolved possession or score context.",
             "sample_warning": "Early-season and quarantined-game coverage can be thin. Reliability labels describe sample size; values are not team rankings.",
             "team_scope": "All teams in admitted games are retained, including FCS opponents, for FBS-vs-FCS context.",
         },
         "coverage": coverage,
         "teams": profiles,
+        "games": games,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
