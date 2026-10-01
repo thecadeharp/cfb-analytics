@@ -1734,6 +1734,13 @@
           </div>
         </div>
 
+        <div
+          id="thi-game-efficiency-log"
+          data-away-team="${escapeHtml(awayName)}"
+          data-home-team="${escapeHtml(homeName)}"
+          aria-live="polite"
+        ></div>
+
         <div class="hammer-pg-grid">
           ${panels.join("")}
         </div>
