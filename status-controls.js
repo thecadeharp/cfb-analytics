@@ -555,7 +555,7 @@
       divider.dataset.hammerStatus = rowStatus(row);
 
       const cell = document.createElement("td");
-      cell.colSpan = 7;
+      cell.colSpan = 8;
 
       const box = document.createElement("div");
       box.className = "hammer-day-divider-box";
