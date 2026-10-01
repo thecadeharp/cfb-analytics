@@ -1,0 +1,148 @@
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg:#0d1117;
+  --surface:#151b23;
+  --surface-2:#111720;
+  --surface-soft:#111720;
+  --border:#29323d;
+  --border-dark:#3a4653;
+  --text:#e6edf3;
+  --ink:#e6edf3;
+  --muted:#9aa7b4;
+  --muted-light:#74808c;
+  --green:#58c7a0;
+  --green-light:#14382f;
+  --amber:#e3a64f;
+  --amber-light:#392a14;
+  --red:#ef8175;
+  --red-light:#3a2020;
+  --blue:#82afe2;
+  --line:#29323d;
+}
+
+html[data-theme="dark"] body { background:var(--bg); color:var(--text); }
+html[data-theme="dark"] .site-header { background:rgba(13,17,23,.94); }
+html[data-theme="dark"] .nav-item:hover { background:rgba(255,255,255,.06); }
+html[data-theme="dark"] .nav-item.active { background:#252d38; color:var(--text); }
+html[data-theme="dark"] .brand-mark { background:#e6edf3; color:#0d1117; }
+html[data-theme="dark"] a { color:#78c9ac; }
+
+.thi-theme-toggle {
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  flex:0 0 auto; min-height:32px; padding:6px 9px;
+  border:1px solid var(--border); border-radius:7px;
+  background:var(--surface); color:var(--text); cursor:pointer;
+  font:700 9px var(--mono); letter-spacing:.04em;
+}
+.thi-theme-toggle:hover { border-color:var(--border-dark); }
+.thi-theme-toggle:focus-visible { outline:2px solid var(--blue); outline-offset:2px; }
+
+html[data-theme="dark"] :is(input,select,textarea) {
+  background:#111720 !important; color:var(--text) !important; border-color:var(--border) !important;
+}
+html[data-theme="dark"] :is(.projection-table,.pv-table,.thi-hub-table,.perf-week-table,.alt-table,.season-schedule-table) thead,
+html[data-theme="dark"] #thi-performance-scorecard th {
+  background:#111720 !important;
+}
+html[data-theme="dark"] :is(.projection-table,.pv-table,.thi-hub-table) tbody tr:hover,
+html[data-theme="dark"] .season-schedule-table tbody tr:hover,
+html[data-theme="dark"] .projection-table tbody tr.game-row:hover {
+  background:#1b232d !important;
+}
+html[data-theme="dark"] :is(.projection-table,.pv-table,.thi-hub-table,.perf-week-table,.alt-table,.season-schedule-table) td,
+html[data-theme="dark"] :is(.metric-row,.analysis-row,.insight-card,.thi-profile-stat,.thi-matchup-metric-row) {
+  border-color:var(--border) !important;
+}
+
+html[data-theme="dark"] :is(
+  .ratings-toggle-button,.conference-filter-select,.summary-filter,
+  .thi-roster-group,.thi-metric-guide,.thi-stands-out-header,.thi-standout-card,
+  .thi-metric-guide-card,.thi-context-card,.schedule-view-button,
+  .perf-period,.perf-stat,.pg-metric,.mobile-projection-card,
+  .thi-team-summary,.thi-unit-matchup,.thi-observed-ratings
+) { background:var(--surface) !important; color:var(--text) !important; }
+
+html[data-theme="dark"] :is(
+  .sample-warning,.thi-rating-reliability,.thi-roster-source-note,
+  .thi-roster-group>summary,.thi-availability-empty,.thi-availability-foot,
+  .thi-intel-summary article,.thi-intel-panel,.thi-intel-method,
+  .thi-resume-item,.thi-cfp-bubble div,.thi-cfp-game-meta,
+  .thi-sp-side,.thi-sp-match-card,.thi-gel-excitement,.thi-gel-columns,.thi-gel-edge,
+  .research-preview,.completed-row
+) { background:var(--surface-soft) !important; }
+
+html[data-theme="dark"] :is(.thi-context-fact,.thi-context-flags,.alt-table td,.season-schedule-table td) {
+  border-color:var(--border) !important;
+}
+html[data-theme="dark"] :is(.thi-context-flag,.schedule-context-chip) {
+  background:#392f15 !important; border-color:#6d5a25 !important; color:#f1cd67 !important;
+}
+html[data-theme="dark"] :is(.thi-metric-guide-subtitle,.thi-standout-copy,.thi-standout-strength) { color:var(--muted) !important; }
+html[data-theme="dark"] .thi-standout-copy strong { color:var(--text) !important; }
+html[data-theme="dark"] .thi-metric-guide-note { background:#252039 !important; color:#cabcf2 !important; border-color:#514477 !important; }
+html[data-theme="dark"] .thi-conf-band { background:#29404a; }
+html[data-theme="dark"] .thi-conf-median { background:#9ccce0; }
+html[data-theme="dark"] .thi-cfp-round { background:#111720; }
+html[data-theme="dark"] .thi-cfp-champion { background:#080c11; }
+html[data-theme="dark"] .thi-intel-summary article.featured,
+html[data-theme="dark"] .thi-resume-item.featured { background:#153129 !important; border-color:#2f6757; }
+html[data-theme="dark"] .thi-watch { background:#15312c; border-color:#2f6256; }
+html[data-theme="dark"] .thi-watch strong { color:#73d0b5; }
+html[data-theme="dark"] .week-tab.active { background:#e2e8ee; border-color:#e2e8ee; color:#10161e; }
+html[data-theme="dark"] :is(.hammer-fcs-matchup-disclosure,.hammer-fcs-score-withheld) {
+  background:#302b1d !important; border-color:#6c6038 !important;
+}
+html[data-theme="dark"] :is(.hammer-fcs-matchup-disclosure-title,.hammer-fcs-score-withheld-title) { color:#ead58e !important; }
+html[data-theme="dark"] :is(.hammer-fcs-matchup-disclosure-copy,.hammer-fcs-score-withheld-copy) { color:#c9bd96 !important; }
+html[data-theme="dark"] :is(.hammer-fcs-matchup-disclosure-copy,.hammer-fcs-score-withheld-copy) strong { color:#f2e6b5 !important; }
+html[data-theme="dark"] .hammer-fcs-fallback-row { background:#171a19 !important; }
+html[data-theme="dark"] .testing-notice-bar {
+  background:#302b1d !important; color:#e6d89e !important; border-color:#6c6038 !important;
+}
+
+html[data-theme="dark"] .thi-band-elite { background:#0c6049 !important; color:#f2fffb !important; }
+html[data-theme="dark"] .thi-band-strong { background:#217353 !important; color:#f2fffb !important; }
+html[data-theme="dark"] .thi-band-above { background:#254d3e !important; color:#d7f4e8 !important; }
+html[data-theme="dark"] .thi-band-average { background:#29313a !important; color:#d4dbe2 !important; }
+html[data-theme="dark"] .thi-band-below { background:#4a3d1f !important; color:#f2d77d !important; }
+html[data-theme="dark"] .thi-band-poor { background:#603c23 !important; color:#ffd1a9 !important; }
+html[data-theme="dark"] .thi-band-critical { background:#692f30 !important; color:#ffd9d6 !important; }
+html[data-theme="dark"] .thi-band-missing { background:#202832 !important; color:#8995a1 !important; }
+html[data-theme="dark"] .thi-band-regression { background:#30294a !important; color:#d6c9ff !important; }
+html[data-theme="dark"] #hammer-postgame-analytics .hammer-pg-band-elite { background:#0c6049 !important; color:#f2fffb !important; }
+html[data-theme="dark"] #hammer-postgame-analytics .hammer-pg-band-strong { background:#217353 !important; color:#f2fffb !important; }
+html[data-theme="dark"] #hammer-postgame-analytics .hammer-pg-band-above { background:#254d3e !important; color:#d7f4e8 !important; }
+html[data-theme="dark"] #hammer-postgame-analytics .hammer-pg-band-average { background:#29313a !important; color:#d4dbe2 !important; }
+html[data-theme="dark"] #hammer-postgame-analytics .hammer-pg-band-below { background:#4a3d1f !important; color:#f2d77d !important; }
+html[data-theme="dark"] #hammer-postgame-analytics .hammer-pg-band-poor { background:#603c23 !important; color:#ffd1a9 !important; }
+html[data-theme="dark"] #hammer-postgame-analytics .hammer-pg-band-critical { background:#692f30 !important; color:#ffd9d6 !important; }
+
+html[data-theme="dark"] #thi-market-story :is(.thi-market-head,.thi-market-grid,.thi-market-card,.thi-market-empty),
+html[data-theme="dark"] #thi-market-story .thi-market-panel,
+html[data-theme="dark"] #thi-performance-scorecard :is(.perf-stat,.perf-period),
+html[data-theme="dark"] #thi-postgame-panel :is(.pg-metric,.pg-note),
+html[data-theme="dark"] #hammer-postgame-analytics :is(.hammer-pg-card,.hammer-pg-row,.hammer-pg-pending) {
+  background:var(--surface) !important; color:var(--text) !important;
+}
+html[data-theme="dark"] #thi-market-story :is(.thi-market-head,.thi-market-empty),
+html[data-theme="dark"] #thi-performance-scorecard th,
+html[data-theme="dark"] #thi-postgame-panel .pg-note {
+  background:var(--surface-soft) !important;
+}
+
+html[data-theme="dark"] :is(.status.agree,.status.inline,.result-pending,.grade-na,.tag-neutral) {
+  background:#252d38 !important; color:var(--muted) !important; border-color:var(--border-dark) !important;
+}
+html[data-theme="dark"] .thi-availability-status.out { color:#ffaaa1; border-color:#70403d; background:#3b2222; }
+html[data-theme="dark"] .thi-availability-status.doubtful { color:#f4bd75; border-color:#704b25; background:#382719; }
+html[data-theme="dark"] .thi-availability-status.questionable { color:#f3d26f; border-color:#6d5a25; background:#392f15; }
+html[data-theme="dark"] .thi-availability-status.available { color:#7bd4b4; border-color:#326a59; background:#15352c; }
+html[data-theme="dark"] .thi-availability-status.unknown { background:#202833; }
+
+html[data-theme="dark"] .team-logo { background:#f1f3f4; border-color:#4b5662; }
+html[data-theme="dark"] :is(.distribution-track,.win-prob-bar,.thi-intel-prob-track,.vl-dist-track) { background:#303946 !important; }
+
+@media (max-width:900px) {
+  .thi-theme-toggle { margin-left:auto; }
+  .thi-theme-label { display:none; }
+}
