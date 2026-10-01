@@ -6,7 +6,9 @@ import pandas as pd
 
 from build_situational_profiles import (
     EXPECTED_FEATURES,
+    build_game_logs,
     build_profiles,
+    excitement_profile,
     expected_points,
     reliability,
     summarize,
@@ -71,6 +73,43 @@ class SituationalProfileTests(unittest.TestCase):
         self.assertEqual(reliability(24), "limited")
         self.assertEqual(reliability(25), "developing")
         self.assertEqual(reliability(50), "established")
+
+    def test_excitement_score_rewards_late_close_possessions(self):
+        game = pd.DataFrame([
+            {"team_id": "1", "home_team_id": "1", "start_period": 1,
+             "start_clock_minutes": 15, "start_clock_seconds": 0,
+             "start_score_margin": 0, "target_offensive_points": 7},
+            {"team_id": "2", "home_team_id": "1", "start_period": 4,
+             "start_clock_minutes": 8, "start_clock_seconds": 0,
+             "start_score_margin": -3, "target_offensive_points": 7},
+            {"team_id": "1", "home_team_id": "1", "start_period": 4,
+             "start_clock_minutes": 2, "start_clock_seconds": 0,
+             "start_score_margin": -4, "target_offensive_points": 7},
+        ])
+        result = excitement_profile(game, final_margin=3, total_points=59)
+        self.assertGreaterEqual(result["score"], 70)
+        self.assertEqual(result["fourth_quarter_one_score_possessions"], 2)
+        self.assertIn(result["label"], {"High Drama", "Must Rewatch", "Instant Classic"})
+
+    def test_game_log_uses_verified_final_and_possession_values(self):
+        possessions = self.sample().assign(
+            week=1,
+            start_clock_minutes=[15, 4, 8, 10],
+            start_clock_seconds=[0, 0, 0, 0],
+        )
+        verified = pd.DataFrame([
+            {"game_id": "g1", "period": 4, "clock.minutes": 0,
+             "clock.seconds": 0, "game_play_number": 100,
+             "homeTeamId": "1", "awayTeamId": "2",
+             "homeTeamName": "Alpha", "awayTeamName": "Beta",
+             "homeScore": 14, "awayScore": 10},
+        ])
+        logs = build_game_logs(possessions, verified)
+        self.assertEqual(len(logs), 1)
+        self.assertEqual(logs[0]["winner"], "Alpha")
+        self.assertEqual(logs[0]["home"]["possessions"], 2)
+        self.assertAlmostEqual(logs[0]["home"]["points_over_expected_per_possession"], 1.0)
+        self.assertIn("score", logs[0]["excitement"])
 
 
 if __name__ == "__main__":
