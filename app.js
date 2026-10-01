@@ -12,6 +12,7 @@ const DATA_URLS = {
   advancedMetrics: "./data/advanced_metrics.json",
   externalRatings: "./data/external_ratings.json",
   rosterFoundation: "./data/roster_foundation.json",
+  rosterAssets: "./data/roster_assets.json",
   hfa: "./data/hfa_2026.json",
   results: "./data/results.json",
   liveScores: "./data/live_scores.json",
@@ -32,6 +33,7 @@ let signalReportData = null;
 let advancedMetricsData = null;
 let externalRatingsData = null;
 let rosterFoundationData = null;
+let rosterAssetsData = null;
 let hfaData = null;
 let resultsData = null;
 let liveScoresData = null;
@@ -1462,6 +1464,97 @@ function ensureMatchupView() {
 
     .thi-rating-reliability strong { color:var(--ink); }
 
+    .thi-roster-assets {
+      margin-top:12px;
+      overflow:hidden;
+    }
+
+    .thi-roster-groups {
+      display:grid;
+      gap:10px;
+      padding:12px 16px 16px;
+    }
+
+    .thi-roster-group {
+      overflow:hidden;
+      border:1px solid var(--border);
+      border-radius:9px;
+      background:#fff;
+    }
+
+    .thi-roster-group > summary {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:11px 13px;
+      cursor:pointer;
+      list-style:none;
+      background:#fafaf8;
+      font-size:12px;
+      font-weight:900;
+      text-transform:uppercase;
+    }
+
+    .thi-roster-group > summary::-webkit-details-marker { display:none; }
+
+    .thi-roster-count {
+      color:var(--muted);
+      font-family:var(--mono);
+      font-size:9px;
+      font-weight:700;
+      letter-spacing:.5px;
+    }
+
+    .thi-roster-table-wrap { overflow-x:auto; }
+
+    .thi-roster-table {
+      width:100%;
+      min-width:680px;
+      border-collapse:collapse;
+    }
+
+    .thi-roster-table th,
+    .thi-roster-table td {
+      padding:9px 11px;
+      border-top:1px solid var(--border);
+      text-align:left;
+    }
+
+    .thi-roster-table th {
+      color:var(--muted);
+      font-family:var(--mono);
+      font-size:8px;
+      letter-spacing:.7px;
+      text-transform:uppercase;
+    }
+
+    .thi-roster-table td {
+      font-size:11px;
+      font-weight:700;
+    }
+
+    .thi-roster-table td:first-child,
+    .thi-roster-table td:nth-child(2),
+    .thi-roster-table td:nth-child(4),
+    .thi-roster-table td:nth-child(5),
+    .thi-roster-usage {
+      font-family:var(--mono);
+    }
+
+    .thi-roster-player-link { color:inherit; text-decoration:none; }
+    .thi-roster-player-link:hover { text-decoration:underline; }
+
+    .thi-roster-source-note {
+      padding:11px 16px;
+      border-top:1px solid var(--border);
+      background:#fafaf8;
+      color:var(--muted);
+      font-family:var(--mono);
+      font-size:9px;
+      line-height:1.55;
+    }
+
     .thi-color-legend {
       display:flex;
       align-items:center;
@@ -1995,6 +2088,7 @@ async function init() {
       advancedMetricsData,
       externalRatingsData,
       rosterFoundationData,
+      rosterAssetsData,
       hfaData,
       resultsData,
       liveScoresData,
@@ -2014,6 +2108,7 @@ async function init() {
       loadJson(DATA_URLS.advancedMetrics).catch(() => null),
       loadJson(DATA_URLS.externalRatings).catch(() => null),
       loadJson(DATA_URLS.rosterFoundation).catch(() => null),
+      loadJson(DATA_URLS.rosterAssets).catch(() => null),
       loadJson(DATA_URLS.hfa),
       loadJson(DATA_URLS.results).catch(() => null),
       loadJson(DATA_URLS.liveScores).catch(() => null),
@@ -5951,6 +6046,105 @@ function renderThiObservedRatings(teamName) {
   `;
 }
 
+function rosterUsageText(player) {
+  const usage = player?.usage ?? {};
+  const position = String(player?.position ?? "").toUpperCase();
+  if (usage.pass_attempt_share_pct != null) {
+    return `${formatNumber(usage.pass_attempt_share_pct, 1)}% pass att · ${formatNumber(usage.pass_yards, 0)} yds`;
+  }
+  if (usage.rush_attempt_share_pct != null) {
+    return `${formatNumber(usage.rush_attempt_share_pct, 1)}% carries · ${formatNumber(usage.rush_yards, 0)} yds`;
+  }
+  if (usage.reception_share_pct != null) {
+    return `${formatNumber(usage.reception_share_pct, 1)}% catches · ${formatNumber(usage.receiving_yards, 0)} yds`;
+  }
+  if (["QB", "RB", "WR", "TE"].includes(position)) return "No recorded workload";
+  return "No tracked usage stat";
+}
+
+function rosterGroupMarkup(label, players, open = false) {
+  const positionOrder = [
+    "QB", "RB", "FB", "WR", "TE", "OL", "OT", "OG", "C",
+    "DL", "DE", "DT", "NT", "LB", "ILB", "OLB", "CB", "S", "DB",
+    "PK", "K", "P", "LS"
+  ];
+  const order = new Map(positionOrder.map((position, index) => [position, index]));
+  const rows = [...players].sort((a, b) => {
+    const positionA = String(a?.position ?? "").toUpperCase();
+    const positionB = String(b?.position ?? "").toUpperCase();
+    return (order.get(positionA) ?? 999) - (order.get(positionB) ?? 999)
+      || positionA.localeCompare(positionB)
+      || String(a?.name ?? "").localeCompare(String(b?.name ?? ""));
+  });
+  return `
+    <details class="thi-roster-group" ${open ? "open" : ""}>
+      <summary>
+        <span>${escapeHtml(label)}</span>
+        <span class="thi-roster-count">${rows.length} players</span>
+      </summary>
+      <div class="thi-roster-table-wrap">
+        <table class="thi-roster-table">
+          <thead>
+            <tr><th>No.</th><th>Pos</th><th>Player</th><th>Class</th><th>Size</th><th>Recorded usage</th></tr>
+          </thead>
+          <tbody>
+            ${rows.map(player => {
+              const name = escapeHtml(player?.name ?? "Unknown");
+              const profile = /^https:\/\//i.test(String(player?.profile_url ?? ""))
+                ? `<a class="thi-roster-player-link" href="${escapeHtml(player.profile_url)}" target="_blank" rel="noopener noreferrer">${name} ↗</a>`
+                : name;
+              const size = [player?.height, player?.weight].filter(Boolean).join(" · ") || "—";
+              return `
+                <tr>
+                  <td>${escapeHtml(player?.jersey ?? "—")}</td>
+                  <td>${escapeHtml(player?.position ?? "—")}</td>
+                  <td>${profile}</td>
+                  <td>${escapeHtml(player?.class ?? "—")}</td>
+                  <td>${escapeHtml(size)}</td>
+                  <td class="thi-roster-usage">${escapeHtml(rosterUsageText(player))}</td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+    </details>
+  `;
+}
+
+function rosterAssetsMarkup(teamName) {
+  const roster = rosterAssetsData?.teams?.[teamName];
+  const players = Array.isArray(roster?.players) ? roster.players : [];
+  if (!players.length) return "";
+  const groups = ["Offense", "Defense", "Special Teams"];
+  const throughWeek = Number(rosterAssetsData?.meta?.through_week);
+  const sourceLine = Number.isFinite(throughWeek) && throughWeek > 0
+    ? `ESPN roster identity · CFBD recorded workload through Week ${throughWeek}`
+    : "ESPN current roster · CFBD recorded workload pending weekly refresh";
+  return `
+    <section class="panel thi-roster-assets">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Roster & Usage Matrix</div>
+          <div class="team-meta" style="margin-top:5px;">
+            ${escapeHtml(sourceLine)}
+          </div>
+        </div>
+      </div>
+      <div class="thi-roster-groups">
+        ${groups.map(group => rosterGroupMarkup(
+          group,
+          players.filter(player => player?.group === group),
+          false
+        )).join("")}
+      </div>
+      <div class="thi-roster-source-note">
+        Display and research context only · workload shares come from recorded box-score events · no snap percentage or official depth order · not used by Model A
+      </div>
+    </section>
+  `;
+}
+
 function rosterNotesMarkup(team) {
   const source = rosterNotesData?.conference_sources?.[team.conference];
   const officialUrl = String(source?.url ?? "");
@@ -6453,6 +6647,8 @@ function renderDossier(team) {
         </div>
       </div>
     </div>
+
+    ${rosterAssetsMarkup(team.team)}
 
     <div
       class="panel"
