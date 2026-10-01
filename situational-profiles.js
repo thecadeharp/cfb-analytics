@@ -57,6 +57,7 @@
 
   let report = null;
   let index = new Map();
+  let gameIndex = new Map();
   let status = 'Loading verified possession profiles…';
   let activeDossierTeam = null;
 
@@ -148,6 +149,67 @@
       <div class="thi-sp-match-grid">${matchupCard(teamA)}${matchupCard(teamB)}</div></section>`;
   }
 
+  function gameKey(away, home) {
+    return `${teamKey(away)}@${teamKey(home)}`;
+  }
+
+  function gameLogRow(label, away, home) {
+    return `<div class="thi-gel-row"><div>${esc(label)}</div><div>${esc(away)}</div><div>${esc(home)}</div></div>`;
+  }
+
+  function excitementComponent(label, value, max) {
+    const numeric = Number(value);
+    const width = Number.isFinite(numeric) && max > 0
+      ? Math.max(0, Math.min(100, numeric / max * 100)) : 0;
+    return `<div class="thi-gel-component"><div><span>${esc(label)}</span><strong>${esc(number(value, 1))}/${esc(max)}</strong></div><div class="thi-gel-track"><i style="width:${width.toFixed(1)}%"></i></div></div>`;
+  }
+
+  function gameLogMarkup(game) {
+    if (!game) {
+      return `<section class="thi-game-efficiency"><div class="thi-sp-eyebrow">Verified possession ledger</div><h3>Game Efficiency Log</h3><p class="thi-sp-empty">This game is not in the fully admitted possession sample. THI withholds the log when final-score, ownership or possession-start checks are incomplete.</p></section>`;
+    }
+    const away = game.away || {};
+    const home = game.home || {};
+    const excitement = game.excitement || {};
+    const components = excitement.components || {};
+    const edge = Number(game.possession_value_edge);
+    const edgeText = Number.isFinite(edge)
+      ? `${edge >= 0 ? game.home_team : game.away_team} ${Math.abs(edge).toFixed(3)}` : '—';
+    return `<section class="thi-game-efficiency">
+      <div class="thi-gel-head"><div><div class="thi-sp-eyebrow">Verified possession ledger</div><h3>Game Efficiency Log</h3><p>What each offense produced relative to its independently verified possession starts.</p></div><div class="thi-gel-excitement"><span>THI Excitement Score</span><strong>${esc(excitement.score ?? '—')}</strong><em>${esc(excitement.label || 'Unavailable')}</em></div></div>
+      <div class="thi-gel-score"><span>${esc(game.away_team)} <strong>${esc(game.away_points)}</strong></span><small>FINAL</small><span><strong>${esc(game.home_points)}</strong> ${esc(game.home_team)}</span></div>
+      <div class="thi-gel-table">
+        <div class="thi-gel-row thi-gel-columns"><div>POSSESSION MEASURE</div><div>${esc(game.away_team)}</div><div>${esc(game.home_team)}</div></div>
+        ${gameLogRow('Possessions', away.possessions ?? '—', home.possessions ?? '—')}
+        ${gameLogRow('Points / possession', number(away.points_per_possession), number(home.points_per_possession))}
+        ${gameLogRow('Expected at possession start', number(away.expected_start_points_per_possession), number(home.expected_start_points_per_possession))}
+        ${gameLogRow('Value over expected / possession', signed(away.points_over_expected_per_possession), signed(home.points_over_expected_per_possession))}
+        ${gameLogRow('Scoring possession rate', percent(away.scoring_possession_rate), percent(home.scoring_possession_rate))}
+        ${gameLogRow('Empty possession rate', percent(away.empty_possession_rate), percent(home.empty_possession_rate))}
+        ${gameLogRow('Average starting field position', number(away.average_start_field_position, 1), number(home.average_start_field_position, 1))}
+        ${gameLogRow('Short-field points / possession', number(away.short_field_points_per_possession), number(home.short_field_points_per_possession))}
+      </div>
+      <div class="thi-gel-edge"><span>Possession value edge</span><strong>${esc(edgeText)} pts/possession</strong></div>
+      <div class="thi-gel-components">
+        ${excitementComponent('Final-score tension', components.final_score_tension, 35)}
+        ${excitementComponent('Late-game pressure', components.late_game_pressure, 25)}
+        ${excitementComponent('Lead exchange', components.lead_exchange, 20)}
+        ${excitementComponent('Scoring activity', components.scoring_activity, 20)}
+      </div>
+      <p class="thi-sp-foot">Excitement is retrospective and descriptive. It combines final-score tension, fourth-quarter one-score possession share, lead exchanges and scoring activity. The efficiency log and score do not alter Model A, THI ratings or the frozen pregame projection.</p>
+    </section>`;
+  }
+
+  function refreshGameLog() {
+    const slot = document.getElementById('thi-game-efficiency-log');
+    if (!slot) return;
+    const key = gameKey(slot.dataset.awayTeam, slot.dataset.homeTeam);
+    const renderKey = `${key}:${report?.meta?.generated_at || status}`;
+    if (slot.dataset.renderKey === renderKey) return;
+    slot.innerHTML = gameLogMarkup(gameIndex.get(key) || null);
+    slot.dataset.renderKey = renderKey;
+  }
+
   function mount(container, id, markup) {
     if (!container) return;
     let panel = container.querySelector(`#${id}`);
@@ -202,6 +264,9 @@
           || !Array.isArray(data?.teams)) throw new Error('Invalid profile contract');
       report = data;
       index = profileIndex(data.teams);
+      gameIndex = new Map((Array.isArray(data.games) ? data.games : []).map(game => [
+        gameKey(game.away_team, game.home_team), game
+      ]));
       status = '';
     })
     .catch(() => {
@@ -210,5 +275,11 @@
     .finally(() => {
       refreshDossier();
       refreshMatchup();
+      refreshGameLog();
     });
+
+  new MutationObserver(refreshGameLog).observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
 })();
