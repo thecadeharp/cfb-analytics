@@ -5,6 +5,8 @@
   let active = "QB";
   let search = "";
   let conference = "ALL";
+  let sortKey = "rank";
+  let sortDirection = "asc";
   let decorateQueued = false;
 
   const escape = value => String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
@@ -97,7 +99,12 @@
       <div class="thi-player-control"><label for="thi-player-conference">Conference</label><select id="thi-player-conference"><option value="ALL">All conferences</option>${conferences.map(name => `<option ${conference === name ? "selected" : ""}>${escape(name)}</option>`).join("")}</select></div></div>
       <div class="thi-player-beta">Through Week ${escape(data.meta?.through_week ?? "—")} · observed roles are derived from recorded workload, not an official depth chart · position ratings are research beta · Model A is unchanged.</div>
       <div id="thi-player-table"></div>`;
-    root.querySelectorAll("[data-player-tab]").forEach(button => button.addEventListener("click", () => { active = button.dataset.playerTab; render(); }));
+    root.querySelectorAll("[data-player-tab]").forEach(button => button.addEventListener("click", () => {
+      active = button.dataset.playerTab;
+      sortKey = "rank";
+      sortDirection = "asc";
+      render();
+    }));
     root.querySelector("#thi-player-search").addEventListener("input", event => { search = event.target.value; renderTable(); });
     root.querySelector("#thi-player-conference").addEventListener("change", event => { conference = event.target.value; renderTable(); });
     renderTable();
@@ -113,14 +120,63 @@
       const note = tested && !validation.passed
         ? `This is a score-based watch list. A ${validation.seasons.length}-season leave-one-season-out backtest did not clear THI's publication gates, so finalist and winner probabilities are withheld.`
         : "This is a score-based watch list. Probabilities remain withheld until historical validation clears every THI publication gate.";
-      target.innerHTML = `<p class="thi-heisman-note">${escape(note)} The board is display-only and does not affect Model A.</p>${table(rows.map(row => ({...data.players[row.athlete_id], ...row, rating:row.player_rating})), true)}`;
+      rows = sortRows(rows.map(row => ({...data.players[row.athlete_id], ...row, rating:row.player_rating})), true);
+      target.innerHTML = `<p class="thi-heisman-note">${escape(note)} The board is display-only and does not affect Model A.</p>${table(rows, true)}`;
+      installSortListeners();
       return;
     }
+    rows = sortRows(rows, false);
     target.innerHTML = table(rows.slice(0, 250), false);
+    installSortListeners();
+  }
+
+  function sortValue(row, key, heisman) {
+    if (key === "rank") return Number(heisman ? row.rank : row.national_position_rank);
+    if (key === "player") return String(row.name || "").toLocaleLowerCase();
+    if (key === "team") return String(row.team || "").toLocaleLowerCase();
+    if (key === "class") return String(row.class || row.class_name || "").toLocaleLowerCase();
+    if (key === "rating") return Number(heisman ? row.heisman_score : row.rating);
+    if (key === "production") return Number(row.opportunities);
+    if (key === "adj_epa") return Number(row.advanced?.opponent_adjusted_epa_per_opportunity);
+    if (key === "total_epa") return Number(row.advanced?.epa_total);
+    if (key === "success") return Number(row.advanced?.success_rate);
+    if (key === "reliability") return Number(row.reliability);
+    return null;
+  }
+
+  function sortRows(rows, heisman) {
+    return rows.slice().sort((a, b) => {
+      const av = sortValue(a, sortKey, heisman);
+      const bv = sortValue(b, sortKey, heisman);
+      const aMissing = av === null || av === undefined || (typeof av === "number" && !Number.isFinite(av));
+      const bMissing = bv === null || bv === undefined || (typeof bv === "number" && !Number.isFinite(bv));
+      if (aMissing !== bMissing) return aMissing ? 1 : -1;
+      let comparison = typeof av === "string" ? av.localeCompare(bv) : Number(av) - Number(bv);
+      if (comparison === 0) comparison = String(a.name || "").localeCompare(String(b.name || ""));
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+  }
+
+  function sortHeader(key, label) {
+    const activeSort = sortKey === key;
+    const arrow = activeSort ? (sortDirection === "asc" ? "↑" : "↓") : "↕";
+    return `<th aria-sort="${activeSort ? (sortDirection === "asc" ? "ascending" : "descending") : "none"}"><button type="button" class="thi-player-sort ${activeSort ? "active" : ""}" data-player-sort="${key}">${label}<span aria-hidden="true">${arrow}</span></button></th>`;
+  }
+
+  function installSortListeners() {
+    document.querySelectorAll("[data-player-sort]").forEach(button => button.addEventListener("click", () => {
+      const next = button.dataset.playerSort;
+      if (sortKey === next) sortDirection = sortDirection === "asc" ? "desc" : "asc";
+      else {
+        sortKey = next;
+        sortDirection = ["rank", "player", "team", "class"].includes(next) ? "asc" : "desc";
+      }
+      renderTable();
+    }));
   }
 
   function table(rows, heisman) {
-    return `<div class="thi-player-table-wrap"><table class="thi-player-table"><thead><tr><th>${heisman ? "Board" : "Pos Rank"}</th><th>Player</th><th>Team</th><th>Class</th><th>${heisman ? "Heisman Score" : "THI Rating"}</th><th>Production</th><th>Adj EPA/Opp</th><th>Total EPA</th><th>Success</th><th>Reliability</th></tr></thead><tbody>${rows.map((row,index) => `<tr>
+    return `<div class="thi-player-table-wrap"><table class="thi-player-table"><thead><tr>${sortHeader("rank", heisman ? "Board" : "Pos Rank")}${sortHeader("player", "Player")}${sortHeader("team", "Team")}${sortHeader("class", "Class")}${sortHeader("rating", heisman ? "Heisman Score" : "THI Rating")}${sortHeader("production", "Production")}${sortHeader("adj_epa", "Adj EPA/Opp")}${sortHeader("total_epa", "Total EPA")}${sortHeader("success", "Success")}${sortHeader("reliability", "Reliability")}</tr></thead><tbody>${rows.map((row,index) => `<tr>
       <td class="thi-player-mono">#${escape(heisman ? row.rank : row.national_position_rank || index + 1)}</td>
       <td><button class="thi-player-name" data-thi-player-id="${escape(row.athlete_id)}">${escape(row.name)}</button><div class="thi-hub-muted">${escape(row.position || row.position_group || "—")}</div></td>
       <td>${escape(row.team || "—")}</td><td>${escape(row.class || "—")}</td>
