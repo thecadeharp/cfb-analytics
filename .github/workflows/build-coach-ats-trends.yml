@@ -1,0 +1,70 @@
+name: Build Coach ATS Trends
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "47 11 * * 1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-coach-ats-trends
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependency
+        run: python -m pip install --disable-pip-version-check requests
+
+      - name: Protect Model A
+        run: |
+          sha256sum \
+            data/projections.json \
+            data/cfb_metrics.json \
+            data/hfa_2026.json \
+            scripts/build_projections.py \
+            > /tmp/model-a-before.sha256
+
+      - name: Build descriptive coach ATS trends
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+          SEASON_YEAR: "2026"
+        run: python scripts/build_coach_ats_trends.py
+
+      - name: Validate output and isolation
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("data/coach_ats_trends.json").read_text())
+          assert data["meta"]["model_usage"] == "descriptive_only_not_used_by_model_a"
+          assert data["meta"]["coach_count"] >= 100
+          for row in data["coaches"]:
+              assert row["coach"] and row["team"]
+              assert row["overall"]["games"] >= 1
+          PY
+          sha256sum --check /tmp/model-a-before.sha256
+
+      - name: Commit coach trends only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/coach_ats_trends.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Refresh coach ATS trends"
+          git pull --rebase origin main
+          git push origin HEAD:main
