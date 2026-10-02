@@ -61,6 +61,10 @@ jobs:
                   assert verified <= now + timedelta(minutes=10)
                   assert expires > now
                   assert expires - verified <= timedelta(days=7)
+                  adjustment = note.get("availability_adjustment_points")
+                  if adjustment is not None:
+                      assert isinstance(adjustment, (int, float))
+                      assert abs(adjustment) <= 10
           PY
           sha256sum --check /tmp/model-a-before.sha256
 
