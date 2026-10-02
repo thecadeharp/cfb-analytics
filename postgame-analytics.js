@@ -15,6 +15,8 @@
   let selectedGameId = null;
   let trackingWeek = "LATEST";
   let observer = null;
+  let dataLoaded = false;
+  let loadPromise = null;
 
   function hasValue(value) {
     return value !== null && value !== undefined && Number.isFinite(Number(value));
@@ -414,7 +416,10 @@
       button.className = "nav-item";
       button.dataset.view = "model-tracking";
       button.textContent = "Model Tracking";
-      button.addEventListener("click", () => { switchView("model-tracking"); applyPerformanceScorecard(); });
+      button.addEventListener("click", () => {
+        switchView("model-tracking");
+        load().catch(() => {});
+      });
       const anchor = nav.querySelector('[data-view="projections"]');
       anchor?.after(button);
     }
@@ -422,7 +427,7 @@
       const view = document.createElement("section");
       view.id = "view-model-tracking";
       view.className = "view";
-      view.innerHTML = `<div class="eyebrow">Prospective accountability</div><h1 class="page-title">Model Tracking</h1><p class="page-subtitle">Every frozen THI projection graded after the final: straight-up winners, ATS results, tracked totals, closing-line value and projection error.</p><div id="model-tracking-container"><div class="loading-state"><div class="spinner"></div>Loading settled results…</div></div>`;
+      view.innerHTML = `<div class="eyebrow">Prospective accountability</div><h1 class="page-title">Model Tracking</h1><p class="page-subtitle">Every frozen THI projection graded after the final: straight-up winners, ATS results, tracked totals, closing-line value and projection error.</p><div id="model-tracking-container"><div class="empty-state">Open Model Tracking to load the current tracking dataset.</div></div>`;
       const projections = document.getElementById("view-projections");
       projections?.after(view);
     }
@@ -723,6 +728,11 @@
   }
 
   async function load() {
+    if (dataLoaded) return;
+    if (loadPromise) return loadPromise;
+    const trackingTarget = document.getElementById("model-tracking-container");
+    if (trackingTarget) trackingTarget.innerHTML = `<div class="loading-state"><div class="spinner"></div>Loading settled results…</div>`;
+    loadPromise = (async () => {
     try {
       const stamp = Date.now();
       const [analyticsResponse, settledResponse, signalResponse, clvResponse] = await Promise.all([
@@ -763,19 +773,25 @@
         }
       }
       if (signalResponse.ok) signalReport = await signalResponse.json();
+      dataLoaded = true;
     } catch (error) {
       console.warn("[Hammer Postgame Analytics] Data unavailable:", error);
       payload = { meta: {}, games: {} };
+      if (trackingTarget) trackingTarget.innerHTML = `<div class="empty-state">Model tracking could not load. Select Model Tracking to retry.</div>`;
+      throw error;
+    } finally {
+      loadPromise = null;
     }
     wrapSelectWeek();
     applyPerformanceScorecard();
+    })();
+    return loadPromise;
   }
 
   async function start() {
     installStyles();
     mountTrackingView();
     wrapSelectWeek();
-    await load();
   }
 
   if (document.readyState === "loading") {
