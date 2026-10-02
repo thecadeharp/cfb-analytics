@@ -1,0 +1,79 @@
+name: Verify CBB API Foundation
+
+on:
+  workflow_dispatch:
+    inputs:
+      season:
+        description: "CBBD season identifier (2027 is the 2026-27 season)"
+        required: true
+        default: "2027"
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cbb-api-foundation
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Preserve College Football and Model A
+        run: |
+          sha256sum \
+            data/projections.json \
+            data/cfb_metrics.json \
+            data/hfa_2026.json \
+            scripts/build_projections.py \
+            index.html \
+            app.js \
+            > /tmp/cbb-foundation-before.sha256
+
+      - name: Test CBB access-report contract
+        run: |
+          python -m py_compile \
+            scripts/verify_cbb_api_foundation.py \
+            scripts/test_cbb_api_foundation.py
+          python -m unittest scripts/test_cbb_api_foundation.py
+
+      - name: Verify CBBD access
+        env:
+          CBBD_API_KEY: ${{ secrets.CBBD_API_KEY }}
+          CBB_SEASON: ${{ inputs.season }}
+        run: python scripts/verify_cbb_api_foundation.py
+
+      - name: Validate isolation and report
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("data/cbb/api_access_report.json").read_text())
+          assert report["meta"]["raw_api_data_stored"] is False
+          assert report["meta"]["model_usage"] == "cbb_foundation_only_no_cfb_or_model_a_access"
+          assert report["checks"]["team_directory"]["team_count"] >= 300
+          assert report["checks"]["benchmark_adjusted_ratings"]["record_count"] >= 300
+          PY
+          sha256sum --check /tmp/cbb-foundation-before.sha256
+
+      - name: Commit access report only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/cbb/api_access_report.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Verify CBB API foundation"
+          git pull --rebase origin main
+          git push origin HEAD:main
