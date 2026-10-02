@@ -11,13 +11,18 @@
 
   const PORTAL_URL    = "./data/portal_2026.json";
   const VARIANCE_URL  = "./data/variance_historical.json";
+  const COACH_TRENDS_URL = "./data/coach_ats_trends.json";
 
   let portalData    = null;
   let varianceData  = null;
+  let coachTrendsData = null;
 
   // ── Sub-tab state ───────────────────────────────────────────────────────────
   let portalSubTab    = "class";      // class | offensive | defensive | conference | juco | impact
-  let varianceSubTab  = "full_reset"; // full_reset | qb_swap | coordinator
+  let varianceSubTab  = "coach_ats"; // coach_ats | full_reset | qb_swap | coordinator
+  let coachSearch = "";
+  let coachSort = "overall_pct";
+  let coachSortDirection = "desc";
   let portalPosFilter = "ALL";
   let portalStarFilter = "ANY";
   let portalConfFilter = "ALL";
@@ -316,6 +321,11 @@
       .vl-dist-meta {
         font-family:var(--mono); font-size:10px; color:var(--muted); text-align:right;
       }
+      .vl-coach-controls { display:flex; gap:10px; align-items:end; flex-wrap:wrap; margin:0 0 14px; }
+      .vl-coach-sort { border:0; padding:0; background:transparent; color:inherit; font:inherit; letter-spacing:inherit; text-transform:inherit; cursor:pointer; white-space:nowrap; }
+      .vl-coach-sort.active { color:var(--text); }
+      .vl-coach-record { font:700 11px var(--mono); white-space:nowrap; }
+      .vl-coach-pct { display:block; margin-top:3px; color:var(--muted); font:9px var(--mono); }
 
       /* QB split cards */
       .vl-qb-split {
@@ -638,6 +648,7 @@
 
   function renderVarianceSubNav() {
     const tabs = [
+      ["coach_ats","Coach ATS"],
       ["full_reset","Full Reset"],
       ["qb_swap","QB-Only Swap"],
       ["coordinator","Coordinator Change"],
@@ -649,6 +660,56 @@
           onclick="pvVarianceTab('${id}')">${pEsc(label)}</button>
       `).join("")}
     </div>`;
+  }
+
+  function coachPct(split) {
+    const value = Number(split?.cover_pct_ex_pushes);
+    return Number.isFinite(value) ? value : null;
+  }
+
+  function coachSplitMarkup(split) {
+    if (!split || !Number(split.games)) return `<span class="vl-coach-record">—</span>`;
+    const pct = coachPct(split);
+    return `<span class="vl-coach-record">${pEsc(split.record)}</span><span class="vl-coach-pct">${pct === null ? "No decisions" : `${pFmt(pct,1)}% cover`}</span>`;
+  }
+
+  function coachSortHeader(key, label) {
+    const activeSort = coachSort === key;
+    const arrow = activeSort ? (coachSortDirection === "asc" ? "↑" : "↓") : "↕";
+    return `<th><button type="button" class="vl-coach-sort ${activeSort ? "active" : ""}" onclick="pvCoachSort('${key}')">${pEsc(label)} ${arrow}</button></th>`;
+  }
+
+  function renderCoachTrends() {
+    const payload = coachTrendsData;
+    const query = coachSearch.trim().toLocaleLowerCase();
+    let rows = (payload?.coaches || []).filter(row => !query || `${row.coach} ${row.team}`.toLocaleLowerCase().includes(query));
+    const value = (row, key) => {
+      if (key === "coach") return String(row.coach || "").toLocaleLowerCase();
+      if (key === "team") return String(row.team || "").toLocaleLowerCase();
+      const splitKey = key.replace(/_(pct|games)$/, "");
+      return key.endsWith("_games") ? Number(row[splitKey]?.games) : Number(row[splitKey]?.cover_pct_ex_pushes);
+    };
+    rows = rows.slice().sort((a,b) => {
+      const av = value(a, coachSort); const bv = value(b, coachSort);
+      const am = av === null || av === undefined || (typeof av === "number" && !Number.isFinite(av));
+      const bm = bv === null || bv === undefined || (typeof bv === "number" && !Number.isFinite(bv));
+      if (am !== bm) return am ? 1 : -1;
+      const comparison = typeof av === "string" ? av.localeCompare(bv) : av - bv;
+      return coachSortDirection === "asc" ? comparison : -comparison;
+    });
+    if (!rows.length) {
+      const awaiting = payload?.meta?.status === "awaiting_workflow";
+      return `<div class="vl-cohort-header"><div class="vl-cohort-label">Coach ATS Trends</div><div class="vl-cohort-title">${awaiting ? "Ready for the first data build" : "No matching coaches"}</div><div class="vl-cohort-sub">${awaiting ? "Run Build Coach ATS Trends after these files are committed." : "Try another coach or team search."}</div></div>`;
+    }
+    return `<div class="vl-cohort-header">
+      <div class="vl-cohort-label">${pEsc(payload.meta?.season || "Current season")} · closing-line results</div>
+      <div class="vl-cohort-title">Head Coach ATS Splits</div>
+      <div class="vl-cohort-sub">${pEsc(payload.meta?.methodology || "Descriptive records against recorded closing spreads.")} Small samples are shown, never presented as predictive signals.</div>
+    </div>
+    <div class="vl-coach-controls"><div class="pv-filter"><label class="pv-filter-label" for="vl-coach-search">Coach or team</label><input id="vl-coach-search" type="search" value="${pEsc(coachSearch)}" placeholder="Search" oninput="pvCoachSearch(this.value)"></div></div>
+    <div class="pv-table-wrap"><table class="pv-table"><thead><tr>
+      ${coachSortHeader("coach","Coach")}${coachSortHeader("team","Team")}${coachSortHeader("overall_pct","Overall")}${coachSortHeader("favorite_pct","Favorite")}${coachSortHeader("dog_pct","Underdog")}${coachSortHeader("home_pct","Home")}${coachSortHeader("road_pct","Road")}${coachSortHeader("overall_games","Sample")}
+    </tr></thead><tbody>${rows.map(row => `<tr><td class="pv-team-name">${pEsc(row.coach)}</td><td>${pTeamLogo(row.team,"table")} <span class="pv-team-name">${pEsc(row.team)}</span></td><td>${coachSplitMarkup(row.overall)}</td><td>${coachSplitMarkup(row.favorite)}</td><td>${coachSplitMarkup(row.dog)}</td><td>${coachSplitMarkup(row.home)}</td><td>${coachSplitMarkup(row.road)}</td><td class="vl-coach-record">${pEsc(row.overall?.games ?? 0)}</td></tr>`).join("")}</tbody></table></div>`;
   }
 
   function renderCohort(cohortKey, label, description) {
@@ -809,6 +870,11 @@
     const hasPublishedVariance = ["full_reset", "qb_swap", "coordinator"]
       .some(key => Number(varianceData?.cohorts?.[key]?.aggregate?.n || 0) > 0);
 
+    if (varianceSubTab === "coach_ats") {
+      container.innerHTML = renderVarianceSubNav() + renderCoachTrends();
+      return;
+    }
+
     if (!hasPublishedVariance) {
       container.innerHTML = `
         <div class="vl-coming-soon">
@@ -852,6 +918,20 @@
   };
   window.pvVarianceTab = function(tab) {
     varianceSubTab = tab;
+    renderVariance();
+  };
+  window.pvCoachSearch = function(value) {
+    coachSearch = value;
+    renderVariance();
+    const input = document.getElementById("vl-coach-search");
+    if (input) { input.focus(); input.setSelectionRange(input.value.length, input.value.length); }
+  };
+  window.pvCoachSort = function(key) {
+    if (coachSort === key) coachSortDirection = coachSortDirection === "asc" ? "desc" : "asc";
+    else {
+      coachSort = key;
+      coachSortDirection = ["coach","team"].includes(key) ? "asc" : "desc";
+    }
     renderVariance();
   };
 
@@ -910,6 +990,18 @@
     renderVariance();
   }
 
+  async function loadCoachTrends() {
+    try {
+      const response = await fetch(`${COACH_TRENDS_URL}?v=${Date.now()}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      coachTrendsData = await response.json();
+    } catch (error) {
+      console.warn("Coach ATS trends unavailable:", error);
+      coachTrendsData = { meta:{}, coaches:[] };
+    }
+    renderVariance();
+  }
+
   // ── Boot ─────────────────────────────────────────────────────────────────────
   installPortalVarianceStyles();
 
@@ -919,6 +1011,7 @@
     renderVariance();
     loadPortalData();
     loadVarianceData();
+    loadCoachTrends();
   });
 
   document.addEventListener("hammer:data-ready", () => {
