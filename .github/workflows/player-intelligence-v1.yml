@@ -1,0 +1,82 @@
+name: Player Intelligence and Team Luck v1
+
+on:
+  workflow_dispatch:
+    inputs:
+      through_week:
+        description: "Completed week (0 = latest source week)"
+        required: false
+        default: "0"
+  schedule:
+    - cron: "35 12 * * 1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: player-intelligence-v1
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install display-data dependencies
+        run: python -m pip install pandas==2.2.3 pyarrow==25.0.0
+
+      - name: Preserve Model A and production projection files
+        run: |
+          sha256sum data/projections.json data/cfb_metrics.json scripts/build_projections.py > /tmp/thi-player-before.sha256
+
+      - name: Build team luck and game-type splits
+        run: python scripts/build_team_intelligence.py
+
+      - name: Build player intelligence
+        env:
+          THROUGH_WEEK: ${{ github.event.inputs.through_week || '0' }}
+        run: |
+          args=()
+          if [ "$THROUGH_WEEK" != "0" ]; then args+=(--through-week "$THROUGH_WEEK"); fi
+          python scripts/build_player_intelligence.py "${args[@]}"
+
+      - name: Validate output contracts
+        run: |
+          python -m json.tool data/team_intelligence.json >/dev/null
+          python -m json.tool data/player_intelligence.json >/dev/null
+          python - <<'PY'
+          import json
+          team = json.load(open('data/team_intelligence.json'))
+          player = json.load(open('data/player_intelligence.json'))
+          assert team['meta']['model_usage'] == 'display_only_not_used_by_model_a'
+          assert player['meta']['model_usage'] == 'display_only_not_used_by_model_a'
+          assert len(team['teams']) >= 130
+          assert len(player['teams']) >= 130
+          assert len(player['players']) >= 3000
+          assert player['meta']['heisman_status'] in {'NOT_RUN', 'BOARD_ONLY_CALIBRATION_GATE_FAILED', 'PASSED_FOR_BETA_PROBABILITIES'}
+          if player['meta']['heisman_status'] != 'PASSED_FOR_BETA_PROBABILITIES':
+              assert all(row['win_probability'] is None and row['finalist_probability'] is None for row in player['heisman_board'])
+          print(f"Validated {len(team['teams'])} team summaries and {len(player['players'])} rostered players")
+          PY
+
+      - name: Verify Model A isolation
+        run: sha256sum --check /tmp/thi-player-before.sha256
+
+      - name: Commit display and research data only
+        run: |
+          if git diff --quiet -- data/team_intelligence.json data/player_intelligence.json; then
+            echo "No player-intelligence changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/team_intelligence.json data/player_intelligence.json
+          git commit -m "Refresh THI player intelligence and team luck"
+          git push
