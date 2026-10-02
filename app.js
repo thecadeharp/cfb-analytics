@@ -23,6 +23,7 @@ const DATA_URLS = {
   thiObservedRatings: "./data/thi_observed_ratings.json",
   thiPowerRatings: "./data/thi_power_ratings.json",
   rosterNotes: "./data/roster_notes.json",
+  teamIntelligence: "./data/team_intelligence.json",
 };
 
 let metricsData = null;
@@ -44,6 +45,7 @@ let scheduleContextData = null;
 let thiObservedRatingsData = null;
 let thiPowerRatingsData = null;
 let rosterNotesData = null;
+let teamIntelligenceData = null;
 
 let teams = {};
 let projections = [];
@@ -2163,7 +2165,8 @@ async function init() {
       scheduleContextData,
       thiObservedRatingsData,
       thiPowerRatingsData,
-      rosterNotesData
+      rosterNotesData,
+      teamIntelligenceData
     ] = await Promise.all([
       loadJson(DATA_URLS.metrics),
       loadJson(DATA_URLS.schedule),
@@ -2184,6 +2187,7 @@ async function init() {
       loadJson(DATA_URLS.thiObservedRatings).catch(() => null),
       loadJson(DATA_URLS.thiPowerRatings).catch(() => null),
       loadJson(DATA_URLS.rosterNotes).catch(() => null),
+      loadJson(DATA_URLS.teamIntelligence).catch(() => null),
     ]);
 
     teams = metricsData?.teams ?? {};
@@ -6152,23 +6156,27 @@ function rosterGroupMarkup(label, players, open = false) {
       <div class="thi-roster-table-wrap">
         <table class="thi-roster-table">
           <thead>
-            <tr><th>No.</th><th>Pos</th><th>Player</th><th>Class</th><th>Size</th><th>Recorded usage</th></tr>
+            <tr><th>No.</th><th>Pos</th><th>Player</th><th>Class</th><th>Size</th><th>Observed role</th><th>THI</th></tr>
           </thead>
           <tbody>
             ${rows.map(player => {
               const name = escapeHtml(player?.name ?? "Unknown");
-              const profile = /^https:\/\//i.test(String(player?.profile_url ?? ""))
-                ? `<a class="thi-roster-player-link" href="${escapeHtml(player.profile_url)}" target="_blank" rel="noopener noreferrer">${name} ↗</a>`
-                : name;
+              const athleteId = escapeHtml(player?.athlete_id ?? "");
+              const profile = athleteId
+                ? `<button type="button" class="thi-roster-player-link thi-player-trigger" data-thi-player-id="${athleteId}" data-player-profile-url="${escapeHtml(player?.profile_url ?? "")}">${name}</button>`
+                : (/^https:\/\//i.test(String(player?.profile_url ?? ""))
+                  ? `<a class="thi-roster-player-link" href="${escapeHtml(player.profile_url)}" target="_blank" rel="noopener noreferrer">${name} ↗</a>`
+                  : name);
               const size = [player?.height, player?.weight].filter(Boolean).join(" · ") || "—";
               return `
-                <tr>
+                <tr ${athleteId ? `data-thi-player-row="${athleteId}"` : ""}>
                   <td>${escapeHtml(player?.jersey ?? "—")}</td>
                   <td>${escapeHtml(player?.position ?? "—")}</td>
                   <td>${profile}</td>
                   <td>${escapeHtml(player?.class ?? "—")}</td>
                   <td>${escapeHtml(size)}</td>
-                  <td class="thi-roster-usage">${escapeHtml(rosterUsageText(player))}</td>
+                  <td class="thi-roster-usage" data-thi-role>${escapeHtml(rosterUsageText(player))}</td>
+                  <td class="thi-roster-usage" data-thi-rating>—</td>
                 </tr>
               `;
             }).join("")}
@@ -6192,7 +6200,7 @@ function rosterAssetsMarkup(teamName) {
     <section class="panel thi-roster-assets">
       <div class="panel-header">
         <div>
-          <div class="panel-title">Roster & Usage Matrix</div>
+          <div class="panel-title">Personnel & Impact List</div>
           <div class="team-meta" style="margin-top:5px;">
             ${escapeHtml(sourceLine)}
           </div>
@@ -6206,10 +6214,45 @@ function rosterAssetsMarkup(teamName) {
         )).join("")}
       </div>
       <div class="thi-roster-source-note">
-        Display and research context only · workload shares come from recorded box-score events · no snap percentage or official depth order · not used by Model A
+        Display and research context only · observed roles come from recorded workload and production · no snap percentage or official depth order · not used by Model A
       </div>
     </section>
   `;
+}
+
+function teamLuckMarkup(teamName) {
+  const payload = teamIntelligenceData?.teams?.[teamName];
+  const splits = payload?.splits;
+  if (!splits?.all) return "";
+  const card = (label, value, note = "") => `
+    <div class="stat-card">
+      <div class="stat-label">${escapeHtml(label)}</div>
+      <div class="stat-value">${value}</div>
+      ${note ? `<div class="stat-note">${escapeHtml(note)}</div>` : ""}
+    </div>`;
+  const split = (name, label) => {
+    const row = splits[name] ?? {};
+    const luck = row.luck ?? {};
+    const developing = name !== "all" && (
+      Number(row.games || 0) < 2 || Number(row.offensive_plays || 0) < 120 || Number(row.defensive_plays || 0) < 120
+    );
+    return `<section class="panel" style="padding:14px;">
+      <div class="panel-title">${escapeHtml(label)}</div>
+      <div class="team-meta" style="margin:5px 0 12px;">${escapeHtml(row.record ?? "0-0")} · ${formatNumber(row.games, 0)} games${developing ? " · developing sample" : ""}</div>
+      <div class="metric-grid">
+        ${card("Net EPA / Play", formatSigned(row.net_epa_per_play, 3))}
+        ${card("Scoreboard Luck", formatSigned(luck.net_scoreboard_luck, 1), "Actual margin − deserved margin")}
+        ${card("Points Left on Field", formatNumber(luck.points_left_on_field, 1))}
+        ${card("TO Points Recredited", formatNumber(luck.turnover_points_recredited, 1))}
+      </div>
+    </section>`;
+  };
+  return `<section class="panel" style="margin-top:12px; padding:16px;">
+    <div class="panel-header"><div><div class="panel-title">Luck & Conversion</div>
+      <div class="team-meta" style="margin-top:5px;">Descriptive beta · actual versus THI deserved scoring · no Model A effect</div></div></div>
+    <div class="dossier-layout" style="margin-top:12px;">${split("all", "All Games")}${split("conference", "Conference")}${split("nonconference", "Nonconference")}</div>
+    <div class="thi-roster-source-note">Positive scoreboard luck means the final margins were more favorable than the underlying game-quality profile. Conference samples remain labeled developing until two games and 120 plays on both sides.</div>
+  </section>`;
 }
 
 function rosterNotesMarkup(team) {
@@ -6806,6 +6849,7 @@ function renderDossier(team) {
       </div>
     </div>
 
+    ${teamLuckMarkup(team.team)}
     ${rosterAssetsMarkup(team.team)}
 
     <div
