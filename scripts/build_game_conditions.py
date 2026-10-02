@@ -109,8 +109,8 @@ def round_tenth(value: float) -> float:
 
 def espn_venue(game_id: str) -> dict:
     """
-    ESPN is used only for venue metadata (indoor / city / state / venue name).
-    No model metric comes from ESPN.
+    ESPN is used only for venue and broadcast metadata. No model metric comes
+    from ESPN.
     """
     url = (
         "https://site.api.espn.com/apis/site/v2/sports/football/"
@@ -125,6 +125,16 @@ def espn_venue(game_id: str) -> dict:
     game_info_venue = (payload.get("gameInfo") or {}).get("venue") or {}
     game_info_address = game_info_venue.get("address") or {}
 
+    broadcast_names = []
+    for broadcast in competition.get("broadcasts") or []:
+        names = broadcast.get("names") or []
+        if isinstance(names, str):
+            names = [names]
+        for name in names:
+            clean = str(name or "").strip()
+            if clean and clean not in broadcast_names:
+                broadcast_names.append(clean)
+
     return {
         "name": venue.get("fullName") or game_info_venue.get("fullName"),
         "indoor": (
@@ -135,6 +145,7 @@ def espn_venue(game_id: str) -> dict:
         "city": address.get("city") or game_info_address.get("city"),
         "state": address.get("state") or game_info_address.get("state"),
         "country": address.get("country") or game_info_address.get("country"),
+        "network": " / ".join(broadcast_names) or None,
     }
 
 
@@ -654,6 +665,7 @@ def main() -> int:
             "generated": now.isoformat(),
             "forecast_source": "Open-Meteo",
             "venue_source": "ESPN event venue metadata",
+            "broadcast_source": "ESPN event broadcast metadata",
             "total_adjustment_cap": TOTAL_CAP,
             "spread_adjustment_cap": SPREAD_CAP,
             "tendency_min_plays": MIN_TENDENCY_PLAYS,
@@ -712,6 +724,7 @@ def main() -> int:
             "game_id": game_id,
             "kickoff_utc": kickoff.isoformat(),
             "venue": game.get("venue"),
+            "network": None,
             "indoor": False,
             "forecast": None,
             "conditions_line": "Forecast unavailable",
@@ -745,6 +758,7 @@ def main() -> int:
             venue = espn_venue(game_id)
             if venue.get("name"):
                 entry["venue"] = venue["name"]
+            entry["network"] = venue.get("network")
 
             indoor = bool(venue.get("indoor"))
             entry["indoor"] = indoor
