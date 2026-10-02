@@ -282,12 +282,21 @@ function gameDateText(dateString) {
   if (!dateString) return "TBD";
   const date = new Date(dateString);
   if (Number.isNaN(date.getTime())) return "TBD";
-  return date.toLocaleString("en-US", {
+  const text = date.toLocaleString("en-US", {
     month: "short",
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
+    timeZone: "America/New_York",
   });
+  return `${text} ET`;
+}
+
+function gameBroadcastText(game) {
+  const gameId = String(game?.game_id ?? "");
+  return String(
+    window.THIConditionsData?.games?.[gameId]?.network ?? game?.network ?? ""
+  ).trim();
 }
 
 function metricRank(team, section, rankField, value) {
@@ -1619,6 +1628,16 @@ function ensureMatchupView() {
     .thi-availability-foot {
       padding:10px 16px; border-top:1px solid var(--border); background:var(--surface-soft);
     }
+    .thi-availability-scenario {
+      display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px;
+      border-top:1px solid var(--border); background:var(--border);
+    }
+    .thi-availability-scenario > div { min-width:0; padding:12px 16px; background:var(--surface-soft); }
+    .thi-availability-scenario span {
+      display:block; color:var(--muted); font-family:var(--mono); font-size:8px;
+      letter-spacing:.45px; line-height:1.4; text-transform:uppercase;
+    }
+    .thi-availability-scenario strong { display:block; margin-top:6px; font:800 11px var(--mono); }
 
     .thi-color-legend {
       display:flex;
@@ -2081,6 +2100,7 @@ function ensureMatchupView() {
       .thi-matchup-section-note { text-align:left; }
       .thi-tale-grid { grid-template-columns:1fr; }
       .thi-availability-grid { grid-template-columns:1fr; }
+      .thi-availability-scenario { grid-template-columns:1fr; }
       .thi-availability-team + .thi-availability-team {
         border-top:1px solid var(--border); border-left:none;
       }
@@ -2495,6 +2515,7 @@ function renderProjectionRow(game) {
     : "No market line";
 
   const gameId = String(game.game_id ?? "");
+  const broadcast = gameBroadcastText(game);
 
   return `
     <tr
@@ -2524,7 +2545,7 @@ function renderProjectionRow(game) {
         </div>
 
         <div class="team-meta" style="margin-top:5px;">
-          ${escapeHtml(gameDateText(game.start_date))}
+          ${escapeHtml(gameDateText(game.start_date))}${broadcast ? ` · ${escapeHtml(broadcast)}` : ""}
         </div>
       </td>
 
@@ -3413,6 +3434,7 @@ function renderMatchup(game) {
 
   const fairLine = favoredLine(homeName, awayName, modelSpread);
   const marketLine = favoredLine(homeName, awayName, marketSpread);
+  const broadcast = gameBroadcastText(game);
 
   const modelEdgeSide =
     preferred && hasValue(marketSpread)
@@ -3429,6 +3451,7 @@ function renderMatchup(game) {
         <div class="matchup-subtitle">
           Week ${game.week ?? "—"}
           · ${escapeHtml(gameDateText(game.start_date))}
+          ${broadcast ? ` · ${escapeHtml(broadcast)}` : ""}
           ${game.venue ? ` · ${escapeHtml(game.venue)}` : ""}
         </div>
       </div>
@@ -3509,7 +3532,7 @@ function renderMatchup(game) {
       </div>
     </div>
 
-    ${availabilityReportMarkup(awayName, homeName)}
+    ${availabilityReportMarkup(awayName, homeName, game)}
 
     ${taleOfTapeMarkup(awayName, homeName)}
 
@@ -6393,7 +6416,23 @@ function availabilityTeamMarkup(teamName) {
     </article>`;
 }
 
-function availabilityReportMarkup(awayName, homeName) {
+function availabilityReportMarkup(awayName, homeName, game) {
+  const modelHomeSpread = hasValue(game?.projection?.home_spread)
+    ? Number(game.projection.home_spread)
+    : null;
+  const awayAdjustment = currentAvailabilityNotes(awayName).reduce((sum, note) => {
+    const value = Number(note?.availability_adjustment_points);
+    return sum + (Number.isFinite(value) ? value : 0);
+  }, 0);
+  const homeAdjustment = currentAvailabilityNotes(homeName).reduce((sum, note) => {
+    const value = Number(note?.availability_adjustment_points);
+    return sum + (Number.isFinite(value) ? value : 0);
+  }, 0);
+  const hasScenario = Number.isFinite(modelHomeSpread)
+    && (Math.abs(awayAdjustment) > 0.001 || Math.abs(homeAdjustment) > 0.001);
+  const scenarioHomeSpread = hasScenario
+    ? modelHomeSpread + awayAdjustment - homeAdjustment
+    : null;
   return `
     <section class="thi-availability-report" aria-label="Matchup availability report">
       <div class="thi-availability-head">
@@ -6407,8 +6446,13 @@ function availabilityReportMarkup(awayName, homeName) {
         ${availabilityTeamMarkup(awayName)}
         ${availabilityTeamMarkup(homeName)}
       </div>
+      <div class="thi-availability-scenario">
+        <div><span>Published Model A</span><strong>${Number.isFinite(modelHomeSpread) ? `${escapeHtml(homeName)} ${escapeHtml(shortSpread(modelHomeSpread))}` : "—"}</strong></div>
+        <div><span>Availability-adjusted scenario</span><strong>${hasScenario ? `${escapeHtml(homeName)} ${escapeHtml(shortSpread(scenarioHomeSpread))}` : "No sourced point adjustment active"}</strong></div>
+        <div><span>Verified team-value inputs</span><strong>${escapeHtml(awayName)} ${formatSigned(awayAdjustment, 1)} · ${escapeHtml(homeName)} ${formatSigned(homeAdjustment, 1)}</strong></div>
+      </div>
       <div class="thi-availability-foot">
-        Reports expire after seven days. Any listed point value is a separate THI research scenario and is never inserted into the published Model A projection.
+        Reports expire after seven days. Negative team-value points represent a downgrade. The scenario is shown separately and is never inserted into the published Model A projection.
       </div>
     </section>`;
 }
