@@ -715,6 +715,29 @@
 
   async function loadProjectionMetadata() {
     try {
+      const useSharedPayload = () => {
+        const games = Array.isArray(window.THIProjectionGames)
+          ? window.THIProjectionGames
+          : Array.isArray(window.THIProjectionsPayload?.games)
+            ? window.THIProjectionsPayload.games
+            : null;
+        if (!games) return false;
+        projectionByGameId = new Map(
+          games
+            .filter(game => game?.game_id !== null && game?.game_id !== undefined)
+            .map(game => [String(game.game_id), game])
+        );
+        return true;
+      };
+      if (useSharedPayload()) return;
+      await new Promise(resolve => {
+        const timeout = window.setTimeout(resolve, 10000);
+        document.addEventListener("hammer:data-ready", () => {
+          window.clearTimeout(timeout);
+          resolve();
+        }, { once: true });
+      });
+      if (useSharedPayload()) return;
       const response = await fetch(
         `${PROJECTIONS_URL}?v=${Date.now()}`,
         { cache: "no-store" }
