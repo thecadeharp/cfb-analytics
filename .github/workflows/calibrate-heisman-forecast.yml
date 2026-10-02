@@ -1,0 +1,62 @@
+name: Calibrate THI Heisman Forecast - Research Only
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: calibrate-heisman-forecast
+  cancel-in-progress: false
+
+jobs:
+  calibrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install research dependencies
+        run: python -m pip install numpy==2.3.5 pandas==2.2.3 pyarrow==25.0.0
+
+      - name: Preserve Model A and site files
+        run: |
+          sha256sum data/projections.json data/cfb_metrics.json scripts/build_projections.py index.html app.js > /tmp/thi-heisman-before.sha256
+
+      - name: Run leave-one-season-out historical calibration
+        run: python scripts/calibrate_heisman_forecast.py
+
+      - name: Verify research report contract
+        run: |
+          python -m json.tool data/research/heisman_calibration.json >/dev/null
+          python - <<'PY'
+          import json
+          report = json.load(open('data/research/heisman_calibration.json'))
+          assert report['meta']['model_usage'] == 'display_only_not_used_by_model_a'
+          assert report['meta']['status'] in {'BOARD_ONLY_CALIBRATION_GATE_FAILED', 'PASSED_FOR_BETA_PROBABILITIES'}
+          assert len(report['validation']['leave_one_season_out']) >= 7
+          assert report['validation']['passed'] == (report['meta']['status'] == 'PASSED_FOR_BETA_PROBABILITIES')
+          print(report['meta']['status'], report['validation'])
+          PY
+
+      - name: Verify isolation
+        run: sha256sum --check /tmp/thi-heisman-before.sha256
+
+      - name: Commit research report only
+        run: |
+          if git diff --quiet -- data/research/heisman_calibration.json; then
+            echo "No calibration changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/research/heisman_calibration.json
+          git commit -m "Refresh THI Heisman calibration report"
+          git push
