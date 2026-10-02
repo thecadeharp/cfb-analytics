@@ -1,6 +1,7 @@
 (() => {
   const DATA_URL = "./data/player_intelligence.json";
   let data = null;
+  let dataPromise = null;
   let active = "QB";
   let search = "";
   let conference = "ALL";
@@ -14,20 +15,45 @@
   const teamConference = row => row?.conference || "FBS Independents";
   const title = {QB:"Quarterbacks",RB:"Running Backs",WR:"Wide Receivers",TE:"Tight Ends",DEF:"Defensive Disruptors",HEISMAN:"THI Heisman Board"};
 
+  function loadData() {
+    if (data) return Promise.resolve(data);
+    if (dataPromise) return dataPromise;
+    const root = document.getElementById("thi-player-root");
+    if (root) root.innerHTML = `<div class="loading-state"><div class="spinner"></div>Loading player intelligence…</div>`;
+    dataPromise = fetch(DATA_URL)
+      .then(response => { if (!response.ok) throw new Error(response.status); return response.json(); })
+      .then(payload => {
+        data = payload;
+        window.THIPlayerIntelligence = payload;
+        render();
+        decorateRoster();
+        return payload;
+      })
+      .catch(error => {
+        dataPromise = null;
+        if (root) root.innerHTML = `<div class="empty-state">Player intelligence could not load. Select Player Ratings to retry.</div>`;
+        throw error;
+      });
+    return dataPromise;
+  }
+
   function install() {
     const nav = document.querySelector(".main-nav");
     const ratings = document.getElementById("view-ratings");
     if (!nav || !ratings || document.getElementById("view-player-ratings")) return;
     const button = document.createElement("button");
     button.className = "nav-item"; button.dataset.view = "player-ratings"; button.textContent = "Player Ratings";
-    button.addEventListener("click", () => switchView("player-ratings"));
+    button.addEventListener("click", () => {
+      switchView("player-ratings");
+      loadData().catch(() => {});
+    });
     const anchor = nav.querySelector('[data-view="thi-ratings"]') || nav.querySelector('[data-view="ratings"]');
     anchor.after(button);
     const view = document.createElement("section");
     view.id = "view-player-ratings"; view.className = "view";
     view.innerHTML = `<div class="eyebrow">THI Player Intelligence</div><h1 class="page-title">Player Ratings</h1>
       <p class="page-subtitle">Position-specific production, opponent-adjusted efficiency and observed workload. Ratings are research and display tools and do not affect Model A.</p>
-      <div id="thi-player-root"><div class="loading-state"><div class="spinner"></div>Loading player intelligence…</div></div>`;
+      <div id="thi-player-root"><div class="empty-state">Open Player Ratings to load the current player dataset.</div></div>`;
     ratings.after(view);
     const drawer = document.createElement("div"); drawer.id = "thi-player-drawer"; drawer.className = "thi-player-drawer"; drawer.hidden = true;
     drawer.innerHTML = `<aside class="thi-player-drawer-panel" role="dialog" aria-modal="true" aria-label="Player profile"><button class="thi-player-drawer-close" type="button">Close</button><div id="thi-player-drawer-content"></div></aside>`;
@@ -37,11 +63,11 @@
     document.addEventListener("keydown", event => { if (event.key === "Escape") closePlayer(); });
     document.addEventListener("click", event => {
       const trigger = event.target.closest("[data-thi-player-id]");
-      if (trigger) { event.preventDefault(); openPlayer(trigger.dataset.thiPlayerId); }
+      if (trigger) {
+        event.preventDefault();
+        loadData().then(() => openPlayer(trigger.dataset.thiPlayerId)).catch(() => {});
+      }
     });
-    fetch(DATA_URL).then(response => { if (!response.ok) throw new Error(response.status); return response.json(); })
-      .then(payload => { data = payload; window.THIPlayerIntelligence = payload; render(); decorateRoster(); })
-      .catch(() => { document.getElementById("thi-player-root").innerHTML = `<div class="empty-state">Player intelligence is awaiting its next weekly build.</div>`; });
     new MutationObserver(decorateRoster).observe(document.body, {subtree:true, childList:true});
   }
 
