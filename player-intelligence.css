@@ -1,0 +1,42 @@
+.thi-player-controls { display:flex; flex-wrap:wrap; gap:10px; align-items:end; margin:22px 0 16px; }
+.thi-player-control { display:grid; gap:6px; }
+.thi-player-control label { color:var(--muted); font:700 9px var(--mono); letter-spacing:.08em; text-transform:uppercase; }
+.thi-player-control select,.thi-player-control input { min-height:38px; border:1px solid var(--border); border-radius:8px; padding:0 11px; background:var(--surface); color:var(--text); }
+.thi-player-tabs { display:flex; gap:6px; flex-wrap:wrap; margin:16px 0; }
+.thi-player-tab { border:1px solid var(--border); border-radius:999px; padding:8px 12px; background:var(--surface); color:var(--muted); font:700 10px var(--mono); cursor:pointer; }
+.thi-player-tab.active { background:var(--ink); border-color:var(--ink); color:#fff; }
+.thi-player-table-wrap { overflow:auto; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
+.thi-player-table { width:100%; border-collapse:collapse; min-width:920px; }
+.thi-player-table th,.thi-player-table td { padding:13px 14px; border-bottom:1px solid var(--border); text-align:left; white-space:nowrap; }
+.thi-player-table th { color:var(--muted); font:700 9px var(--mono); letter-spacing:.07em; text-transform:uppercase; }
+.thi-player-table tbody tr:hover { background:rgba(61,126,176,.05); }
+.thi-player-name { border:0; padding:0; background:transparent; color:var(--text); font:800 13px Inter,sans-serif; cursor:pointer; }
+.thi-player-name:hover { text-decoration:underline; }
+.thi-player-mono { font-family:var(--mono); }
+.thi-player-grade { display:inline-flex; min-width:42px; justify-content:center; border-radius:999px; padding:5px 8px; background:rgba(31,158,92,.12); color:#12694d; font:800 11px var(--mono); }
+.thi-player-beta { margin:14px 0; padding:12px 14px; border:1px solid var(--border); border-radius:9px; color:var(--muted); font-size:12px; line-height:1.55; }
+.thi-player-drawer[hidden] { display:none; }
+.thi-player-drawer { position:fixed; inset:0; z-index:1000; background:rgba(9,15,22,.62); display:flex; justify-content:flex-end; }
+.thi-player-drawer-panel { width:min(560px,100%); height:100%; overflow:auto; background:var(--surface); color:var(--text); box-shadow:-16px 0 48px rgba(0,0,0,.2); padding:24px; }
+.thi-player-drawer-close { float:right; border:1px solid var(--border); border-radius:8px; background:transparent; color:var(--text); padding:7px 10px; cursor:pointer; }
+.thi-player-identity { display:flex; align-items:center; gap:14px; padding:18px 0; }
+.thi-player-headshot { width:68px; height:68px; border-radius:50%; object-fit:cover; background:var(--surface-2,#ecefeb); }
+.thi-player-identity h2 { margin:0 0 5px; font-size:24px; }
+.thi-player-identity p { margin:0; color:var(--muted); }
+.thi-player-card-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:12px 0 20px; }
+.thi-player-card { border:1px solid var(--border); border-radius:10px; padding:13px; min-width:0; }
+.thi-player-card span { display:block; color:var(--muted); font:700 9px var(--mono); letter-spacing:.06em; text-transform:uppercase; }
+.thi-player-card strong { display:block; margin-top:7px; font:800 18px var(--mono); }
+.thi-player-stat-list { display:grid; gap:0; border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:18px; }
+.thi-player-stat-line { display:flex; justify-content:space-between; gap:14px; padding:10px 12px; border-bottom:1px solid var(--border); }
+.thi-player-stat-line:last-child { border-bottom:0; }
+.thi-player-stat-line span { color:var(--muted); }
+.thi-roster-player-link.thi-player-trigger { border:0; padding:0; background:transparent; font:inherit; font-weight:700; cursor:pointer; text-align:left; }
+.thi-heisman-note { margin:0 0 16px; color:var(--muted); line-height:1.55; }
+@media (max-width:700px) {
+  .thi-player-controls { display:grid; grid-template-columns:1fr 1fr; }
+  .thi-player-control:first-child { grid-column:1/-1; }
+  .thi-player-control select,.thi-player-control input { width:100%; min-width:0; }
+  .thi-player-drawer-panel { padding:18px; }
+  .thi-player-card-grid { grid-template-columns:1fr 1fr; }
+}
