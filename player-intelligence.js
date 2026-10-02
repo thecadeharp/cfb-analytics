@@ -5,6 +5,7 @@
   let active = "QB";
   let search = "";
   let conference = "ALL";
+  let decorateQueued = false;
 
   const escape = value => String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const num = (value, digits = 1, signed = false) => {
@@ -68,7 +69,8 @@
         loadData().then(() => openPlayer(trigger.dataset.thiPlayerId)).catch(() => {});
       }
     });
-    new MutationObserver(decorateRoster).observe(document.body, {subtree:true, childList:true});
+    const rosterRoot = document.getElementById("dossier-container") || document.body;
+    new MutationObserver(queueDecorateRoster).observe(rosterRoot, {subtree:true, childList:true});
   }
 
   function eligibleRows() {
@@ -143,6 +145,14 @@
     const share = Math.max(...Object.values(row.workload || {}).map(Number).filter(Number.isFinite), 0);
     if (share >= 60) return "Primary"; if (share >= 25) return "Rotation"; if (row.opportunities > 0) return "Contributor"; return "Roster";
   }
+  function queueDecorateRoster() {
+    if (!data || decorateQueued) return;
+    decorateQueued = true;
+    requestAnimationFrame(() => {
+      decorateQueued = false;
+      decorateRoster();
+    });
+  }
   function decorateRoster() {
     if (!data) return;
     document.querySelectorAll("[data-thi-player-row]").forEach(tr => {
@@ -156,8 +166,10 @@
         return;
       }
       const role = tr.querySelector("[data-thi-role]"); const rating = tr.querySelector("[data-thi-rating]");
-      if (role) role.textContent = `${observedRole(row)}${row.opportunities ? ` · ${row.opportunities} opp` : ""}`;
-      if (rating) rating.textContent = Number.isFinite(Number(row.rating)) ? `${row.rating.toFixed(1)} · #${row.national_position_rank}` : "N/R";
+      const roleText = `${observedRole(row)}${row.opportunities ? ` · ${row.opportunities} opp` : ""}`;
+      const ratingText = Number.isFinite(Number(row.rating)) ? `${row.rating.toFixed(1)} · #${row.national_position_rank}` : "N/R";
+      if (role && role.textContent !== roleText) role.textContent = roleText;
+      if (rating && rating.textContent !== ratingText) rating.textContent = ratingText;
     });
   }
   window.openTHIPlayer = openPlayer;
