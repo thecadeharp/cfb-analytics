@@ -35,6 +35,7 @@ let advancedMetricsData = null;
 let externalRatingsData = null;
 let rosterFoundationData = null;
 let rosterAssetsData = null;
+let rosterAssetsPromise = null;
 let hfaData = null;
 let resultsData = null;
 let liveScoresData = null;
@@ -741,6 +742,9 @@ window.addEventListener("popstate", event => {
     if (team) {
       currentDossierTeamName = state.detail.teamName;
       renderDossier(team);
+      ensureRosterAssetsLoaded().then(() => {
+        if (currentDossierTeamName === state.detail.teamName) renderDossier(team);
+      });
     }
     detailReturnState = state.returnState || detailReturnState;
     updateDetailBackButton("dossier", detailReturnState?.view);
@@ -2142,6 +2146,24 @@ async function loadJson(url) {
   return response.json();
 }
 
+function ensureRosterAssetsLoaded() {
+  if (rosterAssetsData) return Promise.resolve(rosterAssetsData);
+  if (rosterAssetsPromise) return rosterAssetsPromise;
+
+  rosterAssetsPromise = loadJson(DATA_URLS.rosterAssets)
+    .then(payload => {
+      rosterAssetsData = payload;
+      return payload;
+    })
+    .catch(error => {
+      console.error("Roster assets failed to load:", error);
+      rosterAssetsPromise = null;
+      return null;
+    });
+
+  return rosterAssetsPromise;
+}
+
 async function init() {
   try {
     ensureMatchupView();
@@ -2155,7 +2177,6 @@ async function init() {
       advancedMetricsData,
       externalRatingsData,
       rosterFoundationData,
-      rosterAssetsData,
       hfaData,
       resultsData,
       liveScoresData,
@@ -2176,7 +2197,6 @@ async function init() {
       loadJson(DATA_URLS.advancedMetrics).catch(() => null),
       loadJson(DATA_URLS.externalRatings).catch(() => null),
       loadJson(DATA_URLS.rosterFoundation).catch(() => null),
-      loadJson(DATA_URLS.rosterAssets).catch(() => null),
       loadJson(DATA_URLS.hfa),
       loadJson(DATA_URLS.results).catch(() => null),
       loadJson(DATA_URLS.liveScores).catch(() => null),
@@ -4957,6 +4977,9 @@ function openDossier(teamName) {
 
   renderDossier(team);
   enterDetailView("dossier", { teamName });
+  ensureRosterAssetsLoaded().then(() => {
+    if (currentDossierTeamName === teamName) renderDossier(team);
+  });
 }
 
 function advancedSide(teamName, side) {
@@ -6188,6 +6211,18 @@ function rosterGroupMarkup(label, players, open = false) {
 }
 
 function rosterAssetsMarkup(teamName) {
+  if (!rosterAssetsData) {
+    return `
+      <section class="panel thi-roster-assets">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Personnel & Impact List</div>
+            <div class="team-meta" style="margin-top:5px;">Loading roster and observed player usage…</div>
+          </div>
+        </div>
+      </section>
+    `;
+  }
   const roster = rosterAssetsData?.teams?.[teamName];
   const players = Array.isArray(roster?.players) ? roster.players : [];
   if (!players.length) return "";
