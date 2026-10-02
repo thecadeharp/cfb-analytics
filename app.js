@@ -2213,6 +2213,8 @@ async function init() {
     teams = metricsData?.teams ?? {};
     projections = projectionsData?.games ?? [];
     seasonProjections = projectionsData?.season_projections ?? {};
+    window.THIProjectionsPayload = projectionsData;
+    window.THIProjectionGames = projections;
 
     updateHeader();
     buildWeekTabs();
