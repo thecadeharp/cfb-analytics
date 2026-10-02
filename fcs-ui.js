@@ -625,6 +625,27 @@
   }
 
   async function loadProjectionGames() {
+    const shared = Array.isArray(window.THIProjectionGames)
+      ? window.THIProjectionGames
+      : window.THIProjectionsPayload?.games;
+    if (Array.isArray(shared)) {
+      projectionGames = shared;
+      return;
+    }
+    await new Promise(resolve => {
+      const timeout = window.setTimeout(resolve, 10000);
+      document.addEventListener("hammer:data-ready", () => {
+        window.clearTimeout(timeout);
+        resolve();
+      }, { once: true });
+    });
+    const ready = Array.isArray(window.THIProjectionGames)
+      ? window.THIProjectionGames
+      : window.THIProjectionsPayload?.games;
+    if (Array.isArray(ready)) {
+      projectionGames = ready;
+      return;
+    }
     const response =
       await fetch(
         `${DATA_URL}?fcs_ui=${Date.now()}`,
