@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import tempfile
 from datetime import datetime, timedelta, timezone
@@ -17,6 +18,7 @@ EXTERNAL_PATH = ROOT / "data" / "external_ratings.json"
 OUTPUT_PATH = ROOT / "data" / "roster_notes.json"
 ESPN_URL = "https://site.api.espn.com/apis/site/v2/sports/football/college-football/injuries"
 MAX_AGE = timedelta(days=7)
+MAX_ABS_SCENARIO_POINTS = 10.0
 
 
 def utc_now():
@@ -70,6 +72,15 @@ def main():
             expires = parse_utc(note.get("valid_until_utc"))
             if str(note.get("source_label") or "").upper() == "ESPN" or expires is None or expires <= now:
                 continue
+            adjustment = note.get("availability_adjustment_points")
+            if adjustment is not None:
+                try:
+                    adjustment = float(adjustment)
+                except (TypeError, ValueError):
+                    continue
+                if not math.isfinite(adjustment) or abs(adjustment) > MAX_ABS_SCENARIO_POINTS:
+                    continue
+                note["availability_adjustment_points"] = round(adjustment, 1)
             current.append(note)
         if current:
             teams[team_name] = current
@@ -117,6 +128,7 @@ def main():
             "purpose": "Fresh, source-linked player availability context. Display only; never used by Model A.",
             "notes_policy": "Only ESPN records updated within seven days are retained. Empty or expired notes imply unknown status, not full availability.",
             "model_usage": "display_only_not_used_by_model_a",
+            "adjustment_policy": "ESPN statuses are never assigned point values automatically. A point scenario is retained only from a fresh manual note with a public HTTPS source and is capped at +/-10 team-value points.",
             "team_count_with_current_notes": len(teams),
             "current_note_count": sum(len(notes) for notes in teams.values()),
             "espn_current_note_count": espn_note_count,
