@@ -16,6 +16,7 @@
   let currentConferenceFilter = "";
   let currentSignalFilter = "";
   let currentConfidenceFilter = "";
+  let settledResultsPromise = null;
 
   const CONFERENCE_OPTIONS = [
     ["", "All Conferences"],
@@ -1607,6 +1608,8 @@
   }
 
   async function loadSettledResults() {
+    if (settledResultsPromise) return settledResultsPromise;
+    settledResultsPromise = (async () => {
     try {
       const response = await fetch(`${RESULTS_URL}?v=${Date.now()}`);
       if (!response.ok) return;
@@ -1616,7 +1619,11 @@
       if (Array.isArray(projections) && projections.length) renderProjections();
     } catch (error) {
       console.warn("Historical results unavailable:", error);
+    } finally {
+      settledResultsPromise = null;
     }
+    })();
+    return settledResultsPromise;
   }
 
   installStyles();
@@ -1625,6 +1632,8 @@
     installFilterControls();
     installTestingNotice();
     loadConditions();
-    loadSettledResults();
+    window.addEventListener("hammer:status-filter-changed", event => {
+      if (event.detail?.status === "final") loadSettledResults();
+    });
   });
 })();
