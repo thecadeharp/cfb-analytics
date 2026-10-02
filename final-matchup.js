@@ -23,6 +23,7 @@
   let finalGames = [];
   let postgameGames = [];
   let postgameDataLoaded = false;
+  let postgameLoadPromise = null;
   const postgameMetricDistributionCache = new Map();
   let observer = null;
   let applying = false;
@@ -583,11 +584,9 @@
   }
 
   async function loadData() {
-    const [resultsResult, postgameResult] =
-      await Promise.allSettled([
-        fetchJson(RESULTS_URL),
-        fetchJson(POSTGAME_URL)
-      ]);
+    const resultsResult = await Promise.resolve(fetchJson(RESULTS_URL))
+      .then(value => ({ status: "fulfilled", value }))
+      .catch(reason => ({ status: "rejected", reason }));
 
     if (resultsResult.status === "fulfilled") {
       const payload = resultsResult.value;
@@ -605,10 +604,16 @@
         : [];
     }
 
-    if (postgameResult.status === "fulfilled") {
+    applyAll();
+  }
+
+  async function ensurePostgameData() {
+    if (postgameDataLoaded) return;
+    if (postgameLoadPromise) return postgameLoadPromise;
+    postgameLoadPromise = fetchJson(POSTGAME_URL).then(postgamePayload => {
       postgameDataLoaded = true;
       const games =
-        postgameResult.value?.games;
+        postgamePayload?.games;
 
       /*
        * Canonical postgame output is keyed by game ID. Continue accepting the
@@ -623,7 +628,8 @@
           ? Object.values(games)
           : [];
       postgameMetricDistributionCache.clear();
-    } else {
+      applyAll();
+    }).catch(error => {
       /*
        * CRITICAL:
        * Do not convert every final to PENDING when the entire JSON request fails.
@@ -631,11 +637,12 @@
        */
       console.warn(
         "[THI Postgame] postgame_analytics.json unavailable:",
-        postgameResult.reason
+        error
       );
-    }
-
-    applyAll();
+    }).finally(() => {
+      postgameLoadPromise = null;
+    });
+    return postgameLoadPromise;
   }
 
   // ==========================================================================
@@ -2149,6 +2156,10 @@
     try {
       const final =
         applyFinalToCurrentMatchup();
+
+      if (final && !postgameDataLoaded) {
+        ensurePostgameData();
+      }
 
       /*
        * Render from the displayed matchup regardless of whether the final-score
