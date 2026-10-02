@@ -1597,6 +1597,7 @@
       const response = await fetch(`${CONDITIONS_URL}?v=${Date.now()}`);
       if (!response.ok) return;
       gameConditionsData = await response.json();
+      window.THIConditionsData = gameConditionsData;
 
       // Re-render board after weather data arrives so adjusted totals/signals appear.
       if (Array.isArray(projections) && projections.length) {
