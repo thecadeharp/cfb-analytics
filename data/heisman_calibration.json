@@ -1,0 +1,226 @@
+{
+  "meta": {
+    "status": "BOARD_ONLY_CALIBRATION_GATE_FAILED",
+    "generated_at": "2026-10-01T23:49:09.097038+00:00",
+    "seasons": [
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "checkpoints": [
+      4,
+      8,
+      12,
+      16
+    ],
+    "source": "SportsDataverse/cfbfastR PBP and official Heisman finalist labels",
+    "labels_url": "https://www.heisman.com/voting-records/",
+    "model_usage": "display_only_not_used_by_model_a"
+  },
+  "coverage": {
+    "2019": {
+      "rows": 16657,
+      "finalist_rows": 16,
+      "winner_rows": 4
+    },
+    "2020": {
+      "rows": 10146,
+      "finalist_rows": 16,
+      "winner_rows": 4
+    },
+    "2021": {
+      "rows": 13143,
+      "finalist_rows": 16,
+      "winner_rows": 4
+    },
+    "2022": {
+      "rows": 12923,
+      "finalist_rows": 16,
+      "winner_rows": 4
+    },
+    "2023": {
+      "rows": 12965,
+      "finalist_rows": 16,
+      "winner_rows": 4
+    },
+    "2024": {
+      "rows": 13765,
+      "finalist_rows": 16,
+      "winner_rows": 4
+    },
+    "2025": {
+      "rows": 15885,
+      "finalist_rows": 16,
+      "winner_rows": 4
+    }
+  },
+  "validation": {
+    "leave_one_season_out": [
+      {
+        "season": 2019,
+        "top4_finalist_recall": 0.312,
+        "winner_median_rank": 1.0,
+        "finalist_brier": 0.0009
+      },
+      {
+        "season": 2020,
+        "top4_finalist_recall": 0.125,
+        "winner_median_rank": 7.5,
+        "finalist_brier": 0.0016
+      },
+      {
+        "season": 2021,
+        "top4_finalist_recall": 0.25,
+        "winner_median_rank": 10.0,
+        "finalist_brier": 0.0011
+      },
+      {
+        "season": 2022,
+        "top4_finalist_recall": 0.25,
+        "winner_median_rank": 4.0,
+        "finalist_brier": 0.0011
+      },
+      {
+        "season": 2023,
+        "top4_finalist_recall": 0.625,
+        "winner_median_rank": 3.0,
+        "finalist_brier": 0.0011
+      },
+      {
+        "season": 2024,
+        "top4_finalist_recall": 0.188,
+        "winner_median_rank": 141.0,
+        "finalist_brier": 0.0011
+      },
+      {
+        "season": 2025,
+        "top4_finalist_recall": 0.188,
+        "winner_median_rank": 18.5,
+        "finalist_brier": 0.001
+      }
+    ],
+    "mean_top4_finalist_recall": 0.277,
+    "winner_top5_rate": 0.429,
+    "mean_finalist_brier": 0.0011,
+    "gates": {
+      "top4_recall_min": 0.45,
+      "winner_top5_min": 0.7,
+      "brier_max": 0.08
+    },
+    "passed": false
+  },
+  "finalist_model": {
+    "features": [
+      "efficiency_pct",
+      "total_value_pct",
+      "volume_pct",
+      "success_pct",
+      "yards_per_game_pct",
+      "touchdowns_per_game_pct",
+      "team_win_pct",
+      "qb",
+      "rb",
+      "receiver",
+      "defense"
+    ],
+    "means": [
+      50.0,
+      50.0,
+      50.0,
+      50.0,
+      50.0,
+      50.0,
+      45.75548048,
+      0.09738804,
+      0.18289975,
+      0.15188932,
+      0.56782288
+    ],
+    "scales": [
+      19.25856624,
+      25.04985675,
+      24.97303709,
+      19.092786,
+      19.15737132,
+      18.5504036,
+      29.9686341,
+      0.29648543,
+      0.38658432,
+      0.35891358,
+      0.4953787
+    ],
+    "intercept": -3.61521221,
+    "coefficients": [
+      0.18948754,
+      0.73204022,
+      0.60814369,
+      0.12647577,
+      0.3734922,
+      0.62076783,
+      0.73197186,
+      0.42493639,
+      -0.33095516,
+      -0.09938534,
+      0.07595275
+    ]
+  },
+  "winner_model": {
+    "features": [
+      "efficiency_pct",
+      "total_value_pct",
+      "volume_pct",
+      "success_pct",
+      "yards_per_game_pct",
+      "touchdowns_per_game_pct",
+      "team_win_pct",
+      "qb",
+      "rb",
+      "receiver",
+      "defense"
+    ],
+    "means": [
+      50.0,
+      50.0,
+      50.0,
+      50.0,
+      50.0,
+      50.0,
+      45.75548048,
+      0.09738804,
+      0.18289975,
+      0.15188932,
+      0.56782288
+    ],
+    "scales": [
+      19.25856624,
+      25.04985675,
+      24.97303709,
+      19.092786,
+      19.15737132,
+      18.5504036,
+      29.9686341,
+      0.29648543,
+      0.38658432,
+      0.35891358,
+      0.4953787
+    ],
+    "intercept": -4.22628951,
+    "coefficients": [
+      0.29803405,
+      0.33054449,
+      0.35105888,
+      -0.04855104,
+      0.54143431,
+      0.80093399,
+      0.68801361,
+      0.45512566,
+      -0.47541367,
+      0.33262344,
+      -0.14238345
+    ]
+  }
+}
