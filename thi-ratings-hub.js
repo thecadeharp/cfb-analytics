@@ -16,6 +16,8 @@
       : conference === conferenceFilter);
   }
   let situationalData = null;
+  let teamIntelligenceData = null;
+  let gameTypeSplit = "all";
   let selectedTeam = "";
 
   const style = document.createElement("style");
@@ -233,7 +235,8 @@
     const observed = thiObservedRatingsData?.teams ?? {};
     const sourceData = (thiPowerRatingsData?.teams ?? []).map(power => {
       const profile = observed[power.team] ?? {};
-      return { power, profile, team: power.team, conference: profile.conference || teams[power.team]?.conference || "FBS Independents" };
+      const intelligence = teamIntelligenceData?.teams?.[power.team]?.splits?.[gameTypeSplit] ?? {};
+      return { power, profile, intelligence, team: power.team, conference: profile.conference || teams[power.team]?.conference || "FBS Independents" };
     });
     const data = sourceData.filter(row => matchesRatingConference(row) && String(row.team).toLocaleLowerCase().includes(query));
     data.sort((a, b) => {
@@ -241,6 +244,10 @@
         if (sort === "team") return row.team;
         if (sort === "power_rank") return Number(row.power.rank);
         if (sort === "observed_rank") return Number(row.profile.ratings?.net?.rank);
+        if (sort === "split_games") return Number(row.intelligence?.games);
+        if (sort === "split_net_epa") return Number(row.intelligence?.net_epa_per_play);
+        if (sort === "luck") return Number(row.intelligence?.luck?.net_scoreboard_luck);
+        if (sort === "left_on_field") return Number(row.intelligence?.luck?.points_left_on_field);
         if (["offense", "defense", "net", "pace"].includes(sort)) return ratingValue(row.profile, sort);
         return Number(row.power[sort]);
       };
@@ -254,12 +261,16 @@
 
     const allValues = key => sourceData.map(row => {
       if (["offense", "defense", "net", "pace"].includes(key)) return ratingValue(row.profile, key);
+      if (key === "split_games") return row.intelligence?.games;
+      if (key === "split_net_epa") return row.intelligence?.net_epa_per_play;
+      if (key === "luck") return row.intelligence?.luck?.net_scoreboard_luck;
+      if (key === "left_on_field") return row.intelligence?.luck?.points_left_on_field;
       return row.power[key];
     });
     const priorRanks = priorRankMap();
 
     target.innerHTML = data.length ? `<div class="thi-hub-table-wrap"><table class="thi-hub-table">
-      <thead><tr>${sortHeader("power_rank", "Rank", "asc")}${sortHeader("team", "Team", "asc")}${sortHeader("rating", "Rating")}${sortHeader("roster_contribution", "Roster")}${sortHeader("performance_contribution", "Performance")}${sortHeader("performance_only_weekly_change", "Weekly Change")}${sortHeader("qualifying_games", "FBS Games")}${sortHeader("observed_rank", "Observed Rank", "asc")}${sortHeader("offense", "Off")}${sortHeader("defense", "Def", "asc")}${sortHeader("net", "Net")}${sortHeader("pace", "Pace")}</tr></thead>
+      <thead><tr>${sortHeader("power_rank", "Rank", "asc")}${sortHeader("team", "Team", "asc")}${sortHeader("rating", "Rating")}${sortHeader("roster_contribution", "Roster")}${sortHeader("performance_contribution", "Performance")}${sortHeader("performance_only_weekly_change", "Weekly Change")}${sortHeader("qualifying_games", "FBS Games")}${sortHeader("observed_rank", "Observed Rank", "asc")}${sortHeader("offense", "Off")}${sortHeader("defense", "Def", "asc")}${sortHeader("net", "Net")}${sortHeader("pace", "Pace")}${sortHeader("split_games", "Split G")}${sortHeader("split_net_epa", "Split Net EPA")}${sortHeader("luck", "Luck")}${sortHeader("left_on_field", "Left on Field")}</tr></thead>
       <tbody>${data.map(row => {
         const { power, profile } = row;
         const rating = profile.ratings ?? {};
@@ -277,6 +288,10 @@
           ${metricCell("Def", formatNumber(rating.defense?.value, 2), rating.defense?.value, allValues("defense"), "lower")}
           ${metricCell("Net", formatSigned(rating.net?.value, 2), rating.net?.value, allValues("net"))}
           ${metricCell("Pace", formatNumber(rating.pace?.value, 2), rating.pace?.value, allValues("pace"), "context")}
+          ${metricCell("Split G", formatNumber(row.intelligence?.games, 0), row.intelligence?.games, allValues("split_games"), "context")}
+          ${metricCell("Split Net EPA", formatSigned(row.intelligence?.net_epa_per_play, 3), row.intelligence?.net_epa_per_play, allValues("split_net_epa"))}
+          ${metricCell("Luck", formatSigned(row.intelligence?.luck?.net_scoreboard_luck, 1), row.intelligence?.luck?.net_scoreboard_luck, allValues("luck"), "context")}
+          ${metricCell("Left on Field", formatNumber(row.intelligence?.luck?.points_left_on_field, 1), row.intelligence?.luck?.points_left_on_field, allValues("left_on_field"), "context")}
         </tr>`;
       }).join("")}</tbody></table></div>` :
       `<div class="empty-state">No matching teams in the ranked sample.</div>`;
@@ -342,6 +357,14 @@
           </select>
         </div>
         <div class="thi-hub-control-group">
+          <label class="conference-filter-label" for="thi-ratings-game-type">Game sample</label>
+          <select class="conference-filter-select" id="thi-ratings-game-type" aria-label="Filter observed metrics by game type">
+            <option value="all">All games</option>
+            <option value="conference">Conference games</option>
+            <option value="nonconference">Nonconference games</option>
+          </select>
+        </div>
+        <div class="thi-hub-control-group">
           <label class="conference-filter-label" for="thi-situational-team">Profile</label>
           <select class="conference-filter-select" id="thi-situational-team" aria-label="Select team for situational EPA">
           <option value="">Situational profile · select team</option>
@@ -352,7 +375,7 @@
         <span class="conference-filter-count">${escapeHtml(thiPowerRatingsData.teams.length)} teams</span>
       </div>
       <div id="thi-situational-panel"></div>
-      <p class="thi-hub-note">Power Ratings through Week ${escapeHtml(powerMeta.through_week ?? "—")} · Observed diagnostics through Week ${escapeHtml(meta.through_week ?? "—")}. Click any column heading to sort; click again to reverse. Roster measures the talent and returning-production contribution. Performance measures opponent-adjusted on-field efficiency. Weekly Change is the difference in rating points from the previous week using the same model. Offense, defense, net and pace are descriptive diagnostics; lower is better on defense.</p>
+      <p class="thi-hub-note">Power Ratings through Week ${escapeHtml(powerMeta.through_week ?? "—")} · Observed diagnostics through Week ${escapeHtml(meta.through_week ?? "—")}. The game-sample selector changes observed split and luck columns only; it never recomputes the predictive Power Rating. Luck is actual scoring margin minus THI beta deserved margin. Positive values indicate a more favorable scoreboard than the underlying game-quality profile. Left on Field is descriptive and neither metric affects Model A.</p>
       <div id="thi-ratings-rows"></div>
       <details class="thi-hub-method"><summary>How to read these ratings</summary>
         <p>Power Rating is a research scoring-margin scale that combines roster foundation, completed-game result Elo, and opponent-adjusted rate performance. It is separate from Model A and does not change any projection.</p>
@@ -366,6 +389,12 @@
     conferenceSelect.value = conferenceFilter;
     conferenceSelect.addEventListener("change", () => {
       conferenceFilter = conferenceSelect.value;
+      renderRows();
+    });
+    const gameTypeSelect = document.getElementById("thi-ratings-game-type");
+    gameTypeSelect.value = gameTypeSplit;
+    gameTypeSelect.addEventListener("change", () => {
+      gameTypeSplit = gameTypeSelect.value;
       renderRows();
     });
     const teamSelect = document.getElementById("thi-situational-team");
@@ -399,5 +428,9 @@
         renderSituational();
       }
     }).catch(() => { /* Profile generation has not run yet. */ });
+    loadJson("./data/team_intelligence.json").then(data => {
+      teamIntelligenceData = data;
+      renderRows();
+    }).catch(() => { /* Team intelligence build has not run yet. */ });
   });
 })();
