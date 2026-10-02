@@ -23,6 +23,18 @@
   const style = document.createElement("style");
   style.textContent = `
     .thi-hub-intro { max-width:850px; line-height:1.6; }
+    .thi-ratings-difference {
+      display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;
+      max-width:980px; margin:16px 0 22px; padding:13px;
+      border:1px solid var(--border); border-radius:11px; background:var(--surface-soft);
+    }
+    .thi-ratings-difference > div { display:grid; gap:4px; min-width:0; }
+    .thi-ratings-difference strong { font-size:12px; }
+    .thi-ratings-difference span { color:var(--muted); font-size:11px; line-height:1.5; }
+    .thi-ratings-difference p {
+      grid-column:1/-1; margin:2px 0 0; padding-top:10px; border-top:1px solid var(--border);
+      color:var(--muted); font:700 9px/1.5 var(--mono); text-transform:uppercase;
+    }
     .thi-hub-controls { flex-wrap:wrap; }
     .thi-hub-control-group { display:flex; align-items:center; gap:10px; }
     .thi-hub-search { min-width:210px; }
@@ -88,6 +100,7 @@
       .thi-hub-control-group .conference-filter-select { flex:1 1 auto; min-width:0; }
       .thi-situational-grid { grid-template-columns:1fr; }
       .thi-weekly-pulse { grid-template-columns:1fr; }
+      .thi-ratings-difference { grid-template-columns:1fr; }
     }
   `;
   document.head.appendChild(style);
@@ -112,7 +125,12 @@
   view.innerHTML = `
     <div class="eyebrow">Calculated by The Hammer Index</div>
     <h1 class="page-title">THI Ratings</h1>
-    <p class="page-subtitle thi-hub-intro">An independent power rating combining roster strength, completed-game results and opponent-adjusted performance. Compare teams here or open a Team Dossier for the complete breakdown. THI Ratings are separate from Model A and do not affect game projections.</p>
+    <p class="page-subtitle thi-hub-intro">An independent power rating combining roster strength, completed-game results and opponent-adjusted performance. Compare teams here or open a Team Dossier for the complete breakdown.</p>
+    <div class="thi-ratings-difference" aria-label="Difference between Team Data and THI Ratings">
+      <div><strong>Team Data</strong><span>Observed efficiency, schedule and resume context, market performance, and team dossiers.</span></div>
+      <div><strong>THI Ratings</strong><span>THI's predictive weekly power order, blending roster foundation with opponent-adjusted performance and results.</span></div>
+      <p>Both are independent research layers. Model A projections remain separately frozen.</p>
+    </div>
     <div id="thi-ratings-container" aria-live="polite"></div>`;
   section.after(view);
 
