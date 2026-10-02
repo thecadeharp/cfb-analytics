@@ -1,9 +1,10 @@
 {
   "meta": {
     "version": "weather-engine-v1",
-    "generated": "2026-10-02T22:17:45.809409+00:00",
+    "generated": "2026-10-02T22:50:12.449580+00:00",
     "forecast_source": "Open-Meteo",
     "venue_source": "ESPN event venue metadata",
+    "broadcast_source": "ESPN event broadcast metadata",
     "total_adjustment_cap": -6.0,
     "spread_adjustment_cap": 1.5,
     "tendency_min_plays": 100,
@@ -41,19 +42,20 @@
       "game_id": "401871050",
       "kickoff_utc": "2026-10-02T23:00:00+00:00",
       "venue": "Delaware Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-02T23:00Z",
-        "temperature_f": 73.7,
-        "precip_probability_pct": 38.0,
-        "precipitation_in": 0.0,
-        "rain_in": 0.0,
+        "temperature_f": 73.9,
+        "precip_probability_pct": 43.0,
+        "precipitation_in": 0.071,
+        "rain_in": 0.071,
         "snowfall_in": 0.0,
-        "wind_mph": 4.4,
-        "wind_gust_mph": 12.5,
-        "weather_code": 3,
-        "summary": "Cloudy",
-        "precipitation_label": "Dry",
+        "wind_mph": 13.2,
+        "wind_gust_mph": 23.9,
+        "weather_code": 61,
+        "summary": "Rain",
+        "precipitation_label": "Light rain",
         "location": {
           "latitude": 39.68372,
           "longitude": -75.74966,
@@ -63,26 +65,26 @@
           "query": "Newark, DE, USA"
         }
       },
-      "conditions_line": "74\u00b0F \u00b7 4 mph wind \u00b7 gusts 12 \u00b7 Dry",
-      "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
+      "conditions_line": "74\u00b0F \u00b7 13 mph wind \u00b7 gusts 24 \u00b7 Light rain",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency; rain may slightly suppress scoring efficiency.",
       "baseline": {
         "home_spread": 6.0,
         "total": 52.0
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
-          "precipitation": 0.0,
+          "wind": -0.5,
+          "precipitation": -0.5,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -1.0,
+        "total_points": -1.0,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 6.0,
-        "total": 52.0
+        "total": 51.0
       },
       "spread_logic": {
         "status": "ACTIVE",
@@ -112,16 +114,17 @@
       "game_id": "401858245",
       "kickoff_utc": "2026-10-02T23:00:00+00:00",
       "venue": "Lane Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-02T23:00Z",
-        "temperature_f": 72.8,
-        "precip_probability_pct": 2.0,
+        "temperature_f": 73.7,
+        "precip_probability_pct": 9.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 5.8,
-        "wind_gust_mph": 15.4,
+        "wind_mph": 13.3,
+        "wind_gust_mph": 23.3,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -134,26 +137,26 @@
           "query": "Blacksburg, VA, USA"
         }
       },
-      "conditions_line": "73\u00b0F \u00b7 6 mph wind \u00b7 gusts 15 \u00b7 Dry",
-      "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
+      "conditions_line": "74\u00b0F \u00b7 13 mph wind \u00b7 gusts 23 \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": -4.0,
         "total": 53.0
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -4.0,
-        "total": 53.0
+        "total": 52.5
       },
       "spread_logic": {
         "status": "ACTIVE",
@@ -183,16 +186,17 @@
       "game_id": "401858476",
       "kickoff_utc": "2026-10-03T00:00:00+00:00",
       "venue": "Ryan Field",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T00:00Z",
-        "temperature_f": 56.3,
+        "temperature_f": 55.9,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 5.1,
-        "wind_gust_mph": 9.4,
+        "wind_mph": 5.2,
+        "wind_gust_mph": 9.6,
         "weather_code": 0,
         "summary": "Clear",
         "precipitation_label": "Dry",
@@ -254,11 +258,12 @@
       "game_id": "401856707",
       "kickoff_utc": "2026-10-03T16:00:00+00:00",
       "venue": "Davis Wade Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T16:00Z",
         "temperature_f": 84.3,
-        "precip_probability_pct": 6.0,
+        "precip_probability_pct": 9.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -325,11 +330,12 @@
       "game_id": "401858246",
       "kickoff_utc": "2026-10-03T16:00:00+00:00",
       "venue": "Gerald J. Ford Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T16:00Z",
         "temperature_f": 72.4,
-        "precip_probability_pct": 26.0,
+        "precip_probability_pct": 27.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -396,11 +402,12 @@
       "game_id": "401858474",
       "kickoff_utc": "2026-10-03T16:00:00+00:00",
       "venue": "Huntington Bank Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T16:00Z",
         "temperature_f": 58.9,
-        "precip_probability_pct": 13.0,
+        "precip_probability_pct": 10.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -467,6 +474,7 @@
       "game_id": "401856807",
       "kickoff_utc": "2026-10-03T16:00:00+00:00",
       "venue": "David Booth Kansas Memorial Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T16:00Z",
@@ -538,6 +546,7 @@
       "game_id": "401862791",
       "kickoff_utc": "2026-10-03T16:00:00+00:00",
       "venue": "Falcon Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T16:00Z",
@@ -609,11 +618,12 @@
       "game_id": "401858250",
       "kickoff_utc": "2026-10-03T16:00:00+00:00",
       "venue": "Kenan Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T16:00Z",
         "temperature_f": 79.8,
-        "precip_probability_pct": 34.0,
+        "precip_probability_pct": 37.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -680,11 +690,12 @@
       "game_id": "401858251",
       "kickoff_utc": "2026-10-03T16:00:00+00:00",
       "venue": "Allegacy Federal Credit Union Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T16:00Z",
         "temperature_f": 74.2,
-        "precip_probability_pct": 18.0,
+        "precip_probability_pct": 23.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -751,6 +762,7 @@
       "game_id": "401858252",
       "kickoff_utc": "2026-10-03T16:00:00+00:00",
       "venue": "Pratt & Whitney Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T16:00Z",
@@ -822,11 +834,12 @@
       "game_id": "401856819",
       "kickoff_utc": "2026-10-03T16:00:00+00:00",
       "venue": "TDECU Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T16:00Z",
         "temperature_f": 81.2,
-        "precip_probability_pct": 9.0,
+        "precip_probability_pct": 10.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -893,6 +906,7 @@
       "game_id": "401856822",
       "kickoff_utc": "2026-10-03T16:00:00+00:00",
       "venue": "Jack Trice Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T16:00Z",
@@ -964,6 +978,7 @@
       "game_id": "401858479",
       "kickoff_utc": "2026-10-03T16:30:00+00:00",
       "venue": "Camp Randall Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T16:00Z",
@@ -1035,11 +1050,12 @@
       "game_id": "401856705",
       "kickoff_utc": "2026-10-03T16:45:00+00:00",
       "venue": "Sanford Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T17:00Z",
         "temperature_f": 81.3,
-        "precip_probability_pct": 29.0,
+        "precip_probability_pct": 28.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -1106,6 +1122,7 @@
       "game_id": "401866432",
       "kickoff_utc": "2026-10-03T17:00:00+00:00",
       "venue": "Broadview Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T17:00Z",
@@ -1177,6 +1194,7 @@
       "game_id": "401866431",
       "kickoff_utc": "2026-10-03T18:00:00+00:00",
       "venue": "Scheumann Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T18:00Z",
@@ -1248,6 +1266,7 @@
       "game_id": "401866430",
       "kickoff_utc": "2026-10-03T19:30:00+00:00",
       "venue": "Kelly/Shorts Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T19:00Z",
@@ -1319,6 +1338,7 @@
       "game_id": "401856710",
       "kickoff_utc": "2026-10-03T19:30:00+00:00",
       "venue": "Neyland Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T19:00Z",
@@ -1390,6 +1410,7 @@
       "game_id": "401866477",
       "kickoff_utc": "2026-10-03T19:30:00+00:00",
       "venue": "Yager Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T19:00Z",
@@ -1461,6 +1482,7 @@
       "game_id": "401858247",
       "kickoff_utc": "2026-10-03T19:30:00+00:00",
       "venue": "Allegiant Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T19:00Z",
@@ -1532,6 +1554,7 @@
       "game_id": "401866433",
       "kickoff_utc": "2026-10-03T19:30:00+00:00",
       "venue": "Warren McGuirk Alumni Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T19:00Z",
@@ -1603,6 +1626,7 @@
       "game_id": "401856708",
       "kickoff_utc": "2026-10-03T19:30:00+00:00",
       "venue": "Memorial Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T19:00Z",
@@ -1674,11 +1698,12 @@
       "game_id": "401858248",
       "kickoff_utc": "2026-10-03T19:30:00+00:00",
       "venue": "Carter-Finley Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T19:00Z",
         "temperature_f": 78.4,
-        "precip_probability_pct": 33.0,
+        "precip_probability_pct": 28.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -1745,6 +1770,7 @@
       "game_id": "401862787",
       "kickoff_utc": "2026-10-03T19:30:00+00:00",
       "venue": "Jerry Richardson Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T19:00Z",
@@ -1816,6 +1842,7 @@
       "game_id": "401866434",
       "kickoff_utc": "2026-10-03T19:30:00+00:00",
       "venue": "Zoeller Field at Dix Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T19:00Z",
@@ -1887,6 +1914,7 @@
       "game_id": "401858473",
       "kickoff_utc": "2026-10-03T19:30:00+00:00",
       "venue": "Kinnick Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T19:00Z",
@@ -1958,6 +1986,7 @@
       "game_id": "401869956",
       "kickoff_utc": "2026-10-03T19:30:00+00:00",
       "venue": "Center Parc Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T19:00Z",
@@ -2029,6 +2058,7 @@
       "game_id": "401858253",
       "kickoff_utc": "2026-10-03T19:30:00+00:00",
       "venue": "Doak Campbell Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T19:00Z",
@@ -2100,6 +2130,7 @@
       "game_id": "401864515",
       "kickoff_utc": "2026-10-03T19:30:00+00:00",
       "venue": "Fargodome",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T19:00Z",
@@ -2171,11 +2202,12 @@
       "game_id": "401869962",
       "kickoff_utc": "2026-10-03T19:45:00+00:00",
       "venue": "Bridgeforth Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T20:00Z",
         "temperature_f": 54.0,
-        "precip_probability_pct": 14.0,
+        "precip_probability_pct": 13.0,
         "precipitation_in": 0.028,
         "rain_in": 0.028,
         "snowfall_in": 0.0,
@@ -2242,6 +2274,7 @@
       "game_id": "401858475",
       "kickoff_utc": "2026-10-03T20:00:00+00:00",
       "venue": "Memorial Stadium (Lincoln, NE)",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T20:00Z",
@@ -2313,6 +2346,7 @@
       "game_id": "401864514",
       "kickoff_utc": "2026-10-03T20:00:00+00:00",
       "venue": "University Stadium (NM)",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T20:00Z",
@@ -2384,11 +2418,12 @@
       "game_id": "401856709",
       "kickoff_utc": "2026-10-03T20:15:00+00:00",
       "venue": "Williams-Brice Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T20:00Z",
         "temperature_f": 76.9,
-        "precip_probability_pct": 46.0,
+        "precip_probability_pct": 44.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -2455,6 +2490,7 @@
       "game_id": "401858472",
       "kickoff_utc": "2026-10-03T20:15:00+00:00",
       "venue": "Gies Memorial Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T20:00Z",
@@ -2526,6 +2562,7 @@
       "game_id": "401860899",
       "kickoff_utc": "2026-10-03T22:00:00+00:00",
       "venue": "Canvas Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T22:00Z",
@@ -2597,6 +2634,7 @@
       "game_id": "401856711",
       "kickoff_utc": "2026-10-03T23:00:00+00:00",
       "venue": "Kyle Field",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T23:00Z",
@@ -2668,11 +2706,12 @@
       "game_id": "401856818",
       "kickoff_utc": "2026-10-03T23:00:00+00:00",
       "venue": "Amon G. Carter Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T23:00Z",
         "temperature_f": 72.3,
-        "precip_probability_pct": 14.0,
+        "precip_probability_pct": 10.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -2739,6 +2778,7 @@
       "game_id": "401869942",
       "kickoff_utc": "2026-10-03T23:00:00+00:00",
       "venue": "Brooks Stadium (SC)",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T23:00Z",
@@ -2810,11 +2850,12 @@
       "game_id": "401871089",
       "kickoff_utc": "2026-10-03T23:00:00+00:00",
       "venue": "Hancock Whitney Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T23:00Z",
         "temperature_f": 77.5,
-        "precip_probability_pct": 58.0,
+        "precip_probability_pct": 41.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -2822,7 +2863,7 @@
         "wind_gust_mph": 11.6,
         "weather_code": 3,
         "summary": "Cloudy",
-        "precipitation_label": "Light rain",
+        "precipitation_label": "Dry",
         "location": {
           "latitude": 30.69436,
           "longitude": -88.04305,
@@ -2832,9 +2873,9 @@
           "query": "Mobile, AL, USA"
         }
       },
-      "conditions_line": "78\u00b0F \u00b7 5 mph wind \u00b7 gusts 12 \u00b7 Light rain",
-      "impact": "Moderate",
-      "note": "Rain may slightly suppress scoring efficiency.",
+      "conditions_line": "78\u00b0F \u00b7 5 mph wind \u00b7 gusts 12 \u00b7 Dry",
+      "impact": "Minimal",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -12.0,
         "total": 50.0
@@ -2842,16 +2883,16 @@
       "adjustments": {
         "breakdown": {
           "wind": 0.0,
-          "precipitation": -0.5,
+          "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": -0.5,
-        "total_points": -0.5,
+        "raw_total_points": 0.0,
+        "total_points": 0.0,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -12.0,
-        "total": 49.5
+        "total": 50.0
       },
       "spread_logic": {
         "status": "ACTIVE",
@@ -2881,6 +2922,7 @@
       "game_id": "401862788",
       "kickoff_utc": "2026-10-03T23:00:00+00:00",
       "venue": "First Community Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T23:00Z",
@@ -2952,6 +2994,7 @@
       "game_id": "401869842",
       "kickoff_utc": "2026-10-03T23:30:00+00:00",
       "venue": "Joe Aillet Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T23:00Z",
@@ -3023,11 +3066,12 @@
       "game_id": "401858249",
       "kickoff_utc": "2026-10-03T23:30:00+00:00",
       "venue": "Memorial Stadium (Clemson, SC)",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T23:00Z",
         "temperature_f": 81.5,
-        "precip_probability_pct": 43.0,
+        "precip_probability_pct": 39.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -3094,11 +3138,12 @@
       "game_id": "401862792",
       "kickoff_utc": "2026-10-03T23:30:00+00:00",
       "venue": "Raymond James Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T23:00Z",
         "temperature_f": 77.4,
-        "precip_probability_pct": 38.0,
+        "precip_probability_pct": 51.0,
         "precipitation_in": 0.028,
         "rain_in": 0.028,
         "snowfall_in": 0.0,
@@ -3165,6 +3210,7 @@
       "game_id": "401856821",
       "kickoff_utc": "2026-10-03T23:30:00+00:00",
       "venue": "Folsom Field",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T23:00Z",
@@ -3236,6 +3282,7 @@
       "game_id": "401860898",
       "kickoff_utc": "2026-10-03T23:30:00+00:00",
       "venue": "Albertsons Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T23:00Z",
@@ -3307,6 +3354,7 @@
       "game_id": "401858478",
       "kickoff_utc": "2026-10-03T23:30:00+00:00",
       "venue": "Los Angeles Memorial Coliseum",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-03T23:00Z",
@@ -3378,6 +3426,7 @@
       "game_id": "401869932",
       "kickoff_utc": "2026-10-04T00:00:00+00:00",
       "venue": "Our Lady of Lourdes Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-04T00:00Z",
@@ -3449,6 +3498,7 @@
       "game_id": "401858477",
       "kickoff_utc": "2026-10-04T00:00:00+00:00",
       "venue": "SHI Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-04T00:00Z",
@@ -3520,6 +3570,7 @@
       "game_id": "401860921",
       "kickoff_utc": "2026-10-04T01:30:00+00:00",
       "venue": "Martin Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-04T01:00Z",
@@ -3591,6 +3642,7 @@
       "game_id": "401856817",
       "kickoff_utc": "2026-10-04T02:30:00+00:00",
       "venue": "Mountain America Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-04T02:00Z",
@@ -3662,6 +3714,7 @@
       "game_id": "401860900",
       "kickoff_utc": "2026-10-04T02:30:00+00:00",
       "venue": "Snapdragon Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-04T02:00Z",
@@ -3733,6 +3786,7 @@
       "game_id": "401856820",
       "kickoff_utc": "2026-10-04T03:00:00+00:00",
       "venue": "Casino Del Sol Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-04T03:00Z",
@@ -3804,6 +3858,7 @@
       "game_id": "401864513",
       "kickoff_utc": "2026-10-04T03:59:00+00:00",
       "venue": "Clarence T.C. Ching Athletics Complex",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-04T04:00Z",
@@ -3875,6 +3930,7 @@
       "game_id": "401871090",
       "kickoff_utc": "2026-10-07T00:00:00+00:00",
       "venue": "Veterans Memorial Stadium (AL)",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-07T00:00Z",
@@ -3946,6 +4002,7 @@
       "game_id": "401871051",
       "kickoff_utc": "2026-10-07T23:00:00+00:00",
       "venue": "Walens Family Field at Fifth Third Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-07T23:00Z",
@@ -4017,6 +4074,7 @@
       "game_id": "401871066",
       "kickoff_utc": "2026-10-07T23:30:00+00:00",
       "venue": "Pitbull Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-07T23:00Z",
@@ -4088,6 +4146,7 @@
       "game_id": "401871052",
       "kickoff_utc": "2026-10-08T23:00:00+00:00",
       "venue": "Houchens Industries-L.T. Smith Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-08T23:00Z",
@@ -4159,6 +4218,7 @@
       "game_id": "401870766",
       "kickoff_utc": "2026-10-08T23:00:00+00:00",
       "venue": "Williams Stadium (VA)",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-08T23:00Z",
@@ -4230,6 +4290,7 @@
       "game_id": "401869933",
       "kickoff_utc": "2026-10-08T23:30:00+00:00",
       "venue": "Centennial Bank Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-08T23:00Z",
@@ -4301,6 +4362,7 @@
       "game_id": "401862794",
       "kickoff_utc": "2026-10-08T23:30:00+00:00",
       "venue": "Alamodome",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-08T23:00Z",
@@ -4372,6 +4434,7 @@
       "game_id": "401858254",
       "kickoff_utc": "2026-10-09T23:00:00+00:00",
       "venue": "L&N Federal Credit Union Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-09T23:00Z",
@@ -4443,6 +4506,7 @@
       "game_id": "401858487",
       "kickoff_utc": "2026-10-10T01:00:00+00:00",
       "venue": "Husky Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-09T23:00Z",
@@ -4514,6 +4578,7 @@
       "game_id": "401860922",
       "kickoff_utc": "2026-10-10T01:00:00+00:00",
       "venue": "Maverik Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-09T23:00Z",
@@ -4585,6 +4650,7 @@
       "game_id": "401864519",
       "kickoff_utc": "2026-10-10T01:00:00+00:00",
       "venue": "CEFCU Stadium",
+      "network": null,
       "indoor": false,
       "forecast": {
         "forecast_time_utc": "2026-10-09T23:00Z",
@@ -4656,6 +4722,7 @@
       "game_id": "401856826",
       "kickoff_utc": "2026-10-10T02:15:00+00:00",
       "venue": "LaVell Edwards Stadium",
+      "network": null,
       "indoor": false,
       "forecast": null,
       "conditions_line": "Forecast unavailable",
@@ -4707,6 +4774,7 @@
       "game_id": "401869949",
       "kickoff_utc": "2026-10-10T04:00:00+00:00",
       "venue": "Allen E. Paulson Stadium",
+      "network": null,
       "indoor": false,
       "forecast": null,
       "conditions_line": "Forecast unavailable",
@@ -4758,6 +4826,7 @@
       "game_id": "401856714",
       "kickoff_utc": "2026-10-10T04:00:00+00:00",
       "venue": "Ben Hill Griffin Stadium",
+      "network": null,
       "indoor": false,
       "forecast": null,
       "conditions_line": "Forecast unavailable",
@@ -4809,6 +4878,7 @@
       "game_id": "401856716",
       "kickoff_utc": "2026-10-10T04:00:00+00:00",
       "venue": "Memorial Stadium",
+      "network": null,
       "indoor": false,
       "forecast": null,
       "conditions_line": "Forecast unavailable",
@@ -4860,6 +4930,7 @@
       "game_id": "401862798",
       "kickoff_utc": "2026-10-10T04:00:00+00:00",
       "venue": "Simmons Bank Liberty Stadium",
+      "network": null,
       "indoor": false,
       "forecast": null,
       "conditions_line": "Forecast unavailable",
@@ -4911,6 +4982,7 @@
       "game_id": "401856823",
       "kickoff_utc": "2026-10-10T16:00:00+00:00",
       "venue": "Milan Puskar Stadium",
+      "network": null,
       "indoor": false,
       "forecast": null,
       "conditions_line": "Forecast unavailable",
@@ -4962,6 +5034,7 @@
       "game_id": "401858481",
       "kickoff_utc": "2026-10-10T16:00:00+00:00",
       "venue": "Memorial Stadium (Lincoln, NE)",
+      "network": null,
       "indoor": false,
       "forecast": null,
       "conditions_line": "Forecast unavailable",
@@ -5013,6 +5086,7 @@
       "game_id": "401858256",
       "kickoff_utc": "2026-10-10T16:00:00+00:00",
       "venue": "Acrisure Stadium",
+      "network": null,
       "indoor": false,
       "forecast": null,
       "conditions_line": "Forecast unavailable",
@@ -5064,6 +5138,7 @@
       "game_id": "401866436",
       "kickoff_utc": "2026-10-10T16:00:00+00:00",
       "venue": "Doyt L. Perry Stadium",
+      "network": null,
       "indoor": false,
       "forecast": null,
       "conditions_line": "Forecast unavailable",
@@ -5115,6 +5190,7 @@
       "game_id": "401862795",
       "kickoff_utc": "2026-10-10T16:00:00+00:00",
       "venue": "Michie Stadium",
+      "network": null,
       "indoor": false,
       "forecast": null,
       "conditions_line": "Forecast unavailable",
@@ -5166,6 +5242,7 @@
       "game_id": "401856824",
       "kickoff_utc": "2026-10-10T16:00:00+00:00",
       "venue": "Boone Pickens Stadium",
+      "network": null,
       "indoor": false,
       "forecast": null,
       "conditions_line": "Forecast unavailable",
@@ -5217,6 +5294,7 @@
       "game_id": "401858260",
       "kickoff_utc": "2026-10-10T16:00:00+00:00",
       "venue": "Carter-Finley Stadium",
+      "network": null,
       "indoor": false,
       "forecast": null,
       "conditions_line": "Forecast unavailable",
@@ -5260,6 +5338,58 @@
           "epa_pass": 0.391,
           "epa_rush": 0.112,
           "pass_lean_score": 0.279,
+          "eligible": true
+        }
+      }
+    },
+    "401858482": {
+      "game_id": "401858482",
+      "kickoff_utc": "2026-10-10T16:30:00+00:00",
+      "venue": "Ryan Field",
+      "network": null,
+      "indoor": false,
+      "forecast": null,
+      "conditions_line": "Forecast unavailable",
+      "impact": "Minimal",
+      "note": "Forecast unavailable; Model A baseline remains unchanged.",
+      "baseline": {
+        "home_spread": -24.5,
+        "total": 50.0
+      },
+      "adjustments": {
+        "breakdown": {
+          "wind": 0.0,
+          "precipitation": 0.0,
+          "temperature": 0.0
+        },
+        "raw_total_points": 0.0,
+        "total_points": 0.0,
+        "home_spread_points": 0.0
+      },
+      "adjusted": {
+        "home_spread": -24.5,
+        "total": 50.0
+      },
+      "spread_logic": {
+        "status": "LOCKED",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.7,
+        "reason": "forecast unavailable; directional weather adjustment cannot be evaluated",
+        "home_tendency": {
+          "team": "Northwestern",
+          "plays": 100,
+          "epa_pass": 0.669,
+          "epa_rush": -0.02,
+          "pass_lean_score": 0.689,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Ball State",
+          "plays": 136,
+          "epa_pass": -0.007,
+          "epa_rush": -0.025,
+          "pass_lean_score": 0.018,
           "eligible": true
         }
       }
