@@ -1,0 +1,39 @@
+{
+  "meta": {
+    "schema_version": "1.0",
+    "generated_at_utc": "2026-10-03T00:01:32.756693Z",
+    "platform": "CollegeBasketballData.com",
+    "base_url": "https://api.collegebasketballdata.com",
+    "season": 2027,
+    "benchmark_season": 2026,
+    "request_count": 4,
+    "raw_api_data_stored": false,
+    "model_usage": "cbb_foundation_only_no_cfb_or_model_a_access"
+  },
+  "checks": {
+    "team_directory": {
+      "status": "ok",
+      "team_count": 365,
+      "conference_count": 32,
+      "required_fields_present": true
+    },
+    "season_games": {
+      "status": "ok",
+      "record_count": 3000,
+      "required_fields_present": true,
+      "missing_required_fields": []
+    },
+    "benchmark_adjusted_ratings": {
+      "status": "ok",
+      "record_count": 365,
+      "required_fields_present": true,
+      "missing_required_fields": []
+    },
+    "line_providers": {
+      "status": "ok",
+      "record_count": 6,
+      "required_fields_present": true,
+      "missing_required_fields": []
+    }
+  }
+}
