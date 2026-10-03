@@ -155,6 +155,7 @@
 
     stickyShell = document.createElement("div");
     stickyShell.id = STICKY_ID;
+    stickyShell.className = "hammer-sticky-projection-header";
 
     Object.assign(stickyShell.style, {
       display: "none",
@@ -169,6 +170,7 @@
     });
 
     stickyTable = document.createElement("table");
+    stickyTable.className = "projection-table hammer-sticky-projection-table";
 
     Object.assign(stickyTable.style, {
       borderCollapse: "collapse",
