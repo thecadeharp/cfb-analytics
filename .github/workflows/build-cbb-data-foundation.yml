@@ -1,0 +1,90 @@
+name: Build CBB Data Foundation
+
+on:
+  workflow_dispatch:
+    inputs:
+      season:
+        description: "CBBD season identifier (2027 is the 2026-27 season)"
+        required: true
+        default: "2027"
+        type: string
+  schedule:
+    - cron: "17 10 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-cbb-data-foundation
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Preserve College Football and Model A
+        run: |
+          sha256sum \
+            data/projections.json \
+            data/cfb_metrics.json \
+            data/hfa_2026.json \
+            scripts/build_projections.py \
+            index.html \
+            app.js \
+            > /tmp/cbb-data-before.sha256
+
+      - name: Test CBB derivation contract
+        run: |
+          python -m py_compile \
+            scripts/verify_cbb_api_foundation.py \
+            scripts/build_cbb_data_foundation.py \
+            scripts/test_cbb_data_foundation.py
+          python -m unittest scripts/test_cbb_data_foundation.py
+
+      - name: Build derived CBB data
+        env:
+          CBBD_API_KEY: ${{ secrets.CBBD_API_KEY }}
+          CBB_SEASON: ${{ inputs.season || '2027' }}
+        run: python scripts/build_cbb_data_foundation.py
+
+      - name: Validate outputs and isolation
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("data/cbb")
+          teams = json.loads((root / "team_profiles.json").read_text())
+          board = json.loads((root / "game_board.json").read_text())
+          status = json.loads((root / "foundation_status.json").read_text())
+          assert teams["meta"]["team_count"] >= 300
+          assert isinstance(teams["teams"], list)
+          assert isinstance(board["games"], list)
+          assert status["meta"]["request_count"] == 5
+          assert status["meta"]["raw_api_data_stored"] is False
+          assert status["meta"]["cfb_or_model_a_files_accessed"] is False
+          PY
+          sha256sum --check /tmp/cbb-data-before.sha256
+
+      - name: Commit derived CBB outputs only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            data/cbb/team_profiles.json \
+            data/cbb/game_board.json \
+            data/cbb/foundation_status.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Refresh CBB data foundation"
+          git pull --rebase origin main
+          git push origin HEAD:main
