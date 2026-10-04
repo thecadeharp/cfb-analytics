@@ -240,6 +240,7 @@ def build_player_research(
         raise RuntimeError("Current-season roster response contained no players")
 
     matched_roster_keys: set[str] = set()
+    matched_historical_keys: set[str] = set()
     qualified_sources: dict[str, tuple[dict[str, Any], dict[str, Any]]] = {}
     historical_keys: set[str] = set()
     for source in players:
@@ -254,6 +255,7 @@ def build_player_research(
             roster_player = active_by_source.get(str(source_id))
         if roster_player is None:
             continue
+        matched_historical_keys.add(source_key)
         roster_key = f"id:{roster_player['athlete_id']}" if roster_player.get("athlete_id") is not None else f"source:{roster_player.get('athlete_source_id')}"
         matched_roster_keys.add(roster_key)
         minutes = finite(source.get("minutes")) or 0.0
@@ -419,7 +421,7 @@ def build_player_research(
             "current_roster_players": len(roster_player_keys),
             "current_roster_players_with_source_stats": len(matched_roster_keys),
             "current_roster_players_without_qualified_prior": len(roster_player_keys) - len(prepared),
-            "historical_players_excluded_not_current": len(historical_keys - roster_player_keys),
+            "historical_players_withheld_unverified_current": len(historical_keys - matched_historical_keys),
             "qualified_players": len(prepared),
             "qualified_teams": team_count,
             "multi_team_source_stints": sum(row["multi_team_source_season"] for row in prepared),
