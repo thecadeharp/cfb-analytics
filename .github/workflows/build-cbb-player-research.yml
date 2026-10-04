@@ -84,6 +84,8 @@ jobs:
           assert payload["coverage"]["provider_roster_teams"] >= 250
           assert len(payload["team_rosters"]) >= 250
           assert sum(row["player_count"] for row in payload["team_rosters"]) == payload["coverage"]["current_roster_players"]
+          assert sum(row["returning_minutes_pct"] is not None for row in payload["team_rosters"]) >= 250
+          assert sum((row["returning_minutes_pct"] or 0) > 0 for row in payload["team_rosters"]) >= 250
           assert len(players) == meta["player_count"]
           assert len({row["player_season_id"] for row in players}) == len(players)
           assert all(row["current_roster_verified"] is True for row in players)
