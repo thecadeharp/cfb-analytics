@@ -1,0 +1,85 @@
+name: Audit CBB Personnel Sources
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cbb-personnel-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Preserve production files
+        run: |
+          sha256sum \
+            data/projections.json \
+            data/cfb_metrics.json \
+            scripts/build_projections.py \
+            index.html \
+            app.js \
+            data/cbb/model/model_card.json \
+            data/cbb/model/current_priors.json \
+            data/cbb/model/walk_forward_predictions.json.gz \
+            > /tmp/cbb-personnel-before.sha256
+
+      - name: Test personnel audit contract
+        run: |
+          python -m py_compile \
+            scripts/audit_cbb_personnel_sources.py \
+            scripts/test_cbb_personnel_sources.py
+          python -m unittest scripts/test_cbb_personnel_sources.py
+
+      - name: Audit 2027 personnel sources
+        env:
+          CBBD_API_KEY: ${{ secrets.CBBD_API_KEY }}
+        run: |
+          python scripts/audit_cbb_personnel_sources.py \
+            --season 2027 \
+            --prior-season 2026 \
+            --recruiting-year 2026 \
+            --output data/cbb/research/personnel_source_audit.json
+
+      - name: Validate aggregate-only output and isolation
+        run: |
+          sha256sum --check /tmp/cbb-personnel-before.sha256
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("data/cbb/research/personnel_source_audit.json")
+          report = json.loads(path.read_text())
+          assert report["meta"]["audit_version"] == "cbb-personnel-audit-v1.0"
+          assert report["meta"]["request_count"] == 6
+          assert report["meta"]["raw_api_data_stored"] is False
+          assert report["rosters"]["team_count"] >= 300
+          assert "players" not in report and "raw" not in report
+          PY
+
+      - name: Commit audit only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/cbb/research/personnel_source_audit.json
+          if git diff --cached --quiet; then
+            echo "No personnel audit changes"
+            exit 0
+          fi
+          git commit -m "Audit CBB personnel source coverage"
+          git pull --rebase origin main
+          git push origin HEAD:main
