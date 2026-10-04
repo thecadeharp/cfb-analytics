@@ -32,6 +32,7 @@ jobs:
             data/cfb_metrics.json \
             data/hfa_2026.json \
             scripts/build_projections.py \
+            data/cbb/player_ratings.json \
             index.html \
             app.js \
             > /tmp/cbb-model-before.sha256
@@ -57,6 +58,7 @@ jobs:
             --history-dir data/cbb/history \
             --personnel-dir data/cbb/personnel \
             --team-profiles data/cbb/team_profiles.json \
+            --player-ratings data/cbb/player_ratings.json \
             --output-dir data/cbb/model
 
       - name: Validate model contract and isolation
@@ -76,7 +78,7 @@ jobs:
               predictions = json.load(handle)
 
           meta = card["meta"]
-          assert meta["model_version"] == "thi-cbb-walk-forward-v0.4-research"
+          assert meta["model_version"] == "thi-cbb-walk-forward-v0.5-research"
           assert meta["activation_state"] == "research_only"
           assert meta["strict_walk_forward"] is True
           assert meta["same_season_end_ratings_used_as_pregame_features"] is False
@@ -86,6 +88,8 @@ jobs:
           assert len(predictions["games"]) >= 40000
           assert priors["meta"]["team_count"] >= 300
           assert priors["meta"]["personnel_team_count"] >= 300
+          assert priors["meta"]["verified_roster_continuity_count"] >= 250
+          assert priors["meta"]["positive_continuity_count"] >= 250
           for model in (card["models"]["margin"], card["models"]["total"]):
               assert not any("market" in name or "close" in name for name in model["feature_names"])
           PY
