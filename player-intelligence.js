@@ -97,7 +97,7 @@
     root.innerHTML = `<div class="thi-player-tabs">${["QB","RB","WR","TE","DEF","HEISMAN"].map(key => `<button class="thi-player-tab ${active === key ? "active" : ""}" data-player-tab="${key}">${escape(title[key])}</button>`).join("")}</div>
       <div class="thi-player-controls"><div class="thi-player-control"><label for="thi-player-search">Player or team</label><input id="thi-player-search" type="search" value="${escape(search)}" placeholder="Search players"></div>
       <div class="thi-player-control"><label for="thi-player-conference">Conference</label><select id="thi-player-conference"><option value="ALL">All conferences</option>${conferences.map(name => `<option ${conference === name ? "selected" : ""}>${escape(name)}</option>`).join("")}</select></div></div>
-      <div class="thi-player-beta">Through Week ${escape(data.meta?.through_week ?? "—")} · observed roles are derived from recorded workload, not an official depth chart · position ratings are research beta · Model A is unchanged.</div>
+      <div class="thi-player-beta">Through Week ${escape(data.meta?.through_week ?? "—")} · metric colors compare players within the current position and filter · observed roles are derived from recorded workload, not an official depth chart · position ratings are research beta · Model A is unchanged.</div>
       <div id="thi-player-table"></div>`;
     root.querySelectorAll("[data-player-tab]").forEach(button => button.addEventListener("click", () => {
       active = button.dataset.playerTab;
@@ -175,13 +175,51 @@
     }));
   }
 
+  function metricBand(values, rawValue) {
+    const value = Number(rawValue);
+    const valid = values.map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+    if (!Number.isFinite(value) || !valid.length) return {name:"missing", label:"N/A"};
+    if (valid.length === 1) return {name:"average", label:"AVERAGE"};
+    const below = valid.filter(item => item < value).length;
+    const equal = valid.filter(item => item === value).length;
+    const percentile = (below + Math.max(equal - 1, 0) / 2) / Math.max(valid.length - 1, 1);
+    if (percentile >= .90) return {name:"elite", label:"ELITE"};
+    if (percentile >= .70) return {name:"strong", label:"STRONG"};
+    if (percentile >= .55) return {name:"above", label:"ABOVE AVG"};
+    if (percentile >= .45) return {name:"average", label:"AVERAGE"};
+    if (percentile >= .30) return {name:"below", label:"BELOW AVG"};
+    if (percentile >= .10) return {name:"poor", label:"POOR"};
+    return {name:"critical", label:"LOW"};
+  }
+
+  function gradedMetricCell(display, rawValue, values) {
+    const band = metricBand(values, rawValue);
+    return `<td class="thi-player-metric thi-player-band-${band.name}"><span class="thi-player-metric-value">${escape(display)}</span><span class="thi-player-metric-label">${band.label}</span></td>`;
+  }
+
+  function metricValues(rows, key, heisman) {
+    return rows.map(row => sortValue(row, key, heisman)).filter(Number.isFinite);
+  }
+
+  function percent(value, digits = 1) {
+    return Number.isFinite(Number(value)) ? `${num(value, digits)}%` : "—";
+  }
+
   function table(rows, heisman) {
+    const bands = Object.fromEntries(
+      ["rating", "production", "adj_epa", "total_epa", "success", "reliability"]
+        .map(key => [key, metricValues(rows, key, heisman)])
+    );
     return `<div class="thi-player-table-wrap"><table class="thi-player-table"><thead><tr>${sortHeader("rank", heisman ? "Board" : "Pos Rank")}${sortHeader("player", "Player")}${sortHeader("team", "Team")}${sortHeader("class", "Class")}${sortHeader("rating", heisman ? "Heisman Score" : "THI Rating")}${sortHeader("production", "Production")}${sortHeader("adj_epa", "Adj EPA/Opp")}${sortHeader("total_epa", "Total EPA")}${sortHeader("success", "Success")}${sortHeader("reliability", "Reliability")}</tr></thead><tbody>${rows.map((row,index) => `<tr>
       <td class="thi-player-mono">#${escape(heisman ? row.rank : row.national_position_rank || index + 1)}</td>
       <td><button class="thi-player-name" data-thi-player-id="${escape(row.athlete_id)}">${escape(row.name)}</button><div class="thi-hub-muted">${escape(row.position || row.position_group || "—")}</div></td>
       <td>${escape(row.team || "—")}</td><td>${escape(row.class || "—")}</td>
-      <td><span class="thi-player-grade">${num(heisman ? row.heisman_score : row.rating,1)}</span></td><td>${escape(volume(row))}</td>
-      <td class="thi-player-mono">${num(row.advanced?.opponent_adjusted_epa_per_opportunity,3,true)}</td><td class="thi-player-mono">${num(row.advanced?.epa_total,1,true)}</td><td class="thi-player-mono">${num(row.advanced?.success_rate,1)}%</td><td class="thi-player-mono">${num(row.reliability,0)}%</td>
+      ${gradedMetricCell(num(heisman ? row.heisman_score : row.rating,1), sortValue(row,"rating",heisman), bands.rating)}
+      ${gradedMetricCell(volume(row), sortValue(row,"production",heisman), bands.production)}
+      ${gradedMetricCell(num(row.advanced?.opponent_adjusted_epa_per_opportunity,3,true), sortValue(row,"adj_epa",heisman), bands.adj_epa)}
+      ${gradedMetricCell(num(row.advanced?.epa_total,1,true), sortValue(row,"total_epa",heisman), bands.total_epa)}
+      ${gradedMetricCell(percent(row.advanced?.success_rate,1), sortValue(row,"success",heisman), bands.success)}
+      ${gradedMetricCell(percent(row.reliability,0), sortValue(row,"reliability",heisman), bands.reliability)}
     </tr>`).join("")}</tbody></table></div>`;
   }
 
