@@ -114,6 +114,8 @@
     });
     detail.addEventListener("click", event => {
       if (event.target === detail || event.target.closest("[data-cbb-close]")) closeTeamDetail();
+      const playerButton = event.target.closest("[data-roster-player-id]");
+      if (playerButton) openPlayerDetail(playerButton.dataset.rosterPlayerId);
     });
     document.addEventListener("keydown", event => {
       if (event.key === "Escape") closeTeamDetail();
@@ -303,7 +305,7 @@
         <div class="cbb-kicker">Player-level basketball intelligence</div>
         <h1 class="page-title">CBB Player Ratings</h1>
         <p class="page-subtitle">THI's research layer grades production, efficiency, role and two-way possession value without feeding these ratings into public game projections.</p>
-        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Research v1.1</span><strong>${state.playerLoading ? "Loading the player board" : "Player board available"}</strong><p>${state.playerLoading ? "Reading the roster-verified player layer…" : "Open this tab to load active-roster players with qualified prior-season production. Ratings remain research-only until opponent and lineup adjustments are validated."}</p></div>
+        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Research v1.2</span><strong>${state.playerLoading ? "Loading the player board" : "Player board available"}</strong><p>${state.playerLoading ? "Reading the roster-verified player layer…" : "Open this tab to load active-roster players with qualified prior-season production. Ratings remain research-only until opponent and lineup adjustments are validated."}</p></div>
       `;
       return;
     }
@@ -344,7 +346,7 @@
     state.playerLoading = fetchJson(PLAYER_PATH)
       .then(payload => {
         if (!Array.isArray(payload.players)) throw new Error("Player ratings payload is missing players.");
-        if (payload.meta?.version !== "thi-cbb-player-research-v1.1" || payload.players.some(player => player.current_roster_verified !== true)) {
+        if (payload.meta?.version !== "thi-cbb-player-research-v1.2" || !Array.isArray(payload.team_rosters) || payload.players.some(player => player.current_roster_verified !== true)) {
           throw new Error("The roster-verified player rebuild has not completed. Historical-only ratings are withheld.");
         }
         state.playerData = payload;
@@ -497,7 +499,7 @@
       </section>
       <section class="cbb-detail-section"><h3>Sample and rating state</h3>
         ${detailRow("Current roster", `${player.team} · ${state.playerData?.meta?.roster_season || state.playerData?.meta?.season}`)}${detailRow("Production source", `${player.source_team || player.team} · ${player.source_season || state.playerData?.meta?.source_season || "Prior season"}`)}${detailRow("Between-season transfer", player.transfer_between_seasons ? "Yes" : "No")}${detailRow("Games", integer(player.sample?.games))}${detailRow("Starts", integer(player.sample?.starts))}${detailRow("Minutes", integer(player.sample?.minutes))}${detailRow("Minutes per game", number(player.sample?.minutes_per_game,1))}${detailRow("Reliability", pct(player.data_quality?.reliability))}${detailRow("Projection use", "Research reference only")}
-        <div class="cbb-model-sub">V1.1 displays only active-roster players and uses the prior completed season as the statistical input. Opponent and lineup adjustments are not active yet.</div>
+        <div class="cbb-model-sub">V1.2 displays only active-roster players and uses the prior completed season as the statistical input. Opponent and lineup adjustments are not active yet.</div>
       </section>`;
     detail.classList.add("is-open");
     detail.setAttribute("aria-hidden", "false");
@@ -681,15 +683,23 @@
     }).join("") : `<tr><td colspan="8" class="cbb-empty">No teams match those filters.</td></tr>`;
   }
 
-  function openTeamDetail(teamId) {
+  async function openTeamDetail(teamId) {
     const prior = state.data.priors.teams.find(team => Number(team.team_id) === Number(teamId));
     const profile = state.data.profiles.teams.find(team => Number(team.team_id) === Number(teamId));
     if (!prior) return;
     const detail = document.getElementById("cbb-team-detail");
     const panel = detail.querySelector(".cbb-detail-panel");
+    if (!state.playerData) {
+      panel.innerHTML = `<button class="cbb-detail-close" type="button" data-cbb-close>Close</button><div class="cbb-kicker">THI CBB team profile</div><h2 class="cbb-detail-title" id="cbb-detail-title">${escapeHtml(profile?.display_name || prior.team)}</h2><div class="cbb-readiness-banner"><strong>Loading verified roster…</strong></div>`;
+      detail.classList.add("is-open");
+      detail.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      await loadPlayerRatings();
+    }
     const recruiting = prior.personnel?.recruiting || {};
     const transfers = prior.personnel?.transfers || {};
     const preseason = profile?.preseason_prior || {};
+    const roster = state.playerData?.team_rosters?.find(row => Number(row.team_id) === Number(teamId));
     panel.innerHTML = `
       <button class="cbb-detail-close" type="button" data-cbb-close>Close</button>
       <div class="cbb-kicker">THI CBB team profile</div>
@@ -714,6 +724,11 @@
         ${detailRow("Current rating state", "Preseason prior")}
         ${detailRow("Returning-minutes signal", prior.returning_minutes_pct > 0 ? pct(prior.returning_minutes_pct) : "Unavailable in current feed")}
       </section>
+      <section class="cbb-detail-section"><h3>Verified roster and rotation outlook</h3>
+        <div class="cbb-model-sub">Every listed player is verified on the current roster. THI grades appear only when the player has a qualifying prior-season sample; freshmen and limited samples stay explicitly unrated.</div>
+        <div class="cbb-roster-summary">${detailRow("Active players", roster ? integer(roster.player_count) : "Unavailable")}${detailRow("Qualified returning production", roster ? integer(roster.rated_player_count) : "—")}${detailRow("Identified transfers", roster ? integer(roster.transfer_count) : "—")}</div>
+        <div class="cbb-roster-list">${roster?.players?.length ? roster.players.map(rosterPlayerRow).join("") : `<div class="cbb-empty">A verified current roster is not available for this team yet.</div>`}</div>
+      </section>
       <section class="cbb-detail-section"><h3>Current-season Four Factors</h3><div class="cbb-model-sub">Four Factors and shot-profile grades activate after the 2027 season begins and a usable sample is available.</div></section>
     `;
     detail.classList.add("is-open");
@@ -733,6 +748,15 @@
 
   function detailStat(label, value) { return `<div class="cbb-detail-stat"><div class="cbb-label">${escapeHtml(label)}</div><strong>${escapeHtml(value)}</strong></div>`; }
   function detailRow(label, value) { return `<div class="cbb-detail-row"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`; }
+
+  function rosterPlayerRow(player) {
+    const identity = [player.position, player.class, player.height].filter(Boolean).join(" · ") || "Roster verified";
+    const prior = player.prior_state === "rated"
+      ? `<button type="button" class="cbb-roster-rating" data-roster-player-id="${escapeHtml(player.player_season_id)}">${number(player.thi_player_rating,1)} THI · profile →</button>`
+      : `<span class="cbb-roster-unrated">${player.prior_state === "below_sample" ? "Limited prior sample" : "No qualifying prior"}</span>`;
+    const transfer = player.transfer_between_seasons ? `<span class="cbb-chip">Transfer · ${escapeHtml(player.prior_team || "prior team")}</span>` : "";
+    return `<article class="cbb-roster-player"><div><strong>${player.jersey ? `#${escapeHtml(player.jersey)} ` : ""}${escapeHtml(player.name || "Unknown player")}</strong><div class="cbb-team-meta">${escapeHtml(identity)}</div></div><div class="cbb-roster-player-state">${transfer}${prior}</div></article>`;
+  }
 
   function renderTracking() {
     const card = state.data.model;
