@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import json
 import os
 import re
@@ -41,6 +42,20 @@ def require_list(name: str, payload: Any) -> list[dict[str, Any]]:
     return [row for row in payload if isinstance(row, dict)]
 
 
+def roster_player_rows(roster: dict[str, Any]) -> list[dict[str, Any]]:
+    container = roster.get("players")
+    if isinstance(container, list):
+        return [row for row in container if isinstance(row, dict)]
+    if isinstance(container, dict):
+        for key in ("rows", "players", "items", "data"):
+            nested = container.get(key)
+            if isinstance(nested, list):
+                return [row for row in nested if isinstance(row, dict)]
+        if container and all(isinstance(row, dict) for row in container.values()):
+            return list(container.values())
+    return []
+
+
 def build_audit(
     season: int,
     prior_season: int,
@@ -57,12 +72,18 @@ def build_audit(
     roster_players = []
     roster_by_id: dict[str, tuple[str, str]] = {}
     roster_by_name: set[tuple[str, str]] = set()
+    roster_team_ids = {str(row.get("teamId")) for row in rosters if row.get("teamId") is not None}
+    player_container_types = Counter(type(row.get("players")).__name__ for row in rosters)
+    player_object_keys = sorted({
+        key
+        for row in rosters[:100]
+        if isinstance(row.get("players"), dict)
+        for key in row["players"].keys()
+    })
     for roster in rosters:
         team_id = str(roster.get("teamId"))
         team_name = str(roster.get("team") or "")
-        for player in roster.get("players") or []:
-            if not isinstance(player, dict):
-                continue
+        for player in roster_player_rows(roster):
             roster_players.append(player)
             athlete_id = player.get("id")
             if athlete_id is not None:
@@ -136,10 +157,16 @@ def build_audit(
             "purpose": "coverage audit only; no model activation",
         },
         "rosters": {
-            "team_count": len(rosters),
+            "record_count": len(rosters),
+            "unique_team_count": len(roster_team_ids),
             "player_count": len(roster_players),
             "unique_player_id_count": len(roster_by_id),
-            "players_per_team": round(len(roster_players) / len(rosters), 3) if rosters else None,
+            "players_per_team": round(len(roster_players) / len(roster_team_ids), 3) if roster_team_ids else None,
+            "schema_probe": {
+                "top_level_keys": sorted({key for row in rosters[:100] for key in row.keys()}),
+                "players_container_types": dict(sorted(player_container_types.items())),
+                "players_object_keys": player_object_keys,
+            },
         },
         "prior_player_stats": {
             "record_count": len(prior_players),
@@ -166,8 +193,8 @@ def build_audit(
             str(recruiting_year + 1): portal_summary(portal_next),
         },
         "readiness": {
-            "roster_team_coverage_ok": len(rosters) >= 300,
-            "roster_depth_plausible": len(roster_players) >= len(rosters) * 10 if rosters else False,
+            "roster_team_coverage_ok": len(roster_team_ids) >= 300,
+            "roster_depth_plausible": len(roster_players) >= len(roster_team_ids) * 10 if roster_team_ids else False,
             "returning_minutes_usable": sum(value > 0 for value in returning_minutes_by_team.values()) >= 300,
             "incoming_transfer_minutes_usable": sum(value > 0 for value in incoming_minutes_by_team.values()) >= 100,
             "recruiting_coverage_usable": len(recruit_teams) >= 100,
