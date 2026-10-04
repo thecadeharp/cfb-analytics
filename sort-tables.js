@@ -34,6 +34,11 @@
 
   let liveGames = [];
   let completedGames = [];
+  let livePayloadGeneratedAt = null;
+
+  const LIVE_PAYLOAD_MAX_AGE_MS = 20 * 60 * 1000;
+  const LIVE_INFERENCE_DELAY_MS = 10 * 60 * 1000;
+  const GAME_WINDOW_MAX_MS = 5.5 * 60 * 60 * 1000;
 
   let statusRefreshTimer = null;
   let statusRefreshInFlight = false;
@@ -165,11 +170,13 @@
         opacity: 1;
       }
 
-      .hammer-live-row {
+      .hammer-live-row,
+      .hammer-live-pending-row {
         background: #fffafa !important;
       }
 
-      .hammer-live-row:hover {
+      .hammer-live-row:hover,
+      .hammer-live-pending-row:hover {
         background: #fff6f6 !important;
         box-shadow: inset 3px 0 0 #c62828 !important;
       }
@@ -208,6 +215,37 @@
         font-size: 9px;
         font-weight: 700;
         letter-spacing: 0.25px;
+      }
+
+      .hammer-live-pending-label,
+      .hammer-final-pending-label {
+        display: inline-flex;
+        align-items: center;
+        margin-top: 6px;
+        padding: 4px 7px;
+        border-radius: 999px;
+        font-family: var(--mono);
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 0.7px;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .hammer-live-pending-label {
+        border: 1px solid #e2a1a1;
+        background: #fdeaea;
+        color: #b71c1c;
+      }
+
+      .hammer-final-pending-row {
+        background: #fafaf8 !important;
+      }
+
+      .hammer-final-pending-label {
+        border: 1px solid #c7cdd3;
+        background: #f1f3f5;
+        color: #4c5965;
       }
 
       .hammer-live-score,
@@ -599,6 +637,44 @@
       : "";
   }
 
+  function projectionGameMap() {
+    const games = Array.isArray(window.THIProjectionGames)
+      ? window.THIProjectionGames
+      : Array.isArray(window.THIProjectionsPayload?.games)
+        ? window.THIProjectionsPayload.games
+        : [];
+    return gameMap(games);
+  }
+
+  function dateValue(value) {
+    const time = new Date(value || "").getTime();
+    return Number.isFinite(time) ? time : null;
+  }
+
+  function isFreshLivePayload(now = Date.now()) {
+    const generated = dateValue(livePayloadGeneratedAt);
+    return generated !== null && now - generated >= 0 && now - generated <= LIVE_PAYLOAD_MAX_AGE_MS;
+  }
+
+  function temporalState(game, now = Date.now()) {
+    const start = dateValue(game?.start_date ?? game?.startDate ?? game?.date);
+    if (start === null) return "upcoming";
+    const elapsed = now - start;
+    if (elapsed < LIVE_INFERENCE_DELAY_MS) return "upcoming";
+    if (elapsed <= GAME_WINDOW_MAX_MS) return "live-pending";
+    return "final-pending";
+  }
+
+  function liveGameIsPlausible(game, projection, now = Date.now()) {
+    if (!isFreshLivePayload(now)) return false;
+    const start = dateValue(
+      projection?.start_date ?? projection?.startDate ?? game?.start_date ?? game?.startDate ?? game?.date
+    );
+    if (start === null) return true;
+    const elapsed = now - start;
+    return elapsed >= -30 * 60 * 1000 && elapsed <= GAME_WINDOW_MAX_MS;
+  }
+
   function periodText(period) {
     const text = cleanText(period);
     if (!text) return "";
@@ -666,13 +742,31 @@
       ".hammer-final-score, " +
       ".hammer-live-badge, " +
       ".hammer-live-detail, " +
-      ".hammer-final-untracked-label"
+      ".hammer-final-untracked-label, " +
+      ".hammer-live-pending-label, " +
+      ".hammer-final-pending-label"
     ).forEach(node => node.remove());
 
     row.classList.remove(
       "hammer-live-row",
-      "hammer-final-untracked-row"
+      "hammer-live-pending-row",
+      "hammer-final-untracked-row",
+      "hammer-final-pending-row"
     );
+  }
+
+  function decoratePendingRow(row, stateName) {
+    removeStatusArtifacts(row);
+    const isLive = stateName === "live-pending";
+    row.dataset.hammerGameState = isLive ? "live" : "final";
+    row.classList.add(isLive ? "hammer-live-pending-row" : "hammer-final-pending-row");
+    const meta = statusMetaContainer(row);
+    if (meta) {
+      const label = document.createElement("span");
+      label.className = isLive ? "hammer-live-pending-label" : "hammer-final-pending-label";
+      label.textContent = isLive ? "LIVE · SCORE PENDING" : "FINAL STATUS PENDING";
+      meta.appendChild(label);
+    }
   }
 
   function appendTeamScores(
@@ -881,6 +975,8 @@
     try {
       const liveByMatchup = gameMap(liveGames);
       const finalByMatchup = gameMap(completedGames);
+      const projectionByMatchup = projectionGameMap();
+      const now = Date.now();
 
       const rows = document.querySelectorAll(
         "#projections-container .projection-table tbody tr.game-row"
@@ -888,6 +984,7 @@
 
       rows.forEach(row => {
         if (row.classList.contains("completed-row")) {
+          removeStatusArtifacts(row);
           markSettledRow(row);
           return;
         }
@@ -895,13 +992,8 @@
         const key = rowKey(row);
 
         if (!key) {
+          removeStatusArtifacts(row);
           row.dataset.hammerGameState = "upcoming";
-          return;
-        }
-
-        const live = liveByMatchup.get(key);
-        if (live) {
-          decorateLiveRow(row, live);
           return;
         }
 
@@ -911,6 +1003,20 @@
           return;
         }
 
+        const projection = projectionByMatchup.get(key);
+        const live = liveByMatchup.get(key);
+        if (live && liveGameIsPlausible(live, projection, now)) {
+          decorateLiveRow(row, live);
+          return;
+        }
+
+        const inferred = temporalState(projection, now);
+        if (inferred !== "upcoming") {
+          decoratePendingRow(row, inferred);
+          return;
+        }
+
+        removeStatusArtifacts(row);
         row.dataset.hammerGameState = "upcoming";
       });
 
@@ -969,9 +1075,8 @@
         ]);
 
       if (liveResult.status === "fulfilled") {
-        liveGames = Array.isArray(
-          liveResult.value?.games
-        )
+        livePayloadGeneratedAt = liveResult.value?.meta?.generated_at ?? null;
+        liveGames = isFreshLivePayload() && Array.isArray(liveResult.value?.games)
           ? liveResult.value.games
           : [];
       }
