@@ -67,7 +67,7 @@ jobs:
           assert report["meta"]["audit_version"] == "cbb-personnel-audit-v1.0"
           assert report["meta"]["request_count"] == 6
           assert report["meta"]["raw_api_data_stored"] is False
-          assert report["rosters"]["team_count"] >= 300
+          assert report["rosters"]["unique_team_count"] >= 300
           assert "players" not in report and "raw" not in report
           PY
 
