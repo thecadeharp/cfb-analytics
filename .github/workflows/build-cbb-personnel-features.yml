@@ -105,6 +105,24 @@ jobs:
             git push origin HEAD:main
           done
 
+      - name: Rebuild and commit complete manifest
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from scripts.build_cbb_personnel_season import rebuild_manifest
+          rebuild_manifest(Path("data/cbb/personnel"))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/cbb/personnel/manifest.json
+          if git diff --cached --quiet; then
+            echo "Personnel manifest already complete"
+          else
+            git commit -m "Rebuild complete CBB personnel manifest"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+
       - name: Verify isolation
         run: |
           sha256sum --check /tmp/cbb-personnel-features-before.sha256
