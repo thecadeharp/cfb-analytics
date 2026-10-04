@@ -208,10 +208,12 @@ def build_player_research(
         for row in teams if isinstance(row, dict)
     }
     athlete_teams: dict[str, set[str]] = defaultdict(set)
+    source_team_minutes: dict[str, float] = defaultdict(float)
     for row in players:
         if not isinstance(row, dict) or row.get("athleteId") is None:
             continue
         athlete_teams[str(row.get("athleteId"))].add(str(row.get("teamId")))
+        source_team_minutes[str(row.get("teamId"))] += finite(row.get("minutes")) or 0.0
 
     active_by_id: dict[str, dict[str, Any]] = {}
     active_by_source: dict[str, dict[str, Any]] = {}
@@ -257,6 +259,7 @@ def build_player_research(
     matched_roster_keys: set[str] = set()
     matched_historical_keys: set[str] = set()
     prior_sources: dict[str, dict[str, Any]] = {}
+    prior_stints: dict[str, list[dict[str, Any]]] = defaultdict(list)
     qualified_sources: dict[str, tuple[dict[str, Any], dict[str, Any]]] = {}
     historical_keys: set[str] = set()
     for source in players:
@@ -274,6 +277,7 @@ def build_player_research(
         matched_historical_keys.add(source_key)
         roster_key = f"id:{roster_player['athlete_id']}" if roster_player.get("athlete_id") is not None else f"source:{roster_player.get('athlete_source_id')}"
         matched_roster_keys.add(roster_key)
+        prior_stints[roster_key].append(source)
         minutes = finite(source.get("minutes")) or 0.0
         games = finite(source.get("games")) or 0.0
         if roster_key not in prior_sources or minutes > (finite(prior_sources[roster_key].get("minutes")) or 0.0):
@@ -291,6 +295,7 @@ def build_player_research(
         athlete_id = roster_player.get("athlete_id") or source.get("athleteId")
         team_id = roster_player.get("team_id")
         source_team_id = source.get("teamId")
+        roster_key = f"id:{roster_player['athlete_id']}" if roster_player.get("athlete_id") is not None else f"source:{roster_player.get('athlete_source_id')}"
         identity = f"{roster_season}:{athlete_id}:{team_id}"
         context = team_context.get(str(source_team_id), {})
         minutes_per_game = minutes / games if games else None
@@ -335,7 +340,7 @@ def build_player_research(
             "source_season": source_season,
             "source_team_id": source_team_id,
             "source_team": source.get("team"),
-            "transfer_between_seasons": str(source_team_id) != str(team_id),
+            "transfer_between_seasons": not any(str(stint.get("teamId")) == str(team_id) for stint in prior_stints.get(roster_key, [])),
             "multi_team_source_season": len(athlete_teams[str(source.get("athleteId"))]) > 1,
             "sample": {
                 "games": int(games),
@@ -423,6 +428,11 @@ def build_player_research(
         prior = prior_sources.get(roster_key)
         prior_minutes = finite((prior or {}).get("minutes"))
         prior_games = finite((prior or {}).get("games"))
+        returning_minutes = sum(
+            finite(stint.get("minutes")) or 0.0
+            for stint in prior_stints.get(roster_key, [])
+            if str(stint.get("teamId")) == str(active.get("team_id"))
+        )
         if rated:
             prior_state = "rated"
         elif prior:
@@ -451,9 +461,11 @@ def build_player_research(
             "headshot": active.get("headshot"),
             "prior_state": prior_state,
             "prior_team": (prior or {}).get("team"),
+            "prior_team_id": (prior or {}).get("teamId"),
             "prior_minutes": rounded(prior_minutes, 1),
+            "returning_minutes": rounded(returning_minutes, 1),
             "prior_games": int(prior_games) if prior_games is not None else None,
-            "transfer_between_seasons": bool(prior and str(prior.get("teamId")) != str(active.get("team_id"))),
+            "transfer_between_seasons": bool(prior and returning_minutes <= 0),
             "role": rated.get("role") if rated else None,
             "thi_player_rating": (rated.get("research_scores") or {}).get("thi_player_rating") if rated else None,
             "rating_percentile": (rated.get("research_scores") or {}).get("rating_percentile") if rated else None,
@@ -469,6 +481,11 @@ def build_player_research(
         team_roster["player_count"] = len(team_roster["players"])
         team_roster["rated_player_count"] = sum(row["prior_state"] == "rated" for row in team_roster["players"])
         team_roster["transfer_count"] = sum(row["transfer_between_seasons"] for row in team_roster["players"])
+        team_roster["prior_team_minutes"] = round(source_team_minutes.get(str(team_roster.get("team_id")), 0.0), 1)
+        team_roster["returning_minutes"] = round(sum(row["returning_minutes"] or 0.0 for row in team_roster["players"]), 1)
+        team_roster["returning_minutes_pct"] = round(
+            100.0 * team_roster["returning_minutes"] / team_roster["prior_team_minutes"], 2
+        ) if team_roster["prior_team_minutes"] > 0 else None
         team_rosters.append(team_roster)
     team_rosters.sort(key=lambda row: str(row.get("team") or ""))
 
