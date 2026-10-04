@@ -76,10 +76,12 @@ jobs:
           assert meta["version"] == "thi-cbb-player-research-v1.1"
           assert meta["activation_state"] == "research_reference_only"
           assert meta["raw_api_data_stored"] is False
-          assert meta["request_count"] == 3
+          assert meta["cbbd_request_count"] in (3, 4)
+          assert meta["roster_source"] in ("cbbd", "espn_current_roster_fallback")
           assert meta["source_season"] < meta["roster_season"]
           assert meta["player_count"] >= 1500
           assert meta["team_count"] >= 250
+          assert payload["coverage"]["provider_roster_teams"] >= 250
           assert len(players) == meta["player_count"]
           assert len({row["player_season_id"] for row in players}) == len(players)
           assert all(row["current_roster_verified"] is True for row in players)
