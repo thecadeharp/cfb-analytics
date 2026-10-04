@@ -3,7 +3,7 @@
 import math
 import unittest
 
-from scripts.build_cbb_player_research import build_player_research
+from scripts.build_cbb_player_research import build_player_research, normalize_espn_roster
 
 
 def player(index: int, quality: float, team_id: int = 1) -> dict:
@@ -72,6 +72,7 @@ class CbbPlayerResearchTests(unittest.TestCase):
         self.assertEqual(payload["meta"]["version"], "thi-cbb-player-research-v1.1")
         self.assertEqual(payload["meta"]["source_season"], 2026)
         self.assertEqual(payload["meta"]["roster_season"], 2027)
+        self.assertEqual(payload["meta"]["roster_source"], "cbbd")
         self.assertEqual(payload["meta"]["activation_state"], "research_reference_only")
         self.assertFalse(payload["meta"]["raw_api_data_stored"])
         self.assertEqual(len(payload["players"]), 12)
@@ -109,6 +110,23 @@ class CbbPlayerResearchTests(unittest.TestCase):
     def test_rejects_same_or_older_roster_season(self):
         with self.assertRaisesRegex(RuntimeError, "Roster season"):
             build_player_research(2026, 2026, [], [], [])
+
+    def test_normalizes_only_the_requested_espn_roster_season(self):
+        team = {"id": 72, "sourceId": "150", "school": "Duke"}
+        payload = {
+            "season": {"year": 2027, "displayName": "2026-27"},
+            "athletes": [{
+                "id": "5454779",
+                "fullName": "Current Player",
+                "jersey": "5",
+                "position": {"abbreviation": "G"},
+            }],
+        }
+        roster_row = normalize_espn_roster(team, "ACC", payload, 2027)
+        self.assertEqual(roster_row["teamId"], 72)
+        self.assertEqual(roster_row["players"][0]["sourceId"], "5454779")
+        self.assertEqual(roster_row["players"][0]["position"], "G")
+        self.assertIsNone(normalize_espn_roster(team, "ACC", payload, 2026))
 
 
 if __name__ == "__main__":
