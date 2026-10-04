@@ -1,8 +1,8 @@
 {
   "meta": {
-    "model_version": "thi-cbb-walk-forward-v0.2-research",
+    "model_version": "thi-cbb-walk-forward-v0.3-research",
     "activation_state": "research_only",
-    "generated_at_utc": "2026-10-04T04:14:21.589735Z",
+    "generated_at_utc": "2026-10-04T04:25:22.462863Z",
     "strict_walk_forward": true,
     "training_seasons": [
       2019,
@@ -28,9 +28,13 @@
     "margin": {
       "feature_names": [
         "raw_margin",
+        "raw_margin_curve",
         "home_court",
         "experience_diff",
         "experience_sum",
+        "early_strength_margin",
+        "early_home",
+        "nonconference_home",
         "efg_edge",
         "turnover_edge",
         "rebound_edge",
@@ -38,9 +42,13 @@
       ],
       "means": {
         "raw_margin": 1.29964569,
+        "raw_margin_curve": 18.13852051,
         "home_court": 0.88974437,
         "experience_diff": 0.09511367,
         "experience_sum": 4.81978085,
+        "early_strength_margin": 0.32818391,
+        "early_home": 0.17147896,
+        "nonconference_home": 0.33587949,
         "efg_edge": 0.61666932,
         "turnover_edge": 0.19579863,
         "rebound_edge": -0.05329267,
@@ -48,9 +56,13 @@
       },
       "scales": {
         "raw_margin": 7.8322591,
+        "raw_margin_curve": 122.97456939,
         "home_court": 0.31320812,
         "experience_diff": 0.4514407,
         "experience_sum": 1.81240886,
+        "early_strength_margin": 1.88178666,
+        "early_home": 0.26848793,
+        "nonconference_home": 0.472297,
         "efg_edge": 5.29128918,
         "turnover_edge": 3.62939781,
         "rebound_edge": 4.80497993,
@@ -58,14 +70,18 @@
       },
       "coefficients": [
         7.2711199,
-        8.51249518,
-        1.49568474,
-        4.26672052,
-        -3.76918077,
-        -1.2534216,
-        -0.28881184,
-        0.3105371,
-        -0.23249696
+        7.13575106,
+        1.37625558,
+        0.18388366,
+        2.5593507,
+        1.10672842,
+        -0.10618761,
+        5.40579758,
+        1.49949707,
+        -1.08882124,
+        -0.22841399,
+        0.3443663,
+        -0.15656575
       ],
       "ridge": 4.0,
       "sample_count": 32860
@@ -103,17 +119,17 @@
       "ridge": 4.0,
       "sample_count": 32860
     },
-    "margin_residual_sd": 13.235268
+    "margin_residual_sd": 12.942269
   },
   "evaluation": {
     "train": {
       "games": 32860,
-      "margin_mae": 10.2592,
-      "margin_rmse": 13.2353,
+      "margin_mae": 10.0579,
+      "margin_rmse": 12.9423,
       "total_mae": 13.6682,
       "total_rmse": 17.3859,
-      "winner_accuracy": 72.133,
-      "win_probability_brier": 0.180983,
+      "winner_accuracy": 72.973,
+      "win_probability_brier": 0.177794,
       "market_margin_games": 29987,
       "market_margin_mae": 8.8521,
       "market_total_games": 30056,
@@ -121,45 +137,45 @@
       "ats_by_edge": [
         {
           "minimum_edge": 0,
-          "wins": 15092,
-          "losses": 14561,
+          "wins": 15059,
+          "losses": 14594,
           "pushes": 334,
-          "hit_rate": 50.895
+          "hit_rate": 50.784
         },
         {
           "minimum_edge": 1,
-          "wins": 12313,
-          "losses": 11735,
-          "pushes": 266,
-          "hit_rate": 51.202
+          "wins": 11919,
+          "losses": 11363,
+          "pushes": 261,
+          "hit_rate": 51.194
         },
         {
           "minimum_edge": 2,
-          "wins": 9711,
-          "losses": 9231,
-          "pushes": 206,
-          "hit_rate": 51.267
+          "wins": 8925,
+          "losses": 8443,
+          "pushes": 198,
+          "hit_rate": 51.388
         },
         {
           "minimum_edge": 3,
-          "wins": 7472,
-          "losses": 7031,
-          "pushes": 161,
-          "hit_rate": 51.52
+          "wins": 6513,
+          "losses": 6154,
+          "pushes": 146,
+          "hit_rate": 51.417
         },
         {
           "minimum_edge": 4,
-          "wins": 5671,
-          "losses": 5289,
-          "pushes": 116,
-          "hit_rate": 51.743
+          "wins": 4753,
+          "losses": 4418,
+          "pushes": 98,
+          "hit_rate": 51.826
         },
         {
           "minimum_edge": 5,
-          "wins": 4303,
-          "losses": 3978,
-          "pushes": 91,
-          "hit_rate": 51.962
+          "wins": 3456,
+          "losses": 3126,
+          "pushes": 70,
+          "hit_rate": 52.507
         }
       ],
       "totals_by_edge": [
@@ -209,12 +225,12 @@
     },
     "validation": {
       "games": 6118,
-      "margin_mae": 10.2382,
-      "margin_rmse": 13.394,
+      "margin_mae": 9.9994,
+      "margin_rmse": 13.0567,
       "total_mae": 13.2647,
       "total_rmse": 16.9511,
-      "winner_accuracy": 72.981,
-      "win_probability_brier": 0.176448,
+      "winner_accuracy": 73.668,
+      "win_probability_brier": 0.172802,
       "market_margin_games": 5311,
       "market_margin_mae": 8.7258,
       "market_total_games": 5310,
@@ -222,45 +238,45 @@
       "ats_by_edge": [
         {
           "minimum_edge": 0,
-          "wins": 2685,
-          "losses": 2626,
+          "wins": 2717,
+          "losses": 2594,
           "pushes": 0,
-          "hit_rate": 50.555
+          "hit_rate": 51.158
         },
         {
           "minimum_edge": 1,
-          "wins": 2165,
-          "losses": 2103,
+          "wins": 2151,
+          "losses": 2030,
           "pushes": 0,
-          "hit_rate": 50.726
+          "hit_rate": 51.447
         },
         {
           "minimum_edge": 2,
-          "wins": 1704,
-          "losses": 1665,
+          "wins": 1568,
+          "losses": 1499,
           "pushes": 0,
-          "hit_rate": 50.579
+          "hit_rate": 51.125
         },
         {
           "minimum_edge": 3,
-          "wins": 1308,
-          "losses": 1261,
+          "wins": 1122,
+          "losses": 1085,
           "pushes": 0,
-          "hit_rate": 50.915
+          "hit_rate": 50.838
         },
         {
           "minimum_edge": 4,
-          "wins": 982,
-          "losses": 935,
+          "wins": 795,
+          "losses": 754,
           "pushes": 0,
-          "hit_rate": 51.226
+          "hit_rate": 51.323
         },
         {
           "minimum_edge": 5,
-          "wins": 734,
-          "losses": 667,
+          "wins": 582,
+          "losses": 529,
           "pushes": 0,
-          "hit_rate": 52.391
+          "hit_rate": 52.385
         }
       ],
       "totals_by_edge": [
@@ -310,12 +326,12 @@
     },
     "out_of_time_test": {
       "games": 6142,
-      "margin_mae": 10.391,
-      "margin_rmse": 13.5789,
+      "margin_mae": 10.1272,
+      "margin_rmse": 13.1941,
       "total_mae": 14.05,
       "total_rmse": 17.6501,
-      "winner_accuracy": 73.51,
-      "win_probability_brier": 0.173361,
+      "winner_accuracy": 73.82,
+      "win_probability_brier": 0.170644,
       "market_margin_games": 5618,
       "market_margin_mae": 8.9729,
       "market_total_games": 5617,
@@ -323,45 +339,45 @@
       "ats_by_edge": [
         {
           "minimum_edge": 0,
-          "wins": 2896,
-          "losses": 2702,
+          "wins": 2948,
+          "losses": 2650,
           "pushes": 20,
-          "hit_rate": 51.733
+          "hit_rate": 52.662
         },
         {
           "minimum_edge": 1,
-          "wins": 2311,
-          "losses": 2143,
-          "pushes": 19,
-          "hit_rate": 51.886
+          "wins": 2246,
+          "losses": 2033,
+          "pushes": 16,
+          "hit_rate": 52.489
         },
         {
           "minimum_edge": 2,
-          "wins": 1795,
-          "losses": 1632,
-          "pushes": 14,
-          "hit_rate": 52.378
+          "wins": 1660,
+          "losses": 1499,
+          "pushes": 12,
+          "hit_rate": 52.548
         },
         {
           "minimum_edge": 3,
-          "wins": 1310,
-          "losses": 1186,
-          "pushes": 8,
-          "hit_rate": 52.484
+          "wins": 1189,
+          "losses": 1008,
+          "pushes": 9,
+          "hit_rate": 54.119
         },
         {
           "minimum_edge": 4,
-          "wins": 947,
-          "losses": 868,
-          "pushes": 7,
-          "hit_rate": 52.176
+          "wins": 806,
+          "losses": 697,
+          "pushes": 4,
+          "hit_rate": 53.626
         },
         {
           "minimum_edge": 5,
-          "wins": 686,
-          "losses": 631,
-          "pushes": 5,
-          "hit_rate": 52.088
+          "wins": 588,
+          "losses": 505,
+          "pushes": 3,
+          "hit_rate": 53.797
         }
       ],
       "totals_by_edge": [
@@ -410,9 +426,20 @@
       ]
     }
   },
+  "promotion_gate": {
+    "eligible_for_public_projection_engine": false,
+    "checks": {
+      "validation_margin_mae_within_one_point_of_market": false,
+      "test_margin_mae_within_one_point_of_market": false,
+      "validation_large_spread_edge_above_52_38_pct": true,
+      "test_large_spread_edge_above_52_38_pct": true,
+      "validation_totals_edge_above_52_38_pct": false,
+      "usable_roster_continuity_for_300_teams": false
+    }
+  },
   "limitations": [
     "Roster continuity is used only where CBBD supplies matched player IDs and minutes.",
-    "Injuries, travel, altitude, coaching, officials and player-level availability are not active inputs in v0.1.",
+    "Injuries, travel, altitude, coaching, officials and player-level availability are not active inputs in this research version.",
     "Market results are evaluation context and are not model inputs.",
     "The 2027 CBBD roster feed currently has no positive returning-minutes values, so continuity cannot yet differentiate teams.",
     "This research model does not guarantee betting profit."
