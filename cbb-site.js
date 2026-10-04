@@ -303,7 +303,7 @@
         <div class="cbb-kicker">Player-level basketball intelligence</div>
         <h1 class="page-title">CBB Player Ratings</h1>
         <p class="page-subtitle">THI's research layer grades production, efficiency, role and two-way possession value without feeding these ratings into public game projections.</p>
-        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Research v1.0</span><strong>${state.playerLoading ? "Loading the player board" : "Player board available"}</strong><p>${state.playerLoading ? "Reading the derived player-season layer…" : "Open this tab to load the qualified player universe. Ratings remain research-only until opponent and lineup adjustments are validated."}</p></div>
+        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Research v1.1</span><strong>${state.playerLoading ? "Loading the player board" : "Player board available"}</strong><p>${state.playerLoading ? "Reading the roster-verified player layer…" : "Open this tab to load active-roster players with qualified prior-season production. Ratings remain research-only until opponent and lineup adjustments are validated."}</p></div>
       `;
       return;
     }
@@ -314,11 +314,11 @@
     view.innerHTML = `
       <div class="cbb-kicker">Player-level basketball intelligence</div>
       <h1 class="page-title">CBB Player Ratings</h1>
-      <p class="page-subtitle">Qualified ${escapeHtml(meta.season)} player seasons, graded by THI production, efficiency, role and two-way possession value. This is a research reference layer and is not yet opponent-adjusted or lineup-adjusted.</p>
+      <p class="page-subtitle">Active ${escapeHtml(meta.roster_season || meta.season)} roster players with qualified ${escapeHtml(meta.source_season || "prior-season")} production, graded by THI efficiency, role and two-way possession value. This is a research reference layer and is not yet opponent-adjusted or lineup-adjusted.</p>
       <div class="cbb-stat-grid">
         ${statCard("Qualified players", integer(meta.player_count), `${integer(meta.team_count)} Division I teams`)}
         ${statCard("Minimum sample", `${integer(meta.minimum_minutes)} min`, `${integer(meta.minimum_games)} games`)}
-        ${statCard("Identity state", "Reconciled", `${integer(payload.coverage?.multi_team_stints)} multi-team stints flagged`)}
+        ${statCard("Roster state", "Verified active", `${integer(payload.coverage?.historical_players_excluded_not_current)} departed players excluded`)}
         ${statCard("Projection use", "Research only", "No game-line adjustment")}
       </div>
       <div class="cbb-player-controls">
@@ -333,7 +333,7 @@
         </tr></thead><tbody id="cbb-player-body"></tbody></table>
       </div>
       <div class="cbb-player-pager"><button type="button" data-player-page="prev">Previous</button><span id="cbb-player-page-status"></span><button type="button" data-player-page="next">Next</button></div>
-      <div class="cbb-stat-note">Every displayed metric is graded within the qualified player universe. Green is stronger, red is weaker. Rank numbers remain neutral. Click a player for the full profile and methodology context.</div>
+      <div class="cbb-stat-note">Only players verified on a ${escapeHtml(meta.roster_season || meta.season)} roster are shown. Displayed metrics use ${escapeHtml(meta.source_season || "prior-season")} production. Green is stronger, red is weaker. Rank numbers remain neutral.</div>
     `;
     bindPlayerControls();
     paintPlayerRows();
@@ -344,6 +344,9 @@
     state.playerLoading = fetchJson(PLAYER_PATH)
       .then(payload => {
         if (!Array.isArray(payload.players)) throw new Error("Player ratings payload is missing players.");
+        if (payload.meta?.version !== "thi-cbb-player-research-v1.1" || payload.players.some(player => player.current_roster_verified !== true)) {
+          throw new Error("The roster-verified player rebuild has not completed. Historical-only ratings are withheld.");
+        }
         state.playerData = payload;
         state.playerBandCache = {};
         renderPlayerRatings();
@@ -493,8 +496,8 @@
         ${playerDetailRow("Defensive rating", number(metrics.defensive_rating,1), player, "defensive_rating", true)}${playerDetailRow("Net rating", number(metrics.net_rating,1,true), player, "net_rating")}${playerDetailRow("Rebounds per 40", number(metrics.rebounds_per_40,2), player, "rebounds_per_40")}${playerDetailRow("Offensive rebounds per 40", number(metrics.offensive_rebounds_per_40,2), player, "offensive_rebounds_per_40")}${playerDetailRow("Steals per 40", number(metrics.steals_per_40,2), player, "steals_per_40")}${playerDetailRow("Blocks per 40", number(metrics.blocks_per_40,2), player, "blocks_per_40")}${playerDetailRow("Win shares per 40", number(metrics.total_win_shares_per_40,3), player, "total_win_shares_per_40")}
       </section>
       <section class="cbb-detail-section"><h3>Sample and rating state</h3>
-        ${detailRow("Games", integer(player.sample?.games))}${detailRow("Starts", integer(player.sample?.starts))}${detailRow("Minutes", integer(player.sample?.minutes))}${detailRow("Minutes per game", number(player.sample?.minutes_per_game,1))}${detailRow("Reliability", pct(player.data_quality?.reliability))}${detailRow("Multi-team season", player.multi_team_season ? "Yes — team stint shown" : "No")}${detailRow("Projection use", "Research reference only")}
-        <div class="cbb-model-sub">V1.0 uses robust standardized production and efficiency components with sample regression. Opponent and lineup adjustments are not active yet.</div>
+        ${detailRow("Current roster", `${player.team} · ${state.playerData?.meta?.roster_season || state.playerData?.meta?.season}`)}${detailRow("Production source", `${player.source_team || player.team} · ${player.source_season || state.playerData?.meta?.source_season || "Prior season"}`)}${detailRow("Between-season transfer", player.transfer_between_seasons ? "Yes" : "No")}${detailRow("Games", integer(player.sample?.games))}${detailRow("Starts", integer(player.sample?.starts))}${detailRow("Minutes", integer(player.sample?.minutes))}${detailRow("Minutes per game", number(player.sample?.minutes_per_game,1))}${detailRow("Reliability", pct(player.data_quality?.reliability))}${detailRow("Projection use", "Research reference only")}
+        <div class="cbb-model-sub">V1.1 displays only active-roster players and uses the prior completed season as the statistical input. Opponent and lineup adjustments are not active yet.</div>
       </section>`;
     detail.classList.add("is-open");
     detail.setAttribute("aria-hidden", "false");
