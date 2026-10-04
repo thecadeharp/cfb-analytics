@@ -1,14 +1,15 @@
 {
   "meta": {
-    "schema_version": "1.0",
-    "generated_at_utc": "2026-10-03T00:01:32.756693Z",
+    "schema_version": "2.0",
+    "generated_at_utc": "2026-10-04T03:24:58.436892Z",
     "platform": "CollegeBasketballData.com",
     "base_url": "https://api.collegebasketballdata.com",
     "season": 2027,
     "benchmark_season": 2026,
-    "request_count": 4,
+    "request_count": 8,
     "raw_api_data_stored": false,
-    "model_usage": "cbb_foundation_only_no_cfb_or_model_a_access"
+    "model_usage": "cbb_foundation_only_no_cfb_or_model_a_access",
+    "credential_storage": "github_actions_secret_only"
   },
   "checks": {
     "team_directory": {
@@ -29,9 +30,33 @@
       "required_fields_present": true,
       "missing_required_fields": []
     },
+    "benchmark_team_leaderboard": {
+      "status": "ok",
+      "record_count": 365,
+      "required_fields_present": true,
+      "missing_required_fields": []
+    },
+    "current_rosters": {
+      "status": "ok",
+      "record_count": 1535,
+      "required_fields_present": true,
+      "missing_required_fields": []
+    },
+    "benchmark_player_stats": {
+      "status": "ok",
+      "record_count": 10030,
+      "required_fields_present": true,
+      "missing_required_fields": []
+    },
     "line_providers": {
       "status": "ok",
       "record_count": 6,
+      "required_fields_present": true,
+      "missing_required_fields": []
+    },
+    "live_scoreboard": {
+      "status": "empty",
+      "record_count": 0,
       "required_fields_present": true,
       "missing_required_fields": []
     }
