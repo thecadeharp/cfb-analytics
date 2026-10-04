@@ -11,6 +11,7 @@ from scripts.build_cbb_walk_forward_model import (
     initial_states,
     add_personnel_features,
     current_priors,
+    metrics,
     load_seasons,
     projection_features,
 )
@@ -98,6 +99,28 @@ class CbbWalkForwardModelTests(unittest.TestCase):
             self.assertEqual(row["continuity_source"], "verified_current_roster_join")
             self.assertEqual(payload["meta"]["verified_roster_continuity_count"], 1)
             self.assertGreater(row["prior_net"], 15)
+
+    def test_evaluation_reports_context_and_probability_calibration(self):
+        rows = []
+        for index, probability in enumerate((0.2, 0.7, 0.8, 0.4)):
+            rows.append({
+                "home_games_before": index * 2,
+                "away_games_before": index * 2,
+                "conference_game": index % 2 == 0,
+                "neutral_site": index == 1,
+                "projected_home_margin": (-4, 5, 8, -2)[index],
+                "actual_home_margin": (-6, 3, 10, 1)[index],
+                "projected_total": 140 + index,
+                "actual_total": 138 + index,
+                "home_win_probability": probability,
+                "market_home_spread": (3, -4, -7, 1)[index],
+                "market_total": 139 + index,
+            })
+        report = metrics(rows)
+        self.assertEqual(report["context_slices"]["season_opener"]["games"], 1)
+        self.assertEqual(report["context_slices"]["settled_sample"]["games"], 1)
+        self.assertEqual(report["context_slices"]["neutral_site"]["games"], 1)
+        self.assertEqual(sum(row["games"] for row in report["win_probability_calibration"]), 4)
 
 
 if __name__ == "__main__":
