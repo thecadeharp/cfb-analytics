@@ -8,6 +8,11 @@ on:
         required: true
         default: "2027"
         type: string
+      benchmark_season:
+        description: "Completed season used for preseason priors"
+        required: true
+        default: "2026"
+        type: string
   schedule:
     - cron: "17 10 * * *"
 
@@ -56,7 +61,8 @@ jobs:
         env:
           CBBD_API_KEY: ${{ secrets.CBBD_API_KEY }}
           CBB_SEASON: ${{ inputs.season || '2027' }}
-        run: python scripts/build_cbb_data_foundation.py
+          CBB_BENCHMARK_SEASON: ${{ inputs.benchmark_season || '2026' }}
+        run: python scripts/build_cbb_data_foundation.py --output-dir data/cbb
 
       - name: Validate outputs and isolation
         run: |
@@ -67,12 +73,17 @@ jobs:
           teams = json.loads((root / "team_profiles.json").read_text())
           board = json.loads((root / "game_board.json").read_text())
           status = json.loads((root / "foundation_status.json").read_text())
+          print("CBB foundation metadata:", json.dumps(status.get("meta", {}), indent=2))
+          print("CBB foundation coverage:", json.dumps(status.get("coverage", {}), indent=2))
           assert teams["meta"]["team_count"] >= 300
           assert isinstance(teams["teams"], list)
           assert isinstance(board["games"], list)
-          assert status["meta"]["request_count"] == 5
+          assert status["meta"].get("builder_version") == "cbb-foundation-v2.1", "wrong CBB builder version"
+          assert int(status["meta"].get("request_count", 0)) >= 8, "incomplete CBB request contract"
           assert status["meta"]["raw_api_data_stored"] is False
           assert status["meta"]["cfb_or_model_a_files_accessed"] is False
+          assert status["coverage"]["benchmark_leaderboard_teams"] >= 300
+          assert status["coverage"]["current_rosters"] >= 300
           PY
           sha256sum --check /tmp/cbb-data-before.sha256
 
