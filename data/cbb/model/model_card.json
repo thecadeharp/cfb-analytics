@@ -1,0 +1,420 @@
+{
+  "meta": {
+    "model_version": "thi-cbb-walk-forward-v0.2-research",
+    "activation_state": "research_only",
+    "generated_at_utc": "2026-10-04T04:14:21.589735Z",
+    "strict_walk_forward": true,
+    "training_seasons": [
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024
+    ],
+    "validation_seasons": [
+      2025
+    ],
+    "out_of_time_test_seasons": [
+      2026
+    ],
+    "burn_in_seasons": [
+      2018
+    ],
+    "same_season_end_ratings_used_as_pregame_features": false,
+    "description": "Pregame team states update only after each completed game. Current-season end ratings never initialize that same season. Market prices are evaluation fields only."
+  },
+  "models": {
+    "margin": {
+      "feature_names": [
+        "raw_margin",
+        "home_court",
+        "experience_diff",
+        "experience_sum",
+        "efg_edge",
+        "turnover_edge",
+        "rebound_edge",
+        "free_throw_edge"
+      ],
+      "means": {
+        "raw_margin": 1.29964569,
+        "home_court": 0.88974437,
+        "experience_diff": 0.09511367,
+        "experience_sum": 4.81978085,
+        "efg_edge": 0.61666932,
+        "turnover_edge": 0.19579863,
+        "rebound_edge": -0.05329267,
+        "free_throw_edge": 0.35327467
+      },
+      "scales": {
+        "raw_margin": 7.8322591,
+        "home_court": 0.31320812,
+        "experience_diff": 0.4514407,
+        "experience_sum": 1.81240886,
+        "efg_edge": 5.29128918,
+        "turnover_edge": 3.62939781,
+        "rebound_edge": 4.80497993,
+        "free_throw_edge": 8.05933871
+      },
+      "coefficients": [
+        7.2711199,
+        8.51249518,
+        1.49568474,
+        4.26672052,
+        -3.76918077,
+        -1.2534216,
+        -0.28881184,
+        0.3105371,
+        -0.23249696
+      ],
+      "ridge": 4.0,
+      "sample_count": 32860
+    },
+    "total": {
+      "feature_names": [
+        "raw_total",
+        "projected_pace",
+        "experience_sum",
+        "combined_efg",
+        "combined_turnover"
+      ],
+      "means": {
+        "raw_total": 140.38529301,
+        "projected_pace": 66.96060335,
+        "experience_sum": 4.81978085,
+        "combined_efg": 100.81137307,
+        "combined_turnover": 36.91609185
+      },
+      "scales": {
+        "raw_total": 9.45328297,
+        "projected_pace": 2.2602656,
+        "experience_sum": 1.81240886,
+        "combined_efg": 5.04382766,
+        "combined_turnover": 5.25700263
+      },
+      "coefficients": [
+        142.80690809,
+        2.58967187,
+        5.38285086,
+        -3.93359827,
+        1.24567897,
+        -2.19915099
+      ],
+      "ridge": 4.0,
+      "sample_count": 32860
+    },
+    "margin_residual_sd": 13.235268
+  },
+  "evaluation": {
+    "train": {
+      "games": 32860,
+      "margin_mae": 10.2592,
+      "margin_rmse": 13.2353,
+      "total_mae": 13.6682,
+      "total_rmse": 17.3859,
+      "winner_accuracy": 72.133,
+      "win_probability_brier": 0.180983,
+      "market_margin_games": 29987,
+      "market_margin_mae": 8.8521,
+      "market_total_games": 30056,
+      "market_total_mae": 13.0318,
+      "ats_by_edge": [
+        {
+          "minimum_edge": 0,
+          "wins": 15092,
+          "losses": 14561,
+          "pushes": 334,
+          "hit_rate": 50.895
+        },
+        {
+          "minimum_edge": 1,
+          "wins": 12313,
+          "losses": 11735,
+          "pushes": 266,
+          "hit_rate": 51.202
+        },
+        {
+          "minimum_edge": 2,
+          "wins": 9711,
+          "losses": 9231,
+          "pushes": 206,
+          "hit_rate": 51.267
+        },
+        {
+          "minimum_edge": 3,
+          "wins": 7472,
+          "losses": 7031,
+          "pushes": 161,
+          "hit_rate": 51.52
+        },
+        {
+          "minimum_edge": 4,
+          "wins": 5671,
+          "losses": 5289,
+          "pushes": 116,
+          "hit_rate": 51.743
+        },
+        {
+          "minimum_edge": 5,
+          "wins": 4303,
+          "losses": 3978,
+          "pushes": 91,
+          "hit_rate": 51.962
+        }
+      ],
+      "totals_by_edge": [
+        {
+          "minimum_edge": 0,
+          "wins": 15195,
+          "losses": 14668,
+          "pushes": 193,
+          "hit_rate": 50.882
+        },
+        {
+          "minimum_edge": 1,
+          "wins": 12677,
+          "losses": 12167,
+          "pushes": 164,
+          "hit_rate": 51.026
+        },
+        {
+          "minimum_edge": 2,
+          "wins": 10232,
+          "losses": 9733,
+          "pushes": 128,
+          "hit_rate": 51.25
+        },
+        {
+          "minimum_edge": 3,
+          "wins": 8085,
+          "losses": 7623,
+          "pushes": 102,
+          "hit_rate": 51.471
+        },
+        {
+          "minimum_edge": 4,
+          "wins": 6172,
+          "losses": 5779,
+          "pushes": 77,
+          "hit_rate": 51.644
+        },
+        {
+          "minimum_edge": 5,
+          "wins": 4643,
+          "losses": 4242,
+          "pushes": 56,
+          "hit_rate": 52.257
+        }
+      ]
+    },
+    "validation": {
+      "games": 6118,
+      "margin_mae": 10.2382,
+      "margin_rmse": 13.394,
+      "total_mae": 13.2647,
+      "total_rmse": 16.9511,
+      "winner_accuracy": 72.981,
+      "win_probability_brier": 0.176448,
+      "market_margin_games": 5311,
+      "market_margin_mae": 8.7258,
+      "market_total_games": 5310,
+      "market_total_mae": 12.6612,
+      "ats_by_edge": [
+        {
+          "minimum_edge": 0,
+          "wins": 2685,
+          "losses": 2626,
+          "pushes": 0,
+          "hit_rate": 50.555
+        },
+        {
+          "minimum_edge": 1,
+          "wins": 2165,
+          "losses": 2103,
+          "pushes": 0,
+          "hit_rate": 50.726
+        },
+        {
+          "minimum_edge": 2,
+          "wins": 1704,
+          "losses": 1665,
+          "pushes": 0,
+          "hit_rate": 50.579
+        },
+        {
+          "minimum_edge": 3,
+          "wins": 1308,
+          "losses": 1261,
+          "pushes": 0,
+          "hit_rate": 50.915
+        },
+        {
+          "minimum_edge": 4,
+          "wins": 982,
+          "losses": 935,
+          "pushes": 0,
+          "hit_rate": 51.226
+        },
+        {
+          "minimum_edge": 5,
+          "wins": 734,
+          "losses": 667,
+          "pushes": 0,
+          "hit_rate": 52.391
+        }
+      ],
+      "totals_by_edge": [
+        {
+          "minimum_edge": 0,
+          "wins": 2655,
+          "losses": 2655,
+          "pushes": 0,
+          "hit_rate": 50.0
+        },
+        {
+          "minimum_edge": 1,
+          "wins": 2190,
+          "losses": 2221,
+          "pushes": 0,
+          "hit_rate": 49.649
+        },
+        {
+          "minimum_edge": 2,
+          "wins": 1772,
+          "losses": 1779,
+          "pushes": 0,
+          "hit_rate": 49.901
+        },
+        {
+          "minimum_edge": 3,
+          "wins": 1379,
+          "losses": 1407,
+          "pushes": 0,
+          "hit_rate": 49.497
+        },
+        {
+          "minimum_edge": 4,
+          "wins": 1027,
+          "losses": 1082,
+          "pushes": 0,
+          "hit_rate": 48.696
+        },
+        {
+          "minimum_edge": 5,
+          "wins": 752,
+          "losses": 806,
+          "pushes": 0,
+          "hit_rate": 48.267
+        }
+      ]
+    },
+    "out_of_time_test": {
+      "games": 6142,
+      "margin_mae": 10.391,
+      "margin_rmse": 13.5789,
+      "total_mae": 14.05,
+      "total_rmse": 17.6501,
+      "winner_accuracy": 73.51,
+      "win_probability_brier": 0.173361,
+      "market_margin_games": 5618,
+      "market_margin_mae": 8.9729,
+      "market_total_games": 5617,
+      "market_total_mae": 13.3859,
+      "ats_by_edge": [
+        {
+          "minimum_edge": 0,
+          "wins": 2896,
+          "losses": 2702,
+          "pushes": 20,
+          "hit_rate": 51.733
+        },
+        {
+          "minimum_edge": 1,
+          "wins": 2311,
+          "losses": 2143,
+          "pushes": 19,
+          "hit_rate": 51.886
+        },
+        {
+          "minimum_edge": 2,
+          "wins": 1795,
+          "losses": 1632,
+          "pushes": 14,
+          "hit_rate": 52.378
+        },
+        {
+          "minimum_edge": 3,
+          "wins": 1310,
+          "losses": 1186,
+          "pushes": 8,
+          "hit_rate": 52.484
+        },
+        {
+          "minimum_edge": 4,
+          "wins": 947,
+          "losses": 868,
+          "pushes": 7,
+          "hit_rate": 52.176
+        },
+        {
+          "minimum_edge": 5,
+          "wins": 686,
+          "losses": 631,
+          "pushes": 5,
+          "hit_rate": 52.088
+        }
+      ],
+      "totals_by_edge": [
+        {
+          "minimum_edge": 0,
+          "wins": 2780,
+          "losses": 2820,
+          "pushes": 17,
+          "hit_rate": 49.643
+        },
+        {
+          "minimum_edge": 1,
+          "wins": 2295,
+          "losses": 2316,
+          "pushes": 13,
+          "hit_rate": 49.772
+        },
+        {
+          "minimum_edge": 2,
+          "wins": 1819,
+          "losses": 1844,
+          "pushes": 10,
+          "hit_rate": 49.659
+        },
+        {
+          "minimum_edge": 3,
+          "wins": 1398,
+          "losses": 1389,
+          "pushes": 10,
+          "hit_rate": 50.161
+        },
+        {
+          "minimum_edge": 4,
+          "wins": 1029,
+          "losses": 1023,
+          "pushes": 9,
+          "hit_rate": 50.146
+        },
+        {
+          "minimum_edge": 5,
+          "wins": 751,
+          "losses": 718,
+          "pushes": 5,
+          "hit_rate": 51.123
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "Roster continuity is used only where CBBD supplies matched player IDs and minutes.",
+    "Injuries, travel, altitude, coaching, officials and player-level availability are not active inputs in v0.1.",
+    "Market results are evaluation context and are not model inputs.",
+    "The 2027 CBBD roster feed currently has no positive returning-minutes values, so continuity cannot yet differentiate teams.",
+    "This research model does not guarantee betting profit."
+  ]
+}
