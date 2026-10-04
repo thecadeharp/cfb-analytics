@@ -104,7 +104,7 @@ class CbbPlayerResearchTests(unittest.TestCase):
         self.assertEqual(payload["players"][0]["source_team"], "Team 1")
         self.assertTrue(payload["players"][0]["multi_team_source_season"])
         self.assertTrue(payload["players"][0]["transfer_between_seasons"])
-        self.assertEqual(payload["coverage"]["historical_players_excluded_not_current"], 1)
+        self.assertEqual(payload["coverage"]["historical_players_withheld_unverified_current"], 1)
         self.assertNotIn("raw", payload)
 
     def test_rejects_same_or_older_roster_season(self):
