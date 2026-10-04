@@ -18,14 +18,16 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 HISTORY_DIR = ROOT / "data" / "cbb" / "history"
 OUTPUT_DIR = ROOT / "data" / "cbb" / "model"
-MODEL_VERSION = "thi-cbb-walk-forward-v0.3-research"
+MODEL_VERSION = "thi-cbb-walk-forward-v0.4-research"
 TRAIN_SEASONS = set(range(2019, 2025))
 VALIDATION_SEASONS = {2025}
 TEST_SEASONS = {2026}
 MARGIN_FEATURES = (
     "raw_margin", "raw_margin_curve", "home_court", "experience_diff", "experience_sum",
     "early_strength_margin", "early_home", "nonconference_home", "efg_edge", "turnover_edge",
-    "rebound_edge", "free_throw_edge",
+    "rebound_edge", "free_throw_edge", "personnel_recruit_rating", "personnel_transfer_minutes",
+    "personnel_transfer_points", "personnel_transfer_rating", "personnel_recruit_count",
+    "personnel_transfer_count",
 )
 TOTAL_FEATURES = (
     "raw_total", "projected_pace", "experience_sum", "combined_efg", "combined_turnover",
@@ -92,6 +94,79 @@ def load_seasons(history_dir: Path) -> dict[int, dict[str, Any]]:
     if not payloads:
         raise RuntimeError(f"no historical seasons found in {history_dir}")
     return payloads
+
+
+def load_personnel(personnel_dir: Path) -> dict[Any, Any]:
+    output: dict[Any, Any] = {}
+    for path in sorted(personnel_dir.glob("season_*.json.gz")):
+        with gzip.open(path, "rt", encoding="utf-8") as handle:
+            payload = json.load(handle)
+        if payload.get("meta", {}).get("version") != "cbb-personnel-features-v1.0":
+            raise RuntimeError(f"{path} has an unsupported personnel-feature version")
+        season = int(payload["meta"]["season"])
+        rows = payload.get("teams") or []
+        output[season] = {str(row.get("team_id")): row for row in rows}
+        recruit_ratings = [
+            value for row in rows
+            if (value := finite((row.get("recruiting") or {}).get("team_rating"))) is not None
+        ]
+        transfer_ratings = [
+            value for row in rows
+            if (value := finite((row.get("transfers") or {}).get("mean_incoming_rating"))) is not None
+        ]
+        output[(season, "median_recruit_rating")] = median(recruit_ratings, 0.0)
+        output[(season, "median_transfer_rating")] = median(transfer_ratings, 0.0)
+    return output
+
+
+def add_personnel_features(
+    features: dict[str, float],
+    season: int,
+    home_team_id: Any,
+    away_team_id: Any,
+    home_games: int,
+    away_games: int,
+    personnel: dict[Any, Any],
+) -> None:
+    season_rows = personnel.get(season, {})
+    home = season_rows.get(str(home_team_id), {})
+    away = season_rows.get(str(away_team_id), {})
+    home_recruiting = home.get("recruiting") or {}
+    away_recruiting = away.get("recruiting") or {}
+    home_transfers = home.get("transfers") or {}
+    away_transfers = away.get("transfers") or {}
+    early_weight = 1.0 / (1.0 + min(home_games, away_games))
+
+    def value(block: dict[str, Any], key: str, fallback: float = 0.0) -> float:
+        number = finite(block.get(key))
+        return fallback if number is None else number
+
+    recruit_fallback = float(personnel.get((season, "median_recruit_rating"), 0.0))
+    transfer_fallback = float(personnel.get((season, "median_transfer_rating"), 0.0))
+    features.update({
+        "personnel_recruit_rating": early_weight * (
+            value(home_recruiting, "team_rating", recruit_fallback)
+            - value(away_recruiting, "team_rating", recruit_fallback)
+        ),
+        "personnel_transfer_minutes": early_weight * (
+            math.log1p(value(home_transfers, "prior_minutes"))
+            - math.log1p(value(away_transfers, "prior_minutes"))
+        ),
+        "personnel_transfer_points": early_weight * (
+            math.log1p(value(home_transfers, "prior_points"))
+            - math.log1p(value(away_transfers, "prior_points"))
+        ),
+        "personnel_transfer_rating": early_weight * (
+            value(home_transfers, "mean_incoming_rating", transfer_fallback)
+            - value(away_transfers, "mean_incoming_rating", transfer_fallback)
+        ),
+        "personnel_recruit_count": early_weight * (
+            value(home_recruiting, "class_player_count") - value(away_recruiting, "class_player_count")
+        ),
+        "personnel_transfer_count": early_weight * (
+            value(home_transfers, "incoming_count") - value(away_transfers, "incoming_count")
+        ),
+    })
 
 
 def league_context(previous_teams: list[dict[str, Any]]) -> tuple[float, float]:
@@ -214,7 +289,7 @@ def update_states(game: dict[str, Any], home: TeamState, away: TeamState, league
     away.finish_game(when)
 
 
-def generate_rows(seasons: dict[int, dict[str, Any]]) -> list[dict[str, Any]]:
+def generate_rows(seasons: dict[int, dict[str, Any]], personnel: dict[Any, Any]) -> list[dict[str, Any]]:
     rows = []
     prior_teams: list[dict[str, Any]] = []
     for season in sorted(seasons):
@@ -231,6 +306,10 @@ def generate_rows(seasons: dict[int, dict[str, Any]]) -> list[dict[str, Any]]:
             home = get_state(states, game.get("home_team_id"), league_efficiency, league_tempo)
             away = get_state(states, game.get("away_team_id"), league_efficiency, league_tempo)
             features = projection_features(game, home, away, league_efficiency)
+            add_personnel_features(
+                features, season, game.get("home_team_id"), game.get("away_team_id"),
+                home.games, away.games, personnel,
+            )
             market = game.get("market") or {}
             rows.append({
                 "season": season,
@@ -375,10 +454,12 @@ def edge_metrics(rows: list[dict[str, Any]], kind: str) -> list[dict[str, Any]]:
     return output
 
 
-def current_priors(profile_path: Path, previous_teams: list[dict[str, Any]]) -> dict[str, Any]:
+def current_priors(profile_path: Path, previous_teams: list[dict[str, Any]], personnel: dict[Any, Any]) -> dict[str, Any]:
     profiles = json.loads(profile_path.read_text()) if profile_path.exists() else {"meta": {}, "teams": []}
     league_efficiency, league_tempo = league_context(previous_teams)
     rows = []
+    season = int(profiles.get("meta", {}).get("season") or 0)
+    personnel_rows = personnel.get(season, {})
     for profile in profiles.get("teams") or []:
         prior = profile.get("preseason_prior") or {}
         adjusted = prior.get("adjusted") or {}
@@ -395,6 +476,7 @@ def current_priors(profile_path: Path, previous_teams: list[dict[str, Any]]) -> 
             "prior_net": round(carry * (offense - defense), 4),
             "returning_minutes_pct": returning,
             "continuity_known": returning is not None,
+            "personnel": personnel_rows.get(str(profile.get("team_id"))) or {},
         })
     rows.sort(key=lambda row: (-row["prior_net"], str(row.get("team") or "")))
     return {
@@ -404,6 +486,7 @@ def current_priors(profile_path: Path, previous_teams: list[dict[str, Any]]) -> 
             "team_count": len(rows),
             "continuity_known_count": sum(row["continuity_known"] for row in rows),
             "positive_continuity_count": sum((row["returning_minutes_pct"] or 0) > 0 for row in rows),
+            "personnel_team_count": sum(bool(row["personnel"]) for row in rows),
             "status": "preseason_prior; not a current-season adjusted rating",
         },
         "teams": rows,
@@ -423,9 +506,13 @@ def atomic_json(path: Path, payload: Any, compressed: bool = False) -> None:
     temporary.replace(path)
 
 
-def build(history_dir: Path, profile_path: Path, output_dir: Path) -> dict[str, Any]:
+def build(history_dir: Path, personnel_dir: Path, profile_path: Path, output_dir: Path) -> dict[str, Any]:
     seasons = load_seasons(history_dir)
-    rows = generate_rows(seasons)
+    personnel = load_personnel(personnel_dir)
+    missing_personnel = sorted(set(seasons) - {key for key in personnel if isinstance(key, int)})
+    if missing_personnel:
+        raise RuntimeError(f"missing personnel features for seasons: {missing_personnel}")
+    rows = generate_rows(seasons, personnel)
     training = [row for row in rows if row["season"] in TRAIN_SEASONS]
     margin_model = fit_ridge(training, MARGIN_FEATURES, "actual_home_margin")
     total_model = fit_ridge(training, TOTAL_FEATURES, "actual_total")
@@ -446,7 +533,7 @@ def build(history_dir: Path, profile_path: Path, output_dir: Path) -> dict[str, 
         "out_of_time_test": metrics([row for row in evaluated if row["split"] == "test"]),
     }
     latest = seasons[max(seasons)]["season_end_teams"]
-    priors = current_priors(profile_path, latest)
+    priors = current_priors(profile_path, latest, personnel)
     validation = evaluation["validation"]
     test = evaluation["out_of_time_test"]
     gate_checks = {
@@ -468,6 +555,7 @@ def build(history_dir: Path, profile_path: Path, output_dir: Path) -> dict[str, 
             "out_of_time_test_seasons": sorted(TEST_SEASONS),
             "burn_in_seasons": sorted(set(seasons) - TRAIN_SEASONS - VALIDATION_SEASONS - TEST_SEASONS),
             "same_season_end_ratings_used_as_pregame_features": False,
+            "personnel_features_known_before_season": True,
             "description": "Pregame team states update only after each completed game. Current-season end ratings never initialize that same season. Market prices are evaluation fields only.",
         },
         "models": {"margin": margin_model, "total": total_model, "margin_residual_sd": round(residual_sd, 6)},
@@ -494,10 +582,11 @@ def build(history_dir: Path, profile_path: Path, output_dir: Path) -> dict[str, 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--history-dir", type=Path, default=HISTORY_DIR)
+    parser.add_argument("--personnel-dir", type=Path, default=ROOT / "data" / "cbb" / "personnel")
     parser.add_argument("--team-profiles", type=Path, default=ROOT / "data" / "cbb" / "team_profiles.json")
     parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR)
     args = parser.parse_args()
-    card = build(args.history_dir, args.team_profiles, args.output_dir)
+    card = build(args.history_dir, args.personnel_dir, args.team_profiles, args.output_dir)
     test = card["evaluation"]["out_of_time_test"]
     print(f"{MODEL_VERSION}: test margin MAE {test['margin_mae']}, total MAE {test['total_mae']}")
 
