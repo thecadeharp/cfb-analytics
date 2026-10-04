@@ -69,7 +69,7 @@ class CbbPlayerResearchTests(unittest.TestCase):
         ]
         rosters = [roster([row], row["teamId"]) for row in players]
         payload = build_player_research(2026, 2027, players, teams, rosters, min_minutes=0, min_games=0)
-        self.assertEqual(payload["meta"]["version"], "thi-cbb-player-research-v1.1")
+        self.assertEqual(payload["meta"]["version"], "thi-cbb-player-research-v1.2")
         self.assertEqual(payload["meta"]["source_season"], 2026)
         self.assertEqual(payload["meta"]["roster_season"], 2027)
         self.assertEqual(payload["meta"]["roster_source"], "cbbd")
@@ -80,6 +80,8 @@ class CbbPlayerResearchTests(unittest.TestCase):
         self.assertEqual(payload["players"][0]["ranks"]["overall"], 1)
         self.assertEqual(len({row["player_season_id"] for row in payload["players"]}), 12)
         self.assertTrue(all(row["current_roster_verified"] for row in payload["players"]))
+        self.assertEqual(sum(row["player_count"] for row in payload["team_rosters"]), 12)
+        self.assertTrue(all(row["rated_player_count"] == row["player_count"] for row in payload["team_rosters"]))
         for row in payload["players"]:
             rating = row["research_scores"]["thi_player_rating"]
             self.assertTrue(math.isfinite(rating))
@@ -105,6 +107,11 @@ class CbbPlayerResearchTests(unittest.TestCase):
         self.assertTrue(payload["players"][0]["multi_team_source_season"])
         self.assertTrue(payload["players"][0]["transfer_between_seasons"])
         self.assertEqual(payload["coverage"]["historical_players_withheld_unverified_current"], 1)
+        self.assertEqual(payload["team_rosters"][0]["player_count"], 2)
+        roster_states = {row["name"]: row["prior_state"] for row in payload["team_rosters"][0]["players"]}
+        self.assertEqual(roster_states[qualified["name"]], "rated")
+        self.assertEqual(roster_states[low_sample["name"]], "below_sample")
+        self.assertNotIn(departed["name"], roster_states)
         self.assertNotIn("raw", payload)
 
     def test_rejects_same_or_older_roster_season(self):
