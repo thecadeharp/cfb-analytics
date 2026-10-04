@@ -9,6 +9,7 @@
     priors: "data/cbb/model/current_priors.json",
     history: "data/cbb/history/manifest.json"
   };
+  const PLAYER_PATH = "data/cbb/player_ratings.json";
 
   const state = {
     sport: "cfb",
@@ -18,6 +19,16 @@
     loading: null,
     data: null,
     ratingSort: { key: "prior_net", direction: "desc" },
+    playerSort: { key: "thi_player_rating", direction: "desc" },
+    playerQuery: "",
+    playerConference: "all",
+    playerPosition: "all",
+    playerReliability: 0,
+    playerPage: 1,
+    playerPageSize: 100,
+    playerData: null,
+    playerLoading: null,
+    playerBandCache: {},
     query: "",
     conference: "all",
     statusText: ""
@@ -177,6 +188,7 @@
     state.cbbView = view;
     document.querySelectorAll(".cbb-view").forEach(section => section.classList.toggle("active", section.id === `view-${view}`));
     document.querySelectorAll("[data-cbb-view]").forEach(button => button.classList.toggle("active", button.dataset.cbbView === view));
+    if (view === "cbb-player-ratings") loadPlayerRatings();
     if (scroll) window.scrollTo({ top: 0, behavior: "auto" });
   }
 
@@ -286,19 +298,214 @@
 
   function renderPlayerRatings() {
     const view = document.getElementById("view-cbb-player-ratings");
+    if (!state.playerData) {
+      view.innerHTML = `
+        <div class="cbb-kicker">Player-level basketball intelligence</div>
+        <h1 class="page-title">CBB Player Ratings</h1>
+        <p class="page-subtitle">THI's research layer grades production, efficiency, role and two-way possession value without feeding these ratings into public game projections.</p>
+        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Research v1.0</span><strong>${state.playerLoading ? "Loading the player board" : "Player board available"}</strong><p>${state.playerLoading ? "Reading the derived player-season layer…" : "Open this tab to load the qualified player universe. Ratings remain research-only until opponent and lineup adjustments are validated."}</p></div>
+      `;
+      return;
+    }
+    const payload = state.playerData;
+    const meta = payload.meta || {};
+    const players = payload.players || [];
+    const conferences = [...new Set(players.map(player => player.conference).filter(Boolean))].sort();
     view.innerHTML = `
       <div class="cbb-kicker">Player-level basketball intelligence</div>
       <h1 class="page-title">CBB Player Ratings</h1>
-      <p class="page-subtitle">THI's player layer will combine production, efficiency, role difficulty and lineup context. Rankings remain withheld until identity matching and possession attribution pass validation.</p>
-      <div class="cbb-readiness-banner"><span class="cbb-status-pill">Data layer next</span><strong>No placeholder player rankings</strong><p>CBBD player-season and game-level records are available to the research pipeline. THI will publish ratings only after duplicate identities, transfers and team possessions reconcile.</p></div>
-      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Planned rating families</div><h2 class="cbb-section-title">What the player board will answer</h2></div></div>
-        <div class="cbb-method-grid">
-          ${methodCard("Scoring", "Shot creation and shot making", "Usage, true shooting, rim pressure, three-point value, assisted rate and free-throw generation.")}
-          ${methodCard("Possession value", "Passing, turnovers and playmaking", "Assist creation, ball security, on-ball burden and estimated points created per possession.")}
-          ${methodCard("Two-way impact", "Rebounding, defense and lineup value", "Offensive and defensive rebounding, stocks, foul pressure, opponent context and on/off lineup performance.")}
-        </div>
-      </section>
+      <p class="page-subtitle">Qualified ${escapeHtml(meta.season)} player seasons, graded by THI production, efficiency, role and two-way possession value. This is a research reference layer and is not yet opponent-adjusted or lineup-adjusted.</p>
+      <div class="cbb-stat-grid">
+        ${statCard("Qualified players", integer(meta.player_count), `${integer(meta.team_count)} Division I teams`)}
+        ${statCard("Minimum sample", `${integer(meta.minimum_minutes)} min`, `${integer(meta.minimum_games)} games`)}
+        ${statCard("Identity state", "Reconciled", `${integer(payload.coverage?.multi_team_stints)} multi-team stints flagged`)}
+        ${statCard("Projection use", "Research only", "No game-line adjustment")}
+      </div>
+      <div class="cbb-player-controls">
+        <input id="cbb-player-search" class="cbb-input" type="search" placeholder="Search player, team or conference" value="${escapeHtml(state.playerQuery)}">
+        <select id="cbb-player-position" class="cbb-select"><option value="all">All positions</option><option value="backcourt" ${state.playerPosition === "backcourt" ? "selected" : ""}>Backcourt</option><option value="wing" ${state.playerPosition === "wing" ? "selected" : ""}>Wings</option><option value="frontcourt" ${state.playerPosition === "frontcourt" ? "selected" : ""}>Frontcourt</option></select>
+        <select id="cbb-player-conference" class="cbb-select"><option value="all">All conferences</option>${conferences.map(conf => `<option value="${escapeHtml(conf)}" ${state.playerConference === conf ? "selected" : ""}>${escapeHtml(conf)}</option>`).join("")}</select>
+        <select id="cbb-player-reliability" class="cbb-select"><option value="0">Any reliability</option><option value="60" ${state.playerReliability === 60 ? "selected" : ""}>60%+ reliability</option><option value="80" ${state.playerReliability === 80 ? "selected" : ""}>80%+ reliability</option><option value="100" ${state.playerReliability === 100 ? "selected" : ""}>Full reliability</option></select>
+      </div>
+      <div class="cbb-panel cbb-table-wrap">
+        <table class="cbb-table cbb-player-table" aria-label="THI college basketball player ratings"><thead><tr>
+          <th>Rank</th>${playerHeader("name", "Player")}${playerHeader("team", "Team")}${playerHeader("position", "Pos")}${playerHeader("thi_player_rating", "THI")}${playerHeader("offense", "Off")}${playerHeader("defense", "Def")}${playerHeader("all_around", "All-around")}${playerHeader("points_per_40", "Pts/40")}${playerHeader("true_shooting_pct", "TS%")} ${playerHeader("porpag", "PORPAG")}${playerHeader("reliability", "Reliability")}
+        </tr></thead><tbody id="cbb-player-body"></tbody></table>
+      </div>
+      <div class="cbb-player-pager"><button type="button" data-player-page="prev">Previous</button><span id="cbb-player-page-status"></span><button type="button" data-player-page="next">Next</button></div>
+      <div class="cbb-stat-note">Every displayed metric is graded within the qualified player universe. Green is stronger, red is weaker. Rank numbers remain neutral. Click a player for the full profile and methodology context.</div>
     `;
+    bindPlayerControls();
+    paintPlayerRows();
+  }
+
+  function loadPlayerRatings() {
+    if (state.playerData || state.playerLoading) return state.playerLoading;
+    state.playerLoading = fetchJson(PLAYER_PATH)
+      .then(payload => {
+        if (!Array.isArray(payload.players)) throw new Error("Player ratings payload is missing players.");
+        state.playerData = payload;
+        state.playerBandCache = {};
+        renderPlayerRatings();
+        return payload;
+      })
+      .catch(error => {
+        const view = document.getElementById("view-cbb-player-ratings");
+        if (view) view.innerHTML = `<div class="cbb-error"><strong>CBB player ratings are temporarily unavailable.</strong><div>${escapeHtml(error.message)}</div></div>`;
+      })
+      .finally(() => { state.playerLoading = null; });
+    renderPlayerRatings();
+    return state.playerLoading;
+  }
+
+  function playerValue(player, key) {
+    if (key === "name" || key === "team" || key === "position") return player[key] || "";
+    if (key === "reliability") return player.data_quality?.reliability ?? -Infinity;
+    if (["thi_player_rating", "offense", "defense", "all_around"].includes(key)) return player.research_scores?.[key] ?? -Infinity;
+    return player.metrics?.[key] ?? -Infinity;
+  }
+
+  function playerRows() {
+    const players = state.playerData?.players || [];
+    const query = state.playerQuery.trim().toLowerCase();
+    return players.filter(player => {
+      const matchesQuery = !query || `${player.name} ${player.team} ${player.conference} ${player.position}`.toLowerCase().includes(query);
+      const matchesConference = state.playerConference === "all" || player.conference === state.playerConference;
+      const matchesPosition = state.playerPosition === "all" || player.position_group === state.playerPosition;
+      const matchesReliability = Number(player.data_quality?.reliability || 0) >= state.playerReliability;
+      return matchesQuery && matchesConference && matchesPosition && matchesReliability;
+    }).sort((a, b) => {
+      const av = playerValue(a, state.playerSort.key);
+      const bv = playerValue(b, state.playerSort.key);
+      const order = typeof av === "string" ? av.localeCompare(bv) : (Number(av) || 0) - (Number(bv) || 0);
+      return state.playerSort.direction === "asc" ? order : -order;
+    });
+  }
+
+  function playerHeader(key, label) {
+    const active = state.playerSort.key === key;
+    const arrow = active ? (state.playerSort.direction === "desc" ? " ↓" : " ↑") : " ↕";
+    return `<th data-player-sort="${key}" class="${active ? "is-sorted" : ""}">${escapeHtml(label)}${arrow}</th>`;
+  }
+
+  function bindPlayerControls() {
+    const view = document.getElementById("view-cbb-player-ratings");
+    view.querySelector("#cbb-player-search").addEventListener("input", event => { state.playerQuery = event.target.value; state.playerPage = 1; paintPlayerRows(); });
+    view.querySelector("#cbb-player-position").addEventListener("change", event => { state.playerPosition = event.target.value; state.playerPage = 1; paintPlayerRows(); });
+    view.querySelector("#cbb-player-conference").addEventListener("change", event => { state.playerConference = event.target.value; state.playerPage = 1; paintPlayerRows(); });
+    view.querySelector("#cbb-player-reliability").addEventListener("change", event => { state.playerReliability = Number(event.target.value); state.playerPage = 1; paintPlayerRows(); });
+    view.querySelector("thead").addEventListener("click", event => {
+      const header = event.target.closest("[data-player-sort]");
+      if (!header) return;
+      const key = header.dataset.playerSort;
+      state.playerSort.direction = state.playerSort.key === key && state.playerSort.direction === "desc" ? "asc" : "desc";
+      state.playerSort.key = key;
+      state.playerPage = 1;
+      renderPlayerRatings();
+    });
+    view.querySelector("#cbb-player-body").addEventListener("click", event => {
+      const row = event.target.closest("[data-player-id]");
+      if (row) openPlayerDetail(row.dataset.playerId);
+    });
+    view.querySelector(".cbb-player-pager").addEventListener("click", event => {
+      const button = event.target.closest("[data-player-page]");
+      if (!button || button.disabled) return;
+      state.playerPage += button.dataset.playerPage === "next" ? 1 : -1;
+      paintPlayerRows();
+      view.querySelector(".cbb-table-wrap")?.scrollTo({ left: 0, top: 0, behavior: "auto" });
+    });
+  }
+
+  function paintPlayerRows() {
+    const body = document.getElementById("cbb-player-body");
+    if (!body) return;
+    const rows = playerRows();
+    const pageCount = Math.max(1, Math.ceil(rows.length / state.playerPageSize));
+    state.playerPage = Math.min(Math.max(1, state.playerPage), pageCount);
+    const start = (state.playerPage - 1) * state.playerPageSize;
+    const page = rows.slice(start, start + state.playerPageSize);
+    const bands = Object.fromEntries(["thi_player_rating", "offense", "defense", "all_around", "points_per_40", "true_shooting_pct", "porpag", "reliability"].map(key => [key, cachedPlayerBands(key)]));
+    body.innerHTML = page.length ? page.map(player => {
+      const score = player.research_scores || {};
+      const metrics = player.metrics || {};
+      return `<tr data-player-id="${escapeHtml(player.player_season_id)}"><td class="cbb-rank">#${integer(player.ranks?.overall)}</td><td><div class="cbb-team-name">${escapeHtml(player.name)}</div><div class="cbb-team-meta">${escapeHtml(player.role)} · Open profile →</div></td><td>${escapeHtml(player.team)}</td><td>${escapeHtml(player.position || "—")}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.thi_player_rating(player)}">${number(score.thi_player_rating,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.offense(player)}">${number(score.offense,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.defense(player)}">${number(score.defense,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.all_around(player)}">${number(score.all_around,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.points_per_40(player)}">${number(metrics.points_per_40,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.true_shooting_pct(player)}">${shootingPct(metrics.true_shooting_pct)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.porpag(player)}">${number(metrics.porpag,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.reliability(player)}">${pct(player.data_quality?.reliability)}</td></tr>`;
+    }).join("") : `<tr><td colspan="12" class="cbb-empty">No players match those filters.</td></tr>`;
+    const status = document.getElementById("cbb-player-page-status");
+    if (status) status.textContent = `${integer(rows.length)} players · page ${state.playerPage} of ${pageCount}`;
+    const prev = document.querySelector('[data-player-page="prev"]');
+    const next = document.querySelector('[data-player-page="next"]');
+    if (prev) prev.disabled = state.playerPage <= 1;
+    if (next) next.disabled = state.playerPage >= pageCount;
+  }
+
+  function playerQuantileBands(players, key, lowerIsBetter = false) {
+    const values = players.map(player => Number(playerValue(player, key))).filter(Number.isFinite).sort((a, b) => a - b);
+    return player => {
+      const value = Number(playerValue(player, key));
+      if (!Number.isFinite(value) || !values.length) return 3;
+      let low = 0;
+      let high = values.length;
+      while (low < high) { const middle = (low + high) >>> 1; if (values[middle] < value) low = middle + 1; else high = middle; }
+      const percentile = low / Math.max(1, values.length - 1);
+      const score = lowerIsBetter ? 1 - percentile : percentile;
+      return Math.max(1, Math.min(5, Math.ceil(score * 5)));
+    };
+  }
+
+  function cachedPlayerBands(key, lowerIsBetter = false) {
+    const cacheKey = `${key}:${lowerIsBetter ? "low" : "high"}`;
+    if (!state.playerBandCache[cacheKey]) {
+      state.playerBandCache[cacheKey] = playerQuantileBands(state.playerData?.players || [], key, lowerIsBetter);
+    }
+    return state.playerBandCache[cacheKey];
+  }
+
+  function shootingPct(value) {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) return "—";
+    return `${(parsed <= 1.5 ? parsed * 100 : parsed).toFixed(1)}%`;
+  }
+
+  function openPlayerDetail(playerId) {
+    const player = state.playerData?.players?.find(row => row.player_season_id === playerId);
+    if (!player) return;
+    const detail = document.getElementById("cbb-team-detail");
+    const panel = detail.querySelector(".cbb-detail-panel");
+    const score = player.research_scores || {};
+    const metrics = player.metrics || {};
+    panel.innerHTML = `
+      <button class="cbb-detail-close" type="button" data-cbb-close>Close</button>
+      <div class="cbb-kicker">THI CBB player profile</div>
+      <h2 class="cbb-detail-title" id="cbb-detail-title">${escapeHtml(player.name)}</h2>
+      <div class="cbb-detail-sub">${escapeHtml(player.team)} · ${escapeHtml(player.conference || "Independent")} · ${escapeHtml(player.position || "Position unavailable")} · ${escapeHtml(player.role)}</div>
+      <div class="cbb-detail-grid">
+        ${detailStat("THI rating", number(score.thi_player_rating,1))}
+        ${detailStat("Overall rank", `#${integer(player.ranks?.overall)}`)}
+        ${detailStat("Position rank", `#${integer(player.ranks?.position_group)}`)}
+        ${detailStat("Offense", number(score.offense,1))}
+        ${detailStat("Defense", number(score.defense,1))}
+        ${detailStat("All-around", number(score.all_around,1))}
+      </div>
+      <section class="cbb-detail-section"><h3>Scoring and creation</h3>
+        ${playerDetailRow("Points per 40", number(metrics.points_per_40,2), player, "points_per_40")}${playerDetailRow("Usage", pct(metrics.usage), player, "usage")}${playerDetailRow("True shooting", shootingPct(metrics.true_shooting_pct), player, "true_shooting_pct")}${playerDetailRow("Effective FG", pct(metrics.effective_field_goal_pct), player, "effective_field_goal_pct")}${playerDetailRow("PORPAG", number(metrics.porpag,3), player, "porpag")}${playerDetailRow("Offensive rating", number(metrics.offensive_rating,1), player, "offensive_rating")}${playerDetailRow("Assist / turnover", number(metrics.assist_turnover_ratio,2), player, "assist_turnover_ratio")}${playerDetailRow("Assists per 40", number(metrics.assists_per_40,2), player, "assists_per_40")}${playerDetailRow("Turnovers per 40", number(metrics.turnovers_per_40,2), player, "turnovers_per_40", true)}
+      </section>
+      <section class="cbb-detail-section"><h3>Defense and possession value</h3>
+        ${playerDetailRow("Defensive rating", number(metrics.defensive_rating,1), player, "defensive_rating", true)}${playerDetailRow("Net rating", number(metrics.net_rating,1,true), player, "net_rating")}${playerDetailRow("Rebounds per 40", number(metrics.rebounds_per_40,2), player, "rebounds_per_40")}${playerDetailRow("Offensive rebounds per 40", number(metrics.offensive_rebounds_per_40,2), player, "offensive_rebounds_per_40")}${playerDetailRow("Steals per 40", number(metrics.steals_per_40,2), player, "steals_per_40")}${playerDetailRow("Blocks per 40", number(metrics.blocks_per_40,2), player, "blocks_per_40")}${playerDetailRow("Win shares per 40", number(metrics.total_win_shares_per_40,3), player, "total_win_shares_per_40")}
+      </section>
+      <section class="cbb-detail-section"><h3>Sample and rating state</h3>
+        ${detailRow("Games", integer(player.sample?.games))}${detailRow("Starts", integer(player.sample?.starts))}${detailRow("Minutes", integer(player.sample?.minutes))}${detailRow("Minutes per game", number(player.sample?.minutes_per_game,1))}${detailRow("Reliability", pct(player.data_quality?.reliability))}${detailRow("Multi-team season", player.multi_team_season ? "Yes — team stint shown" : "No")}${detailRow("Projection use", "Research reference only")}
+        <div class="cbb-model-sub">V1.0 uses robust standardized production and efficiency components with sample regression. Opponent and lineup adjustments are not active yet.</div>
+      </section>`;
+    detail.classList.add("is-open");
+    detail.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    panel.scrollTop = 0;
+    panel.querySelector("[data-cbb-close]")?.focus();
+  }
+
+  function playerDetailRow(label, value, player, key, lowerIsBetter = false) {
+    const band = cachedPlayerBands(key, lowerIsBetter)(player);
+    return `<div class="cbb-detail-row"><span>${escapeHtml(label)}</span><strong class="cbb-player-grade cbb-band-${band}">${escapeHtml(value)}</strong></div>`;
   }
 
   function renderBracketology() {
