@@ -1,0 +1,116 @@
+name: Build CBB Historical Warehouse
+
+on:
+  workflow_dispatch:
+    inputs:
+      start_season:
+        description: "First CBBD season (2018 is 2017-18)"
+        required: true
+        default: "2018"
+        type: string
+      end_season:
+        description: "Last completed CBBD season"
+        required: true
+        default: "2026"
+        type: string
+      force_rebuild:
+        description: "Rebuild seasons already present"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cbb-historical-warehouse
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Preserve College Football and Model A
+        run: |
+          sha256sum \
+            data/projections.json \
+            data/cfb_metrics.json \
+            data/hfa_2026.json \
+            scripts/build_projections.py \
+            index.html \
+            app.js \
+            > /tmp/cbb-history-before.sha256
+
+      - name: Test historical derivation contract
+        run: |
+          python -m py_compile \
+            scripts/verify_cbb_api_foundation.py \
+            scripts/build_cbb_data_foundation.py \
+            scripts/build_cbb_historical_season.py \
+            scripts/validate_cbb_historical_warehouse.py \
+            scripts/test_cbb_historical_season.py
+          python -m unittest scripts/test_cbb_historical_season.py
+
+      - name: Validate requested range
+        env:
+          START_SEASON: ${{ inputs.start_season }}
+          END_SEASON: ${{ inputs.end_season }}
+        run: |
+          python - <<'PY'
+          import os
+          start = int(os.environ["START_SEASON"])
+          end = int(os.environ["END_SEASON"])
+          assert 2010 <= start <= end <= 2026
+          assert end - start <= 12
+          PY
+
+      - name: Build and checkpoint each season
+        env:
+          CBBD_API_KEY: ${{ secrets.CBBD_API_KEY }}
+          START_SEASON: ${{ inputs.start_season }}
+          END_SEASON: ${{ inputs.end_season }}
+          FORCE_REBUILD: ${{ inputs.force_rebuild }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          for season in $(seq "$START_SEASON" "$END_SEASON"); do
+            target="data/cbb/history/season_${season}.json.gz"
+            if [ -f "$target" ] && [ "$FORCE_REBUILD" != "true" ]; then
+              echo "Season $season already exists; skipping"
+              continue
+            fi
+
+            python scripts/build_cbb_historical_season.py \
+              --season "$season" \
+              --output-dir data/cbb/history
+            python scripts/validate_cbb_historical_warehouse.py \
+              --root data/cbb/history \
+              --season "$season"
+
+            git add "$target" data/cbb/history/manifest.json
+            if git diff --cached --quiet; then
+              echo "Season $season produced no changes"
+              continue
+            fi
+            git commit -m "Build CBB historical features for $season"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          done
+
+      - name: Verify isolation and manifest
+        run: |
+          sha256sum --check /tmp/cbb-history-before.sha256
+          python scripts/validate_cbb_historical_warehouse.py \
+            --root data/cbb/history
