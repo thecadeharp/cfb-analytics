@@ -1,0 +1,111 @@
+name: Build CBB Personnel Features
+
+on:
+  workflow_dispatch:
+    inputs:
+      start_season:
+        description: "First CBB season"
+        required: true
+        default: "2018"
+        type: string
+      end_season:
+        description: "Last CBB season"
+        required: true
+        default: "2027"
+        type: string
+      force_rebuild:
+        description: "Rebuild existing seasons"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cbb-personnel-features
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Preserve production and source data
+        run: |
+          sha256sum \
+            data/projections.json \
+            data/cfb_metrics.json \
+            scripts/build_projections.py \
+            index.html \
+            app.js \
+            data/cbb/model/model_card.json \
+            data/cbb/model/current_priors.json \
+            data/cbb/model/walk_forward_predictions.json.gz \
+            > /tmp/cbb-personnel-features-before.sha256
+          find data/cbb/history -type f -print0 | sort -z | xargs -0 sha256sum > /tmp/cbb-personnel-history-before.sha256
+
+      - name: Test aggregate feature contract
+        run: |
+          python -m py_compile scripts/build_cbb_personnel_season.py scripts/test_cbb_personnel_season.py
+          python -m unittest scripts/test_cbb_personnel_season.py
+
+      - name: Validate range
+        env:
+          START_SEASON: ${{ inputs.start_season }}
+          END_SEASON: ${{ inputs.end_season }}
+        run: |
+          python - <<'PY'
+          import os
+          start = int(os.environ["START_SEASON"])
+          end = int(os.environ["END_SEASON"])
+          assert 2018 <= start <= end <= 2027
+          assert end - start <= 10
+          PY
+
+      - name: Build and checkpoint seasons
+        env:
+          CBBD_API_KEY: ${{ secrets.CBBD_API_KEY }}
+          START_SEASON: ${{ inputs.start_season }}
+          END_SEASON: ${{ inputs.end_season }}
+          FORCE_REBUILD: ${{ inputs.force_rebuild }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for season in $(seq "$START_SEASON" "$END_SEASON"); do
+            target="data/cbb/personnel/season_${season}.json.gz"
+            if [ -f "$target" ] && [ "$FORCE_REBUILD" != "true" ]; then
+              echo "Season $season already exists; skipping"
+              continue
+            fi
+            python scripts/build_cbb_personnel_season.py --season "$season"
+            SEASON="$season" python - <<'PY'
+          import gzip, json, os
+          path = f"data/cbb/personnel/season_{os.environ['SEASON']}.json.gz"
+          with gzip.open(path, "rt", encoding="utf-8") as handle:
+              payload = json.load(handle)
+          assert payload["meta"]["version"] == "cbb-personnel-features-v1.0"
+          assert payload["meta"]["team_count"] >= 300
+          assert payload["meta"]["raw_api_data_stored"] is False
+          assert len(payload["teams"]) == payload["meta"]["team_count"]
+          PY
+            git add "$target" data/cbb/personnel/manifest.json
+            git commit -m "Build CBB personnel features for $season"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          done
+
+      - name: Verify isolation
+        run: |
+          sha256sum --check /tmp/cbb-personnel-features-before.sha256
+          sha256sum --check /tmp/cbb-personnel-history-before.sha256
