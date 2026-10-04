@@ -55,7 +55,7 @@ def validate_season(path: Path) -> dict[str, Any]:
     meta = payload.get("meta") or {}
     games = payload.get("games") or []
     teams = payload.get("season_end_teams") or []
-    assert meta.get("builder_version") == "cbb-history-v1.0", f"{path}: wrong builder"
+    assert meta.get("builder_version") == "cbb-history-v1.1", f"{path}: wrong builder"
     assert meta.get("raw_api_data_stored") is False, f"{path}: raw-data flag is not false"
     assert len(games) == meta.get("game_count") and len(games) >= 3000, f"{path}: invalid game count"
     assert len(teams) == meta.get("team_count") and len(teams) >= 300, f"{path}: invalid team count"
@@ -76,6 +76,9 @@ def validate_season(path: Path) -> dict[str, Any]:
         outcome = game.get("outcome") or {}
         home_points = outcome.get("home_points")
         away_points = outcome.get("away_points")
+        assert float(home_points) >= 20 and float(away_points) >= 20, f"{path}: implausible/incomplete score"
+        assert float(outcome.get("total_points")) >= 40, f"{path}: unplayed game retained"
+        assert float(game.get("pace")) >= 30, f"{path}: implausible/incomplete pace"
         assert close(outcome.get("home_margin"), float(home_points) - float(away_points)), f"{path}: bad margin"
         assert close(outcome.get("total_points"), float(home_points) + float(away_points)), f"{path}: bad total"
         if int((game.get("market") or {}).get("book_count") or 0) > 0:
