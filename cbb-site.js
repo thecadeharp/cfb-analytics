@@ -764,6 +764,9 @@
     const test = card.evaluation?.out_of_time_test || {};
     const checks = card.promotion_gate?.checks || {};
     const ats = test.ats_by_edge || [];
+    const totals = test.totals_by_edge || [];
+    const contexts = test.context_slices || {};
+    const calibration = test.win_probability_calibration || [];
     const view = document.getElementById("view-cbb-tracking");
     view.innerHTML = `
       <div class="cbb-kicker">Transparent research and accountability</div>
@@ -772,6 +775,7 @@
       <div class="cbb-model-grid">
         ${modelCard("2025 validation", "Margin MAE", number(validation.margin_mae,3), `${integer(validation.games)} games · ${pct(validation.winner_accuracy)} winner accuracy`)}
         ${modelCard("2026 out-of-time test", "Margin MAE", number(test.margin_mae,3), `${integer(test.games)} games · ${pct(test.winner_accuracy)} winner accuracy`)}
+        ${modelCard("2026 market comparison", "Margin MAE gap", number(Number(test.margin_mae) - Number(test.market_margin_mae),3,true), `THI ${number(test.margin_mae,3)} · market ${number(test.market_margin_mae,3)}`)}
         ${modelCard("Activation state", "Public engine", "Withheld", "Research-only until every required promotion check passes")}
       </div>
 
@@ -783,6 +787,21 @@
       <section class="cbb-section">
         <div class="cbb-section-head"><div><div class="cbb-label">2026 out-of-time test</div><h2 class="cbb-section-title">Spread disagreement audit</h2></div><div class="cbb-section-note">Retrospective research by absolute model-versus-market disagreement. Market prices were evaluation fields, never model inputs.</div></div>
         <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Minimum disagreement</th><th>Wins</th><th>Losses</th><th>Pushes</th><th>Hit rate</th></tr></thead><tbody>${ats.map(row => `<tr><td class="cbb-number">${row.minimum_edge}+ pts</td><td class="cbb-number">${integer(row.wins)}</td><td class="cbb-number">${integer(row.losses)}</td><td class="cbb-number">${integer(row.pushes)}</td><td class="cbb-number">${pct(row.hit_rate)}</td></tr>`).join("")}</tbody></table></div>
+      </section>
+
+      <section class="cbb-section">
+        <div class="cbb-section-head"><div><div class="cbb-label">2026 out-of-time test</div><h2 class="cbb-section-title">Totals disagreement audit</h2></div><div class="cbb-section-note">Totals remain a separate research problem and must clear their own validation gate.</div></div>
+        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Minimum disagreement</th><th>Wins</th><th>Losses</th><th>Pushes</th><th>Hit rate</th></tr></thead><tbody>${totals.map(row => `<tr><td class="cbb-number">${row.minimum_edge}+ pts</td><td class="cbb-number">${integer(row.wins)}</td><td class="cbb-number">${integer(row.losses)}</td><td class="cbb-number">${integer(row.pushes)}</td><td class="cbb-number">${pct(row.hit_rate)}</td></tr>`).join("")}</tbody></table></div>
+      </section>
+
+      <section class="cbb-section">
+        <div class="cbb-section-head"><div><div class="cbb-label">Error anatomy</div><h2 class="cbb-section-title">Performance by game context</h2></div><div class="cbb-section-note">This separates unstable opening samples from settled team states and campus games from neutral floors.</div></div>
+        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Context</th><th>Games</th><th>THI margin MAE</th><th>Market margin MAE</th><th>THI total MAE</th><th>Market total MAE</th><th>Winner accuracy</th></tr></thead><tbody>${Object.entries(contexts).map(([key,row]) => `<tr><td>${escapeHtml(humanize(key))}</td><td class="cbb-number">${integer(row.games)}</td><td class="cbb-number">${number(row.margin_mae,3)}</td><td class="cbb-number">${number(row.market_margin_mae,3)}</td><td class="cbb-number">${number(row.total_mae,3)}</td><td class="cbb-number">${number(row.market_total_mae,3)}</td><td class="cbb-number">${pct(row.winner_accuracy)}</td></tr>`).join("")}</tbody></table></div>
+      </section>
+
+      <section class="cbb-section">
+        <div class="cbb-section-head"><div><div class="cbb-label">Probability honesty</div><h2 class="cbb-section-title">Win-probability calibration</h2></div><div class="cbb-section-note">A calibrated 70% forecast should win about seven times in ten over a large sample.</div></div>
+        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Forecast band</th><th>Games</th><th>Mean projection</th><th>Actual home win rate</th><th>Calibration gap</th></tr></thead><tbody>${calibration.map(row => `<tr><td class="cbb-number">${escapeHtml(row.range)}</td><td class="cbb-number">${integer(row.games)}</td><td class="cbb-number">${pct(row.mean_projected_probability)}</td><td class="cbb-number">${pct(row.actual_home_win_rate)}</td><td class="cbb-number">${number(Number(row.actual_home_win_rate) - Number(row.mean_projected_probability),2,true)} pts</td></tr>`).join("")}</tbody></table></div>
       </section>
 
       <section class="cbb-section">
