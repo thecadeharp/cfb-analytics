@@ -8,6 +8,11 @@ on:
         required: true
         default: "2027"
         type: string
+      benchmark_season:
+        description: "Completed season used for prior and coverage checks"
+        required: true
+        default: "2026"
+        type: string
 
 permissions:
   contents: write
@@ -53,6 +58,7 @@ jobs:
         env:
           CBBD_API_KEY: ${{ secrets.CBBD_API_KEY }}
           CBB_SEASON: ${{ inputs.season }}
+          CBB_BENCHMARK_SEASON: ${{ inputs.benchmark_season }}
         run: python scripts/verify_cbb_api_foundation.py
 
       - name: Validate isolation and report
@@ -62,9 +68,13 @@ jobs:
           from pathlib import Path
           report = json.loads(Path("data/cbb/api_access_report.json").read_text())
           assert report["meta"]["raw_api_data_stored"] is False
+          assert report["meta"]["request_count"] == 8
           assert report["meta"]["model_usage"] == "cbb_foundation_only_no_cfb_or_model_a_access"
           assert report["checks"]["team_directory"]["team_count"] >= 300
           assert report["checks"]["benchmark_adjusted_ratings"]["record_count"] >= 300
+          assert report["checks"]["benchmark_team_leaderboard"]["record_count"] >= 300
+          assert report["checks"]["current_rosters"]["record_count"] >= 300
+          assert report["checks"]["benchmark_player_stats"]["record_count"] >= 1000
           PY
           sha256sum --check /tmp/cbb-foundation-before.sha256
 
