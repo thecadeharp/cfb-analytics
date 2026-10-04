@@ -607,8 +607,8 @@
       if (!game || typeof game !== "object") return;
 
       const key = matchupKey(
-        game.away_team ?? game.awayTeam ?? game.away,
-        game.home_team ?? game.homeTeam ?? game.home
+        game.away_team ?? game.awayTeam ?? game.away?.team ?? game.away,
+        game.home_team ?? game.homeTeam ?? game.home?.team ?? game.home
       );
 
       if (key) map.set(key, game);
