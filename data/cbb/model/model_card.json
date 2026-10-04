@@ -1,8 +1,8 @@
 {
   "meta": {
-    "model_version": "thi-cbb-walk-forward-v0.3-research",
+    "model_version": "thi-cbb-walk-forward-v0.4-research",
     "activation_state": "research_only",
-    "generated_at_utc": "2026-10-04T04:25:22.462863Z",
+    "generated_at_utc": "2026-10-04T05:03:34.231280Z",
     "strict_walk_forward": true,
     "training_seasons": [
       2019,
@@ -22,6 +22,7 @@
       2018
     ],
     "same_season_end_ratings_used_as_pregame_features": false,
+    "personnel_features_known_before_season": true,
     "description": "Pregame team states update only after each completed game. Current-season end ratings never initialize that same season. Market prices are evaluation fields only."
   },
   "models": {
@@ -38,7 +39,13 @@
         "efg_edge",
         "turnover_edge",
         "rebound_edge",
-        "free_throw_edge"
+        "free_throw_edge",
+        "personnel_recruit_rating",
+        "personnel_transfer_minutes",
+        "personnel_transfer_points",
+        "personnel_transfer_rating",
+        "personnel_recruit_count",
+        "personnel_transfer_count"
       ],
       "means": {
         "raw_margin": 1.29964569,
@@ -52,7 +59,13 @@
         "efg_edge": 0.61666932,
         "turnover_edge": 0.19579863,
         "rebound_edge": -0.05329267,
-        "free_throw_edge": 0.35327467
+        "free_throw_edge": 0.35327467,
+        "personnel_recruit_rating": 0.34582921,
+        "personnel_transfer_minutes": 0.20727851,
+        "personnel_transfer_points": 0.17462663,
+        "personnel_transfer_rating": 5.615e-05,
+        "personnel_recruit_count": 0.11205216,
+        "personnel_transfer_count": 0.08753851
       },
       "scales": {
         "raw_margin": 7.8322591,
@@ -66,22 +79,34 @@
         "efg_edge": 5.29128918,
         "turnover_edge": 3.62939781,
         "rebound_edge": 4.80497993,
-        "free_throw_edge": 8.05933871
+        "free_throw_edge": 8.05933871,
+        "personnel_recruit_rating": 4.37340545,
+        "personnel_transfer_minutes": 1.122801,
+        "personnel_transfer_points": 0.94336844,
+        "personnel_transfer_rating": 0.00688071,
+        "personnel_recruit_count": 0.53815852,
+        "personnel_transfer_count": 0.5199888
       },
       "coefficients": [
         7.2711199,
-        7.13575106,
-        1.37625558,
-        0.18388366,
-        2.5593507,
-        1.10672842,
-        -0.10618761,
-        5.40579758,
-        1.49949707,
-        -1.08882124,
-        -0.22841399,
-        0.3443663,
-        -0.15656575
+        7.07376126,
+        1.36657873,
+        0.26151293,
+        2.49376943,
+        0.97636789,
+        -0.27846393,
+        4.61256124,
+        1.50139342,
+        -0.99986331,
+        -0.1975679,
+        0.3617985,
+        -0.162778,
+        -0.3891855,
+        2.82089232,
+        -1.65369365,
+        0.03596496,
+        0.71602664,
+        -0.11038626
       ],
       "ridge": 4.0,
       "sample_count": 32860
@@ -119,17 +144,17 @@
       "ridge": 4.0,
       "sample_count": 32860
     },
-    "margin_residual_sd": 12.942269
+    "margin_residual_sd": 12.894042
   },
   "evaluation": {
     "train": {
       "games": 32860,
-      "margin_mae": 10.0579,
-      "margin_rmse": 12.9423,
+      "margin_mae": 10.0272,
+      "margin_rmse": 12.894,
       "total_mae": 13.6682,
       "total_rmse": 17.3859,
-      "winner_accuracy": 72.973,
-      "win_probability_brier": 0.177794,
+      "winner_accuracy": 72.955,
+      "win_probability_brier": 0.177187,
       "market_margin_games": 29987,
       "market_margin_mae": 8.8521,
       "market_total_games": 30056,
@@ -137,45 +162,45 @@
       "ats_by_edge": [
         {
           "minimum_edge": 0,
-          "wins": 15059,
-          "losses": 14594,
+          "wins": 15103,
+          "losses": 14550,
           "pushes": 334,
-          "hit_rate": 50.784
+          "hit_rate": 50.932
         },
         {
           "minimum_edge": 1,
-          "wins": 11919,
-          "losses": 11363,
-          "pushes": 261,
-          "hit_rate": 51.194
+          "wins": 11868,
+          "losses": 11298,
+          "pushes": 264,
+          "hit_rate": 51.23
         },
         {
           "minimum_edge": 2,
-          "wins": 8925,
-          "losses": 8443,
-          "pushes": 198,
-          "hit_rate": 51.388
+          "wins": 8877,
+          "losses": 8398,
+          "pushes": 196,
+          "hit_rate": 51.386
         },
         {
           "minimum_edge": 3,
-          "wins": 6513,
-          "losses": 6154,
-          "pushes": 146,
-          "hit_rate": 51.417
+          "wins": 6494,
+          "losses": 6070,
+          "pushes": 144,
+          "hit_rate": 51.687
         },
         {
           "minimum_edge": 4,
-          "wins": 4753,
-          "losses": 4418,
-          "pushes": 98,
-          "hit_rate": 51.826
+          "wins": 4672,
+          "losses": 4350,
+          "pushes": 93,
+          "hit_rate": 51.785
         },
         {
           "minimum_edge": 5,
-          "wins": 3456,
-          "losses": 3126,
-          "pushes": 70,
-          "hit_rate": 52.507
+          "wins": 3405,
+          "losses": 3063,
+          "pushes": 64,
+          "hit_rate": 52.644
         }
       ],
       "totals_by_edge": [
@@ -225,12 +250,12 @@
     },
     "validation": {
       "games": 6118,
-      "margin_mae": 9.9994,
-      "margin_rmse": 13.0567,
+      "margin_mae": 9.9176,
+      "margin_rmse": 12.9385,
       "total_mae": 13.2647,
       "total_rmse": 16.9511,
-      "winner_accuracy": 73.668,
-      "win_probability_brier": 0.172802,
+      "winner_accuracy": 73.684,
+      "win_probability_brier": 0.172094,
       "market_margin_games": 5311,
       "market_margin_mae": 8.7258,
       "market_total_games": 5310,
@@ -238,45 +263,45 @@
       "ats_by_edge": [
         {
           "minimum_edge": 0,
-          "wins": 2717,
-          "losses": 2594,
+          "wins": 2727,
+          "losses": 2584,
           "pushes": 0,
-          "hit_rate": 51.158
+          "hit_rate": 51.346
         },
         {
           "minimum_edge": 1,
-          "wins": 2151,
-          "losses": 2030,
+          "wins": 2144,
+          "losses": 2033,
           "pushes": 0,
-          "hit_rate": 51.447
+          "hit_rate": 51.329
         },
         {
           "minimum_edge": 2,
-          "wins": 1568,
-          "losses": 1499,
+          "wins": 1565,
+          "losses": 1496,
           "pushes": 0,
-          "hit_rate": 51.125
+          "hit_rate": 51.127
         },
         {
           "minimum_edge": 3,
-          "wins": 1122,
-          "losses": 1085,
+          "wins": 1113,
+          "losses": 1086,
           "pushes": 0,
-          "hit_rate": 50.838
+          "hit_rate": 50.614
         },
         {
           "minimum_edge": 4,
-          "wins": 795,
-          "losses": 754,
+          "wins": 793,
+          "losses": 742,
           "pushes": 0,
-          "hit_rate": 51.323
+          "hit_rate": 51.661
         },
         {
           "minimum_edge": 5,
-          "wins": 582,
-          "losses": 529,
+          "wins": 578,
+          "losses": 521,
           "pushes": 0,
-          "hit_rate": 52.385
+          "hit_rate": 52.593
         }
       ],
       "totals_by_edge": [
@@ -326,12 +351,12 @@
     },
     "out_of_time_test": {
       "games": 6142,
-      "margin_mae": 10.1272,
-      "margin_rmse": 13.1941,
+      "margin_mae": 10.042,
+      "margin_rmse": 13.0394,
       "total_mae": 14.05,
       "total_rmse": 17.6501,
-      "winner_accuracy": 73.82,
-      "win_probability_brier": 0.170644,
+      "winner_accuracy": 74.064,
+      "win_probability_brier": 0.170109,
       "market_margin_games": 5618,
       "market_margin_mae": 8.9729,
       "market_total_games": 5617,
@@ -339,45 +364,45 @@
       "ats_by_edge": [
         {
           "minimum_edge": 0,
-          "wins": 2948,
-          "losses": 2650,
+          "wins": 2936,
+          "losses": 2662,
           "pushes": 20,
-          "hit_rate": 52.662
+          "hit_rate": 52.447
         },
         {
           "minimum_edge": 1,
-          "wins": 2246,
-          "losses": 2033,
-          "pushes": 16,
-          "hit_rate": 52.489
+          "wins": 2248,
+          "losses": 2038,
+          "pushes": 15,
+          "hit_rate": 52.45
         },
         {
           "minimum_edge": 2,
-          "wins": 1660,
-          "losses": 1499,
+          "wins": 1666,
+          "losses": 1475,
           "pushes": 12,
-          "hit_rate": 52.548
+          "hit_rate": 53.04
         },
         {
           "minimum_edge": 3,
-          "wins": 1189,
-          "losses": 1008,
-          "pushes": 9,
-          "hit_rate": 54.119
+          "wins": 1192,
+          "losses": 1010,
+          "pushes": 7,
+          "hit_rate": 54.133
         },
         {
           "minimum_edge": 4,
-          "wins": 806,
-          "losses": 697,
+          "wins": 800,
+          "losses": 707,
           "pushes": 4,
-          "hit_rate": 53.626
+          "hit_rate": 53.086
         },
         {
           "minimum_edge": 5,
-          "wins": 588,
-          "losses": 505,
-          "pushes": 3,
-          "hit_rate": 53.797
+          "wins": 580,
+          "losses": 499,
+          "pushes": 2,
+          "hit_rate": 53.753
         }
       ],
       "totals_by_edge": [
