@@ -1,7 +1,7 @@
 {
   "meta": {
     "audit_version": "cbb-personnel-audit-v1.0",
-    "generated_at_utc": "2026-10-04T04:32:30.483915Z",
+    "generated_at_utc": "2026-10-04T04:41:36.933152Z",
     "season": 2027,
     "prior_season": 2026,
     "recruiting_year": 2026,
@@ -10,10 +10,25 @@
     "purpose": "coverage audit only; no model activation"
   },
   "rosters": {
-    "team_count": 1535,
+    "record_count": 1535,
+    "unique_team_count": 1535,
     "player_count": 0,
     "unique_player_id_count": 0,
-    "players_per_team": 0.0
+    "players_per_team": 0.0,
+    "schema_probe": {
+      "top_level_keys": [
+        "conference",
+        "players",
+        "season",
+        "team",
+        "teamId",
+        "teamSourceId"
+      ],
+      "players_container_types": {
+        "list": 1535
+      },
+      "players_object_keys": []
+    }
   },
   "prior_player_stats": {
     "record_count": 10030,
