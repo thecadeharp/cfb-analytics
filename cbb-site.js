@@ -12,7 +12,7 @@
 
   const state = {
     sport: "cfb",
-    cbbView: "cbb-home",
+    cbbView: "cbb-projections",
     cfbView: "projections",
     loaded: false,
     loading: null,
@@ -67,13 +67,18 @@
     cbbNav.className = "main-nav cbb-nav";
     cbbNav.setAttribute("aria-label", "College basketball sections");
     cbbNav.innerHTML = `
-      <button class="nav-item active" type="button" data-cbb-view="cbb-home">Research Board</button>
-      <button class="nav-item" type="button" data-cbb-view="cbb-ratings">Team Ratings</button>
-      <button class="nav-item" type="button" data-cbb-view="cbb-model">Model Lab</button>
+      <button class="nav-item active" type="button" data-cbb-view="cbb-projections">Projections</button>
+      <button class="nav-item" type="button" data-cbb-view="cbb-tracking">Model Tracking</button>
+      <button class="nav-item" type="button" data-cbb-view="cbb-team-data">Team Data</button>
+      <button class="nav-item" type="button" data-cbb-view="cbb-ratings">THI Ratings</button>
+      <button class="nav-item" type="button" data-cbb-view="cbb-player-ratings">Player Ratings</button>
+      <button class="nav-item" type="button" data-cbb-view="cbb-bracketology">THI Bracketology</button>
+      <button class="nav-item" type="button" data-cbb-view="cbb-portal">Transfer Portal</button>
+      <button class="nav-item" type="button" data-cbb-view="cbb-market">Market Research</button>
     `;
     cfbNav.insertAdjacentElement("afterend", cbbNav);
 
-    ["cbb-home", "cbb-ratings", "cbb-model"].forEach(id => {
+    ["cbb-projections", "cbb-tracking", "cbb-team-data", "cbb-ratings", "cbb-player-ratings", "cbb-bracketology", "cbb-portal", "cbb-market"].forEach(id => {
       const section = document.createElement("section");
       section.id = `view-${id}`;
       section.className = "view cbb-view cbb-shell";
@@ -104,7 +109,7 @@
     });
 
     window.thiSportHome = () => {
-      if (state.sport === "cbb") showCbbView("cbb-home");
+      if (state.sport === "cbb") showCbbView("cbb-projections");
       else window.switchView?.("projections");
     };
     window.thiSetSport = setSport;
@@ -176,9 +181,14 @@
   }
 
   function renderAll() {
-    renderHome();
+    renderProjections();
+    renderTracking();
+    renderTeamData();
     renderRatings();
-    renderModel();
+    renderPlayerRatings();
+    renderBracketology();
+    renderPortal();
+    renderMarketResearch();
   }
 
   function renderError(error) {
@@ -188,7 +198,7 @@
     });
   }
 
-  function renderHome() {
+  function renderProjections() {
     const { profiles, games, foundation, history, model } = state.data;
     const meta = profiles.meta || {};
     const coverage = foundation.coverage || {};
@@ -198,12 +208,12 @@
       .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
       .slice(0, 8);
     const modelVersion = model.meta?.model_version || "Research model";
-    const view = document.getElementById("view-cbb-home");
+    const view = document.getElementById("view-cbb-projections");
     view.innerHTML = `
       <div class="cbb-hero">
         <div>
-          <div class="cbb-kicker">The Hammer Index · College Basketball</div>
-          <h1 class="cbb-title">Possession-based college hoops research.</h1>
+          <div class="cbb-kicker">The Hammer Index · CBB Projections</div>
+          <h1 class="cbb-title">The college basketball board.</h1>
           <p class="cbb-lede">Adjusted efficiency, tempo, Four Factors, personnel context and strict walk-forward testing—built as a separate basketball engine inside the same THI research platform.</p>
         </div>
         <div class="cbb-status-card">
@@ -249,6 +259,117 @@
     const venue = game.venue?.name || (game.neutral_site ? "Neutral site" : "Venue TBD");
     const network = game.broadcasts?.map(item => item.network || item).filter(Boolean).join(", ") || "TV TBD";
     return `<article class="cbb-panel cbb-game-card"><div class="cbb-game-top"><span class="cbb-game-date">${escapeHtml(date)}</span>${game.neutral_site ? '<span class="cbb-chip">Neutral</span>' : ""}</div><div class="cbb-matchup">${escapeHtml(game.away?.team)} <span>vs.</span> ${escapeHtml(game.home?.team)}</div><div class="cbb-game-meta">${escapeHtml(venue)} · ${escapeHtml(network)}</div></article>`;
+  }
+
+  function renderTeamData() {
+    const view = document.getElementById("view-cbb-team-data");
+    const teams = [...(state.data.profiles.teams || [])].sort((a, b) => a.team.localeCompare(b.team));
+    view.innerHTML = `
+      <div class="cbb-kicker">Team directory and profiles</div>
+      <h1 class="page-title">CBB Team Data</h1>
+      <p class="page-subtitle">Every Division I program in the THI basketball warehouse. Open a team to inspect its efficiency baseline, recruiting class and incoming-transfer production.</p>
+      <div class="cbb-controls cbb-controls-single"><input id="cbb-team-data-search" class="cbb-input" type="search" placeholder="Search 365 Division I teams"></div>
+      <div class="cbb-panel cbb-table-wrap"><table class="cbb-table" aria-label="College basketball team directory"><thead><tr><th>Team</th><th>Conference</th><th>2026 source rank</th><th>2027 state</th></tr></thead><tbody id="cbb-team-data-body"></tbody></table></div>
+    `;
+    const paint = query => {
+      const needle = String(query || "").trim().toLowerCase();
+      const visible = teams.filter(team => !needle || `${team.team} ${team.display_name} ${team.conference?.name || ""}`.toLowerCase().includes(needle));
+      view.querySelector("#cbb-team-data-body").innerHTML = visible.map(team => `<tr data-team-id="${team.team_id}"><td><div class="cbb-team-name">${escapeHtml(team.display_name || team.team)}</div><div class="cbb-team-meta">Open team profile →</div></td><td>${escapeHtml(team.conference?.abbreviation || "—")}</td><td class="cbb-number">${team.preseason_prior?.adjusted?.net_rank ? `#${integer(team.preseason_prior.adjusted.net_rank)}` : "—"}</td><td><span class="cbb-chip">Preseason prior</span></td></tr>`).join("");
+    };
+    paint("");
+    view.querySelector("#cbb-team-data-search").addEventListener("input", event => paint(event.target.value));
+    view.querySelector("#cbb-team-data-body").addEventListener("click", event => {
+      const row = event.target.closest("[data-team-id]");
+      if (row) openTeamDetail(Number(row.dataset.teamId));
+    });
+  }
+
+  function renderPlayerRatings() {
+    const view = document.getElementById("view-cbb-player-ratings");
+    view.innerHTML = `
+      <div class="cbb-kicker">Player-level basketball intelligence</div>
+      <h1 class="page-title">CBB Player Ratings</h1>
+      <p class="page-subtitle">THI's player layer will combine production, efficiency, role difficulty and lineup context. Rankings remain withheld until identity matching and possession attribution pass validation.</p>
+      <div class="cbb-readiness-banner"><span class="cbb-status-pill">Data layer next</span><strong>No placeholder player rankings</strong><p>CBBD player-season and game-level records are available to the research pipeline. THI will publish ratings only after duplicate identities, transfers and team possessions reconcile.</p></div>
+      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Planned rating families</div><h2 class="cbb-section-title">What the player board will answer</h2></div></div>
+        <div class="cbb-method-grid">
+          ${methodCard("Scoring", "Shot creation and shot making", "Usage, true shooting, rim pressure, three-point value, assisted rate and free-throw generation.")}
+          ${methodCard("Possession value", "Passing, turnovers and playmaking", "Assist creation, ball security, on-ball burden and estimated points created per possession.")}
+          ${methodCard("Two-way impact", "Rebounding, defense and lineup value", "Offensive and defensive rebounding, stocks, foul pressure, opponent context and on/off lineup performance.")}
+        </div>
+      </section>
+    `;
+  }
+
+  function renderBracketology() {
+    const view = document.getElementById("view-cbb-bracketology");
+    view.innerHTML = `
+      <div class="cbb-kicker">NCAA tournament projection</div>
+      <h1 class="page-title">THI Bracketology</h1>
+      <p class="page-subtitle">A projected 68-team field built from THI team strength, résumé quality, conference races and selection-committee style inputs.</p>
+      <div class="cbb-readiness-banner"><span class="cbb-status-pill">Preseason shell</span><strong>The field is not projected yet</strong><p>The bracket activates after schedules, current-season results and conference membership are complete enough to support automatic-bid and at-large modeling.</p></div>
+      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">THI selection framework</div><h2 class="cbb-section-title">Four separate questions</h2></div></div>
+        <div class="cbb-stat-grid">
+          ${statCard("Team quality", "THI rating", "Opponent-adjusted possession strength")}
+          ${statCard("Résumé", "Earned seed", "Results, location and opponent quality")}
+          ${statCard("Auto bids", "Conference race", "Projected tournament champions")}
+          ${statCard("Bubble", "In / out", "Bid probability with first four out")}
+        </div>
+      </section>
+    `;
+  }
+
+  function renderPortal() {
+    const view = document.getElementById("view-cbb-portal");
+    const teams = [...(state.data.priors.teams || [])]
+      .filter(team => Number(team.personnel?.transfers?.incoming_count) > 0)
+      .sort((a, b) => Number(b.personnel?.transfers?.prior_minutes || 0) - Number(a.personnel?.transfers?.prior_minutes || 0));
+    const totalIncoming = teams.reduce((sum, team) => sum + Number(team.personnel?.transfers?.incoming_count || 0), 0);
+    const matched = teams.reduce((sum, team) => sum + Number(team.personnel?.transfers?.prior_production_match_count || 0), 0);
+    view.innerHTML = `
+      <div class="cbb-kicker">Roster movement and proven production</div>
+      <h1 class="page-title">CBB Transfer Portal</h1>
+      <p class="page-subtitle">Team-level incoming transfer context using ratings and prior college production. This board measures what arrives; it does not treat raw transfer count as automatic improvement.</p>
+      <div class="cbb-stat-grid">
+        ${statCard("Teams with additions", integer(teams.length), "2027 incoming transfer classes")}
+        ${statCard("Incoming players", integer(totalIncoming), "Rated and unrated additions")}
+        ${statCard("Production matches", integer(matched), "Incoming players matched to prior stats")}
+        ${statCard("Primary sort", "Prior minutes", "Established college workload")}
+      </div>
+      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Team portal board</div><h2 class="cbb-section-title">Incoming production</h2></div><div class="cbb-section-note">Click a team for its full personnel context.</div></div>
+        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Team</th><th>Conf</th><th>Incoming</th><th>Matched</th><th>Prior minutes</th><th>Prior points</th><th>Mean rating</th></tr></thead><tbody>${teams.map(team => { const t=team.personnel.transfers; return `<tr data-team-id="${team.team_id}"><td class="cbb-team-name">${escapeHtml(team.team)}</td><td>${escapeHtml(team.conference?.abbreviation || "—")}</td><td class="cbb-number">${integer(t.incoming_count)}</td><td class="cbb-number">${integer(t.prior_production_match_count)}</td><td class="cbb-number">${integer(t.prior_minutes)}</td><td class="cbb-number">${integer(t.prior_points)}</td><td class="cbb-number">${number(t.mean_incoming_rating,3)}</td></tr>`; }).join("")}</tbody></table></div>
+      </section>
+    `;
+    view.querySelector("tbody").addEventListener("click", event => {
+      const row = event.target.closest("[data-team-id]");
+      if (row) openTeamDetail(Number(row.dataset.teamId));
+    });
+  }
+
+  function renderMarketResearch() {
+    const view = document.getElementById("view-cbb-market");
+    const coverage = state.data.foundation.coverage || {};
+    const history = state.data.history.seasons || [];
+    const test = state.data.model.evaluation?.out_of_time_test || {};
+    const marketGames = history.reduce((sum, season) => sum + Number(season.games_with_market || 0), 0);
+    view.innerHTML = `
+      <div class="cbb-kicker">Price discovery and model accountability</div>
+      <h1 class="page-title">CBB Market Research</h1>
+      <p class="page-subtitle">Market lines remain evaluation context rather than model inputs. Current edges will stay hidden until the model clears its public-projection gate.</p>
+      <div class="cbb-stat-grid">
+        ${statCard("Historical market games", integer(marketGames), "2018–2026 evaluation inventory")}
+        ${statCard("Current board lines", integer(coverage.games_with_market), `${integer(coverage.window_games)} scheduled games scanned`)}
+        ${statCard("2026 market margin MAE", number(test.market_margin_mae,3), "Closing-market comparison")}
+        ${statCard("2026 THI margin MAE", number(test.margin_mae,3), "Out-of-time research test")}
+      </div>
+      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Research rules</div><h2 class="cbb-section-title">How prices are used</h2></div></div>
+        <div class="cbb-method-grid">
+          ${methodCard("Isolation", "Never a model feature", "Market spread and total are withheld from the predictive feature set.")}
+          ${methodCard("Comparison", "Measure disagreement", "Frozen THI projections are compared with the available market and final result.")}
+          ${methodCard("Accountability", "Track before promotion", "ATS, total, calibration and error results must generalize out of time before public signals appear.")}
+        </div>
+      </section>
+    `;
   }
 
   function ratingsRows() {
@@ -403,16 +524,16 @@
   function detailStat(label, value) { return `<div class="cbb-detail-stat"><div class="cbb-label">${escapeHtml(label)}</div><strong>${escapeHtml(value)}</strong></div>`; }
   function detailRow(label, value) { return `<div class="cbb-detail-row"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`; }
 
-  function renderModel() {
+  function renderTracking() {
     const card = state.data.model;
     const validation = card.evaluation?.validation || {};
     const test = card.evaluation?.out_of_time_test || {};
     const checks = card.promotion_gate?.checks || {};
     const ats = test.ats_by_edge || [];
-    const view = document.getElementById("view-cbb-model");
+    const view = document.getElementById("view-cbb-tracking");
     view.innerHTML = `
       <div class="cbb-kicker">Transparent research and accountability</div>
-      <h1 class="page-title">CBB Model Lab</h1>
+      <h1 class="page-title">CBB Model Tracking</h1>
       <p class="page-subtitle">Strict walk-forward evaluation with market prices reserved for comparison. Current-season end ratings never initialize the same season.</p>
       <div class="cbb-model-grid">
         ${modelCard("2025 validation", "Margin MAE", number(validation.margin_mae,3), `${integer(validation.games)} games · ${pct(validation.winner_accuracy)} winner accuracy`)}
