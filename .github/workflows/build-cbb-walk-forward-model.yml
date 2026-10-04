@@ -1,0 +1,98 @@
+name: Build CBB Walk-Forward Research Model
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cbb-walk-forward-model
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Preserve source data, College Football and Model A
+        run: |
+          sha256sum \
+            data/projections.json \
+            data/cfb_metrics.json \
+            data/hfa_2026.json \
+            scripts/build_projections.py \
+            index.html \
+            app.js \
+            > /tmp/cbb-model-before.sha256
+          find data/cbb/history -type f -print0 \
+            | sort -z \
+            | xargs -0 sha256sum \
+            > /tmp/cbb-history-before.sha256
+
+      - name: Test walk-forward and leakage contracts
+        run: |
+          python -m py_compile \
+            scripts/build_cbb_walk_forward_model.py \
+            scripts/test_cbb_walk_forward_model.py
+          python -m unittest scripts/test_cbb_walk_forward_model.py
+
+      - name: Build research model artifacts
+        run: |
+          python scripts/build_cbb_walk_forward_model.py \
+            --history-dir data/cbb/history \
+            --team-profiles data/cbb/team_profiles.json \
+            --output-dir data/cbb/model
+
+      - name: Validate model contract and isolation
+        run: |
+          sha256sum --check /tmp/cbb-model-before.sha256
+          sha256sum --check /tmp/cbb-history-before.sha256
+          python - <<'PY'
+          import gzip
+          import json
+          from pathlib import Path
+
+          root = Path("data/cbb/model")
+          card = json.loads((root / "model_card.json").read_text())
+          priors = json.loads((root / "current_priors.json").read_text())
+          with gzip.open(root / "walk_forward_predictions.json.gz", "rt", encoding="utf-8") as handle:
+              predictions = json.load(handle)
+
+          meta = card["meta"]
+          assert meta["model_version"] == "thi-cbb-walk-forward-v0.2-research"
+          assert meta["activation_state"] == "research_only"
+          assert meta["strict_walk_forward"] is True
+          assert meta["same_season_end_ratings_used_as_pregame_features"] is False
+          assert card["evaluation"]["out_of_time_test"]["games"] >= 5000
+          assert len(predictions["games"]) >= 40000
+          assert priors["meta"]["team_count"] >= 300
+          for model in (card["models"]["margin"], card["models"]["total"]):
+              assert not any("market" in name or "close" in name for name in model["feature_names"])
+          PY
+
+      - name: Commit research artifacts only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            data/cbb/model/model_card.json \
+            data/cbb/model/current_priors.json \
+            data/cbb/model/walk_forward_predictions.json.gz
+          if git diff --cached --quiet; then
+            echo "No CBB model changes"
+            exit 0
+          fi
+          git commit -m "Build CBB walk-forward research model"
+          git pull --rebase origin main
+          git push origin HEAD:main
