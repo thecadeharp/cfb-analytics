@@ -18,7 +18,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 HISTORY_DIR = ROOT / "data" / "cbb" / "history"
 OUTPUT_DIR = ROOT / "data" / "cbb" / "model"
-MODEL_VERSION = "thi-cbb-walk-forward-v0.4-research"
+MODEL_VERSION = "thi-cbb-walk-forward-v0.5-research"
 TRAIN_SEASONS = set(range(2019, 2025))
 VALIDATION_SEASONS = {2025}
 TEST_SEASONS = {2026}
@@ -454,8 +454,21 @@ def edge_metrics(rows: list[dict[str, Any]], kind: str) -> list[dict[str, Any]]:
     return output
 
 
-def current_priors(profile_path: Path, previous_teams: list[dict[str, Any]], personnel: dict[Any, Any]) -> dict[str, Any]:
+def current_priors(
+    profile_path: Path,
+    previous_teams: list[dict[str, Any]],
+    personnel: dict[Any, Any],
+    player_path: Path | None = None,
+) -> dict[str, Any]:
     profiles = json.loads(profile_path.read_text()) if profile_path.exists() else {"meta": {}, "teams": []}
+    player_payload = json.loads(player_path.read_text()) if player_path and player_path.exists() else {"meta": {}, "team_rosters": []}
+    if player_payload.get("meta", {}).get("version") not in (None, "thi-cbb-player-research-v1.2"):
+        raise RuntimeError("current roster continuity requires thi-cbb-player-research-v1.2")
+    roster_continuity = {
+        str(row.get("team_id")): row
+        for row in player_payload.get("team_rosters") or []
+        if isinstance(row, dict)
+    }
     league_efficiency, league_tempo = league_context(previous_teams)
     rows = []
     season = int(profiles.get("meta", {}).get("season") or 0)
@@ -463,7 +476,10 @@ def current_priors(profile_path: Path, previous_teams: list[dict[str, Any]], per
     for profile in profiles.get("teams") or []:
         prior = profile.get("preseason_prior") or {}
         adjusted = prior.get("adjusted") or {}
-        returning = finite(prior.get("returning_minutes_pct"))
+        roster_row = roster_continuity.get(str(profile.get("team_id")))
+        roster_returning = finite((roster_row or {}).get("returning_minutes_pct"))
+        returning = roster_returning if roster_returning is not None else finite(prior.get("returning_minutes_pct"))
+        continuity_source = "verified_current_roster_join" if roster_returning is not None else "team_profile_feed"
         carry = 0.25 + 0.50 * clip((returning or 0.0) / 100.0, 0.0, 1.0)
         offense = finite(adjusted.get("offense")) or league_efficiency
         defense = finite(adjusted.get("defense")) or league_efficiency
@@ -476,6 +492,7 @@ def current_priors(profile_path: Path, previous_teams: list[dict[str, Any]], per
             "prior_net": round(carry * (offense - defense), 4),
             "returning_minutes_pct": returning,
             "continuity_known": returning is not None,
+            "continuity_source": continuity_source,
             "personnel": personnel_rows.get(str(profile.get("team_id"))) or {},
         })
     rows.sort(key=lambda row: (-row["prior_net"], str(row.get("team") or "")))
@@ -486,6 +503,7 @@ def current_priors(profile_path: Path, previous_teams: list[dict[str, Any]], per
             "team_count": len(rows),
             "continuity_known_count": sum(row["continuity_known"] for row in rows),
             "positive_continuity_count": sum((row["returning_minutes_pct"] or 0) > 0 for row in rows),
+            "verified_roster_continuity_count": sum(row["continuity_source"] == "verified_current_roster_join" for row in rows),
             "personnel_team_count": sum(bool(row["personnel"]) for row in rows),
             "status": "preseason_prior; not a current-season adjusted rating",
         },
@@ -506,7 +524,7 @@ def atomic_json(path: Path, payload: Any, compressed: bool = False) -> None:
     temporary.replace(path)
 
 
-def build(history_dir: Path, personnel_dir: Path, profile_path: Path, output_dir: Path) -> dict[str, Any]:
+def build(history_dir: Path, personnel_dir: Path, profile_path: Path, output_dir: Path, player_path: Path | None = None) -> dict[str, Any]:
     seasons = load_seasons(history_dir)
     personnel = load_personnel(personnel_dir)
     missing_personnel = sorted(set(seasons) - {key for key in personnel if isinstance(key, int)})
@@ -533,7 +551,7 @@ def build(history_dir: Path, personnel_dir: Path, profile_path: Path, output_dir
         "out_of_time_test": metrics([row for row in evaluated if row["split"] == "test"]),
     }
     latest = seasons[max(seasons)]["season_end_teams"]
-    priors = current_priors(profile_path, latest, personnel)
+    priors = current_priors(profile_path, latest, personnel, player_path)
     validation = evaluation["validation"]
     test = evaluation["out_of_time_test"]
     gate_checks = {
@@ -565,10 +583,10 @@ def build(history_dir: Path, personnel_dir: Path, profile_path: Path, output_dir
             "checks": gate_checks,
         },
         "limitations": [
-            "Roster continuity is used only where CBBD supplies matched player IDs and minutes.",
+            "Current preseason continuity is derived only for teams with a verified active-roster join to completed-season player minutes.",
             "Injuries, travel, altitude, coaching, officials and player-level availability are not active inputs in this research version.",
             "Market results are evaluation context and are not model inputs.",
-            "The 2027 CBBD roster feed currently has no positive returning-minutes values, so continuity cannot yet differentiate teams.",
+            "Teams without a verified current roster remain on the conservative baseline carry; current roster coverage is not yet complete for every Division I program.",
             "This research model does not guarantee betting profit.",
         ],
     }
@@ -584,9 +602,10 @@ def main() -> None:
     parser.add_argument("--history-dir", type=Path, default=HISTORY_DIR)
     parser.add_argument("--personnel-dir", type=Path, default=ROOT / "data" / "cbb" / "personnel")
     parser.add_argument("--team-profiles", type=Path, default=ROOT / "data" / "cbb" / "team_profiles.json")
+    parser.add_argument("--player-ratings", type=Path, default=ROOT / "data" / "cbb" / "player_ratings.json")
     parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR)
     args = parser.parse_args()
-    card = build(args.history_dir, args.personnel_dir, args.team_profiles, args.output_dir)
+    card = build(args.history_dir, args.personnel_dir, args.team_profiles, args.output_dir, args.player_ratings)
     test = card["evaluation"]["out_of_time_test"]
     print(f"{MODEL_VERSION}: test margin MAE {test['margin_mae']}, total MAE {test['total_mae']}")
 
