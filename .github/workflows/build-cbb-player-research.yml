@@ -1,0 +1,92 @@
+name: Build CBB Player Research
+
+on:
+  workflow_dispatch:
+    inputs:
+      season:
+        description: "Completed CBB season used for player research"
+        required: true
+        default: "2026"
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-cbb-player-research
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Preserve College Football and CBB projection research
+        run: |
+          sha256sum \
+            data/projections.json \
+            data/cfb_metrics.json \
+            scripts/build_projections.py \
+            data/cbb/model/model_card.json \
+            data/cbb/model/current_priors.json \
+            data/cbb/model/walk_forward_predictions.json.gz \
+            > /tmp/cbb-player-before.sha256
+
+      - name: Test player derivation contract
+        run: |
+          python -m py_compile \
+            scripts/build_cbb_player_research.py \
+            scripts/test_cbb_player_research.py
+          python -m unittest scripts/test_cbb_player_research.py
+
+      - name: Build derived player research
+        env:
+          CBBD_API_KEY: ${{ secrets.CBBD_API_KEY }}
+          CBB_PLAYER_SEASON: ${{ inputs.season }}
+        run: python scripts/build_cbb_player_research.py
+
+      - name: Validate output and isolation
+        run: |
+          python - <<'PY'
+          import json
+          import math
+          from pathlib import Path
+
+          payload = json.loads(Path("data/cbb/player_ratings.json").read_text())
+          meta = payload["meta"]
+          players = payload["players"]
+          print("CBB player metadata:", json.dumps(meta, indent=2))
+          print("CBB player coverage:", json.dumps(payload["coverage"], indent=2))
+          assert meta["version"] == "thi-cbb-player-research-v1.0"
+          assert meta["activation_state"] == "research_reference_only"
+          assert meta["raw_api_data_stored"] is False
+          assert meta["request_count"] == 2
+          assert meta["player_count"] >= 2500
+          assert meta["team_count"] >= 300
+          assert len(players) == meta["player_count"]
+          assert len({row["player_season_id"] for row in players}) == len(players)
+          assert all(row["sample"]["minutes"] >= meta["minimum_minutes"] for row in players)
+          assert all(1 <= row["research_scores"]["thi_player_rating"] <= 99 for row in players)
+          assert all(math.isfinite(row["research_scores"]["thi_player_rating"]) for row in players)
+          PY
+          sha256sum --check /tmp/cbb-player-before.sha256
+
+      - name: Commit derived player output only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/cbb/player_ratings.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Build CBB player research layer"
+          git pull --rebase origin main
+          git push origin HEAD:main
