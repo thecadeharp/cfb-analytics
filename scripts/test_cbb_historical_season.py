@@ -9,6 +9,7 @@ from pathlib import Path
 from scripts.build_cbb_historical_season import (
     atomic_gzip_json,
     build_season,
+    paired_game,
     rebuild_manifest,
     season_windows,
 )
@@ -16,6 +17,16 @@ from scripts.validate_cbb_historical_warehouse import validate_warehouse
 
 
 class CbbHistoricalSeasonTests(unittest.TestCase):
+    def test_rejects_zeroed_canceled_game_rows(self):
+        row = {
+            "gameId": 99,
+            "isHome": True,
+            "teamStats": {"points": {"total": 0}, "possessions": 0},
+            "opponentStats": {"points": {"total": 0}, "possessions": 0},
+            "pace": 0,
+        }
+        self.assertIsNone(paired_game(row, None))
+
     def test_month_windows_cover_regular_season_without_overlap(self):
         windows = season_windows(2024)
         self.assertEqual(len(windows), 6)
@@ -66,7 +77,7 @@ class CbbHistoricalSeasonTests(unittest.TestCase):
             self.assertEqual(manifest["meta"]["game_count"], 3000)
             with gzip.open(root / "season_2024.json.gz", "rt", encoding="utf-8") as handle:
                 saved = json.load(handle)
-            self.assertEqual(saved["meta"]["builder_version"], "cbb-history-v1.0")
+            self.assertEqual(saved["meta"]["builder_version"], "cbb-history-v1.1")
             self.assertEqual(validate_warehouse(root), {"season_count": 1, "game_count": 3000})
 
 
