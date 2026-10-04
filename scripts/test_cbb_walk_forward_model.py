@@ -9,12 +9,29 @@ from pathlib import Path
 from scripts.build_cbb_walk_forward_model import (
     MARGIN_FEATURES,
     initial_states,
+    add_personnel_features,
     load_seasons,
     projection_features,
 )
 
 
 class CbbWalkForwardModelTests(unittest.TestCase):
+    def test_personnel_differences_decay_with_current_season_games(self):
+        personnel = {
+            2026: {
+                "1": {"recruiting": {"team_rating": 60, "class_player_count": 4}, "transfers": {"prior_minutes": 1000, "prior_points": 400, "incoming_count": 3, "mean_incoming_rating": .9}},
+                "2": {"recruiting": {"team_rating": 40, "class_player_count": 2}, "transfers": {"prior_minutes": 100, "prior_points": 40, "incoming_count": 1, "mean_incoming_rating": .7}},
+            },
+            (2026, "median_recruit_rating"): 50,
+            (2026, "median_transfer_rating"): .8,
+        }
+        opener = {}
+        mature = {}
+        add_personnel_features(opener, 2026, 1, 2, 0, 0, personnel)
+        add_personnel_features(mature, 2026, 1, 2, 9, 9, personnel)
+        self.assertGreater(opener["personnel_transfer_minutes"], mature["personnel_transfer_minutes"])
+        self.assertAlmostEqual(opener["personnel_recruit_rating"] / 10, mature["personnel_recruit_rating"])
+
     def test_current_season_end_rating_cannot_initialize_same_season(self):
         current = [{
             "team_id": 1,
