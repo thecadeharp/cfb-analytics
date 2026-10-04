@@ -318,7 +318,7 @@
       <div class="cbb-stat-grid">
         ${statCard("Qualified players", integer(meta.player_count), `${integer(meta.team_count)} Division I teams`)}
         ${statCard("Minimum sample", `${integer(meta.minimum_minutes)} min`, `${integer(meta.minimum_games)} games`)}
-        ${statCard("Roster state", "Verified active", `${integer(payload.coverage?.historical_players_excluded_not_current)} departed players excluded`)}
+        ${statCard("Roster state", "Verified active", `${integer(payload.coverage?.historical_players_withheld_unverified_current)} historical priors withheld`)}
         ${statCard("Projection use", "Research only", "No game-line adjustment")}
       </div>
       <div class="cbb-player-controls">
