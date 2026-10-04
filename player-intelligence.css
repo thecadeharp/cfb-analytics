@@ -17,6 +17,18 @@
 .thi-player-name:hover { text-decoration:underline; }
 .thi-player-mono { font-family:var(--mono); }
 .thi-player-grade { display:inline-flex; min-width:42px; justify-content:center; border-radius:999px; padding:5px 8px; background:rgba(31,158,92,.12); color:#12694d; font:800 11px var(--mono); }
+.thi-player-table td.thi-player-metric { min-width:112px; color:#17212b; transition:filter .15s ease; }
+.thi-player-table tbody tr:hover td.thi-player-metric { filter:saturate(1.08) brightness(.985); }
+.thi-player-metric-value { display:block; color:inherit; font:900 12px/1.25 var(--mono); letter-spacing:-.01em; }
+.thi-player-metric-label { display:block; margin-top:4px; color:inherit; font:800 8px/1 var(--mono); letter-spacing:.08em; opacity:.72; text-transform:uppercase; }
+.thi-player-band-elite { background:#58bf7d; color:#092918 !important; }
+.thi-player-band-strong { background:#8bd19f; color:#12351f !important; }
+.thi-player-band-above { background:#c4e5ca; color:#24422c !important; }
+.thi-player-band-average { background:#edf0e9; color:#465047 !important; }
+.thi-player-band-below { background:#f4dfad; color:#594314 !important; }
+.thi-player-band-poor { background:#efb19b; color:#612b1c !important; }
+.thi-player-band-critical { background:#e98181; color:#541416 !important; }
+.thi-player-band-missing { background:#eef1f3; color:#6e7882 !important; }
 .thi-player-beta { margin:14px 0; padding:12px 14px; border:1px solid var(--border); border-radius:9px; color:var(--muted); font-size:12px; line-height:1.55; }
 .thi-player-drawer[hidden] { display:none; }
 .thi-player-drawer { position:fixed; inset:0; z-index:1000; background:rgba(9,15,22,.62); display:flex; justify-content:flex-end; }
