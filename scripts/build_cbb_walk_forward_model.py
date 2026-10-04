@@ -18,12 +18,13 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 HISTORY_DIR = ROOT / "data" / "cbb" / "history"
 OUTPUT_DIR = ROOT / "data" / "cbb" / "model"
-MODEL_VERSION = "thi-cbb-walk-forward-v0.2-research"
+MODEL_VERSION = "thi-cbb-walk-forward-v0.3-research"
 TRAIN_SEASONS = set(range(2019, 2025))
 VALIDATION_SEASONS = {2025}
 TEST_SEASONS = {2026}
 MARGIN_FEATURES = (
-    "raw_margin", "home_court", "experience_diff", "experience_sum", "efg_edge", "turnover_edge",
+    "raw_margin", "raw_margin_curve", "home_court", "experience_diff", "experience_sum",
+    "early_strength_margin", "early_home", "nonconference_home", "efg_edge", "turnover_edge",
     "rebound_edge", "free_throw_edge",
 )
 TOTAL_FEATURES = (
@@ -155,10 +156,18 @@ def projection_features(game: dict[str, Any], home: TeamState, away: TeamState, 
     away_orb = away.rebound_for + home.rebound_allowed - 30.0
     home_ftr = home.free_throw_for + away.free_throw_allowed - 30.0
     away_ftr = away.free_throw_for + home.free_throw_allowed - 30.0
+    minimum_games = min(home.games, away.games)
+    early_weight = 1.0 / (1.0 + minimum_games)
+    home_court = 0.0 if game.get("neutral_site") else 1.0
+    raw_margin = raw_home - raw_away
     return {
-        "raw_margin": raw_home - raw_away,
+        "raw_margin": raw_margin,
+        "raw_margin_curve": raw_margin * abs(raw_margin),
         "raw_total": raw_home + raw_away,
-        "home_court": 0.0 if game.get("neutral_site") else 1.0,
+        "home_court": home_court,
+        "early_strength_margin": raw_margin * early_weight,
+        "early_home": home_court * early_weight,
+        "nonconference_home": home_court * (0.0 if game.get("conference_game") else 1.0),
         "projected_pace": pace,
         "experience_diff": math.log1p(home.games) - math.log1p(away.games),
         "experience_sum": math.log1p(home.games) + math.log1p(away.games),
@@ -431,6 +440,23 @@ def build(history_dir: Path, profile_path: Path, output_dir: Path) -> dict[str, 
         row["projected_away_points"] = round((row["projected_total"] - row["projected_home_margin"]) / 2.0, 3)
         row["split"] = "train" if row["season"] in TRAIN_SEASONS else "validation" if row["season"] in VALIDATION_SEASONS else "test" if row["season"] in TEST_SEASONS else "burn_in"
     evaluated = [row for row in rows if row["split"] != "burn_in"]
+    evaluation = {
+        "train": metrics([row for row in evaluated if row["split"] == "train"]),
+        "validation": metrics([row for row in evaluated if row["split"] == "validation"]),
+        "out_of_time_test": metrics([row for row in evaluated if row["split"] == "test"]),
+    }
+    latest = seasons[max(seasons)]["season_end_teams"]
+    priors = current_priors(profile_path, latest)
+    validation = evaluation["validation"]
+    test = evaluation["out_of_time_test"]
+    gate_checks = {
+        "validation_margin_mae_within_one_point_of_market": validation["margin_mae"] <= validation["market_margin_mae"] + 1.0,
+        "test_margin_mae_within_one_point_of_market": test["margin_mae"] <= test["market_margin_mae"] + 1.0,
+        "validation_large_spread_edge_above_52_38_pct": validation["ats_by_edge"][5]["hit_rate"] >= 52.38,
+        "test_large_spread_edge_above_52_38_pct": test["ats_by_edge"][5]["hit_rate"] >= 52.38,
+        "validation_totals_edge_above_52_38_pct": validation["totals_by_edge"][5]["hit_rate"] >= 52.38,
+        "usable_roster_continuity_for_300_teams": priors["meta"]["positive_continuity_count"] >= 300,
+    }
     card = {
         "meta": {
             "model_version": MODEL_VERSION,
@@ -445,22 +471,20 @@ def build(history_dir: Path, profile_path: Path, output_dir: Path) -> dict[str, 
             "description": "Pregame team states update only after each completed game. Current-season end ratings never initialize that same season. Market prices are evaluation fields only.",
         },
         "models": {"margin": margin_model, "total": total_model, "margin_residual_sd": round(residual_sd, 6)},
-        "evaluation": {
-            "train": metrics([row for row in evaluated if row["split"] == "train"]),
-            "validation": metrics([row for row in evaluated if row["split"] == "validation"]),
-            "out_of_time_test": metrics([row for row in evaluated if row["split"] == "test"]),
+        "evaluation": evaluation,
+        "promotion_gate": {
+            "eligible_for_public_projection_engine": all(gate_checks.values()),
+            "checks": gate_checks,
         },
         "limitations": [
             "Roster continuity is used only where CBBD supplies matched player IDs and minutes.",
-            "Injuries, travel, altitude, coaching, officials and player-level availability are not active inputs in v0.1.",
+            "Injuries, travel, altitude, coaching, officials and player-level availability are not active inputs in this research version.",
             "Market results are evaluation context and are not model inputs.",
             "The 2027 CBBD roster feed currently has no positive returning-minutes values, so continuity cannot yet differentiate teams.",
             "This research model does not guarantee betting profit.",
         ],
     }
     predictions = {"meta": card["meta"], "games": evaluated}
-    latest = seasons[max(seasons)]["season_end_teams"]
-    priors = current_priors(profile_path, latest)
     atomic_json(output_dir / "model_card.json", card)
     atomic_json(output_dir / "walk_forward_predictions.json.gz", predictions, compressed=True)
     atomic_json(output_dir / "current_priors.json", priors)
