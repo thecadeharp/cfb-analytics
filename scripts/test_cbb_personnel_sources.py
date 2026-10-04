@@ -12,7 +12,7 @@ class CbbPersonnelSourceTests(unittest.TestCase):
     def test_separates_returners_and_incoming_production(self):
         responses = {
             "/teams/roster": [
-                {"teamId": 1, "team": "Alpha", "players": [{"id": 10, "name": "Returner"}, {"id": 20, "name": "Transfer Guy"}]},
+                {"teamId": 1, "team": "Alpha", "players": {"rows": [{"id": 10, "name": "Returner"}, {"id": 20, "name": "Transfer Guy"}]}},
                 {"teamId": 2, "team": "Beta", "players": []},
             ],
             "/stats/player/season": [
@@ -28,6 +28,8 @@ class CbbPersonnelSourceTests(unittest.TestCase):
         self.assertEqual(report["id_join"]["matched_current_players"], 2)
         self.assertEqual(report["id_join"]["teams_with_positive_returning_minutes"], 1)
         self.assertEqual(report["id_join"]["teams_with_positive_incoming_transfer_minutes"], 1)
+        self.assertEqual(report["rosters"]["player_count"], 2)
+        self.assertEqual(report["rosters"]["schema_probe"]["players_object_keys"], ["rows"])
         self.assertFalse(report["meta"]["raw_api_data_stored"])
 
 
