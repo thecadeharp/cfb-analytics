@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Build THI's derived CBB player research layer.
 
-The job makes two transient CBBD requests and persists selected, transformed
-player features. It does not store provider responses or activate public game
-projections. Ratings are a research index with explicit sample reliability.
+The job joins a completed-season statistical prior to the following season's
+verified roster. It persists selected, transformed features only, does not
+store provider responses, and does not activate public game projections.
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ except ModuleNotFoundError:
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "data" / "cbb" / "player_ratings.json"
-VERSION = "thi-cbb-player-research-v1.0"
+VERSION = "thi-cbb-player-research-v1.1"
 MIN_MINUTES = 100.0
 MIN_GAMES = 5.0
 
@@ -110,14 +110,18 @@ def percentile(values: list[float], value: float) -> float:
 
 
 def build_player_research(
-    season: int,
+    source_season: int,
+    roster_season: int,
     players: list[dict[str, Any]],
     teams: list[dict[str, Any]],
+    rosters: list[dict[str, Any]],
     min_minutes: float = MIN_MINUTES,
     min_games: float = MIN_GAMES,
 ) -> dict[str, Any]:
-    if not isinstance(players, list) or not isinstance(teams, list):
-        raise RuntimeError("CBBD player and team responses must be lists")
+    if not isinstance(players, list) or not isinstance(teams, list) or not isinstance(rosters, list):
+        raise RuntimeError("CBBD player, team, and roster responses must be lists")
+    if roster_season <= source_season:
+        raise RuntimeError("Roster season must follow the completed source-stat season")
 
     team_context = {
         str(row.get("teamId")): {
@@ -133,22 +137,72 @@ def build_player_research(
             continue
         athlete_teams[str(row.get("athleteId"))].add(str(row.get("teamId")))
 
-    prepared: list[dict[str, Any]] = []
-    seen: set[str] = set()
+    active_by_id: dict[str, dict[str, Any]] = {}
+    active_by_source: dict[str, dict[str, Any]] = {}
+    roster_player_keys: set[str] = set()
+    for team_roster in rosters:
+        if not isinstance(team_roster, dict):
+            continue
+        for roster_player in team_roster.get("players") or []:
+            if not isinstance(roster_player, dict):
+                continue
+            athlete_id = roster_player.get("id")
+            source_id = roster_player.get("sourceId")
+            roster_record = {
+                "athlete_id": athlete_id,
+                "athlete_source_id": source_id,
+                "name": roster_player.get("name"),
+                "position": roster_player.get("position"),
+                "jersey": roster_player.get("jersey"),
+                "team_id": team_roster.get("teamId"),
+                "team": team_roster.get("team"),
+                "conference": team_roster.get("conference"),
+            }
+            if athlete_id is not None:
+                active_by_id[str(athlete_id)] = roster_record
+                roster_player_keys.add(f"id:{athlete_id}")
+            elif source_id:
+                roster_player_keys.add(f"source:{source_id}")
+            if source_id:
+                active_by_source[str(source_id)] = roster_record
+
+    if not roster_player_keys:
+        raise RuntimeError("Current-season roster response contained no players")
+
+    matched_roster_keys: set[str] = set()
+    qualified_sources: dict[str, tuple[dict[str, Any], dict[str, Any]]] = {}
+    historical_keys: set[str] = set()
     for source in players:
         if not isinstance(source, dict):
             continue
+        athlete_id = source.get("athleteId")
+        source_id = source.get("athleteSourceId")
+        source_key = f"id:{athlete_id}" if athlete_id is not None else f"source:{source_id}"
+        historical_keys.add(source_key)
+        roster_player = active_by_id.get(str(athlete_id)) if athlete_id is not None else None
+        if roster_player is None and source_id:
+            roster_player = active_by_source.get(str(source_id))
+        if roster_player is None:
+            continue
+        roster_key = f"id:{roster_player['athlete_id']}" if roster_player.get("athlete_id") is not None else f"source:{roster_player.get('athlete_source_id')}"
+        matched_roster_keys.add(roster_key)
         minutes = finite(source.get("minutes")) or 0.0
         games = finite(source.get("games")) or 0.0
         if minutes < min_minutes or games < min_games:
             continue
-        athlete_id = source.get("athleteId")
-        team_id = source.get("teamId")
-        identity = f"{season}:{athlete_id}:{team_id}"
-        if identity in seen:
-            continue
-        seen.add(identity)
-        context = team_context.get(str(team_id), {})
+        current = qualified_sources.get(roster_key)
+        if current is None or minutes > (finite(current[0].get("minutes")) or 0.0):
+            qualified_sources[roster_key] = (source, roster_player)
+
+    prepared: list[dict[str, Any]] = []
+    for source, roster_player in qualified_sources.values():
+        minutes = finite(source.get("minutes")) or 0.0
+        games = finite(source.get("games")) or 0.0
+        athlete_id = roster_player.get("athlete_id") or source.get("athleteId")
+        team_id = roster_player.get("team_id")
+        source_team_id = source.get("teamId")
+        identity = f"{roster_season}:{athlete_id}:{team_id}"
+        context = team_context.get(str(source_team_id), {})
         minutes_per_game = minutes / games if games else None
         usage = finite(source.get("usage"))
         metrics = {
@@ -179,20 +233,26 @@ def build_player_research(
         prepared.append({
             "player_season_id": identity,
             "athlete_id": athlete_id,
-            "athlete_source_id": source.get("athleteSourceId"),
-            "name": source.get("name"),
+            "athlete_source_id": roster_player.get("athlete_source_id") or source.get("athleteSourceId"),
+            "name": roster_player.get("name") or source.get("name"),
             "team_id": team_id,
-            "team": source.get("team"),
-            "conference": source.get("conference"),
-            "position": source.get("position"),
-            "position_group": position_group(source.get("position")),
-            "multi_team_season": len(athlete_teams[str(athlete_id)]) > 1,
+            "team": roster_player.get("team"),
+            "conference": roster_player.get("conference"),
+            "position": roster_player.get("position") or source.get("position"),
+            "position_group": position_group(roster_player.get("position") or source.get("position")),
+            "jersey": roster_player.get("jersey"),
+            "current_roster_verified": True,
+            "source_season": source_season,
+            "source_team_id": source_team_id,
+            "source_team": source.get("team"),
+            "transfer_between_seasons": str(source_team_id) != str(team_id),
+            "multi_team_source_season": len(athlete_teams[str(source.get("athleteId"))]) > 1,
             "sample": {
                 "games": int(games),
                 "starts": int(finite(source.get("starts")) or 0),
                 "minutes": round(minutes, 1),
                 "minutes_per_game": rounded(minutes_per_game, 1),
-                "team_pace": rounded(context.get("pace"), 1),
+                "source_team_pace": rounded(context.get("pace"), 1),
             },
             "role": role_label(usage, minutes_per_game),
             "metrics": metrics,
@@ -265,23 +325,31 @@ def build_player_research(
         "meta": {
             "version": VERSION,
             "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-            "season": season,
+            "season": roster_season,
+            "source_season": source_season,
+            "roster_season": roster_season,
             "activation_state": "research_reference_only",
             "player_count": len(prepared),
             "team_count": team_count,
             "minimum_minutes": min_minutes,
             "minimum_games": min_games,
-            "request_count": 2,
+            "request_count": 3,
             "raw_api_data_stored": False,
             "source_attribution": "Data provided by CollegeBasketballData.com; ratings and calculations by The Hammer Index.",
-            "methodology": "Robust standardized production and efficiency components, regressed by sample reliability. Not opponent-adjusted or lineup-adjusted in v1.0.",
+            "methodology": "Active roster players only. Ratings use the prior completed season's robust standardized production and efficiency components, regressed by sample reliability. Not opponent-adjusted or lineup-adjusted in v1.1.",
         },
         "coverage": {
             "provider_player_rows": len(players),
             "provider_team_rows": len(teams),
+            "provider_roster_teams": len(rosters),
+            "current_roster_players": len(roster_player_keys),
+            "current_roster_players_with_source_stats": len(matched_roster_keys),
+            "current_roster_players_without_qualified_prior": len(roster_player_keys) - len(prepared),
+            "historical_players_excluded_not_current": len(historical_keys - roster_player_keys),
             "qualified_players": len(prepared),
             "qualified_teams": team_count,
-            "multi_team_stints": sum(row["multi_team_season"] for row in prepared),
+            "multi_team_source_stints": sum(row["multi_team_source_season"] for row in prepared),
+            "between_season_transfers": sum(row["transfer_between_seasons"] for row in prepared),
             "position_groups": dict(Counter(row["position_group"] for row in prepared)),
         },
         "players": prepared,
@@ -299,15 +367,17 @@ def atomic_write(path: Path, payload: dict[str, Any]) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--season", type=int, default=int(os.environ.get("CBB_PLAYER_SEASON", "2026")))
+    parser.add_argument("--source-season", type=int, default=int(os.environ.get("CBB_PLAYER_SOURCE_SEASON", "2026")))
+    parser.add_argument("--roster-season", type=int, default=int(os.environ.get("CBB_PLAYER_ROSTER_SEASON", "2027")))
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
     api_key = clean_key(os.environ.get("CBBD_API_KEY"))
     if not api_key:
         raise SystemExit("CBBD_API_KEY is required")
-    players = fetch_json("/stats/player/season", {"season": args.season}, api_key)
-    teams = fetch_json("/stats/team/season", {"season": args.season}, api_key)
-    payload = build_player_research(args.season, players, teams)
+    players = fetch_json("/stats/player/season", {"season": args.source_season}, api_key)
+    teams = fetch_json("/stats/team/season", {"season": args.source_season}, api_key)
+    rosters = fetch_json("/teams/roster", {"season": args.roster_season}, api_key)
+    payload = build_player_research(args.source_season, args.roster_season, players, teams, rosters)
     atomic_write(args.output, payload)
     print(json.dumps({"meta": payload["meta"], "coverage": payload["coverage"]}, indent=2))
 
