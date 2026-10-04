@@ -297,6 +297,7 @@ def build_outputs(
         "meta": {
             "schema_version": "2.0", "season": season, "benchmark_season": benchmark_season,
             "generated_at_utc": generated, "request_count": 8,
+            "builder_version": "cbb-foundation-v2.1",
             "raw_api_data_stored": False, "cfb_or_model_a_files_accessed": False,
         },
         "coverage": {
