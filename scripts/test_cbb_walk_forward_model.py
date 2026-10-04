@@ -10,6 +10,7 @@ from scripts.build_cbb_walk_forward_model import (
     MARGIN_FEATURES,
     initial_states,
     add_personnel_features,
+    current_priors,
     load_seasons,
     projection_features,
 )
@@ -65,6 +66,38 @@ class CbbWalkForwardModelTests(unittest.TestCase):
                 json.dump({"meta": {"season": 2026, "builder_version": "cbb-history-v1.0"}}, handle)
             with self.assertRaisesRegex(RuntimeError, "clean cbb-history-v1.1"):
                 load_seasons(Path(tmp))
+
+    def test_current_priors_prefer_verified_roster_continuity(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            profiles = {
+                "meta": {"season": 2027},
+                "teams": [{
+                    "team_id": 1,
+                    "team": "Test",
+                    "conference": {"name": "Test Conf"},
+                    "preseason_prior": {"returning_minutes_pct": None, "adjusted": {"offense": 120, "defense": 90}},
+                }],
+            }
+            players = {
+                "meta": {"version": "thi-cbb-player-research-v1.2"},
+                "team_rosters": [{"team_id": 1, "returning_minutes_pct": 62.5}],
+            }
+            profile_path = root / "profiles.json"
+            player_path = root / "players.json"
+            profile_path.write_text(json.dumps(profiles))
+            player_path.write_text(json.dumps(players))
+            payload = current_priors(
+                profile_path,
+                [{"team_id": 1, "adjusted_offense": 120, "adjusted_defense": 90, "pace": 68}],
+                {2027: {}},
+                player_path,
+            )
+            row = payload["teams"][0]
+            self.assertEqual(row["returning_minutes_pct"], 62.5)
+            self.assertEqual(row["continuity_source"], "verified_current_roster_join")
+            self.assertEqual(payload["meta"]["verified_roster_continuity_count"], 1)
+            self.assertGreater(row["prior_net"], 15)
 
 
 if __name__ == "__main__":
