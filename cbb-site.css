@@ -32,6 +32,22 @@
 .cbb-nav { display: none; }
 body.thi-sport-cbb .main-nav:not(.cbb-nav) { display: none; }
 body.thi-sport-cbb .cbb-nav { display: flex; }
+body.thi-sport-cbb .header-inner {
+  height: auto;
+  min-height: 58px;
+  flex-wrap: wrap;
+  padding-top: 9px;
+  padding-bottom: 7px;
+}
+body.thi-sport-cbb .cbb-nav {
+  order: 3;
+  width: 100%;
+  overflow-x: auto;
+  padding-top: 4px;
+  scrollbar-width: none;
+}
+body.thi-sport-cbb .cbb-nav::-webkit-scrollbar { display: none; }
+body.thi-sport-cbb .cbb-nav .nav-item { flex: 0 0 auto; }
 
 .cbb-view { display: none; }
 .cbb-view.active { display: block; }
@@ -183,6 +199,7 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
   gap: 10px;
   margin: 14px 0 10px;
 }
+.cbb-controls-single { grid-template-columns: minmax(240px, 620px); }
 .cbb-input,
 .cbb-select {
   width: 100%;
@@ -209,6 +226,20 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
   text-align: center;
   font-size: 12px;
 }
+
+.cbb-readiness-banner {
+  display: grid;
+  grid-template-columns: auto minmax(180px, .55fr) minmax(280px, 1fr);
+  align-items: center;
+  gap: 18px;
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid #e5b28e;
+  border-radius: 10px;
+  background: var(--cbb-accent-soft);
+}
+.cbb-readiness-banner strong { font-size: 16px; }
+.cbb-readiness-banner p { margin: 0; color: #744226; font-size: 11px; line-height: 1.55; }
 
 .cbb-model-grid {
   display: grid;
@@ -270,6 +301,8 @@ html[data-theme="dark"] .thi-sport-switcher { background: #111720; border-color:
 html[data-theme="dark"] .thi-sport-button.is-active { background: #314153; color: #f4f7fa; box-shadow: none; }
 html[data-theme="dark"] .cbb-shell { --cbb-accent-soft: #342219; }
 html[data-theme="dark"] .cbb-status-card { border-color: #75482f; }
+html[data-theme="dark"] .cbb-readiness-banner { border-color: #75482f; }
+html[data-theme="dark"] .cbb-readiness-banner p { color: #d0a38a; }
 html[data-theme="dark"] .cbb-status-pill,
 html[data-theme="dark"] .cbb-chip { background: #251914; border-color: #915534; color: #f1a875; }
 html[data-theme="dark"] .cbb-status-card p { color: #d0a38a; }
@@ -292,6 +325,7 @@ html[data-theme="dark"] .cbb-error { background: #3a2020; border-color: #76443e;
   .cbb-hero { grid-template-columns: 1fr; }
   .cbb-method-grid,
   .cbb-model-grid { grid-template-columns: 1fr; }
+  .cbb-readiness-banner { grid-template-columns: 1fr; gap: 10px; }
 }
 
 @media (max-width: 640px) {
