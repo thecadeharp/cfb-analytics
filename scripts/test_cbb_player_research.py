@@ -82,6 +82,7 @@ class CbbPlayerResearchTests(unittest.TestCase):
         self.assertTrue(all(row["current_roster_verified"] for row in payload["players"]))
         self.assertEqual(sum(row["player_count"] for row in payload["team_rosters"]), 12)
         self.assertTrue(all(row["rated_player_count"] == row["player_count"] for row in payload["team_rosters"]))
+        self.assertTrue(all(row["returning_minutes_pct"] == 100.0 for row in payload["team_rosters"]))
         for row in payload["players"]:
             rating = row["research_scores"]["thi_player_rating"]
             self.assertTrue(math.isfinite(rating))
@@ -112,7 +113,17 @@ class CbbPlayerResearchTests(unittest.TestCase):
         self.assertEqual(roster_states[qualified["name"]], "rated")
         self.assertEqual(roster_states[low_sample["name"]], "below_sample")
         self.assertNotIn(departed["name"], roster_states)
+        self.assertIsNone(payload["team_rosters"][0]["returning_minutes_pct"])
         self.assertNotIn("raw", payload)
+
+    def test_derives_returning_minutes_against_full_prior_team_minutes(self):
+        returning = player(1, 4, 1)
+        departed = player(2, 3, 1)
+        teams = [{"teamId": 1, "games": 30, "pace": 68, "teamStats": {"possessions": 2000}}]
+        payload = build_player_research(2026, 2027, [returning, departed], teams, [roster([returning], 1)])
+        team = payload["team_rosters"][0]
+        expected = 100 * returning["minutes"] / (returning["minutes"] + departed["minutes"])
+        self.assertAlmostEqual(team["returning_minutes_pct"], expected, places=2)
 
     def test_rejects_same_or_older_roster_season(self):
         with self.assertRaisesRegex(RuntimeError, "Roster season"):
