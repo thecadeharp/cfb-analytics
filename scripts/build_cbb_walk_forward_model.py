@@ -18,7 +18,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 HISTORY_DIR = ROOT / "data" / "cbb" / "history"
 OUTPUT_DIR = ROOT / "data" / "cbb" / "model"
-MODEL_VERSION = "thi-cbb-walk-forward-v0.5-research"
+MODEL_VERSION = "thi-cbb-walk-forward-v0.6-research"
 TRAIN_SEASONS = set(range(2019, 2025))
 VALIDATION_SEASONS = {2025}
 TEST_SEASONS = {2026}
@@ -421,7 +421,59 @@ def metrics(rows: list[dict[str, Any]]) -> dict[str, Any]:
     result["market_total_mae"] = round(statistics.fmean(abs(row["market_total"] - row["actual_total"]) for row in market_total), 4) if market_total else None
     result["ats_by_edge"] = edge_metrics(market_margin, "spread")
     result["totals_by_edge"] = edge_metrics(market_total, "total")
+    result["context_slices"] = context_metrics(rows)
+    result["win_probability_calibration"] = probability_calibration(margin)
     return result
+
+
+def compact_metrics(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    margin = [row for row in rows if row.get("actual_home_margin") is not None]
+    total = [row for row in rows if row.get("actual_total") is not None]
+    market_margin = [row for row in margin if row.get("market_home_spread") is not None]
+    market_total = [row for row in total if row.get("market_total") is not None]
+    return {
+        "games": len(rows),
+        "margin_mae": round(statistics.fmean(abs(row["projected_home_margin"] - row["actual_home_margin"]) for row in margin), 4) if margin else None,
+        "market_margin_mae": round(statistics.fmean(abs(-row["market_home_spread"] - row["actual_home_margin"]) for row in market_margin), 4) if market_margin else None,
+        "total_mae": round(statistics.fmean(abs(row["projected_total"] - row["actual_total"]) for row in total), 4) if total else None,
+        "market_total_mae": round(statistics.fmean(abs(row["market_total"] - row["actual_total"]) for row in market_total), 4) if market_total else None,
+        "winner_accuracy": round(100 * statistics.fmean((row["projected_home_margin"] > 0) == (row["actual_home_margin"] > 0) for row in margin), 3) if margin else None,
+    }
+
+
+def context_metrics(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    minimum_games = lambda row: min(int(row.get("home_games_before") or 0), int(row.get("away_games_before") or 0))
+    slices = {
+        "season_opener": [row for row in rows if minimum_games(row) == 0],
+        "early_sample": [row for row in rows if 1 <= minimum_games(row) <= 2],
+        "developing_sample": [row for row in rows if 3 <= minimum_games(row) <= 5],
+        "settled_sample": [row for row in rows if minimum_games(row) >= 6],
+        "conference_games": [row for row in rows if row.get("conference_game")],
+        "nonconference_games": [row for row in rows if not row.get("conference_game")],
+        "neutral_site": [row for row in rows if row.get("neutral_site")],
+        "campus_site": [row for row in rows if not row.get("neutral_site")],
+    }
+    return {name: compact_metrics(sample) for name, sample in slices.items() if sample}
+
+
+def probability_calibration(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    buckets = []
+    for low in range(0, 100, 10):
+        high = low + 10
+        sample = [
+            row for row in rows
+            if low / 100 <= float(row["home_win_probability"]) < high / 100
+            or (high == 100 and float(row["home_win_probability"]) == 1.0)
+        ]
+        if not sample:
+            continue
+        buckets.append({
+            "range": f"{low}-{high}%",
+            "games": len(sample),
+            "mean_projected_probability": round(100 * statistics.fmean(float(row["home_win_probability"]) for row in sample), 3),
+            "actual_home_win_rate": round(100 * statistics.fmean(float(row["actual_home_margin"] > 0) for row in sample), 3),
+        })
+    return buckets
 
 
 def edge_metrics(rows: list[dict[str, Any]], kind: str) -> list[dict[str, Any]]:
