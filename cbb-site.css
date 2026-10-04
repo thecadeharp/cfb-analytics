@@ -32,22 +32,24 @@
 .cbb-nav { display: none; }
 body.thi-sport-cbb .main-nav:not(.cbb-nav) { display: none; }
 body.thi-sport-cbb .cbb-nav { display: flex; }
-body.thi-sport-cbb .header-inner {
+.header-inner {
   height: auto;
   min-height: 58px;
   flex-wrap: wrap;
   padding-top: 9px;
   padding-bottom: 7px;
 }
-body.thi-sport-cbb .cbb-nav {
+.main-nav {
   order: 3;
   width: 100%;
   overflow-x: auto;
-  padding-top: 4px;
+  justify-content: center;
+  padding-top: 7px;
+  border-top: 1px solid var(--border);
   scrollbar-width: none;
 }
-body.thi-sport-cbb .cbb-nav::-webkit-scrollbar { display: none; }
-body.thi-sport-cbb .cbb-nav .nav-item { flex: 0 0 auto; }
+.main-nav::-webkit-scrollbar { display: none; }
+.main-nav .nav-item { flex: 0 0 auto; }
 
 .cbb-view { display: none; }
 .cbb-view.active { display: block; }
@@ -322,6 +324,7 @@ html[data-theme="dark"] .cbb-error { background: #3a2020; border-color: #76443e;
 @media (max-width: 900px) {
   .thi-sport-switcher { margin-left: auto; }
   body.thi-sport-cbb .cbb-nav { display: flex; }
+  .main-nav { justify-content: flex-start; }
   .cbb-hero { grid-template-columns: 1fr; }
   .cbb-method-grid,
   .cbb-model-grid { grid-template-columns: 1fr; }
