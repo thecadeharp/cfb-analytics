@@ -70,10 +70,11 @@ jobs:
               predictions = json.load(handle)
 
           meta = card["meta"]
-          assert meta["model_version"] == "thi-cbb-walk-forward-v0.2-research"
+          assert meta["model_version"] == "thi-cbb-walk-forward-v0.3-research"
           assert meta["activation_state"] == "research_only"
           assert meta["strict_walk_forward"] is True
           assert meta["same_season_end_ratings_used_as_pregame_features"] is False
+          assert card["promotion_gate"]["eligible_for_public_projection_engine"] is False
           assert card["evaluation"]["out_of_time_test"]["games"] >= 5000
           assert len(predictions["games"]) >= 40000
           assert priors["meta"]["team_count"] >= 300
