@@ -37,6 +37,9 @@ class CbbWalkForwardModelTests(unittest.TestCase):
         campus = projection_features({"neutral_site": False}, states["1"], states["2"], 100)
         self.assertEqual(neutral["home_court"], 0)
         self.assertEqual(campus["home_court"], 1)
+        self.assertEqual(neutral["early_home"], 0)
+        self.assertEqual(campus["nonconference_home"], 1)
+        self.assertEqual(campus["raw_margin_curve"], campus["raw_margin"] * abs(campus["raw_margin"]))
 
     def test_rejects_pre_cleanup_history(self):
         with tempfile.TemporaryDirectory() as tmp:
