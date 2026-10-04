@@ -31,7 +31,7 @@ except ModuleNotFoundError:
 ROOT = Path(__file__).resolve().parents[1]
 HISTORY_DIR = ROOT / "data" / "cbb" / "history"
 SCHEMA_VERSION = "1.0"
-BUILDER_VERSION = "cbb-history-v1.0"
+BUILDER_VERSION = "cbb-history-v1.1"
 
 
 def finite(value: Any) -> float | None:
@@ -112,10 +112,16 @@ def paired_game(row: dict[str, Any], line_record: dict[str, Any] | None) -> dict
     away_points = finite(away.get("points"))
     if home_points is None or away_points is None:
         return None
+    # CBBD can retain canceled/postponed matchups as zeroed team-game rows.
+    # A played Division I game must have a plausible score and possession sample.
+    if home_points < 20 or away_points < 20 or home_points + away_points < 40:
+        return None
     possessions = finite(row.get("pace"))
     if possessions is None:
         samples = [value for value in (finite(home.get("possessions")), finite(away.get("possessions"))) if value is not None]
         possessions = statistics.mean(samples) if samples else None
+    if possessions is None or possessions < 30:
+        return None
     return {
         "game_id": row.get("gameId"),
         "start_date": row.get("startDate"),
