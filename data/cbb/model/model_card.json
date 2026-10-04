@@ -1,8 +1,8 @@
 {
   "meta": {
-    "model_version": "thi-cbb-walk-forward-v0.5-research",
+    "model_version": "thi-cbb-walk-forward-v0.6-research",
     "activation_state": "research_only",
-    "generated_at_utc": "2026-10-04T20:16:53.047594Z",
+    "generated_at_utc": "2026-10-04T20:37:39.999775Z",
     "strict_walk_forward": true,
     "training_seasons": [
       2019,
@@ -246,6 +246,134 @@
           "pushes": 56,
           "hit_rate": 52.257
         }
+      ],
+      "context_slices": {
+        "season_opener": {
+          "games": 2735,
+          "margin_mae": 15.5062,
+          "market_margin_mae": 9.9206,
+          "total_mae": 15.6776,
+          "market_total_mae": 13.914,
+          "winner_accuracy": 90.896
+        },
+        "early_sample": {
+          "games": 2809,
+          "margin_mae": 12.1625,
+          "market_margin_mae": 9.219,
+          "total_mae": 14.3708,
+          "market_total_mae": 13.1512,
+          "winner_accuracy": 80.135
+        },
+        "developing_sample": {
+          "games": 3266,
+          "margin_mae": 10.3898,
+          "market_margin_mae": 9.276,
+          "total_mae": 14.288,
+          "market_total_mae": 13.2998,
+          "winner_accuracy": 71.586
+        },
+        "settled_sample": {
+          "games": 24050,
+          "margin_mae": 9.1056,
+          "market_margin_mae": 8.7158,
+          "total_mae": 13.2734,
+          "market_total_mae": 12.9456,
+          "winner_accuracy": 70.262
+        },
+        "conference_games": {
+          "games": 19588,
+          "margin_mae": 9.0132,
+          "market_margin_mae": 8.6689,
+          "total_mae": 13.2222,
+          "market_total_mae": 12.9269,
+          "winner_accuracy": 69.252
+        },
+        "nonconference_games": {
+          "games": 13272,
+          "margin_mae": 11.5238,
+          "market_margin_mae": 9.1834,
+          "total_mae": 14.3264,
+          "market_total_mae": 13.2208,
+          "winner_accuracy": 78.421
+        },
+        "neutral_site": {
+          "games": 3623,
+          "margin_mae": 9.7063,
+          "market_margin_mae": 9.2876,
+          "total_mae": 13.6802,
+          "market_total_mae": 13.061,
+          "winner_accuracy": 65.029
+        },
+        "campus_site": {
+          "games": 29237,
+          "margin_mae": 10.067,
+          "market_margin_mae": 8.7936,
+          "total_mae": 13.6667,
+          "market_total_mae": 13.0279,
+          "winner_accuracy": 73.937
+        }
+      },
+      "win_probability_calibration": [
+        {
+          "range": "0-10%",
+          "games": 159,
+          "mean_projected_probability": 6.172,
+          "actual_home_win_rate": 3.774
+        },
+        {
+          "range": "10-20%",
+          "games": 554,
+          "mean_projected_probability": 15.702,
+          "actual_home_win_rate": 15.162
+        },
+        {
+          "range": "20-30%",
+          "games": 1158,
+          "mean_projected_probability": 25.525,
+          "actual_home_win_rate": 25.216
+        },
+        {
+          "range": "30-40%",
+          "games": 2143,
+          "mean_projected_probability": 35.41,
+          "actual_home_win_rate": 34.111
+        },
+        {
+          "range": "40-50%",
+          "games": 3517,
+          "mean_projected_probability": 45.384,
+          "actual_home_win_rate": 44.271
+        },
+        {
+          "range": "50-60%",
+          "games": 5200,
+          "mean_projected_probability": 55.147,
+          "actual_home_win_rate": 56.385
+        },
+        {
+          "range": "60-70%",
+          "games": 5689,
+          "mean_projected_probability": 64.969,
+          "actual_home_win_rate": 66.514
+        },
+        {
+          "range": "70-80%",
+          "games": 5000,
+          "mean_projected_probability": 74.799,
+          "actual_home_win_rate": 76.08
+        },
+        {
+          "range": "80-90%",
+          "games": 3954,
+          "mean_projected_probability": 84.802,
+          "actual_home_win_rate": 85.787
+        },
+        {
+          "range": "90-100%",
+          "games": 5486,
+          "mean_projected_probability": 96.244,
+          "actual_home_win_rate": 94.787
+        }
       ]
     },
     "validation": {
@@ -347,6 +475,134 @@
           "pushes": 0,
           "hit_rate": 48.267
         }
+      ],
+      "context_slices": {
+        "season_opener": {
+          "games": 495,
+          "margin_mae": 14.993,
+          "market_margin_mae": 10.0367,
+          "total_mae": 13.3792,
+          "market_total_mae": 13.1023,
+          "winner_accuracy": 92.727
+        },
+        "early_sample": {
+          "games": 470,
+          "margin_mae": 12.6435,
+          "market_margin_mae": 9.091,
+          "total_mae": 14.0613,
+          "market_total_mae": 12.9478,
+          "winner_accuracy": 82.34
+        },
+        "developing_sample": {
+          "games": 570,
+          "margin_mae": 10.4452,
+          "market_margin_mae": 9.1545,
+          "total_mae": 13.6085,
+          "market_total_mae": 12.4745,
+          "winner_accuracy": 69.123
+        },
+        "settled_sample": {
+          "games": 4583,
+          "margin_mae": 9.0243,
+          "market_margin_mae": 8.5868,
+          "total_mae": 13.1279,
+          "market_total_mae": 12.6445,
+          "winner_accuracy": 71.307
+        },
+        "conference_games": {
+          "games": 3607,
+          "margin_mae": 8.8563,
+          "market_margin_mae": 8.5101,
+          "total_mae": 13.2624,
+          "market_total_mae": 12.8499,
+          "winner_accuracy": 70.585
+        },
+        "nonconference_games": {
+          "games": 2511,
+          "margin_mae": 11.4422,
+          "market_margin_mae": 9.0744,
+          "total_mae": 13.2679,
+          "market_total_mae": 12.3561,
+          "winner_accuracy": 78.136
+        },
+        "neutral_site": {
+          "games": 718,
+          "margin_mae": 8.9669,
+          "market_margin_mae": 8.4563,
+          "total_mae": 13.2732,
+          "market_total_mae": 12.3378,
+          "winner_accuracy": 65.32
+        },
+        "campus_site": {
+          "games": 5400,
+          "margin_mae": 10.044,
+          "market_margin_mae": 8.7673,
+          "total_mae": 13.2636,
+          "market_total_mae": 12.711,
+          "winner_accuracy": 74.796
+        }
+      },
+      "win_probability_calibration": [
+        {
+          "range": "0-10%",
+          "games": 38,
+          "mean_projected_probability": 6.965,
+          "actual_home_win_rate": 5.263
+        },
+        {
+          "range": "10-20%",
+          "games": 106,
+          "mean_projected_probability": 15.559,
+          "actual_home_win_rate": 10.377
+        },
+        {
+          "range": "20-30%",
+          "games": 212,
+          "mean_projected_probability": 25.532,
+          "actual_home_win_rate": 18.396
+        },
+        {
+          "range": "30-40%",
+          "games": 426,
+          "mean_projected_probability": 35.499,
+          "actual_home_win_rate": 36.385
+        },
+        {
+          "range": "40-50%",
+          "games": 669,
+          "mean_projected_probability": 45.253,
+          "actual_home_win_rate": 45.889
+        },
+        {
+          "range": "50-60%",
+          "games": 950,
+          "mean_projected_probability": 55.262,
+          "actual_home_win_rate": 56.737
+        },
+        {
+          "range": "60-70%",
+          "games": 1038,
+          "mean_projected_probability": 65.031,
+          "actual_home_win_rate": 67.823
+        },
+        {
+          "range": "70-80%",
+          "games": 887,
+          "mean_projected_probability": 74.792,
+          "actual_home_win_rate": 76.888
+        },
+        {
+          "range": "80-90%",
+          "games": 677,
+          "mean_projected_probability": 84.734,
+          "actual_home_win_rate": 84.786
+        },
+        {
+          "range": "90-100%",
+          "games": 1115,
+          "mean_projected_probability": 96.665,
+          "actual_home_win_rate": 96.143
+        }
       ]
     },
     "out_of_time_test": {
@@ -447,6 +703,134 @@
           "losses": 718,
           "pushes": 5,
           "hit_rate": 51.123
+        }
+      ],
+      "context_slices": {
+        "season_opener": {
+          "games": 504,
+          "margin_mae": 15.6097,
+          "market_margin_mae": 9.4645,
+          "total_mae": 15.7188,
+          "market_total_mae": 14.2532,
+          "winner_accuracy": 94.246
+        },
+        "early_sample": {
+          "games": 479,
+          "margin_mae": 12.5429,
+          "market_margin_mae": 9.5206,
+          "total_mae": 14.6376,
+          "market_total_mae": 13.2015,
+          "winner_accuracy": 84.969
+        },
+        "developing_sample": {
+          "games": 562,
+          "margin_mae": 10.3043,
+          "market_margin_mae": 9.711,
+          "total_mae": 14.8106,
+          "market_total_mae": 14.0473,
+          "winner_accuracy": 74.911
+        },
+        "settled_sample": {
+          "games": 4597,
+          "margin_mae": 9.1388,
+          "market_margin_mae": 8.8289,
+          "total_mae": 13.7129,
+          "market_total_mae": 13.2924,
+          "winner_accuracy": 70.611
+        },
+        "conference_games": {
+          "games": 3611,
+          "margin_mae": 8.9008,
+          "market_margin_mae": 8.7009,
+          "total_mae": 13.7233,
+          "market_total_mae": 13.3869,
+          "winner_accuracy": 69.067
+        },
+        "nonconference_games": {
+          "games": 2531,
+          "margin_mae": 11.6701,
+          "market_margin_mae": 9.4617,
+          "total_mae": 14.5162,
+          "market_total_mae": 13.3841,
+          "winner_accuracy": 81.193
+        },
+        "neutral_site": {
+          "games": 654,
+          "margin_mae": 9.356,
+          "market_margin_mae": 9.3644,
+          "total_mae": 13.5755,
+          "market_total_mae": 12.9977,
+          "winner_accuracy": 65.291
+        },
+        "campus_site": {
+          "games": 5488,
+          "margin_mae": 10.1237,
+          "market_margin_mae": 8.9218,
+          "total_mae": 14.1066,
+          "market_total_mae": 13.4365,
+          "winner_accuracy": 75.109
+        }
+      },
+      "win_probability_calibration": [
+        {
+          "range": "0-10%",
+          "games": 39,
+          "mean_projected_probability": 6.246,
+          "actual_home_win_rate": 2.564
+        },
+        {
+          "range": "10-20%",
+          "games": 100,
+          "mean_projected_probability": 15.417,
+          "actual_home_win_rate": 13.0
+        },
+        {
+          "range": "20-30%",
+          "games": 258,
+          "mean_projected_probability": 25.491,
+          "actual_home_win_rate": 22.868
+        },
+        {
+          "range": "30-40%",
+          "games": 357,
+          "mean_projected_probability": 35.291,
+          "actual_home_win_rate": 35.014
+        },
+        {
+          "range": "40-50%",
+          "games": 644,
+          "mean_projected_probability": 45.21,
+          "actual_home_win_rate": 43.323
+        },
+        {
+          "range": "50-60%",
+          "games": 948,
+          "mean_projected_probability": 55.104,
+          "actual_home_win_rate": 58.228
+        },
+        {
+          "range": "60-70%",
+          "games": 940,
+          "mean_projected_probability": 64.977,
+          "actual_home_win_rate": 63.191
+        },
+        {
+          "range": "70-80%",
+          "games": 938,
+          "mean_projected_probability": 74.93,
+          "actual_home_win_rate": 74.84
+        },
+        {
+          "range": "80-90%",
+          "games": 713,
+          "mean_projected_probability": 84.808,
+          "actual_home_win_rate": 86.396
+        },
+        {
+          "range": "90-100%",
+          "games": 1205,
+          "mean_projected_probability": 96.743,
+          "actual_home_win_rate": 96.598
         }
       ]
     }
