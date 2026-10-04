@@ -9,11 +9,13 @@ store provider responses, and does not activate public game projections.
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import json
 import math
 import os
 import statistics
 import tempfile
+import urllib.request
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -30,6 +32,70 @@ DEFAULT_OUTPUT = ROOT / "data" / "cbb" / "player_ratings.json"
 VERSION = "thi-cbb-player-research-v1.1"
 MIN_MINUTES = 100.0
 MIN_GAMES = 5.0
+ESPN_ROSTER_URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/teams/{team_source_id}/roster"
+
+
+def normalize_espn_roster(team: dict[str, Any], conference: str | None, payload: dict[str, Any], roster_season: int) -> dict[str, Any] | None:
+    season = payload.get("season") or {}
+    if finite(season.get("year")) != float(roster_season):
+        return None
+    athletes = payload.get("athletes") or []
+    if not isinstance(athletes, list) or not athletes:
+        return None
+    players = []
+    for athlete in athletes:
+        if not isinstance(athlete, dict) or not athlete.get("id"):
+            continue
+        position = athlete.get("position") or {}
+        players.append({
+            "id": None,
+            "sourceId": str(athlete.get("id")),
+            "name": athlete.get("fullName") or athlete.get("displayName"),
+            "firstName": athlete.get("firstName"),
+            "lastName": athlete.get("lastName"),
+            "jersey": athlete.get("jersey"),
+            "position": position.get("abbreviation") or position.get("name") if isinstance(position, dict) else None,
+        })
+    if not players:
+        return None
+    return {
+        "teamId": team.get("id"),
+        "teamSourceId": str(team.get("sourceId")),
+        "team": team.get("school"),
+        "conference": conference,
+        "season": roster_season,
+        "players": players,
+    }
+
+
+def fetch_espn_rosters(directory: dict[str, Any], roster_season: int, max_workers: int = 12) -> tuple[list[dict[str, Any]], int, list[str]]:
+    teams = [team for team in directory.get("teams") or [] if isinstance(team, dict) and team.get("sourceId")]
+    conferences = {
+        str(row.get("id")): row.get("abbreviation") or row.get("name")
+        for row in directory.get("conferences") or [] if isinstance(row, dict)
+    }
+
+    def fetch_one(team: dict[str, Any]) -> tuple[dict[str, Any] | None, str | None]:
+        url = ESPN_ROSTER_URL.format(team_source_id=team["sourceId"])
+        request = urllib.request.Request(url, headers={"User-Agent": "TheHammerIndex/1.0 roster-reconciliation"})
+        try:
+            with urllib.request.urlopen(request, timeout=15) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+            conference = conferences.get(str(team.get("conferenceId")))
+            return normalize_espn_roster(team, conference, payload, roster_season), None
+        except Exception as error:  # One team should not erase a verified national roster build.
+            return None, f"{team.get('school')}: {type(error).__name__}"
+
+    rosters: list[dict[str, Any]] = []
+    errors: list[str] = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        for roster, error in executor.map(fetch_one, teams):
+            if roster:
+                rosters.append(roster)
+            if error:
+                errors.append(error)
+    rosters.sort(key=lambda row: str(row.get("team")))
+    return rosters, len(teams), errors
 
 
 def finite(value: Any) -> float | None:
@@ -117,6 +183,10 @@ def build_player_research(
     rosters: list[dict[str, Any]],
     min_minutes: float = MIN_MINUTES,
     min_games: float = MIN_GAMES,
+    roster_source: str = "cbbd",
+    cbbd_request_count: int = 3,
+    espn_request_count: int = 0,
+    roster_fetch_errors: int = 0,
 ) -> dict[str, Any]:
     if not isinstance(players, list) or not isinstance(teams, list) or not isinstance(rosters, list):
         raise RuntimeError("CBBD player, team, and roster responses must be lists")
@@ -328,12 +398,15 @@ def build_player_research(
             "season": roster_season,
             "source_season": source_season,
             "roster_season": roster_season,
+            "roster_source": roster_source,
             "activation_state": "research_reference_only",
             "player_count": len(prepared),
             "team_count": team_count,
             "minimum_minutes": min_minutes,
             "minimum_games": min_games,
-            "request_count": 3,
+            "request_count": cbbd_request_count + espn_request_count,
+            "cbbd_request_count": cbbd_request_count,
+            "espn_request_count": espn_request_count,
             "raw_api_data_stored": False,
             "source_attribution": "Data provided by CollegeBasketballData.com; ratings and calculations by The Hammer Index.",
             "methodology": "Active roster players only. Ratings use the prior completed season's robust standardized production and efficiency components, regressed by sample reliability. Not opponent-adjusted or lineup-adjusted in v1.1.",
@@ -342,6 +415,7 @@ def build_player_research(
             "provider_player_rows": len(players),
             "provider_team_rows": len(teams),
             "provider_roster_teams": len(rosters),
+            "roster_fetch_errors": roster_fetch_errors,
             "current_roster_players": len(roster_player_keys),
             "current_roster_players_with_source_stats": len(matched_roster_keys),
             "current_roster_players_without_qualified_prior": len(roster_player_keys) - len(prepared),
@@ -377,7 +451,28 @@ def main() -> None:
     players = fetch_json("/stats/player/season", {"season": args.source_season}, api_key)
     teams = fetch_json("/stats/team/season", {"season": args.source_season}, api_key)
     rosters = fetch_json("/teams/roster", {"season": args.roster_season}, api_key)
-    payload = build_player_research(args.source_season, args.roster_season, players, teams, rosters)
+    roster_source = "cbbd"
+    cbbd_request_count = 3
+    espn_request_count = 0
+    roster_fetch_errors = 0
+    if not any(isinstance(row, dict) and row.get("players") for row in rosters or []):
+        directory = fetch_json("/teams/directory", {"season": args.roster_season}, api_key)
+        cbbd_request_count += 1
+        rosters, espn_request_count, errors = fetch_espn_rosters(directory, args.roster_season)
+        roster_fetch_errors = len(errors)
+        roster_source = "espn_current_roster_fallback"
+        print(f"CBBD roster feed was empty; ESPN fallback verified {len(rosters)} teams ({roster_fetch_errors} fetch errors).")
+    payload = build_player_research(
+        args.source_season,
+        args.roster_season,
+        players,
+        teams,
+        rosters,
+        roster_source=roster_source,
+        cbbd_request_count=cbbd_request_count,
+        espn_request_count=espn_request_count,
+        roster_fetch_errors=roster_fetch_errors,
+    )
     atomic_write(args.output, payload)
     print(json.dumps({"meta": payload["meta"], "coverage": payload["coverage"]}, indent=2))
 
