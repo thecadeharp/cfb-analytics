@@ -29,7 +29,7 @@ except ModuleNotFoundError:
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "data" / "cbb" / "player_ratings.json"
-VERSION = "thi-cbb-player-research-v1.1"
+VERSION = "thi-cbb-player-research-v1.2"
 MIN_MINUTES = 100.0
 MIN_GAMES = 5.0
 ESPN_ROSTER_URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/teams/{team_source_id}/roster"
@@ -47,6 +47,8 @@ def normalize_espn_roster(team: dict[str, Any], conference: str | None, payload:
         if not isinstance(athlete, dict) or not athlete.get("id"):
             continue
         position = athlete.get("position") or {}
+        experience = athlete.get("experience") if isinstance(athlete.get("experience"), dict) else {}
+        headshot = athlete.get("headshot") if isinstance(athlete.get("headshot"), dict) else {}
         players.append({
             "id": None,
             "sourceId": str(athlete.get("id")),
@@ -55,6 +57,10 @@ def normalize_espn_roster(team: dict[str, Any], conference: str | None, payload:
             "lastName": athlete.get("lastName"),
             "jersey": athlete.get("jersey"),
             "position": position.get("abbreviation") or position.get("name") if isinstance(position, dict) else None,
+            "class": experience.get("abbreviation") or experience.get("displayValue"),
+            "height": athlete.get("displayHeight"),
+            "weight": athlete.get("displayWeight"),
+            "headshot": headshot.get("href"),
         })
     if not players:
         return None
@@ -209,6 +215,7 @@ def build_player_research(
 
     active_by_id: dict[str, dict[str, Any]] = {}
     active_by_source: dict[str, dict[str, Any]] = {}
+    active_records: dict[str, dict[str, Any]] = {}
     roster_player_keys: set[str] = set()
     for team_roster in rosters:
         if not isinstance(team_roster, dict):
@@ -224,23 +231,32 @@ def build_player_research(
                 "name": roster_player.get("name"),
                 "position": roster_player.get("position"),
                 "jersey": roster_player.get("jersey"),
+                "class": roster_player.get("class") or roster_player.get("year") or roster_player.get("classYear"),
+                "height": roster_player.get("height") or roster_player.get("displayHeight"),
+                "weight": roster_player.get("weight") or roster_player.get("displayWeight"),
+                "headshot": roster_player.get("headshot") or roster_player.get("headshotUrl"),
                 "team_id": team_roster.get("teamId"),
                 "team": team_roster.get("team"),
                 "conference": team_roster.get("conference"),
             }
             if athlete_id is not None:
                 active_by_id[str(athlete_id)] = roster_record
-                roster_player_keys.add(f"id:{athlete_id}")
+                roster_key = f"id:{athlete_id}"
             elif source_id:
-                roster_player_keys.add(f"source:{source_id}")
+                roster_key = f"source:{source_id}"
+            else:
+                continue
+            roster_player_keys.add(roster_key)
             if source_id:
                 active_by_source[str(source_id)] = roster_record
+            active_records[roster_key] = roster_record
 
     if not roster_player_keys:
         raise RuntimeError("Current-season roster response contained no players")
 
     matched_roster_keys: set[str] = set()
     matched_historical_keys: set[str] = set()
+    prior_sources: dict[str, dict[str, Any]] = {}
     qualified_sources: dict[str, tuple[dict[str, Any], dict[str, Any]]] = {}
     historical_keys: set[str] = set()
     for source in players:
@@ -260,6 +276,8 @@ def build_player_research(
         matched_roster_keys.add(roster_key)
         minutes = finite(source.get("minutes")) or 0.0
         games = finite(source.get("games")) or 0.0
+        if roster_key not in prior_sources or minutes > (finite(prior_sources[roster_key].get("minutes")) or 0.0):
+            prior_sources[roster_key] = source
         if minutes < min_minutes or games < min_games:
             continue
         current = qualified_sources.get(roster_key)
@@ -392,6 +410,68 @@ def build_player_research(
         row["ranks"] = {"overall": rank, "position_group": position_counts[group]}
         row["research_scores"]["rating_percentile"] = percentile(ratings, row["research_scores"]["thi_player_rating"])
 
+    rated_by_key: dict[str, dict[str, Any]] = {}
+    for row in prepared:
+        if row.get("athlete_id") is not None:
+            rated_by_key[f"id:{row['athlete_id']}"] = row
+        if row.get("athlete_source_id"):
+            rated_by_key[f"source:{row['athlete_source_id']}"] = row
+
+    roster_teams: dict[str, dict[str, Any]] = {}
+    for roster_key, active in active_records.items():
+        rated = rated_by_key.get(roster_key)
+        prior = prior_sources.get(roster_key)
+        prior_minutes = finite((prior or {}).get("minutes"))
+        prior_games = finite((prior or {}).get("games"))
+        if rated:
+            prior_state = "rated"
+        elif prior:
+            prior_state = "below_sample"
+        else:
+            prior_state = "no_prior_stats"
+        team_key = str(active.get("team_id"))
+        team_roster = roster_teams.setdefault(team_key, {
+            "team_id": active.get("team_id"),
+            "team": active.get("team"),
+            "conference": active.get("conference"),
+            "players": [],
+        })
+        team_roster["players"].append({
+            "roster_player_id": f"{roster_season}:{active.get('athlete_id') or active.get('athlete_source_id')}:{active.get('team_id')}",
+            "player_season_id": rated.get("player_season_id") if rated else None,
+            "athlete_id": active.get("athlete_id"),
+            "athlete_source_id": active.get("athlete_source_id"),
+            "name": active.get("name"),
+            "position": active.get("position"),
+            "position_group": position_group(active.get("position")),
+            "jersey": active.get("jersey"),
+            "class": active.get("class"),
+            "height": active.get("height"),
+            "weight": active.get("weight"),
+            "headshot": active.get("headshot"),
+            "prior_state": prior_state,
+            "prior_team": (prior or {}).get("team"),
+            "prior_minutes": rounded(prior_minutes, 1),
+            "prior_games": int(prior_games) if prior_games is not None else None,
+            "transfer_between_seasons": bool(prior and str(prior.get("teamId")) != str(active.get("team_id"))),
+            "role": rated.get("role") if rated else None,
+            "thi_player_rating": (rated.get("research_scores") or {}).get("thi_player_rating") if rated else None,
+            "rating_percentile": (rated.get("research_scores") or {}).get("rating_percentile") if rated else None,
+        })
+
+    team_rosters = []
+    for team_roster in roster_teams.values():
+        team_roster["players"].sort(key=lambda row: (
+            0 if row["prior_state"] == "rated" else 1 if row["prior_state"] == "below_sample" else 2,
+            -(finite(row.get("thi_player_rating")) or -1.0),
+            str(row.get("name") or ""),
+        ))
+        team_roster["player_count"] = len(team_roster["players"])
+        team_roster["rated_player_count"] = sum(row["prior_state"] == "rated" for row in team_roster["players"])
+        team_roster["transfer_count"] = sum(row["transfer_between_seasons"] for row in team_roster["players"])
+        team_rosters.append(team_roster)
+    team_rosters.sort(key=lambda row: str(row.get("team") or ""))
+
     team_count = len({str(row["team_id"]) for row in prepared})
     return {
         "meta": {
@@ -411,7 +491,7 @@ def build_player_research(
             "espn_request_count": espn_request_count,
             "raw_api_data_stored": False,
             "source_attribution": "Data provided by CollegeBasketballData.com; ratings and calculations by The Hammer Index.",
-            "methodology": "Active roster players only. Ratings use the prior completed season's robust standardized production and efficiency components, regressed by sample reliability. Not opponent-adjusted or lineup-adjusted in v1.1.",
+            "methodology": "Active roster players only. Ratings use the prior completed season's robust standardized production and efficiency components, regressed by sample reliability. Team roster boards also include active players without a qualified prior, clearly marked as unrated. Not opponent-adjusted or lineup-adjusted in v1.2.",
         },
         "coverage": {
             "provider_player_rows": len(players),
@@ -428,6 +508,7 @@ def build_player_research(
             "between_season_transfers": sum(row["transfer_between_seasons"] for row in prepared),
             "position_groups": dict(Counter(row["position_group"] for row in prepared)),
         },
+        "team_rosters": team_rosters,
         "players": prepared,
     }
 
