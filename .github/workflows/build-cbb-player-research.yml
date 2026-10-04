@@ -3,10 +3,15 @@ name: Build CBB Player Research
 on:
   workflow_dispatch:
     inputs:
-      season:
-        description: "Completed CBB season used for player research"
+      source_season:
+        description: "Completed season used as the statistical prior"
         required: true
         default: "2026"
+        type: string
+      roster_season:
+        description: "Active roster season shown on the site"
+        required: true
+        default: "2027"
         type: string
 
 permissions:
@@ -52,7 +57,8 @@ jobs:
       - name: Build derived player research
         env:
           CBBD_API_KEY: ${{ secrets.CBBD_API_KEY }}
-          CBB_PLAYER_SEASON: ${{ inputs.season }}
+          CBB_PLAYER_SOURCE_SEASON: ${{ inputs.source_season }}
+          CBB_PLAYER_ROSTER_SEASON: ${{ inputs.roster_season }}
         run: python scripts/build_cbb_player_research.py
 
       - name: Validate output and isolation
@@ -67,14 +73,17 @@ jobs:
           players = payload["players"]
           print("CBB player metadata:", json.dumps(meta, indent=2))
           print("CBB player coverage:", json.dumps(payload["coverage"], indent=2))
-          assert meta["version"] == "thi-cbb-player-research-v1.0"
+          assert meta["version"] == "thi-cbb-player-research-v1.1"
           assert meta["activation_state"] == "research_reference_only"
           assert meta["raw_api_data_stored"] is False
-          assert meta["request_count"] == 2
-          assert meta["player_count"] >= 2500
-          assert meta["team_count"] >= 300
+          assert meta["request_count"] == 3
+          assert meta["source_season"] < meta["roster_season"]
+          assert meta["player_count"] >= 1500
+          assert meta["team_count"] >= 250
           assert len(players) == meta["player_count"]
           assert len({row["player_season_id"] for row in players}) == len(players)
+          assert all(row["current_roster_verified"] is True for row in players)
+          assert all(row["source_season"] == meta["source_season"] for row in players)
           assert all(row["sample"]["minutes"] >= meta["minimum_minutes"] for row in players)
           assert all(1 <= row["research_scores"]["thi_player_rating"] <= 99 for row in players)
           assert all(math.isfinite(row["research_scores"]["thi_player_rating"]) for row in players)
