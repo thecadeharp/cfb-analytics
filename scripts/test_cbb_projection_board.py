@@ -55,7 +55,7 @@ class CbbProjectionBoardTests(unittest.TestCase):
             },
         }
         payload = build_board(games, profiles, priors, model)
-        self.assertEqual(payload["meta"]["version"], "thi-cbb-projection-board-v0.3")
+        self.assertEqual(payload["meta"]["version"], "thi-cbb-projection-board-v0.4")
         self.assertEqual(len(payload["games"]), 2)
         opening = payload["games"][0]["projection"]
         tracked = payload["games"][1]["projection"]
@@ -78,11 +78,13 @@ class CbbProjectionBoardTests(unittest.TestCase):
         games["games"][0]["status"] = "final"
         games["games"][0]["home"]["score"] = 70
         games["games"][0]["away"]["score"] = 66
+        games["games"][0]["market"] = {"consensus_home_spread": -3, "consensus_total": 138}
         refreshed = build_board(games, profiles, priors, model, payload)
         completed = next(game for game in refreshed["games"] if game["game_id"] == 1)
         self.assertEqual(completed["status"], "final")
         self.assertEqual(completed["home"]["score"], 70)
         self.assertEqual(completed["projection"]["home_margin"], frozen_margin)
+        self.assertEqual(completed["closing_market"]["consensus_home_spread"], -3)
         self.assertEqual(refreshed["meta"]["status_counts"]["final"], 1)
 
     def test_rejects_unapproved_model_version(self):
