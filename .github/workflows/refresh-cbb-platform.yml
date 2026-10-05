@@ -1,0 +1,117 @@
+name: Refresh CBB Platform
+
+on:
+  workflow_dispatch:
+    inputs:
+      season:
+        description: "CBBD season identifier"
+        required: true
+        default: "2027"
+        type: string
+      benchmark_season:
+        description: "Completed season used for priors"
+        required: true
+        default: "2026"
+        type: string
+  schedule:
+    - cron: "17 10 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-cbb-platform
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Preserve College Football and CBB research sources
+        run: |
+          sha256sum \
+            data/projections.json \
+            data/cfb_metrics.json \
+            data/hfa_2026.json \
+            scripts/build_projections.py \
+            data/cbb/history/manifest.json \
+            data/cbb/player_ratings.json \
+            > /tmp/cbb-platform-before.sha256
+
+      - name: Test the complete CBB publishing contract
+        run: |
+          python -m py_compile \
+            scripts/build_cbb_data_foundation.py \
+            scripts/build_cbb_walk_forward_model.py \
+            scripts/build_cbb_projection_board.py \
+            scripts/build_cbb_bracketology.py
+          python -m unittest \
+            scripts/test_cbb_data_foundation.py \
+            scripts/test_cbb_walk_forward_model.py \
+            scripts/test_cbb_projection_board.py \
+            scripts/test_cbb_bracketology.py
+
+      - name: Refresh foundation, ratings, projections and bracketology
+        env:
+          CBBD_API_KEY: ${{ secrets.CBBD_API_KEY }}
+          CBB_SEASON: ${{ inputs.season || '2027' }}
+          CBB_BENCHMARK_SEASON: ${{ inputs.benchmark_season || '2026' }}
+        run: |
+          python scripts/build_cbb_data_foundation.py --output-dir data/cbb
+          python scripts/build_cbb_walk_forward_model.py
+          python scripts/build_cbb_projection_board.py
+          python scripts/build_cbb_bracketology.py
+
+      - name: Validate the coordinated release
+        run: |
+          sha256sum --check /tmp/cbb-platform-before.sha256
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("data/cbb")
+          profiles = json.loads((root / "team_profiles.json").read_text())
+          model = json.loads((root / "model/model_card.json").read_text())
+          priors = json.loads((root / "model/current_priors.json").read_text())
+          projections = json.loads((root / "projection_board.json").read_text())
+          bracket = json.loads((root / "bracketology.json").read_text())
+
+          assert len(profiles["teams"]) >= 300
+          assert sum(bool(team.get("logo_url")) for team in profiles["teams"]) >= 300
+          assert model["meta"]["model_version"] == "thi-cbb-walk-forward-v0.6-research"
+          assert priors["meta"]["model_version"] == model["meta"]["model_version"]
+          assert projections["meta"]["version"] == "thi-cbb-projection-board-v0.3"
+          assert projections["meta"]["model_version"] == model["meta"]["model_version"]
+          assert all(game["projection"]["model_input_label"] != "preseason_game" for game in projections["games"])
+          assert bracket["meta"]["version"] == "thi-cbb-bracketology-v0.1"
+          assert len(bracket["field"]) == 68
+          PY
+
+      - name: Commit the coordinated CBB outputs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            data/cbb/team_profiles.json \
+            data/cbb/game_board.json \
+            data/cbb/foundation_status.json \
+            data/cbb/model/model_card.json \
+            data/cbb/model/current_priors.json \
+            data/cbb/model/walk_forward_predictions.json.gz \
+            data/cbb/projection_board.json \
+            data/cbb/bracketology.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Refresh coordinated CBB platform data"
+          git pull --rebase origin main
+          git push origin HEAD:main
