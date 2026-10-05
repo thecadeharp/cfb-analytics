@@ -423,7 +423,30 @@ def metrics(rows: list[dict[str, Any]]) -> dict[str, Any]:
     result["totals_by_edge"] = edge_metrics(market_total, "total")
     result["context_slices"] = context_metrics(rows)
     result["win_probability_calibration"] = probability_calibration(margin)
+    margin_errors = [row["projected_home_margin"] - row["actual_home_margin"] for row in margin]
+    total_errors = [row["projected_total"] - row["actual_total"] for row in total]
+    result["error_profile"] = {
+        "margin_bias": round(statistics.fmean(margin_errors), 4),
+        "margin_median_absolute_error": round(statistics.median(abs(value) for value in margin_errors), 4),
+        "margin_p90_absolute_error": round(percentile_value([abs(value) for value in margin_errors], 90), 4),
+        "total_bias": round(statistics.fmean(total_errors), 4),
+        "total_median_absolute_error": round(statistics.median(abs(value) for value in total_errors), 4),
+        "total_p90_absolute_error": round(percentile_value([abs(value) for value in total_errors], 90), 4),
+    }
     return result
+
+
+def percentile_value(values: list[float], percentile: float) -> float:
+    ordered = sorted(values)
+    if not ordered:
+        return 0.0
+    position = (len(ordered) - 1) * percentile / 100.0
+    lower = math.floor(position)
+    upper = math.ceil(position)
+    if lower == upper:
+        return ordered[lower]
+    weight = position - lower
+    return ordered[lower] * (1.0 - weight) + ordered[upper] * weight
 
 
 def compact_metrics(rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -604,6 +627,13 @@ def build(history_dir: Path, personnel_dir: Path, profile_path: Path, output_dir
         "train": metrics([row for row in evaluated if row["split"] == "train"]),
         "validation": metrics([row for row in evaluated if row["split"] == "validation"]),
         "out_of_time_test": metrics([row for row in evaluated if row["split"] == "test"]),
+        "by_season": {
+            str(season): {
+                "split": next(row["split"] for row in evaluated if row["season"] == season),
+                **compact_metrics([row for row in evaluated if row["season"] == season]),
+            }
+            for season in sorted({row["season"] for row in evaluated})
+        },
     }
     latest = seasons[max(seasons)]["season_end_teams"]
     priors = current_priors(profile_path, latest, personnel, player_path)
@@ -629,6 +659,14 @@ def build(history_dir: Path, personnel_dir: Path, profile_path: Path, output_dir
             "burn_in_seasons": sorted(set(seasons) - TRAIN_SEASONS - VALIDATION_SEASONS - TEST_SEASONS),
             "same_season_end_ratings_used_as_pregame_features": False,
             "personnel_features_known_before_season": True,
+            "historical_laboratory_version": "thi-cbb-historical-lab-v1.0",
+            "leakage_audit": {
+                "strict_chronological_team_state_updates": True,
+                "same_game_outcome_excluded_from_features": True,
+                "same_season_end_ratings_excluded_from_pregame_features": True,
+                "market_prices_excluded_from_model_features": True,
+                "validation_and_test_seasons_excluded_from_fit": True,
+            },
             "description": "Pregame team states update only after each completed game. Current-season end ratings never initialize that same season. Market prices are evaluation fields only.",
         },
         "models": {"margin": margin_model, "total": total_model, "margin_residual_sd": round(residual_sd, 6)},
