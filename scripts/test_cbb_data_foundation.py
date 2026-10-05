@@ -7,7 +7,7 @@ from scripts.build_cbb_data_foundation import build_outputs
 
 class CbbDataFoundationTests(unittest.TestCase):
     def test_builds_current_edges_prior_continuity_and_consensus_market(self):
-        directory = [{"id": 1, "school": "Alpha", "conferenceId": 10}]
+        directory = [{"id": 1, "sourceId": "1234", "school": "Alpha", "conferenceId": 10}]
         directory += [{"id": i, "school": f"Team {i}", "conferenceId": 10} for i in range(2, 301)]
         prior = [{
             "season": 2026, "teamId": i, "team": "Alpha" if i == 1 else f"Team {i}",
@@ -49,11 +49,14 @@ class CbbDataFoundationTests(unittest.TestCase):
         self.assertEqual(alpha["four_factor_edges"]["turnover_pct"], 5.0)
         self.assertEqual(alpha["preseason_prior"]["returning_minutes_pct"], 60.0)
         self.assertEqual(alpha["preseason_prior"]["returning_points_pct"], 60.0)
+        self.assertEqual(alpha["espn_id"], "1234")
+        self.assertEqual(alpha["logo_url"], "https://a.espncdn.com/i/teamlogos/ncaa/500/1234.png")
         self.assertTrue(alpha["sample_ready"])
         self.assertEqual(board["games"][0]["market"]["consensus_home_spread"], -3.5)
         self.assertEqual(board["games"][0]["market"]["spread_move"], -1.0)
         self.assertEqual(board["games"][0]["broadcasts"], ["ESPN2"])
         self.assertEqual(status["meta"]["request_count"], 8)
+        self.assertEqual(status["meta"]["builder_version"], "cbb-foundation-v2.2")
         self.assertFalse(status["meta"]["raw_api_data_stored"])
 
 
