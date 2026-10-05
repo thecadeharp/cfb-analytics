@@ -83,10 +83,14 @@ jobs:
           assert meta["strict_walk_forward"] is True
           assert meta["same_season_end_ratings_used_as_pregame_features"] is False
           assert meta["personnel_features_known_before_season"] is True
+          assert meta["historical_laboratory_version"] == "thi-cbb-historical-lab-v1.0"
+          assert all(meta["leakage_audit"].values())
           assert card["promotion_gate"]["eligible_for_public_projection_engine"] is False
           assert card["evaluation"]["out_of_time_test"]["games"] >= 5000
           assert len(card["evaluation"]["out_of_time_test"]["context_slices"]) == 8
           assert len(card["evaluation"]["out_of_time_test"]["win_probability_calibration"]) >= 8
+          assert len(card["evaluation"]["by_season"]) >= 8
+          assert "error_profile" in card["evaluation"]["out_of_time_test"]
           assert len(predictions["games"]) >= 40000
           assert priors["meta"]["team_count"] >= 300
           assert priors["meta"]["personnel_team_count"] >= 300
