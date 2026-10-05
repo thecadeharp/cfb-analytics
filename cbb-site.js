@@ -31,6 +31,19 @@
     playerData: null,
     playerLoading: null,
     playerBandCache: {},
+    projectionQuery: "",
+    projectionConference: "all",
+    projectionSignal: "all",
+    projectionConfidence: "all",
+    projectionStatus: "all",
+    projectionSort: { key: "start_date", direction: "asc" },
+    projectionLimit: 150,
+    teamDataQuery: "",
+    teamDataConference: "all",
+    teamDataSort: { key: "team", direction: "asc" },
+    portalQuery: "",
+    portalConference: "all",
+    portalSort: { key: "prior_minutes", direction: "desc" },
     query: "",
     conference: "all",
     statusText: ""
@@ -221,62 +234,253 @@
   }
 
   function renderProjections() {
-    const { profiles, games, foundation, history, model, projectionBoard } = state.data;
-    const meta = profiles.meta || {};
-    const coverage = foundation.coverage || {};
+    const { profiles, foundation, history, model, projectionBoard } = state.data;
     const projected = Array.isArray(projectionBoard?.games) ? projectionBoard.games : [];
-    const scheduled = projected.length ? projected : (Array.isArray(games.games) ? games.games : []);
-    const upcoming = scheduled
-      .filter(game => String(game.status).toLowerCase() === "scheduled")
-      .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
-      .slice(0, 12);
+    const conferences = [...new Set(projected.flatMap(game => [game.home?.conference, game.away?.conference]).filter(Boolean))].sort();
     const trackedSignals = projected.filter(game => game.projection?.spread_signal_eligible).length;
-    const modelVersion = model.meta?.model_version || "Research model";
     const view = document.getElementById("view-cbb-projections");
     view.innerHTML = `
-      <div class="cbb-hero">
-        <div>
-          <div class="cbb-kicker">The Hammer Index · CBB Projections</div>
-          <h1 class="cbb-title">The college basketball board.</h1>
-          <p class="cbb-lede">Adjusted efficiency, tempo, Four Factors, personnel context and strict walk-forward testing—built as a separate basketball engine inside the same THI research platform.</p>
+      <div class="cbb-kicker">The Hammer Index · College Basketball</div>
+      <h1 class="page-title">THI College Basketball Projection Center</h1>
+      <p class="page-subtitle">A possession-based game intelligence board combining adjusted efficiency, pace, matchup drivers, market separation and transparent signal qualification.</p>
+
+      <div class="cbb-research-banner"><strong>Projections · live testing</strong><span>THI scores and win probabilities publish from the opening slate. Spread signals require settled samples and market separation; totals remain research-only until their independent validation gate clears.</span></div>
+
+      <details class="cbb-signal-guide">
+        <summary><span>How CBB signals work</span><small>Methodology + confidence key</small></summary>
+        <div class="cbb-signal-guide-body">
+          <p><strong>Model Signal</strong> measures the absolute difference between THI's fair spread and the consensus market. It measures disagreement, while <strong>Signal Confidence</strong> measures prospective evidence. A large disagreement is not automatically a qualified play.</p>
+          <div class="cbb-signal-key">
+            ${signalKey("Aligned", "0–2.5 pts", "aligned")}
+            ${signalKey("Small edge", "2.6–5.0 pts", "small")}
+            ${signalKey("Play", "5.1–7.0 pts", "play")}
+            ${signalKey("Material disagreement", "7.1–10.0 pts", "material")}
+            ${signalKey("Outlier", "10.1+ pts", "outlier")}
+          </div>
+          <div class="cbb-confidence-key">
+            ${confidenceKey("Research only", "Opening state or no qualified market decision", "research")}
+            ${confidenceKey("Developing", "Prospective evidence is accumulating", "developing")}
+            ${confidenceKey("Validated", "50+ decisions · ≥52.5% ATS · positive closing-line value", "validated")}
+            ${confidenceKey("Established", "100+ decisions · ≥53% ATS · ≥55% beat close", "established")}
+          </div>
+          <p><strong>Totals key:</strong> 4.0–6.9 points from market is a Total Watch; 7.0+ reaches the Total Play research threshold. No totals play is activated until the totals model clears its independent walk-forward and prospective gates.</p>
+          <p><strong>Prior-based model</strong> means the projection still relies on regressed preseason team priors. It does not mean the matchup is an exhibition or preseason game.</p>
         </div>
-        <div class="cbb-status-card">
-          <span class="cbb-status-pill">Research projections</span>
-          <div><strong>Sample-gated projection board</strong><p>Scores and win probabilities are visible from day one. Spread signals require six games for both teams and a five-point disagreement. Totals signals remain withheld.</p></div>
-        </div>
+      </details>
+
+      <div class="cbb-projection-controls">
+        <input id="cbb-projection-search" class="cbb-input" type="search" placeholder="Search teams…" value="${escapeHtml(state.projectionQuery)}">
+        <select id="cbb-projection-conference" class="cbb-select"><option value="all">All conferences</option>${conferences.map(conf => `<option value="${escapeHtml(conf)}" ${state.projectionConference === conf ? "selected" : ""}>${escapeHtml(conf)}</option>`).join("")}</select>
+        <select id="cbb-projection-signal" class="cbb-select"><option value="all">All signals</option>${[['no_line','No line'],['aligned','Aligned'],['small','Small edge'],['play','Play'],['material','Material disagreement'],['outlier','Outlier']].map(([value,label]) => `<option value="${value}" ${state.projectionSignal === value ? "selected" : ""}>${label}</option>`).join("")}</select>
+        <select id="cbb-projection-confidence" class="cbb-select"><option value="all">All confidence</option>${[['research','Research only'],['developing','Developing'],['validated','Validated'],['established','Established']].map(([value,label]) => `<option value="${value}" ${state.projectionConfidence === value ? "selected" : ""}>${label}</option>`).join("")}</select>
+        <button id="cbb-projection-clear" class="cbb-clear-button" type="button">Clear</button>
       </div>
+
+      <div class="cbb-status-filter" role="group" aria-label="Game status">
+        <span>Game status</span>
+        <div>${statusButton("all", "All Games", projected)}${statusButton("upcoming", "Upcoming", projected)}${statusButton("live", "Live", projected)}${statusButton("final", "Final", projected)}</div>
+      </div>
+
+      <div class="cbb-panel cbb-table-wrap cbb-projection-table-wrap">
+        <table class="cbb-table cbb-projection-table" aria-label="THI college basketball game projections"><thead><tr>
+          ${projectionHeader("matchup", "Matchup")}${projectionHeader("watch", "THI Watch")}${projectionHeader("spread", "THI Spread")}${projectionHeader("market", "Market")}${projectionHeader("total", "Total")}${projectionHeader("edge", "Model Edge")}${projectionHeader("signal", "Model Signal")}${projectionHeader("confidence", "Signal Confidence")}
+        </tr></thead><tbody id="cbb-projection-body"></tbody></table>
+      </div>
+      <div class="cbb-projection-footer"><span id="cbb-projection-summary"></span><button id="cbb-projection-more" type="button">Show more games</button></div>
 
       <div class="cbb-stat-grid">
-        ${statCard("D-I teams", integer(meta.team_count), "Full 2027 directory")}
+        ${statCard("D-I teams", integer(profiles.meta?.team_count), "Full Division I directory")}
         ${statCard("Historical games", integer(history.meta?.game_count), `${history.meta?.season_count || 0} walk-forward seasons`)}
         ${statCard("Projected games", integer(projected.length), "Current published window")}
-        ${statCard("Tracked signals", integer(trackedSignals), "Six-game minimum · 5+ point edge")}
-        ${statCard("Model state", "Sample-gated", escapeHtml(modelVersion))}
+        ${statCard("Qualified signals", integer(trackedSignals), "Settled sample · market threshold")}
       </div>
-
-      <section class="cbb-section">
-        <div class="cbb-section-head"><div><div class="cbb-label">Projection board</div><h2 class="cbb-section-title">Upcoming games</h2></div><div class="cbb-section-note">Pregame score and win projections are research outputs. Only cards marked Tracked can carry a spread signal; totals remain projection context only.</div></div>
-        <div class="cbb-game-list">${upcoming.length ? upcoming.map(gameCard).join("") : `<div class="cbb-panel cbb-empty">No scheduled games are currently published.</div>`}</div>
-      </section>
-
-      <section class="cbb-section">
-        <div class="cbb-section-head"><div><div class="cbb-label">Model language</div><h2 class="cbb-section-title">How THI reads basketball</h2></div></div>
-        <div class="cbb-method-grid">
-          ${methodCard("01 · Efficiency", "Adjusted offense and defense", "Points per 100 possessions establish the scoring baseline after opponent and venue context.")}
-          ${methodCard("02 · Possessions", "Tempo and game shape", "Projected pace translates per-possession strength into matchup-level scoring opportunities.")}
-          ${methodCard("03 · Matchup causes", "Four Factors and personnel", "Shooting, turnovers, rebounding, free throws, recruiting and transfer production explain how an edge can appear.")}
-        </div>
-      </section>
     `;
-    const gameList = view.querySelector(".cbb-game-list");
-    const openFromEvent = event => {
-      const card = event.target.closest("[data-cbb-game-id]");
-      if (card) openGameDetail(card.dataset.cbbGameId);
-    };
-    gameList?.addEventListener("click", openFromEvent);
-    gameList?.addEventListener("keydown", event => {
-      if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openFromEvent(event); }
+    bindProjectionControls();
+    paintProjectionBoard();
+  }
+
+  function signalKey(label, range, tier) {
+    return `<div class="cbb-signal-key-item"><strong class="cbb-signal-text cbb-signal-${tier}">${escapeHtml(label)}</strong><span>${escapeHtml(range)}</span></div>`;
+  }
+
+  function confidenceKey(label, copy, tier) {
+    return `<div class="cbb-confidence-key-item"><span class="cbb-confidence cbb-confidence-${tier}">${escapeHtml(label)}</span><small>${escapeHtml(copy)}</small></div>`;
+  }
+
+  function gameStatus(game) {
+    const raw = String(game.status || "scheduled").toLowerCase().replaceAll("_", "");
+    if (["live", "inprogress", "halftime"].includes(raw)) return "live";
+    if (["final", "completed", "complete"].includes(raw)) return "final";
+    return "upcoming";
+  }
+
+  function statusButton(value, label, games) {
+    const count = value === "all" ? games.length : games.filter(game => gameStatus(game) === value).length;
+    return `<button type="button" class="cbb-status-button ${state.projectionStatus === value ? "is-active" : ""}" data-cbb-status="${value}">${escapeHtml(label)} <b>${integer(count)}</b></button>`;
+  }
+
+  function signalTier(game) {
+    const raw = game.projection?.spread_edge;
+    const edge = raw == null ? NaN : Number(raw);
+    if (!Number.isFinite(edge)) return "no_line";
+    const absolute = Math.abs(edge);
+    if (absolute <= 2.5) return "aligned";
+    if (absolute <= 5) return "small";
+    if (absolute <= 7) return "play";
+    if (absolute <= 10) return "material";
+    return "outlier";
+  }
+
+  function signalLabel(tier) {
+    return ({ no_line: "No line", aligned: "Aligned", small: "Small edge", play: "Play", material: "Material disagreement", outlier: "Outlier" })[tier] || "Research";
+  }
+
+  function confidenceTier(game) {
+    return game.projection?.signal_confidence || (game.projection?.spread_signal_eligible ? "developing" : "research");
+  }
+
+  function modelInputLabel(game) {
+    const sample = game.projection?.sample_state;
+    return ({ preseason: "Prior-based model", early_sample: "Early sample", developing_sample: "Developing sample", tracked_sample: "Settled sample" })[sample] || "Research model";
+  }
+
+  function watchability(game) {
+    if (Number.isFinite(Number(game.projection?.watchability_score))) return Number(game.projection.watchability_score);
+    const margin = Math.abs(Number(game.projection?.home_margin || 0));
+    const home = Number(game.projection?.matchup_context?.home?.offense || 100) - Number(game.projection?.matchup_context?.home?.defense || 100);
+    const away = Number(game.projection?.matchup_context?.away?.offense || 100) - Number(game.projection?.matchup_context?.away?.defense || 100);
+    return Math.round(Math.max(1, Math.min(99, 62 - margin * 2 + Math.max(0, (home + away) / 2))));
+  }
+
+  function projectionValue(game, key) {
+    if (key === "matchup") return `${game.away?.team || ""} ${game.home?.team || ""}`;
+    if (key === "watch") return watchability(game);
+    if (key === "spread") return Math.abs(Number(game.projection?.home_margin || 0));
+    if (key === "market") { const value=game.market?.consensus_home_spread; return value == null ? -Infinity : Math.abs(Number(value)); }
+    if (key === "total") return Number(game.projection?.total ?? -Infinity);
+    if (key === "edge") { const value=game.projection?.spread_edge; return value == null ? -Infinity : Math.abs(Number(value)); }
+    if (key === "signal") return ({no_line:0,aligned:1,small:2,play:3,material:4,outlier:5})[signalTier(game)];
+    if (key === "confidence") return ({research:0,developing:1,validated:2,established:3})[confidenceTier(game)] || 0;
+    return new Date(game.start_date).getTime() || 0;
+  }
+
+  function filteredProjectionGames() {
+    const games = [...(state.data.projectionBoard?.games || [])];
+    const query = state.projectionQuery.trim().toLowerCase();
+    return games.filter(game => {
+      const text = `${game.home?.team || ""} ${game.away?.team || ""} ${game.home?.conference || ""} ${game.away?.conference || ""}`.toLowerCase();
+      const conference = state.projectionConference;
+      return (!query || text.includes(query))
+        && (conference === "all" || game.home?.conference === conference || game.away?.conference === conference)
+        && (state.projectionSignal === "all" || signalTier(game) === state.projectionSignal)
+        && (state.projectionConfidence === "all" || confidenceTier(game) === state.projectionConfidence)
+        && (state.projectionStatus === "all" || gameStatus(game) === state.projectionStatus);
+    }).sort((a, b) => {
+      const av = projectionValue(a, state.projectionSort.key);
+      const bv = projectionValue(b, state.projectionSort.key);
+      const comparison = typeof av === "string" ? av.localeCompare(bv) : av - bv;
+      return state.projectionSort.direction === "asc" ? comparison : -comparison;
     });
+  }
+
+  function projectionHeader(key, label) {
+    const active = state.projectionSort.key === key;
+    const arrow = active ? (state.projectionSort.direction === "desc" ? " ↓" : " ↑") : " ↕";
+    return `<th data-cbb-projection-sort="${key}" class="${active ? "is-sorted" : ""}">${escapeHtml(label)}${arrow}</th>`;
+  }
+
+  function bindProjectionControls() {
+    const view = document.getElementById("view-cbb-projections");
+    const resetLimit = () => { state.projectionLimit = 150; paintProjectionBoard(); };
+    view.querySelector("#cbb-projection-search").addEventListener("input", event => { state.projectionQuery = event.target.value; resetLimit(); });
+    view.querySelector("#cbb-projection-conference").addEventListener("change", event => { state.projectionConference = event.target.value; resetLimit(); });
+    view.querySelector("#cbb-projection-signal").addEventListener("change", event => { state.projectionSignal = event.target.value; resetLimit(); });
+    view.querySelector("#cbb-projection-confidence").addEventListener("change", event => { state.projectionConfidence = event.target.value; resetLimit(); });
+    view.querySelector("#cbb-projection-clear").addEventListener("click", () => {
+      state.projectionQuery = ""; state.projectionConference = "all"; state.projectionSignal = "all"; state.projectionConfidence = "all"; state.projectionStatus = "all"; state.projectionLimit = 150; renderProjections();
+    });
+    view.querySelector(".cbb-status-filter").addEventListener("click", event => {
+      const button = event.target.closest("[data-cbb-status]");
+      if (!button) return;
+      state.projectionStatus = button.dataset.cbbStatus;
+      state.projectionLimit = 150;
+      renderProjections();
+    });
+    view.querySelector("thead").addEventListener("click", event => {
+      const header = event.target.closest("[data-cbb-projection-sort]");
+      if (!header) return;
+      const key = header.dataset.cbbProjectionSort;
+      state.projectionSort.direction = state.projectionSort.key === key && state.projectionSort.direction === "desc" ? "asc" : "desc";
+      state.projectionSort.key = key;
+      renderProjections();
+    });
+    view.querySelector("#cbb-projection-body").addEventListener("click", event => {
+      const row = event.target.closest("[data-cbb-game-id]");
+      if (row) openGameDetail(row.dataset.cbbGameId);
+    });
+    view.querySelector("#cbb-projection-more").addEventListener("click", () => { state.projectionLimit += 150; paintProjectionBoard(); });
+  }
+
+  function paintProjectionBoard() {
+    const body = document.getElementById("cbb-projection-body");
+    if (!body) return;
+    const all = filteredProjectionGames();
+    const shown = all.slice(0, state.projectionLimit);
+    const groups = new Map();
+    for (const game of shown) {
+      const start = new Date(game.start_date);
+      const label = Number.isNaN(start.getTime()) ? "Date TBD" : new Intl.DateTimeFormat("en-US", { weekday: "long", month: "short", day: "numeric", timeZone: "America/New_York" }).format(start);
+      if (!groups.has(label)) groups.set(label, []);
+      groups.get(label).push(game);
+    }
+    body.innerHTML = shown.length ? [...groups.entries()].map(([date, games]) => `<tr class="cbb-date-row"><td colspan="8">${escapeHtml(date)}</td></tr>${games.map(projectionRow).join("")}`).join("") : `<tr><td colspan="8" class="cbb-empty">No games match those filters.</td></tr>`;
+    const summary = document.getElementById("cbb-projection-summary");
+    if (summary) summary.textContent = `Showing ${integer(shown.length)} of ${integer(all.length)} matching games`;
+    const more = document.getElementById("cbb-projection-more");
+    if (more) more.hidden = shown.length >= all.length;
+  }
+
+  function teamProfile(teamId) {
+    return state.data?.profiles?.teams?.find(team => String(team.team_id) === String(teamId));
+  }
+
+  function teamLogo(team, size = "normal") {
+    const profile = teamProfile(team?.team_id);
+    const initials = String(profile?.abbreviation || team?.team || "?").split(/\s+/).map(word => word[0]).join("").slice(0,3);
+    return `<span class="cbb-team-logo cbb-team-logo-${size}">${profile?.logo_url ? `<img src="${escapeHtml(profile.logo_url)}" alt="" loading="lazy">` : `<b>${escapeHtml(initials)}</b>`}</span>`;
+  }
+
+  function projectionRow(game) {
+    const projection = game.projection || {};
+    const start = new Date(game.start_date);
+    const time = Number.isNaN(start.getTime()) ? "Time TBD" : (game.start_time_tbd ? "Time TBD" : new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/New_York" }).format(start) + " ET");
+    const network = game.broadcasts?.map(item => item.network || item).filter(Boolean).join(", ") || "TV TBD";
+    const gameType = game.conference_game ? "Conference" : "Nonconference";
+    const margin = Number(projection.home_margin);
+    const favoredTeam = margin >= 0 ? game.home : game.away;
+    const projectedLine = `${favoredTeam?.team || "—"} -${number(Math.abs(margin),1)}`;
+    const marketLine = game.market?.consensus_home_spread == null ? NaN : Number(game.market.consensus_home_spread);
+    const marketTeam = Number.isFinite(marketLine) ? (marketLine <= 0 ? game.home : game.away) : null;
+    const marketText = marketTeam ? `${marketTeam.team} -${number(Math.abs(marketLine),1)}` : "Not posted";
+    const edge = projection.spread_edge == null ? NaN : Number(projection.spread_edge);
+    const edgeTeam = Number.isFinite(edge) ? (edge >= 0 ? game.home : game.away) : null;
+    const tier = signalTier(game);
+    const confidence = confidenceTier(game);
+    const totalMarket = game.market?.consensus_total == null ? NaN : Number(game.market.consensus_total);
+    const totalEdge = Number.isFinite(totalMarket) ? Number(projection.total) - totalMarket : null;
+    const totalFlag = Number.isFinite(totalEdge) && Math.abs(totalEdge) >= 4 ? `<span class="cbb-total-flag">${totalEdge >= 0 ? "Over" : "Under"} ${number(totalMarket,1)} · ${Math.abs(totalEdge) >= 7 ? "play research" : "watch"}</span>` : "";
+    const watch = watchability(game);
+    const watchLabel = watch >= 75 ? "Prime window" : watch >= 60 ? "On the radar" : "Standard";
+    return `<tr class="cbb-projection-row" data-cbb-game-id="${escapeHtml(game.game_id)}">
+      <td><div class="cbb-matchup-team">${teamLogo(game.away,"small")}<strong>${escapeHtml(game.away?.team || "—")}</strong><span>${gameStatus(game) === "final" ? integer(game.away?.score) : ""}</span></div><div class="cbb-matchup-team">${teamLogo(game.home,"small")}<strong>${escapeHtml(game.home?.team || "—")}</strong><span>${gameStatus(game) === "final" ? integer(game.home?.score) : ""}</span></div><div class="cbb-team-meta">${escapeHtml(time)} · ${escapeHtml(network)} · ${gameType}</div></td>
+      <td><span class="cbb-watch-score">${integer(watch)}</span><div class="cbb-team-meta">${watchLabel}</div></td>
+      <td><strong class="cbb-number">${escapeHtml(projectedLine)}</strong><div class="cbb-team-meta">${escapeHtml(modelInputLabel(game))}</div></td>
+      <td><strong class="cbb-number">${escapeHtml(marketText)}</strong><div class="cbb-team-meta">${game.market?.book_count ? `${integer(game.market.book_count)} books` : "No consensus line"}</div></td>
+      <td><strong class="cbb-number">${number(projection.total,1)}</strong><div class="cbb-team-meta">Market ${Number.isFinite(totalMarket) ? number(totalMarket,1) : "—"}</div>${totalFlag}</td>
+      <td><strong class="cbb-edge-value">${Number.isFinite(edge) ? `${number(Math.abs(edge),1)} pts` : "—"}</strong><div class="cbb-team-meta">${edgeTeam ? `Model favors ${escapeHtml(edgeTeam.team)}` : "No market comparison"}</div></td>
+      <td><span class="cbb-signal cbb-signal-${tier}">${escapeHtml(signalLabel(tier))}</span></td>
+      <td><span class="cbb-confidence cbb-confidence-${confidence}">${escapeHtml(confidence === "research" ? "Research only" : humanize(confidence))}</span><div class="cbb-team-meta">${projection.spread_signal_eligible ? "Qualified decision" : "Not in prospective record"}</div></td>
+    </tr>`;
   }
 
   function statCard(label, value, note) {
@@ -315,7 +519,7 @@
     const panel = detail.querySelector(".cbb-detail-panel");
     const start = new Date(game.start_date);
     const date = Number.isNaN(start.getTime()) ? "Date TBD" : new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", hour: game.start_time_tbd ? undefined : "numeric", minute: game.start_time_tbd ? undefined : "2-digit", timeZone: "America/New_York", timeZoneName: game.start_time_tbd ? undefined : "short" }).format(start);
-    const stateLabel = humanize(projection.sample_state || "research");
+    const stateLabel = modelInputLabel(game);
     const spreadSide = Number(projection.home_margin) >= 0 ? game.home?.team : game.away?.team;
     const drivers = context.margin_drivers || [];
     panel.innerHTML = `
@@ -329,7 +533,7 @@
         ${detailStat("Home win probability", pct(projection.home_win_probability))}
         ${detailStat("Projected possessions", number(projection.projected_possessions,1))}
         ${detailStat("Projected total", number(projection.total,1))}
-        ${detailStat("Sample state", stateLabel)}
+        ${detailStat("Model input", stateLabel)}
       </div>
       <section class="cbb-detail-section"><h3>Team efficiency state</h3>
         <div class="cbb-panel cbb-table-wrap"><table class="cbb-table cbb-matchup-table"><thead><tr><th>Team</th><th>Adj offense</th><th>Adj defense</th><th>Tempo</th><th>Games</th><th>Source</th></tr></thead><tbody>
@@ -362,25 +566,31 @@
 
   function renderTeamData() {
     const view = document.getElementById("view-cbb-team-data");
-    const teams = [...(state.data.profiles.teams || [])].sort((a, b) => a.team.localeCompare(b.team));
-    view.innerHTML = `
-      <div class="cbb-kicker">Team directory and profiles</div>
-      <h1 class="page-title">CBB Team Data</h1>
-      <p class="page-subtitle">Every Division I program in the THI basketball warehouse. Open a team to inspect its efficiency baseline, recruiting class and incoming-transfer production.</p>
-      <div class="cbb-controls cbb-controls-single"><input id="cbb-team-data-search" class="cbb-input" type="search" placeholder="Search 365 Division I teams"></div>
-      <div class="cbb-panel cbb-table-wrap"><table class="cbb-table" aria-label="College basketball team directory"><thead><tr><th>Team</th><th>Conference</th><th>2026 source rank</th><th>2027 state</th></tr></thead><tbody id="cbb-team-data-body"></tbody></table></div>
-    `;
-    const paint = query => {
-      const needle = String(query || "").trim().toLowerCase();
-      const visible = teams.filter(team => !needle || `${team.team} ${team.display_name} ${team.conference?.name || ""}`.toLowerCase().includes(needle));
-      view.querySelector("#cbb-team-data-body").innerHTML = visible.map(team => `<tr data-team-id="${team.team_id}"><td><div class="cbb-team-name">${escapeHtml(team.display_name || team.team)}</div><div class="cbb-team-meta">Open team profile →</div></td><td>${escapeHtml(team.conference?.abbreviation || "—")}</td><td class="cbb-number">${team.preseason_prior?.adjusted?.net_rank ? `#${integer(team.preseason_prior.adjusted.net_rank)}` : "—"}</td><td><span class="cbb-chip">Preseason prior</span></td></tr>`).join("");
-    };
-    paint("");
-    view.querySelector("#cbb-team-data-search").addEventListener("input", event => paint(event.target.value));
-    view.querySelector("#cbb-team-data-body").addEventListener("click", event => {
-      const row = event.target.closest("[data-team-id]");
-      if (row) openTeamDetail(Number(row.dataset.teamId));
+    const source = state.data.profiles.teams || [];
+    const conferences = [...new Set(source.map(team => team.conference?.abbreviation || team.conference?.name).filter(Boolean))].sort();
+    const value = (team, key) => key === "team" ? team.team || "" : key === "conference" ? team.conference?.abbreviation || "" : key === "source_rank" ? Number(team.preseason_prior?.adjusted?.net_rank || 9999) : team.rating_state || "";
+    const rows = source.filter(team => {
+      const query = state.teamDataQuery.trim().toLowerCase();
+      const conference = team.conference?.abbreviation || team.conference?.name;
+      return (!query || `${team.team} ${team.display_name} ${team.conference?.name || ""}`.toLowerCase().includes(query)) && (state.teamDataConference === "all" || conference === state.teamDataConference);
+    }).sort((a,b) => {
+      const av=value(a,state.teamDataSort.key), bv=value(b,state.teamDataSort.key);
+      const order=typeof av === "string" ? av.localeCompare(bv) : av-bv;
+      return state.teamDataSort.direction === "asc" ? order : -order;
     });
+    const header = (key,label) => { const active=state.teamDataSort.key===key; return `<th data-team-data-sort="${key}" class="${active ? "is-sorted" : ""}">${label}${active ? (state.teamDataSort.direction === "desc" ? " ↓" : " ↑") : " ↕"}</th>`; };
+    view.innerHTML = `
+      <div class="cbb-kicker">Team directory and observed data</div>
+      <h1 class="page-title">CBB Team Data</h1>
+      <p class="page-subtitle">The factual team layer: identity, conference, records, observed efficiency, Four Factors, shot profile and roster context. THI Ratings is the separate modeled strength layer.</p>
+      <div class="cbb-definition-banner"><strong>Team Data</strong><span>What has happened and who is on the roster.</span><strong>THI Ratings</strong><span>THI's opponent-adjusted estimate of underlying team strength.</span></div>
+      <div class="cbb-controls"><input id="cbb-team-data-search" class="cbb-input" type="search" placeholder="Search 365 Division I teams" value="${escapeHtml(state.teamDataQuery)}"><select id="cbb-team-data-conference" class="cbb-select"><option value="all">All conferences</option>${conferences.map(conf => `<option value="${escapeHtml(conf)}" ${state.teamDataConference === conf ? "selected" : ""}>${escapeHtml(conf)}</option>`).join("")}</select></div>
+      <div class="cbb-panel cbb-table-wrap"><table class="cbb-table" aria-label="College basketball team directory"><thead><tr>${header("team","Team")}${header("conference","Conference")}${header("source_rank","2026 source rank")}${header("state","2027 state")}</tr></thead><tbody id="cbb-team-data-body">${rows.map(team => `<tr data-team-id="${team.team_id}"><td><div class="cbb-team-cell">${teamLogo(team,"normal")}<div><div class="cbb-team-name">${escapeHtml(team.display_name || team.team)}</div><div class="cbb-team-meta">Open team profile →</div></div></div></td><td>${escapeHtml(team.conference?.abbreviation || "—")}</td><td class="cbb-number">${team.preseason_prior?.adjusted?.net_rank ? `#${integer(team.preseason_prior.adjusted.net_rank)}` : "—"}</td><td><span class="cbb-state-label">${team.rating_state === "current_adjusted" ? "Current adjusted" : "Prior-based rating"}</span></td></tr>`).join("")}</tbody></table></div>
+      <div class="cbb-stat-note" style="margin-top:9px">${integer(rows.length)} teams shown. Rankings remain neutral; performance metrics inside each team profile use THI's green-to-red scale.</div>`;
+    view.querySelector("#cbb-team-data-search").addEventListener("input", event => { state.teamDataQuery=event.target.value; renderTeamData(); const input=document.getElementById("cbb-team-data-search"); input?.focus(); input?.setSelectionRange(input.value.length,input.value.length); });
+    view.querySelector("#cbb-team-data-conference").addEventListener("change", event => { state.teamDataConference=event.target.value; renderTeamData(); });
+    view.querySelector("thead").addEventListener("click", event => { const cell=event.target.closest("[data-team-data-sort]"); if(!cell)return; const key=cell.dataset.teamDataSort; state.teamDataSort.direction=state.teamDataSort.key===key&&state.teamDataSort.direction==="asc"?"desc":"asc"; state.teamDataSort.key=key; renderTeamData(); });
+    view.querySelector("#cbb-team-data-body").addEventListener("click", event => { const row=event.target.closest("[data-team-id]"); if(row)openTeamDetail(Number(row.dataset.teamId)); });
   }
 
   function renderPlayerRatings() {
@@ -518,7 +728,7 @@
     body.innerHTML = page.length ? page.map(player => {
       const score = player.research_scores || {};
       const metrics = player.metrics || {};
-      return `<tr data-player-id="${escapeHtml(player.player_season_id)}"><td class="cbb-rank">#${integer(player.ranks?.overall)}</td><td><div class="cbb-team-name">${escapeHtml(player.name)}</div><div class="cbb-team-meta">${escapeHtml(player.role)} · Open profile →</div></td><td>${escapeHtml(player.team)}</td><td>${escapeHtml(player.position || "—")}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.thi_player_rating(player)}">${number(score.thi_player_rating,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.offense(player)}">${number(score.offense,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.defense(player)}">${number(score.defense,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.all_around(player)}">${number(score.all_around,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.points_per_40(player)}">${number(metrics.points_per_40,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.true_shooting_pct(player)}">${shootingPct(metrics.true_shooting_pct)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.porpag(player)}">${number(metrics.porpag,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.reliability(player)}">${pct(player.data_quality?.reliability)}</td></tr>`;
+      return `<tr data-player-id="${escapeHtml(player.player_season_id)}"><td class="cbb-rank">#${integer(player.ranks?.overall)}</td><td><div class="cbb-team-name">${escapeHtml(player.name)}</div><div class="cbb-team-meta">${escapeHtml(player.role)} · Open profile →</div></td><td><div class="cbb-team-cell">${teamLogo(player,"small")}<span>${escapeHtml(player.team)}</span></div></td><td>${escapeHtml(player.position || "—")}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.thi_player_rating(player)}">${number(score.thi_player_rating,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.offense(player)}">${number(score.offense,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.defense(player)}">${number(score.defense,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.all_around(player)}">${number(score.all_around,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.points_per_40(player)}">${number(metrics.points_per_40,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.true_shooting_pct(player)}">${shootingPct(metrics.true_shooting_pct)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.porpag(player)}">${number(metrics.porpag,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.reliability(player)}">${pct(player.data_quality?.reliability)}</td></tr>`;
     }).join("") : `<tr><td colspan="12" class="cbb-empty">No players match those filters.</td></tr>`;
     const status = document.getElementById("cbb-player-page-status");
     if (status) status.textContent = `${integer(rows.length)} players · page ${state.playerPage} of ${pageCount}`;
@@ -651,43 +861,50 @@
   }
 
   function bracketRegion(region, rows) {
-    return `<article class="cbb-panel cbb-region-card"><div class="cbb-region-head"><span>${escapeHtml(region)}</span><small>16 seeds</small></div><div class="cbb-seed-list">${rows.map(row => `<div class="cbb-seed-row ${row.first_four ? "is-first-four" : ""}"><strong>${integer(row.seed)}</strong>${row.first_four ? `<span>${escapeHtml(row.team)}</span>` : `<button type="button" data-bracket-team-id="${escapeHtml(row.team_id)}">${escapeHtml(row.team)}</button>`}<small>${escapeHtml(row.conference)}</small></div>`).join("")}</div></article>`;
+    return `<article class="cbb-panel cbb-region-card"><div class="cbb-region-head"><span>${escapeHtml(region)}</span><small>16 seeds</small></div><div class="cbb-seed-list">${rows.map(row => `<div class="cbb-seed-row ${row.first_four ? "is-first-four" : ""}"><strong>${integer(row.seed)}</strong>${row.first_four ? `<span>${escapeHtml(row.team)}</span>` : `<button type="button" data-bracket-team-id="${escapeHtml(row.team_id)}">${teamLogo({team_id:row.team_id,team:row.team},"tiny")}<span>${escapeHtml(row.team)}</span></button>`}<small>${escapeHtml(row.conference)}</small></div>`).join("")}</div></article>`;
   }
 
   function firstFourCard(game) {
     const label = game.bid_type === "automatic" ? "Automatic bid" : "At-large";
-    return `<article class="cbb-panel cbb-first-four-card"><div class="cbb-label">${escapeHtml(game.region)} · ${integer(game.seed)} seed · ${label}</div>${(game.teams || []).map((team, index) => `<div class="cbb-first-four-team"><button type="button" data-bracket-team-id="${escapeHtml(team.team_id)}">${escapeHtml(team.team)}</button><span>${escapeHtml(team.conference?.abbreviation || "—")}</span></div>${index === 0 ? `<div class="cbb-first-four-vs">vs</div>` : ""}`).join("")}</article>`;
+    return `<article class="cbb-panel cbb-first-four-card"><div class="cbb-label">${escapeHtml(game.region)} · ${integer(game.seed)} seed · ${label}</div>${(game.teams || []).map((team, index) => `<div class="cbb-first-four-team"><button type="button" data-bracket-team-id="${escapeHtml(team.team_id)}">${teamLogo(team,"tiny")}<span>${escapeHtml(team.team)}</span></button><span>${escapeHtml(team.conference?.abbreviation || "—")}</span></div>${index === 0 ? `<div class="cbb-first-four-vs">vs</div>` : ""}`).join("")}</article>`;
   }
 
   function bubbleColumn(title, rows, firstFour = false) {
-    return `<article class="cbb-panel cbb-bubble-card"><h3>${escapeHtml(title)}</h3>${rows.map((team, index) => `<button type="button" class="cbb-bubble-team" data-bracket-team-id="${escapeHtml(team.team_id)}"><span><strong>${index + 1}</strong>${escapeHtml(team.team)}</span><small>${escapeHtml(team.conference?.abbreviation || "—")} · ${number(team.prior_net,1,true)}</small></button>`).join("")} ${firstFour ? `<div class="cbb-model-sub">These four teams occupy the two at-large First Four games.</div>` : ""}</article>`;
+    return `<article class="cbb-panel cbb-bubble-card"><h3>${escapeHtml(title)}</h3>${rows.map((team, index) => `<button type="button" class="cbb-bubble-team" data-bracket-team-id="${escapeHtml(team.team_id)}"><span><strong>${index + 1}</strong>${teamLogo(team,"tiny")}<b>${escapeHtml(team.team)}</b></span><small>${escapeHtml(team.conference?.abbreviation || "—")} · ${number(team.prior_net,1,true)}</small></button>`).join("")} ${firstFour ? `<div class="cbb-model-sub">These four teams occupy the two at-large First Four games.</div>` : ""}</article>`;
   }
 
   function renderPortal() {
     const view = document.getElementById("view-cbb-portal");
-    const teams = [...(state.data.priors.teams || [])]
-      .filter(team => Number(team.personnel?.transfers?.incoming_count) > 0)
-      .sort((a, b) => Number(b.personnel?.transfers?.prior_minutes || 0) - Number(a.personnel?.transfers?.prior_minutes || 0));
-    const totalIncoming = teams.reduce((sum, team) => sum + Number(team.personnel?.transfers?.incoming_count || 0), 0);
-    const matched = teams.reduce((sum, team) => sum + Number(team.personnel?.transfers?.prior_production_match_count || 0), 0);
+    const source = (state.data.priors.teams || []).filter(team => Number(team.personnel?.transfers?.incoming_count) > 0);
+    const conferences = [...new Set(source.map(team => team.conference?.abbreviation || team.conference?.name).filter(Boolean))].sort();
+    const portalValue = (team,key) => {
+      if(key === "team") return team.team || "";
+      if(key === "conference") return team.conference?.abbreviation || "";
+      const transfers=team.personnel?.transfers || {};
+      return transfers[key] ?? -Infinity;
+    };
+    const rows = source.filter(team => {
+      const query=state.portalQuery.trim().toLowerCase(); const conference=team.conference?.abbreviation || team.conference?.name;
+      return (!query || `${team.team} ${team.conference?.name || ""}`.toLowerCase().includes(query)) && (state.portalConference === "all" || conference === state.portalConference);
+    }).sort((a,b) => { const av=portalValue(a,state.portalSort.key),bv=portalValue(b,state.portalSort.key); const order=typeof av === "string" ? av.localeCompare(bv) : Number(av)-Number(bv); return state.portalSort.direction === "asc" ? order : -order; });
+    const totalIncoming = source.reduce((sum, team) => sum + Number(team.personnel?.transfers?.incoming_count || 0), 0);
+    const matched = source.reduce((sum, team) => sum + Number(team.personnel?.transfers?.prior_production_match_count || 0), 0);
+    const header=(key,label)=>{const active=state.portalSort.key===key;return `<th data-portal-sort="${key}" class="${active?"is-sorted":""}">${label}${active?(state.portalSort.direction==="desc"?" ↓":" ↑"):" ↕"}</th>`;};
+    const bandFor=key=>{const values=source.map(team=>Number(portalValue(team,key))).filter(Number.isFinite).sort((a,b)=>a-b);return team=>{const v=Number(portalValue(team,key));let i=values.findIndex(x=>x>=v);if(i<0)i=values.length-1;return Math.max(1,Math.min(5,Math.ceil((i/Math.max(1,values.length-1))*5)));};};
+    const bands={incoming_count:bandFor("incoming_count"),prior_production_match_count:bandFor("prior_production_match_count"),prior_minutes:bandFor("prior_minutes"),prior_points:bandFor("prior_points"),mean_incoming_rating:bandFor("mean_incoming_rating")};
     view.innerHTML = `
       <div class="cbb-kicker">Roster movement and proven production</div>
       <h1 class="page-title">CBB Transfer Portal</h1>
-      <p class="page-subtitle">Team-level incoming transfer context using ratings and prior college production. This board measures what arrives; it does not treat raw transfer count as automatic improvement.</p>
-      <div class="cbb-stat-grid">
-        ${statCard("Teams with additions", integer(teams.length), "2027 incoming transfer classes")}
-        ${statCard("Incoming players", integer(totalIncoming), "Rated and unrated additions")}
-        ${statCard("Production matches", integer(matched), "Incoming players matched to prior stats")}
-        ${statCard("Primary sort", "Prior minutes", "Established college workload")}
-      </div>
-      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Team portal board</div><h2 class="cbb-section-title">Incoming production</h2></div><div class="cbb-section-note">Click a team for its full personnel context.</div></div>
-        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Team</th><th>Conf</th><th>Incoming</th><th>Matched</th><th>Prior minutes</th><th>Prior points</th><th>Mean rating</th></tr></thead><tbody>${teams.map(team => { const t=team.personnel.transfers; return `<tr data-team-id="${team.team_id}"><td class="cbb-team-name">${escapeHtml(team.team)}</td><td>${escapeHtml(team.conference?.abbreviation || "—")}</td><td class="cbb-number">${integer(t.incoming_count)}</td><td class="cbb-number">${integer(t.prior_production_match_count)}</td><td class="cbb-number">${integer(t.prior_minutes)}</td><td class="cbb-number">${integer(t.prior_points)}</td><td class="cbb-number">${number(t.mean_incoming_rating,3)}</td></tr>`; }).join("")}</tbody></table></div>
-      </section>
-    `;
-    view.querySelector("tbody").addEventListener("click", event => {
-      const row = event.target.closest("[data-team-id]");
-      if (row) openTeamDetail(Number(row.dataset.teamId));
-    });
+      <p class="page-subtitle">Team-level incoming transfer context using ratings and prior college production. THI measures what arrives instead of treating raw transfer count as automatic improvement.</p>
+      <div class="cbb-stat-grid">${statCard("Teams with additions",integer(source.length),"2027 incoming transfer classes")}${statCard("Incoming players",integer(totalIncoming),"Rated and unrated additions")}${statCard("Production matches",integer(matched),"Players matched to prior stats")}${statCard("Primary lens","Proven workload","Minutes, points and efficiency")}</div>
+      <div class="cbb-controls"><input id="cbb-portal-search" class="cbb-input" type="search" placeholder="Search team or conference" value="${escapeHtml(state.portalQuery)}"><select id="cbb-portal-conference" class="cbb-select"><option value="all">All conferences</option>${conferences.map(conf=>`<option value="${escapeHtml(conf)}" ${state.portalConference===conf?"selected":""}>${escapeHtml(conf)}</option>`).join("")}</select></div>
+      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Team portal board</div><h2 class="cbb-section-title">Incoming production</h2></div><div class="cbb-section-note">Every metric is sortable and graded relative to the current transfer pool. Click a team for its personnel profile.</div></div>
+        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr>${header("team","Team")}${header("conference","Conf")}${header("incoming_count","Incoming")}${header("prior_production_match_count","Matched")}${header("prior_minutes","Prior minutes")}${header("prior_points","Prior points")}${header("mean_incoming_rating","Mean rating")}</tr></thead><tbody>${rows.map(team=>{const t=team.personnel.transfers;return `<tr data-team-id="${team.team_id}"><td><div class="cbb-team-cell">${teamLogo(team,"small")}<strong>${escapeHtml(team.team)}</strong></div></td><td>${escapeHtml(team.conference?.abbreviation||"—")}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.incoming_count(team)}">${integer(t.incoming_count)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.prior_production_match_count(team)}">${integer(t.prior_production_match_count)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.prior_minutes(team)}">${integer(t.prior_minutes)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.prior_points(team)}">${integer(t.prior_points)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.mean_incoming_rating(team)}">${number(t.mean_incoming_rating,3)}</td></tr>`;}).join("")}</tbody></table></div>
+      </section><div class="cbb-stat-note">${integer(rows.length)} teams shown. Green indicates a stronger incoming production profile relative to this portal class.</div>`;
+    view.querySelector("#cbb-portal-search").addEventListener("input",event=>{state.portalQuery=event.target.value;renderPortal();const input=document.getElementById("cbb-portal-search");input?.focus();input?.setSelectionRange(input.value.length,input.value.length);});
+    view.querySelector("#cbb-portal-conference").addEventListener("change",event=>{state.portalConference=event.target.value;renderPortal();});
+    view.querySelector("thead").addEventListener("click",event=>{const cell=event.target.closest("[data-portal-sort]");if(!cell)return;const key=cell.dataset.portalSort;state.portalSort.direction=state.portalSort.key===key&&state.portalSort.direction==="desc"?"asc":"desc";state.portalSort.key=key;renderPortal();});
+    view.querySelector("tbody").addEventListener("click",event=>{const row=event.target.closest("[data-team-id]");if(row)openTeamDetail(Number(row.dataset.teamId));});
   }
 
   function renderMarketResearch() {
@@ -759,8 +976,9 @@
     const view = document.getElementById("view-cbb-ratings");
     view.innerHTML = `
       <div class="cbb-kicker">2027 preseason research</div>
-      <h1 class="page-title">CBB Team Ratings</h1>
-      <p class="page-subtitle">Regressed 2026 efficiency priors with recruiting and incoming-transfer context. These are preseason research ratings, not current-season adjusted ratings or public game projections.</p>
+      <h1 class="page-title">CBB THI Ratings</h1>
+      <p class="page-subtitle">THI's modeled estimate of team strength: adjusted offense, adjusted defense, tempo, continuity and personnel context translated into a common possession-based scale.</p>
+      <div class="cbb-definition-banner"><strong>THI Ratings</strong><span>How strong the model believes a team is beneath its record.</span><strong>Team Data</strong><span>Observed results, box-score performance and roster facts.</span></div>
       <div class="cbb-controls">
         <input id="cbb-rating-search" class="cbb-input" type="search" placeholder="Search team or conference" value="${escapeHtml(state.query)}">
         <select id="cbb-conference-filter" class="cbb-select"><option value="all">All conferences</option>${conferences.map(conf => `<option value="${escapeHtml(conf)}" ${state.conference === conf ? "selected" : ""}>${escapeHtml(conf)}</option>`).join("")}</select>
@@ -807,11 +1025,13 @@
     const netBand = quantileBands(all, "prior_net");
     const offBand = quantileBands(all, "prior_offense");
     const defBand = quantileBands(all, "prior_defense", true);
+    const recruitingBand = quantileBands(all, "recruiting");
+    const transferBand = quantileBands(all, "transfer_minutes");
     const globalRank = new Map([...all].sort((a,b) => b.prior_net - a.prior_net).map((team,index) => [team.team_id,index+1]));
     body.innerHTML = rows.length ? rows.map(team => {
       const recruiting = team.personnel?.recruiting || {};
       const transfers = team.personnel?.transfers || {};
-      return `<tr data-team-id="${team.team_id}"><td class="cbb-rank">#${globalRank.get(team.team_id) || "—"}</td><td><div class="cbb-team-name">${escapeHtml(team.team)}</div><div class="cbb-team-meta">View team profile →</div></td><td>${escapeHtml(team.conference?.abbreviation || "—")}</td><td class="cbb-number cbb-metric-cell cbb-band-${netBand(team)}">${number(team.prior_net,2,true)}</td><td class="cbb-number cbb-metric-cell cbb-band-${offBand(team)}">${number(team.prior_offense,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${defBand(team)}">${number(team.prior_defense,2)}</td><td class="cbb-number">${number(recruiting.team_rating,2)}</td><td class="cbb-number">${integer(transfers.prior_minutes)}</td></tr>`;
+      return `<tr data-team-id="${team.team_id}"><td class="cbb-rank">#${globalRank.get(team.team_id) || "—"}</td><td><div class="cbb-team-cell">${teamLogo(team,"normal")}<div><div class="cbb-team-name">${escapeHtml(team.team)}</div><div class="cbb-team-meta">View team profile →</div></div></div></td><td>${escapeHtml(team.conference?.abbreviation || "—")}</td><td class="cbb-number cbb-metric-cell cbb-band-${netBand(team)}">${number(team.prior_net,2,true)}</td><td class="cbb-number cbb-metric-cell cbb-band-${offBand(team)}">${number(team.prior_offense,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${defBand(team)}">${number(team.prior_defense,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${recruitingBand(team)}">${number(recruiting.team_rating,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${transferBand(team)}">${integer(transfers.prior_minutes)}</td></tr>`;
     }).join("") : `<tr><td colspan="8" class="cbb-empty">No teams match those filters.</td></tr>`;
   }
 
@@ -835,7 +1055,7 @@
     panel.innerHTML = `
       <button class="cbb-detail-close" type="button" data-cbb-close>Close</button>
       <div class="cbb-kicker">THI CBB team profile</div>
-      <h2 class="cbb-detail-title" id="cbb-detail-title">${escapeHtml(profile?.display_name || prior.team)}</h2>
+      <div class="cbb-detail-team-title">${teamLogo({team_id:prior.team_id,team:prior.team},"large")}<h2 class="cbb-detail-title" id="cbb-detail-title">${escapeHtml(profile?.display_name || prior.team)}</h2></div>
       <div class="cbb-detail-sub">${escapeHtml(prior.conference?.name || "Independent")} · 2027 preseason</div>
       <div class="cbb-detail-grid">
         ${detailStat("Net efficiency", number(prior.prior_net,2,true))}
