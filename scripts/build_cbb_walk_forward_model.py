@@ -514,8 +514,8 @@ def current_priors(
 ) -> dict[str, Any]:
     profiles = json.loads(profile_path.read_text()) if profile_path.exists() else {"meta": {}, "teams": []}
     player_payload = json.loads(player_path.read_text()) if player_path and player_path.exists() else {"meta": {}, "team_rosters": []}
-    if player_payload.get("meta", {}).get("version") not in (None, "thi-cbb-player-research-v1.2"):
-        raise RuntimeError("current roster continuity requires thi-cbb-player-research-v1.2")
+    if player_payload.get("meta", {}).get("version") not in (None, "thi-cbb-player-research-v1.3"):
+        raise RuntimeError("current roster continuity requires thi-cbb-player-research-v1.3")
     roster_continuity = {
         str(row.get("team_id")): row
         for row in player_payload.get("team_rosters") or []
