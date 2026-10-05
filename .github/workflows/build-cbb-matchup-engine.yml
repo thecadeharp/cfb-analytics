@@ -1,0 +1,64 @@
+name: Build CBB Matchup Engine
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_games:
+        description: "Maximum newly completed games to inspect"
+        required: true
+        default: "40"
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-cbb-matchup-engine
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test compact play and matchup contracts
+        run: |
+          python -m py_compile scripts/build_cbb_play_style.py scripts/build_cbb_matchup_engine.py
+          python -m unittest scripts/test_cbb_play_style.py scripts/test_cbb_matchup_engine.py
+      - name: Refresh play style and matchup explanations
+        env:
+          CBBD_API_KEY: ${{ secrets.CBBD_API_KEY }}
+        run: |
+          python scripts/build_cbb_play_style.py --max-games "${{ inputs.max_games }}"
+          python scripts/build_cbb_matchup_engine.py
+      - name: Validate derived output
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("data/cbb")
+          play = json.loads((root / "play_style.json").read_text())
+          matchups = json.loads((root / "matchup_engine.json").read_text())
+          assert play["meta"]["version"] == "thi-cbb-play-style-v1.0"
+          assert play["meta"]["raw_play_by_play_stored"] is False
+          assert matchups["meta"]["version"] == "thi-cbb-matchup-engine-v1.0"
+          assert matchups["meta"]["model_usage"] == "display_only_research_layer"
+          assert all(row["research_status"]["feeds_public_spread"] is False for row in matchups["games"])
+          PY
+      - name: Commit derived research only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/cbb/play_style.json data/cbb/matchup_engine.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Refresh CBB possession and matchup research"
+          git pull --rebase origin main
+          git push origin HEAD:main

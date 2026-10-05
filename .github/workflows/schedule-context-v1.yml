@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: thi-data-writer
+  group: schedule-context-v2
   cancel-in-progress: false
 
 jobs:
@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -59,5 +61,10 @@ jobs:
             exit 0
           fi
           git commit -m "Refresh schedule context"
-          git pull --rebase origin main
-          git push
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 2
+          done
+          exit 1

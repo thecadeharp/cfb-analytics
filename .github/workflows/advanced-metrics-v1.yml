@@ -10,6 +10,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: advanced-metrics-v2
+  cancel-in-progress: false
+
 jobs:
   build-advanced-metrics:
     runs-on: ubuntu-latest
@@ -17,6 +21,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -104,5 +110,15 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/advanced_metrics.json
-          git diff --staged --quiet || git commit -m "Refresh advanced team metrics"
-          git push
+          if git diff --cached --quiet; then
+            echo "Advanced metrics unchanged."
+            exit 0
+          fi
+          git commit -m "Refresh advanced team metrics"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 2
+          done
+          exit 1

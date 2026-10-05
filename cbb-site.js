@@ -9,6 +9,8 @@
     priors: "data/cbb/model/current_priors.json",
     history: "data/cbb/history/manifest.json",
     projectionBoard: "data/cbb/projection_board.json",
+    playStyle: "data/cbb/play_style.json",
+    matchups: "data/cbb/matchup_engine.json",
     tracking: "data/cbb/model_tracking.json",
     bracketology: "data/cbb/bracketology.json"
   };
@@ -153,12 +155,14 @@
     if (state.loaded) return state.data;
     if (state.loading) return state.loading;
     state.loading = Promise.all(Object.entries(PATHS).map(async ([key, path]) => {
-      if (key === "projectionBoard" || key === "tracking" || key === "bracketology") {
+      if (["projectionBoard", "tracking", "bracketology", "playStyle", "matchups"].includes(key)) {
         try { return [key, await fetchJson(path)]; }
         catch (_error) {
           if (key === "projectionBoard") return [key, { meta: {}, games: [] }];
           if (key === "tracking") return [key, { meta: {}, summary: {}, spread_decisions: [], total_decisions: [] }];
-          return [key, { meta: {}, field: [], regions: {}, first_four: [], bubble: {}, conference_bids: [] }];
+          if (key === "bracketology") return [key, { meta: {}, field: [], regions: {}, first_four: [], bubble: {}, conference_bids: [] }];
+          if (key === "playStyle") return [key, { meta: {}, teams: [], games: [] }];
+          return [key, { meta: {}, games: [] }];
         }
       }
       return [key, await fetchJson(path)];
@@ -248,8 +252,6 @@
       <h1 class="page-title">THI College Basketball Projection Center</h1>
       <p class="page-subtitle">A possession-based game intelligence board combining adjusted efficiency, pace, matchup drivers, market separation and transparent signal qualification.</p>
 
-      <div class="cbb-research-banner"><strong>Projections · live testing</strong><span>THI scores and win probabilities publish from the opening slate. Spread signals require settled samples and market separation; totals remain research-only until their independent validation gate clears.</span></div>
-
       <section class="cbb-signal-guide" aria-labelledby="cbb-signal-guide-title">
         <div class="cbb-signal-guide-heading"><strong id="cbb-signal-guide-title">How CBB signals work</strong><small>Methodology + confidence key</small></div>
         <div class="cbb-signal-guide-body">
@@ -271,6 +273,8 @@
           <p><strong>Prior-based model</strong> means the projection still relies on regressed preseason team priors. It does not mean the matchup is an exhibition or preseason game.</p>
         </div>
       </section>
+
+      <div class="cbb-research-banner"><strong>Projections · live testing</strong><span>THI scores and win probabilities publish from the opening slate. Spread signals require settled samples and market separation; totals remain research-only until their independent validation gate clears.</span></div>
 
       <div class="cbb-projection-controls">
         <input id="cbb-projection-search" class="cbb-input" type="search" placeholder="Search teams…" value="${escapeHtml(state.projectionQuery)}">
@@ -511,6 +515,12 @@
     const stateLabel = modelInputLabel(game);
     const spreadSide = Number(projection.home_margin) >= 0 ? game.home?.team : game.away?.team;
     const drivers = context.margin_drivers || [];
+    const matchup = state.data?.matchups?.games?.find(row => String(row.game_id) === String(gameId));
+    const pace = matchup?.pace_environment || {};
+    const advantages = matchup?.factor_advantages || [];
+    const homeStyle = matchup?.shot_style?.home || {};
+    const awayStyle = matchup?.shot_style?.away || {};
+    const styleCell = value => value == null ? "Coverage unavailable" : pct(value);
     panel.innerHTML = `
       <button class="cbb-detail-close" type="button" data-cbb-close>Close</button>
       <div class="cbb-kicker">THI CBB matchup analysis</div>
@@ -536,6 +546,23 @@
           <tr><td class="cbb-team-name">${escapeHtml(game.away?.team)}</td><td class="cbb-number">${pct(factorMatchup.away?.effective_fg_pct)}</td><td class="cbb-number">${pct(factorMatchup.away?.turnover_pct)}</td><td class="cbb-number">${pct(factorMatchup.away?.offensive_rebound_pct)}</td><td class="cbb-number">${pct(factorMatchup.away?.free_throw_rate)}</td></tr>
           <tr><td class="cbb-team-name">${escapeHtml(game.home?.team)}</td><td class="cbb-number">${pct(factorMatchup.home?.effective_fg_pct)}</td><td class="cbb-number">${pct(factorMatchup.home?.turnover_pct)}</td><td class="cbb-number">${pct(factorMatchup.home?.offensive_rebound_pct)}</td><td class="cbb-number">${pct(factorMatchup.home?.free_throw_rate)}</td></tr>
         </tbody></table></div>
+      </section>
+      <section class="cbb-detail-section"><h3>Possession and matchup engine</h3>
+        <div class="cbb-model-sub">This research layer explains the matchup; it does not feed the published spread or total until it clears historical out-of-sample validation.</div>
+        ${matchup ? `
+          <div class="cbb-matchup-summary">
+            ${detailStat("Pace environment", humanize(pace.band || "unavailable"))}
+            ${detailStat("Tempo clash", pace.clash == null ? "Unavailable" : `${number(pace.clash,1)} possessions · ${humanize(pace.clash_label)}`)}
+            ${detailStat("Component status", "Explanation only")}
+          </div>
+          <div class="cbb-advantage-grid">${advantages.map(item => `<div class="cbb-advantage-card"><span>${escapeHtml(humanize(item.dimension))}</span><strong>${escapeHtml(item.advantage_team || "Coverage unavailable")}</strong><small>${item.edge == null ? "No qualified input" : `${humanize(item.magnitude)} · ${number(Math.abs(item.edge),2)}-point rate edge`}</small></div>`).join("")}</div>
+          <h4 class="cbb-detail-minor-title">Observed shot style</h4>
+          <div class="cbb-panel cbb-table-wrap"><table class="cbb-table cbb-matchup-table"><thead><tr><th>Team</th><th>At rim</th><th>Midrange</th><th>Three-point</th><th>Assisted</th><th>Explicit transition</th><th>Sample</th></tr></thead><tbody>
+            <tr><td class="cbb-team-name">${escapeHtml(game.away?.team)}</td><td>${styleCell(awayStyle.rim_rate)}</td><td>${styleCell(awayStyle.midrange_rate)}</td><td>${styleCell(awayStyle.three_rate)}</td><td>${styleCell(awayStyle.assisted_rate)}</td><td>${styleCell(awayStyle.explicit_transition_rate)}</td><td>${escapeHtml(humanize(awayStyle.sample_state || "unavailable"))}</td></tr>
+            <tr><td class="cbb-team-name">${escapeHtml(game.home?.team)}</td><td>${styleCell(homeStyle.rim_rate)}</td><td>${styleCell(homeStyle.midrange_rate)}</td><td>${styleCell(homeStyle.three_rate)}</td><td>${styleCell(homeStyle.assisted_rate)}</td><td>${styleCell(homeStyle.explicit_transition_rate)}</td><td>${escapeHtml(humanize(homeStyle.sample_state || "unavailable"))}</td></tr>
+          </tbody></table></div>
+          <div class="cbb-model-sub">Transition rate uses explicit CBBD play-type labels only. THI does not infer transition from the period clock when shot-clock context is absent.</div>
+        ` : `<div class="cbb-coverage-note">Matchup-engine data will appear after the next coordinated CBB refresh.</div>`}
       </section>
       <section class="cbb-detail-section"><h3>Largest margin drivers</h3>
         <div class="cbb-model-sub">Point contributions explain this projection relative to the model baseline. Positive values favor ${escapeHtml(game.home?.team)}; negative values favor ${escapeHtml(game.away?.team)}.</div>

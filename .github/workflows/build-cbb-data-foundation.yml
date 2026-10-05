@@ -84,6 +84,7 @@ jobs:
           assert status["coverage"]["current_rosters"] >= 300
           assert sum(bool(team.get("logo_url")) for team in teams["teams"]) >= 300
           assert all("four_factors" in team and "four_factors" in team["preseason_prior"] for team in teams["teams"])
+          assert all("shot_profile" in team and "shot_profile" in team["preseason_prior"] for team in teams["teams"])
           PY
           sha256sum --check /tmp/cbb-data-before.sha256
 

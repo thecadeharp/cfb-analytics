@@ -182,10 +182,10 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
 .cbb-signal-play { color: #16815c; }
 .cbb-signal-material { color: #a65a00; }
 .cbb-signal-outlier { color: #bb4f00; }
-.cbb-confidence-research { background: var(--surface-soft); color: var(--muted); }
-.cbb-confidence-developing { border-color: #dfbb47; background: #fff0b2; color: #5b4300; }
-.cbb-confidence-validated { border-color: #4fae88; background: #57c99b; color: #10382a; }
-.cbb-confidence-established { border-color: #7060c9; background: #7664d8; color: #fff; }
+.cbb-confidence-research { background: #f4f4f2; color: var(--muted); border-color: var(--border); }
+.cbb-confidence-developing { background: #f8e7a1; color: #4e3b00; border-color: #d9bd53; }
+.cbb-confidence-validated { background: var(--green); color: #fff; border-color: var(--green); }
+.cbb-confidence-established { background: #5b4bc4; color: #fff; border-color: #4a3cab; box-shadow: 0 0 0 1px rgba(91,75,196,.08); }
 .cbb-state-label { border-color: #7b8997; background: var(--surface-soft); color: var(--text); }
 .cbb-total-flag { margin-top: 5px; border-color: #79b6a1; background: #e5f5ef; color: #25604c; white-space: nowrap; }
 .cbb-projection-footer { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 8px 3px; color: var(--muted); font: 700 9px var(--mono); }
@@ -495,6 +495,13 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
   padding: 4px 7px;
   border-radius: 5px;
 }
+.cbb-matchup-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
+.cbb-advantage-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 12px 0 16px; }
+.cbb-advantage-card { padding: 11px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); }
+.cbb-advantage-card span, .cbb-advantage-card small { display: block; color: var(--muted); font: 700 9px var(--mono); }
+.cbb-advantage-card strong { display: block; margin: 7px 0 5px; color: var(--text); font: 800 12px var(--mono); }
+.cbb-detail-minor-title { margin: 15px 0 8px; font: 800 11px var(--mono); text-transform: uppercase; letter-spacing: .08em; }
+.cbb-coverage-note { margin-top: 12px; padding: 12px; border: 1px dashed var(--border); border-radius: 8px; color: var(--muted); font: 700 10px var(--mono); }
 .cbb-roster-summary { margin-top: 10px; }
 .cbb-roster-list { display: grid; gap: 7px; margin-top: 14px; }
 .cbb-roster-player {
@@ -540,11 +547,12 @@ html[data-theme="dark"] .cbb-roster-rating { background: #174836; border-color: 
 html[data-theme="dark"] .cbb-projection-signal { background: #174836; border-color: #397e64; color: #9be0bd; }
 html[data-theme="dark"] .cbb-signal-small { color: #82b5ea; }
 html[data-theme="dark"] .cbb-signal-play { color: #72d8af; }
-html[data-theme="dark"] .cbb-confidence-validated { background: #174836; border-color: #397e64; color: #9be0bd; }
 html[data-theme="dark"] .cbb-signal-material { color: #f0ae5e; }
 html[data-theme="dark"] .cbb-signal-outlier { color: #ff9b55; }
-html[data-theme="dark"] .cbb-confidence-developing { background: #4a3c14; border-color: #8f7525; color: #f4dc83; }
-html[data-theme="dark"] .cbb-confidence-established { background: #332b72; border-color: #6456b7; color: #ddd8ff; }
+html[data-theme="dark"] .cbb-confidence-research { background: #f4f4f2; border-color: #d4d4d0; color: #5f6b78; }
+html[data-theme="dark"] .cbb-confidence-developing { background: #f8e7a1; border-color: #d9bd53; color: #4e3b00; }
+html[data-theme="dark"] .cbb-confidence-validated { background: var(--green); border-color: var(--green); color: #fff; }
+html[data-theme="dark"] .cbb-confidence-established { background: #5b4bc4; border-color: #4a3cab; color: #fff; }
 html[data-theme="dark"] .cbb-total-flag { background: #173f35; border-color: #397e64; color: #9be0bd; }
 html[data-theme="dark"] .cbb-result-win { background: #174836; border-color: #397e64; color: #9be0bd; }
 html[data-theme="dark"] .cbb-result-loss { background: #482f2a; border-color: #7d4a42; color: #f0bbb0; }
@@ -574,6 +582,7 @@ html[data-theme="dark"] .cbb-error { background: #3a2020; border-color: #76443e;
   .cbb-definition-banner { grid-template-columns: auto 1fr; }
   .cbb-readiness-banner { grid-template-columns: 1fr; gap: 10px; }
   .cbb-player-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cbb-advantage-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 640px) {
@@ -595,6 +604,8 @@ html[data-theme="dark"] .cbb-error { background: #3a2020; border-color: #76443e;
   .cbb-section-head { align-items: flex-start; flex-direction: column; }
   .cbb-section-note { text-align: left; }
   .cbb-detail-grid { grid-template-columns: repeat(2, 1fr); }
+  .cbb-matchup-summary,
+  .cbb-advantage-grid { grid-template-columns: 1fr; }
   .cbb-projection-score,
   .cbb-projection-meta { align-items: flex-start; flex-direction: column; }
   .cbb-projection-score span { text-align: left; }

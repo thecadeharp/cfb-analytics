@@ -105,6 +105,18 @@ def four_factor_profile(stats: dict[str, Any]) -> dict[str, dict[str, float | No
     return {"offense": unit(team), "defense": unit(opponent)}
 
 
+def shot_profile_summary(stats: dict[str, Any]) -> dict[str, Any]:
+    shot_profile = stats.get("shotProfile") or {}
+    summary = stats.get("summary") or {}
+    return {
+        "tracked_shots": int(summary.get("trackedShots") or 0),
+        "at_rim_rate": percent((shot_profile.get("atRim") or {}).get("rate")),
+        "three_point_rate": percent((shot_profile.get("distribution") or {}).get("threeRate")),
+        "midrange_rate": percent((shot_profile.get("distribution") or {}).get("midrangeRate")),
+        "assisted_pct": percent(shot_profile.get("assistedPct")),
+    }
+
+
 def continuity_by_team(
     rosters: list[dict[str, Any]],
     prior_players: list[dict[str, Any]],
@@ -162,7 +174,6 @@ def team_profile(
     record = current.get("record") or {}
     team_stats = current.get("teamStats") or {}
     opponent_stats = current.get("opponentStats") or {}
-    shot_profile = current.get("shotProfile") or {}
     summary = current.get("summary") or {}
     games = int(record.get("games") or 0)
     current_adjusted = adjusted(current)
@@ -201,17 +212,12 @@ def team_profile(
             "free_throw_rate": difference(team_stats.get("freeThrowRate"), opponent_stats.get("freeThrowRate")),
         },
         "four_factors": four_factor_profile(current),
-        "shot_profile": {
-            "tracked_shots": int(summary.get("trackedShots") or 0),
-            "at_rim_rate": percent((shot_profile.get("atRim") or {}).get("rate")),
-            "three_point_rate": percent((shot_profile.get("distribution") or {}).get("threeRate")),
-            "midrange_rate": percent((shot_profile.get("distribution") or {}).get("midrangeRate")),
-            "assisted_pct": percent(shot_profile.get("assistedPct")),
-        },
+        "shot_profile": shot_profile_summary(current),
         "preseason_prior": {
             "source_season": benchmark_season,
             "adjusted": prior_adjusted,
             "four_factors": four_factor_profile(prior),
+            "shot_profile": shot_profile_summary(prior),
             **continuity,
         },
         "sample_ready": games >= 3,
@@ -317,7 +323,7 @@ def build_outputs(
         "meta": {
             "schema_version": "2.0", "season": season, "benchmark_season": benchmark_season,
             "generated_at_utc": generated, "request_count": 8,
-            "builder_version": "cbb-foundation-v2.2",
+            "builder_version": "cbb-foundation-v2.3",
             "raw_api_data_stored": False, "cfb_or_model_a_files_accessed": False,
         },
         "coverage": {

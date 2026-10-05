@@ -51,6 +51,7 @@ class CbbDataFoundationTests(unittest.TestCase):
         self.assertEqual(alpha["four_factors"]["offense"]["effective_fg_pct"], 55.0)
         self.assertEqual(alpha["four_factors"]["defense"]["effective_fg_pct"], 48.0)
         self.assertEqual(alpha["preseason_prior"]["four_factors"]["offense"]["turnover_pct"], 18.0)
+        self.assertEqual(alpha["preseason_prior"]["shot_profile"]["tracked_shots"], 0)
         self.assertEqual(alpha["preseason_prior"]["returning_minutes_pct"], 60.0)
         self.assertEqual(alpha["preseason_prior"]["returning_points_pct"], 60.0)
         self.assertEqual(alpha["espn_id"], "1234")
@@ -60,7 +61,7 @@ class CbbDataFoundationTests(unittest.TestCase):
         self.assertEqual(board["games"][0]["market"]["spread_move"], -1.0)
         self.assertEqual(board["games"][0]["broadcasts"], ["ESPN2"])
         self.assertEqual(status["meta"]["request_count"], 8)
-        self.assertEqual(status["meta"]["builder_version"], "cbb-foundation-v2.2")
+        self.assertEqual(status["meta"]["builder_version"], "cbb-foundation-v2.3")
         self.assertFalse(status["meta"]["raw_api_data_stored"])
 
 
