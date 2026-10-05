@@ -69,7 +69,7 @@ class CbbPlayerResearchTests(unittest.TestCase):
         ]
         rosters = [roster([row], row["teamId"]) for row in players]
         payload = build_player_research(2026, 2027, players, teams, rosters, min_minutes=0, min_games=0)
-        self.assertEqual(payload["meta"]["version"], "thi-cbb-player-research-v1.2")
+        self.assertEqual(payload["meta"]["version"], "thi-cbb-player-research-v1.3")
         self.assertEqual(payload["meta"]["source_season"], 2026)
         self.assertEqual(payload["meta"]["roster_season"], 2027)
         self.assertEqual(payload["meta"]["roster_source"], "cbbd")
@@ -88,6 +88,8 @@ class CbbPlayerResearchTests(unittest.TestCase):
             self.assertTrue(math.isfinite(rating))
             self.assertGreaterEqual(rating, 1)
             self.assertLessEqual(rating, 99)
+            self.assertIn("prior_production_rating", row["research_scores"])
+            self.assertIn("competition_adjustment", row["projection_context"])
 
     def test_filters_departures_and_maps_transfers_to_current_roster(self):
         qualified = player(1, 2, 1)
@@ -124,6 +126,72 @@ class CbbPlayerResearchTests(unittest.TestCase):
         team = payload["team_rosters"][0]
         expected = 100 * returning["minutes"] / (returning["minutes"] + departed["minutes"])
         self.assertAlmostEqual(team["returning_minutes_pct"], expected, places=2)
+
+    def test_projected_impact_translates_equal_production_by_team_strength(self):
+        strong = player(1, 4, 1)
+        weak = dict(strong, teamId=2, team="Team 2", athleteId=2002, athleteSourceId="source-weak", name="Weak Schedule Player")
+        teams = [
+            {"teamId": 1, "adjustedEfficiency": {"netRating": 25, "rankings": {"net": 5}}},
+            {"teamId": 2, "adjustedEfficiency": {"netRating": -12, "rankings": {"net": 330}}},
+            {"teamId": 3, "adjustedEfficiency": {"netRating": 0, "rankings": {"net": 170}}},
+        ]
+        payload = build_player_research(
+            2026,
+            2027,
+            [strong, weak],
+            teams,
+            [roster([strong], 1), roster([weak], 2)],
+            min_minutes=0,
+            min_games=0,
+        )
+        by_name = {row["name"]: row for row in payload["players"]}
+        self.assertGreater(
+            by_name[strong["name"]]["research_scores"]["projected_impact_rating"],
+            by_name[weak["name"]]["research_scores"]["projected_impact_rating"],
+        )
+        self.assertEqual(
+            by_name[strong["name"]]["research_scores"]["prior_production_rating"],
+            by_name[weak["name"]]["research_scores"]["prior_production_rating"],
+        )
+
+    def test_adds_verified_recruit_without_fabricating_prior_stats(self):
+        veteran = player(1, 4, 1)
+        newcomer = {
+            "athleteId": 9001,
+            "athleteSourceId": "freshman-source",
+            "name": "Elite Freshman",
+            "position": "G",
+        }
+        current_roster = roster([veteran], 1)
+        current_roster["players"].append({
+            "id": newcomer["athleteId"],
+            "sourceId": newcomer["athleteSourceId"],
+            "name": newcomer["name"],
+            "position": newcomer["position"],
+        })
+        recruits = [{
+            "athleteId": newcomer["athleteId"],
+            "firstName": "Elite",
+            "lastName": "Freshman",
+            "rating": 0.995,
+            "stars": 5,
+            "committedTo": {"id": 1},
+        }]
+        payload = build_player_research(
+            2026,
+            2027,
+            [veteran],
+            [{"teamId": 1, "adjustedEfficiency": {"netRating": 20}}],
+            [current_roster],
+            min_minutes=0,
+            min_games=0,
+            recruits=recruits,
+        )
+        freshman = next(row for row in payload["players"] if row["name"] == newcomer["name"])
+        self.assertEqual(freshman["projection_context"]["basis"], "freshman projection")
+        self.assertIsNone(freshman["research_scores"]["prior_production_rating"])
+        self.assertEqual(freshman["sample"]["minutes"], 0.0)
+        self.assertEqual(payload["coverage"]["projected_newcomers"], 1)
 
     def test_rejects_same_or_older_roster_season(self):
         with self.assertRaisesRegex(RuntimeError, "Roster season"):
