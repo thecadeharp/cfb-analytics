@@ -81,7 +81,7 @@ class CbbWalkForwardModelTests(unittest.TestCase):
                 }],
             }
             players = {
-                "meta": {"version": "thi-cbb-player-research-v1.2"},
+                "meta": {"version": "thi-cbb-player-research-v1.3"},
                 "team_rosters": [{"team_id": 1, "returning_minutes_pct": 62.5}],
             }
             profile_path = root / "profiles.json"
