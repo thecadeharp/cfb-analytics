@@ -23,7 +23,7 @@ def priors(conferences: int = 32, teams_each: int = 3) -> dict:
 class CbbBracketologyTests(unittest.TestCase):
     def test_builds_complete_field_first_four_and_bubble(self):
         payload = build_bracketology(priors())
-        self.assertEqual(payload["meta"]["version"], "thi-cbb-bracketology-v0.1")
+        self.assertEqual(payload["meta"]["version"], "thi-cbb-bracketology-v0.2")
         self.assertEqual(len(payload["field"]), 68)
         self.assertEqual(sum(row["bid_type"] == "automatic" for row in payload["field"]), 32)
         self.assertEqual(sum(row["bid_type"] == "at_large" for row in payload["field"]), 36)

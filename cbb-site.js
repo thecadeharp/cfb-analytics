@@ -11,6 +11,7 @@
     projectionBoard: "data/cbb/projection_board.json",
     playStyle: "data/cbb/play_style.json",
     matchups: "data/cbb/matchup_engine.json",
+    intelligence: "data/cbb/intelligence_suite.json",
     tracking: "data/cbb/model_tracking.json",
     bracketology: "data/cbb/bracketology.json"
   };
@@ -155,13 +156,14 @@
     if (state.loaded) return state.data;
     if (state.loading) return state.loading;
     state.loading = Promise.all(Object.entries(PATHS).map(async ([key, path]) => {
-      if (["projectionBoard", "tracking", "bracketology", "playStyle", "matchups"].includes(key)) {
+      if (["projectionBoard", "tracking", "bracketology", "playStyle", "matchups", "intelligence"].includes(key)) {
         try { return [key, await fetchJson(path)]; }
         catch (_error) {
           if (key === "projectionBoard") return [key, { meta: {}, games: [] }];
           if (key === "tracking") return [key, { meta: {}, summary: {}, spread_decisions: [], total_decisions: [] }];
           if (key === "bracketology") return [key, { meta: {}, field: [], regions: {}, first_four: [], bubble: {}, conference_bids: [] }];
           if (key === "playStyle") return [key, { meta: {}, teams: [], games: [] }];
+          if (key === "intelligence") return [key, { meta: {}, player_projections: [], team_dossiers: [], market_board: [] }];
           return [key, { meta: {}, games: [] }];
         }
       }
@@ -796,6 +798,7 @@
     const panel = detail.querySelector(".cbb-detail-panel");
     const score = player.research_scores || {};
     const metrics = player.metrics || {};
+    const forecast = state.data?.intelligence?.player_projections?.find(row => row.player_season_id === playerId) || {};
     panel.innerHTML = `
       <button class="cbb-detail-close" type="button" data-cbb-close>Close</button>
       <div class="cbb-kicker">THI CBB player profile</div>
@@ -812,6 +815,10 @@
       </div>
       <section class="cbb-detail-section"><h3>Scoring and creation</h3>
         ${playerDetailRow("Points per 40", number(metrics.points_per_40,2), player, "points_per_40")}${playerDetailRow("Usage", pct(metrics.usage), player, "usage")}${playerDetailRow("True shooting", shootingPct(metrics.true_shooting_pct), player, "true_shooting_pct")}${playerDetailRow("Effective FG", pct(metrics.effective_field_goal_pct), player, "effective_field_goal_pct")}${playerDetailRow("PORPAG", number(metrics.porpag,3), player, "porpag")}${playerDetailRow("Offensive rating", number(metrics.offensive_rating,1), player, "offensive_rating")}${playerDetailRow("Assist / turnover", number(metrics.assist_turnover_ratio,2), player, "assist_turnover_ratio")}${playerDetailRow("Assists per 40", number(metrics.assists_per_40,2), player, "assists_per_40")}${playerDetailRow("Turnovers per 40", number(metrics.turnovers_per_40,2), player, "turnovers_per_40", true)}
+      </section>
+      <section class="cbb-detail-section"><h3>Projected per-game role</h3>
+        ${detailRow("Projected minutes", number(forecast.projected_minutes,1))}${detailRow("Projected points", number(forecast.projected_points,1))}${detailRow("Projected rebounds", number(forecast.projected_rebounds,1))}${detailRow("Projected assists", number(forecast.projected_assists,1))}${detailRow("Projection state", humanize(forecast.projection_state || "not available"))}
+        <div class="cbb-model-sub">Counting-stat forecasts publish only for players with qualified prior production. Role-only players retain impact context without fabricated box-score estimates.</div>
       </section>
       <section class="cbb-detail-section"><h3>Defense and possession value</h3>
         ${playerDetailRow("Defensive rating", number(metrics.defensive_rating,1), player, "defensive_rating", true)}${playerDetailRow("Net rating", number(metrics.net_rating,1,true), player, "net_rating")}${playerDetailRow("Rebounds per 40", number(metrics.rebounds_per_40,2), player, "rebounds_per_40")}${playerDetailRow("Offensive rebounds per 40", number(metrics.offensive_rebounds_per_40,2), player, "offensive_rebounds_per_40")}${playerDetailRow("Steals per 40", number(metrics.steals_per_40,2), player, "steals_per_40")}${playerDetailRow("Blocks per 40", number(metrics.blocks_per_40,2), player, "blocks_per_40")}${playerDetailRow("Win shares per 40", number(metrics.total_win_shares_per_40,3), player, "total_win_shares_per_40")}
@@ -849,17 +856,17 @@
     const bubble = bracket.bubble || {};
     const regions = bracket.regions || {};
     const firstFour = bracket.first_four || [];
-    const atLargeCut = (bubble.last_four_in || []).reduce((minimum, team) => Math.min(minimum, Number(team.prior_net)), Infinity);
+    const atLargeCut = (bubble.last_four_in || []).reduce((minimum, team) => Math.min(minimum, Number(team.selection_score ?? team.prior_net)), Infinity);
     view.innerHTML = `
       <div class="cbb-kicker">NCAA tournament projection</div>
       <h1 class="page-title">THI Bracketology</h1>
       <p class="page-subtitle">THI's 68-team field forecast, organized into four regions with automatic bids, at-large selections, the First Four and both sides of the cut line.</p>
-      <div class="cbb-readiness-banner"><span class="cbb-status-pill">Preseason strength forecast</span><strong>Power selects the opening field</strong><p>${escapeHtml(meta.limitations)}</p></div>
+      <div class="cbb-readiness-banner"><span class="cbb-status-pill">Strength + résumé forecast</span><strong>Predictive quality anchors the field; results phase in</strong><p>${escapeHtml(meta.limitations)}</p></div>
       <div class="cbb-stat-grid">
         ${statCard("Projected field", integer(meta.field_size), `${integer(meta.automatic_bid_count)} auto · ${integer(meta.at_large_count)} at-large`)}
         ${statCard("No. 1 overall", escapeHtml(field[0]?.team || "—"), `${number(field[0]?.prior_net,1,true)} THI net`)}
-        ${statCard("At-large cut", Number.isFinite(atLargeCut) ? number(atLargeCut,1,true) : "—", "Lowest current at-large prior")}
-        ${statCard("Forecast state", "Preseason", `2027 · ${escapeHtml(meta.version || "v0.1")}`)}
+        ${statCard("At-large cut", Number.isFinite(atLargeCut) ? number(atLargeCut,1,true) : "—", "Lowest current selection score")}
+        ${statCard("Forecast state", field.some(team => team.selection_state === "strength_plus_early_resume") ? "Strength + résumé" : "Strength only", `2027 · ${escapeHtml(meta.version || "v0.2")}`)}
       </div>
 
       <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Projected 64-team bracket</div><h2 class="cbb-section-title">Four regions</h2></div><div class="cbb-section-note">The slash identifies a First Four slot. Region placement uses an S-curve with conference separation where the field allows.</div></div>
@@ -938,6 +945,7 @@
     const history = state.data.history.seasons || [];
     const test = state.data.model.evaluation?.out_of_time_test || {};
     const marketGames = history.reduce((sum, season) => sum + Number(season.games_with_market || 0), 0);
+    const marketBoard = state.data.intelligence?.market_board || [];
     view.innerHTML = `
       <div class="cbb-kicker">Price discovery and model accountability</div>
       <h1 class="page-title">CBB Market Research</h1>
@@ -954,6 +962,9 @@
           ${methodCard("Comparison", "Measure disagreement", "Frozen THI projections are compared with the available market and final result.")}
           ${methodCard("Accountability", "Track before promotion", "ATS, total, calibration and error results must generalize out of time before public signals appear.")}
         </div>
+      </section>
+      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Current market board</div><h2 class="cbb-section-title">Open-to-current movement</h2></div><div class="cbb-section-note">Movement is descriptive context. It never enters the projection model.</div></div>
+        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Matchup</th><th>Open spread</th><th>Current spread</th><th>Move</th><th>Open total</th><th>Current total</th><th>Total move</th><th>THI edge</th></tr></thead><tbody>${marketBoard.length ? marketBoard.map(row => `<tr><td><strong>${escapeHtml(row.away_team)} at ${escapeHtml(row.home_team)}</strong></td><td class="cbb-number">${number(row.opening_spread,1,true)}</td><td class="cbb-number">${number(row.current_spread,1,true)}</td><td class="cbb-number">${number(row.spread_move,1,true)}</td><td class="cbb-number">${number(row.opening_total,1)}</td><td class="cbb-number">${number(row.current_total,1)}</td><td class="cbb-number">${number(row.total_move,1,true)}</td><td class="cbb-number">${number(row.model_edge,1,true)}</td></tr>`).join("") : `<tr><td colspan="8" class="cbb-empty">No current market observations are available.</td></tr>`}</tbody></table></div>
       </section>
     `;
   }
@@ -1078,6 +1089,8 @@
     const preseason = profile?.preseason_prior || {};
     const factors = prior.prior_four_factors || {};
     const roster = state.playerData?.team_rosters?.find(row => Number(row.team_id) === Number(teamId));
+    const dossier = state.data?.intelligence?.team_dossiers?.find(row => Number(row.team_id) === Number(teamId));
+    const homeCourt = state.data?.intelligence?.home_court || {};
     panel.innerHTML = `
       <button class="cbb-detail-close" type="button" data-cbb-close>Close</button>
       <div class="cbb-kicker">THI CBB team profile</div>
@@ -1101,6 +1114,13 @@
         ${detailRow("2026 source net", number(preseason.adjusted?.net,1,true))}
         ${detailRow("Current rating state", "Preseason prior")}
         ${detailRow("Returning-minutes signal", prior.returning_minutes_pct > 0 ? pct(prior.returning_minutes_pct) : "Unavailable in current feed")}
+      </section>
+      <section class="cbb-detail-section"><h3>Projection context</h3>
+        ${detailRow("National home-court effect", homeCourt.national_points == null ? "Awaiting model estimate" : `${number(homeCourt.national_points,2,true)} points`)}
+        ${detailRow("Team-specific venue value", "Withheld pending qualified sample")}
+        ${detailRow("Neutral-site adjustment", "0.00 points")}
+        <div class="cbb-model-sub">THI uses the walk-forward model's learned national home-court effect. A team-specific venue value will appear only after its historical sample clears stability checks.</div>
+        <div class="cbb-roster-list">${dossier?.schedule_window?.length ? dossier.schedule_window.slice(0,6).map(game => `<div class="cbb-detail-row"><span>${escapeHtml(humanize(game.site))} vs ${escapeHtml(game.opponent)}</span><strong>${number(game.projected_margin,1,true)} · ${pct(game.win_probability)}</strong></div>`).join("") : `<div class="cbb-empty">No games in the current projection window.</div>`}</div>
       </section>
       <section class="cbb-detail-section"><h3>Verified roster and rotation outlook</h3>
         <div class="cbb-model-sub">Every listed player is verified on the current roster. THI grades appear only when the player has a qualifying prior-season sample; freshmen and limited samples stay explicitly unrated.</div>

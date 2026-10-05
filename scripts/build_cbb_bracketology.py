@@ -14,7 +14,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "thi-cbb-bracketology-v0.1"
+VERSION = "thi-cbb-bracketology-v0.2"
 REGIONS = ("East", "South", "Midwest", "West")
 FIELD_SIZE = 68
 AT_LARGE_COUNT = 36
@@ -22,7 +22,7 @@ AT_LARGE_COUNT = 36
 
 def rating(row: dict[str, Any]) -> float:
     try:
-        value = float(row.get("prior_net"))
+        value = float(row.get("selection_score", row.get("prior_net")))
         return value if math.isfinite(value) else -999.0
     except (TypeError, ValueError):
         return -999.0
@@ -44,6 +44,10 @@ def team_row(row: dict[str, Any], bid_type: str) -> dict[str, Any]:
             "abbreviation": conference.get("abbreviation") or conference.get("name") or "Independent",
         },
         "prior_net": round(rating(row), 3),
+        "strength_score": row.get("strength_score"),
+        "resume_score": row.get("resume_score"),
+        "selection_score": round(rating(row), 3),
+        "selection_state": row.get("selection_state", "strength_only"),
         "bid_type": bid_type,
         "overall_rank": None,
         "seed": None,
@@ -104,11 +108,21 @@ def assign_regions(
     return regions
 
 
-def build_bracketology(priors_payload: dict[str, Any]) -> dict[str, Any]:
+def build_bracketology(priors_payload: dict[str, Any], profiles_payload: dict[str, Any] | None = None) -> dict[str, Any]:
     model_version = priors_payload.get("meta", {}).get("model_version")
     if model_version != "thi-cbb-walk-forward-v0.7-research":
         raise RuntimeError("bracketology requires thi-cbb-walk-forward-v0.7-research priors")
-    source = [row for row in priors_payload.get("teams") or [] if rating(row) > -999]
+    profiles = {str(row.get("team_id")): row for row in (profiles_payload or {}).get("teams") or []}
+    source = []
+    for original in priors_payload.get("teams") or []:
+        row = dict(original)
+        strength = rating(row)
+        record = (profiles.get(str(row.get("team_id"))) or {}).get("record") or {}
+        games, wins = int(record.get("games") or 0), int(record.get("wins") or 0)
+        weight = min(1.0, games / 12.0)
+        resume = (wins / games - .5) * 16.0 if games else 0.0
+        row.update({"strength_score": round(strength,3), "resume_score": round(resume,3) if games else None, "selection_score": round(strength + weight * resume,3), "selection_state": "strength_plus_early_resume" if games else "strength_only"})
+        if rating(row) > -999: source.append(row)
     by_conference: dict[str, list[dict[str, Any]]] = {}
     for row in source:
         by_conference.setdefault(conference_key(row), []).append(row)
@@ -186,12 +200,12 @@ def build_bracketology(priors_payload: dict[str, Any]) -> dict[str, Any]:
             "model_version": model_version,
             "season": priors_payload.get("meta", {}).get("season"),
             "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-            "forecast_type": "preseason_strength_forecast",
+            "forecast_type": "strength_and_resume_forecast",
             "field_size": FIELD_SIZE,
             "automatic_bid_count": len(autos),
             "at_large_count": len(at_larges),
-            "methodology": "The top THI preseason prior in each conference receives its projected automatic bid. The 36 strongest remaining teams receive at-large bids.",
-            "limitations": "This is a preseason strength forecast, not a committee resume simulation. Results, quadrant records, road performance and conference-tournament paths activate after games are played.",
+            "methodology": "Selection score begins with THI predictive strength and gradually adds current win-loss resume evidence over the first 12 games. Conference leaders receive projected automatic bids; the strongest remaining selection scores receive at-large bids.",
+            "limitations": "Quadrant records and road/neutral resume detail remain withheld until opponent NET-style tiers have enough current-season evidence.",
         },
         "field": field,
         "first_four": first_four,
@@ -217,9 +231,10 @@ def atomic_write(path: Path, payload: dict[str, Any]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--priors", type=Path, default=ROOT / "data" / "cbb" / "model" / "current_priors.json")
+    parser.add_argument("--profiles", type=Path, default=ROOT / "data" / "cbb" / "team_profiles.json")
     parser.add_argument("--output", type=Path, default=ROOT / "data" / "cbb" / "bracketology.json")
     args = parser.parse_args()
-    payload = build_bracketology(json.loads(args.priors.read_text()))
+    payload = build_bracketology(json.loads(args.priors.read_text()), json.loads(args.profiles.read_text()) if args.profiles.exists() else None)
     atomic_write(args.output, payload)
     print(f"{VERSION}: {len(payload['field'])} teams, {len(payload['conference_bids'])} conferences")
 
