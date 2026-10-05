@@ -55,7 +55,7 @@ class CbbProjectionBoardTests(unittest.TestCase):
             },
         }
         payload = build_board(games, profiles, priors, model)
-        self.assertEqual(payload["meta"]["version"], "thi-cbb-projection-board-v0.1")
+        self.assertEqual(payload["meta"]["version"], "thi-cbb-projection-board-v0.2")
         self.assertEqual(len(payload["games"]), 2)
         opening = payload["games"][0]["projection"]
         tracked = payload["games"][1]["projection"]
@@ -65,6 +65,8 @@ class CbbProjectionBoardTests(unittest.TestCase):
         self.assertTrue(tracked["spread_signal_eligible"])
         self.assertFalse(tracked["totals_signal_eligible"])
         self.assertTrue(0 <= tracked["home_win_probability"] <= 100)
+        self.assertEqual(len(tracked["matchup_context"]["margin_drivers"]), 2)
+        self.assertEqual(tracked["matchup_context"]["home"]["games"], 6)
 
     def test_rejects_unapproved_model_version(self):
         with self.assertRaisesRegex(RuntimeError, "v0.6"):
