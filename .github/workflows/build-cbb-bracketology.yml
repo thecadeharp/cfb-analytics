@@ -1,0 +1,78 @@
+name: Build CBB Bracketology
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-cbb-bracketology
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Preserve source artifacts and College Football
+        run: |
+          sha256sum \
+            data/projections.json \
+            data/cfb_metrics.json \
+            scripts/build_projections.py \
+            data/cbb/model/current_priors.json \
+            data/cbb/model/model_card.json \
+            data/cbb/projection_board.json \
+            > /tmp/cbb-bracketology-before.sha256
+
+      - name: Test bracketology contract
+        run: |
+          python -m py_compile \
+            scripts/build_cbb_bracketology.py \
+            scripts/test_cbb_bracketology.py
+          python -m unittest scripts/test_cbb_bracketology.py
+
+      - name: Build preseason field forecast
+        run: python scripts/build_cbb_bracketology.py
+
+      - name: Validate output and isolation
+        run: |
+          sha256sum --check /tmp/cbb-bracketology-before.sha256
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("data/cbb/bracketology.json").read_text())
+          meta = payload["meta"]
+          assert meta["version"] == "thi-cbb-bracketology-v0.1"
+          assert meta["model_version"] == "thi-cbb-walk-forward-v0.6-research"
+          assert meta["forecast_type"] == "preseason_strength_forecast"
+          assert len(payload["field"]) == 68
+          assert sum(row["bid_type"] == "automatic" for row in payload["field"]) == 32
+          assert sum(row["bid_type"] == "at_large" for row in payload["field"]) == 36
+          assert len(payload["first_four"]) == 4
+          assert all(len(rows) == 16 for rows in payload["regions"].values())
+          assert len(payload["bubble"]["first_four_out"]) == 4
+          assert len(payload["bubble"]["next_four_out"]) == 4
+          PY
+
+      - name: Commit bracketology output only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/cbb/bracketology.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Build CBB preseason bracketology"
+          git pull --rebase origin main
+          git push origin HEAD:main
