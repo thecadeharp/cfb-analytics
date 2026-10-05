@@ -97,6 +97,7 @@ class CbbWalkForwardModelTests(unittest.TestCase):
             row = payload["teams"][0]
             self.assertEqual(row["returning_minutes_pct"], 62.5)
             self.assertEqual(row["continuity_source"], "verified_current_roster_join")
+            self.assertEqual(row["prior_tempo"], 68)
             self.assertEqual(payload["meta"]["verified_roster_continuity_count"], 1)
             self.assertGreater(row["prior_net"], 15)
 
