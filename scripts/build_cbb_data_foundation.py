@@ -90,6 +90,21 @@ def adjusted(stats: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def four_factor_profile(stats: dict[str, Any]) -> dict[str, dict[str, float | None]]:
+    team = stats.get("teamStats") or {}
+    opponent = stats.get("opponentStats") or {}
+
+    def unit(block: dict[str, Any]) -> dict[str, float | None]:
+        return {
+            "effective_fg_pct": percent(block.get("effectiveFieldGoalPct")),
+            "turnover_pct": percent(block.get("turnoverRatio")),
+            "offensive_rebound_pct": percent(block.get("offensiveReboundPct")),
+            "free_throw_rate": percent(block.get("freeThrowRate")),
+        }
+
+    return {"offense": unit(team), "defense": unit(opponent)}
+
+
 def continuity_by_team(
     rosters: list[dict[str, Any]],
     prior_players: list[dict[str, Any]],
@@ -185,6 +200,7 @@ def team_profile(
             "offensive_rebound_pct": difference(team_stats.get("offensiveReboundPct"), opponent_stats.get("offensiveReboundPct")),
             "free_throw_rate": difference(team_stats.get("freeThrowRate"), opponent_stats.get("freeThrowRate")),
         },
+        "four_factors": four_factor_profile(current),
         "shot_profile": {
             "tracked_shots": int(summary.get("trackedShots") or 0),
             "at_rim_rate": percent((shot_profile.get("atRim") or {}).get("rate")),
@@ -195,6 +211,7 @@ def team_profile(
         "preseason_prior": {
             "source_season": benchmark_season,
             "adjusted": prior_adjusted,
+            "four_factors": four_factor_profile(prior),
             **continuity,
         },
         "sample_ready": games >= 3,
