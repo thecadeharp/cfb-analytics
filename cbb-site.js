@@ -1115,6 +1115,8 @@
     const totals = test.totals_by_edge || [];
     const contexts = test.context_slices || {};
     const calibration = test.win_probability_calibration || [];
+    const seasons = card.evaluation?.by_season || {};
+    const errorProfile = test.error_profile || {};
     const view = document.getElementById("view-cbb-tracking");
     view.innerHTML = `
       <div class="cbb-kicker">Transparent research and accountability</div>
@@ -1137,6 +1139,16 @@
         ${modelCard("2026 out-of-time test", "Margin MAE", number(test.margin_mae,3), `${integer(test.games)} games · ${pct(test.winner_accuracy)} winner accuracy`)}
         ${modelCard("2026 market comparison", "Margin MAE gap", number(Number(test.margin_mae) - Number(test.market_margin_mae),3,true), `THI ${number(test.margin_mae,3)} · market ${number(test.market_margin_mae,3)}`)}
         ${modelCard("Activation state", "Public engine", "Withheld", "Research-only until every required promotion check passes")}
+      </div>
+
+      <section class="cbb-section">
+        <div class="cbb-section-head"><div><div class="cbb-label">Strict chronological replay</div><h2 class="cbb-section-title">Historical walk-forward laboratory</h2></div><div class="cbb-section-note">Every row is projected before that game's result updates either team. Validation and out-of-time seasons never fit the model.</div></div>
+        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Season</th><th>Split</th><th>Games</th><th>Margin MAE</th><th>Market MAE</th><th>Total MAE</th><th>Market total MAE</th><th>Winner accuracy</th></tr></thead><tbody>${Object.entries(seasons).map(([season,row]) => `<tr><td class="cbb-number">${escapeHtml(season)}</td><td>${escapeHtml(humanize(row.split))}</td><td class="cbb-number">${integer(row.games)}</td><td class="cbb-number">${number(row.margin_mae,3)}</td><td class="cbb-number">${number(row.market_margin_mae,3)}</td><td class="cbb-number">${number(row.total_mae,3)}</td><td class="cbb-number">${number(row.market_total_mae,3)}</td><td class="cbb-number">${pct(row.winner_accuracy)}</td></tr>`).join("")}</tbody></table></div>
+      </section>
+
+      <div class="cbb-model-grid">
+        ${modelCard("Out-of-time error shape", "Margin bias", number(errorProfile.margin_bias,3,true), `Median absolute ${number(errorProfile.margin_median_absolute_error,3)} · 90th percentile ${number(errorProfile.margin_p90_absolute_error,3)}`)}
+        ${modelCard("Out-of-time error shape", "Total bias", number(errorProfile.total_bias,3,true), `Median absolute ${number(errorProfile.total_median_absolute_error,3)} · 90th percentile ${number(errorProfile.total_p90_absolute_error,3)}`)}
       </div>
 
       <section class="cbb-section">
