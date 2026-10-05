@@ -122,6 +122,9 @@ class CbbWalkForwardModelTests(unittest.TestCase):
         self.assertEqual(report["context_slices"]["settled_sample"]["games"], 1)
         self.assertEqual(report["context_slices"]["neutral_site"]["games"], 1)
         self.assertEqual(sum(row["games"] for row in report["win_probability_calibration"]), 4)
+        self.assertIn("margin_bias", report["error_profile"])
+        self.assertGreaterEqual(report["error_profile"]["margin_p90_absolute_error"], report["error_profile"]["margin_median_absolute_error"])
+        self.assertGreaterEqual(report["error_profile"]["total_p90_absolute_error"], report["error_profile"]["total_median_absolute_error"])
 
 
 if __name__ == "__main__":
