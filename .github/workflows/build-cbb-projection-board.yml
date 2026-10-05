@@ -57,7 +57,7 @@ jobs:
           payload = json.loads(Path("data/cbb/projection_board.json").read_text())
           meta = payload["meta"]
           games = payload["games"]
-          assert meta["version"] == "thi-cbb-projection-board-v0.3"
+          assert meta["version"] == "thi-cbb-projection-board-v0.4"
           assert meta["model_version"] == "thi-cbb-walk-forward-v0.6-research"
           assert meta["settled_minimum_games"] == 6
           assert meta["spread_signal_minimum_edge"] == 5.0
