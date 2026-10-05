@@ -7,7 +7,8 @@
     foundation: "data/cbb/foundation_status.json",
     model: "data/cbb/model/model_card.json",
     priors: "data/cbb/model/current_priors.json",
-    history: "data/cbb/history/manifest.json"
+    history: "data/cbb/history/manifest.json",
+    projectionBoard: "data/cbb/projection_board.json"
   };
   const PLAYER_PATH = "data/cbb/player_ratings.json";
 
@@ -137,7 +138,13 @@
   async function loadData() {
     if (state.loaded) return state.data;
     if (state.loading) return state.loading;
-    state.loading = Promise.all(Object.entries(PATHS).map(async ([key, path]) => [key, await fetchJson(path)]))
+    state.loading = Promise.all(Object.entries(PATHS).map(async ([key, path]) => {
+      if (key === "projectionBoard") {
+        try { return [key, await fetchJson(path)]; }
+        catch (_error) { return [key, { meta: {}, games: [] }]; }
+      }
+      return [key, await fetchJson(path)];
+    }))
       .then(entries => {
         state.data = Object.fromEntries(entries);
         state.loaded = true;
@@ -213,14 +220,16 @@
   }
 
   function renderProjections() {
-    const { profiles, games, foundation, history, model } = state.data;
+    const { profiles, games, foundation, history, model, projectionBoard } = state.data;
     const meta = profiles.meta || {};
     const coverage = foundation.coverage || {};
-    const scheduled = Array.isArray(games.games) ? games.games : [];
+    const projected = Array.isArray(projectionBoard?.games) ? projectionBoard.games : [];
+    const scheduled = projected.length ? projected : (Array.isArray(games.games) ? games.games : []);
     const upcoming = scheduled
       .filter(game => String(game.status).toLowerCase() === "scheduled")
       .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
-      .slice(0, 8);
+      .slice(0, 12);
+    const trackedSignals = projected.filter(game => game.projection?.spread_signal_eligible).length;
     const modelVersion = model.meta?.model_version || "Research model";
     const view = document.getElementById("view-cbb-projections");
     view.innerHTML = `
@@ -231,20 +240,21 @@
           <p class="cbb-lede">Adjusted efficiency, tempo, Four Factors, personnel context and strict walk-forward testing—built as a separate basketball engine inside the same THI research platform.</p>
         </div>
         <div class="cbb-status-card">
-          <span class="cbb-status-pill">Research preview</span>
-          <div><strong>2027 preseason foundation</strong><p>The model is visible for accountability and evaluation. It has not cleared THI's promotion gate for public projections.</p></div>
+          <span class="cbb-status-pill">Research projections</span>
+          <div><strong>Sample-gated projection board</strong><p>Scores and win probabilities are visible from day one. Spread signals require six games for both teams and a five-point disagreement. Totals signals remain withheld.</p></div>
         </div>
       </div>
 
       <div class="cbb-stat-grid">
         ${statCard("D-I teams", integer(meta.team_count), "Full 2027 directory")}
         ${statCard("Historical games", integer(history.meta?.game_count), `${history.meta?.season_count || 0} walk-forward seasons`)}
-        ${statCard("Scheduled games", integer(coverage.window_games), "Current published window")}
-        ${statCard("Model state", "Research", escapeHtml(modelVersion))}
+        ${statCard("Projected games", integer(projected.length), "Current published window")}
+        ${statCard("Tracked signals", integer(trackedSignals), "Six-game minimum · 5+ point edge")}
+        ${statCard("Model state", "Sample-gated", escapeHtml(modelVersion))}
       </div>
 
       <section class="cbb-section">
-        <div class="cbb-section-head"><div><div class="cbb-label">Schedule</div><h2 class="cbb-section-title">Opening board</h2></div><div class="cbb-section-note">Schedule context only. THI projections remain withheld until the research model clears its validation gate.</div></div>
+        <div class="cbb-section-head"><div><div class="cbb-label">Projection board</div><h2 class="cbb-section-title">Upcoming games</h2></div><div class="cbb-section-note">Pregame score and win projections are research outputs. Only cards marked Tracked can carry a spread signal; totals remain projection context only.</div></div>
         <div class="cbb-game-list">${upcoming.length ? upcoming.map(gameCard).join("") : `<div class="cbb-panel cbb-empty">No scheduled games are currently published.</div>`}</div>
       </section>
 
@@ -272,7 +282,15 @@
     const date = Number.isNaN(start.getTime()) ? "Date TBD" : new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: game.start_time_tbd ? undefined : "numeric", minute: game.start_time_tbd ? undefined : "2-digit", timeZone: "America/New_York", timeZoneName: game.start_time_tbd ? undefined : "short" }).format(start);
     const venue = game.venue?.name || (game.neutral_site ? "Neutral site" : "Venue TBD");
     const network = game.broadcasts?.map(item => item.network || item).filter(Boolean).join(", ") || "TV TBD";
-    return `<article class="cbb-panel cbb-game-card"><div class="cbb-game-top"><span class="cbb-game-date">${escapeHtml(date)}</span>${game.neutral_site ? '<span class="cbb-chip">Neutral</span>' : ""}</div><div class="cbb-matchup">${escapeHtml(game.away?.team)} <span>vs.</span> ${escapeHtml(game.home?.team)}</div><div class="cbb-game-meta">${escapeHtml(venue)} · ${escapeHtml(network)}</div></article>`;
+    const projection = game.projection;
+    if (!projection) return `<article class="cbb-panel cbb-game-card"><div class="cbb-game-top"><span class="cbb-game-date">${escapeHtml(date)}</span>${game.neutral_site ? '<span class="cbb-chip">Neutral</span>' : ""}</div><div class="cbb-matchup">${escapeHtml(game.away?.team)} <span>vs.</span> ${escapeHtml(game.home?.team)}</div><div class="cbb-game-meta">${escapeHtml(venue)} · ${escapeHtml(network)}</div></article>`;
+    const margin = Number(projection.home_margin);
+    const favored = margin >= 0 ? game.home?.team : game.away?.team;
+    const projectedLine = `${favored} -${Math.abs(margin).toFixed(1)}`;
+    const stateLabel = projection.sample_state === "tracked_sample" ? "Tracked" : projection.sample_state === "developing_sample" ? "Developing" : projection.sample_state === "early_sample" ? "Early sample" : "Preseason";
+    const signalTeam = Number(projection.spread_edge) >= 0 ? game.home?.team : game.away?.team;
+    const signal = projection.spread_signal_eligible ? `<span class="cbb-projection-signal">${escapeHtml(signalTeam)} spread edge · ${number(Math.abs(Number(projection.spread_edge)),1)} pts</span>` : `<span class="cbb-projection-withheld">${stateLabel} · no spread signal</span>`;
+    return `<article class="cbb-panel cbb-game-card"><div class="cbb-game-top"><span class="cbb-game-date">${escapeHtml(date)}</span><span class="cbb-chip">${escapeHtml(stateLabel)}</span></div><div class="cbb-matchup">${escapeHtml(game.away?.team)} <span>vs.</span> ${escapeHtml(game.home?.team)}</div><div class="cbb-projection-score"><strong>${number(projection.away_points,1)}–${number(projection.home_points,1)}</strong><span>${escapeHtml(projectedLine)} · ${pct(projection.home_win_probability)} home win</span></div><div class="cbb-projection-meta"><span>${number(projection.projected_possessions,1)} possessions</span><span>Projected total ${number(projection.total,1)} · totals signal withheld</span></div>${signal}<div class="cbb-game-meta">${escapeHtml(venue)} · ${escapeHtml(network)}</div></article>`;
   }
 
   function renderTeamData() {
