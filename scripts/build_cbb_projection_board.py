@@ -14,7 +14,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "thi-cbb-projection-board-v0.3"
+VERSION = "thi-cbb-projection-board-v0.4"
 SETTLED_MIN_GAMES = 6
 SPREAD_SIGNAL_EDGE = 5.0
 
@@ -190,7 +190,13 @@ def build_board(
         if status != "scheduled":
             frozen = existing.get(game_id)
             if frozen:
-                output.append({**frozen, **game, "market": frozen.get("market"), "projection": frozen["projection"]})
+                output.append({
+                    **frozen,
+                    **game,
+                    "market": frozen.get("market"),
+                    "closing_market": game.get("market") if status in {"final", "completed", "complete"} else None,
+                    "projection": frozen["projection"],
+                })
             continue
         home_id = str((game.get("home") or {}).get("team_id"))
         away_id = str((game.get("away") or {}).get("team_id"))
