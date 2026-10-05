@@ -8,7 +8,8 @@
     model: "data/cbb/model/model_card.json",
     priors: "data/cbb/model/current_priors.json",
     history: "data/cbb/history/manifest.json",
-    projectionBoard: "data/cbb/projection_board.json"
+    projectionBoard: "data/cbb/projection_board.json",
+    bracketology: "data/cbb/bracketology.json"
   };
   const PLAYER_PATH = "data/cbb/player_ratings.json";
 
@@ -139,9 +140,9 @@
     if (state.loaded) return state.data;
     if (state.loading) return state.loading;
     state.loading = Promise.all(Object.entries(PATHS).map(async ([key, path]) => {
-      if (key === "projectionBoard") {
+      if (key === "projectionBoard" || key === "bracketology") {
         try { return [key, await fetchJson(path)]; }
-        catch (_error) { return [key, { meta: {}, games: [] }]; }
+        catch (_error) { return [key, key === "projectionBoard" ? { meta: {}, games: [] } : { meta: {}, field: [], regions: {}, first_four: [], bubble: {}, conference_bids: [] }]; }
       }
       return [key, await fetchJson(path)];
     }))
@@ -599,20 +600,67 @@
 
   function renderBracketology() {
     const view = document.getElementById("view-cbb-bracketology");
+    const bracket = state.data.bracketology || {};
+    const meta = bracket.meta || {};
+    const field = bracket.field || [];
+    if (!field.length) {
+      view.innerHTML = `
+        <div class="cbb-kicker">NCAA tournament projection</div>
+        <h1 class="page-title">THI Bracketology</h1>
+        <p class="page-subtitle">A projected 68-team field built from THI team strength, résumé quality, conference races and selection-committee style inputs.</p>
+        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Awaiting first build</span><strong>The forecast is ready to generate</strong><p>Run the CBB Bracketology workflow to publish the initial 68-team preseason field.</p></div>`;
+      return;
+    }
+    const bubble = bracket.bubble || {};
+    const regions = bracket.regions || {};
+    const firstFour = bracket.first_four || [];
+    const atLargeCut = (bubble.last_four_in || []).reduce((minimum, team) => Math.min(minimum, Number(team.prior_net)), Infinity);
     view.innerHTML = `
       <div class="cbb-kicker">NCAA tournament projection</div>
       <h1 class="page-title">THI Bracketology</h1>
-      <p class="page-subtitle">A projected 68-team field built from THI team strength, résumé quality, conference races and selection-committee style inputs.</p>
-      <div class="cbb-readiness-banner"><span class="cbb-status-pill">Preseason shell</span><strong>The field is not projected yet</strong><p>The bracket activates after schedules, current-season results and conference membership are complete enough to support automatic-bid and at-large modeling.</p></div>
-      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">THI selection framework</div><h2 class="cbb-section-title">Four separate questions</h2></div></div>
-        <div class="cbb-stat-grid">
-          ${statCard("Team quality", "THI rating", "Opponent-adjusted possession strength")}
-          ${statCard("Résumé", "Earned seed", "Results, location and opponent quality")}
-          ${statCard("Auto bids", "Conference race", "Projected tournament champions")}
-          ${statCard("Bubble", "In / out", "Bid probability with first four out")}
+      <p class="page-subtitle">THI's 68-team field forecast, organized into four regions with automatic bids, at-large selections, the First Four and both sides of the cut line.</p>
+      <div class="cbb-readiness-banner"><span class="cbb-status-pill">Preseason strength forecast</span><strong>Power selects the opening field</strong><p>${escapeHtml(meta.limitations)}</p></div>
+      <div class="cbb-stat-grid">
+        ${statCard("Projected field", integer(meta.field_size), `${integer(meta.automatic_bid_count)} auto · ${integer(meta.at_large_count)} at-large`)}
+        ${statCard("No. 1 overall", escapeHtml(field[0]?.team || "—"), `${number(field[0]?.prior_net,1,true)} THI net`)}
+        ${statCard("At-large cut", Number.isFinite(atLargeCut) ? number(atLargeCut,1,true) : "—", "Lowest current at-large prior")}
+        ${statCard("Forecast state", "Preseason", `2027 · ${escapeHtml(meta.version || "v0.1")}`)}
+      </div>
+
+      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Projected 64-team bracket</div><h2 class="cbb-section-title">Four regions</h2></div><div class="cbb-section-note">The slash identifies a First Four slot. Region placement uses an S-curve with conference separation where the field allows.</div></div>
+        <div class="cbb-bracket-grid">${["East", "South", "Midwest", "West"].map(region => bracketRegion(region, regions[region] || [])).join("")}</div>
+      </section>
+
+      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Dayton</div><h2 class="cbb-section-title">First Four</h2></div><div class="cbb-section-note">The last four at-larges and four lowest projected automatic bids play into the 64-team bracket.</div></div>
+        <div class="cbb-first-four-grid">${firstFour.map(firstFourCard).join("")}</div>
+      </section>
+
+      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Selection line</div><h2 class="cbb-section-title">Bubble board</h2></div><div class="cbb-section-note">This becomes résumé-driven as 2027 results, road performance and opponent quality accumulate.</div></div>
+        <div class="cbb-bubble-grid">
+          ${bubbleColumn("Last four in", bubble.last_four_in || [], true)}
+          ${bubbleColumn("First four out", bubble.first_four_out || [])}
+          ${bubbleColumn("Next four out", bubble.next_four_out || [])}
         </div>
       </section>
+
+      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">League footprint</div><h2 class="cbb-section-title">Projected bids by conference</h2></div><div class="cbb-section-note">Every conference receives one projected automatic bid; additional bids reflect THI's current strength order.</div></div>
+        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table cbb-bid-table"><thead><tr><th>Conference</th><th>Total bids</th><th>Auto</th><th>At-large</th></tr></thead><tbody>${(bracket.conference_bids || []).map(row => `<tr><td class="cbb-team-name">${escapeHtml(row.conference)}</td><td class="cbb-number">${integer(row.bids)}</td><td class="cbb-number">${integer(row.automatic)}</td><td class="cbb-number">${integer(row.at_large)}</td></tr>`).join("")}</tbody></table></div>
+      </section>
     `;
+    view.querySelectorAll("[data-bracket-team-id]").forEach(button => button.addEventListener("click", () => openTeamDetail(button.dataset.bracketTeamId)));
+  }
+
+  function bracketRegion(region, rows) {
+    return `<article class="cbb-panel cbb-region-card"><div class="cbb-region-head"><span>${escapeHtml(region)}</span><small>16 seeds</small></div><div class="cbb-seed-list">${rows.map(row => `<div class="cbb-seed-row ${row.first_four ? "is-first-four" : ""}"><strong>${integer(row.seed)}</strong>${row.first_four ? `<span>${escapeHtml(row.team)}</span>` : `<button type="button" data-bracket-team-id="${escapeHtml(row.team_id)}">${escapeHtml(row.team)}</button>`}<small>${escapeHtml(row.conference)}</small></div>`).join("")}</div></article>`;
+  }
+
+  function firstFourCard(game) {
+    const label = game.bid_type === "automatic" ? "Automatic bid" : "At-large";
+    return `<article class="cbb-panel cbb-first-four-card"><div class="cbb-label">${escapeHtml(game.region)} · ${integer(game.seed)} seed · ${label}</div>${(game.teams || []).map((team, index) => `<div class="cbb-first-four-team"><button type="button" data-bracket-team-id="${escapeHtml(team.team_id)}">${escapeHtml(team.team)}</button><span>${escapeHtml(team.conference?.abbreviation || "—")}</span></div>${index === 0 ? `<div class="cbb-first-four-vs">vs</div>` : ""}`).join("")}</article>`;
+  }
+
+  function bubbleColumn(title, rows, firstFour = false) {
+    return `<article class="cbb-panel cbb-bubble-card"><h3>${escapeHtml(title)}</h3>${rows.map((team, index) => `<button type="button" class="cbb-bubble-team" data-bracket-team-id="${escapeHtml(team.team_id)}"><span><strong>${index + 1}</strong>${escapeHtml(team.team)}</span><small>${escapeHtml(team.conference?.abbreviation || "—")} · ${number(team.prior_net,1,true)}</small></button>`).join("")} ${firstFour ? `<div class="cbb-model-sub">These four teams occupy the two at-large First Four games.</div>` : ""}</article>`;
   }
 
   function renderPortal() {
