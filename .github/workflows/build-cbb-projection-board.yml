@@ -1,0 +1,82 @@
+name: Build CBB Projection Board
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-cbb-projection-board
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Preserve source artifacts and College Football
+        run: |
+          sha256sum \
+            data/projections.json \
+            data/cfb_metrics.json \
+            scripts/build_projections.py \
+            data/cbb/game_board.json \
+            data/cbb/team_profiles.json \
+            data/cbb/model/current_priors.json \
+            data/cbb/model/model_card.json \
+            > /tmp/cbb-projection-before.sha256
+
+      - name: Test projection and promotion contracts
+        run: |
+          python -m py_compile \
+            scripts/build_cbb_projection_board.py \
+            scripts/test_cbb_projection_board.py
+          python -m unittest scripts/test_cbb_projection_board.py
+
+      - name: Build staged projection board
+        run: python scripts/build_cbb_projection_board.py
+
+      - name: Validate output and isolation
+        run: |
+          sha256sum --check /tmp/cbb-projection-before.sha256
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("data/cbb/projection_board.json").read_text())
+          meta = payload["meta"]
+          games = payload["games"]
+          assert meta["version"] == "thi-cbb-projection-board-v0.1"
+          assert meta["model_version"] == "thi-cbb-walk-forward-v0.6-research"
+          assert meta["settled_minimum_games"] == 6
+          assert meta["spread_signal_minimum_edge"] == 5.0
+          assert len(games) == meta["game_count"]
+          assert len(games) >= 1
+          assert all(game["projection"]["totals_signal_eligible"] is False for game in games)
+          assert all(
+              not game["projection"]["spread_signal_eligible"]
+              or game["projection"]["sample_state"] == "tracked_sample"
+              for game in games
+          )
+          PY
+
+      - name: Commit projection board only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/cbb/projection_board.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Build CBB projection board"
+          git pull --rebase origin main
+          git push origin HEAD:main
