@@ -14,7 +14,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "thi-cbb-projection-board-v0.1"
+VERSION = "thi-cbb-projection-board-v0.2"
 SETTLED_MIN_GAMES = 6
 SPREAD_SIGNAL_EDGE = 5.0
 
@@ -37,6 +37,16 @@ def predict(features: dict[str, float], model: dict[str, Any]) -> float:
         feature = features.get(name, float(model["means"][name]))
         value += float(coefficient) * (feature - float(model["means"][name])) / float(model["scales"][name])
     return value
+
+
+def feature_contributions(features: dict[str, float], model: dict[str, Any], limit: int = 6) -> list[dict[str, Any]]:
+    rows = []
+    for coefficient, name in zip(model["coefficients"][1:], model["feature_names"]):
+        feature = features.get(name, float(model["means"][name]))
+        points = float(coefficient) * (feature - float(model["means"][name])) / float(model["scales"][name])
+        rows.append({"feature": name, "value": round(feature, 3), "margin_points": round(points, 2)})
+    rows.sort(key=lambda row: (-abs(row["margin_points"]), row["feature"]))
+    return rows[:limit]
 
 
 def personnel_features(home: dict[str, Any], away: dict[str, Any], early_weight: float) -> dict[str, float]:
@@ -185,6 +195,11 @@ def build_board(
                 "spread_signal_eligible": signal_eligible,
                 "spread_edge": round(edge, 1) if edge is not None else None,
                 "totals_signal_eligible": False,
+                "matchup_context": {
+                    "home": {"offense": round(home["offense"], 2), "defense": round(home["defense"], 2), "tempo": round(home["tempo"], 2), "games": home["games"], "rating_source": home["rating_source"]},
+                    "away": {"offense": round(away["offense"], 2), "defense": round(away["defense"], 2), "tempo": round(away["tempo"], 2), "games": away["games"], "rating_source": away["rating_source"]},
+                    "margin_drivers": feature_contributions(features, margin_model),
+                },
             },
         })
 
