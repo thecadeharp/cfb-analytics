@@ -29,7 +29,7 @@ except ModuleNotFoundError:
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "data" / "cbb" / "player_ratings.json"
-VERSION = "thi-cbb-player-research-v1.2"
+VERSION = "thi-cbb-player-research-v1.3"
 MIN_MINUTES = 100.0
 MIN_GAMES = 5.0
 ESPN_ROSTER_URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/teams/{team_source_id}/roster"
@@ -117,6 +117,21 @@ def rounded(value: Any, digits: int = 3) -> float | None:
     return round(number, digits) if number is not None else None
 
 
+def normalized(value: Any) -> str:
+    return " ".join("".join(character.lower() if character.isalnum() else " " for character in str(value or "")).split())
+
+
+def robust_value_score(values: list[float], value: float | None, limit: float = 2.5) -> float:
+    if value is None or not values:
+        return 0.0
+    center = statistics.median(values)
+    mad = statistics.median(abs(candidate - center) for candidate in values)
+    scale = 1.4826 * mad
+    if scale < 1e-9:
+        scale = statistics.pstdev(values) if len(values) > 1 else 1.0
+    return max(-limit, min(limit, (value - center) / max(scale, 1e-9)))
+
+
 def nested(row: dict[str, Any], group: str, field: str) -> float | None:
     block = row.get(group) or {}
     return finite(block.get(field)) if isinstance(block, dict) else None
@@ -193,20 +208,51 @@ def build_player_research(
     cbbd_request_count: int = 3,
     espn_request_count: int = 0,
     roster_fetch_errors: int = 0,
+    recruits: list[dict[str, Any]] | None = None,
+    portal: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     if not isinstance(players, list) or not isinstance(teams, list) or not isinstance(rosters, list):
         raise RuntimeError("CBBD player, team, and roster responses must be lists")
     if roster_season <= source_season:
         raise RuntimeError("Roster season must follow the completed source-stat season")
 
+    recruits = recruits or []
+    portal = portal or []
     team_context = {
         str(row.get("teamId")): {
             "games": finite(row.get("games")),
-            "pace": finite(row.get("pace")),
+            "pace": finite(row.get("pace")) or finite((row.get("summary") or {}).get("pace")),
             "possessions": nested(row, "teamStats", "possessions"),
+            "adjusted_net": finite((row.get("adjustedEfficiency") or {}).get("netRating")),
+            "adjusted_net_rank": ((row.get("adjustedEfficiency") or {}).get("rankings") or {}).get("net"),
         }
         for row in teams if isinstance(row, dict)
     }
+    team_strength_values = [row["adjusted_net"] for row in team_context.values() if row.get("adjusted_net") is not None]
+
+    recruit_by_id: dict[str, dict[str, Any]] = {}
+    recruit_by_team_name: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in recruits:
+        if not isinstance(row, dict):
+            continue
+        athlete_id = row.get("athleteId")
+        if athlete_id is not None:
+            recruit_by_id[str(athlete_id)] = row
+        destination = row.get("committedTo") or {}
+        name = normalized(row.get("name") or f"{row.get('firstName') or ''} {row.get('lastName') or ''}")
+        if isinstance(destination, dict) and destination.get("id") is not None and name:
+            recruit_by_team_name[(str(destination.get("id")), name)] = row
+
+    portal_by_team_name: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in portal:
+        if not isinstance(row, dict):
+            continue
+        destination = row.get("destination") or {}
+        name = normalized(row.get("name") or f"{row.get('firstName') or ''} {row.get('lastName') or ''}")
+        if isinstance(destination, dict) and destination.get("id") is not None and name:
+            portal_by_team_name[(str(destination.get("id")), name)] = row
+    recruit_ratings = [value for row in recruits if (value := finite(row.get("rating"))) is not None]
+    portal_ratings = [value for row in portal if (value := finite(row.get("rating"))) is not None]
     athlete_teams: dict[str, set[str]] = defaultdict(set)
     source_team_minutes: dict[str, float] = defaultdict(float)
     for row in players:
@@ -298,6 +344,11 @@ def build_player_research(
         roster_key = f"id:{roster_player['athlete_id']}" if roster_player.get("athlete_id") is not None else f"source:{roster_player.get('athlete_source_id')}"
         identity = f"{roster_season}:{athlete_id}:{team_id}"
         context = team_context.get(str(source_team_id), {})
+        destination_context = team_context.get(str(team_id), {})
+        recruit = recruit_by_id.get(str(athlete_id)) or recruit_by_id.get(str(roster_player.get("athlete_source_id")))
+        if recruit is None:
+            recruit = recruit_by_team_name.get((str(team_id), normalized(roster_player.get("name") or source.get("name"))))
+        transfer = portal_by_team_name.get((str(team_id), normalized(roster_player.get("name") or source.get("name"))))
         minutes_per_game = minutes / games if games else None
         usage = finite(source.get("usage"))
         metrics = {
@@ -349,6 +400,16 @@ def build_player_research(
                 "minutes_per_game": rounded(minutes_per_game, 1),
                 "source_team_pace": rounded(context.get("pace"), 1),
             },
+            "projection_context": {
+                "source_team_adjusted_net": rounded(context.get("adjusted_net"), 2),
+                "source_team_adjusted_net_rank": context.get("adjusted_net_rank"),
+                "destination_team_adjusted_net": rounded(destination_context.get("adjusted_net"), 2),
+                "destination_team_adjusted_net_rank": destination_context.get("adjusted_net_rank"),
+                "recruit_rating": rounded((recruit or {}).get("rating"), 4),
+                "recruit_stars": int(finite((recruit or {}).get("stars")) or 0) or None,
+                "portal_rating": rounded((transfer or {}).get("rating"), 4),
+                "basis": "transfer projection" if str(source_team_id) != str(team_id) else "returning production",
+            },
             "role": role_label(usage, minutes_per_game),
             "metrics": metrics,
             "data_quality": {
@@ -398,13 +459,106 @@ def build_player_research(
         defense = sum(weight * zscores[key][index] for key, weight in defense_weights.items())
         all_around = .72 * offense + .28 * defense
         reliability = row.pop("_reliability")
-        rating = max(1.0, min(99.0, 50 + 12 * all_around * reliability))
+        production_rating = max(1.0, min(99.0, 50 + 12 * all_around * reliability))
+        context = row["projection_context"]
+        competition = robust_value_score(team_strength_values, finite(context.get("source_team_adjusted_net")))
+        destination = robust_value_score(team_strength_values, finite(context.get("destination_team_adjusted_net")))
+        recruit_signal = robust_value_score(recruit_ratings, finite(context.get("recruit_rating")), 2.0)
+        portal_signal = robust_value_score(portal_ratings, finite(context.get("portal_rating")), 2.0)
+        projected_impact = max(1.0, min(99.0, production_rating + 5.0 * competition + 2.0 * destination + 1.5 * recruit_signal + 1.5 * portal_signal))
+        context["competition_adjustment"] = round(5.0 * competition, 1)
+        context["destination_adjustment"] = round(2.0 * destination, 1)
+        context["pedigree_adjustment"] = round(1.5 * recruit_signal + 1.5 * portal_signal, 1)
         row["research_scores"] = {
             "offense": round(50 + 10 * offense * reliability, 1),
             "defense": round(50 + 10 * defense * reliability, 1),
             "all_around": round(50 + 10 * all_around * reliability, 1),
-            "thi_player_rating": round(rating, 1),
+            "prior_production_rating": round(production_rating, 1),
+            "projected_impact_rating": round(projected_impact, 1),
+            "thi_player_rating": round(projected_impact, 1),
         }
+
+    statistical_prior_count = len(prepared)
+    projected_newcomer_count = 0
+    for roster_key, active in active_records.items():
+        if roster_key in prior_sources:
+            continue
+        athlete_id = active.get("athlete_id")
+        source_id = active.get("athlete_source_id")
+        team_id = active.get("team_id")
+        name = active.get("name")
+        recruit = recruit_by_id.get(str(athlete_id)) if athlete_id is not None else None
+        if recruit is None and source_id:
+            recruit = recruit_by_id.get(str(source_id))
+        if recruit is None:
+            recruit = recruit_by_team_name.get((str(team_id), normalized(name)))
+        transfer = portal_by_team_name.get((str(team_id), normalized(name)))
+        recruit_rating = finite((recruit or {}).get("rating"))
+        portal_rating = finite((transfer or {}).get("rating"))
+        if recruit_rating is None and portal_rating is None:
+            continue
+        destination_context = team_context.get(str(team_id), {})
+        destination = robust_value_score(team_strength_values, finite(destination_context.get("adjusted_net")))
+        recruit_signal = robust_value_score(recruit_ratings, recruit_rating, 2.5)
+        portal_signal = robust_value_score(portal_ratings, portal_rating, 2.5)
+        pedigree_signal = recruit_signal if recruit_rating is not None else portal_signal
+        projected_impact = max(1.0, min(99.0, 50.0 + 12.0 * pedigree_signal + 2.0 * destination))
+        basis = "freshman projection" if recruit_rating is not None else "transfer projection"
+        empty_metrics = {key: None for key in component_specs}
+        empty_metrics.update({
+            "assists_per_40": None,
+            "turnovers_per_40": None,
+            "rebounds_per_40": None,
+            "net_rating": None,
+            "effective_field_goal_pct": None,
+            "free_throw_rate": None,
+            "offensive_rebound_pct": None,
+            "total_win_shares_per_40": None,
+        })
+        prepared.append({
+            "player_season_id": f"{roster_season}:{athlete_id or source_id}:{team_id}",
+            "athlete_id": athlete_id,
+            "athlete_source_id": source_id,
+            "name": name,
+            "team_id": team_id,
+            "team": active.get("team"),
+            "conference": active.get("conference"),
+            "position": active.get("position"),
+            "position_group": position_group(active.get("position")),
+            "jersey": active.get("jersey"),
+            "current_roster_verified": True,
+            "source_season": source_season,
+            "source_team_id": None,
+            "source_team": None,
+            "transfer_between_seasons": basis == "transfer projection",
+            "multi_team_source_season": False,
+            "sample": {"games": 0, "starts": 0, "minutes": 0.0, "minutes_per_game": None, "source_team_pace": None},
+            "projection_context": {
+                "source_team_adjusted_net": None,
+                "source_team_adjusted_net_rank": None,
+                "destination_team_adjusted_net": rounded(destination_context.get("adjusted_net"), 2),
+                "destination_team_adjusted_net_rank": destination_context.get("adjusted_net_rank"),
+                "recruit_rating": rounded(recruit_rating, 4),
+                "recruit_stars": int(finite((recruit or {}).get("stars")) or 0) or None,
+                "portal_rating": rounded(portal_rating, 4),
+                "basis": basis,
+                "competition_adjustment": None,
+                "destination_adjustment": round(2.0 * destination, 1),
+                "pedigree_adjustment": round(12.0 * pedigree_signal, 1),
+            },
+            "role": "projected newcomer",
+            "metrics": empty_metrics,
+            "data_quality": {"metrics_available": 0, "metrics_expected": len(empty_metrics), "reliability": 35.0},
+            "research_scores": {
+                "offense": None,
+                "defense": None,
+                "all_around": None,
+                "prior_production_rating": None,
+                "projected_impact_rating": round(projected_impact, 1),
+                "thi_player_rating": round(projected_impact, 1),
+            },
+        })
+        projected_newcomer_count += 1
 
     prepared.sort(key=lambda row: (-row["research_scores"]["thi_player_rating"], -row["sample"]["minutes"], str(row["name"])))
     ratings = [row["research_scores"]["thi_player_rating"] for row in prepared]
@@ -433,8 +587,10 @@ def build_player_research(
             for stint in prior_stints.get(roster_key, [])
             if str(stint.get("teamId")) == str(active.get("team_id"))
         )
-        if rated:
+        if rated and prior:
             prior_state = "rated"
+        elif rated:
+            prior_state = "projected_newcomer"
         elif prior:
             prior_state = "below_sample"
         else:
@@ -474,12 +630,12 @@ def build_player_research(
     team_rosters = []
     for team_roster in roster_teams.values():
         team_roster["players"].sort(key=lambda row: (
-            0 if row["prior_state"] == "rated" else 1 if row["prior_state"] == "below_sample" else 2,
+            0 if row["prior_state"] in ("rated", "projected_newcomer") else 1 if row["prior_state"] == "below_sample" else 2,
             -(finite(row.get("thi_player_rating")) or -1.0),
             str(row.get("name") or ""),
         ))
         team_roster["player_count"] = len(team_roster["players"])
-        team_roster["rated_player_count"] = sum(row["prior_state"] == "rated" for row in team_roster["players"])
+        team_roster["rated_player_count"] = sum(row["prior_state"] in ("rated", "projected_newcomer") for row in team_roster["players"])
         team_roster["transfer_count"] = sum(row["transfer_between_seasons"] for row in team_roster["players"])
         team_roster["prior_team_minutes"] = round(source_team_minutes.get(str(team_roster.get("team_id")), 0.0), 1)
         team_roster["returning_minutes"] = round(sum(row["returning_minutes"] or 0.0 for row in team_roster["players"]), 1)
@@ -508,7 +664,7 @@ def build_player_research(
             "espn_request_count": espn_request_count,
             "raw_api_data_stored": False,
             "source_attribution": "Data provided by CollegeBasketballData.com; ratings and calculations by The Hammer Index.",
-            "methodology": "Active roster players only. Ratings use the prior completed season's robust standardized production and efficiency components, regressed by sample reliability. Team roster boards also include active players without a qualified prior, clearly marked as unrated. Not opponent-adjusted or lineup-adjusted in v1.2.",
+            "methodology": "Active-roster players are ranked by projected impact. For veterans, THI begins with robust prior production and efficiency, regresses for sample reliability, translates production through the source team's adjusted strength, and adds destination and matched pedigree context. Verified newcomers without a qualified prior use a lower-reliability recruiting or portal projection and show no fabricated prior statistics. Prior Production remains visible separately. This research rating is not a lineup-adjusted game projection.",
         },
         "coverage": {
             "provider_player_rows": len(players),
@@ -517,12 +673,15 @@ def build_player_research(
             "roster_fetch_errors": roster_fetch_errors,
             "current_roster_players": len(roster_player_keys),
             "current_roster_players_with_source_stats": len(matched_roster_keys),
-            "current_roster_players_without_qualified_prior": len(roster_player_keys) - len(prepared),
+            "current_roster_players_without_qualified_prior": len(roster_player_keys) - statistical_prior_count,
             "historical_players_withheld_unverified_current": len(historical_keys - matched_historical_keys),
-            "qualified_players": len(prepared),
+            "qualified_players": statistical_prior_count,
+            "rated_players": len(prepared),
             "qualified_teams": team_count,
             "multi_team_source_stints": sum(row["multi_team_source_season"] for row in prepared),
             "between_season_transfers": sum(row["transfer_between_seasons"] for row in prepared),
+            "statistical_prior_players": statistical_prior_count,
+            "projected_newcomers": projected_newcomer_count,
             "position_groups": dict(Counter(row["position_group"] for row in prepared)),
         },
         "team_rosters": team_rosters,
@@ -551,8 +710,10 @@ def main() -> None:
     players = fetch_json("/stats/player/season", {"season": args.source_season}, api_key)
     teams = fetch_json("/stats/team/season", {"season": args.source_season}, api_key)
     rosters = fetch_json("/teams/roster", {"season": args.roster_season}, api_key)
+    recruits = fetch_json("/recruiting/players", {"year": args.roster_season - 1}, api_key)
+    portal = fetch_json("/recruiting/portal", {"year": args.roster_season - 1}, api_key)
     roster_source = "cbbd"
-    cbbd_request_count = 3
+    cbbd_request_count = 5
     espn_request_count = 0
     roster_fetch_errors = 0
     if not any(isinstance(row, dict) and row.get("players") for row in rosters or []):
@@ -572,6 +733,8 @@ def main() -> None:
         cbbd_request_count=cbbd_request_count,
         espn_request_count=espn_request_count,
         roster_fetch_errors=roster_fetch_errors,
+        recruits=recruits,
+        portal=portal,
     )
     atomic_write(args.output, payload)
     print(json.dumps({"meta": payload["meta"], "coverage": payload["coverage"]}, indent=2))
