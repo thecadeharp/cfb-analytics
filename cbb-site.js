@@ -267,6 +267,15 @@
         </div>
       </section>
     `;
+    const gameList = view.querySelector(".cbb-game-list");
+    const openFromEvent = event => {
+      const card = event.target.closest("[data-cbb-game-id]");
+      if (card) openGameDetail(card.dataset.cbbGameId);
+    };
+    gameList?.addEventListener("click", openFromEvent);
+    gameList?.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openFromEvent(event); }
+    });
   }
 
   function statCard(label, value, note) {
@@ -290,7 +299,64 @@
     const stateLabel = projection.sample_state === "tracked_sample" ? "Tracked" : projection.sample_state === "developing_sample" ? "Developing" : projection.sample_state === "early_sample" ? "Early sample" : "Preseason";
     const signalTeam = Number(projection.spread_edge) >= 0 ? game.home?.team : game.away?.team;
     const signal = projection.spread_signal_eligible ? `<span class="cbb-projection-signal">${escapeHtml(signalTeam)} spread edge · ${number(Math.abs(Number(projection.spread_edge)),1)} pts</span>` : `<span class="cbb-projection-withheld">${stateLabel} · no spread signal</span>`;
-    return `<article class="cbb-panel cbb-game-card"><div class="cbb-game-top"><span class="cbb-game-date">${escapeHtml(date)}</span><span class="cbb-chip">${escapeHtml(stateLabel)}</span></div><div class="cbb-matchup">${escapeHtml(game.away?.team)} <span>vs.</span> ${escapeHtml(game.home?.team)}</div><div class="cbb-projection-score"><strong>${number(projection.away_points,1)}–${number(projection.home_points,1)}</strong><span>${escapeHtml(projectedLine)} · ${pct(projection.home_win_probability)} home win</span></div><div class="cbb-projection-meta"><span>${number(projection.projected_possessions,1)} possessions</span><span>Projected total ${number(projection.total,1)} · totals signal withheld</span></div>${signal}<div class="cbb-game-meta">${escapeHtml(venue)} · ${escapeHtml(network)}</div></article>`;
+    return `<article class="cbb-panel cbb-game-card" data-cbb-game-id="${escapeHtml(game.game_id)}" role="button" tabindex="0" aria-label="Open ${escapeHtml(game.away?.team)} at ${escapeHtml(game.home?.team)} matchup analysis"><div class="cbb-game-top"><span class="cbb-game-date">${escapeHtml(date)}</span><span class="cbb-chip">${escapeHtml(stateLabel)}</span></div><div class="cbb-matchup">${escapeHtml(game.away?.team)} <span>vs.</span> ${escapeHtml(game.home?.team)}</div><div class="cbb-projection-score"><strong>${number(projection.away_points,1)}–${number(projection.home_points,1)}</strong><span>${escapeHtml(projectedLine)} · ${pct(projection.home_win_probability)} home win</span></div><div class="cbb-projection-meta"><span>${number(projection.projected_possessions,1)} possessions</span><span>Projected total ${number(projection.total,1)} · totals signal withheld</span></div>${signal}<div class="cbb-game-meta">${escapeHtml(venue)} · ${escapeHtml(network)} · Open matchup analysis →</div></article>`;
+  }
+
+  function openGameDetail(gameId) {
+    const game = state.data?.projectionBoard?.games?.find(row => String(row.game_id) === String(gameId));
+    if (!game?.projection) return;
+    const projection = game.projection;
+    const context = projection.matchup_context || {};
+    const home = context.home || {};
+    const away = context.away || {};
+    const market = game.market || {};
+    const detail = document.getElementById("cbb-team-detail");
+    const panel = detail.querySelector(".cbb-detail-panel");
+    const start = new Date(game.start_date);
+    const date = Number.isNaN(start.getTime()) ? "Date TBD" : new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", hour: game.start_time_tbd ? undefined : "numeric", minute: game.start_time_tbd ? undefined : "2-digit", timeZone: "America/New_York", timeZoneName: game.start_time_tbd ? undefined : "short" }).format(start);
+    const stateLabel = humanize(projection.sample_state || "research");
+    const spreadSide = Number(projection.home_margin) >= 0 ? game.home?.team : game.away?.team;
+    const drivers = context.margin_drivers || [];
+    panel.innerHTML = `
+      <button class="cbb-detail-close" type="button" data-cbb-close>Close</button>
+      <div class="cbb-kicker">THI CBB matchup analysis</div>
+      <h2 class="cbb-detail-title" id="cbb-detail-title">${escapeHtml(game.away?.team)} at ${escapeHtml(game.home?.team)}</h2>
+      <div class="cbb-detail-sub">${escapeHtml(date)} · ${escapeHtml(game.venue?.name || (game.neutral_site ? "Neutral site" : "Venue TBD"))} · ${escapeHtml(game.broadcasts?.map(item => item.network || item).filter(Boolean).join(", ") || "TV TBD")}</div>
+      <div class="cbb-detail-grid">
+        ${detailStat("Projected score", `${number(projection.away_points,1)}–${number(projection.home_points,1)}`)}
+        ${detailStat("THI spread", `${spreadSide} -${number(Math.abs(Number(projection.home_margin)),1)}`)}
+        ${detailStat("Home win probability", pct(projection.home_win_probability))}
+        ${detailStat("Projected possessions", number(projection.projected_possessions,1))}
+        ${detailStat("Projected total", number(projection.total,1))}
+        ${detailStat("Sample state", stateLabel)}
+      </div>
+      <section class="cbb-detail-section"><h3>Team efficiency state</h3>
+        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table cbb-matchup-table"><thead><tr><th>Team</th><th>Adj offense</th><th>Adj defense</th><th>Tempo</th><th>Games</th><th>Source</th></tr></thead><tbody>
+          <tr><td class="cbb-team-name">${escapeHtml(game.away?.team)}</td><td class="cbb-number">${number(away.offense,2)}</td><td class="cbb-number">${number(away.defense,2)}</td><td class="cbb-number">${number(away.tempo,2)}</td><td class="cbb-number">${integer(away.games)}</td><td>${escapeHtml(humanize(away.rating_source || "unknown"))}</td></tr>
+          <tr><td class="cbb-team-name">${escapeHtml(game.home?.team)}</td><td class="cbb-number">${number(home.offense,2)}</td><td class="cbb-number">${number(home.defense,2)}</td><td class="cbb-number">${number(home.tempo,2)}</td><td class="cbb-number">${integer(home.games)}</td><td>${escapeHtml(humanize(home.rating_source || "unknown"))}</td></tr>
+        </tbody></table></div>
+      </section>
+      <section class="cbb-detail-section"><h3>Largest margin drivers</h3>
+        <div class="cbb-model-sub">Point contributions explain this projection relative to the model baseline. Positive values favor ${escapeHtml(game.home?.team)}; negative values favor ${escapeHtml(game.away?.team)}.</div>
+        <div class="cbb-driver-list">${drivers.map(driver => {
+          const points = Number(driver.margin_points);
+          const side = points >= 0 ? game.home?.team : game.away?.team;
+          return `<div class="cbb-detail-row"><span>${escapeHtml(humanize(driver.feature))}</span><strong class="${points >= 0 ? "cbb-driver-home" : "cbb-driver-away"}">${escapeHtml(side)} ${number(Math.abs(points),2)} pts</strong></div>`;
+        }).join("")}</div>
+      </section>
+      <section class="cbb-detail-section"><h3>Market and signal state</h3>
+        ${detailRow("Consensus home spread", market.consensus_home_spread == null ? "Not posted" : number(market.consensus_home_spread,1,true))}
+        ${detailRow("Consensus total", market.consensus_total == null ? "Not posted" : number(market.consensus_total,1))}
+        ${detailRow("Model spread edge", projection.spread_edge == null ? "Unavailable" : `${number(projection.spread_edge,1,true)} points`)}
+        ${detailRow("Spread signal", projection.spread_signal_eligible ? "Eligible" : "Withheld")}
+        ${detailRow("Totals signal", "Withheld")}
+        <div class="cbb-model-sub">Spread signals require at least six games for both teams and a five-point model-versus-market disagreement. Projected totals remain informational while totals validation is below THI's promotion standard.</div>
+      </section>`;
+    detail.classList.add("is-open");
+    detail.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    panel.scrollTop = 0;
+    panel.querySelector("[data-cbb-close]")?.focus();
   }
 
   function renderTeamData() {
