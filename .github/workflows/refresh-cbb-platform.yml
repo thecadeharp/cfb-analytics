@@ -101,12 +101,15 @@ jobs:
           assert players["meta"]["version"] == "thi-cbb-player-research-v1.3"
           assert players["meta"]["player_count"] >= 1500
           assert all("prior_production_rating" in row["research_scores"] for row in players["players"])
-          assert model["meta"]["model_version"] == "thi-cbb-walk-forward-v0.6-research"
+          assert model["meta"]["model_version"] == "thi-cbb-walk-forward-v0.7-research"
           assert model["meta"]["historical_laboratory_version"] == "thi-cbb-historical-lab-v1.0"
+          assert model["meta"]["four_factor_engine_version"] == "thi-cbb-opponent-adjusted-four-factors-v1.0"
           assert all(model["meta"]["leakage_audit"].values())
           assert len(model["evaluation"]["by_season"]) >= 8
           assert priors["meta"]["model_version"] == model["meta"]["model_version"]
-          assert projections["meta"]["version"] == "thi-cbb-projection-board-v0.4"
+          assert projections["meta"]["version"] == "thi-cbb-projection-board-v0.5"
+          assert "Opponent-adjusted" in projections["meta"]["four_factor_method"]
+          assert all("four_factor_matchup" in game["projection"]["matchup_context"] for game in projections["games"] if str(game.get("status", "")).lower() == "scheduled")
           assert projections["meta"]["model_version"] == model["meta"]["model_version"]
           assert all(game["projection"]["model_input_label"] != "preseason_game" for game in projections["games"])
           assert tracking["meta"]["version"] == "thi-cbb-model-tracking-v0.1"
