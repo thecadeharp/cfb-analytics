@@ -152,8 +152,11 @@ def team_profile(
     games = int(record.get("games") or 0)
     current_adjusted = adjusted(current)
     prior_adjusted = adjusted(prior)
+    espn_id = directory.get("sourceId") or directory.get("source_id")
     return {
         "team_id": directory.get("id"),
+        "espn_id": str(espn_id) if espn_id is not None else None,
+        "logo_url": f"https://a.espncdn.com/i/teamlogos/ncaa/500/{espn_id}.png" if espn_id is not None else None,
         "team": directory.get("school"),
         "display_name": directory.get("displayName") or directory.get("school"),
         "abbreviation": directory.get("abbreviation"),
@@ -277,9 +280,9 @@ def build_outputs(
             "schema_version": "2.0", "season": season, "benchmark_season": benchmark_season,
             "generated_at_utc": generated, "team_count": len(teams),
             "rated_sample_count": sum(bool(row["sample_ready"]) for row in teams),
-            "methodology": "THI-transformed efficiency, Four Factor, shot-profile and roster-continuity foundation. No CBB predictive model is active yet.",
+            "methodology": "THI-transformed efficiency, Four Factor, shot-profile and roster-continuity foundation feeding the separate CBB research model.",
             "source_attribution": "Data provided by CollegeBasketballData.com; calculations by The Hammer Index.",
-            "model_usage": "cbb_research_foundation_only",
+            "model_usage": "cbb_research_and_projection_inputs",
         },
         "teams": teams,
     }
@@ -288,7 +291,7 @@ def build_outputs(
             "schema_version": "2.0", "season": season, "generated_at_utc": generated,
             "start_date": start_date, "end_date": end_date, "game_count": len(board),
             "market_method": "Median available book line; movement is current minus opening.",
-            "projection_status": "not_built_no_thi_spread_or_total",
+            "projection_status": "projection_board_built_by_separate_versioned_stage",
             "source_attribution": "Data provided by CollegeBasketballData.com.",
         },
         "games": board,
@@ -297,7 +300,7 @@ def build_outputs(
         "meta": {
             "schema_version": "2.0", "season": season, "benchmark_season": benchmark_season,
             "generated_at_utc": generated, "request_count": 8,
-            "builder_version": "cbb-foundation-v2.1",
+            "builder_version": "cbb-foundation-v2.2",
             "raw_api_data_stored": False, "cfb_or_model_a_files_accessed": False,
         },
         "coverage": {
