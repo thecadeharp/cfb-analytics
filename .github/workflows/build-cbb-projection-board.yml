@@ -57,7 +57,7 @@ jobs:
           payload = json.loads(Path("data/cbb/projection_board.json").read_text())
           meta = payload["meta"]
           games = payload["games"]
-          assert meta["version"] == "thi-cbb-projection-board-v0.2"
+          assert meta["version"] == "thi-cbb-projection-board-v0.3"
           assert meta["model_version"] == "thi-cbb-walk-forward-v0.6-research"
           assert meta["settled_minimum_games"] == 6
           assert meta["spread_signal_minimum_edge"] == 5.0
@@ -65,6 +65,9 @@ jobs:
           assert len(games) >= 1
           assert all(game["projection"]["totals_signal_eligible"] is False for game in games)
           assert all(game["projection"]["matchup_context"]["margin_drivers"] for game in games)
+          assert all(game["projection"]["model_input_label"] != "preseason_game" for game in games)
+          assert all(1 <= game["projection"]["watchability_score"] <= 99 for game in games)
+          assert sum(meta["status_counts"].values()) == len(games)
           assert all(
               not game["projection"]["spread_signal_eligible"]
               or game["projection"]["sample_state"] == "tracked_sample"
