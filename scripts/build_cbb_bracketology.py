@@ -106,8 +106,8 @@ def assign_regions(
 
 def build_bracketology(priors_payload: dict[str, Any]) -> dict[str, Any]:
     model_version = priors_payload.get("meta", {}).get("model_version")
-    if model_version != "thi-cbb-walk-forward-v0.6-research":
-        raise RuntimeError("bracketology requires thi-cbb-walk-forward-v0.6-research priors")
+    if model_version != "thi-cbb-walk-forward-v0.7-research":
+        raise RuntimeError("bracketology requires thi-cbb-walk-forward-v0.7-research priors")
     source = [row for row in priors_payload.get("teams") or [] if rating(row) > -999]
     by_conference: dict[str, list[dict[str, Any]]] = {}
     for row in source:
