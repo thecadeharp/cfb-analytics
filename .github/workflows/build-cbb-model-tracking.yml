@@ -1,0 +1,71 @@
+name: Build CBB Model Tracking
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-cbb-model-tracking
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Preserve projections and College Football
+        run: |
+          sha256sum \
+            data/projections.json \
+            data/cfb_metrics.json \
+            scripts/build_projections.py \
+            data/cbb/projection_board.json \
+            data/cbb/model/model_card.json \
+            > /tmp/cbb-tracking-before.sha256
+
+      - name: Test tracking contract
+        run: |
+          python -m py_compile scripts/build_cbb_model_tracking.py scripts/test_cbb_model_tracking.py
+          python -m unittest scripts/test_cbb_model_tracking.py
+
+      - name: Grade frozen projections
+        run: python scripts/build_cbb_model_tracking.py
+
+      - name: Validate output and isolation
+        run: |
+          sha256sum --check /tmp/cbb-tracking-before.sha256
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("data/cbb/model_tracking.json").read_text())
+          assert payload["meta"]["version"] == "thi-cbb-model-tracking-v0.1"
+          assert payload["meta"]["projection_board_version"] == "thi-cbb-projection-board-v0.4"
+          assert payload["meta"]["model_version"] == "thi-cbb-walk-forward-v0.6-research"
+          spread = payload["summary"]["spread"]
+          assert spread["games"] == len(payload["spread_decisions"])
+          assert spread["wins"] + spread["losses"] + spread["pushes"] == spread["games"]
+          assert payload["summary"]["totals"]["games"] == len(payload["total_decisions"])
+          PY
+
+      - name: Commit tracking output only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/cbb/model_tracking.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Update CBB prospective model tracking"
+          git pull --rebase origin main
+          git push origin HEAD:main
