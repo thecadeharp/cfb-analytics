@@ -502,6 +502,7 @@
     const context = projection.matchup_context || {};
     const home = context.home || {};
     const away = context.away || {};
+    const factorMatchup = context.four_factor_matchup || {};
     const market = game.market || {};
     const detail = document.getElementById("cbb-team-detail");
     const panel = detail.querySelector(".cbb-detail-panel");
@@ -527,6 +528,13 @@
         <div class="cbb-panel cbb-table-wrap"><table class="cbb-table cbb-matchup-table"><thead><tr><th>Team</th><th>Adj offense</th><th>Adj defense</th><th>Tempo</th><th>Games</th><th>Source</th></tr></thead><tbody>
           <tr><td class="cbb-team-name">${escapeHtml(game.away?.team)}</td><td class="cbb-number">${number(away.offense,2)}</td><td class="cbb-number">${number(away.defense,2)}</td><td class="cbb-number">${number(away.tempo,2)}</td><td class="cbb-number">${integer(away.games)}</td><td>${escapeHtml(humanize(away.rating_source || "unknown"))}</td></tr>
           <tr><td class="cbb-team-name">${escapeHtml(game.home?.team)}</td><td class="cbb-number">${number(home.offense,2)}</td><td class="cbb-number">${number(home.defense,2)}</td><td class="cbb-number">${number(home.tempo,2)}</td><td class="cbb-number">${integer(home.games)}</td><td>${escapeHtml(humanize(home.rating_source || "unknown"))}</td></tr>
+        </tbody></table></div>
+      </section>
+      <section class="cbb-detail-section"><h3>Opponent-adjusted Four Factors matchup</h3>
+        <div class="cbb-model-sub">Expected rates combine each offense with the opposing defense. Turnover rate is lower-is-better for the offense; the other displayed rates are higher-is-better.</div>
+        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table cbb-matchup-table"><thead><tr><th>Team</th><th>Expected eFG%</th><th>Expected TO%</th><th>Expected OR%</th><th>Expected FT rate</th></tr></thead><tbody>
+          <tr><td class="cbb-team-name">${escapeHtml(game.away?.team)}</td><td class="cbb-number">${pct(factorMatchup.away?.effective_fg_pct)}</td><td class="cbb-number">${pct(factorMatchup.away?.turnover_pct)}</td><td class="cbb-number">${pct(factorMatchup.away?.offensive_rebound_pct)}</td><td class="cbb-number">${pct(factorMatchup.away?.free_throw_rate)}</td></tr>
+          <tr><td class="cbb-team-name">${escapeHtml(game.home?.team)}</td><td class="cbb-number">${pct(factorMatchup.home?.effective_fg_pct)}</td><td class="cbb-number">${pct(factorMatchup.home?.turnover_pct)}</td><td class="cbb-number">${pct(factorMatchup.home?.offensive_rebound_pct)}</td><td class="cbb-number">${pct(factorMatchup.home?.free_throw_rate)}</td></tr>
         </tbody></table></div>
       </section>
       <section class="cbb-detail-section"><h3>Largest margin drivers</h3>
@@ -1041,6 +1049,7 @@
     const recruiting = prior.personnel?.recruiting || {};
     const transfers = prior.personnel?.transfers || {};
     const preseason = profile?.preseason_prior || {};
+    const factors = prior.prior_four_factors || {};
     const roster = state.playerData?.team_rosters?.find(row => Number(row.team_id) === Number(teamId));
     panel.innerHTML = `
       <button class="cbb-detail-close" type="button" data-cbb-close>Close</button>
@@ -1071,7 +1080,13 @@
         <div class="cbb-roster-summary">${detailRow("Active players", roster ? integer(roster.player_count) : "Unavailable")}${detailRow("Qualified returning production", roster ? integer(roster.rated_player_count) : "—")}${detailRow("Returning minutes", roster?.returning_minutes_pct != null ? pct(roster.returning_minutes_pct) : "Unavailable")}${detailRow("Identified transfers", roster ? integer(roster.transfer_count) : "—")}</div>
         <div class="cbb-roster-list">${roster?.players?.length ? roster.players.map(rosterPlayerRow).join("") : `<div class="cbb-empty">A verified current roster is not available for this team yet.</div>`}</div>
       </section>
-      <section class="cbb-detail-section"><h3>Current-season Four Factors</h3><div class="cbb-model-sub">Four Factors and shot-profile grades activate after the 2027 season begins and a usable sample is available.</div></section>
+      <section class="cbb-detail-section"><h3>Opponent-adjusted Four Factors</h3>
+        <div class="cbb-model-sub">Preseason values carry the prior team's offensive and defensive factor profile toward the national average according to roster continuity. Current-season observations blend in as the sample grows.</div>
+        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Unit</th><th>eFG%</th><th>TO%</th><th>OR%</th><th>FT rate</th></tr></thead><tbody>
+          <tr><td>Offense</td><td class="cbb-number">${pct(factors.offense?.effective_fg_pct)}</td><td class="cbb-number">${pct(factors.offense?.turnover_pct)}</td><td class="cbb-number">${pct(factors.offense?.offensive_rebound_pct)}</td><td class="cbb-number">${pct(factors.offense?.free_throw_rate)}</td></tr>
+          <tr><td>Defense allowed</td><td class="cbb-number">${pct(factors.defense?.effective_fg_pct)}</td><td class="cbb-number">${pct(factors.defense?.turnover_pct)}</td><td class="cbb-number">${pct(factors.defense?.offensive_rebound_pct)}</td><td class="cbb-number">${pct(factors.defense?.free_throw_rate)}</td></tr>
+        </tbody></table></div>
+      </section>
     `;
     detail.classList.add("is-open");
     detail.setAttribute("aria-hidden", "false");
@@ -1093,7 +1108,7 @@
 
   function rosterPlayerRow(player) {
     const identity = [player.position, player.class, player.height].filter(Boolean).join(" · ") || "Roster verified";
-    const prior = player.prior_state === "rated"
+    const prior = ["rated", "projected_newcomer"].includes(player.prior_state)
       ? `<button type="button" class="cbb-roster-rating" data-roster-player-id="${escapeHtml(player.player_season_id)}">${number(player.thi_player_rating,1)} THI · profile →</button>`
       : `<span class="cbb-roster-unrated">${player.prior_state === "below_sample" ? "Limited prior sample" : "No qualifying prior"}</span>`;
     const transfer = player.transfer_between_seasons ? `<span class="cbb-chip">Transfer · ${escapeHtml(player.prior_team || "prior team")}</span>` : "";
