@@ -296,6 +296,65 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
 .cbb-model-card { padding: 18px; }
 .cbb-model-value { margin-top: 9px; font: 800 22px var(--mono); }
 .cbb-model-sub { margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+.cbb-bracket-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(230px, 1fr));
+  gap: 10px;
+}
+.cbb-region-card { overflow: hidden; }
+.cbb-region-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-soft);
+  font: 800 12px var(--mono);
+  text-transform: uppercase;
+}
+.cbb-region-head small { color: var(--muted); font-size: 8px; }
+.cbb-seed-list { padding: 5px 12px 10px; }
+.cbb-seed-row {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  border-bottom: 1px solid var(--border);
+}
+.cbb-seed-row:last-child { border-bottom: 0; }
+.cbb-seed-row > strong { color: var(--muted); font: 800 10px var(--mono); }
+.cbb-seed-row button,
+.cbb-first-four-team button,
+.cbb-bubble-team {
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+.cbb-seed-row button { overflow: hidden; padding: 7px 0; font-size: 10px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.cbb-seed-row button:hover,
+.cbb-first-four-team button:hover { color: var(--cbb-accent); }
+.cbb-seed-row > span { font-size: 9px; font-weight: 800; line-height: 1.25; }
+.cbb-seed-row > small { color: var(--muted); font: 700 8px var(--mono); }
+.cbb-seed-row.is-first-four { margin-inline: -4px; padding-inline: 4px; background: var(--cbb-accent-soft); }
+.cbb-first-four-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.cbb-first-four-card { padding: 16px; }
+.cbb-first-four-team { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; }
+.cbb-first-four-team button { padding: 0; font-weight: 800; }
+.cbb-first-four-team span { color: var(--muted); font: 700 9px var(--mono); }
+.cbb-first-four-vs { margin: 8px 0 -4px; color: var(--muted); font: 700 8px var(--mono); text-transform: uppercase; }
+.cbb-bubble-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.cbb-bubble-card { padding: 16px; }
+.cbb-bubble-card h3 { margin: 0 0 8px; font-size: 15px; }
+.cbb-bubble-team { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.cbb-bubble-team span { display: flex; align-items: center; gap: 9px; font-weight: 800; }
+.cbb-bubble-team span strong { color: var(--muted); font: 800 9px var(--mono); }
+.cbb-bubble-team small { color: var(--muted); font: 700 9px var(--mono); }
+.cbb-bubble-team:hover span { color: var(--cbb-accent); }
+.cbb-bid-table { min-width: 500px; }
 .cbb-gate-list { display: grid; gap: 7px; padding: 16px; }
 .cbb-gate-item { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 6px; background: var(--surface-soft); font-size: 11px; }
 .cbb-gate-icon { font: 800 12px var(--mono); }
@@ -398,6 +457,8 @@ html[data-theme="dark"] .cbb-error { background: #3a2020; border-color: #76443e;
   .header-inner { gap: 10px; }
   .thi-sport-button { padding-inline: 7px; }
   .cbb-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cbb-bracket-grid { grid-template-columns: repeat(2, minmax(230px, 1fr)); }
+  .cbb-first-four-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 900px) {
@@ -407,6 +468,7 @@ html[data-theme="dark"] .cbb-error { background: #3a2020; border-color: #76443e;
   .cbb-hero { grid-template-columns: 1fr; }
   .cbb-method-grid,
   .cbb-model-grid { grid-template-columns: 1fr; }
+  .cbb-bubble-grid { grid-template-columns: 1fr; }
   .cbb-readiness-banner { grid-template-columns: 1fr; gap: 10px; }
   .cbb-player-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -419,7 +481,9 @@ html[data-theme="dark"] .cbb-error { background: #3a2020; border-color: #76443e;
   .cbb-stat-grid,
   .cbb-game-list,
   .cbb-controls,
-  .cbb-player-controls { grid-template-columns: 1fr; }
+  .cbb-player-controls,
+  .cbb-bracket-grid,
+  .cbb-first-four-grid { grid-template-columns: 1fr; }
   .cbb-section-head { align-items: flex-start; flex-direction: column; }
   .cbb-section-note { text-align: left; }
   .cbb-detail-grid { grid-template-columns: repeat(2, 1fr); }
