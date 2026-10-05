@@ -13,8 +13,6 @@ on:
         required: true
         default: "2026"
         type: string
-  schedule:
-    - cron: "17 10 * * *"
 
 permissions:
   contents: write
@@ -78,12 +76,13 @@ jobs:
           assert teams["meta"]["team_count"] >= 300
           assert isinstance(teams["teams"], list)
           assert isinstance(board["games"], list)
-          assert status["meta"].get("builder_version") == "cbb-foundation-v2.1", "wrong CBB builder version"
+          assert status["meta"].get("builder_version") == "cbb-foundation-v2.2", "wrong CBB builder version"
           assert int(status["meta"].get("request_count", 0)) >= 8, "incomplete CBB request contract"
           assert status["meta"]["raw_api_data_stored"] is False
           assert status["meta"]["cfb_or_model_a_files_accessed"] is False
           assert status["coverage"]["benchmark_leaderboard_teams"] >= 300
           assert status["coverage"]["current_rosters"] >= 300
+          assert sum(bool(team.get("logo_url")) for team in teams["teams"]) >= 300
           PY
           sha256sum --check /tmp/cbb-data-before.sha256
 
