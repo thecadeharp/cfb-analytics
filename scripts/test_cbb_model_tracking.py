@@ -30,7 +30,7 @@ def game(game_id, edge, eligible, home_score, away_score, pregame=-3, close=-5):
 class CbbModelTrackingTests(unittest.TestCase):
     def test_grades_frozen_line_and_calculates_clv(self):
         board = {
-            "meta": {"version": "thi-cbb-projection-board-v0.4", "model_version": "thi-cbb-walk-forward-v0.6-research", "season": 2027},
+            "meta": {"version": "thi-cbb-projection-board-v0.5", "model_version": "thi-cbb-walk-forward-v0.7-research", "season": 2027},
             "games": [
                 game(1, 3, True, 75, 70),
                 game(2, -4, True, 70, 76, pregame=3, close=5),
@@ -47,7 +47,7 @@ class CbbModelTrackingTests(unittest.TestCase):
         self.assertEqual(payload["summary"]["projection_accuracy"]["games"], 3)
 
     def test_rejects_unfrozen_board_version(self):
-        with self.assertRaisesRegex(RuntimeError, "v0.4"):
+        with self.assertRaisesRegex(RuntimeError, "v0.5"):
             build_tracking({"meta": {"version": "old"}, "games": []})
 
 
