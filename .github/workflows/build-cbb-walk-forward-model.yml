@@ -92,6 +92,7 @@ jobs:
           assert priors["meta"]["personnel_team_count"] >= 300
           assert priors["meta"]["verified_roster_continuity_count"] >= 250
           assert priors["meta"]["positive_continuity_count"] >= 250
+          assert all(isinstance(row["prior_tempo"], (int, float)) for row in priors["teams"])
           for model in (card["models"]["margin"], card["models"]["total"]):
               assert not any("market" in name or "close" in name for name in model["feature_names"])
           PY
