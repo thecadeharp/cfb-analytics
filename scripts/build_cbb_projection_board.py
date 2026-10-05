@@ -14,7 +14,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "thi-cbb-projection-board-v0.2"
+VERSION = "thi-cbb-projection-board-v0.3"
 SETTLED_MIN_GAMES = 6
 SPREAD_SIGNAL_EDGE = 5.0
 
@@ -130,11 +130,33 @@ def sample_state(minimum_games: int) -> str:
     return "tracked_sample"
 
 
+def spread_signal_tier(edge: float | None) -> str:
+    if edge is None:
+        return "no_line"
+    absolute = abs(edge)
+    if absolute <= 2.5:
+        return "aligned"
+    if absolute <= 5.0:
+        return "small"
+    if absolute <= 7.0:
+        return "play"
+    if absolute <= 10.0:
+        return "material"
+    return "outlier"
+
+
+def total_research_tier(edge: float | None) -> str:
+    if edge is None or abs(edge) < 4.0:
+        return "none"
+    return "watch" if abs(edge) < 7.0 else "play_threshold"
+
+
 def build_board(
     games_payload: dict[str, Any],
     profiles_payload: dict[str, Any],
     priors_payload: dict[str, Any],
     model_card: dict[str, Any],
+    existing_payload: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     model_version = model_card.get("meta", {}).get("model_version")
     if model_version != "thi-cbb-walk-forward-v0.6-research":
@@ -154,9 +176,21 @@ def build_board(
     total_model = model_card["models"]["total"]
     residual_sd = float(model_card["models"]["margin_residual_sd"])
     output = []
+    existing = {
+        str(row.get("game_id")): row
+        for row in (existing_payload or {}).get("games") or []
+        if isinstance(row, dict) and row.get("projection")
+    }
+    seen: set[str] = set()
 
     for game in games_payload.get("games") or []:
-        if str(game.get("status") or "").lower() != "scheduled":
+        game_id = str(game.get("game_id"))
+        seen.add(game_id)
+        status = str(game.get("status") or "").lower().replace("_", "")
+        if status != "scheduled":
+            frozen = existing.get(game_id)
+            if frozen:
+                output.append({**frozen, **game, "market": frozen.get("market"), "projection": frozen["projection"]})
             continue
         home_id = str((game.get("home") or {}).get("team_id"))
         away_id = str((game.get("away") or {}).get("team_id"))
@@ -177,7 +211,12 @@ def build_board(
         market = game.get("market") or {}
         market_spread = finite(market.get("consensus_home_spread"))
         edge = margin + market_spread if market_spread is not None else None
+        market_total = finite(market.get("consensus_total"))
+        total_edge = total - market_total if market_total is not None else None
         signal_eligible = state == "tracked_sample" and edge is not None and abs(edge) >= SPREAD_SIGNAL_EDGE
+        home_quality = home["offense"] - home["defense"]
+        away_quality = away["offense"] - away["defense"]
+        watchability = round(clip(62.0 - abs(margin) * 2.0 + max(0.0, (home_quality + away_quality) / 2.0), 1.0, 99.0))
         output.append({
             **game,
             "projection": {
@@ -189,12 +228,19 @@ def build_board(
                 "home_win_probability": round(100 * probability, 1),
                 "projected_possessions": round(features["projected_pace"], 1),
                 "sample_state": state,
+                "model_input_label": "prior_based" if state == "preseason" else state,
                 "minimum_team_games": minimum_games,
                 "home_rating_source": home["rating_source"],
                 "away_rating_source": away["rating_source"],
                 "spread_signal_eligible": signal_eligible,
                 "spread_edge": round(edge, 1) if edge is not None else None,
+                "spread_signal_tier": spread_signal_tier(edge),
+                "signal_confidence": "developing" if signal_eligible else "research",
                 "totals_signal_eligible": False,
+                "total_edge": round(total_edge, 1) if total_edge is not None else None,
+                "total_research_tier": total_research_tier(total_edge),
+                "watchability_score": watchability,
+                "game_classification": "conference" if game.get("conference_game") else "nonconference",
                 "matchup_context": {
                     "home": {"offense": round(home["offense"], 2), "defense": round(home["defense"], 2), "tempo": round(home["tempo"], 2), "games": home["games"], "rating_source": home["rating_source"]},
                     "away": {"offense": round(away["offense"], 2), "defense": round(away["defense"], 2), "tempo": round(away["tempo"], 2), "games": away["games"], "rating_source": away["rating_source"]},
@@ -203,6 +249,18 @@ def build_board(
             },
         })
 
+    for game_id, frozen in existing.items():
+        frozen_status = str(frozen.get("status") or "").lower().replace("_", "")
+        if game_id not in seen and frozen_status in {"final", "completed", "complete"}:
+            output.append(frozen)
+
+    output.sort(key=lambda row: (str(row.get("start_date") or ""), str(row.get("game_id") or "")))
+    status_counts = {
+        "upcoming": sum(str(row.get("status") or "").lower().replace("_", "") == "scheduled" for row in output),
+        "live": sum(str(row.get("status") or "").lower().replace("_", "") in {"live", "inprogress", "halftime"} for row in output),
+        "final": sum(str(row.get("status") or "").lower().replace("_", "") in {"final", "completed", "complete"} for row in output),
+    }
+
     return {
         "meta": {
             "version": VERSION,
@@ -210,6 +268,7 @@ def build_board(
             "season": games_payload.get("meta", {}).get("season"),
             "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "game_count": len(output),
+            "status_counts": status_counts,
             "settled_minimum_games": SETTLED_MIN_GAMES,
             "spread_signal_minimum_edge": SPREAD_SIGNAL_EDGE,
             "spread_signal_policy": "Only tracked-sample games with at least a five-point model-versus-market disagreement are eligible.",
@@ -237,14 +296,16 @@ def main() -> None:
     parser.add_argument("--model-card", type=Path, default=ROOT / "data" / "cbb" / "model" / "model_card.json")
     parser.add_argument("--output", type=Path, default=ROOT / "data" / "cbb" / "projection_board.json")
     args = parser.parse_args()
+    existing_payload = json.loads(args.output.read_text()) if args.output.exists() else None
     payload = build_board(
         json.loads(args.games.read_text()),
         json.loads(args.profiles.read_text()),
         json.loads(args.priors.read_text()),
         json.loads(args.model_card.read_text()),
+        existing_payload,
     )
     atomic_write(args.output, payload)
-    print(f"{VERSION}: {payload['meta']['game_count']} scheduled games")
+    print(f"{VERSION}: {payload['meta']['game_count']} frozen and upcoming games")
 
 
 if __name__ == "__main__":
