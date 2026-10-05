@@ -37,7 +37,6 @@
     projectionSignal: "all",
     projectionConfidence: "all",
     projectionStatus: "all",
-    projectionSort: { key: "start_date", direction: "asc" },
     projectionLimit: 150,
     teamDataQuery: "",
     teamDataConference: "all",
@@ -251,8 +250,8 @@
 
       <div class="cbb-research-banner"><strong>Projections · live testing</strong><span>THI scores and win probabilities publish from the opening slate. Spread signals require settled samples and market separation; totals remain research-only until their independent validation gate clears.</span></div>
 
-      <details class="cbb-signal-guide">
-        <summary><span>How CBB signals work</span><small>Methodology + confidence key</small></summary>
+      <section class="cbb-signal-guide" aria-labelledby="cbb-signal-guide-title">
+        <div class="cbb-signal-guide-heading"><strong id="cbb-signal-guide-title">How CBB signals work</strong><small>Methodology + confidence key</small></div>
         <div class="cbb-signal-guide-body">
           <p><strong>Model Signal</strong> measures the absolute difference between THI's fair spread and the consensus market. It measures disagreement, while <strong>Signal Confidence</strong> measures prospective evidence. A large disagreement is not automatically a qualified play.</p>
           <div class="cbb-signal-key">
@@ -271,7 +270,7 @@
           <p><strong>Totals key:</strong> 4.0–6.9 points from market is a Total Watch; 7.0+ reaches the Total Play research threshold. No totals play is activated until the totals model clears its independent walk-forward and prospective gates.</p>
           <p><strong>Prior-based model</strong> means the projection still relies on regressed preseason team priors. It does not mean the matchup is an exhibition or preseason game.</p>
         </div>
-      </details>
+      </section>
 
       <div class="cbb-projection-controls">
         <input id="cbb-projection-search" class="cbb-input" type="search" placeholder="Search teams…" value="${escapeHtml(state.projectionQuery)}">
@@ -288,7 +287,7 @@
 
       <div class="cbb-panel cbb-table-wrap cbb-projection-table-wrap">
         <table class="cbb-table cbb-projection-table" aria-label="THI college basketball game projections"><thead><tr>
-          ${projectionHeader("matchup", "Matchup")}${projectionHeader("watch", "THI Watch")}${projectionHeader("spread", "THI Spread")}${projectionHeader("market", "Market")}${projectionHeader("total", "Total")}${projectionHeader("edge", "Model Edge")}${projectionHeader("signal", "Model Signal")}${projectionHeader("confidence", "Signal Confidence")}
+          <th>Matchup</th><th>THI Watch</th><th>THI Spread</th><th>Market</th><th>Total</th><th>Model Edge</th><th>Model Signal</th><th>Signal Confidence</th>
         </tr></thead><tbody id="cbb-projection-body"></tbody></table>
       </div>
       <div class="cbb-projection-footer"><span id="cbb-projection-summary"></span><button id="cbb-projection-more" type="button">Show more games</button></div>
@@ -381,17 +380,9 @@
         && (state.projectionConfidence === "all" || confidenceTier(game) === state.projectionConfidence)
         && (state.projectionStatus === "all" || gameStatus(game) === state.projectionStatus);
     }).sort((a, b) => {
-      const av = projectionValue(a, state.projectionSort.key);
-      const bv = projectionValue(b, state.projectionSort.key);
-      const comparison = typeof av === "string" ? av.localeCompare(bv) : av - bv;
-      return state.projectionSort.direction === "asc" ? comparison : -comparison;
+      const time = (new Date(a.start_date).getTime() || 0) - (new Date(b.start_date).getTime() || 0);
+      return time || String(a.game_id || "").localeCompare(String(b.game_id || ""));
     });
-  }
-
-  function projectionHeader(key, label) {
-    const active = state.projectionSort.key === key;
-    const arrow = active ? (state.projectionSort.direction === "desc" ? " ↓" : " ↑") : " ↕";
-    return `<th data-cbb-projection-sort="${key}" class="${active ? "is-sorted" : ""}">${escapeHtml(label)}${arrow}</th>`;
   }
 
   function bindProjectionControls() {
@@ -409,14 +400,6 @@
       if (!button) return;
       state.projectionStatus = button.dataset.cbbStatus;
       state.projectionLimit = 150;
-      renderProjections();
-    });
-    view.querySelector("thead").addEventListener("click", event => {
-      const header = event.target.closest("[data-cbb-projection-sort]");
-      if (!header) return;
-      const key = header.dataset.cbbProjectionSort;
-      state.projectionSort.direction = state.projectionSort.key === key && state.projectionSort.direction === "desc" ? "asc" : "desc";
-      state.projectionSort.key = key;
       renderProjections();
     });
     view.querySelector("#cbb-projection-body").addEventListener("click", event => {
@@ -604,8 +587,8 @@
       view.innerHTML = `
         <div class="cbb-kicker">Player-level basketball intelligence</div>
         <h1 class="page-title">CBB Player Ratings</h1>
-        <p class="page-subtitle">THI's research layer grades production, efficiency, role and two-way possession value without feeding these ratings into public game projections.</p>
-        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Research v1.2</span><strong>${state.playerLoading ? "Loading the player board" : "Player board available"}</strong><p>${state.playerLoading ? "Reading the roster-verified player layer…" : "Open this tab to load active-roster players with qualified prior-season production. Ratings remain research-only until opponent and lineup adjustments are validated."}</p></div>
+        <p class="page-subtitle">THI's projected-impact layer translates prior production through competition, destination, role, pedigree and sample context without feeding these ratings into public game projections.</p>
+        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Research v1.3</span><strong>${state.playerLoading ? "Loading the player board" : "Player board available"}</strong><p>${state.playerLoading ? "Reading the roster-verified player layer…" : "Open this tab to load active-roster players with qualified prior-season production and THI's competition-adjusted projected-impact grade."}</p></div>
       `;
       return;
     }
@@ -616,10 +599,10 @@
     view.innerHTML = `
       <div class="cbb-kicker">Player-level basketball intelligence</div>
       <h1 class="page-title">CBB Player Ratings</h1>
-      <p class="page-subtitle">Active ${escapeHtml(meta.roster_season || meta.season)} roster players with qualified ${escapeHtml(meta.source_season || "prior-season")} production, graded by THI efficiency, role and two-way possession value. This is a research reference layer and is not yet opponent-adjusted or lineup-adjusted.</p>
+      <p class="page-subtitle">Active ${escapeHtml(meta.roster_season || meta.season)} roster players ranked by projected impact. THI adjusts qualified ${escapeHtml(meta.source_season || "prior-season")} production for competition, destination strength, role, recruiting or portal pedigree, and sample reliability.</p>
       <div class="cbb-stat-grid">
-        ${statCard("Qualified players", integer(meta.player_count), `${integer(meta.team_count)} Division I teams`)}
-        ${statCard("Minimum sample", `${integer(meta.minimum_minutes)} min`, `${integer(meta.minimum_games)} games`)}
+        ${statCard("Rated players", integer(meta.player_count), `${integer(meta.team_count)} Division I teams`)}
+        ${statCard("Prior minimum", `${integer(meta.minimum_minutes)} min`, `${integer(meta.minimum_games)} games · newcomers use verified pedigree`)}
         ${statCard("Roster state", "Verified active", `${integer(payload.coverage?.historical_players_withheld_unverified_current)} historical priors withheld`)}
         ${statCard("Projection use", "Research only", "No game-line adjustment")}
       </div>
@@ -631,11 +614,11 @@
       </div>
       <div class="cbb-panel cbb-table-wrap">
         <table class="cbb-table cbb-player-table" aria-label="THI college basketball player ratings"><thead><tr>
-          <th>Rank</th>${playerHeader("name", "Player")}${playerHeader("team", "Team")}${playerHeader("position", "Pos")}${playerHeader("thi_player_rating", "THI")}${playerHeader("offense", "Off")}${playerHeader("defense", "Def")}${playerHeader("all_around", "All-around")}${playerHeader("points_per_40", "Pts/40")}${playerHeader("true_shooting_pct", "TS%")} ${playerHeader("porpag", "PORPAG")}${playerHeader("reliability", "Reliability")}
+          <th>Rank</th>${playerHeader("name", "Player")}${playerHeader("team", "Team")}${playerHeader("position", "Pos")}${playerHeader("thi_player_rating", "Projected Impact")}${playerHeader("prior_production_rating", "Prior Production")}${playerHeader("offense", "Off")}${playerHeader("defense", "Def")}${playerHeader("all_around", "All-around")}${playerHeader("points_per_40", "Pts/40")}${playerHeader("true_shooting_pct", "TS%")} ${playerHeader("porpag", "PORPAG")}${playerHeader("reliability", "Reliability")}
         </tr></thead><tbody id="cbb-player-body"></tbody></table>
       </div>
       <div class="cbb-player-pager"><button type="button" data-player-page="prev">Previous</button><span id="cbb-player-page-status"></span><button type="button" data-player-page="next">Next</button></div>
-      <div class="cbb-stat-note">Only players verified on a ${escapeHtml(meta.roster_season || meta.season)} roster are shown. Displayed metrics use ${escapeHtml(meta.source_season || "prior-season")} production. Green is stronger, red is weaker. Rank numbers remain neutral.</div>
+      <div class="cbb-stat-note">Only players verified on a ${escapeHtml(meta.roster_season || meta.season)} roster are shown. Projected Impact is the default rank; Prior Production preserves the unadjusted statistical grade. Green is stronger, red is weaker. Rank numbers remain neutral.</div>
     `;
     bindPlayerControls();
     paintPlayerRows();
@@ -646,7 +629,7 @@
     state.playerLoading = fetchJson(PLAYER_PATH)
       .then(payload => {
         if (!Array.isArray(payload.players)) throw new Error("Player ratings payload is missing players.");
-        if (payload.meta?.version !== "thi-cbb-player-research-v1.2" || !Array.isArray(payload.team_rosters) || payload.players.some(player => player.current_roster_verified !== true)) {
+        if (payload.meta?.version !== "thi-cbb-player-research-v1.3" || !Array.isArray(payload.team_rosters) || payload.players.some(player => player.current_roster_verified !== true)) {
           throw new Error("The roster-verified player rebuild has not completed. Historical-only ratings are withheld.");
         }
         state.playerData = payload;
@@ -666,7 +649,7 @@
   function playerValue(player, key) {
     if (key === "name" || key === "team" || key === "position") return player[key] || "";
     if (key === "reliability") return player.data_quality?.reliability ?? -Infinity;
-    if (["thi_player_rating", "offense", "defense", "all_around"].includes(key)) return player.research_scores?.[key] ?? -Infinity;
+    if (["thi_player_rating", "projected_impact_rating", "prior_production_rating", "offense", "defense", "all_around"].includes(key)) return player.research_scores?.[key] ?? -Infinity;
     return player.metrics?.[key] ?? -Infinity;
   }
 
@@ -729,12 +712,12 @@
     state.playerPage = Math.min(Math.max(1, state.playerPage), pageCount);
     const start = (state.playerPage - 1) * state.playerPageSize;
     const page = rows.slice(start, start + state.playerPageSize);
-    const bands = Object.fromEntries(["thi_player_rating", "offense", "defense", "all_around", "points_per_40", "true_shooting_pct", "porpag", "reliability"].map(key => [key, cachedPlayerBands(key)]));
+    const bands = Object.fromEntries(["thi_player_rating", "prior_production_rating", "offense", "defense", "all_around", "points_per_40", "true_shooting_pct", "porpag", "reliability"].map(key => [key, cachedPlayerBands(key)]));
     body.innerHTML = page.length ? page.map(player => {
       const score = player.research_scores || {};
       const metrics = player.metrics || {};
-      return `<tr data-player-id="${escapeHtml(player.player_season_id)}"><td class="cbb-rank">#${integer(player.ranks?.overall)}</td><td><div class="cbb-team-name">${escapeHtml(player.name)}</div><div class="cbb-team-meta">${escapeHtml(player.role)} · Open profile →</div></td><td><div class="cbb-team-cell">${teamLogo(player,"small")}<span>${escapeHtml(player.team)}</span></div></td><td>${escapeHtml(player.position || "—")}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.thi_player_rating(player)}">${number(score.thi_player_rating,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.offense(player)}">${number(score.offense,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.defense(player)}">${number(score.defense,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.all_around(player)}">${number(score.all_around,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.points_per_40(player)}">${number(metrics.points_per_40,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.true_shooting_pct(player)}">${shootingPct(metrics.true_shooting_pct)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.porpag(player)}">${number(metrics.porpag,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.reliability(player)}">${pct(player.data_quality?.reliability)}</td></tr>`;
-    }).join("") : `<tr><td colspan="12" class="cbb-empty">No players match those filters.</td></tr>`;
+      return `<tr data-player-id="${escapeHtml(player.player_season_id)}"><td class="cbb-rank">#${integer(player.ranks?.overall)}</td><td><div class="cbb-team-name">${escapeHtml(player.name)}</div><div class="cbb-team-meta">${escapeHtml(player.projection_context?.basis || player.role)} · Open profile →</div></td><td><div class="cbb-team-cell">${teamLogo(player,"small")}<span>${escapeHtml(player.team)}</span></div></td><td>${escapeHtml(player.position || "—")}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.thi_player_rating(player)}">${number(score.thi_player_rating,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.prior_production_rating(player)}">${number(score.prior_production_rating,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.offense(player)}">${number(score.offense,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.defense(player)}">${number(score.defense,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.all_around(player)}">${number(score.all_around,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.points_per_40(player)}">${number(metrics.points_per_40,1)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.true_shooting_pct(player)}">${shootingPct(metrics.true_shooting_pct)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.porpag(player)}">${number(metrics.porpag,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${bands.reliability(player)}">${pct(player.data_quality?.reliability)}</td></tr>`;
+    }).join("") : `<tr><td colspan="13" class="cbb-empty">No players match those filters.</td></tr>`;
     const status = document.getElementById("cbb-player-page-status");
     if (status) status.textContent = `${integer(rows.length)} players · page ${state.playerPage} of ${pageCount}`;
     const prev = document.querySelector('[data-player-page="prev"]');
@@ -784,7 +767,8 @@
       <h2 class="cbb-detail-title" id="cbb-detail-title">${escapeHtml(player.name)}</h2>
       <div class="cbb-detail-sub">${escapeHtml(player.team)} · ${escapeHtml(player.conference || "Independent")} · ${escapeHtml(player.position || "Position unavailable")} · ${escapeHtml(player.role)}</div>
       <div class="cbb-detail-grid">
-        ${detailStat("THI rating", number(score.thi_player_rating,1))}
+        ${detailStat("Projected impact", number(score.thi_player_rating,1))}
+        ${detailStat("Prior production", number(score.prior_production_rating,1))}
         ${detailStat("Overall rank", `#${integer(player.ranks?.overall)}`)}
         ${detailStat("Position rank", `#${integer(player.ranks?.position_group)}`)}
         ${detailStat("Offense", number(score.offense,1))}
@@ -799,7 +783,8 @@
       </section>
       <section class="cbb-detail-section"><h3>Sample and rating state</h3>
         ${detailRow("Current roster", `${player.team} · ${state.playerData?.meta?.roster_season || state.playerData?.meta?.season}`)}${detailRow("Production source", `${player.source_team || player.team} · ${player.source_season || state.playerData?.meta?.source_season || "Prior season"}`)}${detailRow("Between-season transfer", player.transfer_between_seasons ? "Yes" : "No")}${detailRow("Games", integer(player.sample?.games))}${detailRow("Starts", integer(player.sample?.starts))}${detailRow("Minutes", integer(player.sample?.minutes))}${detailRow("Minutes per game", number(player.sample?.minutes_per_game,1))}${detailRow("Reliability", pct(player.data_quality?.reliability))}${detailRow("Projection use", "Research reference only")}
-        <div class="cbb-model-sub">V1.2 displays only active-roster players and uses the prior completed season as the statistical input. Opponent and lineup adjustments are not active yet.</div>
+        ${detailRow("Projection basis", player.projection_context?.basis || "Qualified prior production")}${detailRow("Competition adjustment", number(player.projection_context?.competition_adjustment,1,true))}${detailRow("Destination adjustment", number(player.projection_context?.destination_adjustment,1,true))}${detailRow("Pedigree adjustment", number(player.projection_context?.pedigree_adjustment,1,true))}
+        <div class="cbb-model-sub">V1.3 ranks projected impact using active-roster status, prior production, team-strength translation, destination context, pedigree when matched, and sample reliability. It remains a research rating rather than a lineup-adjusted game projection.</div>
       </section>`;
     detail.classList.add("is-open");
     detail.setAttribute("aria-hidden", "false");
