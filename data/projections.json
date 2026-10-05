@@ -1,7 +1,7 @@
 {
   "meta": {
     "year": 2026,
-    "generated": "2026-10-05T19:11:46.174089",
+    "generated": "2026-10-05T19:17:13.107846",
     "games": 888,
     "fbs_fbs_games": 761,
     "fbs_fcs_fallback_games": 127,
@@ -56822,20 +56822,25 @@
         }
       },
       "market": {
-        "home_spread": 9.0,
-        "total": 48.0,
-        "bookmaker": "Consensus (10 books)",
+        "home_spread": 7.5,
+        "total": 47.5,
+        "bookmaker": "Consensus (7 books)",
         "method": "cross_book_median_consensus",
-        "spread_books": 10,
-        "total_books": 10,
-        "spread_outliers_removed": [],
+        "spread_books": 6,
+        "total_books": 7,
+        "spread_outliers_removed": [
+          {
+            "bookmaker": "BetRivers",
+            "value": 11.5
+          }
+        ],
         "total_outliers_removed": []
       },
       "comparison": {
-        "disagreement": 2.5,
+        "disagreement": 4.0,
         "preferred_side": "Air Force",
-        "status": "ALIGNED",
-        "signal": "ALIGNED",
+        "status": "SLIGHT EDGE",
+        "signal": "SLIGHT EDGE",
         "bet_status": "TRACKING",
         "status_system": "v2_the_signal",
         "status_thresholds": {
@@ -56864,7 +56869,7 @@
         },
         {
           "title": "MARKET VS MODEL",
-          "text": "The model is 2.5 points more favorable to Air Force than the current market.",
+          "text": "The model is 4.0 points more favorable to Air Force than the current market.",
           "source": "market"
         }
       ]
