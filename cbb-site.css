@@ -135,8 +135,8 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
 }
 .cbb-research-banner strong { flex: 0 0 auto; padding-right: 18px; border-right: 1px solid rgba(245,231,169,.2); font: 800 9px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
 .cbb-signal-guide { margin-top: 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
-.cbb-signal-guide summary { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 14px 16px; cursor: pointer; font-size: 12px; font-weight: 800; }
-.cbb-signal-guide summary small { color: var(--muted); font: 700 8px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.cbb-signal-guide-heading { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 14px 16px; font-size: 12px; font-weight: 800; }
+.cbb-signal-guide-heading small { color: var(--muted); font: 700 8px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
 .cbb-signal-guide-body { padding: 16px; border-top: 1px solid var(--border); }
 .cbb-signal-guide-body p { margin: 0 0 13px; color: var(--muted); font-size: 11px; line-height: 1.6; }
 .cbb-signal-guide-body p:last-child { margin-bottom: 0; }
@@ -173,15 +173,15 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
 .cbb-matchup-team > span:last-child { font: 800 12px var(--mono); }
 .cbb-watch-score { display: inline-flex; min-width: 55px; justify-content: center; padding: 9px 8px; border: 1px solid #397e64; border-radius: 7px; background: #123f35; color: #83ddbc; font: 800 18px var(--mono); }
 .cbb-edge-value { color: #355f91; font: 800 16px var(--mono); }
-.cbb-signal,
 .cbb-confidence,
 .cbb-state-label,
 .cbb-total-flag { display: inline-flex; width: fit-content; align-items: center; justify-content: center; padding: 6px 9px; border: 1px solid var(--border); border-radius: 999px; font: 800 8px var(--mono); letter-spacing: .04em; text-transform: uppercase; }
-.cbb-signal-no_line, .cbb-signal-aligned { background: var(--surface-soft); color: var(--muted); }
-.cbb-signal-small { border-color: #b9cce2; background: #edf4fb; color: #355f91; }
-.cbb-signal-play { border-color: #4fae88; background: #57c99b; color: #10382a; }
-.cbb-signal-material { border-color: #e59a42; background: #fff0dd; color: #a15100; }
-.cbb-signal-outlier { border-color: #d98027; background: #f2b85b; color: #542d00; }
+.cbb-signal { display: inline; padding: 0; border: 0; background: transparent; font: 800 9px var(--mono); letter-spacing: .04em; text-transform: uppercase; }
+.cbb-signal-no_line, .cbb-signal-aligned { color: var(--muted); }
+.cbb-signal-small { color: #355f91; }
+.cbb-signal-play { color: #16815c; }
+.cbb-signal-material { color: #a65a00; }
+.cbb-signal-outlier { color: #bb4f00; }
 .cbb-confidence-research { background: var(--surface-soft); color: var(--muted); }
 .cbb-confidence-developing { border-color: #dfbb47; background: #fff0b2; color: #5b4300; }
 .cbb-confidence-validated { border-color: #4fae88; background: #57c99b; color: #10382a; }
@@ -538,11 +538,11 @@ html[data-theme="dark"] .cbb-band-2 { background: #482f2a; color: #f0bbb0; }
 html[data-theme="dark"] .cbb-band-1 { background: #572a2a; color: #ffb5ad; }
 html[data-theme="dark"] .cbb-roster-rating { background: #174836; border-color: #397e64; color: #9be0bd; }
 html[data-theme="dark"] .cbb-projection-signal { background: #174836; border-color: #397e64; color: #9be0bd; }
-html[data-theme="dark"] .cbb-signal-small { background: #1f3247; border-color: #3d6084; color: #a9ccef; }
-html[data-theme="dark"] .cbb-signal-play,
+html[data-theme="dark"] .cbb-signal-small { color: #82b5ea; }
+html[data-theme="dark"] .cbb-signal-play { color: #72d8af; }
 html[data-theme="dark"] .cbb-confidence-validated { background: #174836; border-color: #397e64; color: #9be0bd; }
-html[data-theme="dark"] .cbb-signal-material { background: #4a321a; border-color: #8c5e28; color: #f5c283; }
-html[data-theme="dark"] .cbb-signal-outlier { background: #5b3414; border-color: #ae692c; color: #ffd39a; }
+html[data-theme="dark"] .cbb-signal-material { color: #f0ae5e; }
+html[data-theme="dark"] .cbb-signal-outlier { color: #ff9b55; }
 html[data-theme="dark"] .cbb-confidence-developing { background: #4a3c14; border-color: #8f7525; color: #f4dc83; }
 html[data-theme="dark"] .cbb-confidence-established { background: #332b72; border-color: #6456b7; color: #ddd8ff; }
 html[data-theme="dark"] .cbb-total-flag { background: #173f35; border-color: #397e64; color: #9be0bd; }
