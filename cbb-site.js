@@ -9,6 +9,7 @@
     priors: "data/cbb/model/current_priors.json",
     history: "data/cbb/history/manifest.json",
     projectionBoard: "data/cbb/projection_board.json",
+    tracking: "data/cbb/model_tracking.json",
     bracketology: "data/cbb/bracketology.json"
   };
   const PLAYER_PATH = "data/cbb/player_ratings.json";
@@ -153,9 +154,13 @@
     if (state.loaded) return state.data;
     if (state.loading) return state.loading;
     state.loading = Promise.all(Object.entries(PATHS).map(async ([key, path]) => {
-      if (key === "projectionBoard" || key === "bracketology") {
+      if (key === "projectionBoard" || key === "tracking" || key === "bracketology") {
         try { return [key, await fetchJson(path)]; }
-        catch (_error) { return [key, key === "projectionBoard" ? { meta: {}, games: [] } : { meta: {}, field: [], regions: {}, first_four: [], bubble: {}, conference_bids: [] }]; }
+        catch (_error) {
+          if (key === "projectionBoard") return [key, { meta: {}, games: [] }];
+          if (key === "tracking") return [key, { meta: {}, summary: {}, spread_decisions: [], total_decisions: [] }];
+          return [key, { meta: {}, field: [], regions: {}, first_four: [], bubble: {}, conference_bids: [] }];
+        }
       }
       return [key, await fetchJson(path)];
     }))
@@ -1112,6 +1117,12 @@
 
   function renderTracking() {
     const card = state.data.model;
+    const prospective = state.data.tracking || {};
+    const prospectiveSummary = prospective.summary || {};
+    const spreadYtd = prospectiveSummary.spread || {};
+    const totalsYtd = prospectiveSummary.totals || {};
+    const accuracyYtd = prospectiveSummary.projection_accuracy || {};
+    const decisions = prospective.spread_decisions || [];
     const validation = card.evaluation?.validation || {};
     const test = card.evaluation?.out_of_time_test || {};
     const checks = card.promotion_gate?.checks || {};
@@ -1123,7 +1134,19 @@
     view.innerHTML = `
       <div class="cbb-kicker">Transparent research and accountability</div>
       <h1 class="page-title">CBB Model Tracking</h1>
-      <p class="page-subtitle">Strict walk-forward evaluation with market prices reserved for comparison. Current-season end ratings never initialize the same season.</p>
+      <p class="page-subtitle">Frozen prospective decisions and strict historical walk-forward evaluation. THI grades every qualified signal at its published line, then measures closing-line value separately.</p>
+      <div class="cbb-research-banner"><strong>Prospective ledger</strong><span>${escapeHtml(prospective.meta?.grading_policy || "The first coordinated refresh will initialize the frozen 2027 tracking ledger.")}</span></div>
+      <div class="cbb-model-grid cbb-ytd-grid">
+        ${modelCard("2027 spread record", "Qualified decisions", spreadYtd.games ? `${integer(spreadYtd.wins)}-${integer(spreadYtd.losses)}-${integer(spreadYtd.pushes)}` : "Awaiting first play", spreadYtd.games ? `${pct(spreadYtd.hit_rate)} ATS across ${integer(spreadYtd.games)} signals` : "No signal is counted before it qualifies")}
+        ${modelCard("Closing-line value", "Average CLV", spreadYtd.average_clv == null ? "—" : number(spreadYtd.average_clv,2,true), spreadYtd.closing_line_games ? `${pct(spreadYtd.beat_close_pct)} beat close · ${integer(spreadYtd.closing_line_games)} closing lines` : "Begins when closing lines are captured")}
+        ${modelCard("Projection accuracy", "Margin MAE", accuracyYtd.margin_mae == null ? "—" : number(accuracyYtd.margin_mae,3), accuracyYtd.games ? `${integer(accuracyYtd.games)} finals · ${pct(accuracyYtd.winner_accuracy)} winners` : "Begins with the first frozen final")}
+        ${modelCard("2027 totals record", "Qualified decisions", totalsYtd.games ? `${integer(totalsYtd.wins)}-${integer(totalsYtd.losses)}-${integer(totalsYtd.pushes)}` : "Withheld", totalsYtd.games ? `${pct(totalsYtd.hit_rate)} across ${integer(totalsYtd.games)} signals` : "Independent totals gate has not cleared")}
+      </div>
+
+      <section class="cbb-section">
+        <div class="cbb-section-head"><div><div class="cbb-label">2027 prospective record</div><h2 class="cbb-section-title">Frozen spread decisions</h2></div><div class="cbb-section-note">The decision line grades the result. The closing line only measures CLV and whether THI beat the close.</div></div>
+        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table cbb-tracking-table"><thead><tr><th>Date</th><th>Matchup</th><th>THI side</th><th>Decision line</th><th>Close</th><th>CLV</th><th>Edge</th><th>Result</th><th>Final</th></tr></thead><tbody>${decisions.length ? decisions.map(trackingDecisionRow).join("") : `<tr><td colspan="9" class="cbb-empty">No qualified CBB spread decision has reached final status yet.</td></tr>`}</tbody></table></div>
+      </section>
       <div class="cbb-model-grid">
         ${modelCard("2025 validation", "Margin MAE", number(validation.margin_mae,3), `${integer(validation.games)} games · ${pct(validation.winner_accuracy)} winner accuracy`)}
         ${modelCard("2026 out-of-time test", "Margin MAE", number(test.margin_mae,3), `${integer(test.games)} games · ${pct(test.winner_accuracy)} winner accuracy`)}
@@ -1165,6 +1188,13 @@
 
   function modelCard(kicker, label, value, note) {
     return `<article class="cbb-panel cbb-model-card"><div class="cbb-label">${escapeHtml(kicker)}</div><div class="cbb-model-sub">${escapeHtml(label)}</div><div class="cbb-model-value">${escapeHtml(value)}</div><div class="cbb-model-sub">${escapeHtml(note)}</div></article>`;
+  }
+
+  function trackingDecisionRow(row) {
+    const start = new Date(row.start_date);
+    const date = Number.isNaN(start.getTime()) ? "—" : new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "America/New_York" }).format(start);
+    const result = String(row.result || "").toLowerCase();
+    return `<tr><td class="cbb-number">${escapeHtml(date)}</td><td><strong>${escapeHtml(row.away_team)} at ${escapeHtml(row.home_team)}</strong></td><td class="cbb-team-name">${escapeHtml(row.pick_team)}</td><td class="cbb-number">${number(row.pregame_line,1,true)}</td><td class="cbb-number">${row.closing_line == null ? "—" : number(row.closing_line,1,true)}</td><td class="cbb-number">${row.clv == null ? "—" : number(row.clv,2,true)}</td><td class="cbb-number">${number(row.model_edge,1)} pts</td><td><span class="cbb-result cbb-result-${escapeHtml(result)}">${escapeHtml(result || "—")}</span></td><td class="cbb-number">${escapeHtml(row.final_score || "—")}</td></tr>`;
   }
 
   function humanize(value) {
