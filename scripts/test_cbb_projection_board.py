@@ -55,18 +55,35 @@ class CbbProjectionBoardTests(unittest.TestCase):
             },
         }
         payload = build_board(games, profiles, priors, model)
-        self.assertEqual(payload["meta"]["version"], "thi-cbb-projection-board-v0.2")
+        self.assertEqual(payload["meta"]["version"], "thi-cbb-projection-board-v0.3")
         self.assertEqual(len(payload["games"]), 2)
         opening = payload["games"][0]["projection"]
         tracked = payload["games"][1]["projection"]
         self.assertEqual(opening["sample_state"], "preseason")
         self.assertFalse(opening["spread_signal_eligible"])
+        self.assertEqual(opening["model_input_label"], "prior_based")
+        self.assertEqual(opening["game_classification"], "nonconference")
+        self.assertEqual(opening["signal_confidence"], "research")
+        self.assertTrue(1 <= opening["watchability_score"] <= 99)
         self.assertEqual(tracked["sample_state"], "tracked_sample")
         self.assertTrue(tracked["spread_signal_eligible"])
+        self.assertEqual(tracked["signal_confidence"], "developing")
+        self.assertIn(tracked["spread_signal_tier"], {"play", "material", "outlier"})
         self.assertFalse(tracked["totals_signal_eligible"])
         self.assertTrue(0 <= tracked["home_win_probability"] <= 100)
         self.assertEqual(len(tracked["matchup_context"]["margin_drivers"]), 2)
         self.assertEqual(tracked["matchup_context"]["home"]["games"], 6)
+
+        frozen_margin = opening["home_margin"]
+        games["games"][0]["status"] = "final"
+        games["games"][0]["home"]["score"] = 70
+        games["games"][0]["away"]["score"] = 66
+        refreshed = build_board(games, profiles, priors, model, payload)
+        completed = next(game for game in refreshed["games"] if game["game_id"] == 1)
+        self.assertEqual(completed["status"], "final")
+        self.assertEqual(completed["home"]["score"], 70)
+        self.assertEqual(completed["projection"]["home_margin"], frozen_margin)
+        self.assertEqual(refreshed["meta"]["status_counts"]["final"], 1)
 
     def test_rejects_unapproved_model_version(self):
         with self.assertRaisesRegex(RuntimeError, "v0.6"):
