@@ -2231,6 +2231,8 @@
     installStyles();
 
     await loadData();
+    // Board badges need the postgame ledger even before a final matchup opens.
+    await ensurePostgameData();
 
     installObserver();
 
