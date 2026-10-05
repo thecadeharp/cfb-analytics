@@ -15,7 +15,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = "thi-cbb-model-tracking-v0.1"
-REQUIRED_BOARD_VERSION = "thi-cbb-projection-board-v0.4"
+REQUIRED_BOARD_VERSION = "thi-cbb-projection-board-v0.5"
 
 
 def finite(value: Any) -> float | None:
