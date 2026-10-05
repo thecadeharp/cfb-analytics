@@ -8,13 +8,16 @@ from pathlib import Path
 
 from scripts.build_cbb_walk_forward_model import (
     MARGIN_FEATURES,
+    TeamState,
     initial_states,
     add_personnel_features,
     current_priors,
     metrics,
     load_seasons,
     projection_features,
+    update_states,
 )
+from datetime import datetime, timezone
 
 
 class CbbWalkForwardModelTests(unittest.TestCase):
@@ -60,6 +63,18 @@ class CbbWalkForwardModelTests(unittest.TestCase):
         self.assertEqual(campus["nonconference_home"], 1)
         self.assertEqual(campus["raw_margin_curve"], campus["raw_margin"] * abs(campus["raw_margin"]))
 
+    def test_four_factors_update_against_opponent_pregame_quality(self):
+        home = TeamState(100, 100, 68, 0, efg_for=50, efg_allowed=50)
+        away = TeamState(100, 100, 68, 0, efg_for=50, efg_allowed=55)
+        game = {
+            "pace": 70,
+            "home": {"efficiency": 110, "effective_fg_pct": 60},
+            "away": {"efficiency": 100, "effective_fg_pct": 50},
+        }
+        update_states(game, home, away, 100, datetime(2026, 11, 1, tzinfo=timezone.utc))
+        self.assertEqual(home.efg_for, 55)
+        self.assertEqual(away.efg_allowed, 60)
+
     def test_rejects_pre_cleanup_history(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "season_2026.json.gz"
@@ -93,6 +108,7 @@ class CbbWalkForwardModelTests(unittest.TestCase):
                 [{"team_id": 1, "adjusted_offense": 120, "adjusted_defense": 90, "pace": 68}],
                 {2027: {}},
                 player_path,
+                {"1": {"offense": {"effective_fg_pct": 56}, "defense": {"effective_fg_pct": 44}}},
             )
             row = payload["teams"][0]
             self.assertEqual(row["returning_minutes_pct"], 62.5)
@@ -100,6 +116,8 @@ class CbbWalkForwardModelTests(unittest.TestCase):
             self.assertEqual(row["prior_tempo"], 68)
             self.assertEqual(payload["meta"]["verified_roster_continuity_count"], 1)
             self.assertGreater(row["prior_net"], 15)
+            self.assertGreater(row["prior_four_factors"]["offense"]["effective_fg_pct"], 50)
+            self.assertLess(row["prior_four_factors"]["defense"]["effective_fg_pct"], 50)
 
     def test_evaluation_reports_context_and_probability_calibration(self):
         rows = []
