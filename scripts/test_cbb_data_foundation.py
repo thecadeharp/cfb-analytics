@@ -12,7 +12,8 @@ class CbbDataFoundationTests(unittest.TestCase):
         prior = [{
             "season": 2026, "teamId": i, "team": "Alpha" if i == 1 else f"Team {i}",
             "record": {"games": 30, "wins": 20, "losses": 10}, "summary": {},
-            "teamStats": {}, "opponentStats": {}, "shotProfile": {},
+            "teamStats": {"effectiveFieldGoalPct": .51, "turnoverRatio": .18, "offensiveReboundPct": .31, "freeThrowRate": .27},
+            "opponentStats": {"effectiveFieldGoalPct": .50, "turnoverRatio": .19, "offensiveReboundPct": .29, "freeThrowRate": .25}, "shotProfile": {},
             "adjustedEfficiency": {"offensiveRating": 110 + i / 100, "defensiveRating": 100, "netRating": 10 + i / 100, "rankings": {"offense": i, "defense": i, "net": i}},
         } for i in range(1, 301)]
         responses = {
@@ -47,6 +48,9 @@ class CbbDataFoundationTests(unittest.TestCase):
         self.assertEqual(alpha["current_efficiency"]["adjusted"]["net"], 17.4)
         self.assertEqual(alpha["four_factor_edges"]["effective_fg_pct"], 7.0)
         self.assertEqual(alpha["four_factor_edges"]["turnover_pct"], 5.0)
+        self.assertEqual(alpha["four_factors"]["offense"]["effective_fg_pct"], 55.0)
+        self.assertEqual(alpha["four_factors"]["defense"]["effective_fg_pct"], 48.0)
+        self.assertEqual(alpha["preseason_prior"]["four_factors"]["offense"]["turnover_pct"], 18.0)
         self.assertEqual(alpha["preseason_prior"]["returning_minutes_pct"], 60.0)
         self.assertEqual(alpha["preseason_prior"]["returning_points_pct"], 60.0)
         self.assertEqual(alpha["espn_id"], "1234")
