@@ -78,12 +78,13 @@ jobs:
               predictions = json.load(handle)
 
           meta = card["meta"]
-          assert meta["model_version"] == "thi-cbb-walk-forward-v0.6-research"
+          assert meta["model_version"] == "thi-cbb-walk-forward-v0.7-research"
           assert meta["activation_state"] == "research_only"
           assert meta["strict_walk_forward"] is True
           assert meta["same_season_end_ratings_used_as_pregame_features"] is False
           assert meta["personnel_features_known_before_season"] is True
           assert meta["historical_laboratory_version"] == "thi-cbb-historical-lab-v1.0"
+          assert meta["four_factor_engine_version"] == "thi-cbb-opponent-adjusted-four-factors-v1.0"
           assert all(meta["leakage_audit"].values())
           assert card["promotion_gate"]["eligible_for_public_projection_engine"] is False
           assert card["evaluation"]["out_of_time_test"]["games"] >= 5000
@@ -97,6 +98,7 @@ jobs:
           assert priors["meta"]["verified_roster_continuity_count"] >= 250
           assert priors["meta"]["positive_continuity_count"] >= 250
           assert all(isinstance(row["prior_tempo"], (int, float)) for row in priors["teams"])
+          assert all("prior_four_factors" in row for row in priors["teams"])
           for model in (card["models"]["margin"], card["models"]["total"]):
               assert not any("market" in name or "close" in name for name in model["feature_names"])
           PY
