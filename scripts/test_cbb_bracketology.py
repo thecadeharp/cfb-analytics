@@ -17,7 +17,7 @@ def priors(conferences: int = 32, teams_each: int = 3) -> dict:
                 "prior_net": 50 - member * 20 - conference / 10,
             })
             team_id += 1
-    return {"meta": {"model_version": "thi-cbb-walk-forward-v0.6-research", "season": 2027}, "teams": teams}
+    return {"meta": {"model_version": "thi-cbb-walk-forward-v0.7-research", "season": 2027}, "teams": teams}
 
 
 class CbbBracketologyTests(unittest.TestCase):
@@ -39,7 +39,7 @@ class CbbBracketologyTests(unittest.TestCase):
     def test_requires_current_model_and_32_conferences(self):
         bad_model = priors()
         bad_model["meta"]["model_version"] = "old"
-        with self.assertRaisesRegex(RuntimeError, "v0.6"):
+        with self.assertRaisesRegex(RuntimeError, "v0.7"):
             build_bracketology(bad_model)
         with self.assertRaisesRegex(RuntimeError, "32 conferences"):
             build_bracketology(priors(conferences=31))
