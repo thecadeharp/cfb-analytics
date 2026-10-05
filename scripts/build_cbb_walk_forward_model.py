@@ -522,6 +522,7 @@ def current_priors(
         if isinstance(row, dict)
     }
     league_efficiency, league_tempo = league_context(previous_teams)
+    previous_by_id = {str(row.get("team_id")): row for row in previous_teams}
     rows = []
     season = int(profiles.get("meta", {}).get("season") or 0)
     personnel_rows = personnel.get(season, {})
@@ -535,6 +536,7 @@ def current_priors(
         carry = 0.25 + 0.50 * clip((returning or 0.0) / 100.0, 0.0, 1.0)
         offense = finite(adjusted.get("offense")) or league_efficiency
         defense = finite(adjusted.get("defense")) or league_efficiency
+        prior_tempo = finite((previous_by_id.get(str(profile.get("team_id"))) or {}).get("pace")) or league_tempo
         rows.append({
             "team_id": profile.get("team_id"),
             "team": profile.get("team"),
@@ -542,6 +544,7 @@ def current_priors(
             "prior_offense": round(league_efficiency + carry * (offense - league_efficiency), 4),
             "prior_defense": round(league_efficiency + carry * (defense - league_efficiency), 4),
             "prior_net": round(carry * (offense - defense), 4),
+            "prior_tempo": round(prior_tempo, 4),
             "returning_minutes_pct": returning,
             "continuity_known": returning is not None,
             "continuity_source": continuity_source,
