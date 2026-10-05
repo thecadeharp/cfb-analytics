@@ -14,7 +14,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "thi-cbb-projection-board-v0.4"
+VERSION = "thi-cbb-projection-board-v0.5"
 SETTLED_MIN_GAMES = 6
 SPREAD_SIGNAL_EDGE = 5.0
 
@@ -71,7 +71,20 @@ def team_state(profile: dict[str, Any], prior: dict[str, Any], league_tempo: flo
     current = profile.get("current_efficiency") or {}
     adjusted = current.get("adjusted") or {}
     current_ready = bool(profile.get("sample_ready")) and finite(adjusted.get("offense")) is not None and finite(adjusted.get("defense")) is not None
-    factors = profile.get("four_factor_edges") or {}
+    current_factors = profile.get("four_factors") or {}
+    prior_factors = prior.get("prior_four_factors") or {}
+    factor_weight = games / (games + 5.0) if current_ready else 0.0
+    baselines = {"effective_fg_pct": 50.0, "turnover_pct": 20.0, "offensive_rebound_pct": 30.0, "free_throw_rate": 30.0}
+
+    def blended_factor(side: str, key: str) -> float:
+        baseline = baselines[key]
+        prior_value = finite((prior_factors.get(side) or {}).get(key))
+        current_value = finite((current_factors.get(side) or {}).get(key))
+        prior_value = baseline if prior_value is None else prior_value
+        if current_value is None:
+            return prior_value
+        return (1.0 - factor_weight) * prior_value + factor_weight * current_value
+
     return {
         "team_id": profile.get("team_id"),
         "team": profile.get("team"),
@@ -80,7 +93,11 @@ def team_state(profile: dict[str, Any], prior: dict[str, Any], league_tempo: flo
         "defense": finite(adjusted.get("defense")) if current_ready else finite(prior.get("prior_defense")),
         "tempo": finite(current.get("pace_per_40")) if current_ready else finite(prior.get("prior_tempo")) or league_tempo,
         "rating_source": "current_adjusted" if current_ready else "preseason_prior",
-        "factors": {key: finite(value) for key, value in factors.items()},
+        "factors": {
+            side: {key: blended_factor(side, key) for key in baselines}
+            for side in ("offense", "defense")
+        },
+        "factor_source": "opponent_adjusted_prior_blended_with_current" if current_ready else "opponent_adjusted_prior",
         "personnel": prior.get("personnel") or {},
     }
 
@@ -96,9 +113,20 @@ def matchup_features(game: dict[str, Any], home: dict[str, Any], away: dict[str,
     early_weight = 1.0 / (1.0 + minimum_games)
     home_court = 0.0 if game.get("neutral_site") else 1.0
 
-    def factor_edge(key: str) -> float:
-        left, right = home["factors"].get(key), away["factors"].get(key)
-        return left - right if left is not None and right is not None else 0.0
+    baselines = {"effective_fg_pct": 50.0, "turnover_pct": 20.0, "offensive_rebound_pct": 30.0, "free_throw_rate": 30.0}
+
+    def expected_factor(offense: dict[str, Any], defense: dict[str, Any], key: str) -> float:
+        baseline = baselines[key]
+        return float(offense["factors"]["offense"][key]) + float(defense["factors"]["defense"][key]) - baseline
+
+    home_efg = expected_factor(home, away, "effective_fg_pct")
+    away_efg = expected_factor(away, home, "effective_fg_pct")
+    home_tov = expected_factor(home, away, "turnover_pct")
+    away_tov = expected_factor(away, home, "turnover_pct")
+    home_orb = expected_factor(home, away, "offensive_rebound_pct")
+    away_orb = expected_factor(away, home, "offensive_rebound_pct")
+    home_ftr = expected_factor(home, away, "free_throw_rate")
+    away_ftr = expected_factor(away, home, "free_throw_rate")
 
     features = {
         "raw_margin": raw_margin,
@@ -111,10 +139,20 @@ def matchup_features(game: dict[str, Any], home: dict[str, Any], away: dict[str,
         "early_home": home_court * early_weight,
         "nonconference_home": home_court * (0.0 if game.get("conference_game") else 1.0),
         "projected_pace": pace,
-        "efg_edge": factor_edge("effective_fg_pct"),
-        "turnover_edge": factor_edge("turnover_pct"),
-        "rebound_edge": factor_edge("offensive_rebound_pct"),
-        "free_throw_edge": factor_edge("free_throw_rate"),
+        "efg_edge": home_efg - away_efg,
+        "turnover_edge": away_tov - home_tov,
+        "rebound_edge": home_orb - away_orb,
+        "free_throw_edge": home_ftr - away_ftr,
+        "combined_efg": home_efg + away_efg,
+        "combined_turnover": home_tov + away_tov,
+        "home_expected_efg": home_efg,
+        "away_expected_efg": away_efg,
+        "home_expected_turnover": home_tov,
+        "away_expected_turnover": away_tov,
+        "home_expected_rebound": home_orb,
+        "away_expected_rebound": away_orb,
+        "home_expected_free_throw": home_ftr,
+        "away_expected_free_throw": away_ftr,
     }
     features.update(personnel_features(home, away, early_weight))
     return features
@@ -159,8 +197,8 @@ def build_board(
     existing_payload: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     model_version = model_card.get("meta", {}).get("model_version")
-    if model_version != "thi-cbb-walk-forward-v0.6-research":
-        raise RuntimeError("projection board requires thi-cbb-walk-forward-v0.6-research")
+    if model_version != "thi-cbb-walk-forward-v0.7-research":
+        raise RuntimeError("projection board requires thi-cbb-walk-forward-v0.7-research")
     if priors_payload.get("meta", {}).get("model_version") != model_version:
         raise RuntimeError("current priors and model card versions do not match")
 
@@ -250,6 +288,12 @@ def build_board(
                 "matchup_context": {
                     "home": {"offense": round(home["offense"], 2), "defense": round(home["defense"], 2), "tempo": round(home["tempo"], 2), "games": home["games"], "rating_source": home["rating_source"]},
                     "away": {"offense": round(away["offense"], 2), "defense": round(away["defense"], 2), "tempo": round(away["tempo"], 2), "games": away["games"], "rating_source": away["rating_source"]},
+                    "four_factor_matchup": {
+                        "home": {"effective_fg_pct": round(features["home_expected_efg"], 2), "turnover_pct": round(features["home_expected_turnover"], 2), "offensive_rebound_pct": round(features["home_expected_rebound"], 2), "free_throw_rate": round(features["home_expected_free_throw"], 2)},
+                        "away": {"effective_fg_pct": round(features["away_expected_efg"], 2), "turnover_pct": round(features["away_expected_turnover"], 2), "offensive_rebound_pct": round(features["away_expected_rebound"], 2), "free_throw_rate": round(features["away_expected_free_throw"], 2)},
+                        "home_source": home["factor_source"],
+                        "away_source": away["factor_source"],
+                    },
                     "margin_drivers": feature_contributions(features, margin_model),
                 },
             },
@@ -280,6 +324,7 @@ def build_board(
             "spread_signal_policy": "Only tracked-sample games with at least a five-point model-versus-market disagreement are eligible.",
             "totals_signal_policy": "Withheld until totals validation clears its independent promotion gate.",
             "projection_state": "research projections; sample-gated spread signals",
+            "four_factor_method": "Opponent-adjusted historical states with continuity-regressed priors blended toward current-season offense and defense factor observations.",
         },
         "games": output,
     }
