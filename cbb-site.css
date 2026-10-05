@@ -379,6 +379,12 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
 .cbb-model-card { padding: 18px; }
 .cbb-model-value { margin-top: 9px; font: 800 22px var(--mono); }
 .cbb-model-sub { margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+.cbb-ytd-grid { margin-top: 14px; }
+.cbb-tracking-table { min-width: 980px; }
+.cbb-result { display: inline-flex; min-width: 48px; justify-content: center; padding: 5px 8px; border: 1px solid var(--border); border-radius: 999px; font: 800 8px var(--mono); text-transform: uppercase; }
+.cbb-result-win { border-color: #4fae88; background: #d7ead8; color: #123f25; }
+.cbb-result-loss { border-color: #d88e84; background: #f5ddd3; color: #713527; }
+.cbb-result-push { background: var(--surface-soft); color: var(--muted); }
 .cbb-bracket-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(230px, 1fr));
@@ -540,6 +546,8 @@ html[data-theme="dark"] .cbb-signal-outlier { background: #5b3414; border-color:
 html[data-theme="dark"] .cbb-confidence-developing { background: #4a3c14; border-color: #8f7525; color: #f4dc83; }
 html[data-theme="dark"] .cbb-confidence-established { background: #332b72; border-color: #6456b7; color: #ddd8ff; }
 html[data-theme="dark"] .cbb-total-flag { background: #173f35; border-color: #397e64; color: #9be0bd; }
+html[data-theme="dark"] .cbb-result-win { background: #174836; border-color: #397e64; color: #9be0bd; }
+html[data-theme="dark"] .cbb-result-loss { background: #482f2a; border-color: #7d4a42; color: #f0bbb0; }
 html[data-theme="dark"] .cbb-driver-home { color: #8dd9b4; }
 html[data-theme="dark"] .cbb-driver-away { color: #f0a69a; }
 html[data-theme="dark"] .cbb-error { background: #3a2020; border-color: #76443e; color: #f1aaa2; }
