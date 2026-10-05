@@ -45,9 +45,9 @@ class CbbProjectionBoardTests(unittest.TestCase):
             ],
         }
         profiles = {"teams": [profile(1, 0), profile(2, 0), profile(3, 6), profile(4, 7)]}
-        priors = {"meta": {"model_version": "thi-cbb-walk-forward-v0.6-research"}, "teams": [prior(i) for i in range(1, 5)]}
+        priors = {"meta": {"model_version": "thi-cbb-walk-forward-v0.7-research"}, "teams": [prior(i) for i in range(1, 5)]}
         model = {
-            "meta": {"model_version": "thi-cbb-walk-forward-v0.6-research"},
+            "meta": {"model_version": "thi-cbb-walk-forward-v0.7-research"},
             "models": {
                 "margin": {"feature_names": ["raw_margin", "home_court"], "means": {"raw_margin": 0, "home_court": 0}, "scales": {"raw_margin": 1, "home_court": 1}, "coefficients": [0, 1, 1]},
                 "total": {"feature_names": ["raw_total"], "means": {"raw_total": 0}, "scales": {"raw_total": 1}, "coefficients": [0, 1]},
@@ -55,7 +55,7 @@ class CbbProjectionBoardTests(unittest.TestCase):
             },
         }
         payload = build_board(games, profiles, priors, model)
-        self.assertEqual(payload["meta"]["version"], "thi-cbb-projection-board-v0.4")
+        self.assertEqual(payload["meta"]["version"], "thi-cbb-projection-board-v0.5")
         self.assertEqual(len(payload["games"]), 2)
         opening = payload["games"][0]["projection"]
         tracked = payload["games"][1]["projection"]
@@ -73,6 +73,7 @@ class CbbProjectionBoardTests(unittest.TestCase):
         self.assertTrue(0 <= tracked["home_win_probability"] <= 100)
         self.assertEqual(len(tracked["matchup_context"]["margin_drivers"]), 2)
         self.assertEqual(tracked["matchup_context"]["home"]["games"], 6)
+        self.assertIn("four_factor_matchup", tracked["matchup_context"])
 
         frozen_margin = opening["home_margin"]
         games["games"][0]["status"] = "final"
@@ -88,7 +89,7 @@ class CbbProjectionBoardTests(unittest.TestCase):
         self.assertEqual(refreshed["meta"]["status_counts"]["final"], 1)
 
     def test_rejects_unapproved_model_version(self):
-        with self.assertRaisesRegex(RuntimeError, "v0.6"):
+        with self.assertRaisesRegex(RuntimeError, "v0.7"):
             build_board({"games": []}, {"teams": []}, {"meta": {}}, {"meta": {"model_version": "old"}})
 
 
