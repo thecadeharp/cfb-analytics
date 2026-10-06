@@ -1,22 +1,23 @@
 {
   "meta": {
-    "version": "thi-trends-lab-v1.0",
-    "generated_at_utc": "2026-10-06T01:59:04.590184Z",
-    "policy": "Descriptive historical research only. Every card publishes its sample and is never an automatic betting recommendation."
+    "version": "thi-variance-systems-lab-v1.1",
+    "generated_at_utc": "2026-10-06T02:11:50.940963Z",
+    "policy": "Every system is recomputed from THI's settled games and closing lines. Samples and estimated -110 ROI publish even when a popular hypothesis fails."
   },
   "sports": {
     "cfb": {
       "settled_games": 5669,
       "cards": [
         {
-          "name": "Home favorites",
-          "description": "Home teams laying points",
+          "name": "Massive home favorites",
+          "description": "Home favorites laying 45 points or more",
           "market": "ATS",
-          "wins": 1834,
-          "losses": 1830,
-          "pushes": 59,
-          "decisions": 3664,
-          "hit_rate": 50.1,
+          "wins": 48,
+          "losses": 52,
+          "pushes": 1,
+          "decisions": 100,
+          "hit_rate": 48.0,
+          "roi_pct_at_minus_110": -8.4,
           "seasons": [
             2019,
             2020,
@@ -26,17 +27,19 @@
             2024,
             2025
           ],
-          "state": "qualified"
+          "state": "developing",
+          "source_note": "Opponent classification is not yet joined."
         },
         {
-          "name": "Home underdogs",
-          "description": "Home teams catching points",
+          "name": "Home dogs vs. road favorites",
+          "description": "Home underdogs catching points against any road favorite",
           "market": "ATS",
           "wins": 955,
           "losses": 932,
           "pushes": 38,
           "decisions": 1887,
           "hit_rate": 50.6,
+          "roi_pct_at_minus_110": -3.4,
           "seasons": [
             2019,
             2020,
@@ -46,37 +49,19 @@
             2024,
             2025
           ],
-          "state": "qualified"
+          "state": "qualified",
+          "source_note": "THI historical warehouse"
         },
         {
-          "name": "Double-digit favorites",
-          "description": "Home favorites of 10 or more",
-          "market": "ATS",
-          "wins": 1075,
-          "losses": 1091,
-          "pushes": 36,
-          "decisions": 2166,
-          "hit_rate": 49.6,
-          "seasons": [
-            2019,
-            2020,
-            2021,
-            2022,
-            2023,
-            2024,
-            2025
-          ],
-          "state": "qualified"
-        },
-        {
-          "name": "All posted totals",
-          "description": "Every settled game with a closing total",
+          "name": "Service academy matchups",
+          "description": "Under when two of Army, Navy and Air Force face each other",
           "market": "Under",
-          "wins": 2833,
-          "losses": 2769,
-          "pushes": 67,
-          "decisions": 5602,
-          "hit_rate": 50.6,
+          "wins": 13,
+          "losses": 7,
+          "pushes": 1,
+          "decisions": 20,
+          "hit_rate": 65.0,
+          "roi_pct_at_minus_110": 24.1,
           "seasons": [
             2019,
             2020,
@@ -86,17 +71,41 @@
             2024,
             2025
           ],
-          "state": "qualified"
+          "state": "limited_sample",
+          "source_note": "THI historical warehouse"
+        },
+        {
+          "name": "Opening-week unders",
+          "description": "Under in Weeks 0\u20131",
+          "market": "Under",
+          "wins": 308,
+          "losses": 226,
+          "pushes": 5,
+          "decisions": 534,
+          "hit_rate": 57.7,
+          "roi_pct_at_minus_110": 10.1,
+          "seasons": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "state": "qualified",
+          "source_note": "THI historical warehouse"
         },
         {
           "name": "High-total unders",
-          "description": "Closing total at or above the historical 75th percentile (59.0)",
+          "description": "Under when the closing total is 60 or higher",
           "market": "Under",
-          "wins": 808,
-          "losses": 655,
-          "pushes": 22,
-          "decisions": 1463,
-          "hit_rate": 55.2,
+          "wins": 692,
+          "losses": 575,
+          "pushes": 17,
+          "decisions": 1267,
+          "hit_rate": 54.6,
+          "roi_pct_at_minus_110": 4.3,
           "seasons": [
             2019,
             2020,
@@ -106,27 +115,8 @@
             2024,
             2025
           ],
-          "state": "qualified"
-        },
-        {
-          "name": "Low-total unders",
-          "description": "Closing total at or below the historical 25th percentile (48.5)",
-          "market": "Under",
-          "wins": 672,
-          "losses": 747,
-          "pushes": 16,
-          "decisions": 1419,
-          "hit_rate": 47.4,
-          "seasons": [
-            2019,
-            2020,
-            2021,
-            2022,
-            2023,
-            2024,
-            2025
-          ],
-          "state": "qualified"
+          "state": "qualified",
+          "source_note": "THI historical warehouse"
         }
       ]
     },
@@ -134,58 +124,15 @@
       "settled_games": 50610,
       "cards": [
         {
-          "name": "Home favorites",
-          "description": "Home teams laying points",
+          "name": "Double-digit road underdogs",
+          "description": "Away underdogs catching 10 points or more",
           "market": "ATS",
-          "wins": 15882,
-          "losses": 15932,
-          "pushes": 304,
-          "decisions": 31814,
-          "hit_rate": 49.9,
-          "seasons": [
-            2018,
-            2019,
-            2020,
-            2021,
-            2022,
-            2023,
-            2024,
-            2025,
-            2026
-          ],
-          "state": "qualified"
-        },
-        {
-          "name": "Home underdogs",
-          "description": "Home teams catching points",
-          "market": "ATS",
-          "wins": 6217,
-          "losses": 6092,
-          "pushes": 122,
-          "decisions": 12309,
-          "hit_rate": 50.5,
-          "seasons": [
-            2018,
-            2019,
-            2020,
-            2021,
-            2022,
-            2023,
-            2024,
-            2025,
-            2026
-          ],
-          "state": "qualified"
-        },
-        {
-          "name": "Double-digit favorites",
-          "description": "Home favorites of 10 or more",
-          "market": "ATS",
-          "wins": 5349,
-          "losses": 5607,
+          "wins": 5607,
+          "losses": 5349,
           "pushes": 100,
           "decisions": 10956,
-          "hit_rate": 48.8,
+          "hit_rate": 51.2,
+          "roi_pct_at_minus_110": -2.3,
           "seasons": [
             2018,
             2019,
@@ -197,17 +144,43 @@
             2025,
             2026
           ],
-          "state": "qualified"
+          "state": "qualified",
+          "source_note": "All qualifiers; no public-ticket condition is available."
         },
         {
-          "name": "Neutral-floor favorites",
-          "description": "Listed home-side favorite at a neutral site",
+          "name": "Sub-130 totals",
+          "description": "Under when the closing total is below 130",
+          "market": "Under",
+          "wins": 1596,
+          "losses": 1790,
+          "pushes": 29,
+          "decisions": 3386,
+          "hit_rate": 47.1,
+          "roi_pct_at_minus_110": -10.0,
+          "seasons": [
+            2018,
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "state": "qualified",
+          "source_note": "Blind-Under test; the cited VSiN rule used the majority bettor's chosen side."
+        },
+        {
+          "name": "November nonconference home favorites",
+          "description": "Home favorites in November nonconference campus games",
           "market": "ATS",
-          "wins": 1823,
-          "losses": 1821,
-          "pushes": 33,
-          "decisions": 3644,
-          "hit_rate": 50.0,
+          "wins": 2597,
+          "losses": 2560,
+          "pushes": 46,
+          "decisions": 5157,
+          "hit_rate": 50.4,
+          "roi_pct_at_minus_110": -3.9,
           "seasons": [
             2018,
             2019,
@@ -219,17 +192,19 @@
             2025,
             2026
           ],
-          "state": "qualified"
+          "state": "qualified",
+          "source_note": "THI historical warehouse"
         },
         {
-          "name": "All posted totals",
-          "description": "Every settled game with a closing total",
-          "market": "Under",
-          "wins": 22221,
-          "losses": 22329,
-          "pushes": 255,
-          "decisions": 44550,
-          "hit_rate": 49.9,
+          "name": "November nonconference home dogs",
+          "description": "Home underdogs in November nonconference campus games",
+          "market": "ATS",
+          "wins": 465,
+          "losses": 408,
+          "pushes": 7,
+          "decisions": 873,
+          "hit_rate": 53.3,
+          "roi_pct_at_minus_110": 1.7,
           "seasons": [
             2018,
             2019,
@@ -241,61 +216,36 @@
             2025,
             2026
           ],
-          "state": "qualified"
+          "state": "qualified",
+          "source_note": "THI historical warehouse"
         },
         {
-          "name": "High-total unders",
-          "description": "Closing total at or above the historical 75th percentile (149.5)",
-          "market": "Under",
-          "wins": 5719,
-          "losses": 5595,
-          "pushes": 55,
-          "decisions": 11314,
-          "hit_rate": 50.5,
+          "name": "Home-side closing support",
+          "description": "Home side ATS when the spread moves 1.5+ points toward home",
+          "market": "ATS",
+          "wins": 450,
+          "losses": 447,
+          "pushes": 4,
+          "decisions": 897,
+          "hit_rate": 50.2,
+          "roi_pct_at_minus_110": -4.2,
           "seasons": [
-            2018,
-            2019,
-            2020,
-            2021,
-            2022,
-            2023,
-            2024,
             2025,
             2026
           ],
-          "state": "qualified"
+          "state": "qualified",
+          "source_note": "Line movement only; not reverse line movement without public percentages."
         },
         {
-          "name": "Low-total unders",
-          "description": "Closing total at or below the historical 25th percentile (136.5)",
-          "market": "Under",
-          "wins": 5878,
-          "losses": 6002,
-          "pushes": 86,
-          "decisions": 11880,
-          "hit_rate": 49.5,
-          "seasons": [
-            2018,
-            2019,
-            2020,
-            2021,
-            2022,
-            2023,
-            2024,
-            2025,
-            2026
-          ],
-          "state": "qualified"
-        },
-        {
-          "name": "Conference-game unders",
-          "description": "Games identified as conference matchups",
+          "name": "Conference unders",
+          "description": "Under in conference games",
           "market": "Under",
           "wins": 14166,
           "losses": 14348,
           "pushes": 167,
           "decisions": 28514,
           "hit_rate": 49.7,
+          "roi_pct_at_minus_110": -5.2,
           "seasons": [
             2018,
             2019,
@@ -307,21 +257,37 @@
             2025,
             2026
           ],
-          "state": "qualified"
+          "state": "qualified",
+          "source_note": "THI historical warehouse"
         }
       ]
     }
   },
-  "planned_splits": [
+  "source_backlog": [
     {
-      "name": "Ranked vs. unranked",
-      "status": "awaiting_point_in_time_rankings",
-      "reason": "A ranking must be joined as it existed before each game."
+      "name": "Primetime systems",
+      "status": "requires_historical_start_times",
+      "path": "Join verified kickoff/tip times and define the window before testing."
     },
     {
-      "name": "Primetime",
-      "status": "awaiting_verified_start_times",
-      "reason": "The current settled training snapshots do not preserve trustworthy kickoff/tip times."
+      "name": "Ranked vs. unranked",
+      "status": "requires_point_in_time_polls",
+      "path": "Join the poll released before each game, never final-season ranks."
+    },
+    {
+      "name": "P4 vs. G5/FCS",
+      "status": "requires_historical_conference_membership",
+      "path": "Join season-specific conference and division membership."
+    },
+    {
+      "name": "Wind and heat",
+      "status": "requires_historical_game_weather",
+      "path": "Join stadium coordinates and weather at kickoff."
+    },
+    {
+      "name": "Public handle and tickets",
+      "status": "requires_licensed_splits_feed",
+      "path": "A closing line alone cannot identify reverse line movement or public fades."
     }
   ]
 }

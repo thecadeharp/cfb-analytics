@@ -110,11 +110,11 @@
       <button class="nav-item" type="button" data-cbb-view="cbb-bracketology">THI Bracketology</button>
       <button class="nav-item" type="button" data-cbb-view="cbb-portal">Transfer Portal</button>
       <button class="nav-item" type="button" data-cbb-view="cbb-market">Market Research</button>
-      <button class="nav-item" type="button" data-cbb-view="cbb-trends">Trends Lab</button>
+      <button class="nav-item" type="button" data-cbb-view="cbb-variance">Variance Lab</button>
     `;
     cfbNav.insertAdjacentElement("afterend", cbbNav);
 
-    ["cbb-projections", "cbb-tracking", "cbb-team-data", "cbb-ratings", "cbb-player-ratings", "cbb-bracketology", "cbb-portal", "cbb-market", "cbb-trends"].forEach(id => {
+    ["cbb-projections", "cbb-tracking", "cbb-team-data", "cbb-ratings", "cbb-player-ratings", "cbb-bracketology", "cbb-portal", "cbb-market", "cbb-variance"].forEach(id => {
       const section = document.createElement("section");
       section.id = `view-${id}`;
       section.className = "view cbb-view cbb-shell";
@@ -122,17 +122,7 @@
       main.appendChild(section);
     });
 
-    const cfbTrendsButton = document.createElement("button");
-    cfbTrendsButton.className = "nav-item";
-    cfbTrendsButton.dataset.view = "trends";
-    cfbTrendsButton.textContent = "Trends Lab";
-    cfbTrendsButton.addEventListener("click", () => { window.switchView?.("trends"); loadData().catch(() => {}); });
-    cfbNav.appendChild(cfbTrendsButton);
-    const cfbTrends = document.createElement("section");
-    cfbTrends.id = "view-trends";
-    cfbTrends.className = "view";
-    cfbTrends.innerHTML = `<div class="cbb-panel cbb-empty">Loading THI Trends Lab…</div>`;
-    main.appendChild(cfbTrends);
+    cfbNav.querySelector('[data-view="variance"]')?.addEventListener("click", () => loadData().catch(() => {}));
 
     const detail = document.createElement("div");
     detail.id = "cbb-team-detail";
@@ -1433,16 +1423,16 @@
   }
 
   function trendCard(card) {
-    return `<article class="cbb-panel cbb-trend-card"><div class="cbb-label">${escapeHtml(card.market)} trend</div><h3>${escapeHtml(card.name)}</h3><p>${escapeHtml(card.description)}</p><div class="cbb-trend-rate">${pct(card.hit_rate)}</div><strong>${integer(card.wins)}–${integer(card.losses)}${card.pushes ? `–${integer(card.pushes)}` : ""}</strong><small>${integer(card.decisions)} decisions · ${escapeHtml(card.state === "qualified" ? "qualified sample" : "limited sample")}</small></article>`;
+    return `<article class="cbb-panel cbb-trend-card"><div class="cbb-label">${escapeHtml(card.market)} system</div><h3>${escapeHtml(card.name)}</h3><p>${escapeHtml(card.description)}</p><div class="cbb-trend-rate">${pct(card.hit_rate)}</div><strong>${integer(card.wins)}–${integer(card.losses)}${card.pushes ? `–${integer(card.pushes)}` : ""} · ${number(card.roi_pct_at_minus_110,1,true)}% ROI</strong><small>${integer(card.decisions)} decisions · ${escapeHtml(humanize(card.state || "limited_sample"))}</small><small>${escapeHtml(card.source_note || "THI historical warehouse")}</small></article>`;
   }
 
   function trendsMarkup(sport) {
     const lab = state.data?.trends || {}; const data = lab.sports?.[sport] || { cards:[] };
-    return `<div class="cbb-kicker">The Hammer Index · ${sport.toUpperCase()}</div><h1 class="page-title">THI Trends Lab</h1><p class="page-subtitle">Historical ATS and totals splits calculated from THI's settled market warehouse. These are descriptive research records, with every sample shown.</p><div class="cbb-research-banner"><strong>Research discipline</strong><span>${escapeHtml(lab.meta?.policy || "Historical research only.")}</span></div><div class="cbb-trends-summary"><strong>${integer(data.settled_games)}</strong><span>settled historical games examined</span></div><div class="cbb-trends-grid">${(data.cards || []).map(trendCard).join("")}</div><div class="cbb-panel cbb-planned-trends"><h3>Coverage being added</h3>${(lab.planned_splits || []).map(row => `<div><strong>${escapeHtml(row.name)}</strong><span>${escapeHtml(row.reason)}</span></div>`).join("")}</div>`;
+    return `<div class="cbb-kicker">The Hammer Index · ${sport.toUpperCase()}</div><h1 class="page-title">THI Variance Lab</h1><p class="page-subtitle">Reproducible situational systems tested against THI's settled closing-line warehouse. Popular betting angles stay hypotheses until our own sample confirms them.</p><div class="cbb-research-banner"><strong>Systems discipline</strong><span>${escapeHtml(lab.meta?.policy || "Historical research only.")}</span></div><div class="cbb-trends-summary"><strong>${integer(data.settled_games)}</strong><span>settled historical games examined</span></div><div class="cbb-trends-grid">${(data.cards || []).map(trendCard).join("")}</div><div class="cbb-panel cbb-planned-trends"><h3>Source pipeline</h3>${(lab.source_backlog || []).map(row => `<div><strong>${escapeHtml(row.name)}</strong><span>${escapeHtml(row.path)}</span></div>`).join("")}</div>`;
   }
 
   function renderTrendsLab() {
-    const cfb = document.getElementById("view-trends"); const cbb = document.getElementById("view-cbb-trends");
+    const cfb = document.getElementById("view-variance"); const cbb = document.getElementById("view-cbb-variance");
     if (cfb) cfb.innerHTML = trendsMarkup("cfb");
     if (cbb) cbb.innerHTML = trendsMarkup("cbb");
   }

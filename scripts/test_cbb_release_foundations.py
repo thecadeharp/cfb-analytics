@@ -5,10 +5,10 @@ from scripts.build_trends_lab import build as trends_build
 
 class ReleaseFoundationTests(unittest.TestCase):
     def test_trends_grade_settled_games_without_claiming_missing_splits(self):
-        rows=[{"season":2025,"margin":7,"total":130,"spread":-3,"market_total":140,"neutral":False,"conference":True,"home_favorite":True,"favorite_size":3} for _ in range(220)]
+        rows=[{"season":2025,"month":11,"margin":7,"total":130,"spread":-12,"market_total":140,"neutral":False,"conference":True,"home_team":"A","away_team":"B"} for _ in range(220)]
         payload=trends_build(rows,rows)
         self.assertEqual(payload["sports"]["cbb"]["cards"][0]["hit_rate"],100.0)
-        self.assertEqual(payload["planned_splits"][0]["status"],"awaiting_point_in_time_rankings")
+        self.assertEqual(payload["source_backlog"][0]["status"],"requires_historical_start_times")
 
     def test_operations_never_invents_availability_or_mileage(self):
         board={"games":[{"game_id":1,"start_date":"2026-11-01T12:00:00Z","neutral_site":True,"venue":{"name":"Arena","city":"X","state":"NY"},"home":{"team_id":1,"team":"A"},"away":{"team_id":2,"team":"B"}}]}

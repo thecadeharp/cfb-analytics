@@ -173,7 +173,7 @@ jobs:
           assert operations["coverage"]["games"] == projections["meta"]["game_count"]
           assert health["meta"]["version"] == "thi-cbb-platform-health-v1.0"
           assert health["meta"]["status"] == "healthy"
-          assert trends["meta"]["version"] == "thi-trends-lab-v1.0"
+          assert trends["meta"]["version"] == "thi-variance-systems-lab-v1.1"
           assert trends["sports"]["cfb"]["cards"] and trends["sports"]["cbb"]["cards"]
           PY
 
