@@ -1275,151 +1275,58 @@
   }
 
   function renderTracking() {
-    const card = state.data.model;
     const prospective = state.data.tracking || {};
     const prospectiveSummary = prospective.summary || {};
     const spreadYtd = prospectiveSummary.spread || {};
     const totalsYtd = prospectiveSummary.totals || {};
     const accuracyYtd = prospectiveSummary.projection_accuracy || {};
-    const decisions = prospective.spread_decisions || [];
-    const validation = card.evaluation?.validation || {};
-    const test = card.evaluation?.out_of_time_test || {};
-    const checks = card.promotion_gate?.checks || {};
-    const ats = test.ats_by_edge || [];
-    const totals = test.totals_by_edge || [];
-    const contexts = test.context_slices || {};
-    const calibration = test.win_probability_calibration || [];
-    const seasons = card.evaluation?.by_season || {};
-    const errorProfile = test.error_profile || {};
-    const registry = state.data?.intelligence?.validation_registry || {};
-    const gateSummary = registry.gate_summary || {};
-    const factors = registry.factors || [];
-    const challenger = state.data?.challenger || {};
-    const selectedCandidate = challenger.selected_candidate || {};
-    const challengerPromotion = challenger.promotion || {};
-    const challengerChecks = challengerPromotion.checks || {};
-    const challengerValidation = challenger.post_selection_comparison?.validation_2025 || {};
-    const challengerAudit = challenger.post_selection_comparison?.audit_2026 || {};
-    const readiness = state.data?.readiness || {};
-    const readinessChecks = readiness.checks || {};
-    const readinessCoverage = readiness.coverage || {};
-    const readinessPassed = Object.values(readinessChecks).filter(Boolean).length;
-    const readinessTotal = Object.keys(readinessChecks).length;
-    const health = state.data?.health || {};
-    const healthChecks = health.checks || {};
-    const healthCoverage = health.coverage || {};
-    const operations = state.data?.operations || {};
-    const operationsCoverage = operations.coverage || {};
-    const activeFactors = factors.filter(row => ["active", "active_prior"].includes(row.status)).length;
-    const researchFactors = factors.filter(row => ["research_only", "evaluation_only"].includes(row.status)).length;
-    const withheldFactors = factors.filter(row => ["withheld", "unavailable"].includes(row.status)).length;
+    const spreadSignals = prospective.spread_by_signal || {};
+    const spreadMonths = prospective.spread_by_month || {};
+    const record = row => Number(row?.games) ? `${integer(row.wins)}-${integer(row.losses)}-${integer(row.pushes)}` : "—";
+    const confidence = row => {
+      const games = Number(row?.games || 0);
+      const hit = Number(row?.hit_rate);
+      const clv = Number(row?.average_clv);
+      const beat = Number(row?.beat_close_pct);
+      if (games >= 100 && hit >= 53 && clv > 0 && beat >= 55) return "ESTABLISHED";
+      if (games >= 50 && hit >= 52.5 && clv > 0 && beat >= 52.5) return "VALIDATED";
+      return "DEVELOPING";
+    };
+    const monthLabel = value => {
+      const [year, month] = String(value).split("-").map(Number);
+      if (!year || !month) return humanize(value);
+      return new Intl.DateTimeFormat("en-US", { month:"long", year:"numeric", timeZone:"UTC" }).format(new Date(Date.UTC(year, month - 1, 1)));
+    };
+    const monthlyRows = Object.entries(spreadMonths).sort(([a],[b]) => a.localeCompare(b)).map(([month,row]) => `<tr>
+      <td>${escapeHtml(monthLabel(month))}</td><td class="cbb-number">${integer(row.games)}</td><td class="cbb-number">${record(row)}</td>
+      <td class="cbb-number">${row.hit_rate == null ? "—" : pct(row.hit_rate)}</td><td class="cbb-number">${row.average_clv == null ? "—" : number(row.average_clv,2,true)}</td>
+      <td class="cbb-number">${row.beat_close_pct == null ? "—" : pct(row.beat_close_pct)}</td></tr>`).join("");
+    const signalRows = Object.entries(spreadSignals).sort(([a],[b]) => a.localeCompare(b)).map(([signal,row]) => `<tr>
+      <td>${escapeHtml(humanize(signal))}</td><td class="cbb-number">${integer(row.games)}</td><td class="cbb-number">${record(row)}</td>
+      <td class="cbb-number">${row.hit_rate == null ? "—" : pct(row.hit_rate)}</td><td class="cbb-number">${row.average_clv == null ? "—" : number(row.average_clv,2,true)}</td>
+      <td class="cbb-number">${row.beat_close_pct == null ? "—" : pct(row.beat_close_pct)}</td><td><span class="cbb-tracking-confidence">${confidence(row)}</span></td></tr>`).join("");
+    const play = spreadSignals.play || spreadSignals.PLAY || {};
     const view = document.getElementById("view-cbb-tracking");
     view.innerHTML = `
-      <div class="cbb-kicker">Transparent research and accountability</div>
-      <h1 class="page-title">CBB Model Tracking &amp; Validation Center</h1>
-      <p class="page-subtitle">Frozen prospective decisions and strict historical walk-forward evaluation. THI grades every qualified signal at its published line, then measures closing-line value separately.</p>
-      <div class="cbb-research-banner"><strong>Prospective ledger</strong><span>${escapeHtml(prospective.meta?.grading_policy || "The first coordinated refresh will initialize the frozen 2027 tracking ledger.")}</span></div>
-      <section class="cbb-operations-grid" aria-label="Game-day operations and challenger status">
-        <article class="cbb-panel cbb-operations-card ${readiness.meta?.status === "ready" ? "is-ready" : "needs-attention"}">
-          <div class="cbb-label">Game-day readiness</div>
-          <div class="cbb-operations-heading"><strong>${readinessTotal ? `${readinessPassed} / ${readinessTotal} checks` : "Awaiting refresh"}</strong><span>${escapeHtml(humanize(readiness.meta?.status || "pending"))}</span></div>
-          <p>Frozen projections survive through final status, closing lines stay separate, and final scores grade the original decision line.</p>
-          <div class="cbb-operations-stats"><span>${integer(readinessCoverage.scheduled)} scheduled</span><span>${integer(readinessCoverage.final)} finals</span><span>${integer(readinessCoverage.finals_with_closing_market)} closes captured</span></div>
-        </article>
-        <article class="cbb-panel cbb-operations-card ${challengerPromotion.recommended ? "is-ready" : "is-research"}">
-          <div class="cbb-label">Model v0.2 challenger lab</div>
-          <div class="cbb-operations-heading"><strong>${escapeHtml(humanize(selectedCandidate.name || "awaiting refresh"))}</strong><span>${challengerPromotion.recommended ? "Promotion candidate" : "No promotion"}</span></div>
-          <p>${challengerPromotion.recommended ? "The challenger cleared every preregistered gate and is eligible for engineering review." : "The published model remains unchanged because the challenger did not clear every preregistered gate."}</p>
-          <div class="cbb-operations-stats"><span>${number(challenger.inner_fold_mae_improvement,4,true)} inner-fold MAE</span><span>${number(challengerValidation.challenger?.margin_mae,3)} 2025 MAE</span><span>${number(challengerAudit.challenger?.margin_mae,3)} 2026 audit MAE</span></div>
-        </article>
-        <article class="cbb-panel cbb-operations-card ${health.meta?.status === "healthy" ? "is-ready" : "needs-attention"}">
-          <div class="cbb-label">Platform health</div>
-          <div class="cbb-operations-heading"><strong>${integer(Object.values(healthChecks).filter(Boolean).length)} / ${integer(Object.keys(healthChecks).length)} checks</strong><span>${escapeHtml(humanize(health.meta?.status || "pending"))}</span></div>
-          <p>Monitors duplicate games and teams, roster coverage, source failures, missing finals, tracking reconciliation and stale game-day output.</p>
-          <div class="cbb-operations-stats"><span>${integer(healthCoverage.teams)} teams</span><span>${integer(healthCoverage.players)} players</span><span>${integer(healthCoverage.games_with_market)} market games</span></div>
-        </article>
-        <article class="cbb-panel cbb-operations-card is-research">
-          <div class="cbb-label">Travel + availability foundation</div>
-          <div class="cbb-operations-heading"><strong>${integer(operationsCoverage.games)} games linked</strong><span>Research only</span></div>
-          <p>Rest context is live. Exact mileage requires verified venue coordinates; availability requires a timestamped source. Neither can silently adjust a projection.</p>
-          <div class="cbb-operations-stats"><span>${integer(operationsCoverage.sides_not_requiring_travel)} home-site rows</span><span>${integer(operationsCoverage.sides_with_verified_mileage)} verified trips</span><span>${integer(operationsCoverage.verified_availability_reports)} availability reports</span></div>
-        </article>
-      </section>
-      <section class="cbb-section">
-        <div class="cbb-section-head"><div><div class="cbb-label">Operational safeguards</div><h2 class="cbb-section-title">Game-day data lifecycle</h2></div><div class="cbb-section-note">The automated refresh audits these rules on every coordinated release.</div></div>
-        <div class="cbb-panel cbb-gate-list">${Object.entries(readinessChecks).map(([key, pass]) => `<div class="cbb-gate-item ${pass ? "pass" : "fail"}"><span class="cbb-gate-icon">${pass ? "✓" : "×"}</span><span>${escapeHtml(humanize(key))}</span></div>`).join("") || `<div class="cbb-empty">Readiness checks will populate on the next coordinated refresh.</div>`}</div>
-      </section>
-      <section class="cbb-section">
-        <div class="cbb-section-head"><div><div class="cbb-label">Leakage-safe challenger research</div><h2 class="cbb-section-title">Model v0.2 promotion decision</h2></div><div class="cbb-section-note">Candidate selection uses only 2022–24 inner folds. The 2025 validation and 2026 audit cannot choose the winner.</div></div>
-        <div class="cbb-panel cbb-gate-list">${Object.entries(challengerChecks).map(([key, pass]) => `<div class="cbb-gate-item ${pass ? "pass" : "fail"}"><span class="cbb-gate-icon">${pass ? "✓" : "×"}</span><span>${escapeHtml(humanize(key))}</span></div>`).join("") || `<div class="cbb-empty">Challenger results will populate on the next coordinated refresh.</div>`}</div>
-      </section>
-      <div class="cbb-validation-status-grid">
-        ${modelCard("Promotion gate", "Checks passed", `${integer(gateSummary.passed)} / ${integer(gateSummary.total)}`, gateSummary.eligible_for_public_projection_engine ? "Full public engine is eligible" : "Research controls remain active")}
-        ${modelCard("Historical evidence", "Validation sample", `${integer(validation.games)} games`, "2025 held outside model fitting")}
-        ${modelCard("Sealed evaluation", "Out-of-time sample", `${integer(test.games)} games`, "2026 used once for final generalization audit")}
-        ${modelCard("Factor inventory", "Projection inputs", `${integer(activeFactors)} active`, `${integer(researchFactors)} research · ${integer(withheldFactors)} withheld/unavailable`)}
-      </div>
-
-      <section class="cbb-section" id="cbb-factor-registry">
-        <div class="cbb-section-head"><div><div class="cbb-label">Auditable model controls</div><h2 class="cbb-section-title">Factor registry</h2></div><div class="cbb-section-note">Every proposed input has one declared state. Only active factors may change a published projection.</div></div>
-        <div class="cbb-factor-registry">${factors.map(factor => `<article class="cbb-factor-card cbb-factor-${escapeHtml(factor.status)}"><div><strong>${escapeHtml(factor.factor)}</strong><span>${escapeHtml(humanize(factor.status))}</span></div><p>${escapeHtml(factor.evidence)}</p><small>Model use · ${escapeHtml(humanize(factor.model_usage))}</small></article>`).join("") || `<div class="cbb-empty">Factor registry will populate on the next coordinated refresh.</div>`}</div>
-      </section>
-      <div class="cbb-model-grid cbb-ytd-grid">
-        ${modelCard("2027 spread record", "Qualified decisions", spreadYtd.games ? `${integer(spreadYtd.wins)}-${integer(spreadYtd.losses)}-${integer(spreadYtd.pushes)}` : "Awaiting first play", spreadYtd.games ? `${pct(spreadYtd.hit_rate)} ATS across ${integer(spreadYtd.games)} signals` : "No signal is counted before it qualifies")}
-        ${modelCard("Closing-line value", "Average CLV", spreadYtd.average_clv == null ? "—" : number(spreadYtd.average_clv,2,true), spreadYtd.closing_line_games ? `${pct(spreadYtd.beat_close_pct)} beat close · ${integer(spreadYtd.closing_line_games)} closing lines` : "Begins when closing lines are captured")}
-        ${modelCard("Projection accuracy", "Margin MAE", accuracyYtd.margin_mae == null ? "—" : number(accuracyYtd.margin_mae,3), accuracyYtd.games ? `${integer(accuracyYtd.games)} finals · ${pct(accuracyYtd.winner_accuracy)} winners` : "Begins with the first frozen final")}
-        ${modelCard("2027 totals record", "Qualified decisions", totalsYtd.games ? `${integer(totalsYtd.wins)}-${integer(totalsYtd.losses)}-${integer(totalsYtd.pushes)}` : "Withheld", totalsYtd.games ? `${pct(totalsYtd.hit_rate)} across ${integer(totalsYtd.games)} signals` : "Independent totals gate has not cleared")}
-      </div>
-
-      <section class="cbb-section">
-        <div class="cbb-section-head"><div><div class="cbb-label">2027 prospective record</div><h2 class="cbb-section-title">Frozen spread decisions</h2></div><div class="cbb-section-note">The decision line grades the result. The closing line only measures CLV and whether THI beat the close.</div></div>
-        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table cbb-tracking-table"><thead><tr><th>Date</th><th>Matchup</th><th>THI side</th><th>Decision line</th><th>Close</th><th>CLV</th><th>Edge</th><th>Result</th><th>Final</th></tr></thead><tbody>${decisions.length ? decisions.map(trackingDecisionRow).join("") : `<tr><td colspan="9" class="cbb-empty">No qualified CBB spread decision has reached final status yet.</td></tr>`}</tbody></table></div>
-      </section>
-      <div class="cbb-model-grid">
-        ${modelCard("2025 validation", "Margin MAE", number(validation.margin_mae,3), `${integer(validation.games)} games · ${pct(validation.winner_accuracy)} winner accuracy`)}
-        ${modelCard("2026 out-of-time test", "Margin MAE", number(test.margin_mae,3), `${integer(test.games)} games · ${pct(test.winner_accuracy)} winner accuracy`)}
-        ${modelCard("2026 market comparison", "Margin MAE gap", number(Number(test.margin_mae) - Number(test.market_margin_mae),3,true), `THI ${number(test.margin_mae,3)} · market ${number(test.market_margin_mae,3)}`)}
-        ${modelCard("Activation state", "Public engine", gateSummary.eligible_for_public_projection_engine ? "Eligible" : "Withheld", gateSummary.eligible_for_public_projection_engine ? "All required promotion checks passed" : "Research-only until every required promotion check passes")}
-      </div>
-
-      <section class="cbb-section">
-        <div class="cbb-section-head"><div><div class="cbb-label">Strict chronological replay</div><h2 class="cbb-section-title">Historical walk-forward laboratory</h2></div><div class="cbb-section-note">Every row is projected before that game's result updates either team. Validation and out-of-time seasons never fit the model.</div></div>
-        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Season</th><th>Split</th><th>Games</th><th>Margin MAE</th><th>Market MAE</th><th>Total MAE</th><th>Market total MAE</th><th>Winner accuracy</th></tr></thead><tbody>${Object.entries(seasons).map(([season,row]) => `<tr><td class="cbb-number">${escapeHtml(season)}</td><td>${escapeHtml(humanize(row.split))}</td><td class="cbb-number">${integer(row.games)}</td><td class="cbb-number">${number(row.margin_mae,3)}</td><td class="cbb-number">${number(row.market_margin_mae,3)}</td><td class="cbb-number">${number(row.total_mae,3)}</td><td class="cbb-number">${number(row.market_total_mae,3)}</td><td class="cbb-number">${pct(row.winner_accuracy)}</td></tr>`).join("")}</tbody></table></div>
-      </section>
-
-      <div class="cbb-model-grid">
-        ${modelCard("Out-of-time error shape", "Margin bias", number(errorProfile.margin_bias,3,true), `Median absolute ${number(errorProfile.margin_median_absolute_error,3)} · 90th percentile ${number(errorProfile.margin_p90_absolute_error,3)}`)}
-        ${modelCard("Out-of-time error shape", "Total bias", number(errorProfile.total_bias,3,true), `Median absolute ${number(errorProfile.total_median_absolute_error,3)} · 90th percentile ${number(errorProfile.total_p90_absolute_error,3)}`)}
-      </div>
-
-      <section class="cbb-section">
-        <div class="cbb-section-head"><div><div class="cbb-label">Promotion standard</div><h2 class="cbb-section-title">Gate checks</h2></div><div class="cbb-section-note">A strong slice does not override failed generalization, totals or personnel-data checks.</div></div>
-        <div class="cbb-panel cbb-gate-list">${Object.entries(checks).map(([key, pass]) => `<div class="cbb-gate-item ${pass ? "pass" : "fail"}"><span class="cbb-gate-icon">${pass ? "✓" : "×"}</span><span>${escapeHtml(humanize(key))}</span></div>`).join("")}</div>
-      </section>
-
-      <section class="cbb-section">
-        <div class="cbb-section-head"><div><div class="cbb-label">2026 out-of-time test</div><h2 class="cbb-section-title">Spread disagreement audit</h2></div><div class="cbb-section-note">Retrospective research by absolute model-versus-market disagreement. Market prices were evaluation fields, never model inputs.</div></div>
-        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Minimum disagreement</th><th>Wins</th><th>Losses</th><th>Pushes</th><th>Hit rate</th></tr></thead><tbody>${ats.map(row => `<tr><td class="cbb-number">${row.minimum_edge}+ pts</td><td class="cbb-number">${integer(row.wins)}</td><td class="cbb-number">${integer(row.losses)}</td><td class="cbb-number">${integer(row.pushes)}</td><td class="cbb-number">${pct(row.hit_rate)}</td></tr>`).join("")}</tbody></table></div>
-      </section>
-
-      <section class="cbb-section">
-        <div class="cbb-section-head"><div><div class="cbb-label">2026 out-of-time test</div><h2 class="cbb-section-title">Totals disagreement audit</h2></div><div class="cbb-section-note">Totals remain a separate research problem and must clear their own validation gate.</div></div>
-        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Minimum disagreement</th><th>Wins</th><th>Losses</th><th>Pushes</th><th>Hit rate</th></tr></thead><tbody>${totals.map(row => `<tr><td class="cbb-number">${row.minimum_edge}+ pts</td><td class="cbb-number">${integer(row.wins)}</td><td class="cbb-number">${integer(row.losses)}</td><td class="cbb-number">${integer(row.pushes)}</td><td class="cbb-number">${pct(row.hit_rate)}</td></tr>`).join("")}</tbody></table></div>
-      </section>
-
-      <section class="cbb-section">
-        <div class="cbb-section-head"><div><div class="cbb-label">Error anatomy</div><h2 class="cbb-section-title">Performance by game context</h2></div><div class="cbb-section-note">This separates unstable opening samples from settled team states and campus games from neutral floors.</div></div>
-        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Context</th><th>Games</th><th>THI margin MAE</th><th>Market margin MAE</th><th>THI total MAE</th><th>Market total MAE</th><th>Winner accuracy</th></tr></thead><tbody>${Object.entries(contexts).map(([key,row]) => `<tr><td>${escapeHtml(humanize(key))}</td><td class="cbb-number">${integer(row.games)}</td><td class="cbb-number">${number(row.margin_mae,3)}</td><td class="cbb-number">${number(row.market_margin_mae,3)}</td><td class="cbb-number">${number(row.total_mae,3)}</td><td class="cbb-number">${number(row.market_total_mae,3)}</td><td class="cbb-number">${pct(row.winner_accuracy)}</td></tr>`).join("")}</tbody></table></div>
-      </section>
-
-      <section class="cbb-section">
-        <div class="cbb-section-head"><div><div class="cbb-label">Probability honesty</div><h2 class="cbb-section-title">Win-probability calibration</h2></div><div class="cbb-section-note">A calibrated 70% forecast should win about seven times in ten over a large sample.</div></div>
-        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Forecast band</th><th>Games</th><th>Mean projection</th><th>Actual home win rate</th><th>Calibration gap</th></tr></thead><tbody>${calibration.map(row => `<tr><td class="cbb-number">${escapeHtml(row.range)}</td><td class="cbb-number">${integer(row.games)}</td><td class="cbb-number">${pct(row.mean_projected_probability)}</td><td class="cbb-number">${pct(row.actual_home_win_rate)}</td><td class="cbb-number">${number(Number(row.actual_home_win_rate) - Number(row.mean_projected_probability),2,true)} pts</td></tr>`).join("")}</tbody></table></div>
-      </section>
-
-      <section class="cbb-section">
-        <div class="cbb-section-head"><div><div class="cbb-label">Known limitations</div><h2 class="cbb-section-title">What is still missing</h2></div></div>
-        <div class="cbb-panel cbb-gate-list">${(card.limitations || []).map(item => `<div class="cbb-gate-item"><span class="cbb-gate-icon">·</span><span>${escapeHtml(item)}</span></div>`).join("")}</div>
+      <div class="cbb-kicker">Prospective accountability</div>
+      <h1 class="page-title">Model Tracking</h1>
+      <p class="page-subtitle">Every frozen THI projection graded after the final: winner accuracy, ATS results, tracked totals, closing-line value and projection error.</p>
+      <section class="cbb-panel cbb-tracking-shell">
+        <header class="cbb-tracking-head"><div><div class="cbb-label">Transparent Model Tracking</div><h2>Season-to-Date Performance</h2></div><p>${escapeHtml(prospective.meta?.grading_policy || "The first coordinated refresh will initialize the frozen tracking ledger.")}</p></header>
+        <div class="cbb-tracking-periods"><span>Season ${escapeHtml(prospective.meta?.season || "2027")}</span></div>
+        <div class="cbb-tracking-section-label">Season to Date</div>
+        <div class="cbb-tracking-grid">
+          ${modelCard("Games final", "Frozen projections", integer(accuracyYtd.games), `${integer(prospectiveSummary.final_games_with_frozen_projection)} finals reconciled`)}
+          ${modelCard("Straight up", "Winner accuracy", accuracyYtd.winner_accuracy == null ? "—" : pct(accuracyYtd.winner_accuracy), accuracyYtd.games ? `${integer(accuracyYtd.games)} graded games` : "No decisions")}
+          ${modelCard("Overall ATS", "Spread record", record(spreadYtd), spreadYtd.games ? `${pct(spreadYtd.hit_rate)} ATS` : "No decisions")}
+          ${modelCard("Tracked totals", "Totals record", record(totalsYtd), totalsYtd.games ? `${pct(totalsYtd.hit_rate)}` : "No decisions")}
+          ${modelCard("Average margin error", "Projection accuracy", accuracyYtd.margin_mae == null ? "—" : `${number(accuracyYtd.margin_mae,1)} pts`, "Absolute THI projection error")}
+          ${modelCard("Average CLV", "Preferred side", spreadYtd.average_clv == null ? "—" : number(spreadYtd.average_clv,1,true), `${integer(spreadYtd.closing_line_games)} decisions with a close`)}
+          ${modelCard("Beat close", "Spread CLV", spreadYtd.beat_close_pct == null ? "—" : pct(spreadYtd.beat_close_pct), "Directional closing-line decisions")}
+          ${modelCard("Play tier ATS", "Qualified plays", record(play), play.games ? `${pct(play.hit_rate)} ATS` : "No decisions")}
+        </div>
+        <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Monthly Ledger</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Month</th><th>Games</th><th>ATS</th><th>Win %</th><th>Average CLV</th><th>Beat Close</th></tr></thead><tbody>${monthlyRows || `<tr><td colspan="6" class="cbb-empty">The ledger will populate after the first qualified CBB decision reaches final status.</td></tr>`}</tbody></table></div></div>
+        <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Season-to-Date · Every Signal and Testing Key</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Signal / Key</th><th>Games</th><th>Record</th><th>Win %</th><th>Average CLV</th><th>Beat Close</th><th>Confidence</th></tr></thead><tbody>${signalRows || `<tr><td colspan="7" class="cbb-empty">Signal records will populate prospectively as qualified games are graded.</td></tr>`}</tbody></table></div></div>
       </section>
     `;
   }
