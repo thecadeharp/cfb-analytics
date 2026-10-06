@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Cache point-in-time CFB context used by Variance Lab; never guess missing fields."""
 from __future__ import annotations
-import argparse,gzip,json,os,time
+import argparse,gzip,json,os,sys,time
 from datetime import datetime,timezone
 from pathlib import Path
 from urllib.parse import urlencode
@@ -27,29 +27,33 @@ def group(conf,raw):
  if conf in P4:return"p4"
  if raw=="fbs":return"g5"
  return raw or None
-def cbb_ranked_games(key):
- output=[]
+def utc_datetime(value):
+ date=datetime.fromisoformat(str(value).replace("Z","+00:00"))
+ return date.replace(tzinfo=timezone.utc)if date.tzinfo is None else date.astimezone(timezone.utc)
+def cbb_ranked_games(key,start_season,end_season):
+ output=[];successful=[];failed=[]
  for path in sorted((ROOT/"data/cbb/history").glob("season_*.json.gz")):
   payload=json.load(gzip.open(path,"rt"));season=int(payload["meta"]["season"])
-  rows=fetch("/rankings",{"season":season},key,CBB_BASE)
+  if season<start_season or season>end_season:continue
+  try:rows=fetch("/rankings",{"season":season,"pollType":"ap"},key,CBB_BASE);successful.append(season)
+  except Exception as exc:
+   failed.append({"season":season,"error":f"{type(exc).__name__}: {exc}"});print(f"CBB rankings unavailable for {season}: {exc}",file=sys.stderr);continue
   by_team={}
   for row in rows:
    poll_type=str(row.get("pollType")or row.get("poll_type")or"").lower()
    if poll_type and "ap"not in poll_type:continue
-   try:
-    date=datetime.fromisoformat(str(row.get("pollDate")or row.get("poll_date")).replace("Z","+00:00"))
-    if date.tzinfo is None:date=date.replace(tzinfo=timezone.utc)
-   except Exception:continue
-   by_team.setdefault(row.get("team"),[]).append((date,int(row.get("ranking")or row.get("rank"))))
+   try:date=utc_datetime(row.get("pollDate")or row.get("poll_date"));ranking=int(row.get("ranking")or row.get("rank"));team=row.get("team")
+   except (TypeError,ValueError):continue
+   if team:by_team.setdefault(team,[]).append((date,ranking))
   for values in by_team.values():values.sort()
   for game in payload.get("games",[]):
-   try:start=datetime.fromisoformat(str(game.get("start_date")).replace("Z","+00:00"))
-   except Exception:continue
+   try:start=utc_datetime(game.get("start_date"))
+   except (TypeError,ValueError):continue
    def rank(team):
     eligible=[value for date,value in by_team.get(team,[])if date<=start]
     return eligible[-1]if eligible else None
    output.append({"game_id":str(game.get("game_id")),"sport":"cbb","season":season,"home_rank":rank(game.get("home_team")),"away_rank":rank(game.get("away_team"))})
- return output
+ return output,successful,failed
 def main():
  p=argparse.ArgumentParser();p.add_argument("--start-season",type=int,default=2019);p.add_argument("--end-season",type=int,default=2026);p.add_argument("--output",type=Path,default=ROOT/"data/variance/context.json");a=p.parse_args();key=os.environ.get("CFBD_API_KEY","").strip();cbb_key=os.environ.get("CBBD_API_KEY","").strip()
  if not key or not cbb_key:raise SystemExit("CFBD_API_KEY and CBBD_API_KEY are required")
@@ -68,8 +72,11 @@ def main():
    except Exception:pass
    week=int(g.get("week")or 0);hr=ranks.get((week,g.get("homeTeam")),ranks.get((max(0,week-1),g.get("homeTeam"))));ar=ranks.get((week,g.get("awayTeam")),ranks.get((max(0,week-1),g.get("awayTeam"))))
    games.append({"game_id":gid,"sport":"cfb","season":season,"start_date":start,"eastern_hour":hour,"home_conference":g.get("homeConference"),"away_conference":g.get("awayConference"),"home_classification":group(g.get("homeConference"),g.get("homeClassification")),"away_classification":group(g.get("awayConference"),g.get("awayClassification")),"home_rank":hr,"away_rank":ar,"indoor":wx.get("gameIndoors"),"temperature_f":wx.get("temperature"),"wind_mph":wx.get("windSpeed"),"precipitation":wx.get("precipitation"),"weather_condition":wx.get("weatherCondition")})
- try:cbb_games=cbb_ranked_games(cbb_key)
- except Exception:cbb_games=[];rankings_ok=False
+ try:cbb_games,cbb_ranking_seasons,cbb_ranking_failures=cbb_ranked_games(cbb_key,a.start_season,a.end_season)
+ except Exception as exc:
+  cbb_games=[];cbb_ranking_seasons=[];cbb_ranking_failures=[{"error":f"{type(exc).__name__}: {exc}"}];rankings_ok=False
+ if cbb_ranking_failures or not cbb_ranking_seasons:rankings_ok=False
  games.extend(cbb_games)
- payload={"meta":{"version":"thi-variance-context-v1.0","generated_at_utc":datetime.now(timezone.utc).isoformat().replace("+00:00","Z"),"cfb_games_status":"ready","classifications_status":"ready","rankings_status":"ready"if rankings_ok else"partial","weather_status":"ready"if weather_ok else"partial","cbb_ranked_games":len(cbb_games),"game_count":len(games)},"games":games};a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(payload,indent=2)+"\n");print(len(games))
+ cbb_ranked_count=sum(bool(g.get("home_rank")or g.get("away_rank"))for g in cbb_games)
+ payload={"meta":{"version":"thi-variance-context-v1.0","generated_at_utc":datetime.now(timezone.utc).isoformat().replace("+00:00","Z"),"cfb_games_status":"ready","classifications_status":"ready","rankings_status":"ready"if rankings_ok else"partial","weather_status":"ready"if weather_ok else"partial","cbb_context_games":len(cbb_games),"cbb_ranked_games":cbb_ranked_count,"cbb_ranking_seasons":cbb_ranking_seasons,"cbb_ranking_failures":cbb_ranking_failures,"game_count":len(games)},"games":games};a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(payload,indent=2)+"\n");print(len(games))
 if __name__=="__main__":main()

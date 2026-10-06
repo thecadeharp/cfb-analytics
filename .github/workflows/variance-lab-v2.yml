@@ -47,6 +47,8 @@ jobs:
           rlm=json.loads(Path('data/market/rlm_monitor.json').read_text())
           assert lab['meta']['version']=='thi-variance-systems-lab-v2.0'
           assert context['meta']['game_count']>1000
+          assert context['meta']['rankings_status']=='ready', context['meta'].get('cbb_ranking_failures')
+          assert context['meta']['cbb_ranked_games']>0
           assert set(lab['sports']['cfb']['sections'])=={'verified','developing','failed_hypothesis','source_pending'}
           assert tracker['meta']['version']=='thi-variance-prospective-v1.0'
           assert rlm['meta']['version']=='thi-rlm-monitor-v1.0'
