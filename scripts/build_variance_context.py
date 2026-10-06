@@ -31,12 +31,16 @@ def cbb_ranked_games(key):
  output=[]
  for path in sorted((ROOT/"data/cbb/history").glob("season_*.json.gz")):
   payload=json.load(gzip.open(path,"rt"));season=int(payload["meta"]["season"])
-  rows=fetch("/rankings",{"season":season,"pollType":"AP"},key,CBB_BASE)
+  rows=fetch("/rankings",{"season":season},key,CBB_BASE)
   by_team={}
   for row in rows:
-   try:date=datetime.fromisoformat(str(row.get("pollDate")).replace("Z","+00:00"))
+   poll_type=str(row.get("pollType")or row.get("poll_type")or"").lower()
+   if poll_type and "ap"not in poll_type:continue
+   try:
+    date=datetime.fromisoformat(str(row.get("pollDate")or row.get("poll_date")).replace("Z","+00:00"))
+    if date.tzinfo is None:date=date.replace(tzinfo=timezone.utc)
    except Exception:continue
-   by_team.setdefault(row.get("team"),[]).append((date,int(row.get("ranking"))))
+   by_team.setdefault(row.get("team"),[]).append((date,int(row.get("ranking")or row.get("rank"))))
   for values in by_team.values():values.sort()
   for game in payload.get("games",[]):
    try:start=datetime.fromisoformat(str(game.get("start_date")).replace("Z","+00:00"))
