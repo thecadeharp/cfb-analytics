@@ -88,6 +88,20 @@
       #${SCORECARD_ID} .perf-period.active { border-color:#76526f; background:#f7f1f6; color:#76526f; }
       #${SCORECARD_ID} .perf-section-label { padding:13px 13px 0; color:var(--muted); font:800 8px var(--mono); letter-spacing:.85px; text-transform:uppercase; }
       #${SCORECARD_ID} .perf-week-table { padding:0 12px 13px; }
+      #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) .perf-ytd-title {
+        padding:15px 2px 11px; font-size:11px; letter-spacing:1.05px;
+      }
+      #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) .perf-table-wrap { border-radius:11px; }
+      #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) table { min-width:900px; }
+      #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) th {
+        padding:11px 13px; font-size:9px; letter-spacing:.7px;
+      }
+      #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) td {
+        padding:13px; font-size:11px; line-height:1.35;
+      }
+      #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) .perf-confidence {
+        padding:5px 8px; font-size:9px;
+      }
       #${SCORECARD_ID} .perf-positive { color:#16734f; }
       #${SCORECARD_ID} .perf-negative { color:#a44842; }
       #${PANEL_ID} { margin-top:18px; }
@@ -141,6 +155,10 @@
         #${SCORECARD_ID} .perf-note { margin-top:6px; text-align:left; }
         #${SCORECARD_ID} .perf-grid { grid-template-columns:repeat(2,minmax(0,1fr)); padding:9px; }
         #${SCORECARD_ID} .perf-ytd { padding:0 9px 10px; }
+        #${SCORECARD_ID} .perf-week-table { padding-left:9px; padding-right:9px; }
+        #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) .perf-ytd-title { font-size:10px; }
+        #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) th { font-size:8px; }
+        #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) td { font-size:10px; }
         #${PANEL_ID} .pg-headlines, #${PANEL_ID} .pg-metrics { grid-template-columns:1fr; }
         #${PANEL_ID} .pg-header { padding:16px; }
         #${PANEL_ID} .pg-headlines, #${PANEL_ID} .pg-section { padding-left:10px; padding-right:10px; }
