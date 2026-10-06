@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "version": "thi-cbb-platform-health-v1.0",
+    "generated_at_utc": "2026-10-06T01:54:51.828474Z",
+    "status": "healthy"
+  },
+  "checks": {
+    "unique_games": true,
+    "unique_teams": true,
+    "team_directory_complete": true,
+    "active_roster_coverage": true,
+    "source_requests_completed": true,
+    "final_scores_complete": true,
+    "finals_reconciled_to_tracking": true,
+    "travel_context_matches_board": true,
+    "game_day_contract_ready": true
+  },
+  "coverage": {
+    "games": 781,
+    "finals": 0,
+    "teams": 365,
+    "players": 2825,
+    "games_with_market": 0,
+    "games_with_broadcast": 5,
+    "team_game_sides": 1562,
+    "sides_not_requiring_travel": 721,
+    "sides_with_verified_mileage": 0,
+    "verified_availability_reports": 0
+  },
+  "alerts": [],
+  "notices": [
+    "No current market lines are posted; this is expected before books open and becomes actionable near tipoff.",
+    "Away and neutral travel mileage is awaiting the verified coordinate registry; no distance adjustment is applied.",
+    "No timestamped availability reports are loaded; no injury adjustment is applied."
+  ]
+}

@@ -159,6 +159,24 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
 .cbb-status-button.is-active { border-color: #64778a; background: #273443; color: #f4f7fa; }
 .cbb-status-button[data-cbb-status="live"]::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: #d84848; }
 .cbb-status-button[data-cbb-status="live"].is-active { border-color: #b54c4c; background: #7c292c; }
+.cbb-date-navigator { display:flex; gap:8px; margin:-4px 0 14px; padding:4px 1px 8px; overflow-x:auto; scrollbar-width:thin; }
+.cbb-date-navigator button { flex:0 0 auto; display:inline-flex; align-items:center; gap:7px; border:1px solid var(--border); border-radius:8px; padding:9px 12px; background:var(--surface); color:var(--muted); cursor:pointer; font:700 9px var(--mono); text-transform:uppercase; }
+.cbb-date-navigator button b { display:inline-grid; place-items:center; min-width:18px; height:18px; border-radius:999px; background:var(--surface-soft); font-size:8px; }
+.cbb-date-navigator button.is-active { border-color:#75621e; background:#302b18; color:#f5e7a9; }
+.cbb-trends-summary { display:flex; align-items:baseline; gap:10px; margin:20px 0 12px; }
+.cbb-trends-summary strong { font:800 30px var(--mono); }
+.cbb-trends-summary span { color:var(--muted); font-size:12px; }
+.cbb-trends-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+.cbb-trend-card { padding:18px; }
+.cbb-trend-card h3 { margin:9px 0 6px; }
+.cbb-trend-card p { min-height:38px; margin:0; color:var(--muted); font-size:11px; line-height:1.5; }
+.cbb-trend-rate { margin:18px 0 3px; color:#16815c; font:800 27px var(--mono); }
+.cbb-trend-card > strong { display:block; font:800 12px var(--mono); }
+.cbb-trend-card > small { display:block; margin-top:6px; color:var(--muted); font-size:9px; }
+.cbb-planned-trends { margin-top:14px; padding:18px; }
+.cbb-planned-trends h3 { margin:0 0 8px; }
+.cbb-planned-trends > div { display:grid; grid-template-columns:180px 1fr; gap:15px; padding:10px 0; border-top:1px solid var(--border); font-size:11px; }
+.cbb-planned-trends span { color:var(--muted); }
 .cbb-projection-table { min-width: 1220px; table-layout: fixed; }
 .cbb-projection-table th:first-child { width: 240px; }
 .cbb-projection-table th:nth-child(2) { width: 100px; }
@@ -678,6 +696,7 @@ html[data-theme="dark"] .cbb-factor-unavailable span { color: #efaaa6; }
 html[data-theme="dark"] .cbb-error { background: #3a2020; border-color: #76443e; color: #f1aaa2; }
 
 @media (max-width: 1120px) {
+  .cbb-trends-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .header-inner { gap: 10px; }
   .thi-sport-button { padding-inline: 7px; }
   .cbb-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -710,6 +729,8 @@ html[data-theme="dark"] .cbb-error { background: #3a2020; border-color: #76443e;
 }
 
 @media (max-width: 640px) {
+  .cbb-trends-grid { grid-template-columns:1fr; }
+  .cbb-planned-trends > div { grid-template-columns:1fr; gap:4px; }
   .brand-copy { display: none; }
   .brand-mark { width: 48px; flex-basis: 48px; }
   .thi-sport-button { font-size: 8px; padding: 6px; }

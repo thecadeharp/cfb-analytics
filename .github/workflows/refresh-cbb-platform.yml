@@ -14,7 +14,7 @@ on:
         default: "2026"
         type: string
   schedule:
-    - cron: "17 10 * * *"
+    - cron: "17 10,22 * * *"
 
 permissions:
   contents: write
@@ -61,7 +61,10 @@ jobs:
             scripts/build_cbb_model_tracking.py \
             scripts/build_cbb_bracketology.py \
             scripts/research_cbb_model_v02.py \
-            scripts/build_cbb_game_day_readiness.py
+            scripts/build_cbb_game_day_readiness.py \
+            scripts/build_cbb_operations_context.py \
+            scripts/build_cbb_platform_health.py \
+            scripts/build_trends_lab.py
           python -m unittest \
             scripts/test_cbb_data_foundation.py \
             scripts/test_cbb_player_research.py \
@@ -73,7 +76,8 @@ jobs:
             scripts/test_cbb_model_tracking.py \
             scripts/test_cbb_bracketology.py \
             scripts/test_cbb_model_v02.py \
-            scripts/test_cbb_game_day_readiness.py
+            scripts/test_cbb_game_day_readiness.py \
+            scripts/test_cbb_release_foundations.py
 
       - name: Refresh foundation, ratings, projections and bracketology
         env:
@@ -94,6 +98,9 @@ jobs:
           python scripts/build_cbb_intelligence_suite.py
           python scripts/research_cbb_model_v02.py
           python scripts/build_cbb_game_day_readiness.py
+          python scripts/build_cbb_operations_context.py
+          python scripts/build_cbb_platform_health.py
+          python scripts/build_trends_lab.py
 
       - name: Validate the coordinated release
         run: |
@@ -115,6 +122,9 @@ jobs:
           intelligence = json.loads((root / "intelligence_suite.json").read_text())
           challenger = json.loads((root / "research/model_v02_challenger.json").read_text())
           readiness = json.loads((root / "game_day_readiness.json").read_text())
+          operations = json.loads((root / "operations_context.json").read_text())
+          health = json.loads((root / "platform_health.json").read_text())
+          trends = json.loads(Path("data/trends_lab.json").read_text())
 
           assert len(profiles["teams"]) >= 300
           assert sum(bool(team.get("logo_url")) for team in profiles["teams"]) >= 300
@@ -158,6 +168,13 @@ jobs:
           assert readiness["meta"]["status"] == "ready"
           assert len(readiness["checks"]) == 8
           assert all(readiness["checks"].values())
+          assert operations["meta"]["version"] == "thi-cbb-operations-context-v1.0"
+          assert operations["meta"]["model_usage"] == "display_only_research_layer"
+          assert operations["coverage"]["games"] == projections["meta"]["game_count"]
+          assert health["meta"]["version"] == "thi-cbb-platform-health-v1.0"
+          assert health["meta"]["status"] == "healthy"
+          assert trends["meta"]["version"] == "thi-trends-lab-v1.0"
+          assert trends["sports"]["cfb"]["cards"] and trends["sports"]["cbb"]["cards"]
           PY
 
       - name: Commit the coordinated CBB outputs
@@ -180,6 +197,10 @@ jobs:
             data/cbb/intelligence_suite.json \
             data/cbb/research/model_v02_challenger.json \
             data/cbb/game_day_readiness.json
+          git add \
+            data/cbb/operations_context.json \
+            data/cbb/platform_health.json \
+            data/trends_lab.json
           git diff --cached --quiet && exit 0
           git commit -m "Refresh coordinated CBB platform data"
           git pull --rebase origin main

@@ -15,7 +15,10 @@
     tracking: "data/cbb/model_tracking.json",
     bracketology: "data/cbb/bracketology.json",
     challenger: "data/cbb/research/model_v02_challenger.json",
-    readiness: "data/cbb/game_day_readiness.json"
+    readiness: "data/cbb/game_day_readiness.json",
+    operations: "data/cbb/operations_context.json",
+    health: "data/cbb/platform_health.json",
+    trends: "data/trends_lab.json"
   };
   const PLAYER_PATH = "data/cbb/player_ratings.json";
 
@@ -42,6 +45,7 @@
     projectionSignal: "all",
     projectionConfidence: "all",
     projectionStatus: "all",
+    projectionDate: "next",
     projectionLimit: 150,
     teamDataQuery: "",
     teamDataConference: "all",
@@ -106,16 +110,29 @@
       <button class="nav-item" type="button" data-cbb-view="cbb-bracketology">THI Bracketology</button>
       <button class="nav-item" type="button" data-cbb-view="cbb-portal">Transfer Portal</button>
       <button class="nav-item" type="button" data-cbb-view="cbb-market">Market Research</button>
+      <button class="nav-item" type="button" data-cbb-view="cbb-trends">Trends Lab</button>
     `;
     cfbNav.insertAdjacentElement("afterend", cbbNav);
 
-    ["cbb-projections", "cbb-tracking", "cbb-team-data", "cbb-ratings", "cbb-player-ratings", "cbb-bracketology", "cbb-portal", "cbb-market"].forEach(id => {
+    ["cbb-projections", "cbb-tracking", "cbb-team-data", "cbb-ratings", "cbb-player-ratings", "cbb-bracketology", "cbb-portal", "cbb-market", "cbb-trends"].forEach(id => {
       const section = document.createElement("section");
       section.id = `view-${id}`;
       section.className = "view cbb-view cbb-shell";
       section.innerHTML = `<div class="cbb-panel cbb-empty">Loading THI College Basketball…</div>`;
       main.appendChild(section);
     });
+
+    const cfbTrendsButton = document.createElement("button");
+    cfbTrendsButton.className = "nav-item";
+    cfbTrendsButton.dataset.view = "trends";
+    cfbTrendsButton.textContent = "Trends Lab";
+    cfbTrendsButton.addEventListener("click", () => { window.switchView?.("trends"); loadData().catch(() => {}); });
+    cfbNav.appendChild(cfbTrendsButton);
+    const cfbTrends = document.createElement("section");
+    cfbTrends.id = "view-trends";
+    cfbTrends.className = "view";
+    cfbTrends.innerHTML = `<div class="cbb-panel cbb-empty">Loading THI Trends Lab…</div>`;
+    main.appendChild(cfbTrends);
 
     const detail = document.createElement("div");
     detail.id = "cbb-team-detail";
@@ -158,7 +175,7 @@
     if (state.loaded) return state.data;
     if (state.loading) return state.loading;
     state.loading = Promise.all(Object.entries(PATHS).map(async ([key, path]) => {
-      if (["projectionBoard", "tracking", "bracketology", "playStyle", "matchups", "intelligence", "challenger", "readiness"].includes(key)) {
+      if (["projectionBoard", "tracking", "bracketology", "playStyle", "matchups", "intelligence", "challenger", "readiness", "operations", "health", "trends"].includes(key)) {
         try { return [key, await fetchJson(path)]; }
         catch (_error) {
           if (key === "projectionBoard") return [key, { meta: {}, games: [] }];
@@ -238,6 +255,7 @@
     renderBracketology();
     renderPortal();
     renderMarketResearch();
+    renderTrendsLab();
   }
 
   function renderError(error) {
@@ -295,6 +313,8 @@
         <div>${statusButton("all", "All Games", projected)}${statusButton("upcoming", "Upcoming", projected)}${statusButton("live", "Live", projected)}${statusButton("final", "Final", projected)}</div>
       </div>
 
+      <div class="cbb-date-navigator" aria-label="Choose game date">${projectionDateButtons()}</div>
+
       <div class="cbb-panel cbb-table-wrap cbb-projection-table-wrap">
         <table class="cbb-table cbb-projection-table" aria-label="THI college basketball game projections"><thead><tr>
           <th>Matchup</th><th>THI Watch</th><th>THI Spread</th><th>Market</th><th>Total</th><th>Model Edge</th><th>Model Signal</th><th>Signal Confidence</th>
@@ -326,6 +346,23 @@
     if (["live", "inprogress", "halftime"].includes(raw)) return "live";
     if (["final", "completed", "complete"].includes(raw)) return "final";
     return "upcoming";
+  }
+
+  function gameDateKey(game) {
+    const start = new Date(game.start_date);
+    if (Number.isNaN(start.getTime())) return "tbd";
+    return new Intl.DateTimeFormat("en-CA", { year:"numeric", month:"2-digit", day:"2-digit", timeZone:"America/New_York" }).format(start);
+  }
+
+  function projectionDateButtons() {
+    const counts = new Map();
+    for (const game of state.data?.projectionBoard?.games || []) {
+      if (state.projectionStatus !== "all" && gameStatus(game) !== state.projectionStatus) continue;
+      const key = gameDateKey(game); counts.set(key, (counts.get(key) || 0) + 1);
+    }
+    const dates = [...counts.keys()].filter(key => key !== "tbd").sort();
+    const format = key => new Intl.DateTimeFormat("en-US", { weekday:"short", month:"short", day:"numeric", timeZone:"UTC" }).format(new Date(`${key}T12:00:00Z`));
+    return `<button type="button" class="${state.projectionDate === "next" ? "is-active" : ""}" data-cbb-date="next">Next slate</button>${dates.map(key => `<button type="button" class="${state.projectionDate === key ? "is-active" : ""}" data-cbb-date="${key}">${escapeHtml(format(key))}<b>${integer(counts.get(key))}</b></button>`).join("")}<button type="button" class="${state.projectionDate === "all" ? "is-active" : ""}" data-cbb-date="all">All dates</button>`;
   }
 
   function statusButton(value, label, games) {
@@ -381,7 +418,7 @@
   function filteredProjectionGames() {
     const games = [...(state.data.projectionBoard?.games || [])];
     const query = state.projectionQuery.trim().toLowerCase();
-    return games.filter(game => {
+    const filtered = games.filter(game => {
       const text = `${game.home?.team || ""} ${game.away?.team || ""} ${game.home?.conference || ""} ${game.away?.conference || ""}`.toLowerCase();
       const conference = state.projectionConference;
       return (!query || text.includes(query))
@@ -393,6 +430,9 @@
       const time = (new Date(a.start_date).getTime() || 0) - (new Date(b.start_date).getTime() || 0);
       return time || String(a.game_id || "").localeCompare(String(b.game_id || ""));
     });
+    if (state.projectionDate === "all") return filtered;
+    const selected = state.projectionDate === "next" ? filtered.map(gameDateKey).find(key => key !== "tbd") : state.projectionDate;
+    return selected ? filtered.filter(game => gameDateKey(game) === selected) : filtered;
   }
 
   function bindProjectionControls() {
@@ -403,12 +443,19 @@
     view.querySelector("#cbb-projection-signal").addEventListener("change", event => { state.projectionSignal = event.target.value; resetLimit(); });
     view.querySelector("#cbb-projection-confidence").addEventListener("change", event => { state.projectionConfidence = event.target.value; resetLimit(); });
     view.querySelector("#cbb-projection-clear").addEventListener("click", () => {
-      state.projectionQuery = ""; state.projectionConference = "all"; state.projectionSignal = "all"; state.projectionConfidence = "all"; state.projectionStatus = "all"; state.projectionLimit = 150; renderProjections();
+      state.projectionQuery = ""; state.projectionConference = "all"; state.projectionSignal = "all"; state.projectionConfidence = "all"; state.projectionStatus = "all"; state.projectionDate = "next"; state.projectionLimit = 150; renderProjections();
     });
     view.querySelector(".cbb-status-filter").addEventListener("click", event => {
       const button = event.target.closest("[data-cbb-status]");
       if (!button) return;
       state.projectionStatus = button.dataset.cbbStatus;
+      state.projectionLimit = 150;
+      renderProjections();
+    });
+    view.querySelector(".cbb-date-navigator").addEventListener("click", event => {
+      const button = event.target.closest("[data-cbb-date]");
+      if (!button) return;
+      state.projectionDate = button.dataset.cbbDate;
       state.projectionLimit = 150;
       renderProjections();
     });
@@ -1266,6 +1313,11 @@
     const readinessCoverage = readiness.coverage || {};
     const readinessPassed = Object.values(readinessChecks).filter(Boolean).length;
     const readinessTotal = Object.keys(readinessChecks).length;
+    const health = state.data?.health || {};
+    const healthChecks = health.checks || {};
+    const healthCoverage = health.coverage || {};
+    const operations = state.data?.operations || {};
+    const operationsCoverage = operations.coverage || {};
     const activeFactors = factors.filter(row => ["active", "active_prior"].includes(row.status)).length;
     const researchFactors = factors.filter(row => ["research_only", "evaluation_only"].includes(row.status)).length;
     const withheldFactors = factors.filter(row => ["withheld", "unavailable"].includes(row.status)).length;
@@ -1287,6 +1339,18 @@
           <div class="cbb-operations-heading"><strong>${escapeHtml(humanize(selectedCandidate.name || "awaiting refresh"))}</strong><span>${challengerPromotion.recommended ? "Promotion candidate" : "No promotion"}</span></div>
           <p>${challengerPromotion.recommended ? "The challenger cleared every preregistered gate and is eligible for engineering review." : "The published model remains unchanged because the challenger did not clear every preregistered gate."}</p>
           <div class="cbb-operations-stats"><span>${number(challenger.inner_fold_mae_improvement,4,true)} inner-fold MAE</span><span>${number(challengerValidation.challenger?.margin_mae,3)} 2025 MAE</span><span>${number(challengerAudit.challenger?.margin_mae,3)} 2026 audit MAE</span></div>
+        </article>
+        <article class="cbb-panel cbb-operations-card ${health.meta?.status === "healthy" ? "is-ready" : "needs-attention"}">
+          <div class="cbb-label">Platform health</div>
+          <div class="cbb-operations-heading"><strong>${integer(Object.values(healthChecks).filter(Boolean).length)} / ${integer(Object.keys(healthChecks).length)} checks</strong><span>${escapeHtml(humanize(health.meta?.status || "pending"))}</span></div>
+          <p>Monitors duplicate games and teams, roster coverage, source failures, missing finals, tracking reconciliation and stale game-day output.</p>
+          <div class="cbb-operations-stats"><span>${integer(healthCoverage.teams)} teams</span><span>${integer(healthCoverage.players)} players</span><span>${integer(healthCoverage.games_with_market)} market games</span></div>
+        </article>
+        <article class="cbb-panel cbb-operations-card is-research">
+          <div class="cbb-label">Travel + availability foundation</div>
+          <div class="cbb-operations-heading"><strong>${integer(operationsCoverage.games)} games linked</strong><span>Research only</span></div>
+          <p>Rest context is live. Exact mileage requires verified venue coordinates; availability requires a timestamped source. Neither can silently adjust a projection.</p>
+          <div class="cbb-operations-stats"><span>${integer(operationsCoverage.sides_not_requiring_travel)} home-site rows</span><span>${integer(operationsCoverage.sides_with_verified_mileage)} verified trips</span><span>${integer(operationsCoverage.verified_availability_reports)} availability reports</span></div>
         </article>
       </section>
       <section class="cbb-section">
@@ -1366,6 +1430,21 @@
         <div class="cbb-panel cbb-gate-list">${(card.limitations || []).map(item => `<div class="cbb-gate-item"><span class="cbb-gate-icon">·</span><span>${escapeHtml(item)}</span></div>`).join("")}</div>
       </section>
     `;
+  }
+
+  function trendCard(card) {
+    return `<article class="cbb-panel cbb-trend-card"><div class="cbb-label">${escapeHtml(card.market)} trend</div><h3>${escapeHtml(card.name)}</h3><p>${escapeHtml(card.description)}</p><div class="cbb-trend-rate">${pct(card.hit_rate)}</div><strong>${integer(card.wins)}–${integer(card.losses)}${card.pushes ? `–${integer(card.pushes)}` : ""}</strong><small>${integer(card.decisions)} decisions · ${escapeHtml(card.state === "qualified" ? "qualified sample" : "limited sample")}</small></article>`;
+  }
+
+  function trendsMarkup(sport) {
+    const lab = state.data?.trends || {}; const data = lab.sports?.[sport] || { cards:[] };
+    return `<div class="cbb-kicker">The Hammer Index · ${sport.toUpperCase()}</div><h1 class="page-title">THI Trends Lab</h1><p class="page-subtitle">Historical ATS and totals splits calculated from THI's settled market warehouse. These are descriptive research records, with every sample shown.</p><div class="cbb-research-banner"><strong>Research discipline</strong><span>${escapeHtml(lab.meta?.policy || "Historical research only.")}</span></div><div class="cbb-trends-summary"><strong>${integer(data.settled_games)}</strong><span>settled historical games examined</span></div><div class="cbb-trends-grid">${(data.cards || []).map(trendCard).join("")}</div><div class="cbb-panel cbb-planned-trends"><h3>Coverage being added</h3>${(lab.planned_splits || []).map(row => `<div><strong>${escapeHtml(row.name)}</strong><span>${escapeHtml(row.reason)}</span></div>`).join("")}</div>`;
+  }
+
+  function renderTrendsLab() {
+    const cfb = document.getElementById("view-trends"); const cbb = document.getElementById("view-cbb-trends");
+    if (cfb) cfb.innerHTML = trendsMarkup("cfb");
+    if (cbb) cbb.innerHTML = trendsMarkup("cbb");
   }
 
   function modelCard(kicker, label, value, note) {
