@@ -2653,7 +2653,7 @@ def save_json(path, data):
         json.dump(
             data,
             file,
-            indent=2,
+            separators=(",", ":"),
             ensure_ascii=False,
         )
 

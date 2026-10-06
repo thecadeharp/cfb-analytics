@@ -942,6 +942,8 @@
         :is(th,td) { font-variant-numeric:tabular-nums; }
       :is(.table-scroll,.perf-table-wrap,.cbb-table-wrap,.thi-hub-table-wrap,.thi-player-table-wrap,.pv-table-wrap)
         :is(th,.cbb-number,.metric-value,.perf-value) { white-space:nowrap; }
+      .cbb-view > .cbb-panel.cbb-empty:first-child { min-height:420px; display:grid; place-content:center; box-sizing:border-box; }
+      tbody .loading-state { min-height:420px; }
       .thi-positive-sign { display:inline-block; width:.72ch; color:var(--muted); opacity:.42; text-align:left; }
       #thi-loader-status {
         position:fixed; right:14px; bottom:14px; z-index:9998; display:none; align-items:center; gap:10px;

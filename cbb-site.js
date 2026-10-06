@@ -23,6 +23,11 @@
     rlmMonitor: "data/market/rlm_monitor.json"
   };
   const PLAYER_PATH = "data/cbb/player_ratings.json";
+  const CORE_DATA_KEYS = new Set(["profiles", "foundation", "model", "priors", "history", "projectionBoard", "tracking", "bracketology"]);
+  const DEFERRED_VIEW_KEYS = {
+    "cbb-market": ["intelligence", "rlmMonitor"],
+    "cbb-variance": ["trends", "varianceTracker", "rlmMonitor"],
+  };
 
   const state = {
     sport: "cfb",
@@ -42,6 +47,7 @@
     playerData: null,
     playerLoading: null,
     playerBandCache: {},
+    deferredLoads: {},
     projectionQuery: "",
     projectionConference: "all",
     projectionSignal: "all",
@@ -79,6 +85,12 @@
     : "—";
 
   const pct = value => Number.isFinite(Number(value)) ? `${Number(value).toFixed(1)}%` : "—";
+  const normalizeSearch = value => String(value ?? "").trim().toLocaleLowerCase();
+
+  function validMarketTotal(value) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed > 0;
+  }
 
   function activeCfbView() {
     return document.querySelector(".view.active:not(.cbb-view)")?.id?.replace(/^view-/, "") || state.cfbView;
@@ -166,7 +178,7 @@
   async function loadData() {
     if (state.loaded) return state.data;
     if (state.loading) return state.loading;
-    state.loading = Promise.all(Object.entries(PATHS).map(async ([key, path]) => {
+    state.loading = Promise.all(Object.entries(PATHS).filter(([key]) => CORE_DATA_KEYS.has(key)).map(async ([key, path]) => {
       if (["projectionBoard", "tracking", "bracketology", "playStyle", "matchups", "intelligence", "challenger", "readiness", "operations", "health", "trends", "varianceTracker", "rlmMonitor"].includes(key)) {
         try { return [key, await fetchJson(path)]; }
         catch (_error) {
@@ -183,9 +195,10 @@
       return [key, await fetchJson(path)];
     }))
       .then(entries => {
-        state.data = Object.fromEntries(entries);
+        state.data = { ...Object.fromEntries(Object.keys(PATHS).map(key => [key, {}])), ...Object.fromEntries(entries) };
         state.loaded = true;
         renderAll();
+        loadDeferredForView(state.cbbView);
         return state.data;
       })
       .catch(error => {
@@ -194,6 +207,23 @@
       })
       .finally(() => { state.loading = null; });
     return state.loading;
+  }
+
+  function loadDeferred(keys = []) {
+    if (!state.data) return Promise.resolve();
+    const pending = keys.filter(key => PATHS[key] && !state.deferredLoads[key]);
+    if (!pending.length) return Promise.resolve();
+    return Promise.all(pending.map(key => {
+      state.deferredLoads[key] = fetchJson(PATHS[key]).then(value => {
+        state.data[key] = value;
+        return value;
+      }).catch(() => state.data[key] || {}).finally(() => { state.deferredLoads[key] = "loaded"; });
+      return state.deferredLoads[key];
+    })).then(() => renderAll());
+  }
+
+  function loadDeferredForView(view) {
+    return loadDeferred(DEFERRED_VIEW_KEYS[view] || []);
   }
 
   function setSport(sport) {
@@ -235,6 +265,7 @@
     document.querySelectorAll(".cbb-view").forEach(section => section.classList.toggle("active", section.id === `view-${view}`));
     document.querySelectorAll("[data-cbb-view]").forEach(button => button.classList.toggle("active", button.dataset.cbbView === view));
     if (view === "cbb-player-ratings") loadPlayerRatings();
+    if (state.loaded) loadDeferredForView(view);
     if (scroll) window.scrollTo({ top: 0, behavior: "auto" });
   }
 
@@ -285,7 +316,7 @@
             ${confidenceKey("Validated", "50+ decisions · ≥52.5% ATS · positive closing-line value", "validated")}
             ${confidenceKey("Established", "100+ decisions · ≥53% ATS · ≥55% beat close", "established")}
           </div>
-          <p><strong>Totals key:</strong> 4.0–6.9 points from market is a Total Watch; 7.0+ reaches the Total Play research threshold. No totals play is activated until the totals model clears its independent walk-forward and prospective gates.</p>
+          <p><strong>Totals key:</strong> 4.0–6.9 points from market is a Total Lean; 7.0+ is a Total Watch. No totals play is activated until the totals model clears its independent walk-forward and prospective gates.</p>
           <p><strong>Prior-based model</strong> means the projection still relies on regressed preseason team priors. It does not mean the matchup is an exhibition or preseason game.</p>
         </div>
       </section>
@@ -451,9 +482,12 @@
       state.projectionLimit = 150;
       renderProjections();
     });
-    view.querySelector("#cbb-projection-body").addEventListener("click", event => {
+    view.querySelector("#cbb-projection-body").addEventListener("click", async event => {
       const row = event.target.closest("[data-cbb-game-id]");
-      if (row) openGameDetail(row.dataset.cbbGameId);
+      if (row) {
+        await loadDeferred(["matchups", "intelligence", "playStyle"]);
+        openGameDetail(row.dataset.cbbGameId);
+      }
     });
     view.querySelector("#cbb-projection-more").addEventListener("click", () => { state.projectionLimit += 150; paintProjectionBoard(); });
   }
@@ -503,9 +537,10 @@
     const edgeTeam = Number.isFinite(edge) ? (edge >= 0 ? game.home : game.away) : null;
     const tier = signalTier(game);
     const confidence = confidenceTier(game);
-    const totalMarket = game.market?.consensus_total == null ? NaN : Number(game.market.consensus_total);
-    const totalEdge = Number.isFinite(totalMarket) ? Number(projection.total) - totalMarket : null;
-    const totalFlag = Number.isFinite(totalEdge) && Math.abs(totalEdge) >= 4 ? `<span class="cbb-total-flag">${totalEdge >= 0 ? "Over" : "Under"} ${number(totalMarket,1)} · ${Math.abs(totalEdge) >= 7 ? "play research" : "watch"}</span>` : "";
+    const totalMarket = validMarketTotal(game.market?.consensus_total) ? Number(game.market.consensus_total) : null;
+    const projectedTotal = Number(projection.total);
+    const totalEdge = totalMarket !== null && Number.isFinite(projectedTotal) && projectedTotal > 0 ? projectedTotal - totalMarket : null;
+    const totalFlag = Number.isFinite(totalEdge) && Math.abs(totalEdge) >= 4 ? `<span class="cbb-total-flag">${totalEdge >= 0 ? "Over" : "Under"} ${number(totalMarket,1)} · ${Math.abs(totalEdge) >= 7 ? "Total Watch" : "Total Lean"}</span>` : "";
     const watch = watchability(game);
     const watchLabel = watch >= 75 ? "Prime window" : watch >= 60 ? "On the radar" : "Standard";
     return `<tr class="cbb-projection-row" data-cbb-game-id="${escapeHtml(game.game_id)}">
@@ -513,7 +548,7 @@
       <td><span class="cbb-watch-score">${integer(watch)}</span><div class="cbb-team-meta">${watchLabel}</div></td>
       <td><strong class="cbb-number">${escapeHtml(projectedLine)}</strong><div class="cbb-team-meta">${escapeHtml(modelInputLabel(game))}</div></td>
       <td><strong class="cbb-number">${escapeHtml(marketText)}</strong><div class="cbb-team-meta">${game.market?.book_count ? `${integer(game.market.book_count)} books` : "No consensus line"}</div></td>
-      <td><strong class="cbb-number">${number(projection.total,1)}</strong><div class="cbb-team-meta">Market ${Number.isFinite(totalMarket) ? number(totalMarket,1) : "—"}</div>${totalFlag}</td>
+      <td><strong class="cbb-number">${Number.isFinite(projectedTotal) && projectedTotal > 0 ? number(projectedTotal,1) : "—"}</strong><div class="cbb-team-meta">Market ${totalMarket !== null ? number(totalMarket,1) : "—"}</div>${totalFlag}</td>
       <td><strong class="cbb-edge-value">${Number.isFinite(edge) ? `${number(Math.abs(edge),1)} pts` : "—"}</strong><div class="cbb-team-meta">${edgeTeam ? `Model favors ${escapeHtml(edgeTeam.team)}` : "No market comparison"}</div></td>
       <td><span class="cbb-signal cbb-signal-${tier}">${escapeHtml(signalLabel(tier))}</span></td>
       <td><span class="cbb-confidence cbb-confidence-${confidence}">${escapeHtml(confidence === "research" ? "Research only" : humanize(confidence))}</span><div class="cbb-team-meta">${projection.spread_signal_eligible ? "Qualified decision" : "Not in prospective record"}</div></td>
@@ -1054,8 +1089,8 @@
   function ratingsRows() {
     const priors = state.data.priors.teams || [];
     const filtered = priors.filter(team => {
-      const query = state.query.trim().toLowerCase();
-      const matchesQuery = !query || `${team.team} ${team.conference?.name || ""}`.toLowerCase().includes(query);
+      const query = normalizeSearch(state.query);
+      const matchesQuery = !query || normalizeSearch(`${team.team} ${team.conference?.name || ""}`).includes(query);
       const matchesConference = state.conference === "all" || (team.conference?.abbreviation || team.conference?.name) === state.conference;
       return matchesQuery && matchesConference;
     });
@@ -1095,7 +1130,8 @@
     view.innerHTML = `
       <div class="cbb-kicker">2027 preseason research</div>
       <h1 class="page-title">CBB THI Ratings</h1>
-      <p class="page-subtitle">THI's modeled estimate of team strength: adjusted offense, adjusted defense, tempo, continuity and personnel context translated into a common possession-based scale.</p>
+      <p class="page-subtitle">THI's modeled estimate of team strength, decomposed into the rating lenses and context that will update as the 2027 season develops.</p>
+      ${cbbRatingDecomposition(priors)}
       <div class="cbb-definition-banner"><strong>THI Ratings</strong><span>How strong the model believes a team is beneath its record.</span><strong>Team Data</strong><span>Observed results, box-score performance and roster facts.</span></div>
       <div class="cbb-controls">
         <input id="cbb-rating-search" class="cbb-input" type="search" placeholder="Search team or conference" value="${escapeHtml(state.query)}">
@@ -1104,12 +1140,12 @@
       <div class="cbb-panel cbb-table-wrap">
         <table class="cbb-table" aria-label="2027 THI college basketball preseason ratings">
           <thead><tr>
-            <th>Rank</th>${ratingHeader("team", "Team")}${ratingHeader("conference", "Conf")}${ratingHeader("prior_net", "Net eff")}${ratingHeader("prior_offense", "Adj off")}${ratingHeader("prior_defense", "Adj def")}${ratingHeader("recruiting", "Recruiting")}${ratingHeader("transfer_minutes", "Transfer min")}
+            <th>Rank</th>${ratingHeader("team", "Team")}${ratingHeader("conference", "Conf")}${ratingHeader("prior_net", "Overall")}<th>Predictive</th><th>Recent form</th><th>SOS</th><th>vs THI Top 25</th>${ratingHeader("prior_offense", "Adj off")}${ratingHeader("prior_defense", "Adj def")}<th>Home edge</th>
           </tr></thead>
           <tbody id="cbb-rating-body"></tbody>
         </table>
       </div>
-      <div class="cbb-stat-note" style="margin-top:9px">Color bands compare each efficiency metric across all 365 teams. Lower defensive efficiency is better. Rank numbers remain uncolored.</div>
+      <div class="cbb-stat-note" style="margin-top:9px">Overall and Predictive share the verified preseason prior until 2027 results create separate lenses. Recent form, schedule strength and quality records activate only after games are played. Lower defensive efficiency is better.</div>
     `;
 
     view.querySelector("#cbb-rating-search").addEventListener("input", event => { state.query = event.target.value; paintRatingRows(); });
@@ -1129,6 +1165,44 @@
     paintRatingRows();
   }
 
+  function cbbRatingDecomposition(priors) {
+    const generated = state.data?.profiles?.meta?.generated_at_utc || state.data?.model?.meta?.generated_at_utc;
+    const stamp = generated ? new Intl.DateTimeFormat("en-US", { dateStyle:"medium", timeStyle:"short" }).format(new Date(generated)) : "Awaiting refresh";
+    const home = cbbNationalHomeAdvantage();
+    const conferenceRows = new Map();
+    priors.forEach(team => {
+      const name = team.conference?.abbreviation || team.conference?.name || "Independent";
+      if (!conferenceRows.has(name)) conferenceRows.set(name, []);
+      if (Number.isFinite(Number(team.prior_net))) conferenceRows.get(name).push(Number(team.prior_net));
+    });
+    const conferences = [...conferenceRows.entries()].map(([name, values]) => ({
+      name,
+      average: values.reduce((sum, value) => sum + value, 0) / Math.max(1, values.length),
+      median: values.slice().sort((a,b) => a-b)[Math.floor(values.length / 2)],
+    })).sort((a,b) => b.average-a.average).slice(0,6);
+    return `<section class="cbb-rating-decomposition" aria-label="THI rating decomposition">
+      <div class="cbb-rating-decomposition-head"><div><div class="cbb-label">THI Rating Decomposition</div><h2>What each rating means now</h2></div><span>Rated ${escapeHtml(stamp)}</span></div>
+      <div class="cbb-rating-lenses">
+        ${methodCard("Overall", "2027 preseason net efficiency", "The full prior blends last season's opponent-adjusted efficiency with verified continuity and personnel context.")}
+        ${methodCard("Predictive", "Powers current projections", "The same preseason team state feeds the walk-forward score model now. It will separate from Overall after completed 2027 games update team state.")}
+        ${methodCard("Recent form", "Awaiting 2027 games", "No recent-form rating is published before a qualified current-season sample exists.")}
+        ${methodCard("Schedule + opponent quality", "Awaiting 2027 games", "Schedule strength and records against top-25 and top-50 THI teams begin only after games are played.")}
+        ${methodCard("Dynamic home advantage", Number.isFinite(home) ? `${number(home,2)} points nationally` : "Awaiting estimate", "Neutral courts receive zero. Team venue effects remain withheld until their samples qualify.")}
+      </div>
+      <div class="cbb-conference-strip"><strong>Conference strength · neutral-floor team benchmark</strong>${conferences.map(row => `<span>${escapeHtml(row.name)} <b>${number(row.average,1,true)}</b> avg · ${number(row.median,1,true)} median</span>`).join("")}</div>
+    </section>`;
+  }
+
+  function cbbNationalHomeAdvantage() {
+    const marginModel = state.data?.model?.models?.margin || {};
+    const homeIndex = (marginModel.feature_names || []).indexOf("home_court");
+    const homeCoefficient = homeIndex >= 0 ? Number((marginModel.coefficients || [])[homeIndex + 1]) : NaN;
+    const homeScale = Number(marginModel.scales?.home_court);
+    const modelHome = Number.isFinite(homeCoefficient) && Number.isFinite(homeScale) && homeScale !== 0 ? homeCoefficient / homeScale : NaN;
+    const suiteHome = Number(state.data?.intelligence?.home_court?.national_points);
+    return Number.isFinite(suiteHome) ? suiteHome : modelHome;
+  }
+
   function ratingHeader(key, label) {
     const active = state.ratingSort.key === key;
     const arrow = active ? (state.ratingSort.direction === "desc" ? "↓" : "↑") : "↕";
@@ -1143,14 +1217,11 @@
     const netBand = quantileBands(all, "prior_net");
     const offBand = quantileBands(all, "prior_offense");
     const defBand = quantileBands(all, "prior_defense", true);
-    const recruitingBand = quantileBands(all, "recruiting");
-    const transferBand = quantileBands(all, "transfer_minutes");
+    const home = cbbNationalHomeAdvantage();
     const globalRank = new Map([...all].sort((a,b) => b.prior_net - a.prior_net).map((team,index) => [team.team_id,index+1]));
     body.innerHTML = rows.length ? rows.map(team => {
-      const recruiting = team.personnel?.recruiting || {};
-      const transfers = team.personnel?.transfers || {};
-      return `<tr data-team-id="${team.team_id}"><td class="cbb-rank">#${globalRank.get(team.team_id) || "—"}</td><td><div class="cbb-team-cell">${teamLogo(team,"normal")}<div><div class="cbb-team-name">${escapeHtml(team.team)}</div><div class="cbb-team-meta">View team profile →</div></div></div></td><td>${escapeHtml(team.conference?.abbreviation || "—")}</td><td class="cbb-number cbb-metric-cell cbb-band-${netBand(team)}">${number(team.prior_net,2,true)}</td><td class="cbb-number cbb-metric-cell cbb-band-${offBand(team)}">${number(team.prior_offense,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${defBand(team)}">${number(team.prior_defense,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${recruitingBand(team)}">${number(recruiting.team_rating,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${transferBand(team)}">${integer(transfers.prior_minutes)}</td></tr>`;
-    }).join("") : `<tr><td colspan="8" class="cbb-empty">No teams match those filters.</td></tr>`;
+      return `<tr data-team-id="${team.team_id}"><td class="cbb-rank">#${globalRank.get(team.team_id) || "—"}</td><td><div class="cbb-team-cell">${teamLogo(team,"normal")}<div><div class="cbb-team-name">${escapeHtml(team.team)}</div><div class="cbb-team-meta">View team profile →</div></div></div></td><td>${escapeHtml(team.conference?.abbreviation || "—")}</td><td class="cbb-number cbb-metric-cell cbb-band-${netBand(team)}">${number(team.prior_net,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${netBand(team)}">${number(team.prior_net,2)}</td><td class="cbb-number cbb-rating-pending">Preseason</td><td class="cbb-number cbb-rating-pending">—</td><td class="cbb-number cbb-rating-pending">0–0</td><td class="cbb-number cbb-metric-cell cbb-band-${offBand(team)}">${number(team.prior_offense,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${defBand(team)}">${number(team.prior_defense,2)}</td><td class="cbb-number cbb-rating-context">${Number.isFinite(home) ? number(home,2) : "—"}</td></tr>`;
+    }).join("") : `<tr><td colspan="11" class="cbb-empty">No teams match those filters.</td></tr>`;
   }
 
   async function openTeamDetail(teamId) {

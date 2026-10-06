@@ -344,7 +344,7 @@ def build_outputs(
 def atomic_write(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile("w", dir=path.parent, delete=False, encoding="utf-8") as handle:
-        json.dump(payload, handle, indent=2, allow_nan=False)
+        json.dump(payload, handle, separators=(",", ":"), allow_nan=False)
         handle.write("\n")
         temporary = Path(handle.name)
     temporary.replace(path)

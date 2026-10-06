@@ -77,9 +77,10 @@
 
   function eligibleRows() {
     if (!data) return [];
+    const query = String(search || "").trim().toLocaleLowerCase();
     if (active === "HEISMAN") return data.heisman_board || [];
     return (data.leaderboards?.[active] || []).map(id => data.players[id]).filter(Boolean)
-      .filter(row => !search || `${row.name} ${row.team}`.toLowerCase().includes(search.toLowerCase()))
+      .filter(row => !query || `${row.name} ${row.team}`.trim().toLocaleLowerCase().includes(query))
       .filter(row => conference === "ALL" || teamConference(row) === conference);
   }
 
@@ -114,7 +115,8 @@
     const target = document.getElementById("thi-player-table"); if (!target) return;
     let rows = eligibleRows();
     if (active === "HEISMAN") {
-      rows = rows.filter(row => !search || `${row.name} ${row.team}`.toLowerCase().includes(search.toLowerCase())).filter(row => conference === "ALL" || teamConference(data.players?.[row.athlete_id]) === conference);
+      const query = String(search || "").trim().toLocaleLowerCase();
+      rows = rows.filter(row => !query || `${row.name} ${row.team}`.trim().toLocaleLowerCase().includes(query)).filter(row => conference === "ALL" || teamConference(data.players?.[row.athlete_id]) === conference);
       const validation = data.meta?.heisman_validation || {};
       const tested = Array.isArray(validation.seasons) && validation.seasons.length > 0;
       const note = tested && !validation.passed

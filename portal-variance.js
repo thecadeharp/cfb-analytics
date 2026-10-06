@@ -466,7 +466,8 @@
 
     // Filter
     let filtered = teams.filter(t => {
-      if (portalSearch && !t.team?.toLowerCase().includes(portalSearch.toLowerCase())) return false;
+      const query = String(portalSearch || "").trim().toLocaleLowerCase();
+      if (query && !String(t.team || "").trim().toLocaleLowerCase().includes(query)) return false;
       if (portalConfFilter !== "ALL" && !(PORTAL_CONFERENCE_GROUPS[portalConfFilter]
         ? PORTAL_CONFERENCE_GROUPS[portalConfFilter].has(t.conference)
         : t.conference === portalConfFilter)) return false;

@@ -650,9 +650,9 @@ def current_priors(
     }
 
 
-def atomic_json(path: Path, payload: Any, compressed: bool = False) -> None:
+def atomic_json(path: Path, payload: Any, compressed: bool = False, compact: bool = False) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    encoded = (json.dumps(payload, separators=(",", ":") if compressed else None, indent=None if compressed else 2, allow_nan=False) + "\n").encode()
+    encoded = (json.dumps(payload, separators=(",", ":") if compressed or compact else None, indent=None if compressed or compact else 2, allow_nan=False) + "\n").encode()
     with tempfile.NamedTemporaryFile("wb", dir=path.parent, delete=False) as handle:
         temporary = Path(handle.name)
     if compressed:
@@ -746,9 +746,9 @@ def build(history_dir: Path, personnel_dir: Path, profile_path: Path, output_dir
         ],
     }
     predictions = {"meta": card["meta"], "games": evaluated}
-    atomic_json(output_dir / "model_card.json", card)
+    atomic_json(output_dir / "model_card.json", card, compressed=False, compact=True)
     atomic_json(output_dir / "walk_forward_predictions.json.gz", predictions, compressed=True)
-    atomic_json(output_dir / "current_priors.json", priors)
+    atomic_json(output_dir / "current_priors.json", priors, compressed=False, compact=True)
     return card
 
 
