@@ -136,15 +136,16 @@
       .hammer-sort-label {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 3px;
       }
 
       .hammer-sort-arrow {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 13px;
+        width: 9px;
         height: 13px;
+        margin-left: 1px;
         color: var(--muted-light);
         font-family: var(--mono);
         font-size: 10px;

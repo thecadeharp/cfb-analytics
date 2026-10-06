@@ -614,9 +614,9 @@
 
   function renderPortalComingSoon(note) {
     return `<div class="vl-coming-soon">
-      <div class="vl-coming-soon-title">Coming Soon.</div>
+      <div class="vl-coming-soon-title">Roadmap · Validation Required</div>
       <div class="pv-section-sub" style="max-width:560px;margin:0 18px">${pEsc(note)}</div>
-      <div class="vl-coming-soon-mark">🔨</div>
+      <div class="vl-coming-soon-mark">Source → validate → publish</div>
     </div>`;
   }
 
@@ -878,8 +878,9 @@
     if (!hasPublishedVariance) {
       container.innerHTML = `
         <div class="vl-coming-soon">
-          <div class="vl-coming-soon-title">Coming Soon.</div>
-          <div class="vl-coming-soon-mark" aria-hidden="true">🔨</div>
+          <div class="vl-coming-soon-title">Variance Lab Research Roadmap</div>
+          <div class="pv-section-sub" style="max-width:620px;margin:0 18px">Historical systems publish only after source coverage, frozen-rule testing and sample checks are complete.</div>
+          <div class="vl-coming-soon-mark">Source → backtest → prospective track → publish</div>
         </div>`;
       return;
     }
@@ -957,7 +958,7 @@
         <h1 class="page-title">Variance Lab</h1>
         <div class="page-subtitle" style="margin-bottom:24px">
           Historical base rates for coaching changes, quarterback transitions,
-          coordinator turnover and full program resets. Coming soon 🔨.
+          coordinator turnover and full program resets. Results publish by evidence state as each research track clears its data checks.
         </div>
         <div id="variance-content">
           <div class="loading-state"><div class="spinner"></div>Loading Variance Lab data...</div>

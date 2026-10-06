@@ -43,9 +43,9 @@
     .thi-hub-table { width:100%; border-collapse:collapse; }
     .thi-hub-table th, .thi-hub-table td { text-align:left; padding:14px 16px; border-bottom:1px solid var(--border); }
     .thi-hub-table th { font:600 11px var(--mono); letter-spacing:.05em; color:var(--muted); white-space:nowrap; }
-    .thi-hub-sort-button { display:inline-flex; align-items:center; gap:6px; border:0; padding:0; background:transparent; color:inherit; font:inherit; letter-spacing:inherit; cursor:pointer; }
+    .thi-hub-sort-button { display:inline-flex; align-items:center; gap:3px; border:0; padding:0; background:transparent; color:inherit; font:inherit; letter-spacing:inherit; cursor:pointer; }
     .thi-hub-sort-button:hover, .thi-hub-sort-button:focus-visible { color:var(--text); text-decoration:underline; }
-    .thi-hub-sort-arrow { display:inline-flex; align-items:center; justify-content:center; width:13px; height:13px; color:var(--muted-light); font-family:var(--mono); font-size:10px; font-weight:700; opacity:.55; }
+    .thi-hub-sort-arrow { display:inline-flex; align-items:center; justify-content:center; width:9px; height:13px; margin-left:1px; color:var(--muted-light); font-family:var(--mono); font-size:9px; font-weight:700; opacity:.55; }
     .thi-hub-sort-button.active .thi-hub-sort-arrow { color:var(--green); opacity:1; }
     .thi-hub-table tr:last-child td { border-bottom:0; }
     .thi-hub-table tbody tr:hover { background:#f6f8f5; }

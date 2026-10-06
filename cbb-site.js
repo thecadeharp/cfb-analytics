@@ -684,7 +684,7 @@
       const order=typeof av === "string" ? av.localeCompare(bv) : av-bv;
       return state.teamDataSort.direction === "asc" ? order : -order;
     });
-    const header = (key,label) => { const active=state.teamDataSort.key===key; return `<th data-team-data-sort="${key}" class="${active ? "is-sorted" : ""}">${label}${active ? (state.teamDataSort.direction === "desc" ? " ↓" : " ↑") : " ↕"}</th>`; };
+    const header = (key,label) => { const active=state.teamDataSort.key===key; const arrow=active ? (state.teamDataSort.direction === "desc" ? "↓" : "↑") : "↕"; return `<th data-team-data-sort="${key}" class="${active ? "is-sorted" : ""}">${label}<span class="cbb-sort-icon" aria-hidden="true">${arrow}</span></th>`; };
     view.innerHTML = `
       <div class="cbb-kicker">Team directory and observed data</div>
       <h1 class="page-title">CBB Team Data</h1>
@@ -1131,8 +1131,8 @@
 
   function ratingHeader(key, label) {
     const active = state.ratingSort.key === key;
-    const arrow = active ? (state.ratingSort.direction === "desc" ? " ↓" : " ↑") : " ↕";
-    return `<th data-sort="${key}" class="${active ? "is-sorted" : ""}">${escapeHtml(label)}${arrow}</th>`;
+    const arrow = active ? (state.ratingSort.direction === "desc" ? "↓" : "↑") : "↕";
+    return `<th data-sort="${key}" class="${active ? "is-sorted" : ""}">${escapeHtml(label)}<span class="cbb-sort-icon" aria-hidden="true">${arrow}</span></th>`;
   }
 
   function paintRatingRows() {

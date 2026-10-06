@@ -66,14 +66,14 @@
       #${SCORECARD_ID} { margin:14px 0; }
       #${SCORECARD_ID} .perf-shell { border:1px solid var(--border); border-radius:13px; background:var(--surface); overflow:hidden; }
       #${SCORECARD_ID} .perf-header { display:flex; justify-content:space-between; gap:14px; align-items:flex-start; padding:15px 17px; border-bottom:1px solid var(--border); }
-      #${SCORECARD_ID} .perf-kicker { color:#76526f; font-family:var(--mono); font-size:8px; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
-      #${SCORECARD_ID} .perf-title { margin-top:4px; font-size:18px; font-weight:850; }
-      #${SCORECARD_ID} .perf-note { max-width:560px; color:var(--muted); font-size:9px; line-height:1.5; text-align:right; }
+      #${SCORECARD_ID} .perf-kicker { color:#76526f; font-family:var(--mono); font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
+      #${SCORECARD_ID} .perf-title { margin-top:5px; font-size:22px; font-weight:850; }
+      #${SCORECARD_ID} .perf-note { max-width:620px; color:var(--muted); font-size:11px; line-height:1.55; text-align:right; }
       #${SCORECARD_ID} .perf-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; padding:12px; }
       #${SCORECARD_ID} .perf-stat { padding:11px 12px; border:1px solid var(--border); border-radius:9px; background:#fbfbfa; }
-      #${SCORECARD_ID} .perf-label { color:var(--muted); font-family:var(--mono); font-size:7px; font-weight:800; letter-spacing:.65px; text-transform:uppercase; }
-      #${SCORECARD_ID} .perf-value { margin-top:5px; font-size:17px; font-weight:850; }
-      #${SCORECARD_ID} .perf-sub { margin-top:3px; color:var(--muted); font-size:8px; }
+      #${SCORECARD_ID} .perf-label { color:var(--muted); font-family:var(--mono); font-size:9px; font-weight:800; letter-spacing:.65px; text-transform:uppercase; }
+      #${SCORECARD_ID} .perf-value { margin-top:6px; font-size:20px; font-weight:850; }
+      #${SCORECARD_ID} .perf-sub { margin-top:4px; color:var(--muted); font-size:10px; }
       #${SCORECARD_ID} .perf-ytd { padding:0 12px 13px; }
       #${SCORECARD_ID} .perf-ytd-title { padding:10px 1px 8px; color:var(--muted); font-family:var(--mono); font-size:8px; font-weight:800; letter-spacing:.9px; text-transform:uppercase; }
       #${SCORECARD_ID} .perf-table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:9px; }
@@ -89,18 +89,18 @@
       #${SCORECARD_ID} .perf-section-label { padding:13px 13px 0; color:var(--muted); font:800 8px var(--mono); letter-spacing:.85px; text-transform:uppercase; }
       #${SCORECARD_ID} .perf-week-table { padding:0 12px 13px; }
       #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) .perf-ytd-title {
-        padding:15px 2px 11px; font-size:11px; letter-spacing:1.05px;
+        padding:17px 2px 12px; font-size:13px; letter-spacing:1.05px;
       }
       #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) .perf-table-wrap { border-radius:11px; }
-      #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) table { min-width:900px; }
+      #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) table { min-width:1040px; }
       #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) th {
-        padding:11px 13px; font-size:9px; letter-spacing:.7px;
+        padding:12px 14px; font-size:10px; letter-spacing:.7px;
       }
       #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) td {
-        padding:13px; font-size:11px; line-height:1.35;
+        padding:14px; font-size:12px; line-height:1.4; font-variant-numeric:tabular-nums;
       }
       #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) .perf-confidence {
-        padding:5px 8px; font-size:9px;
+        padding:5px 9px; font-size:10px;
       }
       #${SCORECARD_ID} .perf-positive { color:#16734f; }
       #${SCORECARD_ID} .perf-negative { color:#a44842; }
@@ -156,9 +156,9 @@
         #${SCORECARD_ID} .perf-grid { grid-template-columns:repeat(2,minmax(0,1fr)); padding:9px; }
         #${SCORECARD_ID} .perf-ytd { padding:0 9px 10px; }
         #${SCORECARD_ID} .perf-week-table { padding-left:9px; padding-right:9px; }
-        #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) .perf-ytd-title { font-size:10px; }
-        #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) th { font-size:8px; }
-        #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) td { font-size:10px; }
+        #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) .perf-ytd-title { font-size:12px; }
+        #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) th { font-size:9px; }
+        #${SCORECARD_ID} :is(.perf-week-table,.perf-ytd) td { font-size:11px; }
         #${PANEL_ID} .pg-headlines, #${PANEL_ID} .pg-metrics { grid-template-columns:1fr; }
         #${PANEL_ID} .pg-header { padding:16px; }
         #${PANEL_ID} .pg-headlines, #${PANEL_ID} .pg-section { padding-left:10px; padding-right:10px; }

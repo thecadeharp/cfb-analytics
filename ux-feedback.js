@@ -584,10 +584,10 @@
         The Hammer Index
       </h2>
       <p style="margin:0 0 16px; line-height:1.6; color:#4b5563;">
-        A college football analytics and projection platform built to create an independent view of every matchup.
+        A college football and college basketball analytics platform built to create an independent view of every matchup.
       </p>
       <p style="margin:0 0 20px; line-height:1.6; color:#4b5563;">
-        Explore <strong>THI Spreads</strong>, <strong>THI Totals</strong>, projected scores, win probabilities, team ratings, matchup analysis and how the model compares with the live betting market.
+        Explore <strong>THI Spreads</strong>, <strong>THI Totals</strong>, projected scores, win probabilities, team and player ratings, matchup analysis and transparent model tracking.
       </p>
       <div style="padding:13px 14px; margin-bottom:12px; border-radius:10px; background:#fff8dc; border:1px solid #e7c967; font-size:13px; line-height:1.5;">
         <strong>THI is independent of the sportsbook line.</strong> Market odds are used for comparison — not to create the model's projection.
@@ -921,12 +921,123 @@
     wireAdvancedRatingsScroll();
   }
 
+  // ========================================================================
+  // STATIC BUILD RESILIENCE + TABLE POLISH
+  // ========================================================================
+
+  function installTableContainment() {
+    if (document.getElementById("thi-table-containment")) return;
+    const style = document.createElement("style");
+    style.id = "thi-table-containment";
+    style.textContent = `
+      :is(.table-scroll,.perf-table-wrap,.cbb-table-wrap,.thi-hub-table-wrap,.thi-player-table-wrap,.pv-table-wrap) {
+        width:100%; max-width:100%; overflow-x:auto; overscroll-behavior-x:contain;
+        -webkit-overflow-scrolling:touch;
+      }
+      :is(.table-scroll,.perf-table-wrap,.cbb-table-wrap,.thi-hub-table-wrap,.thi-player-table-wrap,.pv-table-wrap)
+        table:has(th:nth-child(5)) { min-width:max(100%,760px); }
+      :is(.table-scroll,.perf-table-wrap,.cbb-table-wrap,.thi-hub-table-wrap,.thi-player-table-wrap,.pv-table-wrap)
+        table:has(th:nth-child(8)) { min-width:max(100%,980px); }
+      :is(.table-scroll,.perf-table-wrap,.cbb-table-wrap,.thi-hub-table-wrap,.thi-player-table-wrap,.pv-table-wrap)
+        :is(th,td) { font-variant-numeric:tabular-nums; }
+      :is(.table-scroll,.perf-table-wrap,.cbb-table-wrap,.thi-hub-table-wrap,.thi-player-table-wrap,.pv-table-wrap)
+        :is(th,.cbb-number,.metric-value,.perf-value) { white-space:nowrap; }
+      .thi-positive-sign { display:inline-block; width:.72ch; color:var(--muted); opacity:.42; text-align:left; }
+      #thi-loader-status {
+        position:fixed; right:14px; bottom:14px; z-index:9998; display:none; align-items:center; gap:10px;
+        max-width:min(390px,calc(100vw - 28px)); padding:10px 12px; border:1px solid var(--border);
+        border-radius:9px; background:var(--surface); color:var(--muted); box-shadow:0 8px 26px rgba(0,0,0,.16);
+        font:700 10px/1.4 var(--mono);
+      }
+      html[data-thi-load-state="stalled"] #thi-loader-status { display:flex; }
+      #thi-loader-status button { border:1px solid var(--border); border-radius:7px; padding:6px 9px; background:var(--surface-2); color:var(--text); font:inherit; cursor:pointer; }
+      @media (max-width:640px) {
+        :is(.table-scroll,.perf-table-wrap,.cbb-table-wrap,.thi-hub-table-wrap,.thi-player-table-wrap,.pv-table-wrap)
+          table:has(th:nth-child(5)) { min-width:760px; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function sanitizePositiveSigns(root = document) {
+    const cells = root.matches?.("td") ? [root] : root.querySelectorAll?.("td") || [];
+    cells.forEach(cell => {
+      const walker = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT);
+      const matches = [];
+      while (walker.nextNode()) {
+        const node = walker.currentNode;
+        if (node.parentElement?.closest(".thi-positive-sign")) continue;
+        if (/^\s*\+(?=\d)/.test(node.nodeValue || "")) matches.push(node);
+      }
+      matches.forEach(node => {
+        const match = (node.nodeValue || "").match(/^(\s*)\+(.*)$/s);
+        if (!match) return;
+        const fragment = document.createDocumentFragment();
+        if (match[1]) fragment.append(document.createTextNode(match[1]));
+        const sign = document.createElement("span");
+        sign.className = "thi-positive-sign";
+        sign.textContent = "+";
+        fragment.append(sign, document.createTextNode(match[2]));
+        node.replaceWith(fragment);
+      });
+    });
+  }
+
+  function installStaticLoaderState() {
+    const root = document.documentElement;
+    root.dataset.thiBuild = "static";
+    const status = document.createElement("div");
+    status.id = "thi-loader-status";
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+    status.innerHTML = `<span>Data is taking longer than expected.</span><button type="button">Retry</button>`;
+    status.querySelector("button")?.addEventListener("click", () => window.location.reload());
+    document.body.appendChild(status);
+
+    const visibleLoadingStates = () => [...document.querySelectorAll(".loading-state")].filter(node => {
+      const view = node.closest(".view");
+      return (!view || view.classList.contains("active")) && getComputedStyle(node).display !== "none";
+    });
+    let stallTimer = null;
+    const update = () => {
+      const loading = visibleLoadingStates().length > 0;
+      if (!loading) {
+        root.dataset.thiLoadState = "ready";
+        if (stallTimer) window.clearTimeout(stallTimer);
+        stallTimer = null;
+      } else if (root.dataset.thiLoadState !== "stalled") {
+        root.dataset.thiLoadState = "loading";
+        if (!stallTimer) stallTimer = window.setTimeout(() => {
+          stallTimer = null;
+          update();
+          if (root.dataset.thiLoadState === "loading") root.dataset.thiLoadState = "stalled";
+        }, 15000);
+      }
+    };
+    const observer = new MutationObserver(records => {
+      records.forEach(record => record.addedNodes.forEach(node => {
+        if (node.nodeType === Node.ELEMENT_NODE) sanitizePositiveSigns(node);
+      }));
+      records.filter(record => record.type === "characterData").forEach(record => {
+        const cell = record.target.parentElement?.closest("td");
+        if (cell) sanitizePositiveSigns(cell);
+      });
+      window.requestAnimationFrame(update);
+    });
+    observer.observe(document.body, { childList:true, characterData:true, attributes:true, attributeFilter:["class","style"], subtree:true });
+    sanitizePositiveSigns();
+    update();
+    window.addEventListener("load", () => window.requestAnimationFrame(update), { once:true });
+  }
+
   function start() {
     installMatchupUx();
     installStickyProjectionHeader();
     installTerminologyObserver();
     makeSignalGuidePersistent();
     installWideTableFixes();
+    installTableContainment();
+    installStaticLoaderState();
     installWelcomeModal();
   }
 
