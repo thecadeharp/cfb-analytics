@@ -64,7 +64,9 @@ jobs:
             scripts/build_cbb_game_day_readiness.py \
             scripts/build_cbb_operations_context.py \
             scripts/build_cbb_platform_health.py \
-            scripts/build_trends_lab.py
+            scripts/build_trends_lab.py \
+            scripts/build_variance_prospective_tracker.py \
+            scripts/build_rlm_monitor.py
           python -m unittest \
             scripts/test_cbb_data_foundation.py \
             scripts/test_cbb_player_research.py \
@@ -77,7 +79,8 @@ jobs:
             scripts/test_cbb_bracketology.py \
             scripts/test_cbb_model_v02.py \
             scripts/test_cbb_game_day_readiness.py \
-            scripts/test_cbb_release_foundations.py
+            scripts/test_cbb_release_foundations.py \
+            scripts/test_variance_lab.py
 
       - name: Refresh foundation, ratings, projections and bracketology
         env:
@@ -101,6 +104,8 @@ jobs:
           python scripts/build_cbb_operations_context.py
           python scripts/build_cbb_platform_health.py
           python scripts/build_trends_lab.py
+          python scripts/build_variance_prospective_tracker.py
+          python scripts/build_rlm_monitor.py
 
       - name: Validate the coordinated release
         run: |
@@ -173,7 +178,7 @@ jobs:
           assert operations["coverage"]["games"] == projections["meta"]["game_count"]
           assert health["meta"]["version"] == "thi-cbb-platform-health-v1.0"
           assert health["meta"]["status"] == "healthy"
-          assert trends["meta"]["version"] == "thi-variance-systems-lab-v1.1"
+          assert trends["meta"]["version"] == "thi-variance-systems-lab-v2.0"
           assert trends["sports"]["cfb"]["cards"] and trends["sports"]["cbb"]["cards"]
           PY
 
@@ -201,6 +206,9 @@ jobs:
             data/cbb/operations_context.json \
             data/cbb/platform_health.json \
             data/trends_lab.json
+          git add \
+            data/variance/prospective_tracker.json \
+            data/market/rlm_monitor.json
           git diff --cached --quiet && exit 0
           git commit -m "Refresh coordinated CBB platform data"
           git pull --rebase origin main

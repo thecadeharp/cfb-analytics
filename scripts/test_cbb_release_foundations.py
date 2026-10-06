@@ -8,7 +8,8 @@ class ReleaseFoundationTests(unittest.TestCase):
         rows=[{"season":2025,"month":11,"margin":7,"total":130,"spread":-12,"market_total":140,"neutral":False,"conference":True,"home_team":"A","away_team":"B"} for _ in range(220)]
         payload=trends_build(rows,rows)
         self.assertEqual(payload["sports"]["cbb"]["cards"][0]["hit_rate"],100.0)
-        self.assertEqual(payload["source_backlog"][0]["status"],"requires_historical_start_times")
+        self.assertEqual(payload["source_backlog"][0]["status"],"source_pending")
+        self.assertIn("failed_hypothesis",payload["sports"]["cbb"]["sections"])
 
     def test_operations_never_invents_availability_or_mileage(self):
         board={"games":[{"game_id":1,"start_date":"2026-11-01T12:00:00Z","neutral_site":True,"venue":{"name":"Arena","city":"X","state":"NY"},"home":{"team_id":1,"team":"A"},"away":{"team_id":2,"team":"B"}}]}

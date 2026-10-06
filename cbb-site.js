@@ -18,7 +18,9 @@
     readiness: "data/cbb/game_day_readiness.json",
     operations: "data/cbb/operations_context.json",
     health: "data/cbb/platform_health.json",
-    trends: "data/trends_lab.json"
+    trends: "data/trends_lab.json",
+    varianceTracker: "data/variance/prospective_tracker.json",
+    rlmMonitor: "data/market/rlm_monitor.json"
   };
   const PLAYER_PATH = "data/cbb/player_ratings.json";
 
@@ -165,7 +167,7 @@
     if (state.loaded) return state.data;
     if (state.loading) return state.loading;
     state.loading = Promise.all(Object.entries(PATHS).map(async ([key, path]) => {
-      if (["projectionBoard", "tracking", "bracketology", "playStyle", "matchups", "intelligence", "challenger", "readiness", "operations", "health", "trends"].includes(key)) {
+      if (["projectionBoard", "tracking", "bracketology", "playStyle", "matchups", "intelligence", "challenger", "readiness", "operations", "health", "trends", "varianceTracker", "rlmMonitor"].includes(key)) {
         try { return [key, await fetchJson(path)]; }
         catch (_error) {
           if (key === "projectionBoard") return [key, { meta: {}, games: [] }];
@@ -1423,12 +1425,26 @@
   }
 
   function trendCard(card) {
-    return `<article class="cbb-panel cbb-trend-card"><div class="cbb-label">${escapeHtml(card.market)} system</div><h3>${escapeHtml(card.name)}</h3><p>${escapeHtml(card.description)}</p><div class="cbb-trend-rate">${pct(card.hit_rate)}</div><strong>${integer(card.wins)}–${integer(card.losses)}${card.pushes ? `–${integer(card.pushes)}` : ""} · ${number(card.roi_pct_at_minus_110,1,true)}% ROI</strong><small>${integer(card.decisions)} decisions · ${escapeHtml(humanize(card.state || "limited_sample"))}</small><small>${escapeHtml(card.source_note || "THI historical warehouse")}</small></article>`;
+    const stateName = card.state || "developing";
+    return `<article class="cbb-panel cbb-trend-card is-${escapeHtml(stateName)}"><div class="cbb-label">${escapeHtml(card.market)} · ${escapeHtml(card.family || "situational")}</div><h3>${escapeHtml(card.name)}</h3><p>${escapeHtml(card.description)}</p><div class="cbb-trend-rate">${pct(card.hit_rate)}</div><strong>${integer(card.wins)}–${integer(card.losses)}${card.pushes ? `–${integer(card.pushes)}` : ""} · ${number(card.roi_pct_at_minus_110,1,true)}% ROI</strong><small>${integer(card.decisions)} decisions · ${escapeHtml(humanize(stateName))}</small><small>${escapeHtml(card.source_note || "THI historical warehouse")}</small></article>`;
+  }
+
+  function trendSection(title, note, cards, stateName) {
+    return `<section class="cbb-trend-section"><div class="cbb-section-head"><div><div class="cbb-label">Evidence registry</div><h2 class="cbb-section-title">${escapeHtml(title)}</h2></div><div class="cbb-section-note">${escapeHtml(note)}</div></div>${cards.length ? `<div class="cbb-trends-grid">${cards.map(trendCard).join("")}</div>` : `<div class="cbb-panel cbb-trend-empty">No ${escapeHtml(stateName)} systems currently qualify.</div>`}</section>`;
   }
 
   function trendsMarkup(sport) {
     const lab = state.data?.trends || {}; const data = lab.sports?.[sport] || { cards:[] };
-    return `<div class="cbb-kicker">The Hammer Index · ${sport.toUpperCase()}</div><h1 class="page-title">THI Variance Lab</h1><p class="page-subtitle">Reproducible situational systems tested against THI's settled closing-line warehouse. Popular betting angles stay hypotheses until our own sample confirms them.</p><div class="cbb-research-banner"><strong>Systems discipline</strong><span>${escapeHtml(lab.meta?.policy || "Historical research only.")}</span></div><div class="cbb-trends-summary"><strong>${integer(data.settled_games)}</strong><span>settled historical games examined</span></div><div class="cbb-trends-grid">${(data.cards || []).map(trendCard).join("")}</div><div class="cbb-panel cbb-planned-trends"><h3>Source pipeline</h3>${(lab.source_backlog || []).map(row => `<div><strong>${escapeHtml(row.name)}</strong><span>${escapeHtml(row.path)}</span></div>`).join("")}</div>`;
+    const groups = data.sections || { verified:[], developing:data.cards || [], failed_hypothesis:[], source_pending:[] };
+    const tracker = state.data?.varianceTracker || { frozen:[] }; const tracked = (tracker.frozen || []).filter(row => row.sport === sport);
+    const rlm = state.data?.rlmMonitor || { meta:{ status:"source_pending" }, alerts:[] }; const alerts = (rlm.alerts || []).filter(row => row.sport === sport);
+    return `<div class="cbb-kicker">The Hammer Index · ${sport.toUpperCase()}</div><h1 class="page-title">THI Variance Lab</h1><p class="page-subtitle">Reproducible situational systems, frozen prospective tracking and synchronized market intelligence. Losing hypotheses remain visible.</p><div class="cbb-research-banner"><strong>Systems discipline</strong><span>${escapeHtml(lab.meta?.policy || "Historical research only.")}</span></div><div class="cbb-trends-summary"><strong>${integer(data.settled_games)}</strong><span>settled historical games examined</span></div>
+      ${trendSection("Verified", "Large, profitable historical samples that clear THI's published evidence gate.", groups.verified || [], "verified")}
+      ${trendSection("Developing", "Promising or limited samples remain research observations.", groups.developing || [], "developing")}
+      ${trendSection("Failed hypotheses", "Popular angles that did not survive THI's own closing-line test.", groups.failed_hypothesis || [], "failed")}
+      <section class="cbb-trend-section"><div class="cbb-section-head"><div><div class="cbb-label">Forward evidence</div><h2 class="cbb-section-title">Prospective tracker</h2></div><div class="cbb-section-note">The first eligible pregame line is frozen and cannot be replaced later.</div></div><div class="cbb-panel cbb-variance-ledger"><strong>${integer(tracked.length)} frozen qualifiers</strong>${tracked.slice(0,8).map(row => `<div><span>${escapeHtml(row.away_team)} at ${escapeHtml(row.home_team)}</span><b>${escapeHtml(humanize(row.system_id))}</b><small>${escapeHtml(row.result)}</small></div>`).join("")}${!tracked.length ? `<p>Qualifiers will appear automatically as markets become available.</p>` : ""}</div></section>
+      <section class="cbb-trend-section"><div class="cbb-section-head"><div><div class="cbb-label">Market intelligence</div><h2 class="cbb-section-title">Reverse Line Movement monitor</h2></div><div class="cbb-section-note">An alert requires 65%+ public tickets and a synchronized 0.5+ point move the other way at a named sharp book.</div></div><div class="cbb-panel cbb-rlm-monitor"><div class="cbb-rlm-status is-${escapeHtml(rlm.meta?.status || "source_pending")}">${escapeHtml(humanize(rlm.meta?.status || "source_pending"))}</div>${alerts.map(row => `<div class="cbb-rlm-alert"><strong>${escapeHtml(row.away_team)} at ${escapeHtml(row.home_team)}</strong><span>${pct(row.public_ticket_pct)} tickets on ${escapeHtml(row.public_side)} · ${number(row.line_delta,1,true)} toward ${escapeHtml(row.sharp_team)}</span><b>${escapeHtml(humanize(row.severity))}</b></div>`).join("")}${!alerts.length ? `<p>No qualified alerts. The monitor will stay source pending until licensed splits and sharp-book feeds are connected.</p>` : ""}</div></section>
+      <section class="cbb-trend-section"><div class="cbb-section-head"><div><div class="cbb-label">Data contracts</div><h2 class="cbb-section-title">Source pending</h2></div><div class="cbb-section-note">A missing feed is shown plainly and never converted into a synthetic signal.</div></div><div class="cbb-panel cbb-planned-trends">${(lab.source_backlog || []).map(row => `<div><strong>${escapeHtml(row.name)} <em>${escapeHtml(humanize(row.status || "source_pending"))}</em></strong><span>${escapeHtml(row.path)}</span></div>`).join("")}</div></section>`;
   }
 
   function renderTrendsLab() {

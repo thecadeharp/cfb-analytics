@@ -1,0 +1,62 @@
+name: Variance Lab v2
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "27 11 * * 2"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: variance-lab-v2
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test Variance Lab contracts
+        run: |
+          python -m py_compile scripts/build_variance_context.py scripts/build_trends_lab.py scripts/build_variance_prospective_tracker.py scripts/build_rlm_monitor.py scripts/poll_rlm_feeds.py
+          python -m unittest scripts/test_variance_lab.py
+      - name: Refresh point-in-time context and systems
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+          CBBD_API_KEY: ${{ secrets.CBBD_API_KEY }}
+        run: |
+          python scripts/build_variance_context.py
+          python scripts/build_trends_lab.py
+          python scripts/build_variance_prospective_tracker.py
+          python scripts/build_rlm_monitor.py
+      - name: Validate generated evidence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          lab=json.loads(Path('data/trends_lab.json').read_text())
+          context=json.loads(Path('data/variance/context.json').read_text())
+          tracker=json.loads(Path('data/variance/prospective_tracker.json').read_text())
+          rlm=json.loads(Path('data/market/rlm_monitor.json').read_text())
+          assert lab['meta']['version']=='thi-variance-systems-lab-v2.0'
+          assert context['meta']['game_count']>1000
+          assert set(lab['sports']['cfb']['sections'])=={'verified','developing','failed_hypothesis','source_pending'}
+          assert tracker['meta']['version']=='thi-variance-prospective-v1.0'
+          assert rlm['meta']['version']=='thi-rlm-monitor-v1.0'
+          PY
+      - name: Publish refreshed research
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/trends_lab.json data/variance/context.json data/variance/prospective_tracker.json data/market/rlm_monitor.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Refresh Variance Lab evidence"
+          git pull --rebase origin main
+          git push origin HEAD:main

@@ -1,0 +1,48 @@
+name: RLM Sharp Money Monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "3,13,23,33,43,53 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rlm-sharp-money-monitor
+  cancel-in-progress: true
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Poll synchronized licensed feeds
+        env:
+          THI_ODDS_FEED_URL: ${{ secrets.THI_ODDS_FEED_URL }}
+          THI_ODDS_FEED_TOKEN: ${{ secrets.THI_ODDS_FEED_TOKEN }}
+          THI_SPLITS_FEED_URL: ${{ secrets.THI_SPLITS_FEED_URL }}
+          THI_SPLITS_FEED_TOKEN: ${{ secrets.THI_SPLITS_FEED_TOKEN }}
+        run: |
+          if [ -z "$THI_ODDS_FEED_URL" ] || [ -z "$THI_SPLITS_FEED_URL" ]; then
+            echo "Licensed RLM feeds are not configured; source-pending state remains published."
+            exit 0
+          fi
+          python scripts/poll_rlm_feeds.py
+          python scripts/build_rlm_monitor.py
+      - name: Test and publish qualified monitor state
+        run: |
+          python -m unittest scripts/test_variance_lab.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/market/rlm_snapshots.jsonl data/market/rlm_monitor.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Refresh RLM market monitor"
+          git pull --rebase origin main
+          git push origin HEAD:main
