@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "thi-variance-systems-lab-v2.0",
-    "generated_at_utc": "2026-10-06T21:32:55.574660Z",
+    "generated_at_utc": "2026-10-06T21:36:28.729312Z",
     "policy": "Rules are frozen before evaluation. Every settled qualifier publishes, including losing hypotheses. Verified requires 200 decisions, positive -110 ROI and a 95% separation from 50%."
   },
   "sports": {
@@ -844,6 +844,31 @@
           ],
           "state": "failed_hypothesis",
           "source_note": "THI historical warehouse"
+        },
+        {
+          "id": "unranked-home-dogs-vs-ranked-visitors",
+          "name": "Unranked home dogs vs ranked visitors",
+          "description": "Unranked home underdog ATS against a ranked road team using the pregame poll",
+          "family": "ranking",
+          "market": "ATS",
+          "wins": 860,
+          "losses": 852,
+          "pushes": 14,
+          "decisions": 1712,
+          "hit_rate": 50.2,
+          "roi_pct_at_minus_110": -4.1,
+          "seasons": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "state": "failed_hypothesis",
+          "source_note": "THI historical warehouse"
         }
       ],
       "sections": {
@@ -1051,6 +1076,31 @@
             ],
             "state": "failed_hypothesis",
             "source_note": "THI historical warehouse"
+          },
+          {
+            "id": "unranked-home-dogs-vs-ranked-visitors",
+            "name": "Unranked home dogs vs ranked visitors",
+            "description": "Unranked home underdog ATS against a ranked road team using the pregame poll",
+            "family": "ranking",
+            "market": "ATS",
+            "wins": 860,
+            "losses": 852,
+            "pushes": 14,
+            "decisions": 1712,
+            "hit_rate": 50.2,
+            "roi_pct_at_minus_110": -4.1,
+            "seasons": [
+              2019,
+              2020,
+              2021,
+              2022,
+              2023,
+              2024,
+              2025,
+              2026
+            ],
+            "state": "failed_hypothesis",
+            "source_note": "THI historical warehouse"
           }
         ],
         "source_pending": []
@@ -1065,7 +1115,7 @@
     },
     {
       "name": "Pregame ranking systems",
-      "status": "partial",
+      "status": "ready",
       "path": "Poll published before the game; final-season rankings are prohibited."
     },
     {
