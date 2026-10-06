@@ -450,6 +450,17 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
 .cbb-gate-item.pass .cbb-gate-icon { color: #1a8155; }
 .cbb-gate-item.fail .cbb-gate-icon { color: #bd4f43; }
 .cbb-validation-status-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; margin: 16px 0 4px; }
+.cbb-operations-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin: 18px 0 4px; }
+.cbb-operations-card { padding: 18px; border-left: 4px solid var(--border-dark); }
+.cbb-operations-card.is-ready { border-left-color: #2c9b6a; }
+.cbb-operations-card.is-research { border-left-color: #c5963d; }
+.cbb-operations-card.needs-attention { border-left-color: #bd4f43; }
+.cbb-operations-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; }
+.cbb-operations-heading strong { font-size: 18px; }
+.cbb-operations-heading span { flex: 0 0 auto; padding: 5px 8px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); font: 800 8px var(--mono); text-transform: uppercase; }
+.cbb-operations-card p { margin: 12px 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+.cbb-operations-stats { display: flex; flex-wrap: wrap; gap: 7px; }
+.cbb-operations-stats span { padding: 6px 8px; border-radius: 6px; background: var(--surface-soft); font: 800 9px var(--mono); }
 .cbb-factor-registry { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
 .cbb-factor-card { padding: 14px; border: 1px solid var(--border); border-left-width: 4px; border-radius: 9px; background: var(--surface); }
 .cbb-factor-card > div { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -671,6 +682,7 @@ html[data-theme="dark"] .cbb-error { background: #3a2020; border-color: #76443e;
   .thi-sport-button { padding-inline: 7px; }
   .cbb-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cbb-validation-status-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .cbb-operations-grid { grid-template-columns: 1fr; }
   .cbb-bracket-grid { grid-template-columns: repeat(2, minmax(230px, 1fr)); }
   .cbb-first-four-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cbb-projection-controls { grid-template-columns: repeat(2,minmax(0,1fr)); }

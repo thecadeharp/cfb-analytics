@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "version": "thi-cbb-game-day-readiness-v1.0",
+    "generated_at_utc": "2026-10-06T01:33:00.490015Z",
+    "season": 2027,
+    "status": "ready",
+    "published_model_unchanged": true
+  },
+  "checks": {
+    "projection_board_contract_valid": true,
+    "unique_game_ids": true,
+    "all_scheduled_games_have_frozen_projection": true,
+    "all_final_games_retain_projection": true,
+    "all_final_games_have_scores": true,
+    "all_final_games_have_closing_market_when_opening_market_exists": true,
+    "tracking_matches_projection_board": true,
+    "refresh_is_current_within_36_hours": true
+  },
+  "coverage": {
+    "games": 781,
+    "scheduled": 781,
+    "final": 0,
+    "live": 0,
+    "upcoming_with_market": 0,
+    "finals_with_frozen_projection": 0,
+    "finals_with_closing_market": 0,
+    "graded_spread_decisions": 0,
+    "graded_total_decisions": 0,
+    "board_age_hours": 0.73
+  },
+  "automation": {
+    "opening_snapshot": "The first published projection and market remain frozen when the game leaves scheduled status.",
+    "closing_snapshot": "The final provider market is stored separately as closing_market and never rewrites the frozen decision line.",
+    "final_grading": "Final scores grade the frozen decision line; closing market is used only for CLV and beat-close measurement.",
+    "rating_update": "The next coordinated refresh updates current team states only after completed games are ingested."
+  },
+  "exceptions": []
+}

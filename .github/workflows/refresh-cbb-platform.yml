@@ -59,7 +59,9 @@ jobs:
             scripts/build_cbb_matchup_engine.py \
             scripts/build_cbb_intelligence_suite.py \
             scripts/build_cbb_model_tracking.py \
-            scripts/build_cbb_bracketology.py
+            scripts/build_cbb_bracketology.py \
+            scripts/research_cbb_model_v02.py \
+            scripts/build_cbb_game_day_readiness.py
           python -m unittest \
             scripts/test_cbb_data_foundation.py \
             scripts/test_cbb_player_research.py \
@@ -69,7 +71,9 @@ jobs:
             scripts/test_cbb_matchup_engine.py \
             scripts/test_cbb_intelligence_suite.py \
             scripts/test_cbb_model_tracking.py \
-            scripts/test_cbb_bracketology.py
+            scripts/test_cbb_bracketology.py \
+            scripts/test_cbb_model_v02.py \
+            scripts/test_cbb_game_day_readiness.py
 
       - name: Refresh foundation, ratings, projections and bracketology
         env:
@@ -88,6 +92,8 @@ jobs:
           python scripts/build_cbb_model_tracking.py
           python scripts/build_cbb_bracketology.py
           python scripts/build_cbb_intelligence_suite.py
+          python scripts/research_cbb_model_v02.py
+          python scripts/build_cbb_game_day_readiness.py
 
       - name: Validate the coordinated release
         run: |
@@ -107,6 +113,8 @@ jobs:
           tracking = json.loads((root / "model_tracking.json").read_text())
           bracket = json.loads((root / "bracketology.json").read_text())
           intelligence = json.loads((root / "intelligence_suite.json").read_text())
+          challenger = json.loads((root / "research/model_v02_challenger.json").read_text())
+          readiness = json.loads((root / "game_day_readiness.json").read_text())
 
           assert len(profiles["teams"]) >= 300
           assert sum(bool(team.get("logo_url")) for team in profiles["teams"]) >= 300
@@ -143,6 +151,13 @@ jobs:
           assert all("schedule_strength" in row and "projected_core_lineup" in row for row in intelligence["team_dossiers"])
           assert len(intelligence["validation_registry"]["factors"]) >= 8
           assert all(row["projected_points"] is None for row in intelligence["player_projections"] if row["projection_state"] == "role_only")
+          assert challenger["meta"]["version"] == "thi-cbb-model-v0.2-challenger-lab"
+          assert challenger["meta"]["published_model_unchanged"] is True
+          assert "2022-2024 inner folds" in challenger["meta"]["selection_policy"]
+          assert readiness["meta"]["version"] == "thi-cbb-game-day-readiness-v1.0"
+          assert readiness["meta"]["status"] == "ready"
+          assert len(readiness["checks"]) == 8
+          assert all(readiness["checks"].values())
           PY
 
       - name: Commit the coordinated CBB outputs
@@ -162,7 +177,9 @@ jobs:
             data/cbb/matchup_engine.json \
             data/cbb/model_tracking.json \
             data/cbb/bracketology.json \
-            data/cbb/intelligence_suite.json
+            data/cbb/intelligence_suite.json \
+            data/cbb/research/model_v02_challenger.json \
+            data/cbb/game_day_readiness.json
           git diff --cached --quiet && exit 0
           git commit -m "Refresh coordinated CBB platform data"
           git pull --rebase origin main

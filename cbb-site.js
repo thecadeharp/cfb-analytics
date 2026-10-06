@@ -13,7 +13,9 @@
     matchups: "data/cbb/matchup_engine.json",
     intelligence: "data/cbb/intelligence_suite.json",
     tracking: "data/cbb/model_tracking.json",
-    bracketology: "data/cbb/bracketology.json"
+    bracketology: "data/cbb/bracketology.json",
+    challenger: "data/cbb/research/model_v02_challenger.json",
+    readiness: "data/cbb/game_day_readiness.json"
   };
   const PLAYER_PATH = "data/cbb/player_ratings.json";
 
@@ -156,7 +158,7 @@
     if (state.loaded) return state.data;
     if (state.loading) return state.loading;
     state.loading = Promise.all(Object.entries(PATHS).map(async ([key, path]) => {
-      if (["projectionBoard", "tracking", "bracketology", "playStyle", "matchups", "intelligence"].includes(key)) {
+      if (["projectionBoard", "tracking", "bracketology", "playStyle", "matchups", "intelligence", "challenger", "readiness"].includes(key)) {
         try { return [key, await fetchJson(path)]; }
         catch (_error) {
           if (key === "projectionBoard") return [key, { meta: {}, games: [] }];
@@ -164,6 +166,8 @@
           if (key === "bracketology") return [key, { meta: {}, field: [], regions: {}, first_four: [], bubble: {}, conference_bids: [] }];
           if (key === "playStyle") return [key, { meta: {}, teams: [], games: [] }];
           if (key === "intelligence") return [key, { meta: {}, player_projections: [], team_dossiers: [], game_context: [], market_board: [], validation_registry: { gate_summary: {}, factors: [] } }];
+          if (key === "challenger") return [key, { meta: {}, selected_candidate: {}, promotion: { checks: {} }, post_selection_comparison: {} }];
+          if (key === "readiness") return [key, { meta: {}, checks: {}, coverage: {}, automation: {}, exceptions: [] }];
           return [key, { meta: {}, games: [] }];
         }
       }
@@ -1251,6 +1255,17 @@
     const registry = state.data?.intelligence?.validation_registry || {};
     const gateSummary = registry.gate_summary || {};
     const factors = registry.factors || [];
+    const challenger = state.data?.challenger || {};
+    const selectedCandidate = challenger.selected_candidate || {};
+    const challengerPromotion = challenger.promotion || {};
+    const challengerChecks = challengerPromotion.checks || {};
+    const challengerValidation = challenger.post_selection_comparison?.validation_2025 || {};
+    const challengerAudit = challenger.post_selection_comparison?.audit_2026 || {};
+    const readiness = state.data?.readiness || {};
+    const readinessChecks = readiness.checks || {};
+    const readinessCoverage = readiness.coverage || {};
+    const readinessPassed = Object.values(readinessChecks).filter(Boolean).length;
+    const readinessTotal = Object.keys(readinessChecks).length;
     const activeFactors = factors.filter(row => ["active", "active_prior"].includes(row.status)).length;
     const researchFactors = factors.filter(row => ["research_only", "evaluation_only"].includes(row.status)).length;
     const withheldFactors = factors.filter(row => ["withheld", "unavailable"].includes(row.status)).length;
@@ -1260,6 +1275,28 @@
       <h1 class="page-title">CBB Model Tracking &amp; Validation Center</h1>
       <p class="page-subtitle">Frozen prospective decisions and strict historical walk-forward evaluation. THI grades every qualified signal at its published line, then measures closing-line value separately.</p>
       <div class="cbb-research-banner"><strong>Prospective ledger</strong><span>${escapeHtml(prospective.meta?.grading_policy || "The first coordinated refresh will initialize the frozen 2027 tracking ledger.")}</span></div>
+      <section class="cbb-operations-grid" aria-label="Game-day operations and challenger status">
+        <article class="cbb-panel cbb-operations-card ${readiness.meta?.status === "ready" ? "is-ready" : "needs-attention"}">
+          <div class="cbb-label">Game-day readiness</div>
+          <div class="cbb-operations-heading"><strong>${readinessTotal ? `${readinessPassed} / ${readinessTotal} checks` : "Awaiting refresh"}</strong><span>${escapeHtml(humanize(readiness.meta?.status || "pending"))}</span></div>
+          <p>Frozen projections survive through final status, closing lines stay separate, and final scores grade the original decision line.</p>
+          <div class="cbb-operations-stats"><span>${integer(readinessCoverage.scheduled)} scheduled</span><span>${integer(readinessCoverage.final)} finals</span><span>${integer(readinessCoverage.finals_with_closing_market)} closes captured</span></div>
+        </article>
+        <article class="cbb-panel cbb-operations-card ${challengerPromotion.recommended ? "is-ready" : "is-research"}">
+          <div class="cbb-label">Model v0.2 challenger lab</div>
+          <div class="cbb-operations-heading"><strong>${escapeHtml(humanize(selectedCandidate.name || "awaiting refresh"))}</strong><span>${challengerPromotion.recommended ? "Promotion candidate" : "No promotion"}</span></div>
+          <p>${challengerPromotion.recommended ? "The challenger cleared every preregistered gate and is eligible for engineering review." : "The published model remains unchanged because the challenger did not clear every preregistered gate."}</p>
+          <div class="cbb-operations-stats"><span>${number(challenger.inner_fold_mae_improvement,4,true)} inner-fold MAE</span><span>${number(challengerValidation.challenger?.margin_mae,3)} 2025 MAE</span><span>${number(challengerAudit.challenger?.margin_mae,3)} 2026 audit MAE</span></div>
+        </article>
+      </section>
+      <section class="cbb-section">
+        <div class="cbb-section-head"><div><div class="cbb-label">Operational safeguards</div><h2 class="cbb-section-title">Game-day data lifecycle</h2></div><div class="cbb-section-note">The automated refresh audits these rules on every coordinated release.</div></div>
+        <div class="cbb-panel cbb-gate-list">${Object.entries(readinessChecks).map(([key, pass]) => `<div class="cbb-gate-item ${pass ? "pass" : "fail"}"><span class="cbb-gate-icon">${pass ? "✓" : "×"}</span><span>${escapeHtml(humanize(key))}</span></div>`).join("") || `<div class="cbb-empty">Readiness checks will populate on the next coordinated refresh.</div>`}</div>
+      </section>
+      <section class="cbb-section">
+        <div class="cbb-section-head"><div><div class="cbb-label">Leakage-safe challenger research</div><h2 class="cbb-section-title">Model v0.2 promotion decision</h2></div><div class="cbb-section-note">Candidate selection uses only 2022–24 inner folds. The 2025 validation and 2026 audit cannot choose the winner.</div></div>
+        <div class="cbb-panel cbb-gate-list">${Object.entries(challengerChecks).map(([key, pass]) => `<div class="cbb-gate-item ${pass ? "pass" : "fail"}"><span class="cbb-gate-icon">${pass ? "✓" : "×"}</span><span>${escapeHtml(humanize(key))}</span></div>`).join("") || `<div class="cbb-empty">Challenger results will populate on the next coordinated refresh.</div>`}</div>
+      </section>
       <div class="cbb-validation-status-grid">
         ${modelCard("Promotion gate", "Checks passed", `${integer(gateSummary.passed)} / ${integer(gateSummary.total)}`, gateSummary.eligible_for_public_projection_engine ? "Full public engine is eligible" : "Research controls remain active")}
         ${modelCard("Historical evidence", "Validation sample", `${integer(validation.games)} games`, "2025 held outside model fitting")}
