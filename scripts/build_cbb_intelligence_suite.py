@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "thi-cbb-intelligence-suite-v1.1"
+VERSION = "thi-cbb-intelligence-suite-v1.2"
 
 def num(value: Any) -> float | None:
     try:
@@ -24,9 +24,11 @@ def national_hca(model: dict[str, Any]) -> float | None:
     if "home_court" not in names or len(coefs) != len(names) + 1: return None
     index = names.index("home_court")
     scale = num((margin.get("scales") or {}).get("home_court")) or 1.0
-    mean = num((margin.get("means") or {}).get("home_court")) or 0.0
     coefficient = num(coefs[index + 1])
-    return round(coefficient * (1.0 - mean) / scale, 2) if coefficient is not None else None
+    # Report the counterfactual change from a neutral floor (0) to campus (1).
+    # The model standardizes its inputs, so the intercept/mean cancels when the
+    # two predictions are differenced and the effect is coefficient / scale.
+    return round(coefficient / scale, 2) if coefficient is not None else None
 
 def instant(value: Any) -> datetime | None:
     try:
@@ -212,6 +214,28 @@ def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[
             "rotation": rotation, "schedule_window": schedule,
             "recent_games": sorted(recent_by_team.get(team_id, []), key=lambda row: str(row.get("start_date") or ""), reverse=True)[:10],
         })
+    gate = model.get("promotion_gate") or {}
+    gate_checks = gate.get("checks") or {}
+    validation_registry = {
+        "gate_summary": {
+            "eligible_for_public_projection_engine": bool(gate.get("eligible_for_public_projection_engine")),
+            "passed": sum(bool(value) for value in gate_checks.values()),
+            "total": len(gate_checks),
+            "checks": gate_checks,
+        },
+        "factors": [
+            {"factor": "Opponent-adjusted team efficiency", "status": "active", "model_usage": "projection_input", "evidence": "Chronological team state built from possessions completed before tipoff."},
+            {"factor": "Tempo and Four Factors", "status": "active", "model_usage": "projection_input", "evidence": "Regressed preseason priors transition into opponent-adjusted current-season observations."},
+            {"factor": "National home-court effect", "status": "active", "model_usage": "projection_input", "evidence": f"Walk-forward model coefficient; {hca:.2f} points on campus and zero at neutral sites."},
+            {"factor": "Roster continuity and personnel", "status": "active_prior", "model_usage": "preseason_prior", "evidence": "Verified returners, recruiting and matched transfer production shape the opening prior."},
+            {"factor": "Market disagreement", "status": "evaluation_only", "model_usage": "signal_and_accountability", "evidence": "Lines define signals, ATS grades and CLV; market prices do not fit the team-strength model."},
+            {"factor": "Rest and situational flags", "status": "research_only", "model_usage": "display_only", "evidence": "Back-to-back, short-rest, lookahead, letdown and bounce-back states require incremental walk-forward validation."},
+            {"factor": "Totals signal", "status": "withheld", "model_usage": "no_public_play", "evidence": "Independent totals promotion checks have not cleared."},
+            {"factor": "Injuries and availability", "status": "unavailable", "model_usage": "no_adjustment", "evidence": "Requires a verified timestamped availability feed and auditable player-value translation."},
+            {"factor": "Travel mileage and time zones", "status": "unavailable", "model_usage": "no_adjustment", "evidence": "Requires verified team origin, venue coordinates and chronological travel data."},
+            {"factor": "Team-specific venue value", "status": "withheld", "model_usage": "national_hca_only", "evidence": "No team venue effect publishes until its sample and stability gates clear."},
+        ],
+    }
     return {
         "meta": {
             "version": VERSION, "season": priors.get("meta", {}).get("season"), "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
@@ -224,6 +248,7 @@ def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[
         },
         "home_court": {"national_points": hca, "team_specific_status": "withheld_until_qualified_sample", "neutral_site_points": 0.0},
         "player_projections": player_rows, "team_rotations": rotations, "game_context": game_context,
+        "validation_registry": validation_registry,
         "market_board": market_rows, "market_summary": tracking.get("summary") or {}, "team_dossiers": dossiers,
     }
 

@@ -163,7 +163,7 @@
           if (key === "tracking") return [key, { meta: {}, summary: {}, spread_decisions: [], total_decisions: [] }];
           if (key === "bracketology") return [key, { meta: {}, field: [], regions: {}, first_four: [], bubble: {}, conference_bids: [] }];
           if (key === "playStyle") return [key, { meta: {}, teams: [], games: [] }];
-          if (key === "intelligence") return [key, { meta: {}, player_projections: [], team_dossiers: [], game_context: [], market_board: [] }];
+          if (key === "intelligence") return [key, { meta: {}, player_projections: [], team_dossiers: [], game_context: [], market_board: [], validation_registry: { gate_summary: {}, factors: [] } }];
           return [key, { meta: {}, games: [] }];
         }
       }
@@ -532,6 +532,7 @@
     const market = game.market || {};
     const detail = document.getElementById("cbb-team-detail");
     const panel = detail.querySelector(".cbb-detail-panel");
+    detail.classList.remove("is-team-page");
     detail.classList.add("is-game-page");
     const start = new Date(game.start_date);
     const date = Number.isNaN(start.getTime()) ? "Date TBD" : new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", hour: game.start_time_tbd ? undefined : "numeric", minute: game.start_time_tbd ? undefined : "2-digit", timeZone: "America/New_York", timeZoneName: game.start_time_tbd ? undefined : "short" }).format(start);
@@ -832,7 +833,7 @@
     const player = state.playerData?.players?.find(row => row.player_season_id === playerId);
     if (!player) return;
     const detail = document.getElementById("cbb-team-detail");
-    detail.classList.remove("is-game-page");
+    detail.classList.remove("is-game-page", "is-team-page");
     const panel = detail.querySelector(".cbb-detail-panel");
     const score = player.research_scores || {};
     const metrics = player.metrics || {};
@@ -1115,9 +1116,10 @@
     if (!prior) return;
     const detail = document.getElementById("cbb-team-detail");
     detail.classList.remove("is-game-page");
+    detail.classList.add("is-team-page");
     const panel = detail.querySelector(".cbb-detail-panel");
     if (!state.playerData) {
-      panel.innerHTML = `<button class="cbb-detail-close" type="button" data-cbb-close>Close</button><div class="cbb-kicker">THI CBB team profile</div><h2 class="cbb-detail-title" id="cbb-detail-title">${escapeHtml(profile?.display_name || prior.team)}</h2><div class="cbb-readiness-banner"><strong>Loading verified roster…</strong></div>`;
+      panel.innerHTML = `<button class="cbb-detail-close cbb-game-back" type="button" data-cbb-close>← Back to teams</button><div class="cbb-kicker">THI CBB team profile</div><h2 class="cbb-detail-title" id="cbb-detail-title">${escapeHtml(profile?.display_name || prior.team)}</h2><div class="cbb-readiness-banner"><strong>Loading verified roster…</strong></div>`;
       detail.classList.add("is-open");
       detail.setAttribute("aria-hidden", "false");
       document.body.style.overflow = "hidden";
@@ -1131,7 +1133,7 @@
     const dossier = state.data?.intelligence?.team_dossiers?.find(row => Number(row.team_id) === Number(teamId));
     const homeCourt = state.data?.intelligence?.home_court || {};
     panel.innerHTML = `
-      <button class="cbb-detail-close" type="button" data-cbb-close>Close</button>
+      <button class="cbb-detail-close cbb-game-back" type="button" data-cbb-close>← Back to teams</button>
       <div class="cbb-kicker">THI CBB team profile</div>
       <div class="cbb-detail-team-title">${teamLogo({team_id:prior.team_id,team:prior.team},"large")}<h2 class="cbb-detail-title" id="cbb-detail-title">${escapeHtml(profile?.display_name || prior.team)}</h2></div>
       <div class="cbb-detail-sub">${escapeHtml(prior.conference?.name || "Independent")} · 2027 THI team dossier</div>
@@ -1143,7 +1145,11 @@
         ${detailStat("Roster quality", dossier?.roster_quality?.top_eight_average == null ? "Awaiting ratings" : `${number(dossier.roster_quality.top_eight_average,1)} · #${integer(dossier.roster_quality.rank)}`)}
         ${detailStat("Expected wins", `${number(dossier?.forecast?.expected_wins_in_window,1)} / ${integer(dossier?.forecast?.games_in_window)}`)}
       </div>
-      <section class="cbb-detail-section"><h3>Personnel context</h3>
+      <nav class="cbb-dossier-jump-nav" aria-label="Team dossier sections">
+        <a href="#cbb-dossier-ratings">Ratings</a><a href="#cbb-dossier-personnel">Personnel</a><a href="#cbb-dossier-schedule">Schedule</a><a href="#cbb-dossier-lineups">Lineups</a><a href="#cbb-dossier-methodology">Methodology</a>
+      </nav>
+      <div class="cbb-team-dossier-grid">
+      <section class="cbb-detail-section" id="cbb-dossier-personnel"><h3>Personnel context</h3>
         ${detailRow("Recruiting team rank", recruiting.team_rank ? `#${integer(recruiting.team_rank)}` : "—")}
         ${detailRow("Recruiting team rating", number(recruiting.team_rating,2))}
         ${detailRow("Incoming transfers", integer(transfers.incoming_count))}
@@ -1151,7 +1157,7 @@
         ${detailRow("Incoming prior minutes", integer(transfers.prior_minutes))}
         ${detailRow("Incoming prior points", integer(transfers.prior_points))}
       </section>
-      <section class="cbb-detail-section"><h3>Rating provenance</h3>
+      <section class="cbb-detail-section" id="cbb-dossier-ratings"><h3>Rating provenance</h3>
         ${detailRow("Source season", integer(preseason.source_season || 2026))}
         ${detailRow("2026 source net", number(preseason.adjusted?.net,1,true))}
         ${detailRow("Current rating state", "Preseason prior")}
@@ -1164,14 +1170,14 @@
         <div class="cbb-model-sub">THI uses the walk-forward model's learned national home-court effect. A team-specific venue value will appear only after its historical sample clears stability checks.</div>
         <div class="cbb-roster-list">${dossier?.schedule_window?.length ? dossier.schedule_window.slice(0,6).map(game => `<div class="cbb-detail-row"><span>${escapeHtml(humanize(game.site))} vs ${escapeHtml(game.opponent)}</span><strong>${number(game.projected_margin,1,true)} · ${pct(game.win_probability)}</strong></div>`).join("") : `<div class="cbb-empty">No games in the current projection window.</div>`}</div>
       </section>
-      <section class="cbb-detail-section"><h3>Schedule and résumé outlook</h3>
+      <section class="cbb-detail-section" id="cbb-dossier-schedule"><h3>Schedule and résumé outlook</h3>
         ${detailRow("Average opponent THI net", number(dossier?.schedule_strength?.average_opponent_thi_net,2,true))}
         ${detailRow("Nonconference opponent THI net", number(dossier?.schedule_strength?.nonconference_average_opponent_thi_net,2,true))}
         ${detailRow("Games in projection window", integer(dossier?.schedule_strength?.scheduled_games))}
         ${detailRow("Expected wins in window", number(dossier?.forecast?.expected_wins_in_window,2))}
         <div class="cbb-model-sub">Schedule strength uses THI opponent ratings from the published schedule window. Résumé outcomes and quadrant-style detail will phase in with current-season results.</div>
       </section>
-      <section class="cbb-detail-section"><h3>Projected core lineup</h3>
+      <section class="cbb-detail-section" id="cbb-dossier-lineups"><h3>Projected core lineup</h3>
         <div class="cbb-model-sub">This is a projected five-player rotation core based on minutes and player-impact priors. It is not represented as an observed lineup until possession-level lineup data exists.</div>
         <div class="cbb-lineup-list">${dossier?.projected_core_lineup?.players?.length ? dossier.projected_core_lineup.players.map((player,index) => `<div class="cbb-lineup-player"><strong>${index+1}</strong><span>${escapeHtml(player.name)}</span><small>${escapeHtml(player.position || "—")} · ${number(player.projected_minutes,1)} min · ${number(player.thi_impact,1)} impact</small></div>`).join("") : `<div class="cbb-empty">Projected lineup unavailable.</div>`}</div>
         ${detailRow("Combined projected impact", number(dossier?.projected_core_lineup?.combined_impact,1))}
@@ -1191,11 +1197,12 @@
       <section class="cbb-detail-section"><h3>Recent games</h3>
         <div class="cbb-roster-list">${dossier?.recent_games?.length ? dossier.recent_games.map(game => `<div class="cbb-detail-row"><span>${escapeHtml(String(game.start_date || "").slice(0,10))} · ${escapeHtml(humanize(game.site))} vs ${escapeHtml(game.opponent)}</span><strong>${integer(game.team_score)}–${integer(game.opponent_score)}</strong></div>`).join("") : `<div class="cbb-empty">No current-season finals yet.</div>`}</div>
       </section>
-      <section class="cbb-detail-section cbb-methodology-panel"><h3>How THI builds this rating</h3>
+      <section class="cbb-detail-section cbb-methodology-panel cbb-dossier-wide" id="cbb-dossier-methodology"><h3>How THI builds this rating</h3>
         <div class="cbb-methodology-flow"><span>Regressed prior</span><b>→</b><span>Roster + personnel</span><b>→</b><span>Opponent-adjusted possessions</span><b>→</b><span>Four Factors + pace</span><b>→</b><span>Walk-forward update</span></div>
         <p>${escapeHtml(state.data?.intelligence?.meta?.methodology || "THI combines predictive team strength, possession efficiency and verified roster context in a chronological walk-forward model.")}</p>
         <div class="cbb-model-sub">Concepts are informed by leading public basketball analytics, while THI publishes its own calculations, testing record and data-coverage limits.</div>
       </section>
+      </div>
     `;
     detail.classList.add("is-open");
     detail.setAttribute("aria-hidden", "false");
@@ -1207,7 +1214,7 @@
   function closeTeamDetail() {
     const detail = document.getElementById("cbb-team-detail");
     if (!detail?.classList.contains("is-open")) return;
-    detail.classList.remove("is-open", "is-game-page");
+    detail.classList.remove("is-open", "is-game-page", "is-team-page");
     detail.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
   }
@@ -1241,12 +1248,29 @@
     const calibration = test.win_probability_calibration || [];
     const seasons = card.evaluation?.by_season || {};
     const errorProfile = test.error_profile || {};
+    const registry = state.data?.intelligence?.validation_registry || {};
+    const gateSummary = registry.gate_summary || {};
+    const factors = registry.factors || [];
+    const activeFactors = factors.filter(row => ["active", "active_prior"].includes(row.status)).length;
+    const researchFactors = factors.filter(row => ["research_only", "evaluation_only"].includes(row.status)).length;
+    const withheldFactors = factors.filter(row => ["withheld", "unavailable"].includes(row.status)).length;
     const view = document.getElementById("view-cbb-tracking");
     view.innerHTML = `
       <div class="cbb-kicker">Transparent research and accountability</div>
-      <h1 class="page-title">CBB Model Tracking</h1>
+      <h1 class="page-title">CBB Model Tracking &amp; Validation Center</h1>
       <p class="page-subtitle">Frozen prospective decisions and strict historical walk-forward evaluation. THI grades every qualified signal at its published line, then measures closing-line value separately.</p>
       <div class="cbb-research-banner"><strong>Prospective ledger</strong><span>${escapeHtml(prospective.meta?.grading_policy || "The first coordinated refresh will initialize the frozen 2027 tracking ledger.")}</span></div>
+      <div class="cbb-validation-status-grid">
+        ${modelCard("Promotion gate", "Checks passed", `${integer(gateSummary.passed)} / ${integer(gateSummary.total)}`, gateSummary.eligible_for_public_projection_engine ? "Full public engine is eligible" : "Research controls remain active")}
+        ${modelCard("Historical evidence", "Validation sample", `${integer(validation.games)} games`, "2025 held outside model fitting")}
+        ${modelCard("Sealed evaluation", "Out-of-time sample", `${integer(test.games)} games`, "2026 used once for final generalization audit")}
+        ${modelCard("Factor inventory", "Projection inputs", `${integer(activeFactors)} active`, `${integer(researchFactors)} research · ${integer(withheldFactors)} withheld/unavailable`)}
+      </div>
+
+      <section class="cbb-section" id="cbb-factor-registry">
+        <div class="cbb-section-head"><div><div class="cbb-label">Auditable model controls</div><h2 class="cbb-section-title">Factor registry</h2></div><div class="cbb-section-note">Every proposed input has one declared state. Only active factors may change a published projection.</div></div>
+        <div class="cbb-factor-registry">${factors.map(factor => `<article class="cbb-factor-card cbb-factor-${escapeHtml(factor.status)}"><div><strong>${escapeHtml(factor.factor)}</strong><span>${escapeHtml(humanize(factor.status))}</span></div><p>${escapeHtml(factor.evidence)}</p><small>Model use · ${escapeHtml(humanize(factor.model_usage))}</small></article>`).join("") || `<div class="cbb-empty">Factor registry will populate on the next coordinated refresh.</div>`}</div>
+      </section>
       <div class="cbb-model-grid cbb-ytd-grid">
         ${modelCard("2027 spread record", "Qualified decisions", spreadYtd.games ? `${integer(spreadYtd.wins)}-${integer(spreadYtd.losses)}-${integer(spreadYtd.pushes)}` : "Awaiting first play", spreadYtd.games ? `${pct(spreadYtd.hit_rate)} ATS across ${integer(spreadYtd.games)} signals` : "No signal is counted before it qualifies")}
         ${modelCard("Closing-line value", "Average CLV", spreadYtd.average_clv == null ? "—" : number(spreadYtd.average_clv,2,true), spreadYtd.closing_line_games ? `${pct(spreadYtd.beat_close_pct)} beat close · ${integer(spreadYtd.closing_line_games)} closing lines` : "Begins when closing lines are captured")}
@@ -1262,7 +1286,7 @@
         ${modelCard("2025 validation", "Margin MAE", number(validation.margin_mae,3), `${integer(validation.games)} games · ${pct(validation.winner_accuracy)} winner accuracy`)}
         ${modelCard("2026 out-of-time test", "Margin MAE", number(test.margin_mae,3), `${integer(test.games)} games · ${pct(test.winner_accuracy)} winner accuracy`)}
         ${modelCard("2026 market comparison", "Margin MAE gap", number(Number(test.margin_mae) - Number(test.market_margin_mae),3,true), `THI ${number(test.margin_mae,3)} · market ${number(test.market_margin_mae,3)}`)}
-        ${modelCard("Activation state", "Public engine", "Withheld", "Research-only until every required promotion check passes")}
+        ${modelCard("Activation state", "Public engine", gateSummary.eligible_for_public_projection_engine ? "Eligible" : "Withheld", gateSummary.eligible_for_public_projection_engine ? "All required promotion checks passed" : "Research-only until every required promotion check passes")}
       </div>
 
       <section class="cbb-section">
