@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import statistics
 import tempfile
 from collections import Counter
 from datetime import datetime, timezone
@@ -28,6 +29,14 @@ def rating(row: dict[str, Any]) -> float:
         return -999.0
 
 
+def prior_rating(row: dict[str, Any]) -> float:
+    try:
+        value = float(row.get("prior_net"))
+        return value if math.isfinite(value) else -999.0
+    except (TypeError, ValueError):
+        return -999.0
+
+
 def conference_key(row: dict[str, Any]) -> str:
     conference = row.get("conference") or {}
     return str(conference.get("id") or conference.get("abbreviation") or conference.get("name") or "Independent")
@@ -43,8 +52,10 @@ def team_row(row: dict[str, Any], bid_type: str) -> dict[str, Any]:
             "name": conference.get("name"),
             "abbreviation": conference.get("abbreviation") or conference.get("name") or "Independent",
         },
-        "prior_net": round(rating(row), 3),
+        "prior_net": round(prior_rating(row), 3),
         "strength_score": row.get("strength_score"),
+        "roster_score": row.get("roster_score"),
+        "roster_adjustment": row.get("roster_adjustment"),
         "resume_score": row.get("resume_score"),
         "selection_score": round(rating(row), 3),
         "selection_state": row.get("selection_state", "strength_only"),
@@ -57,7 +68,7 @@ def team_row(row: dict[str, Any], bid_type: str) -> dict[str, Any]:
 
 
 def pair_four(rows: list[dict[str, Any]]) -> list[tuple[dict[str, Any], dict[str, Any]]]:
-    ordered = sorted(rows, key=lambda row: (-row["prior_net"], str(row["team"])))
+    ordered = sorted(rows, key=lambda row: (-row["selection_score"], str(row["team"])))
     return [(ordered[0], ordered[-1]), (ordered[1], ordered[-2])]
 
 
@@ -71,7 +82,7 @@ def assign_regions(
         order = REGIONS if seed % 2 else tuple(reversed(REGIONS))
         available.extend((seed, region) for region in order if (seed, region) not in reserved)
 
-    remaining = sorted(direct, key=lambda row: (-row["prior_net"], str(row["team"])))
+    remaining = sorted(direct, key=lambda row: (-row["selection_score"], str(row["team"])))
     if len(remaining) != len(available):
         raise RuntimeError(f"bracket slot mismatch: {len(remaining)} teams for {len(available)} slots")
 
@@ -108,20 +119,67 @@ def assign_regions(
     return regions
 
 
-def build_bracketology(priors_payload: dict[str, Any], profiles_payload: dict[str, Any] | None = None) -> dict[str, Any]:
+def roster_scores(players_payload: dict[str, Any] | None) -> tuple[dict[str, float], float, float]:
+    """Return top-eight active-roster rating averages and a national baseline.
+
+    Five rated players are required so a thin or partially matched roster cannot
+    receive a misleading boost. The adjustment remains modest and bounded; it
+    supplements the team prior rather than replacing it.
+    """
+    by_team: dict[str, list[float]] = {}
+    for player in (players_payload or {}).get("players") or []:
+        value = (player.get("research_scores") or {}).get("thi_player_rating")
+        try:
+            score = float(value)
+        except (TypeError, ValueError):
+            continue
+        if not math.isfinite(score):
+            continue
+        by_team.setdefault(str(player.get("team_id")), []).append(score)
+    scores = {
+        team_id: statistics.mean(sorted(values, reverse=True)[:8])
+        for team_id, values in by_team.items()
+        if len(values) >= 5
+    }
+    population = list(scores.values())
+    if len(population) < 32:
+        return {}, 0.0, 1.0
+    center = statistics.median(population)
+    spread = statistics.pstdev(population) or 1.0
+    return scores, center, spread
+
+
+def build_bracketology(
+    priors_payload: dict[str, Any],
+    profiles_payload: dict[str, Any] | None = None,
+    players_payload: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     model_version = priors_payload.get("meta", {}).get("model_version")
     if model_version != "thi-cbb-walk-forward-v0.7-research":
         raise RuntimeError("bracketology requires thi-cbb-walk-forward-v0.7-research priors")
     profiles = {str(row.get("team_id")): row for row in (profiles_payload or {}).get("teams") or []}
+    roster_by_team, roster_center, roster_spread = roster_scores(players_payload)
     source = []
     for original in priors_payload.get("teams") or []:
         row = dict(original)
-        strength = rating(row)
+        strength = prior_rating(row)
         record = (profiles.get(str(row.get("team_id"))) or {}).get("record") or {}
         games, wins = int(record.get("games") or 0), int(record.get("wins") or 0)
         weight = min(1.0, games / 12.0)
         resume = (wins / games - .5) * 16.0 if games else 0.0
-        row.update({"strength_score": round(strength,3), "resume_score": round(resume,3) if games else None, "selection_score": round(strength + weight * resume,3), "selection_state": "strength_plus_early_resume" if games else "strength_only"})
+        roster_score = roster_by_team.get(str(row.get("team_id")))
+        roster_adjustment = (
+            max(-3.0, min(3.0, ((roster_score - roster_center) / roster_spread) * 1.25))
+            if roster_score is not None else 0.0
+        )
+        row.update({
+            "strength_score": round(strength, 3),
+            "roster_score": round(roster_score, 3) if roster_score is not None else None,
+            "roster_adjustment": round(roster_adjustment, 3),
+            "resume_score": round(resume, 3) if games else None,
+            "selection_score": round(strength + roster_adjustment + weight * resume, 3),
+            "selection_state": "strength_roster_and_early_resume" if games else "strength_plus_roster",
+        })
         if rating(row) > -999: source.append(row)
     by_conference: dict[str, list[dict[str, Any]]] = {}
     for row in source:
@@ -141,14 +199,14 @@ def build_bracketology(priors_payload: dict[str, Any], profiles_payload: dict[st
 
     autos = [team_row(row, "automatic") for row in auto_source]
     at_larges = [team_row(row, "at_large") for row in selected_at_large]
-    field = sorted(autos + at_larges, key=lambda row: (-row["prior_net"], str(row["team"])))
+    field = sorted(autos + at_larges, key=lambda row: (-row["selection_score"], str(row["team"])))
     if len(field) != FIELD_SIZE:
         raise RuntimeError(f"expected {FIELD_SIZE} selected teams, found {len(field)}")
     for index, row in enumerate(field, start=1):
         row["overall_rank"] = index
 
-    auto_play_in = sorted(autos, key=lambda row: (row["prior_net"], str(row["team"])))[:4]
-    at_large_play_in = sorted(at_larges, key=lambda row: (row["prior_net"], str(row["team"])))[:4]
+    auto_play_in = sorted(autos, key=lambda row: (row["selection_score"], str(row["team"])))[:4]
+    at_large_play_in = sorted(at_larges, key=lambda row: (row["selection_score"], str(row["team"])))[:4]
     participant_ids = {str(row["team_id"]) for row in auto_play_in + at_large_play_in}
     direct = [row for row in field if str(row["team_id"]) not in participant_ids]
 
@@ -204,14 +262,14 @@ def build_bracketology(priors_payload: dict[str, Any], profiles_payload: dict[st
             "field_size": FIELD_SIZE,
             "automatic_bid_count": len(autos),
             "at_large_count": len(at_larges),
-            "methodology": "Selection score begins with THI predictive strength and gradually adds current win-loss resume evidence over the first 12 games. Conference leaders receive projected automatic bids; the strongest remaining selection scores receive at-large bids.",
+            "methodology": "Selection score begins with THI predictive team strength, adds a bounded active-roster quality adjustment from the top eight qualified player projections, and gradually adds current win-loss resume evidence over the first 12 games. Conference leaders receive projected automatic bids; the strongest remaining selection scores receive at-large bids.",
             "limitations": "Quadrant records and road/neutral resume detail remain withheld until opponent NET-style tiers have enough current-season evidence.",
         },
         "field": field,
         "first_four": first_four,
         "regions": regions,
         "bubble": {
-            "last_four_in": sorted(at_large_play_in, key=lambda row: (-row["prior_net"], str(row["team"]))),
+            "last_four_in": sorted(at_large_play_in, key=lambda row: (-row["selection_score"], str(row["team"]))),
             "first_four_out": [team_row(row, "out") for row in first_out_source],
             "next_four_out": [team_row(row, "out") for row in next_out_source],
         },
@@ -232,9 +290,14 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--priors", type=Path, default=ROOT / "data" / "cbb" / "model" / "current_priors.json")
     parser.add_argument("--profiles", type=Path, default=ROOT / "data" / "cbb" / "team_profiles.json")
+    parser.add_argument("--players", type=Path, default=ROOT / "data" / "cbb" / "player_ratings.json")
     parser.add_argument("--output", type=Path, default=ROOT / "data" / "cbb" / "bracketology.json")
     args = parser.parse_args()
-    payload = build_bracketology(json.loads(args.priors.read_text()), json.loads(args.profiles.read_text()) if args.profiles.exists() else None)
+    payload = build_bracketology(
+        json.loads(args.priors.read_text()),
+        json.loads(args.profiles.read_text()) if args.profiles.exists() else None,
+        json.loads(args.players.read_text()) if args.players.exists() else None,
+    )
     atomic_write(args.output, payload)
     print(f"{VERSION}: {len(payload['field'])} teams, {len(payload['conference_bids'])} conferences")
 

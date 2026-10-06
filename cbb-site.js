@@ -866,7 +866,7 @@
         ${statCard("Projected field", integer(meta.field_size), `${integer(meta.automatic_bid_count)} auto · ${integer(meta.at_large_count)} at-large`)}
         ${statCard("No. 1 overall", escapeHtml(field[0]?.team || "—"), `${number(field[0]?.prior_net,1,true)} THI net`)}
         ${statCard("At-large cut", Number.isFinite(atLargeCut) ? number(atLargeCut,1,true) : "—", "Lowest current selection score")}
-        ${statCard("Forecast state", field.some(team => team.selection_state === "strength_plus_early_resume") ? "Strength + résumé" : "Strength only", `2027 · ${escapeHtml(meta.version || "v0.2")}`)}
+        ${statCard("Forecast state", field.some(team => String(team.selection_state || "").includes("early_resume")) ? "Strength + roster + résumé" : "Strength + roster", `2027 · ${escapeHtml(meta.version || "v0.2")}`)}
       </div>
 
       <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Projected 64-team bracket</div><h2 class="cbb-section-title">Four regions</h2></div><div class="cbb-section-note">The slash identifies a First Four slot. Region placement uses an S-curve with conference separation where the field allows.</div></div>
@@ -902,7 +902,7 @@
   }
 
   function bubbleColumn(title, rows, firstFour = false) {
-    return `<article class="cbb-panel cbb-bubble-card"><h3>${escapeHtml(title)}</h3>${rows.map((team, index) => `<button type="button" class="cbb-bubble-team" data-bracket-team-id="${escapeHtml(team.team_id)}"><span><strong>${index + 1}</strong>${teamLogo(team,"tiny")}<b>${escapeHtml(team.team)}</b></span><small>${escapeHtml(team.conference?.abbreviation || "—")} · ${number(team.prior_net,1,true)}</small></button>`).join("")} ${firstFour ? `<div class="cbb-model-sub">These four teams occupy the two at-large First Four games.</div>` : ""}</article>`;
+    return `<article class="cbb-panel cbb-bubble-card"><h3>${escapeHtml(title)}</h3>${rows.map((team, index) => `<button type="button" class="cbb-bubble-team" data-bracket-team-id="${escapeHtml(team.team_id)}"><span><strong>${index + 1}</strong>${teamLogo(team,"tiny")}<b>${escapeHtml(team.team)}</b></span><small>${escapeHtml(team.conference?.abbreviation || "—")} · ${number(team.selection_score ?? team.prior_net,1,true)} selection</small></button>`).join("")} ${firstFour ? `<div class="cbb-model-sub">These four teams occupy the two at-large First Four games.</div>` : ""}</article>`;
   }
 
   function renderPortal() {

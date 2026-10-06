@@ -134,6 +134,8 @@ jobs:
           assert tracking["meta"]["projection_board_version"] == projections["meta"]["version"]
           assert bracket["meta"]["version"] == "thi-cbb-bracketology-v0.2"
           assert len(bracket["field"]) == 68
+          assert "active-roster quality" in bracket["meta"]["methodology"]
+          assert all("roster_adjustment" in row for row in bracket["field"])
           assert intelligence["meta"]["version"] == "thi-cbb-intelligence-suite-v1.0"
           assert len(intelligence["player_projections"]) >= 1500
           assert len(intelligence["team_dossiers"]) >= 300

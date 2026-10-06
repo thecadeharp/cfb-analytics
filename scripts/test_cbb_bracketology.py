@@ -44,6 +44,27 @@ class CbbBracketologyTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "32 conferences"):
             build_bracketology(priors(conferences=31))
 
+    def test_qualified_roster_quality_changes_selection_score_without_overwriting_prior(self):
+        payload = priors()
+        target = payload["teams"][-1]
+        players = {"players": []}
+        for team in payload["teams"]:
+            base = 50.0
+            if team["team_id"] == target["team_id"]:
+                base = 75.0
+            for number in range(8):
+                players["players"].append({
+                    "team_id": team["team_id"],
+                    "research_scores": {"thi_player_rating": base - number / 10},
+                })
+        result = build_bracketology(payload, players_payload=players)
+        rows = result["field"] + result["bubble"]["first_four_out"] + result["bubble"]["next_four_out"]
+        selected = next(row for row in rows if row["team_id"] == target["team_id"])
+        original = next(row for row in payload["teams"] if row["team_id"] == target["team_id"])
+        self.assertEqual(selected["prior_net"], original["prior_net"])
+        self.assertGreater(selected["roster_adjustment"], 0)
+        self.assertGreater(selected["selection_score"], selected["prior_net"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -33,6 +33,7 @@ jobs:
             scripts/build_projections.py \
             data/cbb/model/current_priors.json \
             data/cbb/model/model_card.json \
+            data/cbb/player_ratings.json \
             data/cbb/team_profiles.json \
             data/cbb/projection_board.json \
             > /tmp/cbb-bracketology-before.sha256
@@ -59,6 +60,7 @@ jobs:
           assert meta["version"] == "thi-cbb-bracketology-v0.2"
           assert meta["model_version"] == "thi-cbb-walk-forward-v0.7-research"
           assert meta["forecast_type"] == "strength_and_resume_forecast"
+          assert "active-roster quality" in meta["methodology"]
           assert len(payload["field"]) == 68
           assert sum(row["bid_type"] == "automatic" for row in payload["field"]) == 32
           assert sum(row["bid_type"] == "at_large" for row in payload["field"]) == 36
@@ -66,6 +68,7 @@ jobs:
           assert all(len(rows) == 16 for rows in payload["regions"].values())
           assert len(payload["bubble"]["first_four_out"]) == 4
           assert len(payload["bubble"]["next_four_out"]) == 4
+          assert all("roster_adjustment" in row for row in payload["field"])
           PY
 
       - name: Commit bracketology output only

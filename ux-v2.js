@@ -1036,6 +1036,7 @@
         </div>
         <div style="margin-top:10px;">
           <span class="result-badge ${atsResultClass(result.ats_result)}">${escapeHtml(atsResultLabel(result.ats_result))}</span>
+          <span class="result-badge ${atsResultClass(result.total_result)}">${escapeHtml(result.total_result ? totalResultLabel(result.total_result) : "TOTAL NOT GRADED")}</span>
         </div>
         <div class="final-result-grid">
           <div class="final-result-item">
@@ -1318,7 +1319,7 @@
         <td>
           <div class="line-primary">${frozenScore ? `${frozenScore.away}–${frozenScore.home}` : "—"}</div>
           <div class="line-secondary">Frozen projected score</div>
-          ${result.total_result ? `<span class="result-badge ${atsResultClass(result.total_result)}" style="margin-top:5px">${escapeHtml(totalResultLabel(result.total_result))}</span>` : ""}
+          <span class="result-badge ${atsResultClass(result.total_result)}" style="margin-top:5px">${escapeHtml(result.total_result ? totalResultLabel(result.total_result) : "TOTAL NOT GRADED")}</span>
         </td>
         <td class="disagreement">
           <span class="result-badge ${atsResultClass(result.ats_result)}">${escapeHtml(atsResultLabel(result.ats_result))}</span>
@@ -1633,6 +1634,11 @@
     installFilterControls();
     installTestingNotice();
     loadConditions();
+    // The final board needs the prospective settlement ledger on first paint.
+    // Waiting for a status-filter click lets the raw-score fallback label
+    // legitimately graded games as "FINAL · NOT GRADED" until the user
+    // changes tabs.
+    loadSettledResults();
     window.addEventListener("hammer:status-filter-changed", event => {
       if (event.detail?.status === "final") loadSettledResults();
     });
