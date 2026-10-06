@@ -163,7 +163,7 @@
           if (key === "tracking") return [key, { meta: {}, summary: {}, spread_decisions: [], total_decisions: [] }];
           if (key === "bracketology") return [key, { meta: {}, field: [], regions: {}, first_four: [], bubble: {}, conference_bids: [] }];
           if (key === "playStyle") return [key, { meta: {}, teams: [], games: [] }];
-          if (key === "intelligence") return [key, { meta: {}, player_projections: [], team_dossiers: [], market_board: [] }];
+          if (key === "intelligence") return [key, { meta: {}, player_projections: [], team_dossiers: [], game_context: [], market_board: [] }];
           return [key, { meta: {}, games: [] }];
         }
       }
@@ -501,6 +501,26 @@
     return `<article class="cbb-panel cbb-game-card" data-cbb-game-id="${escapeHtml(game.game_id)}" role="button" tabindex="0" aria-label="Open ${escapeHtml(game.away?.team)} at ${escapeHtml(game.home?.team)} matchup analysis"><div class="cbb-game-top"><span class="cbb-game-date">${escapeHtml(date)}</span><span class="cbb-chip">${escapeHtml(stateLabel)}</span></div><div class="cbb-matchup">${escapeHtml(game.away?.team)} <span>vs.</span> ${escapeHtml(game.home?.team)}</div><div class="cbb-projection-score"><strong>${number(projection.away_points,1)}–${number(projection.home_points,1)}</strong><span>${escapeHtml(projectedLine)} · ${pct(projection.home_win_probability)} home win</span></div><div class="cbb-projection-meta"><span>${number(projection.projected_possessions,1)} possessions</span><span>Projected total ${number(projection.total,1)} · totals signal withheld</span></div>${signal}<div class="cbb-game-meta">${escapeHtml(venue)} · ${escapeHtml(network)} · Open matchup analysis →</div></article>`;
   }
 
+  function compareClass(value, opponent, higherIsBetter = true) {
+    const a = Number(value), b = Number(opponent);
+    if (!Number.isFinite(a) || !Number.isFinite(b) || Math.abs(a-b) < .05) return "cbb-compare-even";
+    return ((a > b) === higherIsBetter) ? "cbb-compare-good" : "cbb-compare-bad";
+  }
+
+  function compareCell(value, opponent, higherIsBetter = true, digits = 1, suffix = "") {
+    return `<td class="cbb-number ${compareClass(value, opponent, higherIsBetter)}">${number(value,digits)}${suffix}</td>`;
+  }
+
+  function contextFlags(teamContext) {
+    const labels = {
+      back_to_back: "Back-to-back", short_rest: "Short rest", neutral_site: "Neutral site",
+      conference_game: "Conference game", lookahead_spot: "Lookahead watch",
+      letdown_watch: "Letdown watch", bounce_back_watch: "Bounce-back watch"
+    };
+    const flags = (teamContext?.flags || []).map(flag => labels[flag] || humanize(flag));
+    return flags.length ? flags.map(flag => `<span class="cbb-context-flag">${escapeHtml(flag)}</span>`).join("") : `<span class="cbb-context-clear">No schedule flag</span>`;
+  }
+
   function openGameDetail(gameId) {
     const game = state.data?.projectionBoard?.games?.find(row => String(row.game_id) === String(gameId));
     if (!game?.projection) return;
@@ -512,6 +532,7 @@
     const market = game.market || {};
     const detail = document.getElementById("cbb-team-detail");
     const panel = detail.querySelector(".cbb-detail-panel");
+    detail.classList.add("is-game-page");
     const start = new Date(game.start_date);
     const date = Number.isNaN(start.getTime()) ? "Date TBD" : new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", hour: game.start_time_tbd ? undefined : "numeric", minute: game.start_time_tbd ? undefined : "2-digit", timeZone: "America/New_York", timeZoneName: game.start_time_tbd ? undefined : "short" }).format(start);
     const stateLabel = modelInputLabel(game);
@@ -522,11 +543,14 @@
     const advantages = matchup?.factor_advantages || [];
     const homeStyle = matchup?.shot_style?.home || {};
     const awayStyle = matchup?.shot_style?.away || {};
+    const situational = state.data?.intelligence?.game_context?.find(row => String(row.game_id) === String(gameId)) || {};
+    const awaySituation = situational.teams?.away || {};
+    const homeSituation = situational.teams?.home || {};
     const styleCell = value => value == null ? "Coverage unavailable" : pct(value);
     panel.innerHTML = `
-      <button class="cbb-detail-close" type="button" data-cbb-close>Close</button>
+      <button class="cbb-detail-close cbb-game-back" type="button" data-cbb-close>← Back to projections</button>
       <div class="cbb-kicker">THI CBB matchup analysis</div>
-      <h2 class="cbb-detail-title" id="cbb-detail-title">${escapeHtml(game.away?.team)} at ${escapeHtml(game.home?.team)}</h2>
+      <div class="cbb-matchup-page-title"><div>${teamLogo(game.away,"large")}<span>${escapeHtml(game.away?.team)}</span></div><b>at</b><div>${teamLogo(game.home,"large")}<span>${escapeHtml(game.home?.team)}</span></div></div>
       <div class="cbb-detail-sub">${escapeHtml(date)} · ${escapeHtml(game.venue?.name || (game.neutral_site ? "Neutral site" : "Venue TBD"))} · ${escapeHtml(game.broadcasts?.map(item => item.network || item).filter(Boolean).join(", ") || "TV TBD")}</div>
       <div class="cbb-detail-grid">
         ${detailStat("Projected score", `${number(projection.away_points,1)}–${number(projection.home_points,1)}`)}
@@ -536,19 +560,32 @@
         ${detailStat("Projected total", number(projection.total,1))}
         ${detailStat("Model input", stateLabel)}
       </div>
+      <section class="cbb-detail-section cbb-situational-section"><h3>Schedule, venue and availability context</h3>
+        <div class="cbb-model-sub">These fields are shown separately from the published projection until each input clears historical out-of-sample testing.</div>
+        <div class="cbb-situation-grid">
+          <article><span>${escapeHtml(game.away?.team)}</span><strong>${awaySituation.rest_days == null ? "Rest unknown" : `${number(awaySituation.rest_days,1)} days rest`}</strong><div>${contextFlags(awaySituation)}</div><small>${awaySituation.next_opponent ? `Next: ${escapeHtml(awaySituation.next_opponent)} in ${number(awaySituation.next_game_days,1)} days` : "No next game in current window"}</small></article>
+          <article><span>Home-court input</span><strong>${situational.home_court_points == null ? "Awaiting estimate" : `${number(situational.home_court_points,2,true)} pts`}</strong><div>${game.neutral_site ? `<span class="cbb-context-clear">Neutral-site override</span>` : `<span class="cbb-context-flag">Learned national HCA</span>`}</div><small>Team-specific venue effects remain withheld pending a stable sample.</small></article>
+          <article><span>${escapeHtml(game.home?.team)}</span><strong>${homeSituation.rest_days == null ? "Rest unknown" : `${number(homeSituation.rest_days,1)} days rest`}</strong><div>${contextFlags(homeSituation)}</div><small>${homeSituation.next_opponent ? `Next: ${escapeHtml(homeSituation.next_opponent)} in ${number(homeSituation.next_game_days,1)} days` : "No next game in current window"}</small></article>
+          <article><span>Injuries and availability</span><strong>Not yet sourced</strong><div><span class="cbb-context-pending">No model adjustment</span></div><small>THI will only publish availability effects from a verified, timestamped feed.</small></article>
+          <article><span>Travel load</span><strong>Mileage pending</strong><div><span class="cbb-context-pending">No model adjustment</span></div><small>Requires verified team origin, venue coordinates and travel chronology.</small></article>
+          <article><span>Situational usage</span><strong>Research context</strong><div><span class="cbb-context-pending">Not priced into line</span></div><small>B2B, lookahead, letdown and bounce-back flags must pass validation first.</small></article>
+        </div>
+      </section>
+      <div class="cbb-matchup-brain-grid">
       <section class="cbb-detail-section"><h3>Team efficiency state</h3>
         <div class="cbb-panel cbb-table-wrap"><table class="cbb-table cbb-matchup-table"><thead><tr><th>Team</th><th>Adj offense</th><th>Adj defense</th><th>Tempo</th><th>Games</th><th>Source</th></tr></thead><tbody>
-          <tr><td class="cbb-team-name">${escapeHtml(game.away?.team)}</td><td class="cbb-number">${number(away.offense,2)}</td><td class="cbb-number">${number(away.defense,2)}</td><td class="cbb-number">${number(away.tempo,2)}</td><td class="cbb-number">${integer(away.games)}</td><td>${escapeHtml(humanize(away.rating_source || "unknown"))}</td></tr>
-          <tr><td class="cbb-team-name">${escapeHtml(game.home?.team)}</td><td class="cbb-number">${number(home.offense,2)}</td><td class="cbb-number">${number(home.defense,2)}</td><td class="cbb-number">${number(home.tempo,2)}</td><td class="cbb-number">${integer(home.games)}</td><td>${escapeHtml(humanize(home.rating_source || "unknown"))}</td></tr>
+          <tr><td class="cbb-team-name">${escapeHtml(game.away?.team)}</td>${compareCell(away.offense,home.offense,true,2)}${compareCell(away.defense,home.defense,false,2)}<td class="cbb-number cbb-compare-even">${number(away.tempo,2)}</td><td class="cbb-number">${integer(away.games)}</td><td>${escapeHtml(humanize(away.rating_source || "unknown"))}</td></tr>
+          <tr><td class="cbb-team-name">${escapeHtml(game.home?.team)}</td>${compareCell(home.offense,away.offense,true,2)}${compareCell(home.defense,away.defense,false,2)}<td class="cbb-number cbb-compare-even">${number(home.tempo,2)}</td><td class="cbb-number">${integer(home.games)}</td><td>${escapeHtml(humanize(home.rating_source || "unknown"))}</td></tr>
         </tbody></table></div>
       </section>
       <section class="cbb-detail-section"><h3>Opponent-adjusted Four Factors matchup</h3>
         <div class="cbb-model-sub">Expected rates combine each offense with the opposing defense. Turnover rate is lower-is-better for the offense; the other displayed rates are higher-is-better.</div>
         <div class="cbb-panel cbb-table-wrap"><table class="cbb-table cbb-matchup-table"><thead><tr><th>Team</th><th>Expected eFG%</th><th>Expected TO%</th><th>Expected OR%</th><th>Expected FT rate</th></tr></thead><tbody>
-          <tr><td class="cbb-team-name">${escapeHtml(game.away?.team)}</td><td class="cbb-number">${pct(factorMatchup.away?.effective_fg_pct)}</td><td class="cbb-number">${pct(factorMatchup.away?.turnover_pct)}</td><td class="cbb-number">${pct(factorMatchup.away?.offensive_rebound_pct)}</td><td class="cbb-number">${pct(factorMatchup.away?.free_throw_rate)}</td></tr>
-          <tr><td class="cbb-team-name">${escapeHtml(game.home?.team)}</td><td class="cbb-number">${pct(factorMatchup.home?.effective_fg_pct)}</td><td class="cbb-number">${pct(factorMatchup.home?.turnover_pct)}</td><td class="cbb-number">${pct(factorMatchup.home?.offensive_rebound_pct)}</td><td class="cbb-number">${pct(factorMatchup.home?.free_throw_rate)}</td></tr>
+          <tr><td class="cbb-team-name">${escapeHtml(game.away?.team)}</td>${compareCell(factorMatchup.away?.effective_fg_pct,factorMatchup.home?.effective_fg_pct,true,1,"%")}${compareCell(factorMatchup.away?.turnover_pct,factorMatchup.home?.turnover_pct,false,1,"%")}${compareCell(factorMatchup.away?.offensive_rebound_pct,factorMatchup.home?.offensive_rebound_pct,true,1,"%")}${compareCell(factorMatchup.away?.free_throw_rate,factorMatchup.home?.free_throw_rate,true,1,"%")}</tr>
+          <tr><td class="cbb-team-name">${escapeHtml(game.home?.team)}</td>${compareCell(factorMatchup.home?.effective_fg_pct,factorMatchup.away?.effective_fg_pct,true,1,"%")}${compareCell(factorMatchup.home?.turnover_pct,factorMatchup.away?.turnover_pct,false,1,"%")}${compareCell(factorMatchup.home?.offensive_rebound_pct,factorMatchup.away?.offensive_rebound_pct,true,1,"%")}${compareCell(factorMatchup.home?.free_throw_rate,factorMatchup.away?.free_throw_rate,true,1,"%")}</tr>
         </tbody></table></div>
       </section>
+      </div>
       <section class="cbb-detail-section"><h3>Possession and matchup engine</h3>
         <div class="cbb-model-sub">This research layer explains the matchup; it does not feed the published spread or total until it clears historical out-of-sample validation.</div>
         ${matchup ? `
@@ -795,6 +832,7 @@
     const player = state.playerData?.players?.find(row => row.player_season_id === playerId);
     if (!player) return;
     const detail = document.getElementById("cbb-team-detail");
+    detail.classList.remove("is-game-page");
     const panel = detail.querySelector(".cbb-detail-panel");
     const score = player.research_scores || {};
     const metrics = player.metrics || {};
@@ -1076,6 +1114,7 @@
     const profile = state.data.profiles.teams.find(team => Number(team.team_id) === Number(teamId));
     if (!prior) return;
     const detail = document.getElementById("cbb-team-detail");
+    detail.classList.remove("is-game-page");
     const panel = detail.querySelector(".cbb-detail-panel");
     if (!state.playerData) {
       panel.innerHTML = `<button class="cbb-detail-close" type="button" data-cbb-close>Close</button><div class="cbb-kicker">THI CBB team profile</div><h2 class="cbb-detail-title" id="cbb-detail-title">${escapeHtml(profile?.display_name || prior.team)}</h2><div class="cbb-readiness-banner"><strong>Loading verified roster…</strong></div>`;
@@ -1095,11 +1134,14 @@
       <button class="cbb-detail-close" type="button" data-cbb-close>Close</button>
       <div class="cbb-kicker">THI CBB team profile</div>
       <div class="cbb-detail-team-title">${teamLogo({team_id:prior.team_id,team:prior.team},"large")}<h2 class="cbb-detail-title" id="cbb-detail-title">${escapeHtml(profile?.display_name || prior.team)}</h2></div>
-      <div class="cbb-detail-sub">${escapeHtml(prior.conference?.name || "Independent")} · 2027 preseason</div>
+      <div class="cbb-detail-sub">${escapeHtml(prior.conference?.name || "Independent")} · 2027 THI team dossier</div>
       <div class="cbb-detail-grid">
-        ${detailStat("Net efficiency", number(prior.prior_net,2,true))}
-        ${detailStat("Adjusted offense", number(prior.prior_offense,2))}
-        ${detailStat("Adjusted defense", number(prior.prior_defense,2))}
+        ${detailStat("Net efficiency", `${number(prior.prior_net,2,true)} · #${integer(dossier?.ratings?.ranks?.net)}`)}
+        ${detailStat("Adjusted offense", `${number(prior.prior_offense,2)} · #${integer(dossier?.ratings?.ranks?.offense)}`)}
+        ${detailStat("Adjusted defense", `${number(prior.prior_defense,2)} · #${integer(dossier?.ratings?.ranks?.defense)}`)}
+        ${detailStat("Adjusted tempo", `${number(prior.prior_tempo,1)} · #${integer(dossier?.ratings?.ranks?.tempo)}`)}
+        ${detailStat("Roster quality", dossier?.roster_quality?.top_eight_average == null ? "Awaiting ratings" : `${number(dossier.roster_quality.top_eight_average,1)} · #${integer(dossier.roster_quality.rank)}`)}
+        ${detailStat("Expected wins", `${number(dossier?.forecast?.expected_wins_in_window,1)} / ${integer(dossier?.forecast?.games_in_window)}`)}
       </div>
       <section class="cbb-detail-section"><h3>Personnel context</h3>
         ${detailRow("Recruiting team rank", recruiting.team_rank ? `#${integer(recruiting.team_rank)}` : "—")}
@@ -1122,6 +1164,18 @@
         <div class="cbb-model-sub">THI uses the walk-forward model's learned national home-court effect. A team-specific venue value will appear only after its historical sample clears stability checks.</div>
         <div class="cbb-roster-list">${dossier?.schedule_window?.length ? dossier.schedule_window.slice(0,6).map(game => `<div class="cbb-detail-row"><span>${escapeHtml(humanize(game.site))} vs ${escapeHtml(game.opponent)}</span><strong>${number(game.projected_margin,1,true)} · ${pct(game.win_probability)}</strong></div>`).join("") : `<div class="cbb-empty">No games in the current projection window.</div>`}</div>
       </section>
+      <section class="cbb-detail-section"><h3>Schedule and résumé outlook</h3>
+        ${detailRow("Average opponent THI net", number(dossier?.schedule_strength?.average_opponent_thi_net,2,true))}
+        ${detailRow("Nonconference opponent THI net", number(dossier?.schedule_strength?.nonconference_average_opponent_thi_net,2,true))}
+        ${detailRow("Games in projection window", integer(dossier?.schedule_strength?.scheduled_games))}
+        ${detailRow("Expected wins in window", number(dossier?.forecast?.expected_wins_in_window,2))}
+        <div class="cbb-model-sub">Schedule strength uses THI opponent ratings from the published schedule window. Résumé outcomes and quadrant-style detail will phase in with current-season results.</div>
+      </section>
+      <section class="cbb-detail-section"><h3>Projected core lineup</h3>
+        <div class="cbb-model-sub">This is a projected five-player rotation core based on minutes and player-impact priors. It is not represented as an observed lineup until possession-level lineup data exists.</div>
+        <div class="cbb-lineup-list">${dossier?.projected_core_lineup?.players?.length ? dossier.projected_core_lineup.players.map((player,index) => `<div class="cbb-lineup-player"><strong>${index+1}</strong><span>${escapeHtml(player.name)}</span><small>${escapeHtml(player.position || "—")} · ${number(player.projected_minutes,1)} min · ${number(player.thi_impact,1)} impact</small></div>`).join("") : `<div class="cbb-empty">Projected lineup unavailable.</div>`}</div>
+        ${detailRow("Combined projected impact", number(dossier?.projected_core_lineup?.combined_impact,1))}
+      </section>
       <section class="cbb-detail-section"><h3>Verified roster and rotation outlook</h3>
         <div class="cbb-model-sub">Every listed player is verified on the current roster. THI grades appear only when the player has a qualifying prior-season sample; freshmen and limited samples stay explicitly unrated.</div>
         <div class="cbb-roster-summary">${detailRow("Active players", roster ? integer(roster.player_count) : "Unavailable")}${detailRow("Qualified returning production", roster ? integer(roster.rated_player_count) : "—")}${detailRow("Returning minutes", roster?.returning_minutes_pct != null ? pct(roster.returning_minutes_pct) : "Unavailable")}${detailRow("Identified transfers", roster ? integer(roster.transfer_count) : "—")}</div>
@@ -1134,6 +1188,14 @@
           <tr><td>Defense allowed</td><td class="cbb-number">${pct(factors.defense?.effective_fg_pct)}</td><td class="cbb-number">${pct(factors.defense?.turnover_pct)}</td><td class="cbb-number">${pct(factors.defense?.offensive_rebound_pct)}</td><td class="cbb-number">${pct(factors.defense?.free_throw_rate)}</td></tr>
         </tbody></table></div>
       </section>
+      <section class="cbb-detail-section"><h3>Recent games</h3>
+        <div class="cbb-roster-list">${dossier?.recent_games?.length ? dossier.recent_games.map(game => `<div class="cbb-detail-row"><span>${escapeHtml(String(game.start_date || "").slice(0,10))} · ${escapeHtml(humanize(game.site))} vs ${escapeHtml(game.opponent)}</span><strong>${integer(game.team_score)}–${integer(game.opponent_score)}</strong></div>`).join("") : `<div class="cbb-empty">No current-season finals yet.</div>`}</div>
+      </section>
+      <section class="cbb-detail-section cbb-methodology-panel"><h3>How THI builds this rating</h3>
+        <div class="cbb-methodology-flow"><span>Regressed prior</span><b>→</b><span>Roster + personnel</span><b>→</b><span>Opponent-adjusted possessions</span><b>→</b><span>Four Factors + pace</span><b>→</b><span>Walk-forward update</span></div>
+        <p>${escapeHtml(state.data?.intelligence?.meta?.methodology || "THI combines predictive team strength, possession efficiency and verified roster context in a chronological walk-forward model.")}</p>
+        <div class="cbb-model-sub">Concepts are informed by leading public basketball analytics, while THI publishes its own calculations, testing record and data-coverage limits.</div>
+      </section>
     `;
     detail.classList.add("is-open");
     detail.setAttribute("aria-hidden", "false");
@@ -1145,7 +1207,7 @@
   function closeTeamDetail() {
     const detail = document.getElementById("cbb-team-detail");
     if (!detail?.classList.contains("is-open")) return;
-    detail.classList.remove("is-open");
+    detail.classList.remove("is-open", "is-game-page");
     detail.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
   }

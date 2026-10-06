@@ -3,14 +3,14 @@
 
 from __future__ import annotations
 
-import argparse, json, math, tempfile
+import argparse, json, math, statistics, tempfile
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "thi-cbb-intelligence-suite-v1.0"
+VERSION = "thi-cbb-intelligence-suite-v1.1"
 
 def num(value: Any) -> float | None:
     try:
@@ -27,6 +27,22 @@ def national_hca(model: dict[str, Any]) -> float | None:
     mean = num((margin.get("means") or {}).get("home_court")) or 0.0
     coefficient = num(coefs[index + 1])
     return round(coefficient * (1.0 - mean) / scale, 2) if coefficient is not None else None
+
+def instant(value: Any) -> datetime | None:
+    try:
+        return datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+
+def ranked(values: dict[str, float | None], reverse: bool = True) -> dict[str, int | None]:
+    ordered = sorted(
+        ((team_id, value) for team_id, value in values.items() if value is not None),
+        key=lambda item: ((-item[1]) if reverse else item[1], item[0]),
+    )
+    return {team_id: index for index, (team_id, _value) in enumerate(ordered, 1)}
+
+def game_status(game: dict[str, Any]) -> str:
+    return str(game.get("status") or "").lower().replace("_", "")
 
 def project_players(players: dict[str, Any], priors: dict[str, Any]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     team_tempo = {str(row.get("team_id")): num(row.get("prior_tempo")) or 68.0 for row in priors.get("teams") or []}
@@ -67,21 +83,149 @@ def project_players(players: dict[str, Any], priors: dict[str, Any]) -> tuple[li
 
 def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[str, Any], board: dict[str, Any], tracking: dict[str, Any], model: dict[str, Any]) -> dict[str, Any]:
     player_rows, rotations = project_players(players, priors)
-    projection_by_team: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    market_rows = []
-    for game in board.get("games") or []:
-        projection = game.get("projection") or {}
-        for side in ("home", "away"):
-            projection_by_team[str((game.get(side) or {}).get("team_id"))].append({"game_id": game.get("game_id"), "opponent": (game.get("away" if side == "home" else "home") or {}).get("team"), "site": "neutral" if game.get("neutral_site") else side, "projected_margin": (num(projection.get("home_margin")) or 0) * (1 if side == "home" else -1), "win_probability": projection.get("home_win_probability") if side == "home" else (round(100 - num(projection.get("home_win_probability")), 1) if num(projection.get("home_win_probability")) is not None else None)})
-        market = game.get("market") or {}
-        market_rows.append({"game_id": game.get("game_id"), "start_date": game.get("start_date"), "away_team": (game.get("away") or {}).get("team"), "home_team": (game.get("home") or {}).get("team"), "opening_spread": market.get("opening_home_spread"), "current_spread": market.get("consensus_home_spread"), "spread_move": market.get("spread_move"), "opening_total": market.get("opening_total"), "current_total": market.get("consensus_total"), "total_move": market.get("total_move"), "model_edge": projection.get("spread_edge"), "signal": projection.get("spread_signal_tier"), "confidence": projection.get("signal_confidence")})
+    prior_rows = priors.get("teams") or []
+    prior_map = {str(row.get("team_id")): row for row in prior_rows}
     profile_map = {str(row.get("team_id")): row for row in profiles.get("teams") or []}
     rotation_map = {str(row.get("team_id")): row for row in rotations}
+    hca = national_hca(model)
+
+    rating_ranks = {
+        "net": ranked({str(row.get("team_id")): num(row.get("prior_net")) for row in prior_rows}),
+        "offense": ranked({str(row.get("team_id")): num(row.get("prior_offense")) for row in prior_rows}),
+        "defense": ranked({str(row.get("team_id")): num(row.get("prior_defense")) for row in prior_rows}, reverse=False),
+        "tempo": ranked({str(row.get("team_id")): num(row.get("prior_tempo")) for row in prior_rows}),
+    }
+    roster_scores = {
+        team_id: round(statistics.mean([
+            num(row.get("thi_impact")) or 0 for row in rotation.get("players", [])[:8]
+        ]), 3)
+        for team_id, rotation in rotation_map.items()
+        if len(rotation.get("players", [])) >= 5
+    }
+    roster_ranks = ranked(roster_scores)
+
+    schedules: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    projection_by_team: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    market_rows, recent_by_team = [], defaultdict(list)
+    games = board.get("games") or []
+    for game in games:
+        projection = game.get("projection") or {}
+        start = instant(game.get("start_date"))
+        for side in ("home", "away"):
+            team = game.get(side) or {}
+            opponent_side = "away" if side == "home" else "home"
+            opponent = game.get(opponent_side) or {}
+            team_id = str(team.get("team_id"))
+            win_probability = num(projection.get("home_win_probability"))
+            if side == "away" and win_probability is not None:
+                win_probability = 100.0 - win_probability
+            item = {
+                "game_id": game.get("game_id"),
+                "start_date": game.get("start_date"),
+                "start": start,
+                "opponent_id": opponent.get("team_id"),
+                "opponent": opponent.get("team"),
+                "site": "neutral" if game.get("neutral_site") else side,
+                "conference_game": bool(game.get("conference_game")),
+                "projected_margin": round((num(projection.get("home_margin")) or 0) * (1 if side == "home" else -1), 2),
+                "win_probability": round(win_probability, 1) if win_probability is not None else None,
+                "status": game_status(game),
+                "team_score": team.get("score"),
+                "opponent_score": opponent.get("score"),
+            }
+            schedules[team_id].append(item)
+            projection_by_team[team_id].append({key: value for key, value in item.items() if key != "start"})
+            if item["status"] in {"final", "completed", "complete"}:
+                recent_by_team[team_id].append({key: value for key, value in item.items() if key != "start"})
+        market = game.get("market") or {}
+        market_rows.append({"game_id": game.get("game_id"), "start_date": game.get("start_date"), "away_team": (game.get("away") or {}).get("team"), "home_team": (game.get("home") or {}).get("team"), "opening_spread": market.get("opening_home_spread"), "current_spread": market.get("consensus_home_spread"), "spread_move": market.get("spread_move"), "opening_total": market.get("opening_total"), "current_total": market.get("consensus_total"), "total_move": market.get("total_move"), "model_edge": projection.get("spread_edge"), "signal": projection.get("spread_signal_tier"), "confidence": projection.get("signal_confidence")})
+
+    for rows in schedules.values():
+        rows.sort(key=lambda row: row.get("start") or datetime.max.replace(tzinfo=timezone.utc))
+
+    game_context = []
+    for game in games:
+        start = instant(game.get("start_date"))
+        context = {
+            "game_id": game.get("game_id"),
+            "model_usage": "research_context_only",
+            "home_court_points": 0.0 if game.get("neutral_site") else hca,
+            "home_court_state": "neutral_site" if game.get("neutral_site") else "national_learned_effect",
+            "availability": {"status": "not_sourced", "adjustment_points": None},
+            "travel": {"miles": None, "status": "awaiting_verified_team_origin_and_travel_feed"},
+            "teams": {},
+        }
+        for side in ("away", "home"):
+            team = game.get(side) or {}
+            team_id = str(team.get("team_id"))
+            rows = schedules.get(team_id, [])
+            index = next((i for i, row in enumerate(rows) if str(row.get("game_id")) == str(game.get("game_id"))), -1)
+            previous = rows[index - 1] if index > 0 else None
+            following = rows[index + 1] if index >= 0 and index + 1 < len(rows) else None
+            rest_days = round((start - previous["start"]).total_seconds() / 86400, 1) if start and previous and previous.get("start") else None
+            next_days = round((following["start"] - start).total_seconds() / 86400, 1) if start and following and following.get("start") else None
+            opponent_id = str((game.get("home" if side == "away" else "away") or {}).get("team_id"))
+            current_opponent = num((prior_map.get(opponent_id) or {}).get("prior_net"))
+            next_opponent = num((prior_map.get(str((following or {}).get("opponent_id"))) or {}).get("prior_net"))
+            previous_opponent = num((prior_map.get(str((previous or {}).get("opponent_id"))) or {}).get("prior_net"))
+            team_net = num((prior_map.get(team_id) or {}).get("prior_net"))
+            flags = []
+            if rest_days is not None and rest_days <= 1.5: flags.append("back_to_back")
+            elif rest_days is not None and rest_days <= 2.5: flags.append("short_rest")
+            if game.get("neutral_site"): flags.append("neutral_site")
+            if game.get("conference_game"): flags.append("conference_game")
+            if next_days is not None and next_days <= 5 and next_opponent is not None and current_opponent is not None and next_opponent >= current_opponent + 8: flags.append("lookahead_spot")
+            if previous and rest_days is not None and rest_days <= 5 and previous_opponent is not None and team_net is not None:
+                scored = num(previous.get("team_score")); allowed = num(previous.get("opponent_score"))
+                if scored is not None and allowed is not None and scored > allowed and previous_opponent >= team_net + 8: flags.append("letdown_watch")
+                if scored is not None and allowed is not None and scored < allowed and previous_opponent <= team_net - 8: flags.append("bounce_back_watch")
+            context["teams"][side] = {
+                "team_id": team.get("team_id"), "team": team.get("team"),
+                "rest_days": rest_days, "next_game_days": next_days,
+                "previous_opponent": (previous or {}).get("opponent"),
+                "next_opponent": (following or {}).get("opponent"),
+                "flags": flags,
+            }
+        game_context.append(context)
+
     dossiers = []
-    for prior in priors.get("teams") or []:
+    for prior in prior_rows:
         team_id = str(prior.get("team_id")); profile = profile_map.get(team_id, {})
-        dossiers.append({"team_id": prior.get("team_id"), "team": prior.get("team"), "conference": prior.get("conference"), "ratings": {"net": prior.get("prior_net"), "offense": prior.get("prior_offense"), "defense": prior.get("prior_defense"), "tempo": prior.get("prior_tempo")}, "record": profile.get("record"), "four_factors": prior.get("prior_four_factors"), "shot_profile": (profile.get("shot_profile") if int((profile.get("shot_profile") or {}).get("tracked_shots") or 0) >= 25 else (profile.get("preseason_prior") or {}).get("shot_profile")), "personnel": prior.get("personnel"), "continuity": {"returning_minutes_pct": prior.get("returning_minutes_pct"), "source": prior.get("continuity_source")}, "rotation": rotation_map.get(team_id, {}).get("players", []), "schedule_window": projection_by_team.get(team_id, [])})
-    return {"meta": {"version": VERSION, "season": priors.get("meta", {}).get("season"), "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"), "player_projection_policy": "Qualified prior production receives per-game counting-stat projections; unverified statistical profiles receive role and impact context only.", "home_court_policy": "National effect learned by the walk-forward model; neutral-site games receive zero. Team venue effects remain withheld pending sample thresholds.", "market_policy": "Market prices are comparison and accountability fields, never predictive features."}, "home_court": {"national_points": national_hca(model), "team_specific_status": "withheld_until_qualified_sample", "neutral_site_points": 0.0}, "player_projections": player_rows, "team_rotations": rotations, "market_board": market_rows, "market_summary": tracking.get("summary") or {}, "team_dossiers": dossiers}
+        rotation = rotation_map.get(team_id, {}).get("players", [])
+        schedule = projection_by_team.get(team_id, [])
+        opponent_nets = [num((prior_map.get(str(row.get("opponent_id"))) or {}).get("prior_net")) for row in schedule]
+        nc_opponent_nets = [value for row, value in zip(schedule, opponent_nets) if not row.get("conference_game") and value is not None]
+        opponent_nets = [value for value in opponent_nets if value is not None]
+        expected_wins = sum((num(row.get("win_probability")) or 0) / 100.0 for row in schedule)
+        ratings = {"net": prior.get("prior_net"), "offense": prior.get("prior_offense"), "defense": prior.get("prior_defense"), "tempo": prior.get("prior_tempo")}
+        ratings["ranks"] = {key: rating_ranks[key].get(team_id) for key in rating_ranks}
+        core = sorted(rotation, key=lambda row: -(num(row.get("projected_minutes")) or 0))[:5]
+        dossiers.append({
+            "team_id": prior.get("team_id"), "team": prior.get("team"), "conference": prior.get("conference"),
+            "ratings": ratings, "record": profile.get("record"), "four_factors": prior.get("prior_four_factors"),
+            "shot_profile": (profile.get("shot_profile") if int((profile.get("shot_profile") or {}).get("tracked_shots") or 0) >= 25 else (profile.get("preseason_prior") or {}).get("shot_profile")),
+            "personnel": prior.get("personnel"), "continuity": {"returning_minutes_pct": prior.get("returning_minutes_pct"), "source": prior.get("continuity_source")},
+            "roster_quality": {"top_eight_average": roster_scores.get(team_id), "rank": roster_ranks.get(team_id), "rated_rotation_players": len([row for row in rotation if num(row.get("thi_impact")) is not None])},
+            "projected_core_lineup": {"players": core, "combined_impact": round(sum(num(row.get("thi_impact")) or 0 for row in core), 1), "state": "projected_rotation_not_observed_lineup"},
+            "schedule_strength": {"average_opponent_thi_net": round(statistics.mean(opponent_nets), 3) if opponent_nets else None, "nonconference_average_opponent_thi_net": round(statistics.mean(nc_opponent_nets), 3) if nc_opponent_nets else None, "scheduled_games": len(schedule)},
+            "forecast": {"expected_wins_in_window": round(expected_wins, 2), "games_in_window": len(schedule)},
+            "rotation": rotation, "schedule_window": schedule,
+            "recent_games": sorted(recent_by_team.get(team_id, []), key=lambda row: str(row.get("start_date") or ""), reverse=True)[:10],
+        })
+    return {
+        "meta": {
+            "version": VERSION, "season": priors.get("meta", {}).get("season"), "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            "methodology": "THI uses regressed preseason priors, roster continuity and personnel quality, possession-based opponent-adjusted efficiency, Four Factors, pace, a learned national home-court effect and chronological walk-forward updates. Market prices remain evaluation fields. Situational flags are displayed as research context until each feature clears out-of-sample validation.",
+            "inspiration_note": "Presentation and research concepts are informed by leading public basketball analytics, while every published THI value is calculated from THI-owned transformations and documented source data.",
+            "player_projection_policy": "Qualified prior production receives per-game counting-stat projections; unverified statistical profiles receive role and impact context only.",
+            "home_court_policy": "National effect learned by the walk-forward model; neutral-site games receive zero. Team venue effects remain withheld pending sample thresholds.",
+            "situational_policy": "Rest, back-to-back, lookahead and result-response flags are research context only. Injury and travel adjustments remain unavailable until verified feeds and out-of-sample validation exist.",
+            "market_policy": "Market prices are comparison and accountability fields, never predictive features.",
+        },
+        "home_court": {"national_points": hca, "team_specific_status": "withheld_until_qualified_sample", "neutral_site_points": 0.0},
+        "player_projections": player_rows, "team_rotations": rotations, "game_context": game_context,
+        "market_board": market_rows, "market_summary": tracking.get("summary") or {}, "team_dossiers": dossiers,
+    }
 
 def write(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)

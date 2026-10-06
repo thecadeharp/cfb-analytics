@@ -136,9 +136,11 @@ jobs:
           assert len(bracket["field"]) == 68
           assert "active-roster quality" in bracket["meta"]["methodology"]
           assert all("roster_adjustment" in row for row in bracket["field"])
-          assert intelligence["meta"]["version"] == "thi-cbb-intelligence-suite-v1.0"
+          assert intelligence["meta"]["version"] == "thi-cbb-intelligence-suite-v1.1"
           assert len(intelligence["player_projections"]) >= 1500
           assert len(intelligence["team_dossiers"]) >= 300
+          assert len(intelligence["game_context"]) == projections["meta"]["game_count"]
+          assert all("schedule_strength" in row and "projected_core_lineup" in row for row in intelligence["team_dossiers"])
           assert all(row["projected_points"] is None for row in intelligence["player_projections"] if row["projection_state"] == "role_only")
           PY
 
