@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: variance-lab-v2
+  group: thi-data-writer
   cancel-in-progress: false
 
 jobs:
@@ -50,7 +50,8 @@ jobs:
           assert context['meta']['rankings_status']=='ready', context['meta'].get('cbb_ranking_failures')
           assert context['meta']['cbb_ranked_games']>0
           assert set(lab['sports']['cfb']['sections'])=={'verified','developing','failed_hypothesis','source_pending'}
-          assert tracker['meta']['version']=='thi-variance-prospective-v1.0'
+          assert tracker['meta']['version']=='thi-variance-prospective-v1.1'
+          assert 'summary' in tracker
           assert rlm['meta']['version']=='thi-rlm-monitor-v1.0'
           PY
       - name: Publish refreshed research

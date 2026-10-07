@@ -46,6 +46,11 @@ jobs:
         run: |
           python scripts/settle_results.py
 
+      - name: Freeze and settle Variance Lab qualifiers
+        run: |
+          python -m unittest scripts/test_variance_lab.py
+          python scripts/build_variance_prospective_tracker.py
+
       - name: Refresh first-snapshot weekly model scorecard
         run: |
           python scripts/build_weekly_model_scorecard.py
@@ -79,6 +84,7 @@ jobs:
           git add data/reports/weekly_model_scorecard.json
           git add data/reports/settled_snapshot_rows.csv
           git add data/reports/signal_report.json
+          git add data/variance/prospective_tracker.json
           git add data/discord_notification_state.json
 
           if git diff --cached --quiet; then
