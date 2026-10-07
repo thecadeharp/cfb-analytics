@@ -23,7 +23,9 @@ def priors(conferences: int = 32, teams_each: int = 3) -> dict:
 class CbbBracketologyTests(unittest.TestCase):
     def test_builds_complete_field_first_four_and_bubble(self):
         payload = build_bracketology(priors())
-        self.assertEqual(payload["meta"]["version"], "thi-cbb-bracketology-v0.2")
+        self.assertEqual(payload["meta"]["version"], "thi-cbb-bracketology-v0.3")
+        self.assertEqual(payload["meta"]["forecast_type"], "preseason_strength_scenario")
+        self.assertEqual(payload["meta"]["current_game_count"], 0)
         self.assertEqual(len(payload["field"]), 68)
         self.assertEqual(sum(row["bid_type"] == "automatic" for row in payload["field"]), 32)
         self.assertEqual(sum(row["bid_type"] == "at_large" for row in payload["field"]), 36)
@@ -64,6 +66,13 @@ class CbbBracketologyTests(unittest.TestCase):
         self.assertEqual(selected["prior_net"], original["prior_net"])
         self.assertGreater(selected["roster_adjustment"], 0)
         self.assertGreater(selected["selection_score"], selected["prior_net"])
+
+    def test_live_bracket_requires_broad_current_resume_sample(self):
+        payload = priors(teams_each=10)
+        profiles = {"teams": [{"team_id": team["team_id"], "record": {"games": 8, "wins": 4}} for team in payload["teams"]]}
+        result = build_bracketology(payload, profiles_payload=profiles)
+        self.assertEqual(result["meta"]["forecast_type"], "live_resume_projection")
+        self.assertEqual(result["meta"]["teams_with_resume_sample"], 320)
 
 
 if __name__ == "__main__":

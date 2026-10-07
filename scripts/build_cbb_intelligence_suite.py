@@ -83,13 +83,16 @@ def project_players(players: dict[str, Any], priors: dict[str, Any]) -> tuple[li
     rotations.sort(key=lambda row: str(row.get("team") or ""))
     return projections, rotations
 
-def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[str, Any], board: dict[str, Any], tracking: dict[str, Any], model: dict[str, Any]) -> dict[str, Any]:
+def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[str, Any], board: dict[str, Any], tracking: dict[str, Any], model: dict[str, Any], home_court: dict[str, Any] | None = None) -> dict[str, Any]:
     player_rows, rotations = project_players(players, priors)
     prior_rows = priors.get("teams") or []
     prior_map = {str(row.get("team_id")): row for row in prior_rows}
     profile_map = {str(row.get("team_id")): row for row in profiles.get("teams") or []}
     rotation_map = {str(row.get("team_id")): row for row in rotations}
     hca = national_hca(model)
+    home_court = home_court or {}
+    hca_map = {str(row.get("team_id")): row for row in home_court.get("teams") or []}
+    hca_national = num((home_court.get("meta") or {}).get("national_points")) or hca
 
     rating_ranks = {
         "net": ranked({str(row.get("team_id")): num(row.get("prior_net")) for row in prior_rows}),
@@ -148,11 +151,15 @@ def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[
     game_context = []
     for game in games:
         start = instant(game.get("start_date"))
+        projection = game.get("projection") or {}
+        projection_hca = ((projection.get("matchup_context") or {}).get("home_court") or {})
+        home_team_id = str((game.get("home") or {}).get("team_id"))
+        team_hca = hca_map.get(home_team_id) or {}
         context = {
             "game_id": game.get("game_id"),
             "model_usage": "research_context_only",
-            "home_court_points": 0.0 if game.get("neutral_site") else hca,
-            "home_court_state": "neutral_site" if game.get("neutral_site") else "national_learned_effect",
+            "home_court_points": 0.0 if game.get("neutral_site") else num(projection_hca.get("points")) if num(projection_hca.get("points")) is not None else num(team_hca.get("home_court_points")) or hca_national,
+            "home_court_state": "neutral_site" if game.get("neutral_site") else "team_specific_regularized" if team_hca else "national_fallback",
             "availability": {"status": "not_sourced", "adjustment_points": None},
             "travel": {"miles": None, "status": "awaiting_verified_team_origin_and_travel_feed"},
             "teams": {},
@@ -213,6 +220,7 @@ def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[
             "forecast": {"expected_wins_in_window": round(expected_wins, 2), "games_in_window": len(schedule)},
             "rotation": rotation, "schedule_window": schedule,
             "recent_games": sorted(recent_by_team.get(team_id, []), key=lambda row: str(row.get("start_date") or ""), reverse=True)[:10],
+            "home_court": hca_map.get(team_id),
         })
     gate = model.get("promotion_gate") or {}
     gate_checks = gate.get("checks") or {}
@@ -226,27 +234,27 @@ def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[
         "factors": [
             {"factor": "Opponent-adjusted team efficiency", "status": "active", "model_usage": "projection_input", "evidence": "Chronological team state built from possessions completed before tipoff."},
             {"factor": "Tempo and Four Factors", "status": "active", "model_usage": "projection_input", "evidence": "Regressed preseason priors transition into opponent-adjusted current-season observations."},
-            {"factor": "National home-court effect", "status": "active", "model_usage": "projection_input", "evidence": f"Walk-forward model coefficient; {hca:.2f} points on campus and zero at neutral sites."},
+            {"factor": "Program-specific home-court effect", "status": "active", "model_usage": "projection_input", "evidence": f"Five-season regularized estimates shrink toward a {hca_national:.2f}-point national mean; neutral sites receive zero."},
             {"factor": "Roster continuity and personnel", "status": "active_prior", "model_usage": "preseason_prior", "evidence": "Verified returners, recruiting and matched transfer production shape the opening prior."},
             {"factor": "Market disagreement", "status": "evaluation_only", "model_usage": "signal_and_accountability", "evidence": "Lines define signals, ATS grades and CLV; market prices do not fit the team-strength model."},
             {"factor": "Rest and situational flags", "status": "research_only", "model_usage": "display_only", "evidence": "Back-to-back, short-rest, lookahead, letdown and bounce-back states require incremental walk-forward validation."},
             {"factor": "Totals signal", "status": "withheld", "model_usage": "no_public_play", "evidence": "Independent totals promotion checks have not cleared."},
             {"factor": "Injuries and availability", "status": "unavailable", "model_usage": "no_adjustment", "evidence": "Requires a verified timestamped availability feed and auditable player-value translation."},
             {"factor": "Travel mileage and time zones", "status": "unavailable", "model_usage": "no_adjustment", "evidence": "Requires verified team origin, venue coordinates and chronological travel data."},
-            {"factor": "Team-specific venue value", "status": "withheld", "model_usage": "national_hca_only", "evidence": "No team venue effect publishes until its sample and stability gates clear."},
+            {"factor": "Four Factor home/road profile", "status": "descriptive", "model_usage": "explanation_only", "evidence": "Home/road eFG%, free-throw rate and opponent-turnover splits explain the court profile and are not double-counted."},
         ],
     }
     return {
         "meta": {
             "version": VERSION, "season": priors.get("meta", {}).get("season"), "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-            "methodology": "THI uses regressed preseason priors, roster continuity and personnel quality, possession-based opponent-adjusted efficiency, Four Factors, pace, a learned national home-court effect and chronological walk-forward updates. Market prices remain evaluation fields. Situational flags are displayed as research context until each feature clears out-of-sample validation.",
+            "methodology": "THI uses regressed preseason priors, roster continuity and personnel quality, possession-based opponent-adjusted efficiency, Four Factors, pace, regularized program-specific home-court effects and chronological walk-forward updates. Market prices remain evaluation fields. Situational flags are displayed as research context until each feature clears out-of-sample validation.",
             "inspiration_note": "Presentation and research concepts are informed by leading public basketball analytics, while every published THI value is calculated from THI-owned transformations and documented source data.",
             "player_projection_policy": "Qualified prior production receives per-game counting-stat projections; unverified statistical profiles receive role and impact context only.",
-            "home_court_policy": "National effect learned by the walk-forward model; neutral-site games receive zero. Team venue effects remain withheld pending sample thresholds.",
+            "home_court_policy": "Program effects use five seasons of conference games, recency weighting and shrinkage toward the national mean; neutral-site games receive zero.",
             "situational_policy": "Rest, back-to-back, lookahead and result-response flags are research context only. Injury and travel adjustments remain unavailable until verified feeds and out-of-sample validation exist.",
             "market_policy": "Market prices are comparison and accountability fields, never predictive features.",
         },
-        "home_court": {"national_points": hca, "team_specific_status": "withheld_until_qualified_sample", "neutral_site_points": 0.0},
+        "home_court": {"national_points": hca_national, "team_specific_status": "active_regularized", "neutral_site_points": 0.0, "programs": home_court.get("teams") or [], "methodology": (home_court.get("meta") or {}).get("methodology")},
         "player_projections": player_rows, "team_rotations": rotations, "game_context": game_context,
         "validation_registry": validation_registry,
         "market_board": market_rows, "market_summary": tracking.get("summary") or {}, "team_dossiers": dossiers,
@@ -263,7 +271,8 @@ def main() -> None:
     parser.add_argument("--root", type=Path, default=ROOT / "data" / "cbb"); parser.add_argument("--output", type=Path, default=ROOT / "data" / "cbb" / "intelligence_suite.json")
     args = parser.parse_args(); root = args.root
     load = lambda path: json.loads(path.read_text())
-    payload = build_suite(load(root/"team_profiles.json"), load(root/"model/current_priors.json"), load(root/"player_ratings.json"), load(root/"projection_board.json"), load(root/"model_tracking.json"), load(root/"model/model_card.json"))
+    hca_path = root/"home_court_advantage.json"
+    payload = build_suite(load(root/"team_profiles.json"), load(root/"model/current_priors.json"), load(root/"player_ratings.json"), load(root/"projection_board.json"), load(root/"model_tracking.json"), load(root/"model/model_card.json"), load(hca_path) if hca_path.exists() else None)
     write(args.output, payload); print(f"{VERSION}: {len(payload['player_projections'])} players, {len(payload['team_dossiers'])} dossiers")
 
 if __name__ == "__main__": main()

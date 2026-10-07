@@ -7,6 +7,7 @@
     foundation: "data/cbb/foundation_status.json",
     model: "data/cbb/model/model_card.json",
     priors: "data/cbb/model/current_priors.json",
+    homeCourt: "data/cbb/home_court_advantage.json",
     history: "data/cbb/history/manifest.json",
     projectionBoard: "data/cbb/projection_board.json",
     playStyle: "data/cbb/play_style.json",
@@ -23,7 +24,7 @@
     rlmMonitor: "data/market/rlm_monitor.json"
   };
   const PLAYER_PATH = "data/cbb/player_ratings.json";
-  const CORE_DATA_KEYS = new Set(["profiles", "foundation", "model", "priors", "history", "projectionBoard", "tracking", "bracketology"]);
+  const CORE_DATA_KEYS = new Set(["profiles", "foundation", "model", "priors", "homeCourt", "history", "projectionBoard", "tracking", "bracketology"]);
   const DEFERRED_VIEW_KEYS = {
     "cbb-market": ["intelligence", "rlmMonitor"],
     "cbb-variance": ["trends", "varianceTracker", "rlmMonitor"],
@@ -643,7 +644,7 @@
         <div class="cbb-model-sub">These fields are shown separately from the published projection until each input clears historical out-of-sample testing.</div>
         <div class="cbb-situation-grid">
           <article><span>${escapeHtml(game.away?.team)}</span><strong>${awaySituation.rest_days == null ? "Rest unknown" : `${number(awaySituation.rest_days,1)} days rest`}</strong><div>${contextFlags(awaySituation)}</div><small>${awaySituation.next_opponent ? `Next: ${escapeHtml(awaySituation.next_opponent)} in ${number(awaySituation.next_game_days,1)} days` : "No next game in current window"}</small></article>
-          <article><span>Home-court input</span><strong>${situational.home_court_points == null ? "Awaiting estimate" : `${number(situational.home_court_points,2,true)} pts`}</strong><div>${game.neutral_site ? `<span class="cbb-context-clear">Neutral-site override</span>` : `<span class="cbb-context-flag">Learned national HCA</span>`}</div><small>Team-specific venue effects remain withheld pending a stable sample.</small></article>
+          <article><span>Home-court input</span><strong>${situational.home_court_points == null ? "Awaiting estimate" : `${number(situational.home_court_points,2)} pts`}</strong><div>${game.neutral_site ? `<span class="cbb-context-clear">Neutral-site override</span>` : `<span class="cbb-context-flag">Program-specific court</span>`}</div><small>Five-season regularized value; thin samples shrink toward the national mean.</small></article>
           <article><span>${escapeHtml(game.home?.team)}</span><strong>${homeSituation.rest_days == null ? "Rest unknown" : `${number(homeSituation.rest_days,1)} days rest`}</strong><div>${contextFlags(homeSituation)}</div><small>${homeSituation.next_opponent ? `Next: ${escapeHtml(homeSituation.next_opponent)} in ${number(homeSituation.next_game_days,1)} days` : "No next game in current window"}</small></article>
           <article><span>Injuries and availability</span><strong>Not yet sourced</strong><div><span class="cbb-context-pending">No model adjustment</span></div><small>THI will only publish availability effects from a verified, timestamped feed.</small></article>
           <article><span>Travel load</span><strong>Mileage pending</strong><div><span class="cbb-context-pending">No model adjustment</span></div><small>Requires verified team origin, venue coordinates and travel chronology.</small></article>
@@ -973,7 +974,40 @@
     const bubble = bracket.bubble || {};
     const regions = bracket.regions || {};
     const firstFour = bracket.first_four || [];
+    const isPreseasonOutlook = meta.forecast_type === "preseason_strength_scenario";
     const atLargeCut = (bubble.last_four_in || []).reduce((minimum, team) => Math.min(minimum, Number(team.selection_score ?? team.prior_net)), Infinity);
+    if (isPreseasonOutlook) {
+      const nationalBoard = [...field].sort((a,b) => Number(a.overall_rank || 999) - Number(b.overall_rank || 999));
+      const atLargePool = nationalBoard.filter(team => team.bid_type === "at_large");
+      const conferenceFavorites = nationalBoard.filter(team => team.bid_type === "automatic").sort((a,b) => String(a.conference?.abbreviation || "").localeCompare(String(b.conference?.abbreviation || "")));
+      view.innerHTML = `
+        <div class="cbb-kicker">NCAA tournament outlook</div>
+        <h1 class="page-title">THI Preseason Field Outlook</h1>
+        <p class="page-subtitle">An opening strength board for the 2027 season. It identifies the teams THI rates most highly before results exist without pretending a committee-quality seed list or bubble can already be known.</p>
+        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Preseason scenario</span><strong>No seed lines or regions yet</strong><p>${escapeHtml(meta.limitations)}</p></div>
+        <div class="cbb-stat-grid">
+          ${statCard("Strength pool", integer(meta.field_size), `${integer(meta.automatic_bid_count)} conference favorites · ${integer(meta.at_large_count)} at-large candidates`)}
+          ${statCard("No. 1 opening rating", escapeHtml(nationalBoard[0]?.team || "—"), `${number(nationalBoard[0]?.selection_score ?? nationalBoard[0]?.prior_net,1,true)} THI selection`)}
+          ${statCard("2027 games included", integer(meta.current_game_count), "Résumé evidence has not begun")}
+          ${statCard("Public forecast state", "Opening outlook", `2027 · ${escapeHtml(meta.version || "v0.3")}`)}
+        </div>
+
+        <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Opening national board</div><h2 class="cbb-section-title">Top 16 by THI strength</h2></div><div class="cbb-section-note">These are rating positions, not NCAA tournament seeds. Region placement begins only after the résumé gate clears.</div></div>
+          <div class="cbb-bubble-grid">${[0,4,8,12].map(start => outlookColumn(`${start + 1}–${start + 4}`, nationalBoard.slice(start,start + 4), start)).join("")}</div>
+        </section>
+
+        <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Unseeded selection pool</div><h2 class="cbb-section-title">Preseason at-large candidates</h2></div><div class="cbb-section-note">The pool reflects predictive strength and qualified roster information. It is deliberately unseeded and has no “last four in” label.</div></div>
+          <div class="cbb-bubble-grid">${[0,9,18,27].map(start => outlookColumn(`${start + 1}–${Math.min(start + 9, atLargePool.length)}`, atLargePool.slice(start,start + 9), start)).join("")}</div>
+        </section>
+
+        <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Automatic-bid baseline</div><h2 class="cbb-section-title">Preseason conference favorites</h2></div><div class="cbb-section-note">Each entry is the highest-rated current team in its league. These are conference forecasts, not awarded bids.</div></div>
+          <div class="cbb-bubble-grid">${[0,8,16,24].map(start => outlookColumn(`${start + 1}–${Math.min(start + 8, conferenceFavorites.length)}`, conferenceFavorites.slice(start,start + 8), start, true)).join("")}</div>
+        </section>
+
+        <div class="cbb-methodology"><strong>When the bracket unlocks</strong><p>THI publishes regions, seed lines, First Four matchups and the live bubble after at least 300 teams have eight current-season games. That is when schedule strength, road performance and opponent-quality records can meaningfully separate résumés.</p><p>${escapeHtml(meta.methodology)}</p></div>`;
+      view.querySelectorAll("[data-bracket-team-id]").forEach(button => button.addEventListener("click", () => openTeamDossier(button.dataset.bracketTeamId)));
+      return;
+    }
     view.innerHTML = `
       <div class="cbb-kicker">NCAA tournament projection</div>
       <h1 class="page-title">THI Bracketology</h1>
@@ -986,7 +1020,7 @@
         ${statCard("Forecast state", field.some(team => String(team.selection_state || "").includes("early_resume")) ? "Strength + roster + résumé" : "Strength + roster", `2027 · ${escapeHtml(meta.version || "v0.2")}`)}
       </div>
 
-      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Projected 64-team bracket</div><h2 class="cbb-section-title">Four regions</h2></div><div class="cbb-section-note">The slash identifies a First Four slot. Region placement uses an S-curve with conference separation where the field allows.</div></div>
+      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Projected 68-team field</div><h2 class="cbb-section-title">Four regions</h2></div><div class="cbb-section-note">The slash identifies a First Four slot. Region placement uses an S-curve with conference separation where the field allows.</div></div>
         <div class="cbb-bracket-grid">${["East", "South", "Midwest", "West"].map(region => bracketRegion(region, regions[region] || [])).join("")}</div>
       </section>
 
@@ -1020,6 +1054,10 @@
 
   function bubbleColumn(title, rows, firstFour = false) {
     return `<article class="cbb-panel cbb-bubble-card"><h3>${escapeHtml(title)}</h3>${rows.map((team, index) => `<button type="button" class="cbb-bubble-team" data-bracket-team-id="${escapeHtml(team.team_id)}"><span><strong>${index + 1}</strong>${teamLogo(team,"tiny")}<b>${escapeHtml(team.team)}</b></span><small>${escapeHtml(team.conference?.abbreviation || "—")} · ${number(team.selection_score ?? team.prior_net,1,true)} selection</small></button>`).join("")} ${firstFour ? `<div class="cbb-model-sub">These four teams occupy the two at-large First Four games.</div>` : ""}</article>`;
+  }
+
+  function outlookColumn(title, rows, offset = 0, conferenceOrder = false) {
+    return `<article class="cbb-panel cbb-bubble-card"><h3>${escapeHtml(title)}</h3>${rows.map((team, index) => `<button type="button" class="cbb-bubble-team" data-bracket-team-id="${escapeHtml(team.team_id)}"><span><strong>${conferenceOrder ? escapeHtml(team.conference?.abbreviation || "—") : offset + index + 1}</strong>${teamLogo(team,"tiny")}<b>${escapeHtml(team.team)}</b></span><small>${conferenceOrder ? `${number(team.selection_score ?? team.prior_net,1,true)} selection` : `${escapeHtml(team.conference?.abbreviation || "—")} · ${number(team.selection_score ?? team.prior_net,1,true)} rating`}</small></button>`).join("")}</article>`;
   }
 
   function renderPortal() {
@@ -1158,9 +1196,9 @@
       state.ratingSort.key = key;
       renderRatings();
     });
-    view.querySelector("#cbb-rating-body").addEventListener("click", event => {
+    view.querySelector("#cbb-rating-body").addEventListener("click", async event => {
       const row = event.target.closest("[data-team-id]");
-      if (row) openTeamDetail(Number(row.dataset.teamId));
+      if (row) { await loadDeferred(["intelligence"]); openTeamDetail(Number(row.dataset.teamId)); }
     });
     paintRatingRows();
   }
@@ -1187,13 +1225,15 @@
         ${methodCard("Predictive", "Powers current projections", "The same preseason team state feeds the walk-forward score model now. It will separate from Overall after completed 2027 games update team state.")}
         ${methodCard("Recent form", "Awaiting 2027 games", "No recent-form rating is published before a qualified current-season sample exists.")}
         ${methodCard("Schedule + opponent quality", "Awaiting 2027 games", "Schedule strength and records against top-25 and top-50 THI teams begin only after games are played.")}
-        ${methodCard("Dynamic home advantage", Number.isFinite(home) ? `${number(home,2)} points nationally` : "Awaiting estimate", "Neutral courts receive zero. Team venue effects remain withheld until their samples qualify.")}
+        ${methodCard("Dynamic home advantage", Number.isFinite(home) ? `${number(home,2)}-point national mean` : "Awaiting estimate", "Every program receives its own five-season regularized value; neutral courts receive zero.")}
       </div>
       <div class="cbb-conference-strip"><strong>Conference strength · neutral-floor team benchmark</strong>${conferences.map(row => `<span>${escapeHtml(row.name)} <b>${number(row.average,1,true)}</b> avg · ${number(row.median,1,true)} median</span>`).join("")}</div>
     </section>`;
   }
 
   function cbbNationalHomeAdvantage() {
+    const published = Number(state.data?.homeCourt?.meta?.national_points);
+    if (Number.isFinite(published)) return published;
     const marginModel = state.data?.model?.models?.margin || {};
     const homeIndex = (marginModel.feature_names || []).indexOf("home_court");
     const homeCoefficient = homeIndex >= 0 ? Number((marginModel.coefficients || [])[homeIndex + 1]) : NaN;
@@ -1218,9 +1258,11 @@
     const offBand = quantileBands(all, "prior_offense");
     const defBand = quantileBands(all, "prior_defense", true);
     const home = cbbNationalHomeAdvantage();
+    const homeByTeam = new Map((state.data?.homeCourt?.teams || []).map(row => [Number(row.team_id), row]));
     const globalRank = new Map([...all].sort((a,b) => b.prior_net - a.prior_net).map((team,index) => [team.team_id,index+1]));
     body.innerHTML = rows.length ? rows.map(team => {
-      return `<tr data-team-id="${team.team_id}"><td class="cbb-rank">#${globalRank.get(team.team_id) || "—"}</td><td><div class="cbb-team-cell">${teamLogo(team,"normal")}<div><div class="cbb-team-name">${escapeHtml(team.team)}</div><div class="cbb-team-meta">View team profile →</div></div></div></td><td>${escapeHtml(team.conference?.abbreviation || "—")}</td><td class="cbb-number cbb-metric-cell cbb-band-${netBand(team)}">${number(team.prior_net,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${netBand(team)}">${number(team.prior_net,2)}</td><td class="cbb-number cbb-rating-pending">Preseason</td><td class="cbb-number cbb-rating-pending">—</td><td class="cbb-number cbb-rating-pending">0–0</td><td class="cbb-number cbb-metric-cell cbb-band-${offBand(team)}">${number(team.prior_offense,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${defBand(team)}">${number(team.prior_defense,2)}</td><td class="cbb-number cbb-rating-context">${Number.isFinite(home) ? number(home,2) : "—"}</td></tr>`;
+      const programHome = homeByTeam.get(Number(team.team_id));
+      return `<tr data-team-id="${team.team_id}"><td class="cbb-rank">#${globalRank.get(team.team_id) || "—"}</td><td><div class="cbb-team-cell">${teamLogo(team,"normal")}<div><div class="cbb-team-name">${escapeHtml(team.team)}</div><div class="cbb-team-meta">View team profile →</div></div></div></td><td>${escapeHtml(team.conference?.abbreviation || "—")}</td><td class="cbb-number cbb-metric-cell cbb-band-${netBand(team)}">${number(team.prior_net,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${netBand(team)}">${number(team.prior_net,2)}</td><td class="cbb-number cbb-rating-pending">Preseason</td><td class="cbb-number cbb-rating-pending">—</td><td class="cbb-number cbb-rating-pending">0–0</td><td class="cbb-number cbb-metric-cell cbb-band-${offBand(team)}">${number(team.prior_offense,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${defBand(team)}">${number(team.prior_defense,2)}</td><td class="cbb-number cbb-rating-context">${number(programHome?.home_court_points ?? home,2)}</td></tr>`;
     }).join("") : `<tr><td colspan="11" class="cbb-empty">No teams match those filters.</td></tr>`;
   }
 
@@ -1246,6 +1288,7 @@
     const roster = state.playerData?.team_rosters?.find(row => Number(row.team_id) === Number(teamId));
     const dossier = state.data?.intelligence?.team_dossiers?.find(row => Number(row.team_id) === Number(teamId));
     const homeCourt = state.data?.intelligence?.home_court || {};
+    const programCourt = (state.data?.homeCourt?.teams || []).find(row => Number(row.team_id) === Number(teamId)) || dossier?.home_court;
     panel.innerHTML = `
       <button class="cbb-detail-close cbb-game-back" type="button" data-cbb-close>← Back to teams</button>
       <div class="cbb-kicker">THI CBB team profile</div>
@@ -1278,10 +1321,14 @@
         ${detailRow("Returning-minutes signal", prior.returning_minutes_pct > 0 ? pct(prior.returning_minutes_pct) : "Unavailable in current feed")}
       </section>
       <section class="cbb-detail-section"><h3>Projection context</h3>
-        ${detailRow("National home-court effect", homeCourt.national_points == null ? "Awaiting model estimate" : `${number(homeCourt.national_points,2,true)} points`)}
-        ${detailRow("Team-specific venue value", "Withheld pending qualified sample")}
+        ${detailRow("Program home-court value", programCourt?.home_court_points == null ? "Awaiting estimate" : `${number(programCourt.home_court_points,2)} points · ${escapeHtml(humanize(programCourt.tier || "standard"))}`)}
+        ${detailRow("National home-court mean", homeCourt.national_points == null ? number(state.data?.homeCourt?.meta?.national_points,2) : `${number(homeCourt.national_points,2)} points`)}
         ${detailRow("Neutral-site adjustment", "0.00 points")}
-        <div class="cbb-model-sub">THI uses the walk-forward model's learned national home-court effect. A team-specific venue value will appear only after its historical sample clears stability checks.</div>
+        ${detailRow("Historical campus sample", programCourt?.sample?.campus_games == null ? "—" : `${integer(programCourt.sample.campus_games)} conference games`)}
+        ${detailRow("Home eFG% shift", programCourt?.four_factor_home_road?.home_efg_delta_pct_points == null ? "—" : `${number(programCourt.four_factor_home_road.home_efg_delta_pct_points,2,true)} pct pts`)}
+        ${detailRow("Home free-throw-rate shift", programCourt?.four_factor_home_road?.home_free_throw_rate_delta == null ? "—" : `${number(programCourt.four_factor_home_road.home_free_throw_rate_delta,2,true)}`)}
+        ${detailRow("Opponent turnover shift", programCourt?.four_factor_home_road?.opponent_turnover_delta_pct_points == null ? "—" : `${number(programCourt.four_factor_home_road.opponent_turnover_delta_pct_points,2,true)} pct pts`)}
+        <div class="cbb-model-sub">The point value comes from a five-season regularized margin model that separates team strength from site. Four Factor splits explain the observed profile and are not added again.</div>
         <div class="cbb-roster-list">${dossier?.schedule_window?.length ? dossier.schedule_window.slice(0,6).map(game => `<div class="cbb-detail-row"><span>${escapeHtml(humanize(game.site))} vs ${escapeHtml(game.opponent)}</span><strong>${number(game.projected_margin,1,true)} · ${pct(game.win_probability)}</strong></div>`).join("") : `<div class="cbb-empty">No games in the current projection window.</div>`}</div>
       </section>
       <section class="cbb-detail-section" id="cbb-dossier-schedule"><h3>Schedule and résumé outlook</h3>
@@ -1426,8 +1473,7 @@
   }
 
   function renderTrendsLab() {
-    const cfb = document.getElementById("view-variance"); const cbb = document.getElementById("view-cbb-variance");
-    if (cfb) cfb.innerHTML = trendsMarkup("cfb");
+    const cbb = document.getElementById("view-cbb-variance");
     if (cbb) cbb.innerHTML = trendsMarkup("cbb");
   }
 

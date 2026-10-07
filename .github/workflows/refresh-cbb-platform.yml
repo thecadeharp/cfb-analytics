@@ -54,6 +54,7 @@ jobs:
             scripts/build_cbb_data_foundation.py \
             scripts/build_cbb_player_research.py \
             scripts/build_cbb_walk_forward_model.py \
+            scripts/build_cbb_home_court.py \
             scripts/build_cbb_projection_board.py \
             scripts/build_cbb_play_style.py \
             scripts/build_cbb_matchup_engine.py \
@@ -71,6 +72,7 @@ jobs:
             scripts/test_cbb_data_foundation.py \
             scripts/test_cbb_player_research.py \
             scripts/test_cbb_walk_forward_model.py \
+            scripts/test_cbb_home_court.py \
             scripts/test_cbb_projection_board.py \
             scripts/test_cbb_play_style.py \
             scripts/test_cbb_matchup_engine.py \
@@ -93,6 +95,7 @@ jobs:
           python scripts/build_cbb_data_foundation.py --output-dir data/cbb
           python scripts/build_cbb_player_research.py
           python scripts/build_cbb_walk_forward_model.py
+          python scripts/build_cbb_home_court.py
           python scripts/build_cbb_projection_board.py
           python scripts/build_cbb_play_style.py --max-games 40
           python scripts/build_cbb_matchup_engine.py
@@ -120,6 +123,7 @@ jobs:
           model = json.loads((root / "model/model_card.json").read_text())
           priors = json.loads((root / "model/current_priors.json").read_text())
           projections = json.loads((root / "projection_board.json").read_text())
+          home_court = json.loads((root / "home_court_advantage.json").read_text())
           play_style = json.loads((root / "play_style.json").read_text())
           matchups = json.loads((root / "matchup_engine.json").read_text())
           tracking = json.loads((root / "model_tracking.json").read_text())
@@ -143,6 +147,9 @@ jobs:
           assert len(model["evaluation"]["by_season"]) >= 8
           assert priors["meta"]["model_version"] == model["meta"]["model_version"]
           assert projections["meta"]["version"] == "thi-cbb-projection-board-v0.5"
+          assert home_court["meta"]["version"] == "thi-cbb-home-court-v1.0"
+          assert len(home_court["teams"]) >= 300
+          assert all(0.5 <= row["home_court_points"] <= 5.5 for row in home_court["teams"])
           assert "Opponent-adjusted" in projections["meta"]["four_factor_method"]
           assert all("four_factor_matchup" in game["projection"]["matchup_context"] for game in projections["games"] if str(game.get("status", "")).lower() == "scheduled")
           assert projections["meta"]["model_version"] == model["meta"]["model_version"]
@@ -155,7 +162,8 @@ jobs:
           assert all(game["projection"]["model_input_label"] != "preseason_game" for game in projections["games"])
           assert tracking["meta"]["version"] == "thi-cbb-model-tracking-v0.1"
           assert tracking["meta"]["projection_board_version"] == projections["meta"]["version"]
-          assert bracket["meta"]["version"] == "thi-cbb-bracketology-v0.2"
+          assert bracket["meta"]["version"] == "thi-cbb-bracketology-v0.3"
+          assert bracket["meta"]["forecast_type"] in {"preseason_strength_scenario", "live_resume_projection"}
           assert len(bracket["field"]) == 68
           assert "active-roster quality" in bracket["meta"]["methodology"]
           assert all("roster_adjustment" in row for row in bracket["field"])
@@ -195,6 +203,7 @@ jobs:
             data/cbb/model/current_priors.json \
             data/cbb/model/walk_forward_predictions.json.gz \
             data/cbb/projection_board.json \
+            data/cbb/home_court_advantage.json \
             data/cbb/play_style.json \
             data/cbb/matchup_engine.json \
             data/cbb/model_tracking.json \

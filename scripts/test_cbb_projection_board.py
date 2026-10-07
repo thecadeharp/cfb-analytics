@@ -54,7 +54,8 @@ class CbbProjectionBoardTests(unittest.TestCase):
                 "margin_residual_sd": 13,
             },
         }
-        payload = build_board(games, profiles, priors, model)
+        hca = {"meta":{"national_points":2.8},"teams":[{"team_id":1,"home_court_points":4.2,"tier":"strong","evidence_state":"established"}]}
+        payload = build_board(games, profiles, priors, model, home_court_payload=hca)
         self.assertEqual(payload["meta"]["version"], "thi-cbb-projection-board-v0.5")
         self.assertEqual(len(payload["games"]), 2)
         opening = payload["games"][0]["projection"]
@@ -65,6 +66,8 @@ class CbbProjectionBoardTests(unittest.TestCase):
         self.assertEqual(opening["game_classification"], "nonconference")
         self.assertEqual(opening["signal_confidence"], "research")
         self.assertTrue(1 <= opening["watchability_score"] <= 99)
+        self.assertEqual(opening["matchup_context"]["home_court"]["points"], 4.2)
+        self.assertEqual(opening["matchup_context"]["home_court"]["source"], "team_specific_regularized")
         self.assertEqual(tracked["sample_state"], "tracked_sample")
         self.assertTrue(tracked["spread_signal_eligible"])
         self.assertEqual(tracked["signal_confidence"], "developing")
@@ -74,6 +77,7 @@ class CbbProjectionBoardTests(unittest.TestCase):
         self.assertEqual(len(tracked["matchup_context"]["margin_drivers"]), 2)
         self.assertEqual(tracked["matchup_context"]["home"]["games"], 6)
         self.assertIn("four_factor_matchup", tracked["matchup_context"])
+        self.assertEqual(tracked["matchup_context"]["home_court"]["points"], 0.0)
 
         frozen_margin = opening["home_margin"]
         games["games"][0]["status"] = "final"

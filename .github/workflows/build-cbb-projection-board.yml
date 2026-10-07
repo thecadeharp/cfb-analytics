@@ -41,11 +41,15 @@ jobs:
         run: |
           python -m py_compile \
             scripts/build_cbb_projection_board.py \
+            scripts/build_cbb_home_court.py \
+            scripts/test_cbb_home_court.py \
             scripts/test_cbb_projection_board.py
-          python -m unittest scripts/test_cbb_projection_board.py
+          python -m unittest scripts/test_cbb_home_court.py scripts/test_cbb_projection_board.py
 
-      - name: Build staged projection board
-        run: python scripts/build_cbb_projection_board.py
+      - name: Build staged home-court ratings and projection board
+        run: |
+          python scripts/build_cbb_home_court.py
+          python scripts/build_cbb_projection_board.py
 
       - name: Validate output and isolation
         run: |
@@ -60,6 +64,7 @@ jobs:
           assert meta["version"] == "thi-cbb-projection-board-v0.5"
           assert meta["model_version"] == "thi-cbb-walk-forward-v0.7-research"
           assert "Opponent-adjusted" in meta["four_factor_method"]
+          assert "Program-specific" in meta["home_court_method"]
           assert all("four_factor_matchup" in game["projection"]["matchup_context"] for game in games if str(game.get("status", "")).lower() == "scheduled")
           assert meta["settled_minimum_games"] == 6
           assert meta["spread_signal_minimum_edge"] == 5.0
@@ -81,7 +86,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/cbb/projection_board.json
+          git add data/cbb/projection_board.json data/cbb/home_court_advantage.json
           git diff --cached --quiet && exit 0
           git commit -m "Build CBB projection board"
           git pull --rebase origin main

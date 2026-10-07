@@ -9,6 +9,8 @@
 
   const CONDITIONS_URL = "./data/game_conditions.json";
   const RESULTS_URL = "./data/reports/settled_results.json";
+  const VARIANCE_SYSTEMS_URL = "./data/trends_lab.json";
+  const VARIANCE_TRACKER_URL = "./data/variance/prospective_tracker.json";
 
   let gameConditionsData = { games: {} };
   let settledResultsData = { rows: [] };
@@ -17,6 +19,8 @@
   let currentSignalFilter = "";
   let currentConfidenceFilter = "";
   let settledResultsPromise = null;
+  let varianceCardsById = new Map();
+  let varianceQualifiersByGame = new Map();
 
   const CONFERENCE_OPTIONS = [
     ["", "All Conferences"],
@@ -465,6 +469,7 @@
         background:#f7f8f5;
         box-shadow:inset 3px 0 0 var(--green);
       }
+      .thi-variance-context{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}.thi-variance-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 6px;border:1px solid var(--border);border-radius:999px;color:var(--muted);font:700 8px var(--mono);text-transform:uppercase}.thi-variance-chip.verified{color:#43c999;border-color:#286b56;background:rgba(20,184,121,.08)}.thi-variance-chip.developing{color:#d8b552;border-color:#6f5b2a;background:rgba(221,178,56,.08)}.thi-variance-chip.failed_hypothesis{color:#e37a86;border-color:#71343c;background:rgba(230,80,97,.07)}
 
       .weather-adjusted-dot {
         display:inline-block;
@@ -1131,6 +1136,17 @@
     }[signal] ?? 0;
   }
 
+  function varianceContextMarkup(game) {
+    const qualifiers = varianceQualifiersByGame.get(String(game?.game_id ?? "")) || [];
+    if (!qualifiers.length) return "";
+    return `<div class="thi-variance-context" aria-label="Variance Lab context">${qualifiers.slice(0,2).map(row => {
+      const card = varianceCardsById.get(row.system_id) || {};
+      const state = card.state || "developing";
+      const stateLabel = state === "failed_hypothesis" ? "did not validate" : state;
+      return `<span class="thi-variance-chip ${escapeHtml(state)}" title="Historical context only; does not affect Model A">${escapeHtml(card.name || String(row.system_id).replaceAll("-"," "))} · ${escapeHtml(stateLabel)}</span>`;
+    }).join("")}</div>`;
+  }
+
   projectionGamesForCurrentView = function projectionGamesForCurrentViewWeatherV1() {
     return projections
       .filter(game => {
@@ -1289,6 +1305,7 @@
           <div class="team-meta" style="margin-top:5px;">
             ${escapeHtml(gameDateText(game.start_date))}
           </div>
+          ${varianceContextMarkup(game)}
         </td>
 
         <td>${window.THIIntelligence?.watchMarkup?.(game) ?? "—"}</td>
@@ -1521,6 +1538,20 @@
     return settledResultsPromise;
   }
 
+  async function loadVarianceContext() {
+    try {
+      const [systemsResponse, trackerResponse] = await Promise.all([fetch(`${VARIANCE_SYSTEMS_URL}?v=${Date.now()}`), fetch(`${VARIANCE_TRACKER_URL}?v=${Date.now()}`)]);
+      if (!systemsResponse.ok || !trackerResponse.ok) return;
+      const systems = await systemsResponse.json(); const tracker = await trackerResponse.json();
+      varianceCardsById = new Map((systems?.sports?.cfb?.cards || []).map(card => [card.id, card]));
+      varianceQualifiersByGame = new Map();
+      (tracker?.frozen || []).filter(row => row.sport === "cfb").forEach(row => {
+        const key = String(row.game_id); if (!varianceQualifiersByGame.has(key)) varianceQualifiersByGame.set(key, []); varianceQualifiersByGame.get(key).push(row);
+      });
+      if (Array.isArray(projections) && projections.length) renderProjections();
+    } catch (error) { console.warn("Variance projection context unavailable:", error); }
+  }
+
   installStyles();
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -1532,6 +1563,7 @@
     // legitimately graded games as "FINAL · NOT GRADED" until the user
     // changes tabs.
     loadSettledResults();
+    loadVarianceContext();
     window.addEventListener("hammer:status-filter-changed", event => {
       if (event.detail?.status === "final") loadSettledResults();
     });

@@ -12,14 +12,18 @@
   const PORTAL_URL    = "./data/portal_2026.json";
   const VARIANCE_URL  = "./data/variance_historical.json";
   const COACH_TRENDS_URL = "./data/coach_ats_trends.json";
+  const SYSTEMS_URL = "./data/trends_lab.json";
+  const TRACKER_URL = "./data/variance/prospective_tracker.json";
 
   let portalData    = null;
   let varianceData  = null;
   let coachTrendsData = null;
+  let systemsData = null;
+  let prospectiveData = null;
 
   // ── Sub-tab state ───────────────────────────────────────────────────────────
   let portalSubTab    = "class";      // class | offensive | defensive | conference | juco | impact
-  let varianceSubTab  = "coach_ats"; // coach_ats | full_reset | qb_swap | coordinator
+  let varianceSubTab  = "systems"; // systems | coach_ats | full_reset | qb_swap | coordinator
   let coachSearch = "";
   let coachSort = "overall_pct";
   let coachSortDirection = "desc";
@@ -649,6 +653,7 @@
 
   function renderVarianceSubNav() {
     const tabs = [
+      ["systems","Systems Registry"],
       ["coach_ats","Coach ATS"],
       ["full_reset","Full Reset"],
       ["qb_swap","QB-Only Swap"],
@@ -661,6 +666,29 @@
           onclick="pvVarianceTab('${id}')">${pEsc(label)}</button>
       `).join("")}
     </div>`;
+  }
+
+  function systemStateLabel(state) {
+    return ({verified:"Verified",developing:"Developing",failed_hypothesis:"Failed hypothesis",source_pending:"Source pending"})[state] || String(state || "Research");
+  }
+
+  function renderSystemsRegistry() {
+    const cfb = systemsData?.sports?.cfb || {cards:[],settled_games:0};
+    const cards = cfb.cards || [];
+    const frozen = (prospectiveData?.frozen || []).filter(row => row.sport === "cfb");
+    const groups = [
+      ["verified","Verified systems","Cleared THI's sample, profitability and separation gates."],
+      ["developing","Developing systems","Promising evidence that remains descriptive until the prospective ledger matures."],
+      ["failed_hypothesis","Failed hypotheses","Popular angles that did not survive THI's own historical test."],
+    ];
+    const sections = groups.map(([state,title,note]) => {
+      const rows = cards.filter(card => card.state === state);
+      return `<section class="vl-system-section"><div class="vl-system-heading"><div><div class="vl-cohort-label">Evidence state</div><h2>${pEsc(title)}</h2></div><p>${pEsc(note)}</p></div><div class="vl-system-grid">${rows.map(card => `<article class="vl-system-card is-${pEsc(state)}"><div class="vl-system-card-top"><span>${pEsc(card.market)} · ${pEsc(card.family)}</span><b>${pEsc(systemStateLabel(state))}</b></div><h3>${pEsc(card.name)}</h3><p>${pEsc(card.description)}</p><div class="vl-system-kpis"><strong>${pFmt(card.hit_rate,1)}%</strong><span>${pEsc(card.wins)}–${pEsc(card.losses)}${card.pushes ? `–${pEsc(card.pushes)}` : ""}</span><span>${pSign(card.roi_pct_at_minus_110,1)}% ROI</span></div><small>${pEsc(card.decisions)} decisions · ${pEsc(card.seasons?.[0])}–${pEsc(card.seasons?.at(-1))}</small></article>`).join("") || `<div class="empty-state">No systems currently occupy this state.</div>`}</div></section>`;
+    }).join("");
+    return `<div class="vl-lab-hero"><div><div class="vl-cohort-label">THI Variance Lab</div><h2>What survives the historical distribution?</h2><p>Every rule is frozen before evaluation. Winning, inconclusive and losing hypotheses stay visible so the lab cannot quietly select only favorable results.</p></div><div class="vl-lab-count"><strong>${Number(cfb.settled_games || 0).toLocaleString()}</strong><span>settled games tested</span></div></div>
+      <div class="vl-system-stats"><div><strong>${cards.filter(c=>c.state==='verified').length}</strong><span>Verified</span></div><div><strong>${cards.filter(c=>c.state==='developing').length}</strong><span>Developing</span></div><div><strong>${cards.filter(c=>c.state==='failed_hypothesis').length}</strong><span>Failed hypotheses</span></div><div><strong>${frozen.length}</strong><span>Frozen qualifiers</span></div></div>
+      ${sections}
+      <section class="vl-system-section"><div class="vl-system-heading"><div><div class="vl-cohort-label">Forward evidence</div><h2>Prospective qualifier ledger</h2></div><p>The first eligible pregame line is immutable. These labels are context only and never modify Model A.</p></div><div class="vl-prospective-list">${frozen.slice(0,16).map(row=>`<div><span>${pEsc(row.away_team)} at ${pEsc(row.home_team)}</span><b>${pEsc(String(row.system_id).replaceAll('-',' '))}</b><small>${pEsc(row.result)}</small></div>`).join("") || `<p>No current qualifiers.</p>`}</div></section>`;
   }
 
   function coachPct(split) {
@@ -871,6 +899,11 @@
     const hasPublishedVariance = ["full_reset", "qb_swap", "coordinator"]
       .some(key => Number(varianceData?.cohorts?.[key]?.aggregate?.n || 0) > 0);
 
+    if (varianceSubTab === "systems") {
+      container.innerHTML = renderVarianceSubNav() + renderSystemsRegistry();
+      return;
+    }
+
     if (varianceSubTab === "coach_ats") {
       container.innerHTML = renderVarianceSubNav() + renderCoachTrends();
       return;
@@ -1004,8 +1037,23 @@
     renderVariance();
   }
 
+  async function loadSystemsData() {
+    try {
+      const [systems, tracker] = await Promise.all([fetch(`${SYSTEMS_URL}?v=${Date.now()}`), fetch(`${TRACKER_URL}?v=${Date.now()}`)]);
+      systemsData = systems.ok ? await systems.json() : {sports:{cfb:{cards:[]}}};
+      prospectiveData = tracker.ok ? await tracker.json() : {frozen:[]};
+    } catch (error) {
+      console.warn("Variance systems registry unavailable:", error);
+      systemsData = {sports:{cfb:{cards:[]}}}; prospectiveData = {frozen:[]};
+    }
+    renderVariance();
+  }
+
   // ── Boot ─────────────────────────────────────────────────────────────────────
   installPortalVarianceStyles();
+  const systemsStyle = document.createElement("style"); systemsStyle.textContent = `
+    .vl-lab-hero{display:flex;justify-content:space-between;gap:24px;padding:22px;border:1px solid var(--border);border-radius:13px;background:var(--surface);margin-bottom:12px}.vl-lab-hero h2{margin:5px 0 8px;font-size:26px}.vl-lab-hero p{max-width:780px;margin:0;color:var(--muted);line-height:1.6}.vl-lab-count{min-width:150px;display:grid;place-content:center;text-align:center;border-left:1px solid var(--border)}.vl-lab-count strong{font:800 30px var(--mono);color:var(--green)}.vl-lab-count span{font:700 9px var(--mono);text-transform:uppercase;color:var(--muted)}.vl-system-stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--border);border-radius:11px;overflow:hidden;background:var(--surface);margin-bottom:20px}.vl-system-stats>div{padding:14px;border-right:1px solid var(--border)}.vl-system-stats>div:last-child{border-right:0}.vl-system-stats strong{display:block;font:800 20px var(--mono)}.vl-system-stats span{color:var(--muted);font-size:10px}.vl-system-section{margin:24px 0}.vl-system-heading{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:10px}.vl-system-heading h2{margin:4px 0 0;font-size:18px}.vl-system-heading p{max-width:560px;margin:0;color:var(--muted);font-size:11px;line-height:1.5}.vl-system-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.vl-system-card{padding:15px;border:1px solid var(--border);border-radius:11px;background:var(--surface)}.vl-system-card.is-verified{border-top:3px solid #14b879}.vl-system-card.is-developing{border-top:3px solid #ddb238}.vl-system-card.is-failed_hypothesis{border-top:3px solid #e65061}.vl-system-card-top{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font:700 8px var(--mono);text-transform:uppercase}.vl-system-card h3{margin:12px 0 7px;font-size:14px}.vl-system-card p{min-height:34px;margin:0;color:var(--muted);font-size:10px;line-height:1.5}.vl-system-kpis{display:flex;align-items:baseline;gap:12px;margin:14px 0 7px;font:700 10px var(--mono)}.vl-system-kpis strong{font-size:22px}.vl-system-card small{color:var(--muted);font:600 8px var(--mono)}.vl-prospective-list{border:1px solid var(--border);border-radius:11px;background:var(--surface);overflow:hidden}.vl-prospective-list>div{display:grid;grid-template-columns:1fr 220px 70px;gap:12px;padding:11px 14px;border-bottom:1px solid var(--border);font-size:11px}.vl-prospective-list>div:last-child{border-bottom:0}.vl-prospective-list b{text-transform:capitalize}.vl-prospective-list small{color:var(--muted);text-align:right}@media(max-width:850px){.vl-lab-hero,.vl-system-heading{display:block}.vl-lab-count{margin-top:15px;padding-top:15px;border-left:0;border-top:1px solid var(--border)}.vl-system-stats{grid-template-columns:repeat(2,1fr)}.vl-system-grid{grid-template-columns:1fr}.vl-prospective-list>div{grid-template-columns:1fr}.vl-prospective-list small{text-align:left}}
+  `; document.head.appendChild(systemsStyle);
 
   document.addEventListener("DOMContentLoaded", () => {
     installContainers();
@@ -1014,6 +1062,7 @@
     loadPortalData();
     loadVarianceData();
     loadCoachTrends();
+    loadSystemsData();
   });
 
   document.addEventListener("hammer:data-ready", () => {

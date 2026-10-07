@@ -39,6 +39,15 @@ def predict(features: dict[str, float], model: dict[str, Any]) -> float:
     return value
 
 
+def model_home_court_points(model: dict[str, Any]) -> float:
+    names = model.get("feature_names") or []
+    if "home_court" not in names: return 0.0
+    index = names.index("home_court")
+    scale = finite((model.get("scales") or {}).get("home_court")) or 1.0
+    coefficient = finite((model.get("coefficients") or [])[index + 1])
+    return coefficient / scale if coefficient is not None else 0.0
+
+
 def feature_contributions(features: dict[str, float], model: dict[str, Any], limit: int = 6) -> list[dict[str, Any]]:
     rows = []
     for coefficient, name in zip(model["coefficients"][1:], model["feature_names"]):
@@ -195,6 +204,7 @@ def build_board(
     priors_payload: dict[str, Any],
     model_card: dict[str, Any],
     existing_payload: dict[str, Any] | None = None,
+    home_court_payload: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     model_version = model_card.get("meta", {}).get("model_version")
     if model_version != "thi-cbb-walk-forward-v0.7-research":
@@ -213,6 +223,9 @@ def build_board(
     margin_model = model_card["models"]["margin"]
     total_model = model_card["models"]["total"]
     residual_sd = float(model_card["models"]["margin_residual_sd"])
+    learned_national_hca = model_home_court_points(margin_model)
+    hca_rows = {str(row.get("team_id")): row for row in (home_court_payload or {}).get("teams") or []}
+    hca_national = finite((home_court_payload or {}).get("meta", {}).get("national_points"))
     output = []
     existing = {
         str(row.get("game_id")): row
@@ -246,6 +259,11 @@ def build_board(
             continue
         features = matchup_features(game, home, away, league_efficiency)
         margin = predict(features, margin_model)
+        home_court = hca_rows.get(home_id) or {}
+        team_hca = finite(home_court.get("home_court_points"))
+        applied_hca = 0.0 if game.get("neutral_site") else (team_hca if team_hca is not None else hca_national if hca_national is not None else learned_national_hca)
+        hca_adjustment = 0.0 if game.get("neutral_site") else applied_hca - learned_national_hca
+        margin += hca_adjustment
         total = predict(features, total_model)
         home_points = (total + margin) / 2.0
         away_points = (total - margin) / 2.0
@@ -294,7 +312,15 @@ def build_board(
                         "home_source": home["factor_source"],
                         "away_source": away["factor_source"],
                     },
-                    "margin_drivers": feature_contributions(features, margin_model),
+                    "home_court": {
+                        "points": round(applied_hca, 2),
+                        "baseline_replaced": round(learned_national_hca, 2),
+                        "margin_adjustment": round(hca_adjustment, 2),
+                        "source": "neutral_site" if game.get("neutral_site") else "team_specific_regularized" if team_hca is not None else "national_fallback",
+                        "evidence_state": "neutral_site" if game.get("neutral_site") else home_court.get("evidence_state") if team_hca is not None else "fallback",
+                        "tier": "neutral" if game.get("neutral_site") else home_court.get("tier") if team_hca is not None else "national",
+                    },
+                    "margin_drivers": ([{"feature":"team_home_court_adjustment","value":round(applied_hca,3),"margin_points":round(hca_adjustment,2)}] if abs(hca_adjustment) >= .01 else []) + feature_contributions(features, margin_model),
                 },
             },
         })
@@ -325,6 +351,7 @@ def build_board(
             "totals_signal_policy": "Withheld until totals validation clears its independent promotion gate.",
             "projection_state": "research projections; sample-gated spread signals",
             "four_factor_method": "Opponent-adjusted historical states with continuity-regressed priors blended toward current-season offense and defense factor observations.",
+            "home_court_method": "Program-specific five-season regularized conference-game estimates replace the model's national campus coefficient; neutral-site games receive zero.",
         },
         "games": output,
     }
@@ -345,6 +372,7 @@ def main() -> None:
     parser.add_argument("--profiles", type=Path, default=ROOT / "data" / "cbb" / "team_profiles.json")
     parser.add_argument("--priors", type=Path, default=ROOT / "data" / "cbb" / "model" / "current_priors.json")
     parser.add_argument("--model-card", type=Path, default=ROOT / "data" / "cbb" / "model" / "model_card.json")
+    parser.add_argument("--home-court", type=Path, default=ROOT / "data" / "cbb" / "home_court_advantage.json")
     parser.add_argument("--output", type=Path, default=ROOT / "data" / "cbb" / "projection_board.json")
     args = parser.parse_args()
     existing_payload = json.loads(args.output.read_text()) if args.output.exists() else None
@@ -354,6 +382,7 @@ def main() -> None:
         json.loads(args.priors.read_text()),
         json.loads(args.model_card.read_text()),
         existing_payload,
+        json.loads(args.home_court.read_text()) if args.home_court.exists() else None,
     )
     atomic_write(args.output, payload)
     print(f"{VERSION}: {payload['meta']['game_count']} frozen and upcoming games")

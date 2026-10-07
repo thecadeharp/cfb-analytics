@@ -57,9 +57,9 @@ jobs:
 
           payload = json.loads(Path("data/cbb/bracketology.json").read_text())
           meta = payload["meta"]
-          assert meta["version"] == "thi-cbb-bracketology-v0.2"
+          assert meta["version"] == "thi-cbb-bracketology-v0.3"
+          assert meta["forecast_type"] in {"preseason_strength_scenario", "live_resume_projection"}
           assert meta["model_version"] == "thi-cbb-walk-forward-v0.7-research"
-          assert meta["forecast_type"] == "strength_and_resume_forecast"
           assert "active-roster quality" in meta["methodology"]
           assert len(payload["field"]) == 68
           assert sum(row["bid_type"] == "automatic" for row in payload["field"]) == 32
