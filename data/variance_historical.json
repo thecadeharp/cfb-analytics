@@ -1,1 +1,23 @@
-
+{
+  "meta": {"schema_version": 2, "status": "awaiting_verified_workflow", "source": "CollegeFootballData API"},
+  "cohorts": {
+    "full_reset": {
+      "data_status": "awaiting_workflow",
+      "definition": "Verified head-coach change plus primary-quarterback change",
+      "unavailable_reason": "The historical CFBD identity build is ready but has not produced the checked artifact in this checkout.",
+      "aggregate": {"n": 0}, "distribution": [], "qb_split": {}, "analysis": "", "qualifying_2026": [], "biggest_swings": []
+    },
+    "qb_swap": {
+      "data_status": "awaiting_workflow",
+      "definition": "Same verified head coach plus primary-quarterback change",
+      "unavailable_reason": "The historical CFBD identity build is ready but has not produced the checked artifact in this checkout.",
+      "aggregate": {"n": 0}, "distribution": [], "qb_split": {}, "analysis": "", "qualifying_2026": [], "biggest_swings": []
+    },
+    "coordinator": {
+      "data_status": "unavailable",
+      "definition": "New offensive coordinator, same head coach and primary quarterback",
+      "unavailable_reason": "A verified offensive-coordinator history source is required; head-coach changes are not used as a proxy.",
+      "aggregate": {"n": 0}, "distribution": [], "qb_split": {}, "analysis": "", "qualifying_2026": [], "biggest_swings": []
+    }
+  }
+}

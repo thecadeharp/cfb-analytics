@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "version": "thi-cbb-opening-night-rehearsal-v1.0",
+    "generated_at_utc": "2026-10-07T01:24:50.561967Z",
+    "status": "passed",
+    "scope": "Synthetic neutral-site open, market move, prospective freeze, final score, Variance Lab settlement, official model grading and CLV."
+  },
+  "checks": {
+    "neutral_context_zero": true,
+    "opening_line_frozen": true,
+    "market_move_captured": true,
+    "variance_qualifier_frozen": true,
+    "variance_final_settled": true,
+    "model_signal_graded": true,
+    "closing_line_value_calculated": true
+  },
+  "evidence": {
+    "opening_home_spread": -2.0,
+    "current_home_spread": -3.0,
+    "spread_move": -1.0,
+    "market_snapshots": 2,
+    "variance_qualifiers": 2,
+    "settled_qualifiers": 2,
+    "model_grade": "win",
+    "clv": 1.0
+  }
+}

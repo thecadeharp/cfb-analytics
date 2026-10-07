@@ -2,14 +2,14 @@
 
 Data source: CollegeFootballData API.
 
-Verified cohorts produced by this script:
-  * full_reset: head coach changed AND primary quarterback changed.
-  * qb_swap: head coach stayed AND primary quarterback changed.
+Diagnostic identity joins produced by this script:
+  * head coach changed AND primary quarterback changed.
+  * head coach stayed AND primary quarterback changed.
 
-CFBD does not provide offensive-coordinator history. The coordinator cohort is
-therefore emitted as explicitly unavailable instead of being inferred from head
-coach changes. Add a separately verified coordinator-history dataset before
-publishing coordinator-only results.
+CFBD does not provide offensive-coordinator history. Because the product's
+Full Reset and QB-Only definitions also require verified coordinator identity,
+all three staff cohorts remain source-pending. The head-coach/QB joins are kept
+only as withheld diagnostics and are never labeled as the requested cohorts.
 """
 
 from __future__ import annotations
@@ -535,6 +535,32 @@ def unavailable_coordinator_cohort() -> dict[str, Any]:
     }
 
 
+def staff_history_pending(key: str, proxy: dict[str, Any]) -> dict[str, Any]:
+    definitions = {
+        "full_reset": "New head coach + new offensive coordinator + new primary quarterback",
+        "qb_swap": "New primary quarterback with the same head coach and offensive coordinator",
+    }
+    return {
+        "data_status": "source_pending",
+        "definition": definitions[key],
+        "unavailable_reason": (
+            "CFBD verifies head coaches and primary quarterbacks but does not provide the "
+            "historical offensive-coordinator identity required for this exact cohort."
+        ),
+        "aggregate": {"n": 0},
+        "distribution": [],
+        "qb_split": {},
+        "analysis": "No head-coach-only proxy is published as the requested staff cohort.",
+        "qualifying_2026": [],
+        "biggest_swings": [],
+        "diagnostic_proxy": {
+            "definition": "Head-coach continuity/change plus primary-QB change; OC identity unknown",
+            "observations": proxy.get("aggregate", {}).get("n", 0),
+            "publication_status": "withheld_from_product",
+        },
+    }
+
+
 def validate_output(payload: dict[str, Any]) -> None:
     cohorts = payload.get("cohorts", {})
     for key in ("full_reset", "qb_swap", "coordinator"):
@@ -543,16 +569,10 @@ def validate_output(payload: dict[str, Any]) -> None:
 
     for key in ("full_reset", "qb_swap"):
         cohort = cohorts[key]
-        n = integer(cohort.get("aggregate", {}).get("n"), 0)
-        distribution_n = sum(integer(row.get("count"), 0) for row in cohort["distribution"])
-        if n <= 0 or distribution_n != n:
-            raise RuntimeError(
-                f"{key} failed validation: n={n}, distribution total={distribution_n}."
-            )
-        for field in ("avg_win_change", "std_dev", "boom_rate", "bust_rate"):
-            value = cohort["aggregate"].get(field)
-            if not isinstance(value, (int, float)) or not math.isfinite(value):
-                raise RuntimeError(f"{key}.{field} is not a finite number.")
+        if cohort.get("data_status") != "source_pending":
+            raise RuntimeError(f"{key} must remain source_pending without verified OC history")
+        if integer(cohort.get("diagnostic_proxy", {}).get("observations"), 0) <= 0:
+            raise RuntimeError(f"{key} diagnostic proxy is unexpectedly empty")
 
     if cohorts["coordinator"].get("data_status") != "unavailable":
         raise RuntimeError("Coordinator cohort must remain unavailable without verified OC data.")
@@ -593,8 +613,8 @@ def main() -> None:
             },
         },
         "cohorts": {
-            "full_reset": build_cohort(by_cohort["full_reset"], "full_reset"),
-            "qb_swap": build_cohort(by_cohort["qb_swap"], "qb_swap"),
+            "full_reset": staff_history_pending("full_reset", build_cohort(by_cohort["full_reset"], "full_reset")),
+            "qb_swap": staff_history_pending("qb_swap", build_cohort(by_cohort["qb_swap"], "qb_swap")),
             "coordinator": unavailable_coordinator_cohort(),
         },
     }

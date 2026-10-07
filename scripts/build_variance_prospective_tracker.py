@@ -167,7 +167,7 @@ def build(old: dict[str, Any], cfb_board: dict[str, Any], cbb_board: dict[str, A
             spread, total, opening = market_values(game); game_id = str(game.get("game_id"))
             for system_id in qualifying_systems(sport, game, start, spread, total, opening):
                 freeze_id = f"{sport}:{game_id}:{system_id}"
-                by_freeze.setdefault(freeze_id, {"freeze_id": freeze_id, "sport": sport, "game_id": game_id, "system_id": system_id, "start_date": game.get("start_date"), "away_team": team_name(game, "away"), "home_team": team_name(game, "home"), "spread_at_freeze": spread, "total_at_freeze": total, "opening_spread_at_freeze": opening, "frozen_at_utc": now.isoformat().replace("+00:00", "Z"), "result": "pending"})
+                by_freeze.setdefault(freeze_id, {"freeze_id": freeze_id, "sport": sport, "game_id": game_id, "system_id": system_id, "start_date": game.get("start_date"), "away_team": team_name(game, "away"), "home_team": team_name(game, "home"), "neutral_site": bool(game.get("neutral_site")), "spread_at_freeze": spread, "total_at_freeze": total, "opening_spread_at_freeze": opening, "frozen_at_utc": now.isoformat().replace("+00:00", "Z"), "result": "pending"})
 
     for sport in ("cfb", "cbb"):
         by_id, by_matchup = final_scores(sport, cfb_results, cbb_board)

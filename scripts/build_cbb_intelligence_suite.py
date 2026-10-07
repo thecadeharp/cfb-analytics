@@ -203,7 +203,7 @@ def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[
             if item["status"] in {"final", "completed", "complete"}:
                 recent_by_team[team_id].append({key: value for key, value in item.items() if key != "start"})
         market = game.get("market") or {}
-        market_rows.append({"game_id": game.get("game_id"), "start_date": game.get("start_date"), "away_team": (game.get("away") or {}).get("team"), "home_team": (game.get("home") or {}).get("team"), "opening_spread": market.get("opening_home_spread"), "current_spread": market.get("consensus_home_spread"), "spread_move": market.get("spread_move"), "opening_total": market.get("opening_total"), "current_total": market.get("consensus_total"), "total_move": market.get("total_move"), "model_edge": projection.get("spread_edge"), "signal": projection.get("spread_signal_tier"), "confidence": projection.get("signal_confidence")})
+        market_rows.append({"game_id": game.get("game_id"), "start_date": game.get("start_date"), "away_team": (game.get("away") or {}).get("team"), "home_team": (game.get("home") or {}).get("team"), "neutral_site": bool(game.get("neutral_site")), "opening_spread": market.get("opening_home_spread"), "current_spread": market.get("consensus_home_spread"), "spread_move": market.get("spread_move"), "opening_total": market.get("opening_total"), "current_total": market.get("consensus_total"), "total_move": market.get("total_move"), "model_edge": projection.get("spread_edge"), "signal": projection.get("spread_signal_tier"), "confidence": projection.get("signal_confidence")})
 
     for rows in schedules.values():
         rows.sort(key=lambda row: row.get("start") or datetime.max.replace(tzinfo=timezone.utc))

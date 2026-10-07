@@ -59,12 +59,11 @@ jobs:
 
           for key, minimum in (("full_reset", 25), ("qb_swap", 100)):
               cohort = cohorts[key]
-              n = cohort.get("aggregate", {}).get("n", 0)
-              distribution_n = sum(row.get("count", 0) for row in cohort.get("distribution", []))
-              if cohort.get("data_status") != "verified" or n < minimum:
-                  raise SystemExit(f"{key} is sparse or unverified: status={cohort.get('data_status')}, n={n}")
-              if distribution_n != n:
-                  raise SystemExit(f"{key} distribution total {distribution_n} does not equal n={n}")
+              proxy_n = cohort.get("diagnostic_proxy", {}).get("observations", 0)
+              if cohort.get("data_status") != "source_pending" or proxy_n < minimum:
+                  raise SystemExit(f"{key} safety gate failed: status={cohort.get('data_status')}, proxy_n={proxy_n}")
+              if cohort.get("aggregate", {}).get("n", 0) != 0:
+                  raise SystemExit(f"{key} must not publish proxy observations as the exact cohort")
 
           coordinator = cohorts["coordinator"]
           if coordinator.get("data_status") != "unavailable":

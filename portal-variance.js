@@ -526,21 +526,35 @@
   }
 
   function renderPortalOffensive() {
+    const players = (portalData?.players || []).filter(row => row.side === "offense");
     return `
       <div class="pv-section-header">
         <div class="pv-section-title">Offensive Portal Impact</div>
-        <div class="pv-section-sub">PTR weighted by projected role and positional leverage. OL = offensive line, RB = running backs, QB = quarterbacks, and WR = wide receivers.</div>
+        <div class="pv-section-sub">Verified incoming offensive transfers by destination, position and published portal rating. Display-only research; no projected role is invented.</div>
       </div>
-      ${renderPortalComingSoon("Player-level position and production data is required before these ratings can be published responsibly.")}`;
+      ${renderPortalPlayerTable(players,"No verified offensive player rows are loaded yet. Run Build CFB Portal Intelligence to populate this panel.")}`;
   }
 
   function renderPortalDefensive() {
+    const players = (portalData?.players || []).filter(row => row.side === "defense");
     return `
       <div class="pv-section-header">
         <div class="pv-section-title">Defensive Portal Impact</div>
-        <div class="pv-section-sub">Position-group movement and defensive roster impact.</div>
+        <div class="pv-section-sub">Verified incoming defensive transfers by destination, position and published portal rating. Model A remains isolated from this research layer.</div>
       </div>
-      ${renderPortalComingSoon("Player-level position data is required before these ratings can be published responsibly.")}`;
+      ${renderPortalPlayerTable(players,"No verified defensive player rows are loaded yet. Run Build CFB Portal Intelligence to populate this panel.")}`;
+  }
+
+  function renderPortalPlayerTable(players, emptyNote) {
+    if (!players.length) return renderPortalComingSoon(emptyNote);
+    const rows = [...players].sort((a,b)=>(Number(b.rating)||0)-(Number(a.rating)||0)).map(row => `<tr>
+      <td><div class="pv-team-name">${pEsc(row.name)}</div><div class="pv-conf">from ${pEsc(row.origin||"Unknown")}</div></td>
+      <td>${pEsc(row.position||"—")}</td>
+      <td><span class="team-with-logo">${pTeamLogo(row.destination)}<span class="pv-team-name">${pEsc(row.destination)}</span></span></td>
+      <td class="r">${pFmt(row.rating,3)}</td>
+      <td class="r">${row.juco?'<span class="vl-badge ten-w">JUCO</span>':"—"}</td>
+    </tr>`).join("");
+    return `<div class="pv-table-wrap"><table class="pv-table"><thead><tr><th>Player</th><th>Pos</th><th>Destination</th><th class="r">Rating</th><th class="r">Origin</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }
 
   function renderPortalConference() {
@@ -600,21 +614,24 @@
   }
 
   function renderPortalJuco() {
+    const players = (portalData?.players || []).filter(row => row.juco);
     return `
       <div class="pv-section-header">
         <div class="pv-section-title">JUCO Signees</div>
-        <div class="pv-section-sub">Junior college transfers signing with FBS programs.</div>
+        <div class="pv-section-sub">Transfers whose source record explicitly identifies a junior-college origin. Ambiguous origin schools are excluded.</div>
       </div>
-      ${renderPortalComingSoon("JUCO classification requires verified player-level origin-school data.")}`;
+      ${renderPortalPlayerTable(players,"No source-verified JUCO classifications are loaded. THI will not infer JUCO status from a missing origin.")}`;
   }
 
   function renderPortalImpact() {
+    const rows = portalData?.position_impact || [];
+    const markup = rows.length ? `<div class="pv-table-wrap"><table class="pv-table"><thead><tr><th>Team</th><th class="r">Off IN</th><th class="r">Off Avg</th><th class="r">Def IN</th><th class="r">Def Avg</th></tr></thead><tbody>${rows.map(row=>`<tr><td><span class="team-with-logo">${pTeamLogo(row.team)}<span class="pv-team-name">${pEsc(row.team)}</span></span></td><td class="r">${row.offense?.count||0}</td><td class="r">${pFmt(row.offense?.avg_rating,3)}</td><td class="r">${row.defense?.count||0}</td><td class="r">${pFmt(row.defense?.avg_rating,3)}</td></tr>`).join("")}</tbody></table></div>` : renderPortalComingSoon("The verified player-level destination build has not completed yet.");
     return `
       <div class="pv-section-header">
         <div class="pv-section-title">Portal Impact on 2026 Projections</div>
-        <div class="pv-section-sub">Player-level production translated into projected team impact.</div>
+        <div class="pv-section-sub">Position-group arrivals and average portal rating. This is roster context only until player production and projected roles clear validation.</div>
       </div>
-      ${renderPortalComingSoon("This will remain separate from Model A until production-based transfer values are validated.")}`;
+      ${markup}`;
   }
 
   function renderPortalComingSoon(note) {
@@ -682,16 +699,17 @@
       return pendingOrder || String(a.start_date || "").localeCompare(String(b.start_date || ""));
     });
     const groups = [
-      ["verified","Verified systems","Cleared THI's sample, profitability and separation gates."],
+      ["verified","Verified systems","Cleared the no-vig baseline, exact-test, Holm correction and bomb-dependency gates."],
       ["developing","Developing systems","Promising evidence that remains descriptive until the prospective ledger matures."],
       ["failed_hypothesis","Failed hypotheses","Popular angles that did not survive THI's own historical test."],
+      ["source_pending","Source pending","Defined research questions whose required market or identity source is not complete."],
     ];
     const sections = groups.map(([state,title,note]) => {
       const rows = cards.filter(card => card.state === state);
-      return `<section class="vl-system-section"><div class="vl-system-heading"><div><div class="vl-cohort-label">Evidence state</div><h2>${pEsc(title)}</h2></div><p>${pEsc(note)}</p></div><div class="vl-system-grid">${rows.map(card => { const live = prospectiveSummary[card.id]; return `<article class="vl-system-card is-${pEsc(state)}"><div class="vl-system-card-top"><span>${pEsc(card.market)} · ${pEsc(card.family)}</span><b>${pEsc(systemStateLabel(state))}</b></div><h3>${pEsc(card.name)}</h3><p>${pEsc(card.description)}</p><div class="vl-system-kpis"><strong>${pFmt(card.hit_rate,1)}%</strong><span>${pEsc(card.wins)}–${pEsc(card.losses)}${card.pushes ? `–${pEsc(card.pushes)}` : ""}</span><span>${pSign(card.roi_pct_at_minus_110,1)}% ROI</span></div><small>${pEsc(card.decisions)} historical decisions · ${pEsc(card.seasons?.[0])}–${pEsc(card.seasons?.at(-1))}</small>${live ? `<div class="vl-live-record"><b>LIVE PROSPECTIVE</b><span>${pEsc(live.wins)}–${pEsc(live.losses)}–${pEsc(live.pushes)} · ${pEsc(live.pending)} pending</span></div>` : ""}</article>`; }).join("") || `<div class="empty-state">No systems currently occupy this state.</div>`}</div></section>`;
+      return `<section class="vl-system-section"><div class="vl-system-heading"><div><div class="vl-cohort-label">Evidence state</div><h2>${pEsc(title)}</h2></div><p>${pEsc(note)}</p></div><div class="vl-system-grid">${rows.map(card => { const live = prospectiveSummary[card.id]; const gate = card.validation; return `<article class="vl-system-card is-${pEsc(state)}"><div class="vl-system-card-top"><span>${pEsc(card.market)} · ${pEsc(card.family)}</span><b>${pEsc(systemStateLabel(state))}</b></div><h3>${pEsc(card.name)}</h3><p>${pEsc(card.description)}</p><div class="vl-system-kpis"><strong>${pFmt(card.hit_rate,1)}%</strong><span>${pEsc(card.wins)}–${pEsc(card.losses)}${card.pushes ? `–${pEsc(card.pushes)}` : ""}</span><span>${pSign(card.roi_pct_at_minus_110,1)}% ROI</span></div><small>${pEsc(card.decisions)} historical decisions · ${pEsc(card.seasons?.[0])}–${pEsc(card.seasons?.at(-1))}</small>${gate ? `<div class="vl-live-record"><b>VALIDATION GATE</b><span>${gate.passed ? "4/4 passed" : "Price-aware baseline pending"}</span></div>` : ""}${live ? `<div class="vl-live-record"><b>LIVE PROSPECTIVE</b><span>${pEsc(live.wins)}–${pEsc(live.losses)}–${pEsc(live.pushes)} · ${pEsc(live.pending)} pending</span></div>` : ""}</article>`; }).join("") || `<div class="empty-state">No systems currently occupy this state.</div>`}</div></section>`;
     }).join("");
     return `<div class="vl-lab-hero"><div><div class="vl-cohort-label">THI Variance Lab</div><h2>What survives the historical distribution?</h2><p>Every rule is frozen before evaluation. Winning, inconclusive and losing hypotheses stay visible so the lab cannot quietly select only favorable results.</p></div><div class="vl-lab-count"><strong>${Number(cfb.settled_games || 0).toLocaleString()}</strong><span>settled games tested</span></div></div>
-      <div class="vl-system-stats"><div><strong>${cards.filter(c=>c.state==='verified').length}</strong><span>Verified</span></div><div><strong>${cards.filter(c=>c.state==='developing').length}</strong><span>Developing</span></div><div><strong>${cards.filter(c=>c.state==='failed_hypothesis').length}</strong><span>Failed hypotheses</span></div><div><strong>${frozen.length}</strong><span>Frozen qualifiers</span></div></div>
+      <div class="vl-system-stats"><div><strong>${cards.filter(c=>c.state==='verified').length}</strong><span>Verified</span></div><div><strong>${cards.filter(c=>c.state==='developing').length}</strong><span>Developing</span></div><div><strong>${cards.filter(c=>c.state==='failed_hypothesis').length}</strong><span>Failed hypotheses</span></div><div><strong>${cards.filter(c=>c.state==='source_pending').length}</strong><span>Source pending</span></div><div><strong>${frozen.length}</strong><span>Frozen qualifiers</span></div></div>
       ${sections}
       <section class="vl-system-section"><div class="vl-system-heading"><div><div class="vl-cohort-label">Forward evidence</div><h2>Prospective qualifier ledger</h2></div><p>The first eligible pregame line is immutable. Final scores automatically grade the frozen number; these labels never modify Model A.</p></div><div class="vl-prospective-list">${visibleLedger.slice(0,24).map(row=>`<div><span>${pEsc(row.away_team)} at ${pEsc(row.home_team)}</span><b>${pEsc(String(row.system_id).replaceAll('-',' '))}</b><small>${pEsc(row.result)}</small></div>`).join("") || `<p>No current qualifiers.</p>`}</div></section>`;
   }
@@ -749,6 +767,13 @@
   function renderCohort(cohortKey, label, description) {
     const cohort = varianceData?.cohorts?.[cohortKey];
     if (!cohort) return `<div class="empty-state" style="padding:60px 20px">No data for this cohort yet.</div>`;
+    if (cohort.data_status !== "verified") {
+      return `<div class="vl-cohort-header">
+        <div class="vl-cohort-label">${pEsc(label)} · Source pending</div>
+        <div class="vl-cohort-title">${pEsc(description)}</div>
+        <div class="vl-cohort-sub">${pEsc(cohort.unavailable_reason || "The verified historical build has not completed yet. This cohort stays unpublished until its source and identity joins pass validation.")}</div>
+      </div>${renderPortalComingSoon("No proxy data or inferred staff assignments are displayed in this section.")}`;
+    }
 
     const stats = cohort.aggregate || {};
     const distribution = cohort.distribution || [];
@@ -856,6 +881,10 @@
 
   function renderVarianceCrossComparison() {
     const cohorts = varianceData?.cohorts ?? {};
+    const verified = Object.values(cohorts).filter(cohort => cohort?.data_status === "verified" && Number(cohort?.aggregate?.n || 0) > 0);
+    if (!verified.length) {
+      return `<div class="pv-section-header"><div class="pv-section-title">Cross-Cohort Comparison</div><div class="pv-section-sub">The comparison will publish after at least two independently verified cohort builds are available.</div></div>${renderPortalComingSoon("Full Reset, QB-Only Swap and Coordinator Change are never compared using placeholder or proxy observations.")}`;
+    }
     const keys = [
       ["full_reset","Full Reset","New HC + New OC + New QB"],
       ["qb_swap","QB-Only Swap","Same HC + Same OC + New QB"],
@@ -883,7 +912,7 @@
     return `
       <div class="pv-section-header">
         <div class="pv-section-title">Cross-Cohort Comparison</div>
-        <div class="pv-section-sub">Side-by-side aggregate stats across all three change cohorts. Full Reset carries the most variance; Coordinator Change shows the least.</div>
+        <div class="pv-section-sub">Side-by-side aggregate stats across the verified change cohorts.</div>
       </div>
       <div class="vl-compare-grid">${cards}</div>`;
   }
@@ -901,9 +930,6 @@
       return;
     }
 
-    const hasPublishedVariance = ["full_reset", "qb_swap", "coordinator"]
-      .some(key => Number(varianceData?.cohorts?.[key]?.aggregate?.n || 0) > 0);
-
     if (varianceSubTab === "systems") {
       container.innerHTML = renderVarianceSubNav() + renderSystemsRegistry();
       return;
@@ -911,16 +937,6 @@
 
     if (varianceSubTab === "coach_ats") {
       container.innerHTML = renderVarianceSubNav() + renderCoachTrends();
-      return;
-    }
-
-    if (!hasPublishedVariance) {
-      container.innerHTML = `
-        <div class="vl-coming-soon">
-          <div class="vl-coming-soon-title">Variance Lab Research Roadmap</div>
-          <div class="pv-section-sub" style="max-width:620px;margin:0 18px">Historical systems publish only after source coverage, frozen-rule testing and sample checks are complete.</div>
-          <div class="vl-coming-soon-mark">Source → backtest → prospective track → publish</div>
-        </div>`;
       return;
     }
 
@@ -1057,7 +1073,7 @@
   // ── Boot ─────────────────────────────────────────────────────────────────────
   installPortalVarianceStyles();
   const systemsStyle = document.createElement("style"); systemsStyle.textContent = `
-    .vl-lab-hero{display:flex;justify-content:space-between;gap:24px;padding:22px;border:1px solid var(--border);border-radius:13px;background:var(--surface);margin-bottom:12px}.vl-lab-hero h2{margin:5px 0 8px;font-size:26px}.vl-lab-hero p{max-width:780px;margin:0;color:var(--muted);line-height:1.6}.vl-lab-count{min-width:150px;display:grid;place-content:center;text-align:center;border-left:1px solid var(--border)}.vl-lab-count strong{font:800 30px var(--mono);color:var(--green)}.vl-lab-count span{font:700 9px var(--mono);text-transform:uppercase;color:var(--muted)}.vl-system-stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--border);border-radius:11px;overflow:hidden;background:var(--surface);margin-bottom:20px}.vl-system-stats>div{padding:14px;border-right:1px solid var(--border)}.vl-system-stats>div:last-child{border-right:0}.vl-system-stats strong{display:block;font:800 20px var(--mono)}.vl-system-stats span{color:var(--muted);font-size:10px}.vl-system-section{margin:24px 0}.vl-system-heading{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:10px}.vl-system-heading h2{margin:4px 0 0;font-size:18px}.vl-system-heading p{max-width:560px;margin:0;color:var(--muted);font-size:11px;line-height:1.5}.vl-system-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.vl-system-card{padding:15px;border:1px solid var(--border);border-radius:11px;background:var(--surface)}.vl-system-card.is-verified{border-top:3px solid #14b879}.vl-system-card.is-developing{border-top:3px solid #ddb238}.vl-system-card.is-failed_hypothesis{border-top:3px solid #e65061}.vl-system-card-top{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font:700 8px var(--mono);text-transform:uppercase}.vl-system-card h3{margin:12px 0 7px;font-size:14px}.vl-system-card p{min-height:34px;margin:0;color:var(--muted);font-size:10px;line-height:1.5}.vl-system-kpis{display:flex;align-items:baseline;gap:12px;margin:14px 0 7px;font:700 10px var(--mono)}.vl-system-kpis strong{font-size:22px}.vl-system-card small{color:var(--muted);font:600 8px var(--mono)}.vl-live-record{display:flex;justify-content:space-between;gap:8px;margin-top:10px;padding-top:9px;border-top:1px solid var(--border);font:700 8px var(--mono)}.vl-live-record b{color:var(--green)}.vl-live-record span{color:var(--muted)}.vl-prospective-list{border:1px solid var(--border);border-radius:11px;background:var(--surface);overflow:hidden}.vl-prospective-list>div{display:grid;grid-template-columns:1fr 220px 70px;gap:12px;padding:11px 14px;border-bottom:1px solid var(--border);font-size:11px}.vl-prospective-list>div:last-child{border-bottom:0}.vl-prospective-list b{text-transform:capitalize}.vl-prospective-list small{color:var(--muted);text-align:right}@media(max-width:850px){.vl-lab-hero,.vl-system-heading{display:block}.vl-lab-count{margin-top:15px;padding-top:15px;border-left:0;border-top:1px solid var(--border)}.vl-system-stats{grid-template-columns:repeat(2,1fr)}.vl-system-grid{grid-template-columns:1fr}.vl-prospective-list>div{grid-template-columns:1fr}.vl-prospective-list small{text-align:left}}
+    .vl-lab-hero{display:flex;justify-content:space-between;gap:24px;padding:22px;border:1px solid var(--border);border-radius:13px;background:var(--surface);margin-bottom:12px}.vl-lab-hero h2{margin:5px 0 8px;font-size:26px}.vl-lab-hero p{max-width:780px;margin:0;color:var(--muted);line-height:1.6}.vl-lab-count{min-width:150px;display:grid;place-content:center;text-align:center;border-left:1px solid var(--border)}.vl-lab-count strong{font:800 30px var(--mono);color:var(--green)}.vl-lab-count span{font:700 9px var(--mono);text-transform:uppercase;color:var(--muted)}.vl-system-stats{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--border);border-radius:11px;overflow:hidden;background:var(--surface);margin-bottom:20px}.vl-system-stats>div{padding:14px;border-right:1px solid var(--border)}.vl-system-stats>div:last-child{border-right:0}.vl-system-stats strong{display:block;font:800 20px var(--mono)}.vl-system-stats span{color:var(--muted);font-size:10px}.vl-system-section{margin:24px 0}.vl-system-heading{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:10px}.vl-system-heading h2{margin:4px 0 0;font-size:18px}.vl-system-heading p{max-width:560px;margin:0;color:var(--muted);font-size:11px;line-height:1.5}.vl-system-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.vl-system-card{padding:15px;border:1px solid var(--border);border-radius:11px;background:var(--surface)}.vl-system-card.is-verified{border-top:3px solid #14b879}.vl-system-card.is-developing{border-top:3px solid #ddb238}.vl-system-card.is-failed_hypothesis{border-top:3px solid #e65061}.vl-system-card.is-source_pending{border-top:3px solid #7d8794}.vl-system-card-top{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font:700 8px var(--mono);text-transform:uppercase}.vl-system-card h3{margin:12px 0 7px;font-size:14px}.vl-system-card p{min-height:34px;margin:0;color:var(--muted);font-size:10px;line-height:1.5}.vl-system-kpis{display:flex;align-items:baseline;gap:12px;margin:14px 0 7px;font:700 10px var(--mono)}.vl-system-kpis strong{font-size:22px}.vl-system-card small{color:var(--muted);font:600 8px var(--mono)}.vl-live-record{display:flex;justify-content:space-between;gap:8px;margin-top:10px;padding-top:9px;border-top:1px solid var(--border);font:700 8px var(--mono)}.vl-live-record b{color:var(--green)}.vl-live-record span{color:var(--muted)}.vl-prospective-list{border:1px solid var(--border);border-radius:11px;background:var(--surface);overflow:hidden}.vl-prospective-list>div{display:grid;grid-template-columns:1fr 220px 70px;gap:12px;padding:11px 14px;border-bottom:1px solid var(--border);font-size:11px}.vl-prospective-list>div:last-child{border-bottom:0}.vl-prospective-list b{text-transform:capitalize}.vl-prospective-list small{color:var(--muted);text-align:right}@media(max-width:850px){.vl-lab-hero,.vl-system-heading{display:block}.vl-lab-count{margin-top:15px;padding-top:15px;border-left:0;border-top:1px solid var(--border)}.vl-system-stats{grid-template-columns:repeat(2,1fr)}.vl-system-grid{grid-template-columns:1fr}.vl-prospective-list>div{grid-template-columns:1fr}.vl-prospective-list small{text-align:left}}
   `; document.head.appendChild(systemsStyle);
 
   document.addEventListener("DOMContentLoaded", () => {

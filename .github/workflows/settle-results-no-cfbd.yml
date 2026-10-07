@@ -48,7 +48,7 @@ jobs:
 
       - name: Freeze and settle Variance Lab qualifiers
         run: |
-          python -m unittest scripts/test_variance_lab.py
+          python -m unittest scripts/test_validation_framework.py scripts/test_variance_lab.py
           python scripts/build_variance_prospective_tracker.py
 
       - name: Refresh first-snapshot weekly model scorecard

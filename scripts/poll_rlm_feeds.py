@@ -10,6 +10,8 @@ import json,os
 from datetime import datetime,timezone
 from pathlib import Path
 from urllib.request import Request,urlopen
+try:from scripts.build_rlm_monitor import sharp_book_identity
+except ModuleNotFoundError:from build_rlm_monitor import sharp_book_identity
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/"data/market/rlm_snapshots.jsonl"
 def fetch(url,token):
  headers={"Accept":"application/json","User-Agent":"THI-RLM/1.0"}
@@ -26,9 +28,11 @@ def main():
  for market in odds:
   public=split_index.get((str(market.get("sport")),str(market.get("event_id"))))
   if not public:continue
+  sharp_book=sharp_book_identity(market.get("book"))
+  if not sharp_book:continue
   market_time=captured(market.get("captured_at_utc"));public_time=captured(public.get("captured_at_utc"))
   if not market_time or not public_time or abs((market_time-public_time).total_seconds())>300:continue
-  added.append({"captured_at_utc":now,"odds_captured_at_utc":market.get("captured_at_utc"),"splits_captured_at_utc":public.get("captured_at_utc"),"sport":market.get("sport"),"event_id":market.get("event_id"),"start_date":market.get("start_date"),"away_team":market.get("away_team"),"home_team":market.get("home_team"),"sharp_book":market.get("book"),"opening_home_spread":market.get("opening_home_spread"),"current_home_spread":market.get("current_home_spread"),"public_source":public.get("source"),"public_side":public.get("public_side"),"public_ticket_pct":public.get("public_ticket_pct"),"public_handle_pct":public.get("public_handle_pct")})
+  added.append({"captured_at_utc":now,"odds_captured_at_utc":market.get("captured_at_utc"),"splits_captured_at_utc":public.get("captured_at_utc"),"sport":market.get("sport"),"event_id":market.get("event_id"),"start_date":market.get("start_date"),"away_team":market.get("away_team"),"home_team":market.get("home_team"),"sharp_book":sharp_book,"opening_home_spread":market.get("opening_home_spread"),"current_home_spread":market.get("current_home_spread"),"public_source":public.get("source"),"public_side":public.get("public_side"),"public_ticket_pct":public.get("public_ticket_pct"),"public_handle_pct":public.get("public_handle_pct")})
  OUT.parent.mkdir(parents=True,exist_ok=True)
  with OUT.open("a")as h:
   for row in added:h.write(json.dumps(row,separators=(",",":"))+"\n")

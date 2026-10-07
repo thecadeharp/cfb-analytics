@@ -136,15 +136,18 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
 .cbb-research-banner strong { flex: 0 0 auto; padding-right: 18px; border-right: 1px solid rgba(245,231,169,.2); font: 800 9px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
 .cbb-neutral-label { color: #79d9b1; font: 800 10px var(--mono); letter-spacing: .06em; }
 .cbb-neutral-audit { margin: 8px 0 12px; padding: 10px 12px; border: 1px solid rgba(75,207,155,.32); border-radius: 8px; background: rgba(27,112,82,.13); color: #8be0bd; font: 800 10px var(--mono); letter-spacing: .04em; text-transform: uppercase; }
-.cbb-health-strip { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1px; margin:14px 0; overflow:hidden; border:1px solid var(--border); border-radius:10px; background:var(--border); }
+.cbb-health-strip { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; margin:14px 0; overflow:hidden; border:1px solid var(--border); border-radius:10px; background:var(--border); }
 .cbb-health-strip > div { min-width:0; padding:12px 14px; background:var(--panel); }
 .cbb-health-strip small { display:block; margin-bottom:5px; color:var(--muted); font:800 9px var(--mono); letter-spacing:.06em; text-transform:uppercase; }
 .cbb-health-strip strong { display:block; overflow:hidden; text-overflow:ellipsis; color:var(--text); font-size:12px; white-space:nowrap; }
 .cbb-health-strip .is-good { color:#75d9af; }
 .cbb-health-strip .is-watch { color:#e8bd68; }
 .cbb-signal-guide { margin-top: 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
-.cbb-signal-guide-heading { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 14px 16px; font-size: 12px; font-weight: 800; }
-.cbb-signal-guide-heading small { color: var(--muted); font: 700 8px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.cbb-signal-guide-heading { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 14px 16px; font-size: 12px; font-weight: 800; cursor: pointer; list-style: none; }
+.cbb-signal-guide-heading::-webkit-details-marker { display: none; }
+.cbb-signal-guide-heading::after { content: "+"; color: var(--muted); font: 700 15px var(--mono); }
+.cbb-signal-guide[open] .cbb-signal-guide-heading::after { content: "−"; }
+.cbb-signal-guide-heading small { margin-left: auto; color: var(--muted); font: 700 8px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
 .cbb-signal-guide-body { padding: 16px; border-top: 1px solid var(--border); }
 .cbb-signal-guide-body p { margin: 0 0 13px; color: var(--muted); font-size: 11px; line-height: 1.6; }
 .cbb-signal-guide-body p:last-child { margin-bottom: 0; }

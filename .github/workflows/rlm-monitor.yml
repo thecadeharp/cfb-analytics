@@ -38,7 +38,7 @@ jobs:
           python scripts/build_rlm_monitor.py
       - name: Test and publish qualified monitor state
         run: |
-          python -m unittest scripts/test_variance_lab.py
+          python -m unittest scripts/test_validation_framework.py scripts/test_variance_lab.py
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/market/rlm_snapshots.jsonl data/market/rlm_monitor.json

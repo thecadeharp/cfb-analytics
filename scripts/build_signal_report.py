@@ -46,6 +46,10 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 from statistics import mean
+try:
+    from scripts.validation_framework import exact_binomial_tail, holm_bonferroni, validation_gate
+except ModuleNotFoundError:
+    from validation_framework import exact_binomial_tail, holm_bonferroni, validation_gate
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -153,7 +157,9 @@ def first_snapshot_rows(report):
     return first
 
 
-def confidence_for(decisions, ats_pct, avg_clv, beat_close_pct):
+def confidence_for(decisions, ats_pct, avg_clv, beat_close_pct, validation_passed=False):
+    if not validation_passed:
+        return "DEVELOPING"
     established = CONFIDENCE_RULES["ESTABLISHED"]
     if (
         decisions >= established["minimum_decisions"]
@@ -302,8 +308,19 @@ def main():
             "beat_close_pct_ex_pushes": beat_pct,
         }
         output["confidence"] = confidence
+        output["_outcomes"] = [value for value in ats if value != "P"]
 
         signals[signal] = output
+
+    p_values = [exact_binomial_tail(len(item["_outcomes"]), item["_outcomes"].count("W"), .5) if item["_outcomes"] else 1.0 for item in signals.values()]
+    for item, adjusted_p in zip(signals.values(), holm_bonferroni(p_values)):
+        outcomes = item.pop("_outcomes")
+        profits = [1.0 if result == "W" else -1.1 for result in outcomes]
+        gate = validation_gate(outcomes=outcomes, no_vig_probabilities=None, adjusted_p=adjusted_p, profits=profits)
+        gate["baseline_note"] = "Both sides' recorded prices are not present in the current prospective ledger; this tier cannot be promoted from a flat baseline."
+        item["validation"] = gate
+        record=item["record"];clv=item["clv"]
+        item["confidence"] = confidence_for(item["sample"]["ats_decisions"],record["ats_win_pct_ex_pushes"],clv["average_clv_points"],clv["beat_close_pct_ex_pushes"],gate["passed"])
 
     report = {
         "report_version": REPORT_VERSION,
@@ -324,8 +341,9 @@ def main():
             "rules": CONFIDENCE_RULES,
             "meaning": (
                 "Signal Confidence measures the prospective evidence supporting "
-                "each signal tier using sample size, ATS performance, CLV and "
-                "beat-close rate."
+                "each signal tier. Promotion requires a recorded per-play no-vig "
+                "baseline, exact testing, Holm correction, outlier robustness, "
+                "positive CLV and stable rolling results."
             ),
         },
         "signals": signals,

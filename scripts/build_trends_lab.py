@@ -6,6 +6,10 @@ from datetime import datetime,timezone
 from pathlib import Path
 from typing import Any,Callable
 from zoneinfo import ZoneInfo
+try:
+ from scripts.validation_framework import exact_binomial_tail, holm_bonferroni, monthly_results, validation_gate
+except ModuleNotFoundError:
+ from validation_framework import exact_binomial_tail, holm_bonferroni, monthly_results, validation_gate
 ROOT=Path(__file__).resolve().parents[1];VERSION="thi-variance-systems-lab-v2.0";ACADEMIES={"Army","Navy","Air Force"};EASTERN=ZoneInfo("America/New_York")
 def num(v:Any)->float|None:
  try:v=float(v);return v if math.isfinite(v) else None
@@ -13,14 +17,13 @@ def num(v:Any)->float|None:
 def iso(v):
  try:return datetime.fromisoformat(str(v).replace("Z","+00:00"))
  except(TypeError,ValueError):return None
-def evidence_state(n,w,roi):
+def evidence_state(n,w,roi,gate=None):
  if not n:return "source_pending"
- significant=(w/n-.5)/math.sqrt(.25/n)>=1.96
- if n>=200 and (roi or 0)>0 and significant:return "verified"
+ if gate and gate.get("passed"):return "verified"
  if n>=75 and (roi or 0)<=0:return "failed_hypothesis"
  return "developing"
 def system(rows,name,rule,select:Callable[[dict[str,Any]],bool],market,side="home",source_note="THI historical warehouse",family="situational"):
- w=l=p=0;seasons=set()
+ w=l=p=0;seasons=set();observations=[]
  for r in rows:
   if not select(r):continue
   margin,total,spread,market_total=map(num,(r.get("margin"),r.get("total"),r.get("spread"),r.get("market_total")))
@@ -30,12 +33,33 @@ def system(rows,name,rule,select:Callable[[dict[str,Any]],bool],market,side="hom
   else:
    if total is None or market_total is None:continue
    result=market_total-total if market=="under" else total-market_total
-  if abs(result)<.001:p+=1
-  elif result>0:w+=1
-  else:l+=1
+  if abs(result)<.001:p+=1;decision="P"
+  elif result>0:w+=1;decision="W"
+  else:l+=1;decision="L"
+  observations.append({"result":decision,"date":r.get("start_date")})
   seasons.add(int(r["season"]))
  n=w+l;rate=round(100*w/n,1)if n else None;roi=round(100*(w-l*1.1)/(1.1*n),1)if n else None
- return {"id":name.lower().replace("&","and").replace(" ","-").replace("/","-"),"name":name,"description":rule,"family":family,"market":"ATS"if market=="ats"else market.title(),"wins":w,"losses":l,"pushes":p,"decisions":n,"hit_rate":rate,"roi_pct_at_minus_110":roi,"seasons":sorted(seasons),"state":evidence_state(n,w,roi),"source_note":source_note}
+ raw_p=exact_binomial_tail(n,w,.5) if n else None
+ return {"id":name.lower().replace("&","and").replace(" ","-").replace("/","-"),"name":name,"description":rule,"family":family,"market":"ATS"if market=="ats"else market.title(),"wins":w,"losses":l,"pushes":p,"decisions":n,"hit_rate":rate,"roi_pct_at_minus_110":roi,"seasons":sorted(seasons),"state":evidence_state(n,w,roi),"source_note":source_note,"monthly":monthly_results(observations),"_outcomes":[x["result"] for x in observations if x["result"]!="P"],"_raw_p":raw_p}
+
+def apply_validation(cards):
+ testable=[card for card in cards if card.get("_raw_p") is not None]
+ adjusted=holm_bonferroni([card["_raw_p"] for card in testable]) if testable else []
+ for card,adjusted_p in zip(testable,adjusted):
+  outcomes=card.pop("_outcomes")
+  card.pop("_raw_p",None)
+  # Historical files contain closing lines but not the two-sided prices needed
+  # for a true per-play no-vig baseline. The exact 50% test remains research
+  # context; it can never promote a card to Validated by itself.
+  profits=[1.0 if result=="W" else -1.1 for result in outcomes]
+  gate=validation_gate(outcomes=outcomes,no_vig_probabilities=None,adjusted_p=adjusted_p,profits=profits)
+  gate["research_exact_p_value"] = round(exact_binomial_tail(len(outcomes),outcomes.count("W"),.5),6) if outcomes else None
+  gate["baseline_note"] = "Closing prices were not recorded on both sides; 50% is shown for research only and cannot validate the system."
+  card["validation"] = gate
+  card["state"] = evidence_state(card["decisions"],card["wins"],card["roi_pct_at_minus_110"],gate)
+ for card in cards:
+  card.pop("_outcomes",None);card.pop("_raw_p",None)
+ return cards
 def context_index(path):
  if not path.exists():return {}
  return {f"{x.get('sport')}:{x['game_id']}":x for x in json.loads(path.read_text()).get("games",[])}
@@ -45,7 +69,7 @@ def cfb_rows(path,ctx):
   for r in csv.DictReader(h):
    if str(r.get("completed")).lower()!="true":continue
    joined=ctx.get(f"cfb:{r.get('game_id')}",{})
-   out.append({"game_id":str(r.get("game_id")),"season":int(r["season"]),"week":int(float(r.get("week")or 0)),"home_team":r.get("home_team"),"away_team":r.get("away_team"),"margin":num(r.get("actual_home_margin")),"total":num(r.get("actual_total")),"spread":num(r.get("market_home_spread")),"market_total":num(r.get("market_total")),**joined})
+   out.append({"game_id":str(r.get("game_id")),"season":int(r["season"]),"week":int(float(r.get("week")or 0)),"start_date":r.get("start_date")or r.get("date"),"home_team":r.get("home_team"),"away_team":r.get("away_team"),"margin":num(r.get("actual_home_margin")),"total":num(r.get("actual_total")),"spread":num(r.get("market_home_spread")),"market_total":num(r.get("market_total")),**joined})
  return out
 def cbb_rows(history,ctx):
  out=[]
@@ -69,9 +93,9 @@ def cbb_systems(r):
 def sections(cards):return {s:[x for x in cards if x["state"]==s]for s in("verified","developing","failed_hypothesis","source_pending")}
 def build(cfb,cbb,meta=None):
  meta=meta or {}
- a,b=cfb_systems(cfb),cbb_systems(cbb)
+ a,b=apply_validation(cfb_systems(cfb)),apply_validation(cbb_systems(cbb))
  backlog=[{"name":"CFB kickoff-time systems","status":meta.get("cfb_games_status","source_pending"),"path":"CFBD historical start times; 7:00 p.m. ET threshold frozen before testing."},{"name":"Pregame ranking systems","status":meta.get("rankings_status","source_pending"),"path":"Poll published before the game; final-season rankings are prohibited."},{"name":"P4 / G5 / FCS systems","status":meta.get("classifications_status","source_pending"),"path":"Season-specific conference and subdivision labels joined by game ID."},{"name":"Historical weather systems","status":meta.get("weather_status","source_pending"),"path":"Kickoff wind, temperature and precipitation; indoor games excluded."},{"name":"External systems intake · Trendsperts","status":"source_pending","path":"Public rule definitions are leads only. THI independently rebuilds the sample, line convention, price, holdout and prospective record before publication. The current Discover board exposes four CFB cards and no CBB cards."},{"name":"Coach and prior-meeting systems","status":"source_pending","path":"The visible Trendsperts CFB lead uses coach identity, home-favorite status and previous-meeting result. THI needs chronological coach-tenure and prior-matchup joins before an honest backtest; a 13-game outside sample is not promoted."},{"name":"True reverse line movement","status":"source_pending","path":"Requires synchronized ticket percentages and sharp-book price snapshots."}]
- return {"meta":{"version":VERSION,"generated_at_utc":datetime.now(timezone.utc).isoformat().replace("+00:00","Z"),"policy":"Rules are frozen before evaluation. Every settled qualifier publishes, including losing hypotheses. Verified requires 200 decisions, positive -110 ROI and a 95% separation from 50%."},"sports":{"cfb":{"settled_games":len(cfb),"cards":a,"sections":sections(a)},"cbb":{"settled_games":len(cbb),"cards":b,"sections":sections(b)}},"source_backlog":backlog}
+ return {"meta":{"version":VERSION,"generated_at_utc":datetime.now(timezone.utc).isoformat().replace("+00:00","Z"),"policy":"Rules are frozen before evaluation. Validated requires a recorded per-play no-vig baseline, an exact binomial or Poisson-binomial test, Holm multiple-comparison control, and a passed bomb-dependency check. Rolling monthly results are retained for stability review."},"sports":{"cfb":{"settled_games":len(cfb),"cards":a,"sections":sections(a)},"cbb":{"settled_games":len(cbb),"cards":b,"sections":sections(b)}},"source_backlog":backlog}
 def main():
  p=argparse.ArgumentParser();p.add_argument("--output",type=Path,default=ROOT/"data/trends_lab.json");p.add_argument("--context",type=Path,default=ROOT/"data/variance/context.json");a=p.parse_args();ctx=context_index(a.context);meta=json.loads(a.context.read_text()).get("meta",{})if a.context.exists()else{};payload=build(cfb_rows(ROOT/"data/training/historical_games.csv",ctx),cbb_rows(ROOT/"data/cbb/history",ctx),meta);a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(payload,indent=2,allow_nan=False)+"\n");print(VERSION)
 if __name__=="__main__":main()

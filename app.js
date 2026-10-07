@@ -2506,6 +2506,9 @@ function renderProjectionRow(game) {
   const disagreement = game?.comparison?.disagreement;
   const preferred = game?.comparison?.preferred_side;
   const status = game?.comparison?.signal ?? game?.comparison?.status;
+  const recommendedSide = preferred && status !== "ALIGNED" && hasValue(marketSpread)
+    ? marketSideForTeam(preferred, homeName, awayName, marketSpread)
+    : null;
   const confidence = signalConfidence(status);
   const cssStatus = statusClass(status);
   const confidenceCss = confidenceClass(confidence);
@@ -2554,8 +2557,8 @@ function renderProjectionRow(game) {
       </td>
 
       <td>
-        <div class="line-primary">${escapeHtml(shortSpread(modelSpread))}</div>
-        <div class="line-secondary">${escapeHtml(homeName)} home line</div>
+        <div class="line-primary">${escapeHtml(recommendedSide || favoredLine(homeName, awayName, modelSpread))}</div>
+        <div class="line-secondary">${recommendedSide ? "THI preferred side at current market" : "THI projected spread"}</div>
       </td>
 
       <td>

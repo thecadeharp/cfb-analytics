@@ -1279,6 +1279,9 @@
     const disagreementNote = hasValue(disagreement)
       ? (preferred ? `Model favors ${preferred}` : "Model agrees with market")
       : "No market line";
+    const recommendedSide = preferred && status !== "ALIGNED" && hasValue(marketSpread)
+      ? marketSideForTeam(preferred, homeName, awayName, marketSpread)
+      : null;
 
     const gameId = String(game.game_id ?? "");
 
@@ -1312,11 +1315,11 @@
 
         <td>
           <div class="line-primary">
-            ${escapeHtml(shortSpread(modelSpread))}
+            ${escapeHtml(recommendedSide || favoredLine(homeName, awayName, modelSpread))}
             ${spreadWeatherApplied ? `<span class="weather-adjusted-dot" title="Weather-adjusted spread"></span>` : ""}
           </div>
           <div class="line-secondary">
-            ${spreadWeatherApplied ? "Weather-adjusted fair line" : `${escapeHtml(homeName)} home line`}
+            ${recommendedSide ? "THI preferred side at current market" : "THI projected spread"}
           </div>
         </td>
 

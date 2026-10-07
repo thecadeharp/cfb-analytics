@@ -94,6 +94,7 @@
 
   const pct = value => Number.isFinite(Number(value)) ? `${Number(value).toFixed(1)}%` : "—";
   const normalizeSearch = value => String(value ?? "").trim().toLocaleLowerCase();
+  const matchupWord = row => row?.neutral_site ? "vs." : "at";
 
   function validMarketTotal(value) {
     const parsed = Number(value);
@@ -311,8 +312,8 @@
       <h1 class="page-title">THI College Basketball Projection Center</h1>
       <p class="page-subtitle">A possession-based game intelligence board combining adjusted efficiency, pace, matchup drivers, market separation and transparent signal qualification.</p>
 
-      <section class="cbb-signal-guide" aria-labelledby="cbb-signal-guide-title">
-        <div class="cbb-signal-guide-heading"><strong id="cbb-signal-guide-title">How CBB signals work</strong><small>Methodology + confidence key</small></div>
+      <details class="cbb-signal-guide" aria-labelledby="cbb-signal-guide-title">
+        <summary class="cbb-signal-guide-heading"><strong id="cbb-signal-guide-title">How CBB signals work</strong><small>Methodology + confidence key</small></summary>
         <div class="cbb-signal-guide-body">
           <p><strong>Model Signal</strong> measures the absolute difference between THI's fair spread and the consensus market. It measures disagreement, while <strong>Signal Confidence</strong> measures prospective evidence. A large disagreement is not automatically a qualified play.</p>
           <div class="cbb-signal-key">
@@ -325,13 +326,13 @@
           <div class="cbb-confidence-key">
             ${confidenceKey("Research only", "Opening state or no qualified market decision", "research")}
             ${confidenceKey("Developing", "Prospective evidence is accumulating", "developing")}
-            ${confidenceKey("Validated", "50+ decisions · ≥52.5% ATS · positive closing-line value", "validated")}
-            ${confidenceKey("Established", "100+ decisions · ≥53% ATS · ≥55% beat close", "established")}
+            ${confidenceKey("Validated", "No-vig exact test · Holm corrected · outlier robust · positive CLV", "validated")}
+            ${confidenceKey("Established", "Validated edge also remains stable across rolling windows", "established")}
           </div>
           <p><strong>Totals key:</strong> 4.0–6.9 points from market is a Total Lean; 7.0+ is a Total Watch. No totals play is activated until the totals model clears its independent walk-forward and prospective gates.</p>
           <p><strong>Prior-based model</strong> means the projection still relies on regressed preseason team priors. It does not mean the matchup is an exhibition or preseason game.</p>
         </div>
-      </section>
+      </details>
 
       <div class="cbb-research-banner"><strong>Projections · live testing</strong><span>THI scores and win probabilities publish from the opening slate. Spread signals require settled samples and market separation; totals remain research-only until their independent validation gate clears.</span></div>
 
@@ -339,7 +340,9 @@
         <div><small>Pipeline</small><strong class="${healthStatus === "Operational" ? "is-good" : "is-watch"}">${escapeHtml(healthStatus)}</strong></div>
         <div><small>Last coordinated refresh</small><strong>${escapeHtml(formatTimestamp(health.meta?.generated_at_utc || projectionBoard.meta?.generated_at_utc))}</strong></div>
         <div><small>Market coverage</small><strong>${integer(healthCoverage.games_with_market)} / ${integer(healthCoverage.games)} games</strong></div>
-        <div><small>Neutral-site audit</small><strong class="${health.checks?.neutral_site_home_context_zero === false ? "is-watch" : "is-good"}">${health.checks?.neutral_site_home_context_zero === false ? "Attention" : "Passed"}</strong></div>
+        <div><small>Neutral-site audit</small><strong class="${health.checks?.neutral_site_home_context_zero === false || health.checks?.neutral_venue_audit_ready === false ? "is-watch" : "is-good"}">${health.checks?.neutral_site_home_context_zero === false || health.checks?.neutral_venue_audit_ready === false ? "Attention" : `${integer(healthCoverage.neutral_site_games)} passed`}</strong></div>
+        <div><small>Official venue corrections</small><strong>${integer(healthCoverage.neutral_site_official_overrides)} applied · ${integer(healthCoverage.neutral_site_unresolved_reviews)} unresolved</strong></div>
+        <div><small>Opening-night rehearsal</small><strong class="${health.checks?.opening_night_rehearsal_passed === false ? "is-watch" : "is-good"}">${health.checks?.opening_night_rehearsal_passed === false ? "Attention" : "Passed"}</strong></div>
       </section>
 
       <div class="cbb-projection-controls">
@@ -555,6 +558,12 @@
     const edge = projection.spread_edge == null ? NaN : Number(projection.spread_edge);
     const edgeTeam = Number.isFinite(edge) ? (edge >= 0 ? game.home : game.away) : null;
     const tier = signalTier(game);
+    const edgeMarketNumber = edgeTeam && tier !== "aligned" && Number.isFinite(marketLine)
+      ? (String(edgeTeam.team_id) === String(game.home?.team_id) ? marketLine : -marketLine)
+      : NaN;
+    const edgeMarketText = edgeTeam && Number.isFinite(edgeMarketNumber)
+      ? `${edgeTeam.team} ${edgeMarketNumber > 0 ? "+" : ""}${number(edgeMarketNumber,1)}`
+      : null;
     const confidence = confidenceTier(game);
     const totalMarket = validMarketTotal(game.market?.consensus_total) ? Number(game.market.consensus_total) : null;
     const projectedTotal = Number(projection.total);
@@ -568,7 +577,7 @@
     return `<tr class="cbb-projection-row" data-cbb-game-id="${escapeHtml(game.game_id)}">
       <td><div class="cbb-matchup-team">${teamLogo(game.away,"small")}<strong>${escapeHtml(game.away?.team || "—")}</strong><span>${gameStatus(game) === "final" ? integer(game.away?.score) : ""}</span></div><div class="cbb-matchup-team">${teamLogo(game.home,"small")}<strong>${escapeHtml(game.home?.team || "—")}</strong><span>${gameStatus(game) === "final" ? integer(game.home?.score) : ""}</span></div><div class="cbb-team-meta">${escapeHtml(time)} · ${escapeHtml(network)} · ${gameType}</div>${varianceMarkup}</td>
       <td><span class="cbb-watch-score">${integer(watch)}</span><div class="cbb-team-meta">${watchLabel}</div></td>
-      <td><strong class="cbb-number">${escapeHtml(projectedLine)}</strong><div class="cbb-team-meta">${escapeHtml(modelInputLabel(game))}</div></td>
+      <td><strong class="cbb-number">${escapeHtml(edgeMarketText || projectedLine)}</strong><div class="cbb-team-meta">${edgeMarketText ? "THI preferred side at current market" : "THI projected spread"}</div></td>
       <td><strong class="cbb-number">${escapeHtml(marketText)}</strong><div class="cbb-team-meta">${game.market?.book_count ? `${integer(game.market.book_count)} books` : "No consensus line"}</div></td>
       <td><strong class="cbb-number">${Number.isFinite(projectedTotal) && projectedTotal > 0 ? number(projectedTotal,1) : "—"}</strong><div class="cbb-team-meta">Market ${totalMarket !== null ? number(totalMarket,1) : "—"}</div>${totalFlag}</td>
       <td><strong class="cbb-edge-value">${Number.isFinite(edge) ? `${number(Math.abs(edge),1)} pts` : "—"}</strong><div class="cbb-team-meta">${edgeTeam ? `Model favors ${escapeHtml(edgeTeam.team)}` : "No market comparison"}</div></td>
@@ -591,14 +600,14 @@
     const venue = game.venue?.name || (game.neutral_site ? "Neutral site" : "Venue TBD");
     const network = game.broadcasts?.map(item => item.network || item).filter(Boolean).join(", ") || "TV TBD";
     const projection = game.projection;
-    if (!projection) return `<article class="cbb-panel cbb-game-card"><div class="cbb-game-top"><span class="cbb-game-date">${escapeHtml(date)}</span>${game.neutral_site ? '<span class="cbb-chip">Neutral</span>' : ""}</div><div class="cbb-matchup">${escapeHtml(game.away?.team)} <span>vs.</span> ${escapeHtml(game.home?.team)}</div><div class="cbb-game-meta">${escapeHtml(venue)} · ${escapeHtml(network)}</div></article>`;
+    if (!projection) return `<article class="cbb-panel cbb-game-card"><div class="cbb-game-top"><span class="cbb-game-date">${escapeHtml(date)}</span>${game.neutral_site ? '<span class="cbb-chip">Neutral</span>' : ""}</div><div class="cbb-matchup">${escapeHtml(game.away?.team)} <span>${matchupWord(game)}</span> ${escapeHtml(game.home?.team)}</div><div class="cbb-game-meta">${escapeHtml(venue)} · ${escapeHtml(network)}</div></article>`;
     const margin = Number(projection.home_margin);
     const favored = margin >= 0 ? game.home?.team : game.away?.team;
     const projectedLine = `${favored} -${Math.abs(margin).toFixed(1)}`;
     const stateLabel = projection.sample_state === "tracked_sample" ? "Tracked" : projection.sample_state === "developing_sample" ? "Developing" : projection.sample_state === "early_sample" ? "Early sample" : "Preseason";
     const signalTeam = Number(projection.spread_edge) >= 0 ? game.home?.team : game.away?.team;
     const signal = projection.spread_signal_eligible ? `<span class="cbb-projection-signal">${escapeHtml(signalTeam)} spread edge · ${number(Math.abs(Number(projection.spread_edge)),1)} pts</span>` : `<span class="cbb-projection-withheld">${stateLabel} · no spread signal</span>`;
-    return `<article class="cbb-panel cbb-game-card" data-cbb-game-id="${escapeHtml(game.game_id)}" role="button" tabindex="0" aria-label="Open ${escapeHtml(game.away?.team)} at ${escapeHtml(game.home?.team)} matchup analysis"><div class="cbb-game-top"><span class="cbb-game-date">${escapeHtml(date)}</span><span class="cbb-chip">${escapeHtml(stateLabel)}</span></div><div class="cbb-matchup">${escapeHtml(game.away?.team)} <span>vs.</span> ${escapeHtml(game.home?.team)}</div><div class="cbb-projection-score"><strong>${number(projection.away_points,1)}–${number(projection.home_points,1)}</strong><span>${escapeHtml(projectedLine)} · ${pct(projection.home_win_probability)} home win</span></div><div class="cbb-projection-meta"><span>${number(projection.projected_possessions,1)} possessions</span><span>Projected total ${number(projection.total,1)} · totals signal withheld</span></div>${signal}<div class="cbb-game-meta">${escapeHtml(venue)} · ${escapeHtml(network)} · Open matchup analysis →</div></article>`;
+    return `<article class="cbb-panel cbb-game-card" data-cbb-game-id="${escapeHtml(game.game_id)}" role="button" tabindex="0" aria-label="Open ${escapeHtml(game.away?.team)} ${matchupWord(game)} ${escapeHtml(game.home?.team)} matchup analysis"><div class="cbb-game-top"><span class="cbb-game-date">${escapeHtml(date)}</span><span class="cbb-chip">${escapeHtml(stateLabel)}</span></div><div class="cbb-matchup">${escapeHtml(game.away?.team)} <span>${matchupWord(game)}</span> ${escapeHtml(game.home?.team)}</div><div class="cbb-projection-score"><strong>${number(projection.away_points,1)}–${number(projection.home_points,1)}</strong><span>${escapeHtml(projectedLine)} · ${pct(projection.home_win_probability)} ${game.neutral_site ? escapeHtml(game.home?.team) : "home"} win</span></div><div class="cbb-projection-meta"><span>${number(projection.projected_possessions,1)} possessions</span><span>Projected total ${number(projection.total,1)} · totals signal withheld</span></div>${signal}<div class="cbb-game-meta">${escapeHtml(venue)} · ${escapeHtml(network)} · Open matchup analysis →</div></article>`;
   }
 
   function compareClass(value, opponent, higherIsBetter = true) {
@@ -651,7 +660,7 @@
     panel.innerHTML = `
       <button class="cbb-detail-close cbb-game-back" type="button" data-cbb-close>← Back to projections</button>
       <div class="cbb-kicker">THI CBB matchup analysis</div>
-      <div class="cbb-matchup-page-title"><div>${teamLogo(game.away,"large")}<span>${escapeHtml(game.away?.team)}</span></div><b>at</b><div>${teamLogo(game.home,"large")}<span>${escapeHtml(game.home?.team)}</span></div></div>
+      <div class="cbb-matchup-page-title"><div>${teamLogo(game.away,"large")}<span>${escapeHtml(game.away?.team)}</span></div><b>${matchupWord(game)}</b><div>${teamLogo(game.home,"large")}<span>${escapeHtml(game.home?.team)}</span></div></div>
       <div class="cbb-detail-sub">${escapeHtml(date)} · ${escapeHtml(game.venue?.name || (game.neutral_site ? "Neutral site" : "Venue TBD"))} · ${escapeHtml(game.broadcasts?.map(item => item.network || item).filter(Boolean).join(", ") || "TV TBD")}${game.neutral_site ? ' · <strong class="cbb-neutral-label">NEUTRAL FLOOR · NO HOME-COURT INPUT</strong>' : ""}</div>
       <div class="cbb-detail-grid">
         ${detailStat("Projected score", `${number(projection.away_points,1)}–${number(projection.home_points,1)}`)}
@@ -1141,7 +1150,7 @@
         </div>
       </section>
       <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Current market board</div><h2 class="cbb-section-title">Open-to-current movement</h2></div><div class="cbb-section-note">Movement is descriptive context. It never enters the projection model.</div></div>
-        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Matchup</th><th>Open spread</th><th>Current spread</th><th>Move</th><th>Open total</th><th>Current total</th><th>Total move</th><th>THI edge</th></tr></thead><tbody>${marketBoard.length ? marketBoard.map(row => `<tr><td><strong>${escapeHtml(row.away_team)} at ${escapeHtml(row.home_team)}</strong></td><td class="cbb-number">${number(row.opening_spread,1,true)}</td><td class="cbb-number">${number(row.current_spread,1,true)}</td><td class="cbb-number">${number(row.spread_move,1,true)}</td><td class="cbb-number">${number(row.opening_total,1)}</td><td class="cbb-number">${number(row.current_total,1)}</td><td class="cbb-number">${number(row.total_move,1,true)}</td><td class="cbb-number">${number(row.model_edge,1,true)}</td></tr>`).join("") : `<tr><td colspan="8" class="cbb-empty">No current market observations are available.</td></tr>`}</tbody></table></div>
+        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Matchup</th><th>Open spread</th><th>Current spread</th><th>Move</th><th>Open total</th><th>Current total</th><th>Total move</th><th>THI edge</th></tr></thead><tbody>${marketBoard.length ? marketBoard.map(row => `<tr><td><strong>${escapeHtml(row.away_team)} ${matchupWord(row)} ${escapeHtml(row.home_team)}</strong></td><td class="cbb-number">${number(row.opening_spread,1,true)}</td><td class="cbb-number">${number(row.current_spread,1,true)}</td><td class="cbb-number">${number(row.spread_move,1,true)}</td><td class="cbb-number">${number(row.opening_total,1)}</td><td class="cbb-number">${number(row.current_total,1)}</td><td class="cbb-number">${number(row.total_move,1,true)}</td><td class="cbb-number">${number(row.model_edge,1,true)}</td></tr>`).join("") : `<tr><td colspan="8" class="cbb-empty">No current market observations are available.</td></tr>`}</tbody></table></div>
       </section>
     `;
   }
@@ -1437,6 +1446,7 @@
     const spreadMonths = prospective.spread_by_month || {};
     const record = row => Number(row?.games) ? `${integer(row.wins)}-${integer(row.losses)}-${integer(row.pushes)}` : "—";
     const confidence = row => {
+      if (row?.validation?.passed !== true) return "DEVELOPING";
       const games = Number(row?.games || 0);
       const hit = Number(row?.hit_rate);
       const clv = Number(row?.average_clv);
@@ -1503,7 +1513,7 @@
       ${trendSection("Verified", "Large, profitable historical samples that clear THI's published evidence gate.", groups.verified || [], "verified", sport)}
       ${trendSection("Developing", "Promising or limited samples remain research observations.", groups.developing || [], "developing", sport)}
       ${trendSection("Failed hypotheses", "Popular angles that did not survive THI's own closing-line test.", groups.failed_hypothesis || [], "failed", sport)}
-      <section class="cbb-trend-section"><div class="cbb-section-head"><div><div class="cbb-label">Forward evidence</div><h2 class="cbb-section-title">Prospective tracker</h2></div><div class="cbb-section-note">The first eligible pregame line is frozen and final scores automatically grade it.</div></div><div class="cbb-panel cbb-variance-ledger"><strong>${integer(tracked.length)} frozen qualifiers</strong>${tracked.slice(0,16).map(row => `<div><span>${escapeHtml(row.away_team)} at ${escapeHtml(row.home_team)}</span><b>${escapeHtml(humanize(row.system_id))}</b><small>${escapeHtml(row.result)}</small></div>`).join("")}${!tracked.length ? `<p>Qualifiers will appear automatically as markets become available.</p>` : ""}</div></section>
+      <section class="cbb-trend-section"><div class="cbb-section-head"><div><div class="cbb-label">Forward evidence</div><h2 class="cbb-section-title">Prospective tracker</h2></div><div class="cbb-section-note">The first eligible pregame line is frozen and final scores automatically grade it.</div></div><div class="cbb-panel cbb-variance-ledger"><strong>${integer(tracked.length)} frozen qualifiers</strong>${tracked.slice(0,16).map(row => `<div><span>${escapeHtml(row.away_team)} ${matchupWord(row)} ${escapeHtml(row.home_team)}</span><b>${escapeHtml(humanize(row.system_id))}</b><small>${escapeHtml(row.result)}</small></div>`).join("")}${!tracked.length ? `<p>Qualifiers will appear automatically as markets become available.</p>` : ""}</div></section>
       <section class="cbb-trend-section"><div class="cbb-section-head"><div><div class="cbb-label">Market intelligence</div><h2 class="cbb-section-title">Reverse Line Movement monitor</h2></div><div class="cbb-section-note">An alert requires 65%+ public tickets and a synchronized 0.5+ point move the other way at a named sharp book.</div></div><div class="cbb-panel cbb-rlm-monitor"><div class="cbb-rlm-status is-${escapeHtml(rlm.meta?.status || "source_pending")}">${escapeHtml(humanize(rlm.meta?.status || "source_pending"))}</div>${alerts.map(row => `<div class="cbb-rlm-alert"><strong>${escapeHtml(row.away_team)} at ${escapeHtml(row.home_team)}</strong><span>${pct(row.public_ticket_pct)} tickets on ${escapeHtml(row.public_side)} · ${number(row.line_delta,1,true)} toward ${escapeHtml(row.sharp_team)}</span><b>${escapeHtml(humanize(row.severity))}</b></div>`).join("")}${!alerts.length ? `<p>No qualified alerts. The monitor will stay source pending until licensed splits and sharp-book feeds are connected.</p>` : ""}</div></section>
       <section class="cbb-trend-section"><div class="cbb-section-head"><div><div class="cbb-label">Data contracts</div><h2 class="cbb-section-title">Source pending</h2></div><div class="cbb-section-note">A missing feed is shown plainly and never converted into a synthetic signal.</div></div><div class="cbb-panel cbb-planned-trends">${(lab.source_backlog || []).map(row => `<div><strong>${escapeHtml(row.name)} <em>${escapeHtml(humanize(row.status || "source_pending"))}</em></strong><span>${escapeHtml(row.path)}</span></div>`).join("")}</div></section>`;
   }
@@ -1521,7 +1531,7 @@
     const start = new Date(row.start_date);
     const date = Number.isNaN(start.getTime()) ? "—" : new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "America/New_York" }).format(start);
     const result = String(row.result || "").toLowerCase();
-    return `<tr><td class="cbb-number">${escapeHtml(date)}</td><td><strong>${escapeHtml(row.away_team)} at ${escapeHtml(row.home_team)}</strong></td><td class="cbb-team-name">${escapeHtml(row.pick_team)}</td><td class="cbb-number">${number(row.pregame_line,1,true)}</td><td class="cbb-number">${row.closing_line == null ? "—" : number(row.closing_line,1,true)}</td><td class="cbb-number">${row.clv == null ? "—" : number(row.clv,2,true)}</td><td class="cbb-number">${number(row.model_edge,1)} pts</td><td><span class="cbb-result cbb-result-${escapeHtml(result)}">${escapeHtml(result || "—")}</span></td><td class="cbb-number">${escapeHtml(row.final_score || "—")}</td></tr>`;
+    return `<tr><td class="cbb-number">${escapeHtml(date)}</td><td><strong>${escapeHtml(row.away_team)} ${matchupWord(row)} ${escapeHtml(row.home_team)}</strong></td><td class="cbb-team-name">${escapeHtml(row.pick_team)}</td><td class="cbb-number">${number(row.pregame_line,1,true)}</td><td class="cbb-number">${row.closing_line == null ? "—" : number(row.closing_line,1,true)}</td><td class="cbb-number">${row.clv == null ? "—" : number(row.clv,2,true)}</td><td class="cbb-number">${number(row.model_edge,1)} pts</td><td><span class="cbb-result cbb-result-${escapeHtml(result)}">${escapeHtml(result || "—")}</span></td><td class="cbb-number">${escapeHtml(row.final_score || "—")}</td></tr>`;
   }
 
   function humanize(value) {

@@ -462,10 +462,7 @@
   // ==========================================================================
 
   // ==========================================================================
-  // PROJECTIONS — ALWAYS-VISIBLE SIGNAL / CONFIDENCE GUIDE
-  //
-  // The guide used to be a <details> dropdown. Keep the full methodology/key
-  // visible so first-time users do not have to discover or open it themselves.
+  // PROJECTIONS — COLLAPSIBLE METHODOLOGY PANEL
   // ==========================================================================
 
   function makeSignalGuidePersistent() {
@@ -473,40 +470,13 @@
     if (!guide || guide.dataset.hammerPersistentGuide === "1") return;
 
     guide.dataset.hammerPersistentGuide = "1";
-    guide.open = true;
-
-    // A details element can still be toggled by script/keyboard. Force it open.
-    guide.addEventListener("toggle", () => {
-      if (!guide.open) guide.open = true;
-    });
+    guide.open = false;
 
     const summary = guide.querySelector(":scope > summary");
     if (summary) {
-      summary.style.cursor = "default";
-      summary.style.pointerEvents = "none";
-      summary.setAttribute("aria-disabled", "true");
-
-      // Remove the browser disclosure triangle while preserving the existing
-      // title/subtitle styling and wording.
-      const style = document.createElement("style");
-      style.textContent = `
-        #view-projections details.signal-guide > summary {
-          list-style: none;
-        }
-        #view-projections details.signal-guide > summary::-webkit-details-marker {
-          display: none;
-        }
-        #view-projections details.signal-guide > summary::marker {
-          display: none;
-          content: "";
-        }
-        #view-projections details.signal-guide > summary::before,
-        #view-projections details.signal-guide > summary::after {
-          display: none !important;
-          content: none !important;
-        }
-      `;
-      document.head.appendChild(style);
+      summary.style.cursor = "pointer";
+      summary.style.pointerEvents = "auto";
+      summary.removeAttribute("aria-disabled");
     }
   }
 

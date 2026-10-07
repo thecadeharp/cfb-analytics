@@ -12,6 +12,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+try:
+    from scripts.build_cbb_venue_audit import apply_overrides
+except ModuleNotFoundError:
+    from build_cbb_venue_audit import apply_overrides
+
 
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = "thi-cbb-projection-board-v0.5"
@@ -393,11 +398,15 @@ def main() -> None:
     parser.add_argument("--priors", type=Path, default=ROOT / "data" / "cbb" / "model" / "current_priors.json")
     parser.add_argument("--model-card", type=Path, default=ROOT / "data" / "cbb" / "model" / "model_card.json")
     parser.add_argument("--home-court", type=Path, default=ROOT / "data" / "cbb" / "home_court_advantage.json")
+    parser.add_argument("--venue-overrides", type=Path, default=ROOT / "data" / "cbb" / "venue_overrides.json")
     parser.add_argument("--output", type=Path, default=ROOT / "data" / "cbb" / "projection_board.json")
     args = parser.parse_args()
     existing_payload = json.loads(args.output.read_text()) if args.output.exists() else None
+    games_payload = json.loads(args.games.read_text())
+    if args.venue_overrides.exists():
+        games_payload = apply_overrides(games_payload, json.loads(args.venue_overrides.read_text()))
     payload = build_board(
-        json.loads(args.games.read_text()),
+        games_payload,
         json.loads(args.profiles.read_text()),
         json.loads(args.priors.read_text()),
         json.loads(args.model_card.read_text()),

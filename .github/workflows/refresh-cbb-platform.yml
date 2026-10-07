@@ -55,6 +55,7 @@ jobs:
             scripts/build_cbb_player_research.py \
             scripts/build_cbb_walk_forward_model.py \
             scripts/build_cbb_home_court.py \
+            scripts/build_cbb_venue_audit.py \
             scripts/build_cbb_projection_board.py \
             scripts/build_cbb_play_style.py \
             scripts/build_cbb_matchup_engine.py \
@@ -65,7 +66,9 @@ jobs:
             scripts/build_cbb_game_day_readiness.py \
             scripts/build_cbb_operations_context.py \
             scripts/build_cbb_platform_health.py \
+            scripts/run_cbb_opening_night_rehearsal.py \
             scripts/refresh_cbb_markets.py \
+            scripts/validation_framework.py \
             scripts/build_trends_lab.py \
             scripts/build_variance_prospective_tracker.py \
             scripts/build_rlm_monitor.py
@@ -74,6 +77,7 @@ jobs:
             scripts/test_cbb_player_research.py \
             scripts/test_cbb_walk_forward_model.py \
             scripts/test_cbb_home_court.py \
+            scripts/test_cbb_venue_audit.py \
             scripts/test_cbb_projection_board.py \
             scripts/test_cbb_play_style.py \
             scripts/test_cbb_matchup_engine.py \
@@ -83,8 +87,10 @@ jobs:
             scripts/test_cbb_model_v02.py \
             scripts/test_cbb_game_day_readiness.py \
             scripts/test_cbb_platform_health.py \
+            scripts/test_cbb_opening_night_rehearsal.py \
             scripts/test_cbb_release_foundations.py \
             scripts/test_refresh_cbb_markets.py \
+            scripts/test_validation_framework.py \
             scripts/test_variance_lab.py
 
       - name: Refresh foundation, ratings, projections and bracketology
@@ -99,6 +105,7 @@ jobs:
           python scripts/build_cbb_player_research.py
           python scripts/build_cbb_walk_forward_model.py
           python scripts/build_cbb_home_court.py
+          python scripts/build_cbb_venue_audit.py
           python scripts/build_cbb_projection_board.py
           python scripts/build_cbb_play_style.py --max-games 40
           python scripts/build_cbb_matchup_engine.py
@@ -108,6 +115,7 @@ jobs:
           python scripts/research_cbb_model_v02.py
           python scripts/build_cbb_game_day_readiness.py
           python scripts/build_cbb_operations_context.py
+          python scripts/run_cbb_opening_night_rehearsal.py
           python scripts/build_cbb_platform_health.py
           python scripts/build_trends_lab.py
           python scripts/build_variance_prospective_tracker.py
@@ -136,6 +144,8 @@ jobs:
           readiness = json.loads((root / "game_day_readiness.json").read_text())
           operations = json.loads((root / "operations_context.json").read_text())
           health = json.loads((root / "platform_health.json").read_text())
+          venue_audit = json.loads((root / "venue_audit.json").read_text())
+          rehearsal = json.loads((root / "opening_night_rehearsal.json").read_text())
           trends = json.loads(Path("data/trends_lab.json").read_text())
 
           assert len(profiles["teams"]) >= 300
@@ -190,6 +200,11 @@ jobs:
           assert health["meta"]["version"] == "thi-cbb-platform-health-v1.0"
           assert health["meta"]["status"] == "healthy"
           assert health["checks"]["neutral_site_home_context_zero"] is True
+          assert health["checks"]["neutral_venue_audit_ready"] is True
+          assert health["checks"]["opening_night_rehearsal_passed"] is True
+          assert venue_audit["meta"]["status"] == "healthy"
+          assert venue_audit["summary"]["unresolved_reviews"] == 0
+          assert rehearsal["meta"]["status"] == "passed"
           assert trends["meta"]["version"] == "thi-variance-systems-lab-v2.0"
           assert trends["sports"]["cfb"]["cards"] and trends["sports"]["cbb"]["cards"]
           PY
@@ -218,6 +233,8 @@ jobs:
           git add \
             data/cbb/operations_context.json \
             data/cbb/platform_health.json \
+            data/cbb/venue_audit.json \
+            data/cbb/opening_night_rehearsal.json \
             data/trends_lab.json
           git add \
             data/variance/prospective_tracker.json \

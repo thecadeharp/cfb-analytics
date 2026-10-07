@@ -25,8 +25,8 @@ jobs:
           python-version: "3.12"
       - name: Test Variance Lab contracts
         run: |
-          python -m py_compile scripts/build_variance_context.py scripts/build_trends_lab.py scripts/build_variance_prospective_tracker.py scripts/build_rlm_monitor.py scripts/poll_rlm_feeds.py
-          python -m unittest scripts/test_variance_lab.py
+          python -m py_compile scripts/validation_framework.py scripts/build_variance_context.py scripts/build_trends_lab.py scripts/build_variance_prospective_tracker.py scripts/build_rlm_monitor.py scripts/poll_rlm_feeds.py
+          python -m unittest scripts/test_validation_framework.py scripts/test_variance_lab.py
       - name: Refresh point-in-time context and systems
         env:
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
