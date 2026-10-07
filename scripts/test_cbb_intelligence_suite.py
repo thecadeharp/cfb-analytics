@@ -17,7 +17,7 @@ class IntelligenceSuiteTests(unittest.TestCase):
         self.assertIsNotNone(veteran["projected_points"]); self.assertIsNone(freshman["projected_points"])
         self.assertEqual(freshman["projection_state"],"role_only"); self.assertEqual(payload["home_court"]["national_points"],2.8)
         self.assertEqual(len(payload["team_dossiers"]),1)
-        self.assertEqual(payload["meta"]["version"],"thi-cbb-intelligence-suite-v1.2")
+        self.assertEqual(payload["meta"]["version"],"thi-cbb-intelligence-suite-v1.3")
         self.assertEqual(payload["validation_registry"]["gate_summary"]["passed"],1)
         self.assertEqual(payload["validation_registry"]["gate_summary"]["total"],2)
         factor_states={row["factor"]:row["status"] for row in payload["validation_registry"]["factors"]}
@@ -31,6 +31,8 @@ class IntelligenceSuiteTests(unittest.TestCase):
         self.assertIn("back_to_back", context["teams"]["home"]["flags"])
         dossier=payload["team_dossiers"][0]
         self.assertEqual(dossier["forecast"]["games_in_window"],2)
+        self.assertIn("resume", dossier)
+        self.assertEqual(dossier["resume"]["games_graded"],0)
         self.assertEqual(dossier["projected_core_lineup"]["state"],"projected_rotation_not_observed_lineup")
 
 if __name__ == "__main__": unittest.main()

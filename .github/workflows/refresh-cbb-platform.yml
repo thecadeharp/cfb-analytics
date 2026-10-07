@@ -65,6 +65,7 @@ jobs:
             scripts/build_cbb_game_day_readiness.py \
             scripts/build_cbb_operations_context.py \
             scripts/build_cbb_platform_health.py \
+            scripts/refresh_cbb_markets.py \
             scripts/build_trends_lab.py \
             scripts/build_variance_prospective_tracker.py \
             scripts/build_rlm_monitor.py
@@ -81,7 +82,9 @@ jobs:
             scripts/test_cbb_bracketology.py \
             scripts/test_cbb_model_v02.py \
             scripts/test_cbb_game_day_readiness.py \
+            scripts/test_cbb_platform_health.py \
             scripts/test_cbb_release_foundations.py \
+            scripts/test_refresh_cbb_markets.py \
             scripts/test_variance_lab.py
 
       - name: Refresh foundation, ratings, projections and bracketology
@@ -167,7 +170,7 @@ jobs:
           assert len(bracket["field"]) == 68
           assert "active-roster quality" in bracket["meta"]["methodology"]
           assert all("roster_adjustment" in row for row in bracket["field"])
-          assert intelligence["meta"]["version"] == "thi-cbb-intelligence-suite-v1.2"
+          assert intelligence["meta"]["version"] == "thi-cbb-intelligence-suite-v1.3"
           assert len(intelligence["player_projections"]) >= 1500
           assert len(intelligence["team_dossiers"]) >= 300
           assert len(intelligence["game_context"]) == projections["meta"]["game_count"]
@@ -186,6 +189,7 @@ jobs:
           assert operations["coverage"]["games"] == projections["meta"]["game_count"]
           assert health["meta"]["version"] == "thi-cbb-platform-health-v1.0"
           assert health["meta"]["status"] == "healthy"
+          assert health["checks"]["neutral_site_home_context_zero"] is True
           assert trends["meta"]["version"] == "thi-variance-systems-lab-v2.0"
           assert trends["sports"]["cfb"]["cards"] and trends["sports"]["cbb"]["cards"]
           PY

@@ -1,0 +1,96 @@
+name: Capture CBB Game-Day Markets
+
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Query the line feed even when no game is within 72 hours"
+        required: false
+        default: false
+        type: boolean
+  schedule:
+    - cron: "2,17,32,47 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thi-data-writer
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify market capture and neutral-site contracts
+        run: |
+          python -m py_compile scripts/refresh_cbb_markets.py scripts/build_cbb_projection_board.py scripts/build_cbb_platform_health.py
+          python -m unittest scripts/test_refresh_cbb_markets.py scripts/test_cbb_projection_board.py scripts/test_cbb_game_day_readiness.py scripts/test_cbb_platform_health.py
+
+      - name: Capture near-term consensus market
+        id: market
+        env:
+          CBBD_API_KEY: ${{ secrets.CBBD_API_KEY }}
+        run: |
+          extra=""
+          if [ "${{ inputs.force || false }}" = "true" ]; then extra="--force"; fi
+          python scripts/refresh_cbb_markets.py $extra
+          if [ -n "$(git status --porcelain -- data/cbb/game_board.json data/cbb/market_snapshots.json)" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Rebuild market-facing CBB views
+        if: steps.market.outputs.changed == 'true'
+        run: |
+          python scripts/build_cbb_projection_board.py
+          python scripts/build_cbb_intelligence_suite.py
+          python scripts/build_cbb_model_tracking.py
+          python scripts/build_cbb_game_day_readiness.py
+          python scripts/build_cbb_platform_health.py
+          python scripts/build_variance_prospective_tracker.py
+
+      - name: Validate refreshed market contract
+        if: steps.market.outputs.changed == 'true'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          board=json.loads(Path("data/cbb/projection_board.json").read_text())
+          health=json.loads(Path("data/cbb/platform_health.json").read_text())
+          history=json.loads(Path("data/cbb/market_snapshots.json").read_text())
+          assert history["meta"]["version"] == "thi-cbb-market-capture-v1.0"
+          assert health["checks"]["neutral_site_home_context_zero"] is True
+          assert all(float((((g.get("projection") or {}).get("matchup_context") or {}).get("home_court") or {}).get("points") or 0) == 0 for g in board["games"] if g.get("neutral_site"))
+          PY
+
+      - name: Commit market snapshots and derived views
+        if: steps.market.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            data/cbb/game_board.json \
+            data/cbb/market_snapshots.json \
+            data/cbb/projection_board.json \
+            data/cbb/intelligence_suite.json \
+            data/cbb/model_tracking.json \
+            data/cbb/game_day_readiness.json \
+            data/cbb/platform_health.json \
+            data/variance/prospective_tracker.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Capture CBB game-day market"
+          git pull --rebase origin main
+          git push origin HEAD:main

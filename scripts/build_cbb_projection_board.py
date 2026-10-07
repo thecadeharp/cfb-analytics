@@ -48,9 +48,17 @@ def model_home_court_points(model: dict[str, Any]) -> float:
     return coefficient / scale if coefficient is not None else 0.0
 
 
-def feature_contributions(features: dict[str, float], model: dict[str, Any], limit: int = 6) -> list[dict[str, Any]]:
+def feature_contributions(
+    features: dict[str, float],
+    model: dict[str, Any],
+    limit: int = 6,
+    excluded: set[str] | None = None,
+) -> list[dict[str, Any]]:
+    excluded = excluded or set()
     rows = []
     for coefficient, name in zip(model["coefficients"][1:], model["feature_names"]):
+        if name in excluded:
+            continue
         feature = features.get(name, float(model["means"][name]))
         points = float(coefficient) * (feature - float(model["means"][name])) / float(model["scales"][name])
         rows.append({"feature": name, "value": round(feature, 3), "margin_points": round(points, 2)})
@@ -320,7 +328,19 @@ def build_board(
                         "evidence_state": "neutral_site" if game.get("neutral_site") else home_court.get("evidence_state") if team_hca is not None else "fallback",
                         "tier": "neutral" if game.get("neutral_site") else home_court.get("tier") if team_hca is not None else "national",
                     },
-                    "margin_drivers": ([{"feature":"team_home_court_adjustment","value":round(applied_hca,3),"margin_points":round(hca_adjustment,2)}] if abs(hca_adjustment) >= .01 else []) + feature_contributions(features, margin_model),
+                    # A neutral floor still differs from the average campus game
+                    # used to center the fitted model. That counterfactual belongs
+                    # in the prediction, but rendering it as an "early home" or
+                    # "nonconference home" edge is misleading. Neutral-site
+                    # explanations therefore suppress every home-context row.
+                    "margin_drivers": (
+                        ([{"feature":"team_home_court_adjustment","value":round(applied_hca,3),"margin_points":round(hca_adjustment,2)}] if abs(hca_adjustment) >= .01 else [])
+                        + feature_contributions(
+                            features,
+                            margin_model,
+                            excluded={"home_court", "early_home", "nonconference_home"} if game.get("neutral_site") else set(),
+                        )
+                    ),
                 },
             },
         })

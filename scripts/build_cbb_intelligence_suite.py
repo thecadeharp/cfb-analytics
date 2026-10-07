@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "thi-cbb-intelligence-suite-v1.2"
+VERSION = "thi-cbb-intelligence-suite-v1.3"
 
 def num(value: Any) -> float | None:
     try:
@@ -45,6 +45,60 @@ def ranked(values: dict[str, float | None], reverse: bool = True) -> dict[str, i
 
 def game_status(game: dict[str, Any]) -> str:
     return str(game.get("status") or "").lower().replace("_", "")
+
+def wl_record(rows: list[dict[str, Any]]) -> dict[str, int]:
+    wins = sum(num(row.get("team_score")) is not None and num(row.get("opponent_score")) is not None and num(row.get("team_score")) > num(row.get("opponent_score")) for row in rows)
+    losses = sum(num(row.get("team_score")) is not None and num(row.get("opponent_score")) is not None and num(row.get("team_score")) < num(row.get("opponent_score")) for row in rows)
+    return {"wins": wins, "losses": losses}
+
+def thi_quadrant(site: str, opponent_rank: int | None) -> str | None:
+    if opponent_rank is None:
+        return None
+    q1 = {"home": 30, "neutral": 50, "away": 75}[site]
+    q2 = {"home": 75, "neutral": 100, "away": 135}[site]
+    q3 = {"home": 160, "neutral": 200, "away": 240}[site]
+    return "q1" if opponent_rank <= q1 else "q2" if opponent_rank <= q2 else "q3" if opponent_rank <= q3 else "q4"
+
+def resume_profile(
+    rows: list[dict[str, Any]],
+    opponent_ranks: dict[str, int | None],
+    opponent_ratings: dict[str, float | None],
+    team_count: int,
+) -> dict[str, Any]:
+    finals = [row for row in rows if row.get("status") in {"final", "completed", "complete"} and num(row.get("team_score")) is not None and num(row.get("opponent_score")) is not None]
+    enriched = []
+    for row in finals:
+        site = str(row.get("site") or "neutral")
+        opponent_id = str(row.get("opponent_id"))
+        opponent_rank = opponent_ranks.get(opponent_id)
+        actual_margin = float(num(row.get("team_score")) or 0) - float(num(row.get("opponent_score")) or 0)
+        projected_margin = num(row.get("projected_margin"))
+        residual = actual_margin - projected_margin if projected_margin is not None else None
+        won = actual_margin > 0
+        rank_quality = (team_count + 1 - opponent_rank) / max(team_count, 1) if opponent_rank else .5
+        site_multiplier = 1.1 if (won and site == "away") or (not won and site == "home") else .9 if (won and site == "home") or (not won and site == "away") else 1.0
+        enriched.append({**row, "opponent_rank": opponent_rank, "opponent_rating": opponent_ratings.get(opponent_id), "actual_margin": round(actual_margin, 1), "performance_vs_projection": round(residual, 2) if residual is not None else None, "quadrant": thi_quadrant(site, opponent_rank), "record_quality_value": (1 if won else -1) * rank_quality * site_multiplier})
+    site_records = {site: wl_record([row for row in enriched if row.get("site") == site]) for site in ("home", "away", "neutral")}
+    quadrant_records = {q: wl_record([row for row in enriched if row.get("quadrant") == q]) for q in ("q1", "q2", "q3", "q4")}
+    top_records = {label: wl_record([row for row in enriched if row.get("opponent_rank") is not None and row["opponent_rank"] <= cutoff]) for label, cutoff in (("top_25", 25), ("top_50", 50), ("top_100", 100))}
+    residuals = [row["performance_vs_projection"] for row in enriched if row.get("performance_vs_projection") is not None]
+    away_residuals = [row["performance_vs_projection"] for row in enriched if row.get("site") in {"away", "neutral"} and row.get("performance_vs_projection") is not None]
+    recent = sorted(enriched, key=lambda row: str(row.get("start_date") or ""), reverse=True)[:5]
+    recent_residuals = [row["performance_vs_projection"] for row in recent if row.get("performance_vs_projection") is not None]
+    return {
+        "overall_record": wl_record(enriched),
+        "site_records": site_records,
+        "quadrant_records": quadrant_records,
+        "opponent_quality_records": top_records,
+        "record_quality": round(statistics.mean(row["record_quality_value"] for row in enriched), 3) if enriched else None,
+        "away_from_home_performance": round(statistics.mean(away_residuals), 2) if away_residuals else None,
+        "overall_performance_vs_projection": round(statistics.mean(residuals), 2) if residuals else None,
+        "recent_form_vs_projection": round(statistics.mean(recent_residuals), 2) if recent_residuals else None,
+        "games_graded": len(enriched),
+        "away_neutral_games_graded": len(away_residuals),
+        "recent_games_graded": len(recent_residuals),
+        "policy": "THI-calculated résumé context using frozen projections and THI opponent ranks; quadrant-style records are not NCAA NET quadrants.",
+    }
 
 def project_players(players: dict[str, Any], priors: dict[str, Any]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     team_tempo = {str(row.get("team_id")): num(row.get("prior_tempo")) or 68.0 for row in priors.get("teams") or []}
@@ -100,6 +154,12 @@ def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[
         "defense": ranked({str(row.get("team_id")): num(row.get("prior_defense")) for row in prior_rows}, reverse=False),
         "tempo": ranked({str(row.get("team_id")): num(row.get("prior_tempo")) for row in prior_rows}),
     }
+    current_net = {
+        team_id: num((((profile_map.get(team_id) or {}).get("current_efficiency") or {}).get("adjusted") or {}).get("net"))
+        for team_id in prior_map
+    }
+    current_or_prior_net = {team_id: current_net.get(team_id) if current_net.get(team_id) is not None else num(row.get("prior_net")) for team_id, row in prior_map.items()}
+    current_ranks = ranked(current_or_prior_net)
     roster_scores = {
         team_id: round(statistics.mean([
             num(row.get("thi_impact")) or 0 for row in rotation.get("players", [])[:8]
@@ -208,7 +268,12 @@ def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[
         expected_wins = sum((num(row.get("win_probability")) or 0) / 100.0 for row in schedule)
         ratings = {"net": prior.get("prior_net"), "offense": prior.get("prior_offense"), "defense": prior.get("prior_defense"), "tempo": prior.get("prior_tempo")}
         ratings["ranks"] = {key: rating_ranks[key].get(team_id) for key in rating_ranks}
+        ratings["current_net"] = current_net.get(team_id)
+        ratings["current_rank"] = current_ranks.get(team_id)
+        ratings["movement_since_preseason"] = round(current_net[team_id] - float(num(prior.get("prior_net")) or 0), 2) if current_net.get(team_id) is not None else None
+        ratings["rank_movement_since_preseason"] = rating_ranks["net"].get(team_id) - current_ranks.get(team_id) if current_net.get(team_id) is not None and rating_ranks["net"].get(team_id) and current_ranks.get(team_id) else None
         core = sorted(rotation, key=lambda row: -(num(row.get("projected_minutes")) or 0))[:5]
+        resume = resume_profile(schedule, current_ranks, current_or_prior_net, len(prior_rows))
         dossiers.append({
             "team_id": prior.get("team_id"), "team": prior.get("team"), "conference": prior.get("conference"),
             "ratings": ratings, "record": profile.get("record"), "four_factors": prior.get("prior_four_factors"),
@@ -218,6 +283,7 @@ def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[
             "projected_core_lineup": {"players": core, "combined_impact": round(sum(num(row.get("thi_impact")) or 0 for row in core), 1), "state": "projected_rotation_not_observed_lineup"},
             "schedule_strength": {"average_opponent_thi_net": round(statistics.mean(opponent_nets), 3) if opponent_nets else None, "nonconference_average_opponent_thi_net": round(statistics.mean(nc_opponent_nets), 3) if nc_opponent_nets else None, "scheduled_games": len(schedule)},
             "forecast": {"expected_wins_in_window": round(expected_wins, 2), "games_in_window": len(schedule)},
+            "resume": resume,
             "rotation": rotation, "schedule_window": schedule,
             "recent_games": sorted(recent_by_team.get(team_id, []), key=lambda row: str(row.get("start_date") or ""), reverse=True)[:10],
             "home_court": hca_map.get(team_id),
@@ -248,7 +314,7 @@ def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[
         "meta": {
             "version": VERSION, "season": priors.get("meta", {}).get("season"), "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "methodology": "THI uses regressed preseason priors, roster continuity and personnel quality, possession-based opponent-adjusted efficiency, Four Factors, pace, regularized program-specific home-court effects and chronological walk-forward updates. Market prices remain evaluation fields. Situational flags are displayed as research context until each feature clears out-of-sample validation.",
-            "inspiration_note": "Presentation and research concepts are informed by leading public basketball analytics, while every published THI value is calculated from THI-owned transformations and documented source data.",
+            "inspiration_note": "Away-from-home performance, record quality, quadrant-style records, rating movement and recent form are THI calculations inspired by useful public dossier concepts; no external proprietary rating is copied or used as a model input.",
             "player_projection_policy": "Qualified prior production receives per-game counting-stat projections; unverified statistical profiles receive role and impact context only.",
             "home_court_policy": "Program effects use five seasons of conference games, recency weighting and shrinkage toward the national mean; neutral-site games receive zero.",
             "situational_policy": "Rest, back-to-back, lookahead and result-response flags are research context only. Injury and travel adjustments remain unavailable until verified feeds and out-of-sample validation exist.",
