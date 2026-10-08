@@ -119,6 +119,16 @@ def main() -> None:
     payload = build_audit(raw, overrides)
     args.output.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n")
     print(VERSION, payload["meta"]["status"], payload["summary"])
+    for row in payload["games"]:
+        if row["audit_state"] == "provider_neutral_campus_venue_review":
+            print("UNRESOLVED_NEUTRAL_VENUE", json.dumps({
+                "game_id": row["game_id"],
+                "start_date": row["start_date"],
+                "away_team": row["away_team"],
+                "home_team": row["home_team"],
+                "source_venue": row["source_venue"],
+                "participant_campus_match": row["participant_campus_match"],
+            }, sort_keys=True))
 
 
 if __name__ == "__main__":
