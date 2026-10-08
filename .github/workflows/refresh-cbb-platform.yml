@@ -31,6 +31,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          # Scheduled events retain the commit that existed when the event was
+          # queued. This workflow writes generated data back to main, so it
+          # must begin from the current branch head to avoid rebase conflicts
+          # with earlier serialized data-writer jobs.
+          ref: main
           fetch-depth: 0
 
       - name: Set up Python
