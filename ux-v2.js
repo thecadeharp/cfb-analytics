@@ -1170,6 +1170,21 @@
         const bFinal = settledResultForGame(b) ? 1 : 0;
         if (aFinal !== bFinal) return aFinal - bFinal;
 
+        if (currentProjectionSort === "watch") {
+          const aWatch = Number(window.THIIntelligence?.watchIndex?.(a)?.score || 0);
+          const bWatch = Number(window.THIIntelligence?.watchIndex?.(b)?.score || 0);
+          if (bWatch !== aWatch) return bWatch - aWatch;
+        }
+
+        if (currentProjectionSort === "top25") {
+          const aRank = Math.min(Number(a?.home?.power_rating_rank || 999), Number(a?.away?.power_rating_rank || 999));
+          const bRank = Math.min(Number(b?.home?.power_rating_rank || 999), Number(b?.away?.power_rating_rank || 999));
+          const aTop25 = aRank <= 25 ? 1 : 0;
+          const bTop25 = bRank <= 25 ? 1 : 0;
+          if (bTop25 !== aTop25) return bTop25 - aTop25;
+          if (aRank !== bRank) return aRank - bRank;
+        }
+
         const aPriority = signalBoardPriority(a);
         const bPriority = signalBoardPriority(b);
         if (bPriority !== aPriority) return bPriority - aPriority;
@@ -1293,7 +1308,7 @@
             <span class="team-name" onclick="event.stopPropagation(); openDossier('${escapeJsString(awayName)}');">
               ${escapeHtml(awayName)}
             </span>
-            <span class="team-meta">${awayRank ? `#${awayRank}` : ""}</span>
+            <span class="team-meta">${awayRank ? `THI #${awayRank}` : ""}</span>
           </div>
 
           <div class="team-line">
@@ -1302,7 +1317,7 @@
             <span class="team-name" onclick="event.stopPropagation(); openDossier('${escapeJsString(homeName)}');">
               ${escapeHtml(homeName)}
             </span>
-            <span class="team-meta">${homeRank ? `#${homeRank}` : ""}</span>
+            <span class="team-meta">${homeRank ? `THI #${homeRank}` : ""}</span>
           </div>
 
           <div class="team-meta" style="margin-top:5px;">

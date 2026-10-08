@@ -491,6 +491,7 @@
   // --------------------------------------------------------------------------
 
   function sortedRows() {
+    const sortMode = document.getElementById("projection-sort")?.value || "edge";
     return [...rows()].sort((a, b) => {
       const statusDiff =
         statusPriority(rowStatus(a)) -
@@ -498,6 +499,27 @@
 
       if (statusDiff !== 0) {
         return statusDiff;
+      }
+
+      const aGame = projectionByGameId.get(gameIdFromRow(a));
+      const bGame = projectionByGameId.get(gameIdFromRow(b));
+
+      if (sortMode === "top25") {
+        const rank = game => Math.min(
+          Number(game?.home?.power_rating_rank || 999),
+          Number(game?.away?.power_rating_rank || 999)
+        );
+        const aRank = rank(aGame);
+        const bRank = rank(bGame);
+        const top25Diff = Number(bRank <= 25) - Number(aRank <= 25);
+        if (top25Diff !== 0) return top25Diff;
+        if (aRank !== bRank) return aRank - bRank;
+      }
+
+      if (sortMode === "watch") {
+        const watch = game => Number(window.THIIntelligence?.watchIndex?.(game)?.score || 0);
+        const watchDiff = watch(bGame) - watch(aGame);
+        if (watchDiff !== 0) return watchDiff;
       }
 
       const timeDiff = rowTime(a) - rowTime(b);
@@ -540,6 +562,10 @@
       });
 
       body.appendChild(fragment);
+    }
+
+    if ((document.getElementById("projection-sort")?.value || "edge") !== "edge") {
+      return;
     }
 
     let previousGroup = "";

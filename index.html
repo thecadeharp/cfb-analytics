@@ -461,6 +461,12 @@
       border-color: #aeb5b0;
     }
 
+    .projection-sort {
+      width: auto;
+      min-width: 180px;
+      padding-left: 12px;
+    }
+
     .projection-summary {
       font-size: 11px;
       color: var(--muted);
@@ -1379,6 +1385,12 @@
           >
         </div>
 
+        <select class="team-search projection-sort" id="projection-sort" aria-label="Sort projection games">
+          <option value="edge">Sort: Game time</option>
+          <option value="watch">Sort: THI Watch</option>
+          <option value="top25">Sort: THI Top 25 first</option>
+        </select>
+
         <div class="projection-summary" id="projection-summary">
           Loading games...
         </div>
@@ -1526,17 +1538,17 @@
 
   </main>
 
-  <script src="app.js?v=2026-site-context-v01"></script>
+  <script src="app.js?v=2026-ranked-odds-v01"></script>
   <script src="thi-ratings-hub.js?v=2026-ux-cleanup-v01"></script>
   <script src="portfolio-config.js"></script>
-  <script src="market-research.js?v=2026-private-research-v05"></script>
+  <script src="market-research.js?v=2026-public-odds-backtest-v01"></script>
   <script src="last-updated-timestamp.js"></script>
   <script src="dossier-ranks.js"></script>
-  <script src="ux-v2.js?v=2026-ux-cleanup-v01"></script>
-  <script src="portal-variance.js?v=2026-ux-cleanup-v01"></script>
+  <script src="ux-v2.js?v=2026-ranked-odds-v01"></script>
+  <script src="portal-variance.js?v=2026-free-market-monitor-v01"></script>
   <script src="mobile.js?v=2026-intelligence-v01"></script>
   <script src="sort-tables.js?v=2026-ux-cleanup-v01"></script>
-  <script src="status-controls.js?v=2026-performance-hotfix-v02"></script>
+  <script src="status-controls.js?v=2026-ranked-odds-v01"></script>
   <script src="final-matchup.js?v=2026-postgame-board-v03"></script>
   <script src="fcs-ui.js?v=2026-performance-hotfix-v02"></script>
   <script src="ux-feedback.js?v=2026-ux-cleanup-v01"></script>
@@ -1553,7 +1565,7 @@
   <link rel="stylesheet" href="cbb-site.css?v=2027-cbb-ui-v30">
   <link rel="stylesheet" href="dark-mode.css?v=2026-dark-v05">
   <script src="dark-mode.js?v=2026-dark-v01"></script>
-  <script src="cbb-site.js?v=2027-cbb-ui-v30"></script>
+  <script src="cbb-site.js?v=2027-ranked-backtest-v01"></script>
 
   <!-- Cloudflare Web Analytics -->
   <script

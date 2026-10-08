@@ -28,6 +28,11 @@
     .research-summary .research-card{padding:13px}
     .research-summary .research-card strong{display:block;font-size:21px}
     .research-capture{margin:5px 0 7px;color:var(--text,#1d2730);font-size:13px;font-weight:650}
+    .research-table-wrap{overflow:auto;border:1px solid var(--border,#ddd);border-radius:10px;background:var(--surface,#fff)}
+    .research-table{width:100%;min-width:760px;border-collapse:collapse;font-size:12px}
+    .research-table th,.research-table td{padding:10px 12px;border-bottom:1px solid var(--border,#ddd);text-align:left;white-space:nowrap}
+    .research-table th{font:700 9px var(--mono,monospace);letter-spacing:.6px;text-transform:uppercase;color:var(--muted,#5b6974)}
+    .research-negative{color:#b4414e;font-weight:700}.research-search{width:min(100%,360px);padding:10px 12px;margin:8px 0 12px;border:1px solid var(--border,#ddd);border-radius:8px;background:var(--surface,#fff);color:var(--text,#1d2730)}
   `;
   document.head.appendChild(style);
   const button = document.createElement('button');
@@ -39,6 +44,8 @@
   view.innerHTML = `<div class="eyebrow">THI research</div><h1 class="page-title">Market Research</h1>
     <p class="page-subtitle">First-snapshot model accountability and a private workspace for evaluating your line selection.</p>
     <div id="research-scorecard" aria-live="polite"><p class="research-muted">Loading weekly scorecard…</p></div>
+    <div id="research-backtest" aria-live="polite"><p class="research-muted">Loading historical ROI check…</p></div>
+    <div id="research-odds" aria-live="polite"><p class="research-muted">Loading current odds board…</p></div>
     <div class="research-card"><h2>Private portfolio</h2><div id="research-private" aria-live="polite"></div></div>`;
   main.append(view);
   const $ = selector => view.querySelector(selector);
@@ -107,6 +114,39 @@
       Not yet settled: ${esc(w.unsettled_or_unmatched)} of ${esc(w.games_with_frozen_snapshots)} captured.</p></div>`).join('')}</div>
       <p class="research-muted">Latest included kickoff: ${esc(time(data.latest_settled_kickoff_utc))}. Metrics use the first captured prospective projection for each game.</p>`;
   }).catch(() => { $('#research-scorecard').innerHTML = '<p class="research-muted">Weekly scorecard pending its first settlement run.</p>'; });
+
+  fetch('./data/reports/public_backtest_scorecard.json', {cache:'no-store'}).then(r => {
+    if (!r.ok) throw Error('Backtest scorecard not published yet'); return r.json();
+  }).then(data => {
+    const cfb = data.sports?.cfb || {};
+    const qualified = cfb.qualified_5_plus || {};
+    const signed = value => Number.isFinite(Number(value)) ? `${Number(value) > 0 ? '+' : ''}${Number(value).toFixed(1)}%` : '—';
+    $('#research-backtest').innerHTML = `<section class="research-summary"><h3>2024–2025 Historical ROI Check</h3>
+      <p class="research-muted">${esc(cfb.model)} against ${esc(cfb.market)}. ${esc(data.meta?.staking)} Every signal bucket is published below.</p>
+      <div class="research-grid"><div class="research-card"><span>&gt;5 point disagreement</span><strong>${esc(qualified.record || '—')}</strong><span>${number(qualified.hit_rate)}% ATS · ${esc(qualified.games || 0)} games</span></div><div class="research-card"><span>ROI at −110</span><strong class="${Number(qualified.roi_pct) >= 0 ? 'research-positive' : 'research-negative'}">${signed(qualified.roi_pct)}</strong><span>${Number(qualified.profit_units) > 0 ? '+' : ''}${number(qualified.profit_units)} units</span></div><div class="research-card"><span>Evidence status</span><strong>Research proxy</strong><span>Prospective validation still controls labels</span></div></div>
+      <div class="research-table-wrap"><table class="research-table"><thead><tr><th>Signal bucket</th><th>Edge</th><th>Games</th><th>Record</th><th>ATS</th><th>ROI</th></tr></thead><tbody>${(cfb.buckets || []).map(row => `<tr><td><strong>${esc(row.label)}</strong></td><td>${esc(row.edge_range)} pts</td><td>${esc(row.games)}</td><td>${esc(row.record)}</td><td>${number(row.hit_rate)}%</td><td class="${Number(row.roi_pct) >= 0 ? 'research-positive' : 'research-negative'}">${signed(row.roi_pct)}</td></tr>`).join('')}</tbody></table></div>
+      <p class="research-muted">${esc(cfb.validation_note)} ${esc(data.meta?.promotion_rule)}</p></section>`;
+  }).catch(() => { $('#research-backtest').innerHTML = '<p class="research-muted">Historical ROI scorecard is temporarily unavailable.</p>'; });
+
+  fetch('./data/odds.json', {cache:'no-store'}).then(r => {
+    if (!r.ok) throw Error('Odds board unavailable'); return r.json();
+  }).then(data => {
+    const rows = (data.games || []).slice().sort((a,b) => new Date(a.commence_time) - new Date(b.commence_time));
+    const spread = row => {
+      const value = finiteNumber(row.spread_home);
+      if (value === null) return '—';
+      const team = value <= 0 ? row.home_team : row.away_team;
+      return `${team} -${Math.abs(value).toFixed(1)}`;
+    };
+    const paint = query => {
+      const terms = String(query || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
+      const shown = rows.filter(row => terms.every(term => `${row.away_team} ${row.home_team}`.toLowerCase().includes(term))).slice(0,100);
+      $('#research-odds-body').innerHTML = shown.length ? shown.map(row => `<tr><td><strong>${esc(row.away_team)} at ${esc(row.home_team)}</strong></td><td>${esc(time(row.commence_time))}</td><td>${esc(spread(row))}</td><td>${finiteNumber(row.total) === null ? '—' : number(row.total)}</td><td>${esc(row.bookmaker || 'Consensus')}</td></tr>`).join('') : '<tr><td colspan="5">No current games match.</td></tr>';
+      $('#research-odds-count').textContent = `${shown.length} of ${rows.length} current games`;
+    };
+    $('#research-odds').innerHTML = `<section class="research-summary"><h3>Current Odds Screen</h3><p class="research-muted">Current consensus spread and total inventory. Prices are informational and remain separate from Model A.</p><input id="research-odds-search" class="research-search" type="search" placeholder="Search either team"><span id="research-odds-count" class="research-muted"></span><div class="research-table-wrap"><table class="research-table"><thead><tr><th>Matchup</th><th>Start</th><th>Spread</th><th>Total</th><th>Source</th></tr></thead><tbody id="research-odds-body"></tbody></table></div><p class="research-muted">Feed updated ${esc(time(data.meta?.generated_at_utc || data.meta?.generated))}. The separate Pinnacle movement collector appears in Variance Lab.</p></section>`;
+    $('#research-odds-search').addEventListener('input', event => paint(event.target.value)); paint('');
+  }).catch(() => { $('#research-odds').innerHTML = '<p class="research-muted">The current odds board will populate when market lines are available.</p>'; });
 
   if (!config.enabled || !/^https:\/\/[^/]+\.supabase\.co$/.test(config.url || '') || !config.publishableKey) {
     privateBox.innerHTML = '<p class="research-muted">Private play logging is being set up. The weekly scorecard above is available now.</p>';

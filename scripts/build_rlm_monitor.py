@@ -38,12 +38,24 @@ def select_authoritative_rows(rows):
   key=(sport,event_id);current=events.get(key)
   if current is None or SHARP_BOOK_PRIORITY[book]<SHARP_BOOK_PRIORITY[current["sharp_book"]]:events[key]=row
  return list(events.values())
+def sharp_line_moves(state):
+ moves=[]
+ for row in (state or {}).get("events",{}).values():
+  opening=number(row.get("opening_home_spread"));current=number(row.get("current_home_spread"))
+  if opening is None or current is None:continue
+  delta=round(current-opening,2)
+  if abs(delta)<.5:continue
+  toward="home" if delta<0 else "away";team=row.get(f"{toward}_team");sport=str(row.get("sport")or"").lower()
+  key=crossed_key(opening,current) if sport=="cfb" else None
+  severity="key_number" if key else("major" if abs(delta)>=2 else"move")
+  moves.append({**row,"line_delta":delta,"movement_toward":toward,"movement_toward_team":team,"key_number_crossed":key,"severity":severity,"definition":"Observed Pinnacle spread movement from THI's first captured number. Public betting splits are unavailable, so this is not an RLM or sharp-money claim."})
+ return sorted(moves,key=lambda row:(str(row.get("start_date")),str(row.get("event_id"))))
 def main():
- p=argparse.ArgumentParser();p.add_argument("--snapshots",type=Path,default=ROOT/"data/market/rlm_snapshots.jsonl");p.add_argument("--output",type=Path,default=ROOT/"data/market/rlm_monitor.json");a=p.parse_args();raw=[]
+ p=argparse.ArgumentParser();p.add_argument("--snapshots",type=Path,default=ROOT/"data/market/rlm_snapshots.jsonl");p.add_argument("--sharp-state",type=Path,default=ROOT/"data/market/sharp_line_state.json");p.add_argument("--output",type=Path,default=ROOT/"data/market/rlm_monitor.json");a=p.parse_args();raw=[]
  if a.snapshots.exists():
   for line in a.snapshots.read_text().splitlines():
    if line.strip():raw.append(json.loads(line))
- selected=select_authoritative_rows(raw);alerts=sorted((alert for row in selected if(alert:=analyze(row))),key=lambda x:str(x.get("start_date")))
- payload={"meta":{"version":"thi-rlm-monitor-v1.1","generated_at_utc":datetime.now(timezone.utc).isoformat().replace("+00:00","Z"),"status":"monitoring"if selected else"source_pending","alert_count":len(alerts),"qualified_event_count":len(selected),"sharp_book_policy":{"primary":"Pinnacle","fallback":"BetOnline","rejected_as_sharp_reference":["DraftKings","FanDuel","Caesars","BetMGM"]},"minimum_ticket_pct":65,"minimum_move_points":.5,"requirements":["Ticket percentage and side from a licensed splits source","Opening and current spread from the same named sharp book","Pinnacle is required when present; BetOnline is used only when Pinnacle is absent","Snapshots captured no more than five minutes apart","No alert when either input is absent"]},"alerts":alerts}
+ selected=select_authoritative_rows(raw);alerts=sorted((alert for row in selected if(alert:=analyze(row))),key=lambda x:str(x.get("start_date")));sharp_state=json.loads(a.sharp_state.read_text())if a.sharp_state.exists()else{};moves=sharp_line_moves(sharp_state);tracked=len((sharp_state or{}).get("events",{}))
+ payload={"meta":{"version":"thi-rlm-monitor-v1.2","generated_at_utc":datetime.now(timezone.utc).isoformat().replace("+00:00","Z"),"status":"line_monitoring"if tracked else"source_pending","rlm_status":"monitoring"if alerts else"public_splits_pending","sharp_line_status":"monitoring"if tracked else"api_key_pending","alert_count":len(alerts),"sharp_move_count":len(moves),"sharp_tracked_event_count":tracked,"qualified_event_count":len(selected),"sharp_book_policy":{"primary":"Pinnacle","fallback":"BetOnline","rejected_as_sharp_reference":["DraftKings","FanDuel","Caesars","BetMGM"]},"free_source":{"provider":"The Odds API","monthly_credits":500,"polls_per_day":6,"historical_odds":False},"minimum_ticket_pct":65,"minimum_move_points":.5,"requirements":["Ticket percentage and side from a licensed splits source before any RLM label","Opening and current spread from the same named sharp book","Pinnacle is required when present; BetOnline is used only when Pinnacle is absent","No sharp-money claim from line movement alone","No alert when required inputs are absent"]},"sharp_line_moves":moves,"alerts":alerts}
  a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(payload,indent=2)+"\n");print(len(alerts))
 if __name__=="__main__":main()

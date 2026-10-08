@@ -54,6 +54,7 @@ let seasonProjections = {};
 
 let currentWeek = null;
 let currentSearch = "";
+let currentProjectionSort = "edge";
 let currentRatingsMode = "overview";
 let currentTeamConference = "ALL";
 let currentAdvancedSample = "non_garbage";
@@ -624,6 +625,7 @@ function captureNavigationState(viewName = activeViewName()) {
     scrollY: Math.max(0, Math.round(window.scrollY || 0)),
     week: currentWeek,
     search: currentSearch,
+    projectionSort: currentProjectionSort,
     ratingsMode: currentRatingsMode,
     teamConference: currentTeamConference,
     status: window.hammerStatusControls?.getActiveStatus?.() || "all",
@@ -638,6 +640,7 @@ function restoreNavigationState(state) {
     currentWeek = Number(state.week);
   }
   if (typeof state.search === "string") currentSearch = state.search;
+  if (typeof state.projectionSort === "string") currentProjectionSort = state.projectionSort;
   if (typeof state.ratingsMode === "string") currentRatingsMode = state.ratingsMode;
   if (typeof state.teamConference === "string") {
     currentTeamConference = state.teamConference;
@@ -654,6 +657,8 @@ function restoreNavigationState(state) {
 
     const search = document.getElementById("team-search");
     if (search) search.value = currentSearch;
+    const projectionSort = document.getElementById("projection-sort");
+    if (projectionSort) projectionSort.value = currentProjectionSort;
 
     window.hammerStatusControls?.setActiveStatus?.(
       state.status || "all",
@@ -2417,6 +2422,19 @@ function projectionGamesForCurrentView() {
       return home.includes(query) || away.includes(query);
     })
     .sort((a, b) => {
+      if (currentProjectionSort === "watch") {
+        const aWatch = Number(window.THIIntelligence?.watchIndex?.(a)?.score || 0);
+        const bWatch = Number(window.THIIntelligence?.watchIndex?.(b)?.score || 0);
+        if (bWatch !== aWatch) return bWatch - aWatch;
+      }
+      if (currentProjectionSort === "top25") {
+        const aRank = Math.min(Number(a?.home?.power_rating_rank || 999), Number(a?.away?.power_rating_rank || 999));
+        const bRank = Math.min(Number(b?.home?.power_rating_rank || 999), Number(b?.away?.power_rating_rank || 999));
+        const aTop25 = aRank <= 25 ? 1 : 0;
+        const bTop25 = bRank <= 25 ? 1 : 0;
+        if (bTop25 !== aTop25) return bTop25 - aTop25;
+        if (aRank !== bRank) return aRank - bRank;
+      }
       const aDisagreement = a?.comparison?.disagreement ?? -1;
       const bDisagreement = b?.comparison?.disagreement ?? -1;
 
@@ -2533,7 +2551,7 @@ function renderProjectionRow(game) {
           >
             ${escapeHtml(awayName)}
           </span>
-          <span class="team-meta">${awayRank ? `#${awayRank}` : ""}</span>
+          <span class="team-meta">${awayRank ? `THI #${awayRank}` : ""}</span>
         </div>
 
         <div class="team-line">
@@ -2544,7 +2562,7 @@ function renderProjectionRow(game) {
           >
             ${escapeHtml(homeName)}
           </span>
-          <span class="team-meta">${homeRank ? `#${homeRank}` : ""}</span>
+          <span class="team-meta">${homeRank ? `THI #${homeRank}` : ""}</span>
         </div>
 
         <div class="team-meta" style="margin-top:5px;">
@@ -7304,6 +7322,7 @@ function attachEvents() {
       "team-search"
     );
 
+  const projectionSort = document.getElementById("projection-sort");
   if (!search) return;
 
   search.addEventListener(
@@ -7315,6 +7334,11 @@ function attachEvents() {
       renderProjections();
     }
   );
+
+  projectionSort?.addEventListener("change", event => {
+    currentProjectionSort = event.target.value;
+    renderProjections();
+  });
 }
 
 document.addEventListener(

@@ -1,6 +1,7 @@
 import unittest
 from datetime import datetime, timezone
-from scripts.build_rlm_monitor import analyze,select_authoritative_rows
+from scripts.build_rlm_monitor import analyze,select_authoritative_rows,sharp_line_moves
+from scripts.poll_free_sharp_lines import merge_events
 from scripts.build_trends_lab import evidence_state
 from scripts.build_variance_context import utc_datetime
 from scripts.build_variance_prospective_tracker import build
@@ -15,6 +16,21 @@ class VarianceLabTests(unittest.TestCase):
  def test_pinnacle_wins_over_betonline_for_same_event(self):
   rows=[{"sport":"cfb","event_id":"1","sharp_book":"betonline","captured_at_utc":"2026-01-01T12:05:00Z"},{"sport":"cfb","event_id":"1","sharp_book":"pinnacle","captured_at_utc":"2026-01-01T12:00:00Z"}]
   self.assertEqual(select_authoritative_rows(rows)[0]["sharp_book"],"pinnacle")
+ def test_free_pinnacle_capture_preserves_open_and_updates_current(self):
+  payload=[{"id":"game-1","commence_time":"2026-10-08T23:00:00Z","away_team":"Away","home_team":"Home","bookmakers":[{"key":"pinnacle","last_update":"2026-10-07T12:00:00Z","markets":[{"key":"spreads","outcomes":[{"name":"Away","point":3.5},{"name":"Home","point":-3.5}]}]}]}]
+  state,changes=merge_events({"events":{}},"cfb",payload,"2026-10-07T12:00:00Z")
+  self.assertEqual(len(changes),1)
+  payload[0]["bookmakers"][0]["markets"][0]["outcomes"][1]["point"]=-2.5
+  state,changes=merge_events(state,"cfb",payload,"2026-10-07T16:00:00Z")
+  row=state["events"]["cfb:game-1"]
+  self.assertEqual(row["opening_home_spread"],-3.5);self.assertEqual(row["current_home_spread"],-2.5)
+  self.assertEqual(len(changes),1)
+ def test_free_line_move_is_not_labeled_rlm(self):
+  state={"events":{"cfb:1":{"sport":"cfb","event_id":"1","away_team":"Away","home_team":"Home","opening_home_spread":-3.5,"current_home_spread":-2.5}}}
+  move=sharp_line_moves(state)[0]
+  self.assertEqual(move["movement_toward_team"],"Away")
+  self.assertNotIn("public_ticket_pct",move)
+  self.assertIn("not an RLM",move["definition"])
  def test_rank_dates_are_normalized_to_utc(self):
   self.assertEqual(utc_datetime("2025-01-06T12:00:00").tzinfo,timezone.utc)
   self.assertEqual(utc_datetime("2025-01-06T07:00:00-05:00").hour,12)

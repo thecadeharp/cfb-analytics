@@ -21,10 +21,11 @@
     health: "data/cbb/platform_health.json",
     trends: "data/trends_lab.json",
     varianceTracker: "data/variance/prospective_tracker.json",
-    rlmMonitor: "data/market/rlm_monitor.json"
+    rlmMonitor: "data/market/rlm_monitor.json",
+    publicBacktest: "data/reports/public_backtest_scorecard.json"
   };
   const PLAYER_PATH = "data/cbb/player_ratings.json";
-  const CORE_DATA_KEYS = new Set(["profiles", "foundation", "model", "priors", "homeCourt", "history", "projectionBoard", "tracking", "bracketology", "readiness", "health", "trends", "varianceTracker"]);
+  const CORE_DATA_KEYS = new Set(["profiles", "foundation", "model", "priors", "homeCourt", "history", "projectionBoard", "tracking", "bracketology", "readiness", "health", "trends", "varianceTracker", "publicBacktest"]);
   const DEFERRED_VIEW_KEYS = {
     "cbb-projections": ["intelligence", "matchups", "operations"],
     "cbb-team-data": ["intelligence"],
@@ -56,6 +57,7 @@
     projectionConference: "all",
     projectionSignal: "all",
     projectionConfidence: "all",
+    projectionSort: "time",
     projectionStatus: "all",
     projectionDate: "next",
     projectionLimit: 150,
@@ -188,7 +190,7 @@
     if (state.loaded) return state.data;
     if (state.loading) return state.loading;
     state.loading = Promise.all(Object.entries(PATHS).filter(([key]) => CORE_DATA_KEYS.has(key)).map(async ([key, path]) => {
-      if (["projectionBoard", "tracking", "bracketology", "playStyle", "matchups", "intelligence", "challenger", "readiness", "operations", "health", "trends", "varianceTracker", "rlmMonitor"].includes(key)) {
+      if (["projectionBoard", "tracking", "bracketology", "playStyle", "matchups", "intelligence", "challenger", "readiness", "operations", "health", "trends", "varianceTracker", "rlmMonitor", "publicBacktest"].includes(key)) {
         try { return [key, await fetchJson(path)]; }
         catch (_error) {
           if (key === "projectionBoard") return [key, { meta: {}, games: [] }];
@@ -198,6 +200,7 @@
           if (key === "intelligence") return [key, { meta: {}, player_projections: [], team_dossiers: [], game_context: [], market_board: [], validation_registry: { gate_summary: {}, factors: [] } }];
           if (key === "challenger") return [key, { meta: {}, selected_candidate: {}, promotion: { checks: {} }, post_selection_comparison: {} }];
           if (key === "readiness") return [key, { meta: {}, checks: {}, coverage: {}, automation: {}, exceptions: [] }];
+          if (key === "publicBacktest") return [key, { meta: {}, sports: {} }];
           return [key, { meta: {}, games: [] }];
         }
       }
@@ -350,6 +353,7 @@
         <select id="cbb-projection-conference" class="cbb-select"><option value="all">All conferences</option>${conferences.map(conf => `<option value="${escapeHtml(conf)}" ${state.projectionConference === conf ? "selected" : ""}>${escapeHtml(conf)}</option>`).join("")}</select>
         <select id="cbb-projection-signal" class="cbb-select"><option value="all">All signals</option>${[['no_line','No line'],['aligned','Aligned'],['small','Small edge'],['play','Play'],['material','Material disagreement'],['outlier','Outlier']].map(([value,label]) => `<option value="${value}" ${state.projectionSignal === value ? "selected" : ""}>${label}</option>`).join("")}</select>
         <select id="cbb-projection-confidence" class="cbb-select"><option value="all">All confidence</option>${[['research','Research only'],['developing','Developing'],['validated','Validated'],['established','Established']].map(([value,label]) => `<option value="${value}" ${state.projectionConfidence === value ? "selected" : ""}>${label}</option>`).join("")}</select>
+        <select id="cbb-projection-sort" class="cbb-select"><option value="time" ${state.projectionSort === "time" ? "selected" : ""}>Sort: Game time</option><option value="watch" ${state.projectionSort === "watch" ? "selected" : ""}>Sort: THI Watch</option><option value="top25" ${state.projectionSort === "top25" ? "selected" : ""}>Sort: THI Top 25 first</option></select>
         <button id="cbb-projection-clear" class="cbb-clear-button" type="button">Clear</button>
       </div>
 
@@ -448,6 +452,12 @@
     return Math.round(Math.max(1, Math.min(99, 62 - margin * 2 + Math.max(0, (home + away) / 2))));
   }
 
+  function cbbThiRank(teamId) {
+    const teams = [...(state.data?.priors?.teams || [])].sort((a,b) => Number(b.prior_net || -Infinity) - Number(a.prior_net || -Infinity));
+    const index = teams.findIndex(team => String(team.team_id) === String(teamId));
+    return index >= 0 ? index + 1 : null;
+  }
+
   function projectionValue(game, key) {
     if (key === "matchup") return `${game.away?.team || ""} ${game.home?.team || ""}`;
     if (key === "watch") return watchability(game);
@@ -472,6 +482,17 @@
         && (state.projectionConfidence === "all" || confidenceTier(game) === state.projectionConfidence)
         && (state.projectionStatus === "all" || gameStatus(game) === state.projectionStatus);
     }).sort((a, b) => {
+      if (state.projectionSort === "watch") {
+        const watchOrder = watchability(b) - watchability(a);
+        if (watchOrder) return watchOrder;
+      }
+      if (state.projectionSort === "top25") {
+        const aRank = Math.min(cbbThiRank(a.home?.team_id) || 999, cbbThiRank(a.away?.team_id) || 999);
+        const bRank = Math.min(cbbThiRank(b.home?.team_id) || 999, cbbThiRank(b.away?.team_id) || 999);
+        const top25Order = Number(bRank <= 25) - Number(aRank <= 25);
+        if (top25Order) return top25Order;
+        if (aRank !== bRank) return aRank - bRank;
+      }
       const time = (new Date(a.start_date).getTime() || 0) - (new Date(b.start_date).getTime() || 0);
       return time || String(a.game_id || "").localeCompare(String(b.game_id || ""));
     });
@@ -487,8 +508,9 @@
     view.querySelector("#cbb-projection-conference").addEventListener("change", event => { state.projectionConference = event.target.value; resetLimit(); });
     view.querySelector("#cbb-projection-signal").addEventListener("change", event => { state.projectionSignal = event.target.value; resetLimit(); });
     view.querySelector("#cbb-projection-confidence").addEventListener("change", event => { state.projectionConfidence = event.target.value; resetLimit(); });
+    view.querySelector("#cbb-projection-sort").addEventListener("change", event => { state.projectionSort = event.target.value; resetLimit(); });
     view.querySelector("#cbb-projection-clear").addEventListener("click", () => {
-      state.projectionQuery = ""; state.projectionConference = "all"; state.projectionSignal = "all"; state.projectionConfidence = "all"; state.projectionStatus = "all"; state.projectionDate = "next"; state.projectionLimit = 150; renderProjections();
+      state.projectionQuery = ""; state.projectionConference = "all"; state.projectionSignal = "all"; state.projectionConfidence = "all"; state.projectionSort = "time"; state.projectionStatus = "all"; state.projectionDate = "next"; state.projectionLimit = 150; renderProjections();
     });
     view.querySelector(".cbb-status-filter").addEventListener("click", event => {
       const button = event.target.closest("[data-cbb-status]");
@@ -574,8 +596,10 @@
     const varianceRows = (state.data?.varianceTracker?.frozen || []).filter(row => row.sport === "cbb" && String(row.game_id) === String(game.game_id));
     const varianceCards = new Map((state.data?.trends?.sports?.cbb?.cards || []).map(card => [card.id, card]));
     const varianceMarkup = varianceRows.length ? `<div class="cbb-variance-context">${varianceRows.slice(0,2).map(row => { const card = varianceCards.get(row.system_id) || {}; const evidence = card.state === "failed_hypothesis" ? "did not validate" : humanize(card.state || "prospective"); return `<span title="Historical context only; does not affect the THI projection">${escapeHtml(card.name || humanize(row.system_id))} · ${escapeHtml(evidence)}</span>`; }).join("")}</div>` : "";
+    const awayRank = cbbThiRank(game.away?.team_id);
+    const homeRank = cbbThiRank(game.home?.team_id);
     return `<tr class="cbb-projection-row" data-cbb-game-id="${escapeHtml(game.game_id)}">
-      <td><div class="cbb-matchup-team">${teamLogo(game.away,"small")}<strong>${escapeHtml(game.away?.team || "—")}</strong><span>${gameStatus(game) === "final" ? integer(game.away?.score) : ""}</span></div><div class="cbb-matchup-team">${teamLogo(game.home,"small")}<strong>${escapeHtml(game.home?.team || "—")}</strong><span>${gameStatus(game) === "final" ? integer(game.home?.score) : ""}</span></div><div class="cbb-team-meta">${escapeHtml(time)} · ${escapeHtml(network)} · ${gameType}</div>${varianceMarkup}</td>
+      <td><div class="cbb-matchup-team">${teamLogo(game.away,"small")}<strong>${escapeHtml(game.away?.team || "—")}</strong><small>${awayRank ? `THI #${awayRank}` : ""}</small><span>${gameStatus(game) === "final" ? integer(game.away?.score) : ""}</span></div><div class="cbb-matchup-team">${teamLogo(game.home,"small")}<strong>${escapeHtml(game.home?.team || "—")}</strong><small>${homeRank ? `THI #${homeRank}` : ""}</small><span>${gameStatus(game) === "final" ? integer(game.home?.score) : ""}</span></div><div class="cbb-team-meta">${escapeHtml(time)} · ${escapeHtml(network)} · ${gameType}</div>${varianceMarkup}</td>
       <td><span class="cbb-watch-score">${integer(watch)}</span><div class="cbb-team-meta">${watchLabel}</div></td>
       <td><strong class="cbb-number">${escapeHtml(edgeMarketText || projectedLine)}</strong><div class="cbb-team-meta">${edgeMarketText ? "THI preferred side at current market" : "THI projected spread"}</div></td>
       <td><strong class="cbb-number">${escapeHtml(marketText)}</strong><div class="cbb-team-meta">${game.market?.book_count ? `${integer(game.market.book_count)} books` : "No consensus line"}</div></td>
@@ -1131,7 +1155,12 @@
     const history = state.data.history.seasons || [];
     const test = state.data.model.evaluation?.out_of_time_test || {};
     const marketGames = history.reduce((sum, season) => sum + Number(season.games_with_market || 0), 0);
-    const marketBoard = state.data.intelligence?.market_board || [];
+    const marketBoard = (state.data.intelligence?.market_board || []).filter(row =>
+      [row.opening_spread, row.current_spread, row.opening_total, row.current_total].some(value => value !== null && value !== undefined && Number.isFinite(Number(value)))
+    );
+    const backtest = state.data.publicBacktest?.sports?.cbb || {};
+    const backtestResult = backtest.qualified_5_plus || {};
+    const marketRowsMarkup = rows => rows.length ? rows.slice(0,100).map(row => `<tr><td><strong>${escapeHtml(row.away_team)} ${matchupWord(row)} ${escapeHtml(row.home_team)}</strong></td><td class="cbb-number">${number(row.opening_spread,1,true)}</td><td class="cbb-number">${number(row.current_spread,1,true)}</td><td class="cbb-number">${number(row.spread_move,1,true)}</td><td class="cbb-number">${number(row.opening_total,1)}</td><td class="cbb-number">${number(row.current_total,1)}</td><td class="cbb-number">${number(row.total_move,1,true)}</td><td class="cbb-number">${number(row.model_edge,1,true)}</td></tr>`).join("") : `<tr><td colspan="8" class="cbb-empty">No sportsbook lines are posted yet. This board will populate automatically when usable spreads or totals arrive.</td></tr>`;
     view.innerHTML = `
       <div class="cbb-kicker">Price discovery and model accountability</div>
       <h1 class="page-title">CBB Market Research</h1>
@@ -1149,10 +1178,26 @@
           ${methodCard("Accountability", "Track before promotion", "ATS, total, calibration and error results must generalize out of time before public signals appear.")}
         </div>
       </section>
+      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">2025–2026 · strict walk-forward</div><h2 class="cbb-section-title">Public Historical ROI Check</h2></div><div class="cbb-section-note">Every game with a 5+ point model edge, one unit risked at -110. Historical context does not replace prospective validation.</div></div>
+        <div class="cbb-stat-grid">
+          ${statCard("ATS record", backtestResult.record || "—", `${integer(backtestResult.games)} historical decisions`)}
+          ${statCard("Hit rate", pct(backtestResult.hit_rate), "Pushes excluded from hit rate")}
+          ${statCard("ROI", `${number(backtestResult.roi_pct,1,true)}%`, `${number(backtestResult.profit_units,1,true)} units`)}
+          ${statCard("Current status", "Research only", "Combined two-season ROI remains below zero")}
+        </div>
+        <div class="cbb-stat-note">${escapeHtml(backtest.validation_note || "Historical ATS results are withheld until the audit is available.")} ${escapeHtml(state.data.publicBacktest?.meta?.promotion_rule || "")}</div>
+      </section>
       <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Current market board</div><h2 class="cbb-section-title">Open-to-current movement</h2></div><div class="cbb-section-note">Movement is descriptive context. It never enters the projection model.</div></div>
-        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Matchup</th><th>Open spread</th><th>Current spread</th><th>Move</th><th>Open total</th><th>Current total</th><th>Total move</th><th>THI edge</th></tr></thead><tbody>${marketBoard.length ? marketBoard.map(row => `<tr><td><strong>${escapeHtml(row.away_team)} ${matchupWord(row)} ${escapeHtml(row.home_team)}</strong></td><td class="cbb-number">${number(row.opening_spread,1,true)}</td><td class="cbb-number">${number(row.current_spread,1,true)}</td><td class="cbb-number">${number(row.spread_move,1,true)}</td><td class="cbb-number">${number(row.opening_total,1)}</td><td class="cbb-number">${number(row.current_total,1)}</td><td class="cbb-number">${number(row.total_move,1,true)}</td><td class="cbb-number">${number(row.model_edge,1,true)}</td></tr>`).join("") : `<tr><td colspan="8" class="cbb-empty">No current market observations are available.</td></tr>`}</tbody></table></div>
+        <div class="cbb-controls"><input id="cbb-market-search" class="cbb-input" type="search" placeholder="Search either team"><span id="cbb-market-count" class="cbb-stat-note">${integer(Math.min(marketBoard.length,100))} of ${integer(marketBoard.length)} lined games</span></div>
+        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Matchup</th><th>Open spread</th><th>Current spread</th><th>Move</th><th>Open total</th><th>Current total</th><th>Total move</th><th>THI edge</th></tr></thead><tbody id="cbb-market-body">${marketRowsMarkup(marketBoard)}</tbody></table></div>
       </section>
     `;
+    view.querySelector("#cbb-market-search")?.addEventListener("input", event => {
+      const query = normalizeSearch(event.target.value);
+      const rows = marketBoard.filter(row => !query || normalizeSearch(`${row.away_team} ${row.home_team}`).includes(query));
+      view.querySelector("#cbb-market-body").innerHTML = marketRowsMarkup(rows);
+      view.querySelector("#cbb-market-count").textContent = `${integer(Math.min(rows.length,100))} of ${integer(rows.length)} matching lined games`;
+    });
   }
 
   function ratingsRows() {
@@ -1508,13 +1553,16 @@
     const lab = state.data?.trends || {}; const data = lab.sports?.[sport] || { cards:[] };
     const groups = data.sections || { verified:[], developing:data.cards || [], failed_hypothesis:[], source_pending:[] };
     const tracker = state.data?.varianceTracker || { frozen:[] }; const tracked = (tracker.frozen || []).filter(row => row.sport === sport).sort((a,b) => Number(b.result === "pending") - Number(a.result === "pending") || String(a.start_date || "").localeCompare(String(b.start_date || "")));
-    const rlm = state.data?.rlmMonitor || { meta:{ status:"source_pending" }, alerts:[] }; const alerts = (rlm.alerts || []).filter(row => row.sport === sport);
+    const rlm = state.data?.rlmMonitor || { meta:{ status:"source_pending" }, sharp_line_moves:[], alerts:[] };
+    const lineMoves = (rlm.sharp_line_moves || []).filter(row => row.sport === sport);
+    const alerts = (rlm.alerts || []).filter(row => row.sport === sport);
     return `<div class="cbb-kicker">The Hammer Index · ${sport.toUpperCase()}</div><h1 class="page-title">THI Variance Lab</h1><p class="page-subtitle">Reproducible situational systems, frozen prospective tracking and synchronized market intelligence. Losing hypotheses remain visible.</p><div class="cbb-research-banner"><strong>Systems discipline</strong><span>${escapeHtml(lab.meta?.policy || "Historical research only.")}</span></div><div class="cbb-trends-summary"><strong>${integer(data.settled_games)}</strong><span>settled historical games examined</span></div>
       ${trendSection("Verified", "Large, profitable historical samples that clear THI's published evidence gate.", groups.verified || [], "verified", sport)}
       ${trendSection("Developing", "Promising or limited samples remain research observations.", groups.developing || [], "developing", sport)}
       ${trendSection("Failed hypotheses", "Popular angles that did not survive THI's own closing-line test.", groups.failed_hypothesis || [], "failed", sport)}
       <section class="cbb-trend-section"><div class="cbb-section-head"><div><div class="cbb-label">Forward evidence</div><h2 class="cbb-section-title">Prospective tracker</h2></div><div class="cbb-section-note">The first eligible pregame line is frozen and final scores automatically grade it.</div></div><div class="cbb-panel cbb-variance-ledger"><strong>${integer(tracked.length)} frozen qualifiers</strong>${tracked.slice(0,16).map(row => `<div><span>${escapeHtml(row.away_team)} ${matchupWord(row)} ${escapeHtml(row.home_team)}</span><b>${escapeHtml(humanize(row.system_id))}</b><small>${escapeHtml(row.result)}</small></div>`).join("")}${!tracked.length ? `<p>Qualifiers will appear automatically as markets become available.</p>` : ""}</div></section>
-      <section class="cbb-trend-section"><div class="cbb-section-head"><div><div class="cbb-label">Market intelligence</div><h2 class="cbb-section-title">Reverse Line Movement monitor</h2></div><div class="cbb-section-note">An alert requires 65%+ public tickets and a synchronized 0.5+ point move the other way at a named sharp book.</div></div><div class="cbb-panel cbb-rlm-monitor"><div class="cbb-rlm-status is-${escapeHtml(rlm.meta?.status || "source_pending")}">${escapeHtml(humanize(rlm.meta?.status || "source_pending"))}</div>${alerts.map(row => `<div class="cbb-rlm-alert"><strong>${escapeHtml(row.away_team)} at ${escapeHtml(row.home_team)}</strong><span>${pct(row.public_ticket_pct)} tickets on ${escapeHtml(row.public_side)} · ${number(row.line_delta,1,true)} toward ${escapeHtml(row.sharp_team)}</span><b>${escapeHtml(humanize(row.severity))}</b></div>`).join("")}${!alerts.length ? `<p>No qualified alerts. The monitor will stay source pending until licensed splits and sharp-book feeds are connected.</p>` : ""}</div></section>
+      <section class="cbb-trend-section"><div class="cbb-section-head"><div><div class="cbb-label">Free market intelligence</div><h2 class="cbb-section-title">Sharp Line Movement</h2></div><div class="cbb-section-note">Pinnacle spread movement from THI's first captured number. This is market context only and does not affect Model A.</div></div><div class="cbb-panel cbb-rlm-monitor"><div class="cbb-rlm-status is-${escapeHtml(rlm.meta?.sharp_line_status || "api_key_pending")}">${escapeHtml(humanize(rlm.meta?.sharp_line_status || "api_key_pending"))}</div>${lineMoves.map(row => `<div class="cbb-rlm-alert"><strong>${escapeHtml(row.away_team)} at ${escapeHtml(row.home_team)}</strong><span>Home spread ${number(row.opening_home_spread,1,true)} → ${number(row.current_home_spread,1,true)} · toward ${escapeHtml(row.movement_toward_team || humanize(row.movement_toward || "unknown"))}</span><b>${escapeHtml(row.key_number_crossed ? `Crossed ${row.key_number_crossed}` : humanize(row.severity || "move"))}</b></div>`).join("")}${!lineMoves.length ? `<p>${rlm.meta?.sharp_line_status === "monitoring" ? "No Pinnacle moves of 0.5 points or more are active." : "The free Pinnacle collector is ready and begins after the ODDS_API_KEY repository secret is configured."}</p>` : ""}</div></section>
+      <section class="cbb-trend-section"><div class="cbb-section-head"><div><div class="cbb-label">Public splits contract</div><h2 class="cbb-section-title">Reverse Line Movement</h2></div><div class="cbb-section-note">RLM requires verified ticket percentages synchronized with a sharp-book move. Line movement alone is never labeled sharp money.</div></div><div class="cbb-panel cbb-rlm-monitor"><div class="cbb-rlm-status is-${escapeHtml(rlm.meta?.rlm_status || "public_splits_pending")}">${escapeHtml(humanize(rlm.meta?.rlm_status || "public_splits_pending"))}</div>${alerts.map(row => `<div class="cbb-rlm-alert"><strong>${escapeHtml(row.away_team)} at ${escapeHtml(row.home_team)}</strong><span>${pct(row.public_ticket_pct)} tickets on ${escapeHtml(row.public_side)} · ${number(row.line_delta,1,true)} toward ${escapeHtml(row.sharp_team)}</span><b>${escapeHtml(humanize(row.severity))}</b></div>`).join("")}${!alerts.length ? `<p>No RLM alerts. A verified public-splits source is still required, so THI is making no public-money claim.</p>` : ""}</div></section>
       <section class="cbb-trend-section"><div class="cbb-section-head"><div><div class="cbb-label">Data contracts</div><h2 class="cbb-section-title">Source pending</h2></div><div class="cbb-section-note">A missing feed is shown plainly and never converted into a synthetic signal.</div></div><div class="cbb-panel cbb-planned-trends">${(lab.source_backlog || []).map(row => `<div><strong>${escapeHtml(row.name)} <em>${escapeHtml(humanize(row.status || "source_pending"))}</em></strong><span>${escapeHtml(row.path)}</span></div>`).join("")}</div></section>`;
   }
 

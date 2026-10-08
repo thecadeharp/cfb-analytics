@@ -1,9 +1,9 @@
-name: RLM Sharp Money Monitor
+name: Sharp Line Movement + RLM Monitor
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "3,13,23,33,43,53 * * * *"
+    - cron: "13 */4 * * *"
 
 permissions:
   contents: write
@@ -23,7 +23,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Poll synchronized licensed feeds
+      - name: Poll free Pinnacle line feed
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: |
+          if [ -z "$ODDS_API_KEY" ]; then
+            echo "The Odds API free key is not configured; the monitor remains API-key pending."
+            echo "FREE_SHARP_ENABLED=0" >> "$GITHUB_ENV"
+          else
+            python scripts/poll_free_sharp_lines.py
+            echo "FREE_SHARP_ENABLED=1" >> "$GITHUB_ENV"
+          fi
+      - name: Poll synchronized licensed RLM feeds when available
         env:
           THI_ODDS_FEED_URL: ${{ secrets.THI_ODDS_FEED_URL }}
           THI_ODDS_FEED_TOKEN: ${{ secrets.THI_ODDS_FEED_TOKEN }}
@@ -31,17 +42,23 @@ jobs:
           THI_SPLITS_FEED_TOKEN: ${{ secrets.THI_SPLITS_FEED_TOKEN }}
         run: |
           if [ -z "$THI_ODDS_FEED_URL" ] || [ -z "$THI_SPLITS_FEED_URL" ]; then
-            echo "Licensed RLM feeds are not configured; source-pending state remains published."
-            exit 0
+            echo "Licensed public splits are not configured; RLM remains public-splits pending."
+            echo "LICENSED_RLM_ENABLED=0" >> "$GITHUB_ENV"
+          else
+            python scripts/poll_rlm_feeds.py
+            echo "LICENSED_RLM_ENABLED=1" >> "$GITHUB_ENV"
           fi
-          python scripts/poll_rlm_feeds.py
-          python scripts/build_rlm_monitor.py
       - name: Test and publish qualified monitor state
         run: |
           python -m unittest scripts/test_validation_framework.py scripts/test_variance_lab.py
+          if [ "$FREE_SHARP_ENABLED" != "1" ] && [ "$LICENSED_RLM_ENABLED" != "1" ]; then
+            echo "No market feed is configured; skipping an empty timestamp-only commit."
+            exit 0
+          fi
+          python scripts/build_rlm_monitor.py
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/market/rlm_snapshots.jsonl data/market/rlm_monitor.json
+          git add --all data/market/
           git diff --cached --quiet && exit 0
           git commit -m "Refresh RLM market monitor"
           git pull --rebase origin main
