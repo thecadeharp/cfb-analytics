@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "data" / "portal_2026.json"
-API = "https://api.collegefootballdata.com/recruiting/portal"
+API = "https://api.collegefootballdata.com/player/portal"
 OFFENSE = {"QB","RB","FB","WR","TE","OT","OG","C","OL","IOL"}
 DEFENSE = {"DL","DE","DT","EDGE","LB","ILB","OLB","CB","DB","S","ATH"}
 
