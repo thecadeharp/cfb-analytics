@@ -23,10 +23,10 @@
     varianceTracker: "data/variance/prospective_tracker.json",
     rlmMonitor: "data/market/rlm_monitor.json",
     publicBacktest: "data/reports/public_backtest_scorecard.json",
-    commercialReadiness: "data/reports/commercial_readiness.json"
+    marketSnapshots: "data/cbb/market_snapshots.json"
   };
   const PLAYER_PATH = "data/cbb/player_ratings.json";
-  const CORE_DATA_KEYS = new Set(["profiles", "foundation", "model", "priors", "homeCourt", "history", "projectionBoard", "tracking", "bracketology", "readiness", "health", "trends", "varianceTracker", "publicBacktest", "commercialReadiness"]);
+  const CORE_DATA_KEYS = new Set(["profiles", "foundation", "model", "priors", "homeCourt", "history", "projectionBoard", "tracking", "bracketology", "readiness", "health", "trends", "varianceTracker", "publicBacktest", "marketSnapshots"]);
   const DEFERRED_VIEW_KEYS = {
     "cbb-projections": ["intelligence", "matchups", "operations"],
     "cbb-team-data": ["intelligence"],
@@ -191,7 +191,7 @@
     if (state.loaded) return state.data;
     if (state.loading) return state.loading;
     state.loading = Promise.all(Object.entries(PATHS).filter(([key]) => CORE_DATA_KEYS.has(key)).map(async ([key, path]) => {
-      if (["projectionBoard", "tracking", "bracketology", "playStyle", "matchups", "intelligence", "challenger", "readiness", "operations", "health", "trends", "varianceTracker", "rlmMonitor", "publicBacktest"].includes(key)) {
+      if (["projectionBoard", "tracking", "bracketology", "playStyle", "matchups", "intelligence", "challenger", "readiness", "operations", "health", "trends", "varianceTracker", "rlmMonitor", "publicBacktest", "marketSnapshots"].includes(key)) {
         try { return [key, await fetchJson(path)]; }
         catch (_error) {
           if (key === "projectionBoard") return [key, { meta: {}, games: [] }];
@@ -202,6 +202,7 @@
           if (key === "challenger") return [key, { meta: {}, selected_candidate: {}, promotion: { checks: {} }, post_selection_comparison: {} }];
           if (key === "readiness") return [key, { meta: {}, checks: {}, coverage: {}, automation: {}, exceptions: [] }];
           if (key === "publicBacktest") return [key, { meta: {}, sports: {} }];
+          if (key === "marketSnapshots") return [key, { meta: {}, games: {} }];
           return [key, { meta: {}, games: [] }];
         }
       }
@@ -655,6 +656,36 @@
     return flags.length ? flags.map(flag => `<span class="cbb-context-flag">${escapeHtml(flag)}</span>`).join("") : `<span class="cbb-context-clear">No schedule flag</span>`;
   }
 
+  function cbbMarketMovement(game) {
+    const stored = state.data?.marketSnapshots?.games?.[String(game.game_id)] || {};
+    const snapshots = Array.isArray(stored.snapshots) ? stored.snapshots : [];
+    const market = game.market || {};
+    const firstSpread = stored.first_captured_home_spread ?? stored.open_home_spread ?? market.opening_home_spread;
+    const currentSpread = stored.current_home_spread ?? market.consensus_home_spread;
+    const firstTotal = stored.first_captured_total ?? stored.open_total ?? market.opening_total;
+    const currentTotal = stored.current_total ?? market.consensus_total;
+    const spreadMove = Number.isFinite(Number(firstSpread)) && Number.isFinite(Number(currentSpread)) ? Number(currentSpread) - Number(firstSpread) : null;
+    const lineFor = value => {
+      if (!Number.isFinite(Number(value))) return "—";
+      const home = Number(value) <= 0;
+      return `${home ? game.home?.team : game.away?.team} ${number(-Math.abs(Number(value)),1,true)}`;
+    };
+    const rows = snapshots.slice(-24).reverse().map((row,index) => `<tr><td>${index === 0 ? "Latest" : index === snapshots.slice(-24).length - 1 ? "First captured" : "Update"}</td><td>${escapeHtml(formatTimestamp(row.captured_at || row.captured_at_utc))}</td><td class="cbb-number">${lineFor(row.home_spread)}</td><td class="cbb-number">${Number.isFinite(Number(row.total)) ? number(row.total,1) : "—"}</td><td>${escapeHtml(row.bookmaker || row.source || "Consensus")}</td></tr>`).join("");
+    return `<section class="cbb-detail-section"><h3>Odds &amp; line movement</h3>
+      <div class="cbb-model-sub">Timestamped market observations for this game. Movement remains separate from the projection model.</div>
+      <div class="cbb-detail-grid">
+        ${detailStat("First captured spread", lineFor(firstSpread))}
+        ${detailStat("Current spread", lineFor(currentSpread))}
+        ${detailStat("Home-side move", spreadMove == null ? "—" : `${number(spreadMove,1,true)} pts`)}
+        ${detailStat("First captured total", Number.isFinite(Number(firstTotal)) ? number(firstTotal,1) : "—")}
+        ${detailStat("Current total", Number.isFinite(Number(currentTotal)) ? number(currentTotal,1) : "—")}
+        ${detailStat("Captured updates", integer(snapshots.length))}
+      </div>
+      ${rows ? `<div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Capture</th><th>Time</th><th>Spread</th><th>Total</th><th>Source</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="cbb-coverage-note">No market chronology is available yet. This panel will populate automatically as books release and move CBB lines.</div>`}
+      <div class="cbb-model-sub">“First captured” means THI's first recorded observation; it is not presented as an official sportsbook opener.</div>
+    </section>`;
+  }
+
   function openGameDetail(gameId) {
     const game = state.data?.projectionBoard?.games?.find(row => String(row.game_id) === String(gameId));
     if (!game?.projection) return;
@@ -754,7 +785,8 @@
         ${detailRow("Spread signal", projection.spread_signal_eligible ? "Eligible" : "Withheld")}
         ${detailRow("Totals signal", "Withheld")}
         <div class="cbb-model-sub">Spread signals require at least six games for both teams and a five-point model-versus-market disagreement. Projected totals remain informational while totals validation is below THI's promotion standard.</div>
-      </section>`;
+      </section>
+      ${cbbMarketMovement(game)}`;
     detail.classList.add("is-open");
     detail.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
@@ -1162,17 +1194,12 @@
     const backtest = state.data.publicBacktest?.sports?.cbb || {};
     const backtestResult = backtest.actionable_over_5 || {};
     const backtestMeta = state.data.publicBacktest?.meta || {};
-    const commercial = state.data.commercialReadiness || {};
-    const readinessLabel = status => ({ready:"Ready",in_progress:"In progress",collector_upgraded_history_incomplete:"Collector upgraded",ready_with_open_items:"Ready with open items"}[status] || status || "Unknown");
+    const short = backtest.short_favorites || {};
     const marketRowsMarkup = rows => rows.length ? rows.slice(0,100).map(row => `<tr><td><strong>${escapeHtml(row.away_team)} ${matchupWord(row)} ${escapeHtml(row.home_team)}</strong></td><td class="cbb-number">${number(row.opening_spread,1,true)}</td><td class="cbb-number">${number(row.current_spread,1,true)}</td><td class="cbb-number">${number(row.spread_move,1,true)}</td><td class="cbb-number">${number(row.opening_total,1)}</td><td class="cbb-number">${number(row.current_total,1)}</td><td class="cbb-number">${number(row.total_move,1,true)}</td><td class="cbb-number">${number(row.model_edge,1,true)}</td></tr>`).join("") : `<tr><td colspan="8" class="cbb-empty">No sportsbook lines are posted yet. This board will populate automatically when usable spreads or totals arrive.</td></tr>`;
     view.innerHTML = `
       <div class="cbb-kicker">Price discovery and model accountability</div>
       <h1 class="page-title">CBB Market Research</h1>
       <p class="page-subtitle">Market lines remain evaluation context rather than model inputs. Current edges will stay hidden until the model clears its public-projection gate.</p>
-      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Five-pillar audit</div><h2 class="cbb-section-title">Paid Research Readiness</h2></div><div class="cbb-section-note">Research subscription: ready with guardrails. Betting-edge product: not ready.</div></div>
-        <div class="cbb-method-grid">${(commercial.pillars || []).map(row=>methodCard(row.label,readinessLabel(row.status),row.summary)).join("")}</div>
-        <div class="cbb-stat-note">${escapeHtml(commercial.verdict?.recommended_positioning || "Paid college-sports research and decision support.")}</div>
-      </section>
       <div class="cbb-stat-grid">
         ${statCard("Historical market games", integer(marketGames), "2018–2026 evaluation inventory")}
         ${statCard("Current board lines", integer(coverage.games_with_market), `${integer(coverage.window_games)} scheduled games scanned`)}
@@ -1194,6 +1221,11 @@
           ${statCard("Current status", "Not validated", `Exact p ${number(backtestResult.p_value_vs_flat_minus_110,3)} · Holm p ${number(backtestResult.holm_adjusted_p,3)}`)}
         </div>
         <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Season</th><th>Record</th><th>ATS</th><th>Hypothetical return</th><th>THI margin MAE</th><th>Market margin MAE</th></tr></thead><tbody>${(backtest.yearly || []).map(row=>{const accuracy=(backtest.market_accuracy||[]).find(item=>item.season===row.season)||{};return `<tr><td><strong>${integer(row.season)}</strong></td><td>${escapeHtml(row.record)}</td><td class="cbb-number">${number(row.hit_rate,1)}%</td><td class="cbb-number">${number(row.hypothetical_return_pct,1,true)}%</td><td class="cbb-number">${number(accuracy.thi_margin_mae,2)}</td><td class="cbb-number">${number(accuracy.market_margin_mae,2)}</td></tr>`;}).join("")}</tbody></table></div>
+        <div class="cbb-stat-grid">
+          ${statCard("Short favorites SU", short.su_record || "—", `${number(short.su_win_rate,1)}% straight-up · −1 to −4.5`)}
+          ${statCard("Short favorites ATS", short.ats_record || "—", `${number(short.ats_cover_rate,1)}% ATS · ${integer(short.games)} games`)}
+        </div>
+        <div class="cbb-stat-note">${escapeHtml(short.note || "Short-favorite research will publish with the next audit build.")}</div>
         <div class="cbb-stat-note"><strong>${escapeHtml(backtest.verdict || "Not validated")}.</strong> ${escapeHtml(backtest.validation_note || "Historical results are unavailable.")} ${escapeHtml(backtestMeta.price_policy || "")} ${escapeHtml(backtestMeta.promotion_rule || "")}</div>
       </section>
       <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Current market board</div><h2 class="cbb-section-title">Open-to-current movement</h2></div><div class="cbb-section-note">Movement is descriptive context. It never enters the projection model.</div></div>

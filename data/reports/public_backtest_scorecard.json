@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "thi-public-backtest-v2.0",
-    "generated_at_utc": "2026-10-08T10:46:18.781419Z",
+    "generated_at_utc": "2026-10-08T21:45:13.636616Z",
     "audit_standard": "Exact one-sided binomial test against the 52.381% break-even rate implied by a hypothetical flat -110 price; Holm correction across the six displayed comparisons; 95% Wilson hit-rate intervals; season and outlier sensitivity checks.",
     "financial_claim": false,
     "price_policy": "Historical per-play prices and no-vig probabilities are unavailable. Return figures are hypothetical flat -110 arithmetic, not realized ROI.",
@@ -175,6 +175,15 @@
           "holm_adjusted_p": 1.0
         }
       ],
+      "short_favorites": {
+        "definition": "Market favorites priced from -1 through -4.5 points",
+        "games": 417,
+        "su_record": "241-176-0",
+        "su_win_rate": 57.794,
+        "ats_record": "202-205-10",
+        "ats_cover_rate": 49.631,
+        "note": "Descriptive market behavior only. This is not a THI signal and moneyline ROI cannot be calculated without historical prices."
+      },
       "data_integrity": {
         "source_rows": 1165,
         "duplicate_game_keys": 0
@@ -380,6 +389,15 @@
           "market_advantage_points": 1.1121
         }
       ],
+      "short_favorites": {
+        "definition": "Market favorites priced from -1 through -4.5 points",
+        "games": 4123,
+        "su_record": "2356-1767-0",
+        "su_win_rate": 57.143,
+        "ats_record": "1991-2128-4",
+        "ats_cover_rate": 48.337,
+        "note": "Descriptive market behavior only. This is not a THI signal and moneyline ROI cannot be calculated without historical prices."
+      },
       "data_integrity": {
         "source_rows": 10929,
         "duplicate_game_keys": 0

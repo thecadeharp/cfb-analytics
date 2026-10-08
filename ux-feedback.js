@@ -542,7 +542,8 @@
       border: "1px solid var(--border, #d8d8d4)",
       borderRadius: "16px",
       boxShadow: "0 24px 70px rgba(0, 0, 0, 0.28)",
-      padding: "28px"
+      padding: "28px",
+      color: "#17212b"
     });
 
     modal.innerHTML = `
@@ -550,7 +551,7 @@
       <div style="font-family:var(--mono, monospace); font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#8a6a00; margin-bottom:8px;">
         Welcome to
       </div>
-      <h2 id="thi-welcome-title" style="margin:0 0 12px; font-size:28px; line-height:1.08;">
+      <h2 id="thi-welcome-title" style="margin:0 0 12px; font-size:28px; line-height:1.08; color:#111827;">
         The Hammer Index
       </h2>
       <p style="margin:0 0 16px; line-height:1.6; color:#4b5563;">
@@ -565,9 +566,10 @@
       <div style="padding:13px 14px; margin-bottom:22px; border-radius:10px; background:#f3f4f6; border:1px solid #d1d5db; font-size:13px; line-height:1.5; color:#4b5563;">
         <strong>Beta / Testing:</strong> The Hammer Index is actively being tested and refined. The site is available to use for analysis, research and entertainment, but projections and features may change as feedback and new data are incorporated. Nothing on THI should be considered financial or betting advice.
       </div>
-      <button id="thi-welcome-enter" type="button" style="width:100%; border:0; border-radius:10px; padding:13px 16px; cursor:pointer; font:inherit; font-weight:800; background:#1f2937; color:#fff;">
-        Explore The Hammer Index →
-      </button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <button id="thi-welcome-account" type="button" style="border:0; border-radius:10px; padding:13px 16px; cursor:pointer; font:inherit; font-weight:800; background:#b99726; color:#111827;">Create free account</button>
+        <button id="thi-welcome-enter" type="button" style="border:0; border-radius:10px; padding:13px 16px; cursor:pointer; font:inherit; font-weight:800; background:#1f2937; color:#fff;">Continue exploring →</button>
+      </div>
     `;
 
     overlay.appendChild(modal);
@@ -576,6 +578,10 @@
 
     const button = modal.querySelector("#thi-welcome-enter");
     button?.addEventListener("click", closeWelcome);
+    modal.querySelector("#thi-welcome-account")?.addEventListener("click", () => {
+      closeWelcome();
+      window.THIAccount?.open?.();
+    });
 
     overlay.addEventListener("click", event => {
       if (event.target === overlay) closeWelcome();

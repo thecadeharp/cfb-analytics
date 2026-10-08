@@ -82,6 +82,42 @@ def summarize(rows: list[dict], selector: Callable[[dict], bool], result: Callab
     )
 
 
+
+def short_favorite_summary(rows: list[dict], spread_key: str = "market_home_spread", margin_key: str = "actual_home_margin") -> dict:
+    """Describe -1 through -4.5 market favorites, comparing straight-up and ATS results."""
+    selected = []
+    for row in rows:
+        try:
+            spread = float(row[spread_key])
+            margin = float(row[margin_key])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if not 1.0 <= abs(spread) <= 4.5:
+            continue
+        home_favorite = spread < 0
+        favorite_margin = margin if home_favorite else -margin
+        ats_margin = margin + spread
+        favorite_ats_margin = ats_margin if home_favorite else -ats_margin
+        selected.append((favorite_margin, favorite_ats_margin))
+
+    su_wins = sum(margin > 0.01 for margin, _ in selected)
+    su_losses = sum(margin < -0.01 for margin, _ in selected)
+    su_ties = len(selected) - su_wins - su_losses
+    ats_wins = sum(margin > 0.01 for _, margin in selected)
+    ats_losses = sum(margin < -0.01 for _, margin in selected)
+    ats_pushes = len(selected) - ats_wins - ats_losses
+    su_decisions = su_wins + su_losses
+    ats_decisions = ats_wins + ats_losses
+    return {
+        "definition": "Market favorites priced from -1 through -4.5 points",
+        "games": len(selected),
+        "su_record": f"{su_wins}-{su_losses}-{su_ties}",
+        "su_win_rate": round(100 * su_wins / su_decisions, 3) if su_decisions else None,
+        "ats_record": f"{ats_wins}-{ats_losses}-{ats_pushes}",
+        "ats_cover_rate": round(100 * ats_wins / ats_decisions, 3) if ats_decisions else None,
+        "note": "Descriptive market behavior only. This is not a THI signal and moneyline ROI cannot be calculated without historical prices.",
+    }
+
 def cfb_scorecard(path: Path) -> dict:
     source = json.loads(path.read_text())
     rows = [row for row in source["games"] if int(row["year"]) in {2024, 2025}]
@@ -106,6 +142,7 @@ def cfb_scorecard(path: Path) -> dict:
         "selection_policy": "All five predeclared signal tiers plus the combined >5-point group are shown.",
         "validation_note": "The combined result is positive under a hypothetical flat -110 price, but it is not statistically significant, turns negative in 2025, and cannot validate live Model A.",
         "actionable_over_5": actionable, "yearly": yearly, "buckets": buckets,
+        "short_favorites": short_favorite_summary(rows),
         "data_integrity": {"source_rows": len(rows), "duplicate_game_keys": len(identities) - len(set(identities))},
         "robustness": {
             "without_outlier_tier": summarize(rows, lambda row: 5 < edge(row) <= 10, result),
@@ -152,6 +189,7 @@ def cbb_scorecard(predictions_path: Path, card_path: Path) -> dict:
         "selection_policy": "All five predeclared signal tiers plus the combined >5-point group are shown.",
         "validation_note": "The combined >5-point sample loses at a hypothetical flat -110 price, no displayed tier clears the corrected significance test, and the market has lower margin error in both held-out seasons.",
         "actionable_over_5": actionable, "yearly": yearly, "buckets": buckets, "market_accuracy": accuracy,
+        "short_favorites": short_favorite_summary(rows),
         "data_integrity": {"source_rows": len(rows), "duplicate_game_keys": len(identities) - len(set(identities))},
         "robustness": {
             "without_outlier_tier": summarize(rows, lambda row: 5 < edge(row) <= 10, cbb_result),

@@ -1,6 +1,6 @@
 import unittest
 
-from scripts.build_public_backtest_scorecard import ROOT, cbb_scorecard, cfb_scorecard, exact_binomial_upper_tail, grade, holm_adjust
+from scripts.build_public_backtest_scorecard import ROOT, cbb_scorecard, cfb_scorecard, exact_binomial_upper_tail, grade, holm_adjust, short_favorite_summary
 
 
 class PublicBacktestScorecardTests(unittest.TestCase):
@@ -25,6 +25,17 @@ class PublicBacktestScorecardTests(unittest.TestCase):
         cbb = cbb_scorecard(ROOT / "data/cbb/model/walk_forward_predictions.json.gz", ROOT / "data/cbb/model/model_card.json")
         self.assertEqual(cfb["data_integrity"]["duplicate_game_keys"], 0)
         self.assertEqual(cbb["data_integrity"]["duplicate_game_keys"], 0)
+
+    def test_short_favorites_separate_straight_up_and_ats_outcomes(self):
+        rows = [
+            {"market_home_spread": -3, "actual_home_margin": 2},   # favorite wins SU, loses ATS
+            {"market_home_spread": 4, "actual_home_margin": -7},   # away favorite wins SU and ATS
+            {"market_home_spread": -8, "actual_home_margin": 20},  # outside predeclared range
+        ]
+        result = short_favorite_summary(rows)
+        self.assertEqual(result["games"], 2)
+        self.assertEqual(result["su_record"], "2-0-0")
+        self.assertEqual(result["ats_record"], "1-1-0")
 
 
 if __name__ == "__main__":

@@ -617,21 +617,28 @@
 
   function renderPortalJuco() {
     const players = (portalData?.players || []).filter(row => row.juco);
+    const totalPlayers = (portalData?.players || []).length;
     return `
       <div class="pv-section-header">
         <div class="pv-section-title">JUCO Signees</div>
-        <div class="pv-section-sub">Transfers whose source record explicitly identifies a junior-college origin. Ambiguous origin schools are excluded.</div>
+        <div class="pv-section-sub">Transfers whose source record explicitly identifies a junior-college origin. Ambiguous origin schools are excluded. ${totalPlayers.toLocaleString()} player records were checked.</div>
       </div>
-      ${renderPortalPlayerTable(players,"No source-verified JUCO classifications are loaded. THI will not infer JUCO status from a missing origin.")}`;
+      ${renderPortalPlayerTable(players,"No source-verified JUCO classifications are present in the current player feed. The section is complete and will populate when the source begins identifying JUCO origin; THI will not guess from missing school metadata.")}`;
   }
 
   function renderPortalImpact() {
-    const rows = portalData?.position_impact || [];
-    const markup = rows.length ? `<div class="pv-table-wrap"><table class="pv-table"><thead><tr><th>Team</th><th class="r">Off IN</th><th class="r">Off Avg</th><th class="r">Def IN</th><th class="r">Def Avg</th></tr></thead><tbody>${rows.map(row=>`<tr><td><span class="team-with-logo">${pTeamLogo(row.team)}<span class="pv-team-name">${pEsc(row.team)}</span></span></td><td class="r">${row.offense?.count||0}</td><td class="r">${pFmt(row.offense?.avg_rating,3)}</td><td class="r">${row.defense?.count||0}</td><td class="r">${pFmt(row.defense?.avg_rating,3)}</td></tr>`).join("")}</tbody></table></div>` : renderPortalComingSoon("The verified player-level destination build has not completed yet.");
+    const rows = (portalData?.position_impact || []).slice().sort((a,b) => {
+      const av = ((Number(a.offense?.avg_rating)||0) + (Number(a.defense?.avg_rating)||0)) / 2;
+      const bv = ((Number(b.offense?.avg_rating)||0) + (Number(b.defense?.avg_rating)||0)) / 2;
+      return bv-av;
+    });
+    const bestOffense = rows.slice().sort((a,b)=>(Number(b.offense?.avg_rating)||0)-(Number(a.offense?.avg_rating)||0))[0];
+    const bestDefense = rows.slice().sort((a,b)=>(Number(b.defense?.avg_rating)||0)-(Number(a.defense?.avg_rating)||0))[0];
+    const markup = rows.length ? `<div class="vl-system-stats"><div><strong>${rows.length}</strong><span>Teams covered</span></div><div><strong>${pEsc(bestOffense?.team||"—")}</strong><span>Top offensive average · ${pFmt(bestOffense?.offense?.avg_rating,3)}</span></div><div><strong>${pEsc(bestDefense?.team||"—")}</strong><span>Top defensive average · ${pFmt(bestDefense?.defense?.avg_rating,3)}</span></div><div><strong>Context</strong><span>Not a Model A input</span></div></div><div class="pv-table-wrap"><table class="pv-table"><thead><tr><th>Team</th><th class="r">Off arrivals</th><th class="r">Off avg</th><th class="r">Def arrivals</th><th class="r">Def avg</th><th class="r">Unit lean</th></tr></thead><tbody>${rows.map(row=>{const off=Number(row.offense?.avg_rating);const def=Number(row.defense?.avg_rating);const lean=Number.isFinite(off)&&Number.isFinite(def)?(off-def):null;return `<tr><td><span class="team-with-logo">${pTeamLogo(row.team)}<span class="pv-team-name">${pEsc(row.team)}</span></span></td><td class="r">${row.offense?.count||0}</td><td class="r">${pFmt(off,3)}</td><td class="r">${row.defense?.count||0}</td><td class="r">${pFmt(def,3)}</td><td class="r ${netClass(lean)}">${lean===null?"—":lean>0?`Off +${pFmt(lean,3)}`:lean<0?`Def ${pFmt(lean,3)}`:"Balanced"}</td></tr>`}).join("")}</tbody></table></div>` : renderPortalComingSoon("The verified player-level destination build has not completed yet.");
     return `
       <div class="pv-section-header">
         <div class="pv-section-title">Portal Impact on 2026 Projections</div>
-        <div class="pv-section-sub">Position-group arrivals and average portal rating. This is roster context only until player production and projected roles clear validation.</div>
+        <div class="pv-section-sub">Offensive and defensive arrival volume with average portal rating, ranked by combined unit quality. Unit lean is the difference between the two averages. This is roster context only until player production and projected roles clear validation.</div>
       </div>
       ${markup}`;
   }
@@ -778,7 +785,7 @@
         <div class="vl-cohort-label">${pEsc(label)} · Source pending</div>
         <div class="vl-cohort-title">${pEsc(description)}</div>
         <div class="vl-cohort-sub">${pEsc(cohort.unavailable_reason || "The verified historical build has not completed yet. This cohort stays unpublished until its source and identity joins pass validation.")}</div>
-      </div>${renderPortalComingSoon("No proxy data or inferred staff assignments are displayed in this section.")}`;
+      </div><div class="vl-system-stats"><div><strong>0</strong><span>Published observations</span></div><div><strong>Source pending</strong><span>Evidence state</span></div><div><strong>No proxy</strong><span>Identity standard</span></div><div><strong>Withheld</strong><span>Projection usage</span></div></div><div class="vl-analysis">This research track is structurally complete. Results remain withheld until historical offensive-coordinator identities can be joined to the verified head-coach and quarterback records. No inferred staff assignments or substitute cohorts are displayed.</div>`;
     }
 
     const stats = cohort.aggregate || {};
@@ -887,10 +894,6 @@
 
   function renderVarianceCrossComparison() {
     const cohorts = varianceData?.cohorts ?? {};
-    const verified = Object.values(cohorts).filter(cohort => cohort?.data_status === "verified" && Number(cohort?.aggregate?.n || 0) > 0);
-    if (!verified.length) {
-      return `<div class="pv-section-header"><div class="pv-section-title">Cross-Cohort Comparison</div><div class="pv-section-sub">The comparison will publish after at least two independently verified cohort builds are available.</div></div>${renderPortalComingSoon("Full Reset, QB-Only Swap and Coordinator Change are never compared using placeholder or proxy observations.")}`;
-    }
     const keys = [
       ["full_reset","Full Reset","New HC + New OC + New QB"],
       ["qb_swap","QB-Only Swap","Same HC + Same OC + New QB"],
@@ -898,11 +901,9 @@
     ];
 
     const cards = keys.map(([key,label,desc]) => {
+      const status = cohorts[key]?.data_status || "unavailable";
       const s = cohorts[key]?.aggregate ?? {};
-      return `<div class="vl-compare-card">
-        <div class="vl-compare-header">${pEsc(label)}</div>
-        <div class="vl-compare-body">
-          <div style="font-size:10px;color:var(--muted);margin-bottom:10px">${pEsc(desc)} · N=${s.n||0}</div>
+      const metrics = status === "verified" ? `
           <div class="vl-compare-row"><span>Avg win change</span><span class="${netClass(s.avg_win_change)}">${pSign(s.avg_win_change,1)}</span></div>
           <div class="vl-compare-row"><span>Std deviation</span><span>±${pFmt(s.std_dev,1)}</span></div>
           <div class="vl-compare-row"><span>Boom rate</span><span class="net-pos">${pPct(s.boom_rate)}</span></div>
@@ -910,7 +911,15 @@
           <div class="vl-compare-row"><span>Won 10+ games</span><span>${pPct(s.won_10_plus)}</span></div>
           <div class="vl-compare-row"><span>Finished AP 25</span><span>${pPct(s.finished_ap_25)}</span></div>
           <div class="vl-compare-row"><span>Best swing</span><span class="net-pos">${s.best_swing??""}</span></div>
-          <div class="vl-compare-row"><span>Worst swing</span><span class="net-neg">${s.worst_swing??""}</span></div>
+          <div class="vl-compare-row"><span>Worst swing</span><span class="net-neg">${s.worst_swing??""}</span></div>` : `
+          <div class="vl-compare-row"><span>Published observations</span><span>0</span></div>
+          <div class="vl-compare-row"><span>Metrics</span><span>Withheld</span></div>
+          <div class="vl-compare-row"><span>Reason</span><span>OC identity source required</span></div>`;
+      return `<div class="vl-compare-card">
+        <div class="vl-compare-header">${pEsc(label)}</div>
+        <div class="vl-compare-body">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:10px">${pEsc(desc)} · ${status === "verified" ? `N=${s.n||0}` : "SOURCE PENDING"}</div>
+          ${metrics}
         </div>
       </div>`;
     }).join("");
@@ -918,7 +927,7 @@
     return `
       <div class="pv-section-header">
         <div class="pv-section-title">Cross-Cohort Comparison</div>
-        <div class="pv-section-sub">Side-by-side aggregate stats across the verified change cohorts.</div>
+        <div class="pv-section-sub">Side-by-side evidence status and aggregate results. Metrics remain withheld for any cohort that lacks verified coordinator identity.</div>
       </div>
       <div class="vl-compare-grid">${cards}</div>`;
   }

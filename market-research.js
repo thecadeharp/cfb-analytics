@@ -43,7 +43,6 @@
   view.id = 'view-research'; view.className = 'view';
   view.innerHTML = `<div class="eyebrow">THI research</div><h1 class="page-title">Market Research</h1>
     <p class="page-subtitle">First-snapshot model accountability and a private workspace for evaluating your line selection.</p>
-    <div id="research-readiness" aria-live="polite"><p class="research-muted">Loading research readiness audit…</p></div>
     <div id="research-scorecard" aria-live="polite"><p class="research-muted">Loading weekly scorecard…</p></div>
     <div id="research-backtest" aria-live="polite"><p class="research-muted">Loading historical research audit…</p></div>
     <div id="research-odds" aria-live="polite"><p class="research-muted">Loading current odds board…</p></div>
@@ -58,16 +57,6 @@
   const line = value => Number(value) > 0 ? `+${number(value)}` : number(value);
   const finiteNumber = value => value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value)) ? Number(value) : null;
   let client, games = [], history = {}, closings = {};
-
-  fetch('./data/reports/commercial_readiness.json', {cache:'no-store'}).then(r => {
-    if (!r.ok) throw Error('Readiness audit not published yet'); return r.json();
-  }).then(data => {
-    const label = status => ({ready:'Ready',in_progress:'In progress',collector_upgraded_history_incomplete:'Collector upgraded',ready_with_open_items:'Ready with open items'}[status] || status || 'Unknown');
-    $('#research-readiness').innerHTML = `<section class="research-summary"><h3>Paid Research Readiness</h3>
-      <p class="research-muted"><strong>Research subscription: ready with guardrails.</strong> Betting-edge product: not ready. ${esc(data.verdict?.recommended_positioning)}</p>
-      <div class="research-grid">${(data.pillars || []).map(row => `<div class="research-card"><span>${esc(row.label)}</span><strong style="font-size:17px">${esc(label(row.status))}</strong><p>${esc(row.summary)}</p></div>`).join('')}</div>
-      <p class="research-muted">${esc(data.verdict?.prohibited_positioning)}</p></section>`;
-  }).catch(() => { $('#research-readiness').innerHTML = '<p class="research-muted">The paid research readiness audit is temporarily unavailable.</p>'; });
 
   function comparisonFor(play) {
     if (play.market !== 'spread' && play.market !== 'total') return null;
@@ -132,6 +121,7 @@
   }).then(data => {
     const cfb = data.sports?.cfb || {};
     const qualified = cfb.actionable_over_5 || {};
+    const short = cfb.short_favorites || {};
     const signed = value => Number.isFinite(Number(value)) ? `${Number(value) > 0 ? '+' : ''}${Number(value).toFixed(1)}%` : '—';
     const interval = row => Array.isArray(row.hit_rate_ci_95) ? `${number(row.hit_rate_ci_95[0])}–${number(row.hit_rate_ci_95[1])}%` : '—';
     $('#research-backtest').innerHTML = `<section class="research-summary"><h3>2024–2025 Historical Research Audit</h3>
@@ -139,6 +129,8 @@
       <div class="research-grid"><div class="research-card"><span>&gt;5 point disagreement</span><strong>${esc(qualified.record || '—')}</strong><span>${number(qualified.hit_rate)}% ATS · 95% CI ${interval(qualified)}</span></div><div class="research-card"><span>Hypothetical flat −110 return</span><strong class="${Number(qualified.hypothetical_return_pct) >= 0 ? 'research-positive' : 'research-negative'}">${signed(qualified.hypothetical_return_pct)}</strong><span>Not realized ROI · p=${precise(qualified.p_value_vs_flat_minus_110)}</span></div><div class="research-card"><span>Evidence status</span><strong>Not validated</strong><span>Holm-adjusted p=${precise(qualified.holm_adjusted_p)}</span></div></div>
       <div class="research-table-wrap"><table class="research-table"><thead><tr><th>Season</th><th>Games</th><th>Record</th><th>ATS</th><th>Hypothetical return</th><th>Exact p</th></tr></thead><tbody>${(cfb.yearly || []).map(row => `<tr><td><strong>${esc(row.season)}</strong></td><td>${esc(row.games)}</td><td>${esc(row.record)}</td><td>${number(row.hit_rate)}%</td><td>${signed(row.hypothetical_return_pct)}</td><td>${precise(row.p_value_vs_flat_minus_110)}</td></tr>`).join('')}</tbody></table></div>
       <div class="research-table-wrap"><table class="research-table"><thead><tr><th>Signal bucket</th><th>Edge</th><th>Games</th><th>Record</th><th>ATS</th><th>Hypothetical return</th><th>Holm p</th></tr></thead><tbody>${(cfb.buckets || []).map(row => `<tr><td><strong>${esc(row.label)}</strong></td><td>${esc(row.edge_range)} pts</td><td>${esc(row.games)}</td><td>${esc(row.record)}</td><td>${number(row.hit_rate)}%</td><td>${signed(row.hypothetical_return_pct)}</td><td>${precise(row.holm_adjusted_p)}</td></tr>`).join('')}</tbody></table></div>
+      <div class="research-grid"><div class="research-card"><span>Short favorites · straight up</span><strong>${esc(short.su_record || '—')}</strong><span>${number(short.su_win_rate)}% SU</span></div><div class="research-card"><span>Short favorites · ATS</span><strong>${esc(short.ats_record || '—')}</strong><span>${number(short.ats_cover_rate)}% ATS</span></div><div class="research-card"><span>Definition</span><strong style="font-size:16px">−1 to −4.5</strong><span>${esc(short.games || 0)} market favorites</span></div></div>
+      <p class="research-muted">${esc(short.note || '')}</p>
       <p class="research-muted"><strong>${esc(cfb.verdict)}.</strong> ${esc(cfb.validation_note)} ${esc(data.meta?.price_policy)} ${esc(data.meta?.promotion_rule)}</p></section>`;
   }).catch(() => { $('#research-backtest').innerHTML = '<p class="research-muted">Historical research audit is temporarily unavailable.</p>'; });
 
@@ -166,16 +158,17 @@
     privateBox.innerHTML = '<p class="research-muted">Private play logging is being set up. The weekly scorecard above is available now.</p>';
     return;
   }
-  const library = document.createElement('script');
-  library.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-  library.onload = async () => {
-    if (!window.supabase?.createClient) { privateBox.textContent = 'Sign-in library unavailable.'; return; }
-    client = window.supabase.createClient(config.url, config.publishableKey);
+  const initializePrivatePortfolio = async () => {
+    client = window.THIAccount ? await window.THIAccount.ready : window.THI_SUPABASE_CLIENT;
+    if (!client && window.supabase?.createClient) {
+      client = window.supabase.createClient(config.url, config.publishableKey);
+      window.THI_SUPABASE_CLIENT = client;
+    }
+    if (!client) { privateBox.textContent = 'Sign-in library unavailable.'; return; }
     client.auth.onAuthStateChange(() => setTimeout(refresh, 0));
     await refresh();
   };
-  library.onerror = () => { privateBox.textContent = 'Sign-in library unavailable.'; };
-  document.head.append(library);
+  initializePrivatePortfolio();
 
   async function refresh() {
     const {data:{user}, error} = await client.auth.getUser();
@@ -186,7 +179,7 @@
       $('#research-login').onsubmit = async ev => {
         ev.preventDefault();
         const email = new FormData(ev.currentTarget).get('email');
-        const {error: sendError} = await client.auth.signInWithOtp({email, options:{emailRedirectTo:location.origin + location.pathname}});
+        const {error: sendError} = await client.auth.signInWithOtp({email, options:{emailRedirectTo:location.origin + location.pathname, data:{signup_source:'market_research'}}});
         $('#research-message').textContent = sendError ? sendError.message : 'Check your email for your sign-in link.';
       };
       return;

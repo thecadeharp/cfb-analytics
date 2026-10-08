@@ -24,6 +24,7 @@ const DATA_URLS = {
   thiPowerRatings: "./data/thi_power_ratings.json",
   rosterNotes: "./data/roster_notes.json",
   teamIntelligence: "./data/team_intelligence.json",
+  marketHistory: "./data/market_history.json",
 };
 
 let metricsData = null;
@@ -47,6 +48,7 @@ let thiObservedRatingsData = null;
 let thiPowerRatingsData = null;
 let rosterNotesData = null;
 let teamIntelligenceData = null;
+let marketHistoryData = null;
 
 let teams = {};
 let projections = [];
@@ -2212,7 +2214,8 @@ async function init() {
       thiObservedRatingsData,
       thiPowerRatingsData,
       rosterNotesData,
-      teamIntelligenceData
+      teamIntelligenceData,
+      marketHistoryData
     ] = await Promise.all([
       loadJson(DATA_URLS.metrics),
       loadJson(DATA_URLS.schedule),
@@ -2233,6 +2236,7 @@ async function init() {
       loadJson(DATA_URLS.thiPowerRatings).catch(() => null),
       loadJson(DATA_URLS.rosterNotes).catch(() => null),
       loadJson(DATA_URLS.teamIntelligence).catch(() => null),
+      loadJson(DATA_URLS.marketHistory).catch(() => ({ games: {} })),
     ]);
 
     teams = metricsData?.teams ?? {};
@@ -3559,6 +3563,8 @@ function renderMatchup(game) {
 
     ${scheduleContextMarkup(game)}
 
+    ${marketMovementMarkup(game)}
+
     <div class="analysis-layout">
       <div class="analysis-panel">
         <div class="analysis-panel-header">
@@ -3711,6 +3717,44 @@ function renderMatchup(game) {
       </div>
     </div>
   `;
+}
+
+function americanPrice(value) {
+  if (!hasValue(value)) return "—";
+  const number = Number(value);
+  return number > 0 ? `+${Math.round(number)}` : `${Math.round(number)}`;
+}
+
+function marketMovementMarkup(game) {
+  const history = marketHistoryData?.games?.[String(game?.game_id)] ?? {};
+  const snapshots = Array.isArray(history.snapshots) ? history.snapshots.slice() : [];
+  const current = (oddsData?.games ?? []).find(row =>
+    String(row.home_team) === String(game?.home?.team) && String(row.away_team) === String(game?.away?.team)
+  ) ?? {};
+  const firstSpread = history.first_captured_home_spread ?? history.open_home_spread;
+  const currentSpread = history.current_home_spread ?? current.spread_home ?? game?.market?.home_spread;
+  const movement = hasValue(firstSpread) && hasValue(currentSpread) ? Number(currentSpread) - Number(firstSpread) : null;
+  const reference = current.reference_spread ?? {};
+  const total = current.reference_total ?? {};
+  const rows = snapshots.slice(-24).reverse().map((snapshot, index) => {
+    const when = new Date(snapshot.captured_at);
+    const captured = Number.isNaN(when.getTime()) ? "Time unavailable" : when.toLocaleString("en-US", {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+    return `<tr><td>${escapeHtml(index === snapshots.slice(-24).length - 1 ? "First captured" : index === 0 ? "Latest" : "Update")}</td><td>${escapeHtml(captured)}</td><td>${escapeHtml(favoredLine(game.home.team, game.away.team, snapshot.home_spread))}</td></tr>`;
+  }).join("");
+  return `<section class="analysis-panel wide" aria-label="Market movement">
+    <div class="analysis-panel-header"><div><div class="analysis-panel-title">Odds &amp; Line Movement</div><div class="team-meta">Recorded market history · informational only</div></div></div>
+    <div class="analysis-panel-body">
+      <div class="analysis-grid" style="margin:0 0 14px;">
+        <div class="analysis-card"><div class="analysis-label">First captured</div><div class="analysis-value">${escapeHtml(favoredLine(game.home.team, game.away.team, firstSpread))}</div><div class="analysis-small">THI's first observation, not a claimed opener</div></div>
+        <div class="analysis-card"><div class="analysis-label">Current line</div><div class="analysis-value">${escapeHtml(favoredLine(game.home.team, game.away.team, currentSpread))}</div><div class="analysis-small">${escapeHtml(current.bookmaker || game?.market?.bookmaker || "Market unavailable")}</div></div>
+        <div class="analysis-card"><div class="analysis-label">Home-side move</div><div class="analysis-value">${hasValue(movement) ? formatSigned(movement,1) + " pts" : "—"}</div><div class="analysis-small">Negative means movement toward ${escapeHtml(game.home.team)}</div></div>
+        <div class="analysis-card"><div class="analysis-label">Reference price</div><div class="analysis-value">${hasValue(reference.home_spread) ? americanPrice(reference.home_price) : "—"}</div><div class="analysis-small">${escapeHtml(reference.bookmaker || "Awaiting a paired sharp-book quote")}${hasValue(reference.away_price) ? ` · away ${americanPrice(reference.away_price)}` : ""}</div></div>
+      </div>
+      ${rows ? `<div style="overflow:auto"><table class="data-table" style="min-width:520px"><thead><tr><th>Capture</th><th>Time</th><th>Consensus spread</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="sample-warning">Line chronology will appear after THI captures at least one market snapshot for this game.</div>`}
+      <div class="analysis-row"><div class="analysis-row-label">Current reference total</div><div class="analysis-row-value">${hasValue(total.total) ? `${formatNumber(total.total,1)} · over ${americanPrice(total.over_price)} / under ${americanPrice(total.under_price)}` : "—"}</div></div>
+      <p class="team-meta" style="margin:10px 0 0;">This screen tracks THI's timestamped observations. It does not claim sportsbook opening or closing lines unless the capture is explicitly labeled that way.</p>
+    </div>
+  </section>`;
 }
 
 
