@@ -1159,7 +1159,8 @@
       [row.opening_spread, row.current_spread, row.opening_total, row.current_total].some(value => value !== null && value !== undefined && Number.isFinite(Number(value)))
     );
     const backtest = state.data.publicBacktest?.sports?.cbb || {};
-    const backtestResult = backtest.qualified_5_plus || {};
+    const backtestResult = backtest.actionable_over_5 || {};
+    const backtestMeta = state.data.publicBacktest?.meta || {};
     const marketRowsMarkup = rows => rows.length ? rows.slice(0,100).map(row => `<tr><td><strong>${escapeHtml(row.away_team)} ${matchupWord(row)} ${escapeHtml(row.home_team)}</strong></td><td class="cbb-number">${number(row.opening_spread,1,true)}</td><td class="cbb-number">${number(row.current_spread,1,true)}</td><td class="cbb-number">${number(row.spread_move,1,true)}</td><td class="cbb-number">${number(row.opening_total,1)}</td><td class="cbb-number">${number(row.current_total,1)}</td><td class="cbb-number">${number(row.total_move,1,true)}</td><td class="cbb-number">${number(row.model_edge,1,true)}</td></tr>`).join("") : `<tr><td colspan="8" class="cbb-empty">No sportsbook lines are posted yet. This board will populate automatically when usable spreads or totals arrive.</td></tr>`;
     view.innerHTML = `
       <div class="cbb-kicker">Price discovery and model accountability</div>
@@ -1178,14 +1179,15 @@
           ${methodCard("Accountability", "Track before promotion", "ATS, total, calibration and error results must generalize out of time before public signals appear.")}
         </div>
       </section>
-      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">2025–2026 · strict walk-forward</div><h2 class="cbb-section-title">Public Historical ROI Check</h2></div><div class="cbb-section-note">Every game with a 5+ point model edge, one unit risked at -110. Historical context does not replace prospective validation.</div></div>
+      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">2025–2026 · held-out research</div><h2 class="cbb-section-title">Historical Research Audit</h2></div><div class="cbb-section-note">Every game with a &gt;5-point model edge is shown. Flat −110 returns are hypothetical because per-play prices are unavailable.</div></div>
         <div class="cbb-stat-grid">
           ${statCard("ATS record", backtestResult.record || "—", `${integer(backtestResult.games)} historical decisions`)}
-          ${statCard("Hit rate", pct(backtestResult.hit_rate), "Pushes excluded from hit rate")}
-          ${statCard("ROI", `${number(backtestResult.roi_pct,1,true)}%`, `${number(backtestResult.profit_units,1,true)} units`)}
-          ${statCard("Current status", "Research only", "Combined two-season ROI remains below zero")}
+          ${statCard("Hit rate", pct(backtestResult.hit_rate), `95% CI ${(backtestResult.hit_rate_ci_95 || []).map(value=>number(value,1)).join("–")}%`)}
+          ${statCard("Hypothetical return", `${number(backtestResult.hypothetical_return_pct,1,true)}%`, "Flat −110 arithmetic; not realized ROI")}
+          ${statCard("Current status", "Not validated", `Exact p ${number(backtestResult.p_value_vs_flat_minus_110,3)} · Holm p ${number(backtestResult.holm_adjusted_p,3)}`)}
         </div>
-        <div class="cbb-stat-note">${escapeHtml(backtest.validation_note || "Historical ATS results are withheld until the audit is available.")} ${escapeHtml(state.data.publicBacktest?.meta?.promotion_rule || "")}</div>
+        <div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Season</th><th>Record</th><th>ATS</th><th>Hypothetical return</th><th>THI margin MAE</th><th>Market margin MAE</th></tr></thead><tbody>${(backtest.yearly || []).map(row=>{const accuracy=(backtest.market_accuracy||[]).find(item=>item.season===row.season)||{};return `<tr><td><strong>${integer(row.season)}</strong></td><td>${escapeHtml(row.record)}</td><td class="cbb-number">${number(row.hit_rate,1)}%</td><td class="cbb-number">${number(row.hypothetical_return_pct,1,true)}%</td><td class="cbb-number">${number(accuracy.thi_margin_mae,2)}</td><td class="cbb-number">${number(accuracy.market_margin_mae,2)}</td></tr>`;}).join("")}</tbody></table></div>
+        <div class="cbb-stat-note"><strong>${escapeHtml(backtest.verdict || "Not validated")}.</strong> ${escapeHtml(backtest.validation_note || "Historical results are unavailable.")} ${escapeHtml(backtestMeta.price_policy || "")} ${escapeHtml(backtestMeta.promotion_rule || "")}</div>
       </section>
       <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Current market board</div><h2 class="cbb-section-title">Open-to-current movement</h2></div><div class="cbb-section-note">Movement is descriptive context. It never enters the projection model.</div></div>
         <div class="cbb-controls"><input id="cbb-market-search" class="cbb-input" type="search" placeholder="Search either team"><span id="cbb-market-count" class="cbb-stat-note">${integer(Math.min(marketBoard.length,100))} of ${integer(marketBoard.length)} lined games</span></div>

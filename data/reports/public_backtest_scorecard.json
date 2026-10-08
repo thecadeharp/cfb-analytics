@@ -1,145 +1,408 @@
 {
   "meta": {
-    "version": "thi-public-backtest-v1.0",
-    "generated_at_utc": "2026-10-08T04:04:23.504683Z",
-    "staking": "One unit risked per play at -110; pushes return stake.",
-    "promotion_rule": "Historical ROI is context. Prospective no-vig, exact-test, multiplicity, outlier and stability gates still control validation labels."
+    "version": "thi-public-backtest-v2.0",
+    "generated_at_utc": "2026-10-08T04:14:00.577430Z",
+    "audit_standard": "Exact one-sided binomial test against the 52.381% break-even rate implied by a hypothetical flat -110 price; Holm correction across the six displayed comparisons; 95% Wilson hit-rate intervals; season and outlier sensitivity checks.",
+    "financial_claim": false,
+    "price_policy": "Historical per-play prices and no-vig probabilities are unavailable. Return figures are hypothetical flat -110 arithmetic, not realized ROI.",
+    "promotion_rule": "These archived studies cannot validate the live models. Prospective frozen projections, verified prices, no-vig baselines, multiplicity control, outlier checks and stability checks govern any future validation label."
   },
   "sports": {
     "cfb": {
-      "status": "historical_research_proxy",
+      "status": "not_validated",
+      "verdict": "Historical pattern did not validate",
       "seasons": [
         2024,
         2025
       ],
-      "model": "Leakage-safe weekly composite predecessor",
-      "market": "Historical closing spread",
+      "model": "Time-safe weekly composite predecessor; not the live 2026 Model A",
+      "market": "Archived provider spread snapshot; closing time and two-sided price are not verified",
       "price_assumption": -110,
-      "selection_policy": "Every frozen edge bucket is published; no favorable bucket is hidden.",
-      "validation_note": "Descriptive proxy only. It is not the exact 2026 Model A and lacks per-play two-sided prices for a no-vig probability test.",
-      "qualified_5_plus": {
+      "selection_policy": "All five predeclared signal tiers plus the combined >5-point group are shown.",
+      "validation_note": "The combined result is positive under a hypothetical flat -110 price, but it is not statistically significant, turns negative in 2025, and cannot validate live Model A.",
+      "actionable_over_5": {
         "games": 490,
+        "decisions": 479,
         "wins": 261,
         "losses": 218,
         "pushes": 11,
         "record": "261-218-11",
         "hit_rate": 54.489,
-        "roi_pct": 3.933,
-        "profit_units": 19.273
+        "hit_rate_ci_95": [
+          50.011,
+          58.895
+        ],
+        "hypothetical_return_pct": 3.933,
+        "hypothetical_units": 19.273,
+        "p_value_vs_flat_minus_110": 0.190073,
+        "holm_adjusted_p": 0.950365
       },
+      "yearly": [
+        {
+          "season": 2024,
+          "games": 253,
+          "decisions": 247,
+          "wins": 142,
+          "losses": 105,
+          "pushes": 6,
+          "record": "142-105-6",
+          "hit_rate": 57.49,
+          "hit_rate_ci_95": [
+            51.256,
+            63.494
+          ],
+          "hypothetical_return_pct": 9.522,
+          "hypothetical_units": 24.091,
+          "p_value_vs_flat_minus_110": 0.061038
+        },
+        {
+          "season": 2025,
+          "games": 237,
+          "decisions": 232,
+          "wins": 119,
+          "losses": 113,
+          "pushes": 5,
+          "record": "119-113-5",
+          "hit_rate": 51.293,
+          "hit_rate_ci_95": [
+            44.893,
+            57.651
+          ],
+          "hypothetical_return_pct": -2.033,
+          "hypothetical_units": -4.818,
+          "p_value_vs_flat_minus_110": 0.654779
+        }
+      ],
       "buckets": [
         {
           "key": "aligned",
           "label": "Aligned",
           "edge_range": "0 to 2.5",
           "games": 382,
+          "decisions": 373,
           "wins": 202,
           "losses": 171,
           "pushes": 9,
           "record": "202-171-9",
           "hit_rate": 54.155,
-          "roi_pct": 3.308,
-          "profit_units": 12.636
+          "hit_rate_ci_95": [
+            49.082,
+            59.144
+          ],
+          "hypothetical_return_pct": 3.308,
+          "hypothetical_units": 12.636,
+          "p_value_vs_flat_minus_110": 0.263104,
+          "holm_adjusted_p": 1.0
         },
         {
           "key": "small_edge",
           "label": "Small edge",
           "edge_range": ">2.5 to 5",
           "games": 293,
+          "decisions": 287,
           "wins": 136,
           "losses": 151,
           "pushes": 6,
           "record": "136-151-6",
           "hit_rate": 47.387,
-          "roi_pct": -9.339,
-          "profit_units": -27.364
+          "hit_rate_ci_95": [
+            41.683,
+            53.16
+          ],
+          "hypothetical_return_pct": -9.339,
+          "hypothetical_units": -27.364,
+          "p_value_vs_flat_minus_110": 0.960136,
+          "holm_adjusted_p": 1.0
         },
         {
           "key": "play",
           "label": "Play",
           "edge_range": ">5 to 7",
           "games": 175,
+          "decisions": 172,
           "wins": 101,
           "losses": 71,
           "pushes": 3,
           "record": "101-71-3",
           "hit_rate": 58.721,
-          "roi_pct": 11.896,
-          "profit_units": 20.818
+          "hit_rate_ci_95": [
+            51.251,
+            65.81
+          ],
+          "hypothetical_return_pct": 11.896,
+          "hypothetical_units": 20.818,
+          "p_value_vs_flat_minus_110": 0.055742,
+          "holm_adjusted_p": 0.334452
         },
         {
           "key": "material_disagreement",
           "label": "Material disagreement",
           "edge_range": ">7 to 10",
           "games": 173,
+          "decisions": 167,
           "wins": 86,
           "losses": 81,
           "pushes": 6,
           "record": "86-81-6",
           "hit_rate": 51.497,
-          "roi_pct": -1.629,
-          "profit_units": -2.818
+          "hit_rate_ci_95": [
+            43.969,
+            58.958
+          ],
+          "hypothetical_return_pct": -1.629,
+          "hypothetical_units": -2.818,
+          "p_value_vs_flat_minus_110": 0.620643,
+          "holm_adjusted_p": 1.0
         },
         {
           "key": "outlier",
           "label": "Outlier",
           "edge_range": ">10",
           "games": 142,
+          "decisions": 140,
           "wins": 74,
           "losses": 66,
           "pushes": 2,
           "record": "74-66-2",
           "hit_rate": 52.857,
-          "roi_pct": 0.896,
-          "profit_units": 1.273
+          "hit_rate_ci_95": [
+            44.623,
+            60.939
+          ],
+          "hypothetical_return_pct": 0.896,
+          "hypothetical_units": 1.273,
+          "p_value_vs_flat_minus_110": 0.489293,
+          "holm_adjusted_p": 1.0
         }
-      ]
+      ],
+      "data_integrity": {
+        "source_rows": 1165,
+        "duplicate_game_keys": 0
+      },
+      "robustness": {
+        "without_outlier_tier": {
+          "games": 348,
+          "decisions": 339,
+          "wins": 187,
+          "losses": 152,
+          "pushes": 9,
+          "record": "187-152-9",
+          "hit_rate": 55.162,
+          "hit_rate_ci_95": [
+            49.84,
+            60.369
+          ],
+          "hypothetical_return_pct": 5.172,
+          "hypothetical_units": 18.0,
+          "p_value_vs_flat_minus_110": 0.165798
+        },
+        "interpretation": "Removing >10-point outliers does not make the combined result statistically significant."
+      }
     },
     "cbb": {
-      "status": "strict_walk_forward_research",
+      "status": "not_validated",
+      "verdict": "Research model did not validate",
       "seasons": [
         2025,
         2026
       ],
       "model": "THI CBB walk-forward v0.7 research",
-      "market": "Historical closing spread",
+      "market": "Archived closing-spread field; two-sided prices are unavailable",
       "price_assumption": -110,
-      "selection_policy": "All games with an absolute model edge of at least 5 points.",
-      "validation_note": "Strict validation and out-of-time test seasons. Combined ROI remains below zero, so current CBB signals stay research-only.",
-      "qualified_5_plus": {
+      "selection_policy": "All five predeclared signal tiers plus the combined >5-point group are shown.",
+      "validation_note": "The combined >5-point sample loses at a hypothetical flat -110 price, no displayed tier clears the corrected significance test, and the market has lower margin error in both held-out seasons.",
+      "actionable_over_5": {
         "games": 2378,
+        "decisions": 2375,
         "wins": 1231,
         "losses": 1144,
         "pushes": 3,
         "record": "1231-1144-3",
         "hit_rate": 51.832,
-        "roi_pct": -1.047,
-        "profit_units": -24.909
+        "hit_rate_ci_95": [
+          49.821,
+          53.837
+        ],
+        "hypothetical_return_pct": -1.047,
+        "hypothetical_units": -24.909,
+        "p_value_vs_flat_minus_110": 0.711177,
+        "holm_adjusted_p": 1.0
       },
       "yearly": [
         {
           "season": 2025,
           "games": 1175,
+          "decisions": 1175,
           "wins": 594,
           "losses": 581,
           "pushes": 0,
           "record": "594-581-0",
           "hit_rate": 50.553,
-          "roi_pct": -3.489,
-          "profit_units": -41.0
+          "hit_rate_ci_95": [
+            47.697,
+            53.405
+          ],
+          "hypothetical_return_pct": -3.489,
+          "hypothetical_units": -41.0,
+          "p_value_vs_flat_minus_110": 0.900331
         },
         {
           "season": 2026,
           "games": 1203,
+          "decisions": 1200,
           "wins": 637,
           "losses": 563,
           "pushes": 3,
           "record": "637-563-3",
           "hit_rate": 53.083,
-          "roi_pct": 1.338,
-          "profit_units": 16.091
+          "hit_rate_ci_95": [
+            50.254,
+            55.893
+          ],
+          "hypothetical_return_pct": 1.338,
+          "hypothetical_units": 16.091,
+          "p_value_vs_flat_minus_110": 0.323516
         }
-      ]
+      ],
+      "buckets": [
+        {
+          "key": "aligned",
+          "label": "Aligned",
+          "edge_range": "0 to 2.5",
+          "games": 5401,
+          "decisions": 5389,
+          "wins": 2698,
+          "losses": 2691,
+          "pushes": 12,
+          "record": "2698-2691-12",
+          "hit_rate": 50.065,
+          "hit_rate_ci_95": [
+            48.73,
+            51.399
+          ],
+          "hypothetical_return_pct": -4.412,
+          "hypothetical_units": -238.273,
+          "p_value_vs_flat_minus_110": 0.999682,
+          "holm_adjusted_p": 1.0
+        },
+        {
+          "key": "small_edge",
+          "label": "Small edge",
+          "edge_range": ">2.5 to 5",
+          "games": 3150,
+          "decisions": 3145,
+          "wins": 1640,
+          "losses": 1505,
+          "pushes": 5,
+          "record": "1640-1505-5",
+          "hit_rate": 52.146,
+          "hit_rate_ci_95": [
+            50.399,
+            53.888
+          ],
+          "hypothetical_return_pct": -0.447,
+          "hypothetical_units": -14.091,
+          "p_value_vs_flat_minus_110": 0.610887,
+          "holm_adjusted_p": 1.0
+        },
+        {
+          "key": "play",
+          "label": "Play",
+          "edge_range": ">5 to 7",
+          "games": 1091,
+          "decisions": 1089,
+          "wins": 559,
+          "losses": 530,
+          "pushes": 2,
+          "record": "559-530-2",
+          "hit_rate": 51.331,
+          "hit_rate_ci_95": [
+            48.363,
+            54.29
+          ],
+          "hypothetical_return_pct": -2.0,
+          "hypothetical_units": -21.818,
+          "p_value_vs_flat_minus_110": 0.765457,
+          "holm_adjusted_p": 1.0
+        },
+        {
+          "key": "material_disagreement",
+          "label": "Material disagreement",
+          "edge_range": ">7 to 10",
+          "games": 705,
+          "decisions": 705,
+          "wins": 370,
+          "losses": 335,
+          "pushes": 0,
+          "record": "370-335-0",
+          "hit_rate": 52.482,
+          "hit_rate_ci_95": [
+            48.793,
+            56.145
+          ],
+          "hypothetical_return_pct": 0.193,
+          "hypothetical_units": 1.364,
+          "p_value_vs_flat_minus_110": 0.493793,
+          "holm_adjusted_p": 1.0
+        },
+        {
+          "key": "outlier",
+          "label": "Outlier",
+          "edge_range": ">10",
+          "games": 582,
+          "decisions": 581,
+          "wins": 302,
+          "losses": 279,
+          "pushes": 1,
+          "record": "302-279-1",
+          "hit_rate": 51.979,
+          "hit_rate_ci_95": [
+            47.917,
+            56.015
+          ],
+          "hypothetical_return_pct": -0.765,
+          "hypothetical_units": -4.455,
+          "p_value_vs_flat_minus_110": 0.593265,
+          "holm_adjusted_p": 1.0
+        }
+      ],
+      "market_accuracy": [
+        {
+          "season": 2025,
+          "thi_margin_mae": 9.9189,
+          "market_margin_mae": 8.7258,
+          "market_advantage_points": 1.1931
+        },
+        {
+          "season": 2026,
+          "thi_margin_mae": 10.085,
+          "market_margin_mae": 8.9729,
+          "market_advantage_points": 1.1121
+        }
+      ],
+      "data_integrity": {
+        "source_rows": 10929,
+        "duplicate_game_keys": 0
+      },
+      "robustness": {
+        "without_outlier_tier": {
+          "games": 1796,
+          "decisions": 1794,
+          "wins": 929,
+          "losses": 865,
+          "pushes": 2,
+          "record": "929-865-2",
+          "hit_rate": 51.784,
+          "hit_rate_ci_95": [
+            49.47,
+            54.09
+          ],
+          "hypothetical_return_pct": -1.139,
+          "hypothetical_units": -20.455,
+          "p_value_vs_flat_minus_110": 0.702077
+        },
+        "interpretation": "Removing >10-point outliers leaves the combined sample negative."
+      }
     }
   }
 }

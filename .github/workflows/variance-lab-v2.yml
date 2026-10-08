@@ -55,7 +55,9 @@ jobs:
           assert tracker['meta']['version']=='thi-variance-prospective-v1.1'
           assert 'summary' in tracker
           assert rlm['meta']['version']=='thi-rlm-monitor-v1.2'
-          assert backtest['meta']['version']=='thi-public-backtest-v1.0'
+          assert backtest['meta']['version']=='thi-public-backtest-v2.0'
+          assert backtest['meta']['financial_claim'] is False
+          assert all(sport['status']=='not_validated' for sport in backtest['sports'].values())
           assert set(backtest['sports'])=={'cfb','cbb'}
           PY
       - name: Publish refreshed research

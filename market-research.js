@@ -44,7 +44,7 @@
   view.innerHTML = `<div class="eyebrow">THI research</div><h1 class="page-title">Market Research</h1>
     <p class="page-subtitle">First-snapshot model accountability and a private workspace for evaluating your line selection.</p>
     <div id="research-scorecard" aria-live="polite"><p class="research-muted">Loading weekly scorecard…</p></div>
-    <div id="research-backtest" aria-live="polite"><p class="research-muted">Loading historical ROI check…</p></div>
+    <div id="research-backtest" aria-live="polite"><p class="research-muted">Loading historical research audit…</p></div>
     <div id="research-odds" aria-live="polite"><p class="research-muted">Loading current odds board…</p></div>
     <div class="research-card"><h2>Private portfolio</h2><div id="research-private" aria-live="polite"></div></div>`;
   main.append(view);
@@ -52,6 +52,7 @@
   const privateBox = $('#research-private');
   const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const number = value => Number.isFinite(Number(value)) && value !== null ? Number(value).toFixed(2) : '—';
+  const precise = (value, digits = 3) => Number.isFinite(Number(value)) && value !== null ? Number(value).toFixed(digits) : '—';
   const time = value => value ? new Date(value).toLocaleString() : '—';
   const line = value => Number(value) > 0 ? `+${number(value)}` : number(value);
   const finiteNumber = value => value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value)) ? Number(value) : null;
@@ -119,14 +120,16 @@
     if (!r.ok) throw Error('Backtest scorecard not published yet'); return r.json();
   }).then(data => {
     const cfb = data.sports?.cfb || {};
-    const qualified = cfb.qualified_5_plus || {};
+    const qualified = cfb.actionable_over_5 || {};
     const signed = value => Number.isFinite(Number(value)) ? `${Number(value) > 0 ? '+' : ''}${Number(value).toFixed(1)}%` : '—';
-    $('#research-backtest').innerHTML = `<section class="research-summary"><h3>2024–2025 Historical ROI Check</h3>
-      <p class="research-muted">${esc(cfb.model)} against ${esc(cfb.market)}. ${esc(data.meta?.staking)} Every signal bucket is published below.</p>
-      <div class="research-grid"><div class="research-card"><span>&gt;5 point disagreement</span><strong>${esc(qualified.record || '—')}</strong><span>${number(qualified.hit_rate)}% ATS · ${esc(qualified.games || 0)} games</span></div><div class="research-card"><span>ROI at −110</span><strong class="${Number(qualified.roi_pct) >= 0 ? 'research-positive' : 'research-negative'}">${signed(qualified.roi_pct)}</strong><span>${Number(qualified.profit_units) > 0 ? '+' : ''}${number(qualified.profit_units)} units</span></div><div class="research-card"><span>Evidence status</span><strong>Research proxy</strong><span>Prospective validation still controls labels</span></div></div>
-      <div class="research-table-wrap"><table class="research-table"><thead><tr><th>Signal bucket</th><th>Edge</th><th>Games</th><th>Record</th><th>ATS</th><th>ROI</th></tr></thead><tbody>${(cfb.buckets || []).map(row => `<tr><td><strong>${esc(row.label)}</strong></td><td>${esc(row.edge_range)} pts</td><td>${esc(row.games)}</td><td>${esc(row.record)}</td><td>${number(row.hit_rate)}%</td><td class="${Number(row.roi_pct) >= 0 ? 'research-positive' : 'research-negative'}">${signed(row.roi_pct)}</td></tr>`).join('')}</tbody></table></div>
-      <p class="research-muted">${esc(cfb.validation_note)} ${esc(data.meta?.promotion_rule)}</p></section>`;
-  }).catch(() => { $('#research-backtest').innerHTML = '<p class="research-muted">Historical ROI scorecard is temporarily unavailable.</p>'; });
+    const interval = row => Array.isArray(row.hit_rate_ci_95) ? `${number(row.hit_rate_ci_95[0])}–${number(row.hit_rate_ci_95[1])}%` : '—';
+    $('#research-backtest').innerHTML = `<section class="research-summary"><h3>2024–2025 Historical Research Audit</h3>
+      <p class="research-muted">${esc(cfb.model)}. Market input: ${esc(cfb.market)}.</p>
+      <div class="research-grid"><div class="research-card"><span>&gt;5 point disagreement</span><strong>${esc(qualified.record || '—')}</strong><span>${number(qualified.hit_rate)}% ATS · 95% CI ${interval(qualified)}</span></div><div class="research-card"><span>Hypothetical flat −110 return</span><strong class="${Number(qualified.hypothetical_return_pct) >= 0 ? 'research-positive' : 'research-negative'}">${signed(qualified.hypothetical_return_pct)}</strong><span>Not realized ROI · p=${precise(qualified.p_value_vs_flat_minus_110)}</span></div><div class="research-card"><span>Evidence status</span><strong>Not validated</strong><span>Holm-adjusted p=${precise(qualified.holm_adjusted_p)}</span></div></div>
+      <div class="research-table-wrap"><table class="research-table"><thead><tr><th>Season</th><th>Games</th><th>Record</th><th>ATS</th><th>Hypothetical return</th><th>Exact p</th></tr></thead><tbody>${(cfb.yearly || []).map(row => `<tr><td><strong>${esc(row.season)}</strong></td><td>${esc(row.games)}</td><td>${esc(row.record)}</td><td>${number(row.hit_rate)}%</td><td>${signed(row.hypothetical_return_pct)}</td><td>${precise(row.p_value_vs_flat_minus_110)}</td></tr>`).join('')}</tbody></table></div>
+      <div class="research-table-wrap"><table class="research-table"><thead><tr><th>Signal bucket</th><th>Edge</th><th>Games</th><th>Record</th><th>ATS</th><th>Hypothetical return</th><th>Holm p</th></tr></thead><tbody>${(cfb.buckets || []).map(row => `<tr><td><strong>${esc(row.label)}</strong></td><td>${esc(row.edge_range)} pts</td><td>${esc(row.games)}</td><td>${esc(row.record)}</td><td>${number(row.hit_rate)}%</td><td>${signed(row.hypothetical_return_pct)}</td><td>${precise(row.holm_adjusted_p)}</td></tr>`).join('')}</tbody></table></div>
+      <p class="research-muted"><strong>${esc(cfb.verdict)}.</strong> ${esc(cfb.validation_note)} ${esc(data.meta?.price_policy)} ${esc(data.meta?.promotion_rule)}</p></section>`;
+  }).catch(() => { $('#research-backtest').innerHTML = '<p class="research-muted">Historical research audit is temporarily unavailable.</p>'; });
 
   fetch('./data/odds.json', {cache:'no-store'}).then(r => {
     if (!r.ok) throw Error('Odds board unavailable'); return r.json();
