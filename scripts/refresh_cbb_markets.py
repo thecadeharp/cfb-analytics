@@ -111,7 +111,7 @@ def refresh(
                 "home_team": (game.get("home") or {}).get("team"),
                 "start_date": game.get("start_date"),
                 "neutral_site": bool(game.get("neutral_site")),
-                **{key: merged.get(key) for key in ("book_count", "consensus_home_spread", "consensus_total", "opening_home_spread", "opening_total", "spread_move", "total_move")},
+                **{key: merged.get(key) for key in ("book_count", "consensus_home_spread", "consensus_total", "opening_home_spread", "opening_total", "spread_move", "total_move", "reference_moneyline", "spread_price_status")},
             })
             history_games[game_id] = snapshots[-200:]
             changed += 1

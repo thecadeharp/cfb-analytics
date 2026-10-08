@@ -63,6 +63,7 @@ jobs:
           python scripts/run_cbb_opening_night_rehearsal.py
           python scripts/build_cbb_platform_health.py
           python scripts/build_variance_prospective_tracker.py
+          python scripts/build_commercial_readiness.py
 
       - name: Validate refreshed market contract
         if: steps.market.outputs.changed == 'true'
@@ -97,7 +98,8 @@ jobs:
             data/cbb/platform_health.json \
             data/cbb/venue_audit.json \
             data/cbb/opening_night_rehearsal.json \
-            data/variance/prospective_tracker.json
+            data/variance/prospective_tracker.json \
+            data/reports/commercial_readiness.json
           git diff --cached --quiet && exit 0
           git commit -m "Capture CBB game-day market"
           git pull --rebase origin main

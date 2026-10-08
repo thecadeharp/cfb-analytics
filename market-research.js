@@ -43,6 +43,7 @@
   view.id = 'view-research'; view.className = 'view';
   view.innerHTML = `<div class="eyebrow">THI research</div><h1 class="page-title">Market Research</h1>
     <p class="page-subtitle">First-snapshot model accountability and a private workspace for evaluating your line selection.</p>
+    <div id="research-readiness" aria-live="polite"><p class="research-muted">Loading research readiness audit…</p></div>
     <div id="research-scorecard" aria-live="polite"><p class="research-muted">Loading weekly scorecard…</p></div>
     <div id="research-backtest" aria-live="polite"><p class="research-muted">Loading historical research audit…</p></div>
     <div id="research-odds" aria-live="polite"><p class="research-muted">Loading current odds board…</p></div>
@@ -57,6 +58,16 @@
   const line = value => Number(value) > 0 ? `+${number(value)}` : number(value);
   const finiteNumber = value => value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value)) ? Number(value) : null;
   let client, games = [], history = {}, closings = {};
+
+  fetch('./data/reports/commercial_readiness.json', {cache:'no-store'}).then(r => {
+    if (!r.ok) throw Error('Readiness audit not published yet'); return r.json();
+  }).then(data => {
+    const label = status => ({ready:'Ready',in_progress:'In progress',collector_upgraded_history_incomplete:'Collector upgraded',ready_with_open_items:'Ready with open items'}[status] || status || 'Unknown');
+    $('#research-readiness').innerHTML = `<section class="research-summary"><h3>Paid Research Readiness</h3>
+      <p class="research-muted"><strong>Research subscription: ready with guardrails.</strong> Betting-edge product: not ready. ${esc(data.verdict?.recommended_positioning)}</p>
+      <div class="research-grid">${(data.pillars || []).map(row => `<div class="research-card"><span>${esc(row.label)}</span><strong style="font-size:17px">${esc(label(row.status))}</strong><p>${esc(row.summary)}</p></div>`).join('')}</div>
+      <p class="research-muted">${esc(data.verdict?.prohibited_positioning)}</p></section>`;
+  }).catch(() => { $('#research-readiness').innerHTML = '<p class="research-muted">The paid research readiness audit is temporarily unavailable.</p>'; });
 
   function comparisonFor(play) {
     if (play.market !== 'spread' && play.market !== 'total') return null;

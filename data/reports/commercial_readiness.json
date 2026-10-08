@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "version": "thi-commercial-readiness-v1.0",
+    "generated_at_utc": "2026-10-08T10:43:52.060155Z",
+    "scope": "Operational and evidence readiness for a paid THI research product; this is not a claim that a betting edge has validated."
+  },
+  "verdict": {
+    "research_subscription": "ready_with_guardrails",
+    "betting_edge_product": "not_ready",
+    "recommended_positioning": "Paid college-sports research, model transparency, team intelligence and decision support.",
+    "prohibited_positioning": "Do not market THI as a proven profitable picks service unless the prospective price-aware validation gate clears."
+  },
+  "pillars": [
+    {
+      "id": "prospective_validation",
+      "label": "Prospective validation",
+      "status": "in_progress",
+      "summary": "CFB has 6,126 immutable observations across 361 frozen games and 264 settled games. CBB automation is ready but has 0 settled 2027 spread decisions.",
+      "pass_condition": "A full predeclared sample settles with complete price records, stability checks and corrected significance tests."
+    },
+    {
+      "id": "real_prices",
+      "label": "Exact market prices",
+      "status": "collector_upgraded_history_incomplete",
+      "summary": "Existing CFB history has 0/6,126 opening snapshots and 0/173 near-kickoff captures with paired single-book prices. New CFB captures preserve them. CBBD exposes paired moneyline prices but not spread juice, so CBB ATS price validation still needs a two-sided sportsbook feed.",
+      "pass_condition": "Every evaluated play stores one named book, exact line, both prices and timestamp at selection and close."
+    },
+    {
+      "id": "predeclared_rules",
+      "label": "Predeclared validation rules",
+      "status": "ready",
+      "summary": "The production validator requires a per-play no-vig baseline, exact or Poisson-binomial testing, Holm correction, outlier dependency checks and rolling stability. Signal Confidence measures the prospective evidence supporting each signal tier. Promotion requires a recorded per-play no-vig baseline, exact testing, Holm correction, outlier robustness, positive CLV and stable rolling results.",
+      "pass_condition": "Rules remain frozen before outcomes are observed and every tested bucket stays in the correction family."
+    },
+    {
+      "id": "operational_proof",
+      "label": "Operational proof",
+      "status": "in_progress",
+      "summary": "CFB collection, closing capture and settlement are active. CBB platform health is healthy with 859 scheduled games and 0 market observations; live CBB proof begins when books post lines.",
+      "pass_condition": "Complete a season with scheduled jobs healthy, no silent gaps, reconciled finals and published incident notes for material failures."
+    },
+    {
+      "id": "data_rights",
+      "label": "Paid-data rights",
+      "status": "ready_with_open_items",
+      "summary": "CFBD/CBBD and The Odds API permit commercial analytical products under their current terms while restricting raw redistribution. SportsDataverse code is MIT licensed. Source-level rights for third-party underlying data, team marks and any ESPN/NCAA-derived fields remain open items before scaling paid access.",
+      "pass_condition": "Maintain a source register, comply with attribution/redistribution limits and resolve every source-pending asset or field."
+    }
+  ],
+  "rights_register": [
+    {
+      "source": "CollegeFootballData.com / CollegeBasketballData.com",
+      "status": "commercial_use_permitted_with_limits",
+      "url": "https://collegebasketballdata.com/terms",
+      "conditions": "Derived models, paid sites, dashboards and reasonable factual display are allowed; do not redistribute a raw bulk mirror or competing API."
+    },
+    {
+      "source": "The Odds API",
+      "status": "commercial_use_permitted_with_limits",
+      "url": "https://the-odds-api.com/terms-and-conditions.html",
+      "conditions": "Integrated display, research and derived analytics are allowed; do not resell or repackage the feed as a standalone data product."
+    },
+    {
+      "source": "cfbfastR / SportsDataverse code",
+      "status": "code_license_verified_source_data_pending",
+      "url": "https://cfbfastr.sportsdataverse.org/",
+      "conditions": "Package code is MIT licensed; that license does not itself grant rights to every upstream dataset loaded by the package."
+    },
+    {
+      "source": "Team names, logos and third-party endpoint-derived fields",
+      "status": "source_pending",
+      "url": null,
+      "conditions": "Inventory marks and upstream fields, then document a license, permission, fair-use rationale or replacement for each paid-product dependency."
+    }
+  ]
+}

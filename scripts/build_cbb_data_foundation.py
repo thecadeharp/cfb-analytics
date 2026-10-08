@@ -66,6 +66,43 @@ def market_summary(lines: list[dict[str, Any]]) -> dict[str, Any] | None:
     total = median(lines, "overUnder")
     open_spread = median(lines, "spreadOpen")
     open_total = median(lines, "overUnderOpen")
+    provider_priority = {
+        "pinnacle": 0,
+        "circa sports": 1,
+        "betonline": 2,
+        "bookmaker": 3,
+    }
+    priced = [
+        row for row in lines
+        if (home_price := finite(row.get("homeMoneyline"))) is not None
+        and (away_price := finite(row.get("awayMoneyline"))) is not None
+        and abs(home_price) >= 100
+        and abs(away_price) >= 100
+    ]
+    reference_moneyline = None
+    if priced:
+        row = min(
+            priced,
+            key=lambda item: (
+                provider_priority.get(str(item.get("provider") or "").strip().lower(), 100),
+                str(item.get("provider") or ""),
+            ),
+        )
+        reference_moneyline = {
+            "provider": row.get("provider"),
+            "home_price": int(finite(row.get("homeMoneyline"))),
+            "away_price": int(finite(row.get("awayMoneyline"))),
+            "price_format": "american",
+            "validation_scope": "moneyline_only",
+        }
+        home = finite(row.get("homeMoneyline"))
+        away = finite(row.get("awayMoneyline"))
+        home_implied = abs(home) / (abs(home) + 100) if home < 0 else 100 / (home + 100)
+        away_implied = abs(away) / (abs(away) + 100) if away < 0 else 100 / (away + 100)
+        total_implied = home_implied + away_implied
+        reference_moneyline["implied_probability"] = {"home": round(home_implied, 8), "away": round(away_implied, 8)}
+        reference_moneyline["no_vig_probability"] = {"home": round(home_implied / total_implied, 8), "away": round(away_implied / total_implied, 8)}
+        reference_moneyline["overround"] = round(total_implied - 1, 8)
     return {
         "book_count": len(lines),
         "consensus_home_spread": spread,
@@ -74,6 +111,8 @@ def market_summary(lines: list[dict[str, Any]]) -> dict[str, Any] | None:
         "opening_total": open_total,
         "spread_move": rounded(spread - open_spread) if spread is not None and open_spread is not None else None,
         "total_move": rounded(total - open_total) if total is not None and open_total is not None else None,
+        "reference_moneyline": reference_moneyline,
+        "spread_price_status": "unavailable_from_provider_contract",
     }
 
 

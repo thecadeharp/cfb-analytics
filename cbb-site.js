@@ -22,10 +22,11 @@
     trends: "data/trends_lab.json",
     varianceTracker: "data/variance/prospective_tracker.json",
     rlmMonitor: "data/market/rlm_monitor.json",
-    publicBacktest: "data/reports/public_backtest_scorecard.json"
+    publicBacktest: "data/reports/public_backtest_scorecard.json",
+    commercialReadiness: "data/reports/commercial_readiness.json"
   };
   const PLAYER_PATH = "data/cbb/player_ratings.json";
-  const CORE_DATA_KEYS = new Set(["profiles", "foundation", "model", "priors", "homeCourt", "history", "projectionBoard", "tracking", "bracketology", "readiness", "health", "trends", "varianceTracker", "publicBacktest"]);
+  const CORE_DATA_KEYS = new Set(["profiles", "foundation", "model", "priors", "homeCourt", "history", "projectionBoard", "tracking", "bracketology", "readiness", "health", "trends", "varianceTracker", "publicBacktest", "commercialReadiness"]);
   const DEFERRED_VIEW_KEYS = {
     "cbb-projections": ["intelligence", "matchups", "operations"],
     "cbb-team-data": ["intelligence"],
@@ -1161,11 +1162,17 @@
     const backtest = state.data.publicBacktest?.sports?.cbb || {};
     const backtestResult = backtest.actionable_over_5 || {};
     const backtestMeta = state.data.publicBacktest?.meta || {};
+    const commercial = state.data.commercialReadiness || {};
+    const readinessLabel = status => ({ready:"Ready",in_progress:"In progress",collector_upgraded_history_incomplete:"Collector upgraded",ready_with_open_items:"Ready with open items"}[status] || status || "Unknown");
     const marketRowsMarkup = rows => rows.length ? rows.slice(0,100).map(row => `<tr><td><strong>${escapeHtml(row.away_team)} ${matchupWord(row)} ${escapeHtml(row.home_team)}</strong></td><td class="cbb-number">${number(row.opening_spread,1,true)}</td><td class="cbb-number">${number(row.current_spread,1,true)}</td><td class="cbb-number">${number(row.spread_move,1,true)}</td><td class="cbb-number">${number(row.opening_total,1)}</td><td class="cbb-number">${number(row.current_total,1)}</td><td class="cbb-number">${number(row.total_move,1,true)}</td><td class="cbb-number">${number(row.model_edge,1,true)}</td></tr>`).join("") : `<tr><td colspan="8" class="cbb-empty">No sportsbook lines are posted yet. This board will populate automatically when usable spreads or totals arrive.</td></tr>`;
     view.innerHTML = `
       <div class="cbb-kicker">Price discovery and model accountability</div>
       <h1 class="page-title">CBB Market Research</h1>
       <p class="page-subtitle">Market lines remain evaluation context rather than model inputs. Current edges will stay hidden until the model clears its public-projection gate.</p>
+      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Five-pillar audit</div><h2 class="cbb-section-title">Paid Research Readiness</h2></div><div class="cbb-section-note">Research subscription: ready with guardrails. Betting-edge product: not ready.</div></div>
+        <div class="cbb-method-grid">${(commercial.pillars || []).map(row=>methodCard(row.label,readinessLabel(row.status),row.summary)).join("")}</div>
+        <div class="cbb-stat-note">${escapeHtml(commercial.verdict?.recommended_positioning || "Paid college-sports research and decision support.")}</div>
+      </section>
       <div class="cbb-stat-grid">
         ${statCard("Historical market games", integer(marketGames), "2018–2026 evaluation inventory")}
         ${statCard("Current board lines", integer(coverage.games_with_market), `${integer(coverage.window_games)} scheduled games scanned`)}

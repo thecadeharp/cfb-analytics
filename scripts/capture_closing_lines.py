@@ -174,6 +174,9 @@ def main():
                 "home_spread": market_home_spread,
                 "total": market.get("total"),
                 "bookmaker": market.get("bookmaker"),
+                "reference_spread": market.get("reference_spread"),
+                "reference_total": market.get("reference_total"),
+                "price_policy": "single_book_two_sided_quote_only",
             },
             "signal_at_close": {
                 "disagreement": comparison.get("disagreement"),

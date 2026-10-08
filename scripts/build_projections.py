@@ -939,12 +939,55 @@ def market_consensus(quotes, outlier_distance):
     }
 
 
+def american_implied_probability(price):
+    price = optional_number(price)
+    if price is None or abs(price) < 100:
+        return None
+    return abs(price) / (abs(price) + 100.0) if price < 0 else 100.0 / (price + 100.0)
+
+
+def add_no_vig_baseline(quote, first_price, second_price, first_label, second_label):
+    if not quote:
+        return None
+    first = american_implied_probability(quote.get(first_price))
+    second = american_implied_probability(quote.get(second_price))
+    total = (first or 0) + (second or 0)
+    if first is None or second is None or total <= 0:
+        return quote
+    return {
+        **quote,
+        "implied_probability": {
+            first_label: round(first, 8),
+            second_label: round(second, 8),
+        },
+        "no_vig_probability": {
+            first_label: round(first / total, 8),
+            second_label: round(second / total, 8),
+        },
+        "overround": round(total - 1.0, 8),
+        "price_format": "american",
+    }
+
+
 def extract_market(raw_game):
     bookmakers = raw_game.get("bookmakers", []) or []
     raw_home = canonical_name(raw_game.get("home_team"))
 
     spread_quotes = []
     total_quotes = []
+    reference_spreads = []
+    reference_totals = []
+
+    # A validation price must come from one named sportsbook with both sides
+    # captured at the same time. It cannot be inferred from the display
+    # consensus. Prefer market-setting books when the provider returns them,
+    # then retain the first complete two-sided quote as an auditable fallback.
+    reference_priority = {
+        "pinnacle": 0,
+        "circasports": 1,
+        "betonlineag": 2,
+        "bookmaker": 3,
+    }
 
     for book in bookmakers:
         book_key = book.get("key")
@@ -957,16 +1000,56 @@ def extract_market(raw_game):
             market_key = market.get("key")
 
             if market_key == "spreads":
-                for outcome in market.get("outcomes", []) or []:
+                outcomes = market.get("outcomes", []) or []
+                for outcome in outcomes:
                     if canonical_name(outcome.get("name")) == raw_home:
                         spread = optional_number(outcome.get("point"))
                         break
+                home_outcome = next(
+                    (row for row in outcomes if canonical_name(row.get("name")) == raw_home),
+                    None,
+                )
+                away_outcome = next(
+                    (row for row in outcomes if canonical_name(row.get("name")) != raw_home),
+                    None,
+                )
+                if home_outcome and away_outcome:
+                    home_point = optional_number(home_outcome.get("point"))
+                    away_point = optional_number(away_outcome.get("point"))
+                    home_price = optional_number(home_outcome.get("price"))
+                    away_price = optional_number(away_outcome.get("price"))
+                    if None not in (home_point, away_point, home_price, away_price) and abs(home_price) >= 100 and abs(away_price) >= 100:
+                        reference_spreads.append({
+                            "bookmaker": book_title,
+                            "bookmaker_key": book_key,
+                            "home_spread": home_point,
+                            "home_price": int(home_price),
+                            "away_spread": away_point,
+                            "away_price": int(away_price),
+                        })
 
             elif market_key == "totals":
-                for outcome in market.get("outcomes", []) or []:
+                outcomes = market.get("outcomes", []) or []
+                for outcome in outcomes:
                     if str(outcome.get("name", "")).lower() == "over":
                         total = optional_number(outcome.get("point"))
                         break
+                over = next((row for row in outcomes if str(row.get("name", "")).lower() == "over"), None)
+                under = next((row for row in outcomes if str(row.get("name", "")).lower() == "under"), None)
+                if over and under:
+                    over_total = optional_number(over.get("point"))
+                    under_total = optional_number(under.get("point"))
+                    over_price = optional_number(over.get("price"))
+                    under_price = optional_number(under.get("price"))
+                    if None not in (over_total, under_total, over_price, under_price) and abs(over_price) >= 100 and abs(under_price) >= 100:
+                        reference_totals.append({
+                            "bookmaker": book_title,
+                            "bookmaker_key": book_key,
+                            "total": over_total,
+                            "under_total": under_total,
+                            "over_price": int(over_price),
+                            "under_price": int(under_price),
+                        })
 
         if spread is not None:
             spread_quotes.append({
@@ -1013,6 +1096,23 @@ def extract_market(raw_game):
     total_books = total_consensus["books"]
     market_books = max(spread_books, total_books)
 
+    choose_reference = lambda rows: min(
+        rows,
+        key=lambda row: (
+            reference_priority.get(str(row.get("bookmaker_key") or "").lower(), 100),
+            str(row.get("bookmaker_key") or row.get("bookmaker") or ""),
+        ),
+    ) if rows else None
+
+    reference_spread = add_no_vig_baseline(
+        choose_reference(reference_spreads),
+        "home_price", "away_price", "home", "away",
+    )
+    reference_total = add_no_vig_baseline(
+        choose_reference(reference_totals),
+        "over_price", "under_price", "over", "under",
+    )
+
     return {
         "spread": spread_consensus["value"],
         "total": total_consensus["value"],
@@ -1039,6 +1139,8 @@ def extract_market(raw_game):
             }
             for quote in total_consensus["excluded"]
         ],
+        "reference_spread": reference_spread,
+        "reference_total": reference_total,
     }
 
 
@@ -1105,6 +1207,8 @@ def fetch_odds(
             "total_raw_books": market["total_raw_books"],
             "spread_outliers_removed": market["spread_outliers_removed"],
             "total_outliers_removed": market["total_outliers_removed"],
+            "reference_spread": market["reference_spread"],
+            "reference_total": market["reference_total"],
         })
 
     matched = sum(
@@ -1740,6 +1844,8 @@ def market_payload(market):
             "total_books": 0,
             "spread_outliers_removed": [],
             "total_outliers_removed": [],
+            "reference_spread": None,
+            "reference_total": None,
         }
 
     return {
@@ -1757,6 +1863,8 @@ def market_payload(market):
             market.get("total_outliers_removed", [])
             or []
         ),
+        "reference_spread": market.get("reference_spread"),
+        "reference_total": market.get("reference_total"),
     }
 
 

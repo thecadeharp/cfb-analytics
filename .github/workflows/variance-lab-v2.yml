@@ -25,8 +25,8 @@ jobs:
           python-version: "3.12"
       - name: Test Variance Lab contracts
         run: |
-          python -m py_compile scripts/validation_framework.py scripts/build_variance_context.py scripts/build_trends_lab.py scripts/build_variance_prospective_tracker.py scripts/build_rlm_monitor.py scripts/poll_free_sharp_lines.py scripts/poll_rlm_feeds.py scripts/build_public_backtest_scorecard.py
-          python -m unittest scripts/test_validation_framework.py scripts/test_variance_lab.py scripts/test_public_backtest_scorecard.py
+          python -m py_compile scripts/validation_framework.py scripts/build_variance_context.py scripts/build_trends_lab.py scripts/build_variance_prospective_tracker.py scripts/build_rlm_monitor.py scripts/poll_free_sharp_lines.py scripts/poll_rlm_feeds.py scripts/build_public_backtest_scorecard.py scripts/build_commercial_readiness.py
+          python -m unittest scripts/test_validation_framework.py scripts/test_variance_lab.py scripts/test_public_backtest_scorecard.py scripts/test_market_price_and_readiness.py
       - name: Refresh point-in-time context and systems
         env:
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
@@ -37,6 +37,7 @@ jobs:
           python scripts/build_variance_prospective_tracker.py
           python scripts/build_rlm_monitor.py
           python scripts/build_public_backtest_scorecard.py
+          python scripts/build_commercial_readiness.py
       - name: Validate generated evidence
         run: |
           python - <<'PY'
@@ -47,6 +48,7 @@ jobs:
           tracker=json.loads(Path('data/variance/prospective_tracker.json').read_text())
           rlm=json.loads(Path('data/market/rlm_monitor.json').read_text())
           backtest=json.loads(Path('data/reports/public_backtest_scorecard.json').read_text())
+          readiness=json.loads(Path('data/reports/commercial_readiness.json').read_text())
           assert lab['meta']['version']=='thi-variance-systems-lab-v2.0'
           assert context['meta']['game_count']>1000
           assert context['meta']['rankings_status']=='ready', context['meta'].get('cbb_ranking_failures')
@@ -59,12 +61,14 @@ jobs:
           assert backtest['meta']['financial_claim'] is False
           assert all(sport['status']=='not_validated' for sport in backtest['sports'].values())
           assert set(backtest['sports'])=={'cfb','cbb'}
+          assert readiness['verdict']['research_subscription']=='ready_with_guardrails'
+          assert readiness['verdict']['betting_edge_product']=='not_ready'
           PY
       - name: Publish refreshed research
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/trends_lab.json data/variance/context.json data/variance/prospective_tracker.json data/market/rlm_monitor.json data/reports/public_backtest_scorecard.json
+          git add data/trends_lab.json data/variance/context.json data/variance/prospective_tracker.json data/market/rlm_monitor.json data/reports/public_backtest_scorecard.json data/reports/commercial_readiness.json
           git diff --cached --quiet && exit 0
           git commit -m "Refresh Variance Lab evidence"
           git pull --rebase origin main
