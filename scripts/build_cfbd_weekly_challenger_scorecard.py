@@ -36,4 +36,8 @@ def build(pack: Path, settled: dict, audit: dict) -> dict:
 
 if __name__ == "__main__":
     p=argparse.ArgumentParser(); p.add_argument("pack",type=Path); p.add_argument("--settled",type=Path,default=ROOT/"data/reports/settled_results.json"); p.add_argument("--audit",type=Path,default=ROOT/"data/research/cfbd_training_pack_audit.json"); p.add_argument("--output",type=Path,default=ROOT/"data/research/cfbd_weekly_challenger_scorecard.json"); a=p.parse_args()
-    payload=build(a.pack,json.loads(a.settled.read_text()),json.loads(a.audit.read_text())); a.output.write_text(json.dumps(payload,indent=2,allow_nan=False)+"\n"); print(payload["meta"]["status"],payload["scope"])
+    payload=build(a.pack,json.loads(a.settled.read_text()),json.loads(a.audit.read_text()))
+    if a.output.exists():
+        previous=json.loads(a.output.read_text()); old=dict(previous); new=dict(payload); old_meta=dict(old.pop("meta",{}));new_meta=dict(new.pop("meta",{}));old_meta.pop("generated_at_utc",None);new_meta.pop("generated_at_utc",None)
+        if old==new and old_meta==new_meta: print(previous["meta"]["status"],previous["scope"]);raise SystemExit
+    a.output.write_text(json.dumps(payload,indent=2,allow_nan=False)+"\n"); print(payload["meta"]["status"],payload["scope"])
