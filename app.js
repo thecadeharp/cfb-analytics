@@ -2640,6 +2640,18 @@ function openMatchup(gameId) {
   enterDetailView("matchup", { gameId: String(gameId) });
 }
 
+function saveMatchupToAccount(gameId, button) {
+  const game = findGame(gameId);
+  if (!game || !window.THIAccount) return;
+  window.THIAccount.saveGame({id:String(game.game_id),game_id:String(game.game_id),sport:"cfb",away_team:game.away?.team,home_team:game.home?.team,start_date:game.start_date});
+  if (button) button.textContent = "Saved";
+}
+
+function saveTeamToAccount(teamName, sport, button) {
+  window.THIAccount?.saveTeam({id:`${sport}:${teamName}`,team:teamName,sport});
+  if (button) button.textContent = "Saved";
+}
+
 function adjustmentClass(value) {
   if (!hasValue(value)) return "adjustment-neutral";
   const number = Number(value);
@@ -3482,6 +3494,7 @@ function renderMatchup(game) {
       </div>
 
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+        <button class="thi-account-button" type="button" onclick="saveMatchupToAccount('${escapeJsString(String(game.game_id ?? ""))}',this)">Save game</button>
         <span class="status ${statusCss}">
           ${escapeHtml(displayStatus(status))}
         </span>
@@ -6582,6 +6595,7 @@ function renderDossier(team) {
         <div class="eyebrow">
           Team dossier
         </div>
+        <button class="thi-account-button" type="button" onclick="saveTeamToAccount('${escapeJsString(team.team)}','cfb',this)">Save team</button>
 
         <div class="team-title-row dossier-team-heading">
           ${teamLogoMarkup(

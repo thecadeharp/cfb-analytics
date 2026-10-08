@@ -12,6 +12,7 @@
     .thi-account-dialog h2{margin:7px 0 8px;font-size:25px;color:#fff}.thi-account-dialog p{margin:0 0 15px;color:#bac5cf;line-height:1.55;font-size:13px}
     .thi-account-dialog label{display:grid;gap:6px;color:#e9eef2;font-size:12px;font-weight:700}.thi-account-dialog input{width:100%;box-sizing:border-box;padding:12px;border:1px solid #465562;border-radius:8px;background:#0b1117;color:#fff;font:inherit}
     .thi-account-actions{display:flex;gap:9px;margin-top:14px}.thi-account-primary,.thi-account-secondary{border-radius:8px;padding:11px 14px;font:700 12px var(--mono,monospace);cursor:pointer}.thi-account-primary{border:0;background:#e0c45a;color:#14110a}.thi-account-secondary{border:1px solid #465562;background:transparent;color:#e7edf2}.thi-account-status{min-height:20px;margin-top:10px!important;color:#d8c66c!important}
+    .thi-account-library{display:grid;gap:9px;margin:15px 0}.thi-account-library section{border:1px solid #34414d;border-radius:9px;padding:10px}.thi-account-library h3{margin:0 0 6px;font:700 11px var(--mono,monospace);letter-spacing:.08em;text-transform:uppercase}.thi-account-library p{margin:0;font-size:12px}.thi-account-actions{flex-wrap:wrap}
     @media(max-width:800px){.thi-account-button{padding:7px 9px;font-size:9px}}
   `;
   document.head.appendChild(style);
@@ -20,6 +21,38 @@
   let currentUser = null;
   let resolveReady;
   const ready = new Promise(resolve => { resolveReady = resolve; });
+
+  function ownerKey() { return currentUser?.id || "anonymous"; }
+  function storageKey() { return `thi:saved-library:v1:${ownerKey()}`; }
+  function readLibrary() {
+    try { return Object.assign({teams:[],games:[],plays:[]}, JSON.parse(localStorage.getItem(storageKey()) || "{}")); }
+    catch { return {teams:[],games:[],plays:[]}; }
+  }
+  function writeLibrary(value) {
+    localStorage.setItem(storageKey(), JSON.stringify(value));
+    document.dispatchEvent(new CustomEvent("thi:library-change", {detail:value}));
+    return value;
+  }
+  function save(kind, value) {
+    if (!['teams','games','plays'].includes(kind)) throw new Error(`Unsupported library kind: ${kind}`);
+    const library=readLibrary(); const item=Object.assign({},value,{saved_at_utc:value.saved_at_utc||new Date().toISOString()});
+    const identity=String(item.id||item.game_id||item.team||item.name||JSON.stringify(item));
+    library[kind]=[item,...library[kind].filter(row=>String(row.id||row.game_id||row.team||row.name||JSON.stringify(row))!==identity)].slice(0,250);
+    return writeLibrary(library);
+  }
+  function remove(kind, identity) {
+    const library=readLibrary();
+    library[kind]=(library[kind]||[]).filter(row=>String(row.id||row.game_id||row.team||row.name||JSON.stringify(row))!==String(identity));
+    return writeLibrary(library);
+  }
+  function librarySummary() {
+    const data=readLibrary();
+    return `<div class="thi-account-library"><section><h3>Saved teams</h3><p>${data.teams.length} saved</p></section><section><h3>Saved games</h3><p>${data.games.length} saved</p></section><section><h3>Logged plays</h3><p>${data.plays.length} private entries on this device</p></section></div>`;
+  }
+  function exportLibrary() {
+    const blob=new Blob([JSON.stringify(readLibrary(),null,2)],{type:'application/json'}); const link=document.createElement('a');
+    link.href=URL.createObjectURL(blob);link.download='thi-saved-library.json';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+  }
 
   function ensureButton() {
     const header = document.querySelector(".header-inner");
@@ -52,12 +85,13 @@
     overlay.innerHTML = `<div class="thi-account-dialog">
       <div style="font:700 10px var(--mono,monospace);letter-spacing:.12em;text-transform:uppercase;color:#d8c66c">The Hammer Index</div>
       <h2>${currentUser ? "Your account" : "Create a free account"}</h2>
-      ${currentUser ? `<p>Signed in as <strong>${escapeHtml(currentUser.email || "THI member")}</strong>. Your logged plays and private notes stay connected to this account.</p><div class="thi-account-actions"><button class="thi-account-primary" data-account-market>Open Market Research</button><button class="thi-account-secondary" data-account-signout>Sign out</button><button class="thi-account-secondary" data-account-close>Close</button></div>` : `<p>Use a secure email link to sign in. Your session is saved on this device, and your Market Research plays and notes remain private.</p><form data-account-form><label>Email address<input name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label><div class="thi-account-actions"><button class="thi-account-primary" type="submit">Email my sign-in link</button><button class="thi-account-secondary" type="button" data-account-close>Continue exploring</button></div><p class="thi-account-status" role="status"></p></form>`}
+      ${currentUser ? `<p>Signed in as <strong>${escapeHtml(currentUser.email || "THI member")}</strong>. Your session stays signed in on this device.</p>${librarySummary()}<div class="thi-account-actions"><button class="thi-account-primary" data-account-market>Open Market Research</button><button class="thi-account-secondary" data-account-export>Export saved data</button><button class="thi-account-secondary" data-account-signout>Sign out</button><button class="thi-account-secondary" data-account-close>Close</button></div>` : `<p>Use a secure email link to sign in. Your session is saved on this device, and your Market Research plays and notes remain private.</p><form data-account-form><label>Email address<input name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label><div class="thi-account-actions"><button class="thi-account-primary" type="submit">Email my sign-in link</button><button class="thi-account-secondary" type="button" data-account-close>Continue exploring</button></div><p class="thi-account-status" role="status"></p></form>`}
     </div>`;
     document.body.appendChild(overlay);
     overlay.addEventListener("click", event => { if (event.target === overlay || event.target.closest("[data-account-close]")) close(); });
     overlay.querySelector("[data-account-signout]")?.addEventListener("click", async () => { await client.auth.signOut(); close(); });
     overlay.querySelector("[data-account-market]")?.addEventListener("click", () => { close(); window.switchView?.("research"); });
+    overlay.querySelector("[data-account-export]")?.addEventListener("click", exportLibrary);
     overlay.querySelector("form")?.addEventListener("submit", async event => {
       event.preventDefault();
       const email = new FormData(event.currentTarget).get("email");
@@ -80,7 +114,7 @@
     resolveReady(client);
   }
 
-  window.THIAccount = { ready, open, close, getClient: () => client, getUser: () => currentUser };
+  window.THIAccount = { ready, open, close, getClient: () => client, getUser: () => currentUser, getLibrary: readLibrary, saveTeam: value => save('teams', value), saveGame: value => save('games', value), logPlay: value => save('plays', value), remove, exportLibrary };
   ensureButton();
   if (window.supabase?.createClient) initialize();
   else {

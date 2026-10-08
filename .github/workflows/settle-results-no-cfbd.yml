@@ -54,6 +54,8 @@ jobs:
       - name: Refresh first-snapshot weekly model scorecard
         run: |
           python scripts/build_weekly_model_scorecard.py
+          python scripts/build_prediction_archive.py
+          python scripts/build_operations_readiness.py
 
       - name: Build postgame analytics
         env:
@@ -83,6 +85,8 @@ jobs:
           git add data/postgame_analytics.json
           git add data/reports/settled_results.json
           git add data/reports/weekly_model_scorecard.json
+          git add data/reports/prediction_archive.json
+          git add data/reports/operations_readiness.json
           git add data/reports/settled_snapshot_rows.csv
           git add data/reports/signal_report.json
           git add data/reports/commercial_readiness.json

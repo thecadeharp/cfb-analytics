@@ -715,6 +715,7 @@
     const styleCell = value => value == null ? "Coverage unavailable" : pct(value);
     panel.innerHTML = `
       <button class="cbb-detail-close cbb-game-back" type="button" data-cbb-close>← Back to projections</button>
+      <button class="thi-account-button" type="button" data-cbb-save-game>Save game</button>
       <div class="cbb-kicker">THI CBB matchup analysis</div>
       <div class="cbb-matchup-page-title"><div>${teamLogo(game.away,"large")}<span>${escapeHtml(game.away?.team)}</span></div><b>${matchupWord(game)}</b><div>${teamLogo(game.home,"large")}<span>${escapeHtml(game.home?.team)}</span></div></div>
       <div class="cbb-detail-sub">${escapeHtml(date)} · ${escapeHtml(game.venue?.name || (game.neutral_site ? "Neutral site" : "Venue TBD"))} · ${escapeHtml(game.broadcasts?.map(item => item.network || item).filter(Boolean).join(", ") || "TV TBD")}${game.neutral_site ? ' · <strong class="cbb-neutral-label">NEUTRAL FLOOR · NO HOME-COURT INPUT</strong>' : ""}</div>
@@ -791,6 +792,10 @@
     detail.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
     panel.scrollTop = 0;
+    panel.querySelector("[data-cbb-save-game]")?.addEventListener("click", event => {
+      window.THIAccount?.saveGame({id:String(game.game_id),game_id:String(game.game_id),sport:"cbb",away_team:game.away?.team,home_team:game.home?.team,start_date:game.start_date});
+      event.currentTarget.textContent="Saved";
+    });
     panel.querySelector("[data-cbb-close]")?.focus();
   }
 
@@ -1410,6 +1415,7 @@
     const recordText = record => record ? `${integer(record.wins)}–${integer(record.losses)}` : "0–0";
     panel.innerHTML = `
       <button class="cbb-detail-close cbb-game-back" type="button" data-cbb-close>← Back to teams</button>
+      <button class="thi-account-button" type="button" data-cbb-save-team>Save team</button>
       <div class="cbb-kicker">THI CBB team profile</div>
       <div class="cbb-detail-team-title">${teamLogo({team_id:prior.team_id,team:prior.team},"large")}<h2 class="cbb-detail-title" id="cbb-detail-title">${escapeHtml(profile?.display_name || prior.team)}</h2></div>
       <div class="cbb-detail-sub">${escapeHtml(prior.conference?.name || "Independent")} · 2027 THI team dossier</div>
@@ -1499,6 +1505,10 @@
     detail.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
     panel.scrollTop = 0;
+    panel.querySelector("[data-cbb-save-team]")?.addEventListener("click", event => {
+      window.THIAccount?.saveTeam({id:`cbb:${prior.team_id}`,team:profile?.display_name || prior.team,sport:"cbb",team_id:prior.team_id});
+      event.currentTarget.textContent="Saved";
+    });
     panel.querySelector("[data-cbb-close]")?.focus();
   }
 

@@ -18,6 +18,7 @@ def miles(a,b):
     return round(3958.8*2*math.asin(math.sqrt(h)))
 def build(board:dict[str,Any], geocodes:dict[str,Any], availability:dict[str,Any])->dict[str,Any]:
     games=board.get("games",[]); venue_counts=defaultdict(Counter)
+    geocodes=geocodes.get("venues",geocodes)
     for g in games:
       if not g.get("neutral_site") and (g.get("venue") or {}).get("name"): venue_counts[str((g.get("home") or {}).get("team_id"))][(g["venue"]["name"],g["venue"].get("city"),g["venue"].get("state"))]+=1
     campuses={t:c.most_common(1)[0][0] for t,c in venue_counts.items() if c}

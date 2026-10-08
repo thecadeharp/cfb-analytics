@@ -71,6 +71,8 @@ jobs:
             scripts/build_cbb_game_day_readiness.py \
             scripts/build_cbb_operations_context.py \
             scripts/build_cbb_platform_health.py \
+            scripts/build_prediction_archive.py \
+            scripts/build_operations_readiness.py \
             scripts/run_cbb_opening_night_rehearsal.py \
             scripts/refresh_cbb_markets.py \
             scripts/validation_framework.py \
@@ -94,6 +96,7 @@ jobs:
             scripts/test_cbb_platform_health.py \
             scripts/test_cbb_opening_night_rehearsal.py \
             scripts/test_cbb_release_foundations.py \
+            scripts/test_pregame_completion.py \
             scripts/test_refresh_cbb_markets.py \
             scripts/test_validation_framework.py \
             scripts/test_variance_lab.py
@@ -125,6 +128,8 @@ jobs:
           python scripts/build_trends_lab.py
           python scripts/build_variance_prospective_tracker.py
           python scripts/build_rlm_monitor.py
+          python scripts/build_prediction_archive.py
+          python scripts/build_operations_readiness.py
 
       - name: Validate the coordinated release
         run: |
@@ -244,6 +249,9 @@ jobs:
           git add \
             data/variance/prospective_tracker.json \
             data/market/rlm_monitor.json
+          git add \
+            data/reports/prediction_archive.json \
+            data/reports/operations_readiness.json
           git diff --cached --quiet && exit 0
           git commit -m "Refresh coordinated CBB platform data"
           git pull --rebase origin main
