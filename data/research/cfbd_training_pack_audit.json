@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "generated_at": "2026-10-08T21:59:19.604231+00:00",
+    "status": "PASS_WITH_WARNINGS",
+    "source": "licensed CFBD Model Training Pack weekly drop",
+    "raw_data_committed": false,
+    "raw_data_policy": "Keep purchased rows in gitignored local storage; publish aggregate diagnostics and independently derived outputs only.",
+    "input_sha256": "80af0b026f8de2aa669a2f84609df765ebab722e3ed1e8d36aa07fe61044d96d",
+    "model_usage": "CHALLENGER_AND_DATA_QUALITY_ONLY",
+    "production_model_a_changed": false,
+    "market_feature_rule": "The opening spread is retained only for evaluation and line-movement comparison; it is excluded from predictive features."
+  },
+  "scope": {
+    "seasons": [
+      2026
+    ],
+    "weeks": [
+      6
+    ],
+    "rows": 57,
+    "columns": 83,
+    "numeric_feature_columns_including_identifiers": 75,
+    "matched_games": 57,
+    "projection_metrics_through_week": 5
+  },
+  "checks": {
+    "required_columns_present": true,
+    "rows_present": true,
+    "unique_game_ids": true,
+    "no_blank_cells": true,
+    "all_numeric_values_finite": true,
+    "all_games_on_thi_board": true,
+    "matchup_identities_match": true,
+    "conference_labels_match": true,
+    "neutral_site_flags_match": true,
+    "pregame_feature_timing_is_safe": true,
+    "opening_spread_is_evaluation_only": true
+  },
+  "advisories": {
+    "start_times_match_current_board": false
+  },
+  "diagnostics": {
+    "missing_required_columns": [],
+    "duplicate_game_ids": [],
+    "blank_cells": 0,
+    "invalid_numeric_cells": [],
+    "schedule_missing_game_ids": [],
+    "matchup_mismatches": [],
+    "conference_mismatches": [],
+    "neutral_site_mismatch_game_ids": [],
+    "start_time_mismatches": [
+      {
+        "game_id": "401856808",
+        "pack": "2026-10-11 02:30:00",
+        "board": "2026-10-11T01:30:00.000Z"
+      }
+    ],
+    "safe_name_normalizations": [
+      {
+        "game_id": "401864519",
+        "side": "home",
+        "pack": "San Jos\u00e9 State",
+        "board": "San Jose State"
+      }
+    ]
+  },
+  "opening_to_current_market": {
+    "paired_games": 54,
+    "unpaired_games": 3,
+    "median_signed_move_points": 0.0,
+    "median_absolute_move_points": 0.5,
+    "p90_absolute_move_points": 2.0,
+    "maximum_absolute_move_points": 4.0
+  }
+}
