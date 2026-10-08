@@ -204,8 +204,8 @@ def main():
     closing_by_game = {}
     for row in closings:
         key = game_key(row)
-        # The closing capture script intentionally records each game once.
-        # If duplicates ever exist, keep the capture closest to kickoff.
+        # Legacy line-only rows may have one immutable price-upgrade row.
+        # Keep the capture closest to kickoff for the CLV comparison.
         current = closing_by_game.get(key)
         if current is None:
             closing_by_game[key] = row

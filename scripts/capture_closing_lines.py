@@ -7,7 +7,7 @@ Near-kickoff market capture for prospective CLV evaluation.
 Runs after build_projections.py refreshes the current market using cached
 schedule mode. This script does not call CFBD or any API itself.
 
-It captures one near-kickoff market line per TRACKING-ELIGIBLE game:
+It captures one price-complete near-kickoff market line per TRACKING-ELIGIBLE game:
 - up to 90 minutes before scheduled kickoff
 - up to 10 minutes after scheduled kickoff
 
@@ -15,7 +15,9 @@ Output:
     data/snapshots/closing_lines.jsonl
     data/snapshots/latest_closing_capture.json
 
-FCS fallback and any tracking_eligible == false games are excluded from the
+Legacy line-only rows remain immutable. If a game has an old row without paired
+prices and is still inside the capture window, one labeled price-upgrade row is
+appended. FCS fallback and any tracking_eligible == false games are excluded from the
 official closing-line ledger so they cannot enter CLV / Signal Confidence data.
 """
 
@@ -78,16 +80,18 @@ def game_key(game):
     return f"{away}@{home}|{start}"
 
 
-def closing_id(game):
-    raw = "|".join([MODEL_VERSION, game_key(game), "closing-line"])
+def closing_id(game, price_contract=False):
+    version = "closing-line-priced-v1" if price_contract else "closing-line"
+    raw = "|".join([MODEL_VERSION, game_key(game), version])
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:24]
 
 
-def load_existing_game_keys():
-    if not CLOSING_LEDGER_PATH.exists():
-        return set()
+def load_existing_game_keys(path=CLOSING_LEDGER_PATH):
+    if not path.exists():
+        return set(), set()
     keys = set()
-    with CLOSING_LEDGER_PATH.open("r", encoding="utf-8") as f:
+    price_complete_keys = set()
+    with path.open("r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -96,7 +100,10 @@ def load_existing_game_keys():
             key = row.get("game_key")
             if key:
                 keys.add(str(key))
-    return keys
+                reference = (row.get("closing_market") or {}).get("reference_spread") or {}
+                if reference.get("home_price") is not None and reference.get("away_price") is not None:
+                    price_complete_keys.add(str(key))
+    return keys, price_complete_keys
 
 
 def main():
@@ -117,7 +124,7 @@ def main():
         raise SystemExit("No projections found.")
 
     now = utc_now()
-    existing_keys = load_existing_game_keys()
+    existing_keys, price_complete_keys = load_existing_game_keys()
     rows = []
     excluded_untracked = 0
 
@@ -137,7 +144,7 @@ def main():
             continue
 
         key = game_key(game)
-        if key in existing_keys:
+        if key in price_complete_keys:
             continue
 
         market = game.get("market") or {}
@@ -148,15 +155,27 @@ def main():
         if market_home_spread is None:
             continue
 
+        reference_spread = market.get("reference_spread") or {}
+        price_contract = (
+            reference_spread.get("home_price") is not None
+            and reference_spread.get("away_price") is not None
+        )
+        if key in existing_keys and not price_contract:
+            continue
+
         minutes_to_kick = round((kickoff - now).total_seconds() / 60.0, 1)
 
         row = {
-            "closing_id": closing_id(game),
+            "closing_id": closing_id(game, price_contract=price_contract),
             "game_key": key,
             "captured_at_utc": now.isoformat(),
             "scheduled_kickoff_utc": kickoff.isoformat(),
             "minutes_to_kickoff": minutes_to_kick,
-            "capture_type": "near_kickoff_closing_proxy",
+            "capture_type": (
+                "near_kickoff_closing_proxy_price_upgrade"
+                if key in existing_keys
+                else "near_kickoff_closing_proxy"
+            ),
             "model_version": MODEL_VERSION,
             "projection_source_generated": meta.get("generated"),
             "model_type": game.get("model_type") or "fbs_full_model",
@@ -189,6 +208,8 @@ def main():
 
         rows.append(row)
         existing_keys.add(key)
+        if price_contract:
+            price_complete_keys.add(key)
 
     CLOSING_LEDGER_PATH.parent.mkdir(parents=True, exist_ok=True)
 

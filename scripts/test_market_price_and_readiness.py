@@ -1,6 +1,9 @@
 import sys
+import json
+import tempfile
 import types
 import unittest
+from pathlib import Path
 
 # The projection builder imports the HTTP client used only by live refreshes.
 # Unit tests exercise pure market parsing and do not make network calls.
@@ -13,6 +16,7 @@ if "requests" not in sys.modules:
 from scripts.build_cbb_data_foundation import market_summary
 from scripts.build_commercial_readiness import build
 from scripts.build_projections import extract_market
+from scripts.capture_closing_lines import load_existing_game_keys
 
 
 class PriceContractTest(unittest.TestCase):
@@ -43,6 +47,18 @@ class PriceContractTest(unittest.TestCase):
         self.assertEqual(market["reference_moneyline"]["validation_scope"], "moneyline_only")
         self.assertAlmostEqual(sum(market["reference_moneyline"]["no_vig_probability"].values()), 1.0)
         self.assertEqual(market["spread_price_status"], "unavailable_from_provider_contract")
+
+    def test_legacy_closing_is_eligible_for_one_price_upgrade(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "closings.jsonl"
+            rows = [
+                {"game_key": "old", "closing_market": {"home_spread": -3}},
+                {"game_key": "priced", "closing_market": {"reference_spread": {"home_price": -105, "away_price": -115}}},
+            ]
+            path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+            existing, complete = load_existing_game_keys(path)
+            self.assertEqual(existing, {"old", "priced"})
+            self.assertEqual(complete, {"priced"})
 
 
 class ReadinessTest(unittest.TestCase):
