@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: weather-engine-v1
+  group: thi-data-writer
   cancel-in-progress: false
 
 jobs:
@@ -22,6 +22,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
 
       - name: Set up Python

@@ -27,6 +27,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Verify scheduled writer safety
+        run: python -m unittest scripts/test_scheduled_writer_workflows.py -v
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip

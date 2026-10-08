@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: refresh-signal-report
+  group: thi-data-writer
   cancel-in-progress: false
 
 jobs:
@@ -21,6 +21,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Set up Python
         uses: actions/setup-python@v5
