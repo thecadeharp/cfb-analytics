@@ -1,6 +1,6 @@
 {
   "report_version": "signal-system-v1",
-  "generated_at_utc": "2026-10-07T23:31:35.519664+00:00",
+  "generated_at_utc": "2026-10-08T01:25:23.302071+00:00",
   "model_scope": "Prospective Model A accountability layer",
   "signal_system": {
     "order": [
@@ -71,7 +71,7 @@
         "minimum_beat_close_pct": 55.0
       }
     },
-    "meaning": "Signal Confidence measures the prospective evidence supporting each signal tier using sample size, ATS performance, CLV and beat-close rate."
+    "meaning": "Signal Confidence measures the prospective evidence supporting each signal tier. Promotion requires a recorded per-play no-vig baseline, exact testing, Holm correction, outlier robustness, positive CLV and stable rolling results."
   },
   "signals": {
     "ALIGNED": {
@@ -99,7 +99,25 @@
         "same_as_close": 12,
         "beat_close_pct_ex_pushes": 46.0
       },
-      "confidence": "DEVELOPING"
+      "confidence": "DEVELOPING",
+      "validation": {
+        "passed": false,
+        "checks": {
+          "recorded_no_vig_baseline": false,
+          "exact_test": false,
+          "multiple_comparison_control": false,
+          "bomb_dependency": false
+        },
+        "adjusted_p_value": 1.0,
+        "bomb_dependency": {
+          "passed": false,
+          "removed": 2,
+          "remaining_profit": -8.0,
+          "original_profit": -6.0
+        },
+        "label_rule": "All four checks must pass before THI displays Validated.",
+        "baseline_note": "Both sides' recorded prices are not present in the current prospective ledger; this tier cannot be promoted from a flat baseline."
+      }
     },
     "SMALL EDGE": {
       "signal": "SMALL EDGE",
@@ -126,7 +144,25 @@
         "same_as_close": 5,
         "beat_close_pct_ex_pushes": 53.7
       },
-      "confidence": "DEVELOPING"
+      "confidence": "DEVELOPING",
+      "validation": {
+        "passed": false,
+        "checks": {
+          "recorded_no_vig_baseline": false,
+          "exact_test": false,
+          "multiple_comparison_control": false,
+          "bomb_dependency": false
+        },
+        "adjusted_p_value": 1.0,
+        "bomb_dependency": {
+          "passed": false,
+          "removed": 2,
+          "remaining_profit": -9.6,
+          "original_profit": -7.6
+        },
+        "label_rule": "All four checks must pass before THI displays Validated.",
+        "baseline_note": "Both sides' recorded prices are not present in the current prospective ledger; this tier cannot be promoted from a flat baseline."
+      }
     },
     "PLAY": {
       "signal": "PLAY",
@@ -153,7 +189,25 @@
         "same_as_close": 7,
         "beat_close_pct_ex_pushes": 33.3
       },
-      "confidence": "DEVELOPING"
+      "confidence": "DEVELOPING",
+      "validation": {
+        "passed": false,
+        "checks": {
+          "recorded_no_vig_baseline": false,
+          "exact_test": false,
+          "multiple_comparison_control": false,
+          "bomb_dependency": false
+        },
+        "adjusted_p_value": 1.0,
+        "bomb_dependency": {
+          "passed": false,
+          "removed": 1,
+          "remaining_profit": -5.5,
+          "original_profit": -4.5
+        },
+        "label_rule": "All four checks must pass before THI displays Validated.",
+        "baseline_note": "Both sides' recorded prices are not present in the current prospective ledger; this tier cannot be promoted from a flat baseline."
+      }
     },
     "MATERIAL DISAGREEMENT": {
       "signal": "MATERIAL DISAGREEMENT",
@@ -180,7 +234,25 @@
         "same_as_close": 4,
         "beat_close_pct_ex_pushes": 60.0
       },
-      "confidence": "DEVELOPING"
+      "confidence": "DEVELOPING",
+      "validation": {
+        "passed": false,
+        "checks": {
+          "recorded_no_vig_baseline": false,
+          "exact_test": false,
+          "multiple_comparison_control": false,
+          "bomb_dependency": true
+        },
+        "adjusted_p_value": 0.473118,
+        "bomb_dependency": {
+          "passed": true,
+          "removed": 1,
+          "remaining_profit": 5.3,
+          "original_profit": 6.3
+        },
+        "label_rule": "All four checks must pass before THI displays Validated.",
+        "baseline_note": "Both sides' recorded prices are not present in the current prospective ledger; this tier cannot be promoted from a flat baseline."
+      }
     },
     "OUTLIER": {
       "signal": "OUTLIER",
@@ -207,7 +279,25 @@
         "same_as_close": 1,
         "beat_close_pct_ex_pushes": 66.7
       },
-      "confidence": "DEVELOPING"
+      "confidence": "DEVELOPING",
+      "validation": {
+        "passed": false,
+        "checks": {
+          "recorded_no_vig_baseline": false,
+          "exact_test": false,
+          "multiple_comparison_control": false,
+          "bomb_dependency": false
+        },
+        "adjusted_p_value": 1.0,
+        "bomb_dependency": {
+          "passed": false,
+          "removed": 1,
+          "remaining_profit": -0.5,
+          "original_profit": 0.5
+        },
+        "label_rule": "All four checks must pass before THI displays Validated.",
+        "baseline_note": "Both sides' recorded prices are not present in the current prospective ledger; this tier cannot be promoted from a flat baseline."
+      }
     }
   },
   "source_status": {
