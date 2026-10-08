@@ -210,7 +210,9 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
 .cbb-projection-row:hover { background: rgba(87,160,132,.07); }
 .cbb-date-row td { padding: 13px 16px; border-bottom: 1px solid #705e20; background: #302b18; color: #ead47b; font: 800 11px var(--mono); letter-spacing: .04em; text-transform: uppercase; }
 .cbb-matchup-team { display: grid; grid-template-columns: 24px minmax(0,1fr) auto; align-items: center; gap: 7px; min-height: 27px; }
-.cbb-matchup-team strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cbb-matchup-name { display: flex; min-width: 0; align-items: baseline; gap: 6px; }
+.cbb-matchup-name strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cbb-matchup-name small { flex: 0 0 auto; color: var(--muted); font: 600 9px var(--mono); }
 .cbb-matchup-team > span:last-child { font: 800 12px var(--mono); }
 .cbb-watch-score { display: inline-flex; min-width: 55px; justify-content: center; padding: 9px 8px; border: 1px solid #397e64; border-radius: 7px; background: #123f35; color: #83ddbc; font: 800 18px var(--mono); }
 .cbb-edge-value { color: #355f91; font: 800 16px var(--mono); }
