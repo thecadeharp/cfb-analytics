@@ -1,14 +1,26 @@
 {
   "meta": {
-    "version": "thi-rlm-monitor-v1.0",
-    "generated_at_utc": "2026-10-07T17:26:39.117740Z",
+    "version": "thi-rlm-monitor-v1.1",
+    "generated_at_utc": "2026-10-08T00:09:54.749973Z",
     "status": "source_pending",
     "alert_count": 0,
+    "qualified_event_count": 0,
+    "sharp_book_policy": {
+      "primary": "Pinnacle",
+      "fallback": "BetOnline",
+      "rejected_as_sharp_reference": [
+        "DraftKings",
+        "FanDuel",
+        "Caesars",
+        "BetMGM"
+      ]
+    },
     "minimum_ticket_pct": 65,
     "minimum_move_points": 0.5,
     "requirements": [
       "Ticket percentage and side from a licensed splits source",
       "Opening and current spread from the same named sharp book",
+      "Pinnacle is required when present; BetOnline is used only when Pinnacle is absent",
       "Snapshots captured no more than five minutes apart",
       "No alert when either input is absent"
     ]

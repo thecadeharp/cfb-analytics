@@ -52,7 +52,7 @@ jobs:
           assert set(lab['sports']['cfb']['sections'])=={'verified','developing','failed_hypothesis','source_pending'}
           assert tracker['meta']['version']=='thi-variance-prospective-v1.1'
           assert 'summary' in tracker
-          assert rlm['meta']['version']=='thi-rlm-monitor-v1.0'
+          assert rlm['meta']['version']=='thi-rlm-monitor-v1.1'
           PY
       - name: Publish refreshed research
         run: |

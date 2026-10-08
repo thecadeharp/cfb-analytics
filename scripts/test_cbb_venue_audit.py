@@ -17,6 +17,20 @@ class CbbVenueAuditTests(unittest.TestCase):
         self.assertEqual(audit["summary"]["official_overrides"], 1)
         self.assertEqual(audit["games"][0]["home_court_points_required"], 0.0)
 
+    def test_missing_neutral_venue_stays_safe_without_blocking_refresh(self):
+        board = {"games": [{
+            "game_id": 3,
+            "neutral_site": True,
+            "home": {"team_id": 2, "team": "B"},
+            "away": {"team_id": 4, "team": "D"},
+            "venue": {},
+        }]}
+        audit = build_audit(board, {"games": {}})
+        self.assertEqual(audit["meta"]["status"], "healthy")
+        self.assertEqual(audit["summary"]["provider_neutral_venue_pending"], 1)
+        self.assertEqual(audit["summary"]["unresolved_reviews"], 0)
+        self.assertEqual(audit["games"][0]["home_court_points_required"], 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()

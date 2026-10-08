@@ -68,10 +68,10 @@ def build_audit(raw: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any
         missing = not str(resolved_venue.get("name") or "").strip() or not str(resolved_venue.get("city") or "").strip()
         if override:
             state = "official_override_applied"
-        elif missing:
-            state = "venue_review_required"
         elif participant_campus_match:
             state = "provider_neutral_campus_venue_review"
+        elif missing:
+            state = "provider_neutral_venue_pending"
         else:
             state = "provider_neutral_flag"
         rows.append({
@@ -89,7 +89,7 @@ def build_audit(raw: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any
             "home_court_points_required": 0.0,
         })
     counts = Counter(row["audit_state"] for row in rows)
-    unresolved = counts["venue_review_required"] + counts["provider_neutral_campus_venue_review"]
+    unresolved = counts["provider_neutral_campus_venue_review"]
     return {
         "meta": {
             "version": VERSION,
@@ -101,6 +101,7 @@ def build_audit(raw: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any
             "neutral_games": len(rows),
             "official_overrides": counts["official_override_applied"],
             "provider_neutral_flags": counts["provider_neutral_flag"],
+            "provider_neutral_venue_pending": counts["provider_neutral_venue_pending"],
             "unresolved_reviews": unresolved,
         },
         "games": rows,
