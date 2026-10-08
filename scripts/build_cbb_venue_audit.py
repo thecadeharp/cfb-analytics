@@ -20,6 +20,8 @@ def apply_overrides(board: dict[str, Any], overrides: dict[str, Any]) -> dict[st
         game = dict(source)
         override = rows.get(str(game.get("game_id")))
         if override:
+            if override.get("exclude") is True:
+                continue
             if "neutral_site" in override:
                 game["neutral_site"] = bool(override["neutral_site"])
             if override.get("venue"):

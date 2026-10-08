@@ -31,6 +31,21 @@ class CbbVenueAuditTests(unittest.TestCase):
         self.assertEqual(audit["summary"]["unresolved_reviews"], 0)
         self.assertEqual(audit["games"][0]["home_court_points_required"], 0.0)
 
+    def test_official_schedules_can_exclude_phantom_provider_event(self):
+        board = {"games": [{
+            "game_id": 4,
+            "neutral_site": True,
+            "home": {"team_id": 2, "team": "B"},
+            "away": {"team_id": 4, "team": "D"},
+            "venue": {"name": "B Arena", "city": "B", "state": "BB"},
+        }]}
+        overrides = {"games": {"4": {"exclude": True, "verification": "official_schedules_no_matching_event"}}}
+        resolved = apply_overrides(board, overrides)
+        self.assertEqual(resolved["games"], [])
+        audit = build_audit(board, overrides)
+        self.assertEqual(audit["meta"]["status"], "healthy")
+        self.assertEqual(audit["summary"]["neutral_games"], 0)
+
 
 if __name__ == "__main__":
     unittest.main()
