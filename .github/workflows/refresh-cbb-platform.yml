@@ -57,6 +57,7 @@ jobs:
         run: |
           python -m py_compile \
             scripts/build_cbb_data_foundation.py \
+            scripts/enrich_cbb_schedule.py \
             scripts/build_cbb_player_research.py \
             scripts/build_cbb_walk_forward_model.py \
             scripts/build_cbb_home_court.py \
@@ -82,6 +83,7 @@ jobs:
             scripts/build_rlm_monitor.py
           python -m unittest \
             scripts/test_cbb_data_foundation.py \
+            scripts/test_enrich_cbb_schedule.py \
             scripts/test_cbb_player_research.py \
             scripts/test_cbb_walk_forward_model.py \
             scripts/test_cbb_home_court.py \
@@ -112,6 +114,7 @@ jobs:
           CBB_PLAYER_ROSTER_SEASON: ${{ inputs.season || '2027' }}
         run: |
           python scripts/build_cbb_data_foundation.py --output-dir data/cbb
+          python scripts/enrich_cbb_schedule.py
           python scripts/build_cbb_player_research.py
           python scripts/audit_cbb_roster_integrity.py
           python scripts/build_cbb_walk_forward_model.py
