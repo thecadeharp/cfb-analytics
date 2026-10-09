@@ -18,6 +18,10 @@ assert(football.includes('sportsbookGrid(game, bookLines)'));
 assert(basketball.includes('cbbOddsGrid(game, marketBooks)'));
 assert(football.includes('thi-book-badge'));
 assert(basketball.includes('thi-book-badge'));
+assert(football.includes('novig: ["NVG", "Novig"]'));
+assert(football.includes('prophetx: ["PX", "ProphetX"]'));
+assert(football.includes('["lowvig", "mybookieag"]'));
+assert(basketball.includes('["lowvig","mybookieag"]'));
 assert(!football.includes('>Save game</button>'));
 assert(!basketball.includes('>Save game</button>'));
 

@@ -3747,8 +3747,8 @@ function sportsbookBadge(book) {
     pinnacle: ["PIN", "Pinnacle"], betonlineag: ["BOL", "BetOnline"], betonline: ["BOL", "BetOnline"],
     draftkings: ["DK", "DraftKings"], fanduel: ["FD", "FanDuel"], betmgm: ["MGM", "BetMGM"],
     betrivers: ["BR", "BetRivers"], caesars: ["CZR", "Caesars"], fanatics: ["FAN", "Fanatics"],
-    bet365: ["365", "bet365"], hardrockbet: ["HR", "Hard Rock Bet"], lowvig: ["LV", "LowVig"],
-    bovada: ["BOV", "Bovada"], mybookieag: ["MYB", "MyBookie"], betus: ["BUS", "BetUS"], bookmaker: ["BKR", "Bookmaker"]
+    bet365: ["365", "bet365"], hardrockbet: ["HR", "Hard Rock Bet"],
+    bovada: ["BOV", "Bovada"], novig: ["NVG", "Novig"], prophetx: ["PX", "ProphetX"], bookmaker: ["BKR", "Bookmaker"]
   };
   const brand = brands[key] || [String(book?.bookmaker || book?.provider || "BOOK").slice(0, 4).toUpperCase(), book?.bookmaker || book?.provider || "Sportsbook"];
   return `<span class="thi-book-badge thi-book-${escapeHtml(key)}" title="${escapeHtml(brand[1])}" aria-label="${escapeHtml(brand[1])}">${escapeHtml(brand[0])}</span>`;
@@ -3760,6 +3760,8 @@ function bestAmericanPrice(bookLines, side) {
 }
 
 function sportsbookGrid(game, bookLines) {
+  const excluded = new Set(["lowvig", "mybookieag"]);
+  bookLines = bookLines.filter(book => !excluded.has(String(book?.bookmaker_key || book?.provider || "").toLowerCase()));
   if (!bookLines.length) return `<div class="sample-warning" style="margin-top:14px">Sportsbook prices will appear here after the next market refresh.</div>`;
   const awayBest = bestAmericanPrice(bookLines, "away");
   const homeBest = bestAmericanPrice(bookLines, "home");
@@ -3786,7 +3788,7 @@ function marketMovementMarkup(game) {
   const reference = current.reference_spread ?? {};
   const total = current.reference_total ?? {};
   const bookLines = Array.isArray(current.book_lines) ? current.book_lines.slice().sort((a,b) => {
-    const priority = {pinnacle:0,circasports:1,betonlineag:2,bookmaker:3};
+    const priority = {pinnacle:0,circasports:1,betonlineag:2,bookmaker:3,novig:4,prophetx:5};
     return (priority[a.bookmaker_key] ?? 50) - (priority[b.bookmaker_key] ?? 50);
   }) : [];
   const rows = snapshots.slice(-24).reverse().map((snapshot, index) => {

@@ -47,6 +47,10 @@ METRICS_PATH = "data/cfb_metrics.json"
 HFA_PATH = "data/hfa_2026.json"
 SCHEDULE_PATH = "data/schedule.json"
 ODDS_PATH = "data/odds.json"
+ODDS_SCREEN_BOOKMAKERS = (
+    "betonlineag,draftkings,fanduel,fanatics,betmgm,betrivers,"
+    "williamhill_us,bovada,novig,prophetx"
+)
 PROJECTIONS_PATH = "data/projections.json"
 
 MAX_MATCHUP_ADJUSTMENT = 3.0
@@ -449,7 +453,9 @@ def odds_get():
             f"{ODDS_BASE}/sports/americanfootball_ncaaf/odds",
             params={
                 "apiKey": ODDS_API_KEY,
-                "regions": "us",
+                # Ten explicit books cost the same as one region while allowing
+                # THI to include the Novig and ProphetX exchange markets.
+                "bookmakers": ODDS_SCREEN_BOOKMAKERS,
                 "markets": "spreads,totals",
                 "oddsFormat": "american",
                 "dateFormat": "iso",

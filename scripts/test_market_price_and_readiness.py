@@ -15,11 +15,19 @@ if "requests" not in sys.modules:
 
 from scripts.build_cbb_data_foundation import market_summary
 from scripts.build_commercial_readiness import build
-from scripts.build_projections import extract_market
+from scripts.build_projections import ODDS_SCREEN_BOOKMAKERS, extract_market
 from scripts.capture_closing_lines import load_existing_game_keys
 
 
 class PriceContractTest(unittest.TestCase):
+    def test_odds_screen_uses_requested_exchange_books_at_one_region_cost(self):
+        books = ODDS_SCREEN_BOOKMAKERS.split(",")
+        self.assertEqual(len(books), 10)
+        self.assertIn("novig", books)
+        self.assertIn("prophetx", books)
+        self.assertNotIn("lowvig", books)
+        self.assertNotIn("mybookieag", books)
+
     def test_cfb_reference_quote_is_two_sided_and_prefers_sharp_book(self):
         raw = {
             "home_team": "Home",

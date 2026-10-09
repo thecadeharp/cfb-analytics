@@ -661,13 +661,15 @@
     const brands = {
       pinnacle:["PIN","Pinnacle"],betonlineag:["BOL","BetOnline"],betonline:["BOL","BetOnline"],draftkings:["DK","DraftKings"],
       fanduel:["FD","FanDuel"],betmgm:["MGM","BetMGM"],betrivers:["BR","BetRivers"],caesars:["CZR","Caesars"],
-      fanatics:["FAN","Fanatics"],bet365:["365","bet365"],hardrockbet:["HR","Hard Rock Bet"],lowvig:["LV","LowVig"]
+      fanatics:["FAN","Fanatics"],bet365:["365","bet365"],hardrockbet:["HR","Hard Rock Bet"],novig:["NVG","Novig"],prophetx:["PX","ProphetX"]
     };
     const brand = brands[key] || [String(book?.provider || book?.bookmaker || "BOOK").slice(0,4).toUpperCase(),book?.provider || book?.bookmaker || "Sportsbook"];
     return `<span class="thi-book-badge thi-book-${escapeHtml(key)}" title="${escapeHtml(brand[1])}" aria-label="${escapeHtml(brand[1])}">${escapeHtml(brand[0])}</span>`;
   }
 
   function cbbOddsGrid(game, books) {
+    const excluded = new Set(["lowvig","mybookieag"]);
+    books = books.filter(book => !excluded.has(String(book?.bookmaker_key || book?.provider || "").toLowerCase()));
     if (!books.length) return `<div class="cbb-coverage-note">Sportsbook prices will appear here when CBB markets are posted.</div>`;
     const normalized = books.map(book => {
       const spread = book.spread && typeof book.spread === "object" ? book.spread : {};
