@@ -159,7 +159,80 @@ def cbb_result(row: dict) -> str:
     return "win" if edge * outcome > 0 else "loss"
 
 
-def cbb_scorecard(predictions_path: Path, card_path: Path) -> dict:
+def prior_season_rankings(history_dir: Path, seasons: set[int]) -> dict[int, dict[str, int]]:
+    """Load only ratings that were available before each evaluated season began."""
+    rankings: dict[int, dict[str, int]] = {}
+    for season in sorted(seasons):
+        path = history_dir / f"season_{season - 1}.json.gz"
+        if not path.exists():
+            rankings[season] = {}
+            continue
+        with gzip.open(path, "rt") as handle:
+            payload = json.load(handle)
+        rankings[season] = {
+            str(team["team_id"]): int(team["adjusted_net_rank"])
+            for team in payload.get("season_end_teams", [])
+            if team.get("team_id") is not None and team.get("adjusted_net_rank") is not None
+        }
+    return rankings
+
+
+def cbb_quality_sensitivity(rows: list[dict], history_dir: Path) -> dict:
+    """Test whether excluding weaker teams improves the predeclared >5-point tier."""
+    rankings = prior_season_rankings(history_dir, {int(row["season"]) for row in rows})
+    edge = lambda row: abs(float(row["projected_home_margin"]) + float(row["market_home_spread"]))
+
+    def prior_rank(row: dict, side: str) -> int | None:
+        return rankings.get(int(row["season"]), {}).get(str(row.get(f"{side}_team_id")))
+
+    def cohort(max_rank: int) -> list[dict]:
+        selected = []
+        for row in rows:
+            home_rank = prior_rank(row, "home")
+            away_rank = prior_rank(row, "away")
+            if home_rank is not None and away_rank is not None and max(home_rank, away_rank) <= max_rank:
+                selected.append(row)
+        return selected
+
+    comparisons = []
+    for max_rank in (300, 200, 100):
+        selected = cohort(max_rank)
+        overall = summarize(selected, lambda row: edge(row) > 5, cbb_result)
+        yearly = [
+            {
+                "season": season,
+                **summarize(
+                    [row for row in selected if int(row["season"]) == season],
+                    lambda row: edge(row) > 5,
+                    cbb_result,
+                ),
+            }
+            for season in (2025, 2026)
+        ]
+        comparisons.append({
+            "cohort": f"Both teams prior-season top {max_rank}",
+            "maximum_prior_season_rank": max_rank,
+            "eligible_market_games": len(selected),
+            "actionable_over_5": overall,
+            "yearly": yearly,
+        })
+    return {
+        "status": "filter_rejected",
+        "definition": (
+            "A team is excluded when its prior-season adjusted-net rank is below the cohort cutoff "
+            "or it has no prior-season rating. Same-season final ratings are never used."
+        ),
+        "primary_cutoff": 300,
+        "comparisons": comparisons,
+        "interpretation": (
+            "The predeclared top-300 sensitivity performs worse than the full Division-I sample. "
+            "Narrower cutoffs are exploratory, fail corrected significance, and are unstable by season, "
+            "so team-quality exclusion is not adopted as a selection rule."
+        ),
+    }
+
+
+def cbb_scorecard(predictions_path: Path, card_path: Path, history_dir: Path | None = None) -> dict:
     with gzip.open(predictions_path, "rt") as handle:
         rows = [row for row in json.load(handle)["games"] if row.get("split") in {"validation", "test"} and row.get("market_home_spread") is not None]
     card = json.loads(card_path.read_text())
@@ -181,12 +254,18 @@ def cbb_scorecard(predictions_path: Path, card_path: Path) -> dict:
         for year, key in ((2025, "validation"), (2026, "out_of_time_test"))
     ]
     identities = [(int(row["season"]), str(row["game_id"])) for row in rows]
+    quality_sensitivity = cbb_quality_sensitivity(rows, history_dir or ROOT / "data/cbb/history")
+    holm_adjust([
+        actionable,
+        *buckets,
+        *(comparison["actionable_over_5"] for comparison in quality_sensitivity["comparisons"]),
+    ])
     return {
         "status": "not_validated", "verdict": "Research model did not validate", "seasons": [2025, 2026],
         "model": "THI CBB walk-forward v0.7 research",
         "market": "Archived closing-spread field; two-sided prices are unavailable",
         "price_assumption": PRICE,
-        "selection_policy": "All five predeclared signal tiers plus the combined >5-point group are shown.",
+        "selection_policy": "All five predeclared signal tiers, the combined >5-point group and three team-quality sensitivity cohorts are shown and corrected as one nine-test family.",
         "validation_note": "The combined >5-point sample loses at a hypothetical flat -110 price, no displayed tier clears the corrected significance test, and the market has lower margin error in both held-out seasons.",
         "actionable_over_5": actionable, "yearly": yearly, "buckets": buckets, "market_accuracy": accuracy,
         "short_favorites": short_favorite_summary(rows),
@@ -195,6 +274,7 @@ def cbb_scorecard(predictions_path: Path, card_path: Path) -> dict:
             "without_outlier_tier": summarize(rows, lambda row: 5 < edge(row) <= 10, cbb_result),
             "interpretation": "Removing >10-point outliers leaves the combined sample negative.",
         },
+        "team_quality_sensitivity": quality_sensitivity,
     }
 
 
@@ -202,9 +282,9 @@ def main() -> None:
     output = ROOT / "data/reports/public_backtest_scorecard.json"
     payload = {
         "meta": {
-            "version": "thi-public-backtest-v2.0",
+            "version": "thi-public-backtest-v2.1",
             "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-            "audit_standard": "Exact one-sided binomial test against the 52.381% break-even rate implied by a hypothetical flat -110 price; Holm correction across the six displayed comparisons; 95% Wilson hit-rate intervals; season and outlier sensitivity checks.",
+            "audit_standard": "Exact one-sided binomial test against the 52.381% break-even rate implied by a hypothetical flat -110 price; Holm correction across each sport's complete displayed comparison family; 95% Wilson hit-rate intervals; season, outlier and CBB team-quality sensitivity checks.",
             "financial_claim": False,
             "price_policy": "Historical per-play prices and no-vig probabilities are unavailable. Return figures are hypothetical flat -110 arithmetic, not realized ROI.",
             "promotion_rule": "These archived studies cannot validate the live models. Prospective frozen projections, verified prices, no-vig baselines, multiplicity control, outlier checks and stability checks govern any future validation label.",

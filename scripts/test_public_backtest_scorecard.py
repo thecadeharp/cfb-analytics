@@ -1,6 +1,10 @@
+import gzip
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
-from scripts.build_public_backtest_scorecard import ROOT, cbb_scorecard, cfb_scorecard, exact_binomial_upper_tail, grade, holm_adjust, short_favorite_summary
+from scripts.build_public_backtest_scorecard import ROOT, cbb_quality_sensitivity, cbb_scorecard, cfb_scorecard, exact_binomial_upper_tail, grade, holm_adjust, short_favorite_summary
 
 
 class PublicBacktestScorecardTests(unittest.TestCase):
@@ -36,6 +40,34 @@ class PublicBacktestScorecardTests(unittest.TestCase):
         self.assertEqual(result["games"], 2)
         self.assertEqual(result["su_record"], "2-0-0")
         self.assertEqual(result["ats_record"], "1-1-0")
+
+    def test_cbb_quality_filter_uses_prior_season_rank_only(self):
+        rows = [
+            {
+                "season": 2025, "home_team_id": 1, "away_team_id": 2,
+                "projected_home_margin": 8, "market_home_spread": 0, "actual_home_margin": 10,
+            },
+            {
+                "season": 2025, "home_team_id": 1, "away_team_id": 3,
+                "projected_home_margin": 8, "market_home_spread": 0, "actual_home_margin": -10,
+            },
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            history = Path(directory)
+            payload = {
+                "season_end_teams": [
+                    {"team_id": 1, "adjusted_net_rank": 10},
+                    {"team_id": 2, "adjusted_net_rank": 250},
+                    {"team_id": 3, "adjusted_net_rank": 320},
+                ]
+            }
+            with gzip.open(history / "season_2024.json.gz", "wt") as handle:
+                json.dump(payload, handle)
+            result = cbb_quality_sensitivity(rows, history)
+        top_300 = result["comparisons"][0]
+        self.assertEqual(top_300["eligible_market_games"], 1)
+        self.assertEqual(top_300["actionable_over_5"]["record"], "1-0-0")
+        self.assertEqual(result["status"], "filter_rejected")
 
 
 if __name__ == "__main__":

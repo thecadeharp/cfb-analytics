@@ -1,8 +1,8 @@
 {
   "meta": {
-    "version": "thi-public-backtest-v2.0",
-    "generated_at_utc": "2026-10-08T21:53:06.779924Z",
-    "audit_standard": "Exact one-sided binomial test against the 52.381% break-even rate implied by a hypothetical flat -110 price; Holm correction across the six displayed comparisons; 95% Wilson hit-rate intervals; season and outlier sensitivity checks.",
+    "version": "thi-public-backtest-v2.1",
+    "generated_at_utc": "2026-10-09T04:40:15.200917Z",
+    "audit_standard": "Exact one-sided binomial test against the 52.381% break-even rate implied by a hypothetical flat -110 price; Holm correction across each sport's complete displayed comparison family; 95% Wilson hit-rate intervals; season, outlier and CBB team-quality sensitivity checks.",
     "financial_claim": false,
     "price_policy": "Historical per-play prices and no-vig probabilities are unavailable. Return figures are hypothetical flat -110 arithmetic, not realized ROI.",
     "promotion_rule": "These archived studies cannot validate the live models. Prospective frozen projections, verified prices, no-vig baselines, multiplicity control, outlier checks and stability checks govern any future validation label."
@@ -218,7 +218,7 @@
       "model": "THI CBB walk-forward v0.7 research",
       "market": "Archived closing-spread field; two-sided prices are unavailable",
       "price_assumption": -110,
-      "selection_policy": "All five predeclared signal tiers plus the combined >5-point group are shown.",
+      "selection_policy": "All five predeclared signal tiers, the combined >5-point group and three team-quality sensitivity cohorts are shown and corrected as one nine-test family.",
       "validation_note": "The combined >5-point sample loses at a hypothetical flat -110 price, no displayed tier clears the corrected significance test, and the market has lower margin error in both held-out seasons.",
       "actionable_over_5": {
         "games": 2378,
@@ -420,6 +420,188 @@
           "p_value_vs_flat_minus_110": 0.702077
         },
         "interpretation": "Removing >10-point outliers leaves the combined sample negative."
+      },
+      "team_quality_sensitivity": {
+        "status": "filter_rejected",
+        "definition": "A team is excluded when its prior-season adjusted-net rank is below the cohort cutoff or it has no prior-season rating. Same-season final ratings are never used.",
+        "primary_cutoff": 300,
+        "comparisons": [
+          {
+            "cohort": "Both teams prior-season top 300",
+            "maximum_prior_season_rank": 300,
+            "eligible_market_games": 7787,
+            "actionable_over_5": {
+              "games": 1633,
+              "decisions": 1630,
+              "wins": 822,
+              "losses": 808,
+              "pushes": 3,
+              "record": "822-808-3",
+              "hit_rate": 50.429,
+              "hit_rate_ci_95": [
+                48.004,
+                52.853
+              ],
+              "hypothetical_return_pct": -3.719,
+              "hypothetical_units": -60.727,
+              "p_value_vs_flat_minus_110": 0.945408,
+              "holm_adjusted_p": 1.0
+            },
+            "yearly": [
+              {
+                "season": 2025,
+                "games": 815,
+                "decisions": 815,
+                "wins": 400,
+                "losses": 415,
+                "pushes": 0,
+                "record": "400-415-0",
+                "hit_rate": 49.08,
+                "hit_rate_ci_95": [
+                  45.66,
+                  52.508
+                ],
+                "hypothetical_return_pct": -6.302,
+                "hypothetical_units": -51.364,
+                "p_value_vs_flat_minus_110": 0.972641
+              },
+              {
+                "season": 2026,
+                "games": 818,
+                "decisions": 815,
+                "wins": 422,
+                "losses": 393,
+                "pushes": 3,
+                "record": "422-393-3",
+                "hit_rate": 51.779,
+                "hit_rate_ci_95": [
+                  48.348,
+                  55.193
+                ],
+                "hypothetical_return_pct": -1.145,
+                "hypothetical_units": -9.364,
+                "p_value_vs_flat_minus_110": 0.647847
+              }
+            ]
+          },
+          {
+            "cohort": "Both teams prior-season top 200",
+            "maximum_prior_season_rank": 200,
+            "eligible_market_games": 4269,
+            "actionable_over_5": {
+              "games": 833,
+              "decisions": 832,
+              "wins": 424,
+              "losses": 408,
+              "pushes": 1,
+              "record": "424-408-1",
+              "hit_rate": 50.962,
+              "hit_rate_ci_95": [
+                47.568,
+                54.346
+              ],
+              "hypothetical_return_pct": -2.707,
+              "hypothetical_units": -22.545,
+              "p_value_vs_flat_minus_110": 0.803616,
+              "holm_adjusted_p": 1.0
+            },
+            "yearly": [
+              {
+                "season": 2025,
+                "games": 422,
+                "decisions": 422,
+                "wins": 205,
+                "losses": 217,
+                "pushes": 0,
+                "record": "205-217-0",
+                "hit_rate": 48.578,
+                "hit_rate_ci_95": [
+                  43.844,
+                  53.338
+                ],
+                "hypothetical_return_pct": -7.26,
+                "hypothetical_units": -30.636,
+                "p_value_vs_flat_minus_110": 0.946536
+              },
+              {
+                "season": 2026,
+                "games": 411,
+                "decisions": 410,
+                "wins": 219,
+                "losses": 191,
+                "pushes": 1,
+                "record": "219-191-1",
+                "hit_rate": 53.415,
+                "hit_rate_ci_95": [
+                  48.577,
+                  58.189
+                ],
+                "hypothetical_return_pct": 1.969,
+                "hypothetical_units": 8.091,
+                "p_value_vs_flat_minus_110": 0.356102
+              }
+            ]
+          },
+          {
+            "cohort": "Both teams prior-season top 100",
+            "maximum_prior_season_rank": 100,
+            "eligible_market_games": 1867,
+            "actionable_over_5": {
+              "games": 290,
+              "decisions": 290,
+              "wins": 155,
+              "losses": 135,
+              "pushes": 0,
+              "record": "155-135-0",
+              "hit_rate": 53.448,
+              "hit_rate_ci_95": [
+                47.7,
+                59.107
+              ],
+              "hypothetical_return_pct": 2.038,
+              "hypothetical_units": 5.909,
+              "p_value_vs_flat_minus_110": 0.380483,
+              "holm_adjusted_p": 1.0
+            },
+            "yearly": [
+              {
+                "season": 2025,
+                "games": 144,
+                "decisions": 144,
+                "wins": 66,
+                "losses": 78,
+                "pushes": 0,
+                "record": "66-78-0",
+                "hit_rate": 45.833,
+                "hit_rate_ci_95": [
+                  37.909,
+                  53.974
+                ],
+                "hypothetical_return_pct": -12.5,
+                "hypothetical_units": -18.0,
+                "p_value_vs_flat_minus_110": 0.951139
+              },
+              {
+                "season": 2026,
+                "games": 146,
+                "decisions": 146,
+                "wins": 89,
+                "losses": 57,
+                "pushes": 0,
+                "record": "89-57-0",
+                "hit_rate": 60.959,
+                "hit_rate_ci_95": [
+                  52.862,
+                  68.494
+                ],
+                "hypothetical_return_pct": 16.376,
+                "hypothetical_units": 23.909,
+                "p_value_vs_flat_minus_110": 0.022758
+              }
+            ]
+          }
+        ],
+        "interpretation": "The predeclared top-300 sensitivity performs worse than the full Division-I sample. Narrower cutoffs are exploratory, fail corrected significance, and are unstable by season, so team-quality exclusion is not adopted as a selection rule."
       }
     }
   }
