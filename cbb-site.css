@@ -200,14 +200,22 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
 .cbb-rlm-status { display:inline-flex; margin-bottom:10px; border:1px solid var(--border); border-radius:999px; padding:6px 10px; color:#d7bc63; font:800 8px var(--mono); text-transform:uppercase; }
 .cbb-rlm-status.is-active { border-color:#287357; color:#6fd2aa; }
 .cbb-rlm-monitor p,.cbb-variance-ledger p { margin:8px 0 0; color:var(--muted); font-size:11px; }
-.cbb-projection-table { min-width: 1220px; table-layout: fixed; }
+.cbb-projection-table { min-width: 1340px; table-layout: fixed; }
 .cbb-projection-table th:first-child { width: 240px; }
 .cbb-projection-table th:nth-child(2) { width: 100px; }
-.cbb-projection-table th:nth-child(3), .cbb-projection-table th:nth-child(4), .cbb-projection-table th:nth-child(5) { width: 135px; }
+.cbb-projection-table th:nth-child(3), .cbb-projection-table th:nth-child(4) { width: 195px; }
+.cbb-projection-table th:nth-child(5) { width: 135px; }
 .cbb-projection-table th:nth-child(6) { width: 145px; }
 .cbb-projection-table th:nth-child(7), .cbb-projection-table th:nth-child(8) { width: 160px; }
 .cbb-projection-row { cursor: pointer; }
 .cbb-projection-row:hover { background: rgba(87,160,132,.07); }
+.cbb-projection-table .cbb-line-cell { overflow: hidden; }
+.cbb-projection-table .cbb-line-value {
+  display: block;
+  max-width: 100%;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
 .cbb-date-row td { padding: 13px 16px; border-bottom: 1px solid #705e20; background: #302b18; color: #ead47b; font: 800 11px var(--mono); letter-spacing: .04em; text-transform: uppercase; }
 .cbb-matchup-team { display: grid; grid-template-columns: 24px minmax(0,1fr) auto; align-items: center; gap: 7px; min-height: 27px; }
 .cbb-matchup-name { display: flex; min-width: 0; align-items: baseline; gap: 6px; }
