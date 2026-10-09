@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "version": "thi-market-provider-capabilities-v1.0",
+    "public_navigation": false,
+    "policy": "Odds, exchange liquidity and public betting splits are separate capabilities. THI never infers ticket or handle percentages from price movement."
+  },
+  "providers": {
+    "the_odds_api": {
+      "status": "active",
+      "odds": true,
+      "multi_book_comparison": true,
+      "liquidity": false,
+      "ticket_splits": false,
+      "handle_splits": false
+    },
+    "novig": {
+      "status": "approval_pending",
+      "odds": true,
+      "multi_book_comparison": false,
+      "liquidity": true,
+      "last_trade": true,
+      "ticket_splits": false,
+      "handle_splits": false,
+      "activation_requirements": [
+        "affiliate approval and Partner ID",
+        "read-only API credentials",
+        "subscriber-display and caching rights confirmed"
+      ]
+    },
+    "licensed_public_splits": {
+      "status": "provider_pending",
+      "odds": false,
+      "ticket_splits": true,
+      "handle_splits": true,
+      "required_for_true_rlm": true
+    }
+  }
+}

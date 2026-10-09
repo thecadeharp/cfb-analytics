@@ -61,6 +61,7 @@ jobs:
             scripts/build_cbb_walk_forward_model.py \
             scripts/build_cbb_home_court.py \
             scripts/build_cbb_venue_audit.py \
+            scripts/resolve_cbb_venue_geocodes.py \
             scripts/build_cbb_projection_board.py \
             scripts/build_cbb_play_style.py \
             scripts/build_cbb_matchup_engine.py \
@@ -85,6 +86,7 @@ jobs:
             scripts/test_cbb_walk_forward_model.py \
             scripts/test_cbb_home_court.py \
             scripts/test_cbb_venue_audit.py \
+            scripts/test_cbb_venue_geocodes.py \
             scripts/test_cbb_projection_board.py \
             scripts/test_cbb_play_style.py \
             scripts/test_cbb_matchup_engine.py \
@@ -207,6 +209,9 @@ jobs:
           assert operations["meta"]["version"] == "thi-cbb-operations-context-v1.0"
           assert operations["meta"]["model_usage"] == "display_only_research_layer"
           assert operations["coverage"]["games"] == projections["meta"]["game_count"]
+          geocodes = json.loads((root / "verified_venue_geocodes.json").read_text())
+          assert geocodes["meta"]["version"] == "thi-cbb-verified-venues-v1.1"
+          assert geocodes["meta"]["verified_venues"] > 0
           assert health["meta"]["version"] == "thi-cbb-platform-health-v1.0"
           assert health["meta"]["status"] == "healthy"
           assert health["checks"]["neutral_site_home_context_zero"] is True

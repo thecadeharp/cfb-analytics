@@ -61,7 +61,7 @@ jobs:
           fi
       - name: Test and publish qualified monitor state
         run: |
-          python -m unittest scripts/test_validation_framework.py scripts/test_variance_lab.py
+          python -m unittest scripts/test_validation_framework.py scripts/test_variance_lab.py scripts/test_market_provider_contract.py
           if [ "$FREE_SHARP_ENABLED" != "1" ] && [ "$LICENSED_RLM_ENABLED" != "1" ]; then
             echo "No market feed is configured; skipping an empty timestamp-only commit."
             exit 0

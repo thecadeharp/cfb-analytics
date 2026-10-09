@@ -47,6 +47,7 @@ jobs:
       - name: Capture immutable projection and market snapshot
         run: |
           python scripts/snapshot_projections.py
+          python scripts/build_operations_readiness.py
 
       - name: Commit refreshed projections and snapshot ledger
         run: |
@@ -57,6 +58,7 @@ jobs:
           git add data/projections.json
           git add data/snapshots/projection_market_snapshots.jsonl
           git add data/snapshots/latest_snapshot.json
+          git add data/reports/operations_readiness.json
 
           if git diff --cached --quiet; then
             echo "No projection/snapshot changes to commit."

@@ -716,6 +716,13 @@
     const situational = state.data?.intelligence?.game_context?.find(row => String(row.game_id) === String(gameId)) || {};
     const awaySituation = situational.teams?.away || {};
     const homeSituation = situational.teams?.home || {};
+    const operation = state.data?.operations?.games?.find(row => String(row.game_id) === String(gameId)) || {};
+    const awayTravel = operation.teams?.away?.travel_miles;
+    const homeTravel = operation.teams?.home?.travel_miles;
+    const travelReady = Number.isFinite(Number(awayTravel)) || Number.isFinite(Number(homeTravel));
+    const travelSummary = travelReady
+      ? `${escapeHtml(game.away?.team)} ${Number.isFinite(Number(awayTravel)) ? `${integer(awayTravel)} mi` : "pending"} · ${escapeHtml(game.home?.team)} ${Number.isFinite(Number(homeTravel)) ? `${integer(homeTravel)} mi` : "pending"}`
+      : "Mileage pending";
     const styleCell = value => value == null ? "Coverage unavailable" : pct(value);
     panel.innerHTML = `
       <button class="cbb-detail-close cbb-game-back" type="button" data-cbb-close>← Back to projections</button>
@@ -738,7 +745,7 @@
           <article><span>${game.neutral_site ? "Venue adjustment" : "Home-court input"}</span><strong>${game.neutral_site ? "0.00 pts" : situational.home_court_points == null ? "Awaiting estimate" : `${number(situational.home_court_points,2)} pts`}</strong><div>${game.neutral_site ? `<span class="cbb-context-clear">Neutral-floor override verified</span>` : `<span class="cbb-context-flag">Program-specific court</span>`}</div><small>${game.neutral_site ? "Home-court, early-home and nonconference-home effects are disabled." : "Five-season regularized value; thin samples shrink toward the national mean."}</small></article>
           <article><span>${escapeHtml(game.home?.team)}</span><strong>${homeSituation.rest_days == null ? "Rest unknown" : `${number(homeSituation.rest_days,1)} days rest`}</strong><div>${contextFlags(homeSituation)}</div><small>${homeSituation.next_opponent ? `Next: ${escapeHtml(homeSituation.next_opponent)} in ${number(homeSituation.next_game_days,1)} days` : "No next game in current window"}</small></article>
           <article><span>Injuries and availability</span><strong>Not yet sourced</strong><div><span class="cbb-context-pending">No model adjustment</span></div><small>THI will only publish availability effects from a verified, timestamped feed.</small></article>
-          <article><span>Travel load</span><strong>Mileage pending</strong><div><span class="cbb-context-pending">No model adjustment</span></div><small>Requires verified team origin, venue coordinates and travel chronology.</small></article>
+          <article><span>Travel load</span><strong>${travelSummary}</strong><div><span class="${travelReady ? "cbb-context-clear" : "cbb-context-pending"}">${travelReady ? "Verified straight-line distance" : "No model adjustment"}</span></div><small>${travelReady ? "Derived from named OpenStreetMap venue objects; © OpenStreetMap contributors. Display-only research context." : "Requires verified team origin and venue coordinates."}</small></article>
           <article><span>Situational usage</span><strong>Research context</strong><div><span class="cbb-context-pending">Not priced into line</span></div><small>B2B, lookahead, letdown and bounce-back flags must pass validation first.</small></article>
         </div>
       </section>

@@ -37,7 +37,7 @@ jobs:
       - name: Verify market capture and neutral-site contracts
         run: |
           python -m py_compile scripts/refresh_cbb_markets.py scripts/build_cbb_venue_audit.py scripts/build_cbb_projection_board.py scripts/build_cbb_platform_health.py scripts/run_cbb_opening_night_rehearsal.py
-          python -m unittest scripts/test_refresh_cbb_markets.py scripts/test_cbb_venue_audit.py scripts/test_cbb_projection_board.py scripts/test_cbb_game_day_readiness.py scripts/test_cbb_platform_health.py scripts/test_cbb_opening_night_rehearsal.py
+          python -m unittest scripts/test_refresh_cbb_markets.py scripts/test_cbb_venue_audit.py scripts/test_cbb_venue_geocodes.py scripts/test_cbb_projection_board.py scripts/test_cbb_game_day_readiness.py scripts/test_cbb_platform_health.py scripts/test_cbb_opening_night_rehearsal.py
 
       - name: Capture near-term consensus market
         id: market
@@ -61,10 +61,12 @@ jobs:
           python scripts/build_cbb_intelligence_suite.py
           python scripts/build_cbb_model_tracking.py
           python scripts/build_cbb_game_day_readiness.py
+          python scripts/build_cbb_operations_context.py
           python scripts/run_cbb_opening_night_rehearsal.py
           python scripts/build_cbb_platform_health.py
           python scripts/build_variance_prospective_tracker.py
           python scripts/build_commercial_readiness.py
+          python scripts/build_operations_readiness.py
 
       - name: Validate refreshed market contract
         if: steps.market.outputs.changed == 'true'
@@ -96,11 +98,13 @@ jobs:
             data/cbb/intelligence_suite.json \
             data/cbb/model_tracking.json \
             data/cbb/game_day_readiness.json \
+            data/cbb/operations_context.json \
             data/cbb/platform_health.json \
             data/cbb/venue_audit.json \
             data/cbb/opening_night_rehearsal.json \
             data/variance/prospective_tracker.json \
             data/reports/commercial_readiness.json
+          git add data/reports/operations_readiness.json
           git diff --cached --quiet && exit 0
           git commit -m "Capture CBB game-day market"
           git pull --rebase origin main

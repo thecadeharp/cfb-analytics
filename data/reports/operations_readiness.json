@@ -1,14 +1,15 @@
 {
   "meta": {
     "version": "thi-operations-readiness-v1.0",
-    "generated_at_utc": "2026-10-09T09:21:39.523801Z",
+    "generated_at_utc": "2026-10-09T14:27:45.312953Z",
     "audience": "internal",
     "public_navigation": false
   },
   "cfb": {
     "active_week": 6,
-    "scheduled_games": 58,
+    "scheduled_games": 51,
     "games_with_spread": 51,
+    "games_awaiting_spread": [],
     "frozen_snapshot_games": 367,
     "settled_initial_snapshots": 268,
     "unmatched_initial_snapshots": 99,
@@ -33,20 +34,49 @@
     "games_with_broadcast": 8,
     "team_game_sides": 1754,
     "sides_not_requiring_travel": 787,
-    "sides_with_verified_mileage": 0,
+    "sides_with_verified_mileage": 14,
     "verified_availability_reports": 0
   },
   "market_monitor": {
     "status": "line_monitoring",
     "rlm_status": "public_splits_pending",
-    "sharp_tracked_events": 55,
-    "sharp_moves": 10,
-    "true_rlm_alerts": 0
+    "sharp_tracked_events": 53,
+    "sharp_moves": 9,
+    "true_rlm_alerts": 0,
+    "provider_readiness": {
+      "the_odds_api": {
+        "status": "active",
+        "odds": true,
+        "multi_book_comparison": true,
+        "liquidity": false,
+        "ticket_splits": false,
+        "handle_splits": false
+      },
+      "novig": {
+        "status": "approval_pending",
+        "odds": true,
+        "multi_book_comparison": false,
+        "liquidity": true,
+        "last_trade": true,
+        "ticket_splits": false,
+        "handle_splits": false,
+        "activation_requirements": [
+          "affiliate approval and Partner ID",
+          "read-only API credentials",
+          "subscriber-display and caching rights confirmed"
+        ]
+      },
+      "licensed_public_splits": {
+        "status": "provider_pending",
+        "odds": false,
+        "ticket_splits": true,
+        "handle_splits": true,
+        "required_for_true_rlm": true
+      }
+    }
   },
   "open_items": [
-    "CFB Week 6: 7 games do not have a spread.",
     "CBB books have not posted board lines yet.",
-    "CBB verified venue coordinates are not loaded; mileage remains inactive.",
     "CBB verified player availability reports are not loaded.",
     "True RLM remains inactive until a licensed public-splits feed is configured."
   ]

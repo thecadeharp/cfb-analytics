@@ -1,0 +1,60 @@
+name: Resolve Verified CBB Venues
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thi-data-writer
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate conservative venue contracts
+        run: |
+          python -m py_compile scripts/resolve_cbb_venue_geocodes.py scripts/build_cbb_operations_context.py
+          python -m unittest scripts/test_cbb_venue_geocodes.py scripts/test_cbb_release_foundations.py
+      - name: Resolve named venue objects and rebuild travel coverage
+        run: |
+          python scripts/resolve_cbb_venue_geocodes.py --delay 0.1
+          python scripts/build_cbb_operations_context.py
+          python scripts/build_cbb_platform_health.py
+          python scripts/build_operations_readiness.py
+      - name: Verify no inferred coordinates entered the registry
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload=json.loads(Path('data/cbb/verified_venue_geocodes.json').read_text())
+          allowed={'fitness_centre','ice_rink','sports_centre','stadium','civic','college','sports_hall','university','yes','community_centre','events_centre','events_venue','attraction','resort'}
+          assert payload['meta']['version']=='thi-cbb-verified-venues-v1.1'
+          assert payload['meta']['verified_venues'] > 0
+          assert all((row.get('source_object') or {}).get('osm_value') in allowed for row in payload['venues'].values())
+          assert all(str(row.get('source_url','')).startswith('https://www.openstreetmap.org/') for row in payload['venues'].values())
+          PY
+      - name: Commit verified venue and travel outputs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            data/cbb/verified_venue_geocodes.json \
+            data/cbb/venue_geocode_review.json \
+            data/cbb/operations_context.json \
+            data/cbb/platform_health.json \
+            data/reports/operations_readiness.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Expand verified CBB venue coverage"
+          git pull --rebase origin main
+          git push origin HEAD:main
