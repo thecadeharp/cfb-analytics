@@ -831,3 +831,14 @@ html[data-theme="dark"] .cbb-error { background: #3a2020; border-color: #76443e;
   .cbb-rating-lenses { grid-template-columns:1fr; }
 }
 .cbb-variance-context{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}.cbb-variance-context span{display:inline-flex;padding:3px 6px;border:1px solid var(--border);border-radius:999px;color:var(--muted);font:700 8px var(--mono);text-transform:uppercase;background:rgba(255,255,255,.025)}
+
+/* Compact book comparison shared by CFB and CBB matchup views. */
+.thi-odds-board{margin-top:14px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}
+.thi-odds-head,.thi-odds-row{display:grid;grid-template-columns:minmax(76px,.8fr) repeat(2,minmax(110px,1fr));gap:8px;align-items:center;padding:8px 10px}
+.thi-odds-head{background:var(--surface-soft);border-bottom:1px solid var(--border);color:var(--muted);font:700 9px/1.25 var(--mono);text-transform:uppercase;letter-spacing:.55px;text-align:center}
+.thi-odds-head span{text-align:left}.thi-odds-row+.thi-odds-row{border-top:1px solid var(--border)}
+.thi-book-badge{display:inline-flex;align-items:center;justify-content:center;width:64px;min-height:34px;padding:5px 7px;border-radius:7px;background:#202832;color:#fff;font:800 10px/1 var(--mono);letter-spacing:.3px}
+.thi-book-draftkings{background:#151a20;color:#f58220}.thi-book-fanduel{background:#0879ef}.thi-book-betmgm{background:#262626;color:#d8b85a}.thi-book-bet365{background:#087b52;color:#f6da3a}.thi-book-betrivers{background:#173559;color:#fff}.thi-book-caesars{background:#123e31;color:#d6b76a}.thi-book-fanatics{background:#050505}.thi-book-hardrockbet{background:#050505}.thi-book-pinnacle{background:#132231;color:#f0a437}.thi-book-betonlineag,.thi-book-betonline{background:#111;color:#ef473d}
+.thi-odds-price{min-height:44px;display:flex;gap:7px;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:8px;background:var(--surface-soft);font-family:var(--mono)}
+.thi-odds-price strong{font-size:15px}.thi-odds-price span{color:var(--amber);font-size:11px;font-weight:700}.thi-odds-price.is-best{border-color:#23a774;box-shadow:inset 0 0 0 1px rgba(35,167,116,.16);background:rgba(35,167,116,.06)}
+@media(max-width:560px){.thi-odds-head,.thi-odds-row{grid-template-columns:60px repeat(2,minmax(82px,1fr));gap:5px;padding:6px}.thi-book-badge{width:54px;min-height:32px}.thi-odds-head{font-size:8px}.thi-odds-price strong{font-size:13px}}

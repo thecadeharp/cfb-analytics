@@ -1,14 +1,14 @@
 {
   "meta": {
     "version": "thi-cbb-platform-health-v1.0",
-    "generated_at_utc": "2026-10-09T14:43:59.261583Z",
+    "generated_at_utc": "2026-10-09T20:00:27.042153Z",
     "status": "healthy"
   },
   "checks": {
     "unique_games": true,
     "unique_teams": true,
     "team_directory_complete": true,
-    "active_roster_coverage": true,
+    "roster_layer_safe": true,
     "source_requests_completed": true,
     "final_scores_complete": true,
     "finals_reconciled_to_tracking": true,
@@ -25,7 +25,9 @@
     "neutral_site_official_overrides": 11,
     "neutral_site_unresolved_reviews": 0,
     "teams": 365,
-    "players": 2868,
+    "roster_source_players": 2868,
+    "published_roster_players": 0,
+    "roster_verification_status": "withheld_unverified_fallback",
     "games_with_market": 0,
     "games_with_broadcast": 8,
     "team_game_sides": 1754,
@@ -36,6 +38,7 @@
   "alerts": [],
   "notices": [
     "No current market lines are posted; this is expected before books open and becomes actionable near tipoff.",
-    "No timestamped availability reports are loaded; no injury adjustment is applied."
+    "No timestamped availability reports are loaded; no injury adjustment is applied.",
+    "The fallback roster failed verification; player ratings, rotations and roster adjustments are safely withheld."
   ]
 }

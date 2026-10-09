@@ -3741,6 +3741,39 @@ function americanPrice(value) {
   return number > 0 ? `+${Math.round(number)}` : `${Math.round(number)}`;
 }
 
+function sportsbookBadge(book) {
+  const key = String(book?.bookmaker_key || book?.provider || book?.bookmaker || "book").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const brands = {
+    pinnacle: ["PIN", "Pinnacle"], betonlineag: ["BOL", "BetOnline"], betonline: ["BOL", "BetOnline"],
+    draftkings: ["DK", "DraftKings"], fanduel: ["FD", "FanDuel"], betmgm: ["MGM", "BetMGM"],
+    betrivers: ["BR", "BetRivers"], caesars: ["CZR", "Caesars"], fanatics: ["FAN", "Fanatics"],
+    bet365: ["365", "bet365"], hardrockbet: ["HR", "Hard Rock Bet"], lowvig: ["LV", "LowVig"],
+    bovada: ["BOV", "Bovada"], mybookieag: ["MYB", "MyBookie"], betus: ["BUS", "BetUS"], bookmaker: ["BKR", "Bookmaker"]
+  };
+  const brand = brands[key] || [String(book?.bookmaker || book?.provider || "BOOK").slice(0, 4).toUpperCase(), book?.bookmaker || book?.provider || "Sportsbook"];
+  return `<span class="thi-book-badge thi-book-${escapeHtml(key)}" title="${escapeHtml(brand[1])}" aria-label="${escapeHtml(brand[1])}">${escapeHtml(brand[0])}</span>`;
+}
+
+function bestAmericanPrice(bookLines, side) {
+  const values = bookLines.map(book => book?.spread?.[`${side}_price`]).filter(hasValue).map(Number).filter(Number.isFinite);
+  return values.length ? Math.max(...values) : null;
+}
+
+function sportsbookGrid(game, bookLines) {
+  if (!bookLines.length) return `<div class="sample-warning" style="margin-top:14px">Sportsbook prices will appear here after the next market refresh.</div>`;
+  const awayBest = bestAmericanPrice(bookLines, "away");
+  const homeBest = bestAmericanPrice(bookLines, "home");
+  return `<div class="thi-odds-board" aria-label="Sportsbook odds comparison">
+    <div class="thi-odds-head"><span>Books</span><strong>${escapeHtml(game.away.team)}</strong><strong>${escapeHtml(game.home.team)}</strong></div>
+    ${bookLines.map(book => {
+      const spread = book.spread || {};
+      const awayPrice = hasValue(spread.away_price) ? Number(spread.away_price) : NaN;
+      const homePrice = hasValue(spread.home_price) ? Number(spread.home_price) : NaN;
+      return `<div class="thi-odds-row">${sportsbookBadge(book)}<div class="thi-odds-price ${Number.isFinite(awayPrice) && awayPrice === awayBest ? "is-best" : ""}">${hasValue(spread.away_spread) ? `<strong>${formatSigned(spread.away_spread,1)}</strong><span>${americanPrice(spread.away_price)}</span>` : "—"}</div><div class="thi-odds-price ${Number.isFinite(homePrice) && homePrice === homeBest ? "is-best" : ""}">${hasValue(spread.home_spread) ? `<strong>${formatSigned(spread.home_spread,1)}</strong><span>${americanPrice(spread.home_price)}</span>` : "—"}</div></div>`;
+    }).join("")}
+  </div>`;
+}
+
 function marketMovementMarkup(game) {
   const history = marketHistoryData?.games?.[String(game?.game_id)] ?? {};
   const snapshots = Array.isArray(history.snapshots) ? history.snapshots.slice() : [];
@@ -3771,11 +3804,7 @@ function marketMovementMarkup(game) {
         <div class="analysis-card"><div class="analysis-label">Reference price</div><div class="analysis-value">${hasValue(reference.home_spread) ? americanPrice(reference.home_price) : "—"}</div><div class="analysis-small">${escapeHtml(reference.bookmaker || "Awaiting a paired sharp-book quote")}${hasValue(reference.away_price) ? ` · away ${americanPrice(reference.away_price)}` : ""}</div></div>
       </div>
       ${rows ? `<div style="overflow:auto"><table class="data-table" style="min-width:520px"><thead><tr><th>Capture</th><th>Time</th><th>Consensus spread</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="sample-warning">Line chronology will appear after THI captures at least one market snapshot for this game.</div>`}
-      ${bookLines.length ? `<div style="overflow:auto;margin-top:14px"><table class="data-table" style="min-width:860px"><thead><tr><th>Sportsbook</th><th>${escapeHtml(game.away.team)} spread</th><th>${escapeHtml(game.home.team)} spread</th><th>Total</th><th>Updated</th></tr></thead><tbody>${bookLines.map(book => {
-        const spread = book.spread || {}; const bookTotal = book.total || {}; const updated = new Date(book.last_update || spread.last_update || bookTotal.last_update);
-        const updatedLabel = Number.isNaN(updated.getTime()) ? "—" : updated.toLocaleString("en-US", {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
-        return `<tr><td><strong>${escapeHtml(book.bookmaker || book.bookmaker_key || "Sportsbook")}</strong></td><td>${hasValue(spread.away_spread) ? `${formatSigned(spread.away_spread,1)} · ${americanPrice(spread.away_price)}` : "—"}</td><td>${hasValue(spread.home_spread) ? `${formatSigned(spread.home_spread,1)} · ${americanPrice(spread.home_price)}` : "—"}</td><td>${hasValue(bookTotal.total) ? `${formatNumber(bookTotal.total,1)} · O ${americanPrice(bookTotal.over_price)} / U ${americanPrice(bookTotal.under_price)}` : "—"}</td><td>${escapeHtml(updatedLabel)}</td></tr>`;
-      }).join("")}</tbody></table></div>` : `<div class="sample-warning" style="margin-top:14px">Sportsbook-by-sportsbook prices will appear after the next market refresh.</div>`}
+      ${sportsbookGrid(game, bookLines)}
       <div class="analysis-row"><div class="analysis-row-label">Current reference total</div><div class="analysis-row-value">${hasValue(total.total) ? `${formatNumber(total.total,1)} · over ${americanPrice(total.over_price)} / under ${americanPrice(total.under_price)}` : "—"}</div></div>
       <p class="team-meta" style="margin:10px 0 0;">This screen tracks THI's timestamped observations. It does not claim sportsbook opening or closing lines unless the capture is explicitly labeled that way.</p>
     </div>

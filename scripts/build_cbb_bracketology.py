@@ -126,8 +126,12 @@ def roster_scores(players_payload: dict[str, Any] | None) -> tuple[dict[str, flo
     receive a misleading boost. The adjustment remains modest and bounded; it
     supplements the team prior rather than replacing it.
     """
+    if (players_payload or {}).get("meta", {}).get("roster_verification_status") not in (None, "provider_verified"):
+        return {}, 0.0, 1.0
     by_team: dict[str, list[float]] = {}
     for player in (players_payload or {}).get("players") or []:
+        if player.get("current_roster_verified") is False:
+            continue
         value = (player.get("research_scores") or {}).get("thi_player_rating")
         try:
             score = float(value)
@@ -163,6 +167,7 @@ def build_bracketology(
     teams_with_resume_sample = sum(int(record.get("games") or 0) >= 8 for record in profile_records)
     live_resume_ready = teams_with_resume_sample >= 300
     roster_by_team, roster_center, roster_spread = roster_scores(players_payload)
+    roster_active = bool(roster_by_team)
     source = []
     for original in priors_payload.get("teams") or []:
         row = dict(original)
@@ -182,7 +187,7 @@ def build_bracketology(
             "roster_adjustment": round(roster_adjustment, 3),
             "resume_score": round(resume, 3) if games else None,
             "selection_score": round(strength + roster_adjustment + weight * resume, 3),
-            "selection_state": "strength_roster_and_early_resume" if games else "strength_plus_roster",
+            "selection_state": ("strength_roster_and_early_resume" if roster_active else "strength_and_early_resume") if games else ("strength_plus_roster" if roster_active else "strength_only"),
         })
         if rating(row) > -999: source.append(row)
     by_conference: dict[str, list[dict[str, Any]]] = {}
@@ -269,7 +274,7 @@ def build_bracketology(
             "field_size": FIELD_SIZE,
             "automatic_bid_count": len(autos),
             "at_large_count": len(at_larges),
-            "methodology": "Selection score begins with THI predictive team strength, adds a bounded active-roster quality adjustment from the top eight qualified player projections, and gradually adds current win-loss resume evidence over the first 12 games. Conference leaders receive projected automatic bids; the strongest remaining selection scores receive at-large bids.",
+            "methodology": ("Selection score begins with THI predictive team strength, adds a bounded active-roster quality adjustment from the top eight qualified player projections, and gradually adds current win-loss resume evidence over the first 12 games." if roster_active else "Selection score currently uses THI predictive team strength without a roster adjustment because the active roster source is withheld; current win-loss résumé evidence is added gradually over the first 12 games.") + " Conference leaders receive projected automatic bids; the strongest remaining selection scores receive at-large bids.",
             "limitations": (
                 "This is a preseason strength scenario, not a current committee projection. No 2027 results, quadrant records, road wins or neutral-floor evidence are available yet, so THI does not publish seed lines, regions, First Four assignments or a true bubble board in the public preseason view."
                 if not live_resume_ready else

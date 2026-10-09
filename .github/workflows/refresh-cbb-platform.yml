@@ -113,6 +113,7 @@ jobs:
         run: |
           python scripts/build_cbb_data_foundation.py --output-dir data/cbb
           python scripts/build_cbb_player_research.py
+          python scripts/audit_cbb_roster_integrity.py
           python scripts/build_cbb_walk_forward_model.py
           python scripts/build_cbb_home_court.py
           python scripts/build_cbb_venue_audit.py
@@ -143,6 +144,7 @@ jobs:
           root = Path("data/cbb")
           profiles = json.loads((root / "team_profiles.json").read_text())
           players = json.loads((root / "player_ratings.json").read_text())
+          roster_audit = json.loads((root / "roster_audit.json").read_text())
           model = json.loads((root / "model/model_card.json").read_text())
           priors = json.loads((root / "model/current_priors.json").read_text())
           projections = json.loads((root / "projection_board.json").read_text())
@@ -165,6 +167,8 @@ jobs:
           assert players["meta"]["version"] == "thi-cbb-player-research-v1.3"
           assert players["meta"]["player_count"] >= 1500
           assert all("prior_production_rating" in row["research_scores"] for row in players["players"])
+          assert roster_audit["meta"]["status"] in ("passed", "withheld")
+          assert (roster_audit["meta"]["status"] == "passed") == (players["meta"]["roster_verification_status"] == "provider_verified" and all(roster_audit["checks"].values()))
           assert model["meta"]["model_version"] == "thi-cbb-walk-forward-v0.6-research"
           assert model["meta"]["historical_laboratory_version"] == "thi-cbb-historical-lab-v1.0"
           assert model["meta"]["four_factor_engine_version"] == "thi-cbb-chronological-four-factors-v0.6"
@@ -233,6 +237,7 @@ jobs:
             data/cbb/game_board.json \
             data/cbb/foundation_status.json \
             data/cbb/player_ratings.json \
+            data/cbb/roster_audit.json \
             data/cbb/model/model_card.json \
             data/cbb/model/current_priors.json \
             data/cbb/model/walk_forward_predictions.json.gz \

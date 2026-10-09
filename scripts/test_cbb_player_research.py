@@ -201,6 +201,7 @@ class CbbPlayerResearchTests(unittest.TestCase):
         team = {"id": 72, "sourceId": "150", "school": "Duke"}
         payload = {
             "season": {"year": 2027, "displayName": "2026-27"},
+            "team": {"id": "150", "displayName": "Duke Blue Devils"},
             "athletes": [{
                 "id": "5454779",
                 "fullName": "Current Player",
@@ -213,6 +214,19 @@ class CbbPlayerResearchTests(unittest.TestCase):
         self.assertEqual(roster_row["players"][0]["sourceId"], "5454779")
         self.assertEqual(roster_row["players"][0]["position"], "G")
         self.assertIsNone(normalize_espn_roster(team, "ACC", payload, 2026))
+        payload["team"]["id"] = "99"
+        self.assertIsNone(normalize_espn_roster(team, "ACC", payload, 2027))
+
+    def test_withholds_unverified_fallback_rosters(self):
+        veteran = player(1, 4, 1)
+        payload = build_player_research(
+            2026, 2027, [veteran], [{"teamId": 1}], [roster([veteran], 1)],
+            min_minutes=0, min_games=0, roster_source="espn_current_roster_fallback",
+        )
+        self.assertEqual(payload["meta"]["activation_state"], "withheld_pending_verified_rosters")
+        self.assertEqual(payload["meta"]["roster_verification_status"], "withheld_unverified_fallback")
+        self.assertFalse(payload["coverage"]["publication_allowed"])
+        self.assertTrue(all(row["current_roster_verified"] is False for row in payload["players"]))
 
 
 if __name__ == "__main__":

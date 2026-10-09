@@ -539,10 +539,11 @@ def current_priors(
     player_payload = json.loads(player_path.read_text()) if player_path and player_path.exists() else {"meta": {}, "team_rosters": []}
     if player_payload.get("meta", {}).get("version") not in (None, "thi-cbb-player-research-v1.3"):
         raise RuntimeError("current roster continuity requires thi-cbb-player-research-v1.3")
+    roster_verified = player_payload.get("meta", {}).get("roster_verification_status") in (None, "provider_verified")
     roster_continuity = {
         str(row.get("team_id")): row
         for row in player_payload.get("team_rosters") or []
-        if isinstance(row, dict)
+        if roster_verified and isinstance(row, dict) and row.get("verification_status") in (None, "provider_verified")
     }
     league_efficiency, league_tempo = league_context(previous_teams)
     previous_by_id = {str(row.get("team_id")): row for row in previous_teams}

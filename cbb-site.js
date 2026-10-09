@@ -656,6 +656,47 @@
     return flags.length ? flags.map(flag => `<span class="cbb-context-flag">${escapeHtml(flag)}</span>`).join("") : `<span class="cbb-context-clear">No schedule flag</span>`;
   }
 
+  function cbbBookBadge(book) {
+    const key = String(book?.bookmaker_key || book?.provider || book?.bookmaker || "book").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const brands = {
+      pinnacle:["PIN","Pinnacle"],betonlineag:["BOL","BetOnline"],betonline:["BOL","BetOnline"],draftkings:["DK","DraftKings"],
+      fanduel:["FD","FanDuel"],betmgm:["MGM","BetMGM"],betrivers:["BR","BetRivers"],caesars:["CZR","Caesars"],
+      fanatics:["FAN","Fanatics"],bet365:["365","bet365"],hardrockbet:["HR","Hard Rock Bet"],lowvig:["LV","LowVig"]
+    };
+    const brand = brands[key] || [String(book?.provider || book?.bookmaker || "BOOK").slice(0,4).toUpperCase(),book?.provider || book?.bookmaker || "Sportsbook"];
+    return `<span class="thi-book-badge thi-book-${escapeHtml(key)}" title="${escapeHtml(brand[1])}" aria-label="${escapeHtml(brand[1])}">${escapeHtml(brand[0])}</span>`;
+  }
+
+  function cbbOddsGrid(game, books) {
+    if (!books.length) return `<div class="cbb-coverage-note">Sportsbook prices will appear here when CBB markets are posted.</div>`;
+    const normalized = books.map(book => {
+      const spread = book.spread && typeof book.spread === "object" ? book.spread : {};
+      const homeSpread = Number.isFinite(Number(spread.home_spread)) ? Number(spread.home_spread) : Number.isFinite(Number(book.spread)) ? Number(book.spread) : null;
+      const awaySpread = Number.isFinite(Number(spread.away_spread)) ? Number(spread.away_spread) : homeSpread == null ? null : -homeSpread;
+      const odds = value => value === null || value === undefined || value === "" ? NaN : Number(value);
+      return {book, awaySpread, homeSpread, awayPrice:odds(spread.away_price), homePrice:odds(spread.home_price), awayMl:odds(book.away_moneyline), homeMl:odds(book.home_moneyline)};
+    });
+    const hasSpreadPrices = normalized.some(row => Number.isFinite(row.awayPrice) || Number.isFinite(row.homePrice));
+    const hasMoneylines = normalized.some(row => Number.isFinite(row.awayMl) || Number.isFinite(row.homeMl));
+    const priceFor = (row, side) => hasSpreadPrices ? row[`${side}Price`] : hasMoneylines ? row[`${side}Ml`] : null;
+    const best = side => {
+      const values = normalized.map(row => priceFor(row,side)).filter(Number.isFinite);
+      return values.length ? Math.max(...values) : null;
+    };
+    const awayBest=best("away"), homeBest=best("home");
+    const display = (row, side) => {
+      const value = priceFor(row,side);
+      const spread = row[`${side}Spread`];
+      if (hasSpreadPrices) return Number.isFinite(spread) ? `<strong>${number(spread,1,true)}</strong><span>${number(value,0,true)}</span>` : "—";
+      if (hasMoneylines) return Number.isFinite(value) ? `<strong>${number(value,0,true)}</strong>` : "—";
+      return Number.isFinite(spread) ? `<strong>${number(spread,1,true)}</strong>` : "—";
+    };
+    return `<div class="thi-odds-board" aria-label="Sportsbook odds comparison"><div class="thi-odds-head"><span>Books</span><strong>${escapeHtml(game.away?.team)}</strong><strong>${escapeHtml(game.home?.team)}</strong></div>${normalized.map(row => {
+      const away=priceFor(row,"away"), home=priceFor(row,"home");
+      return `<div class="thi-odds-row">${cbbBookBadge(row.book)}<div class="thi-odds-price ${Number.isFinite(away)&&away===awayBest?"is-best":""}">${display(row,"away")}</div><div class="thi-odds-price ${Number.isFinite(home)&&home===homeBest?"is-best":""}">${display(row,"home")}</div></div>`;
+    }).join("")}</div>`;
+  }
+
   function cbbMarketMovement(game) {
     const stored = state.data?.marketSnapshots?.games?.[String(game.game_id)] || {};
     const snapshots = Array.isArray(stored.snapshots) ? stored.snapshots : [];
@@ -684,7 +725,7 @@
         ${detailStat("Captured updates", integer(snapshots.length))}
         ${detailStat("Reference moneyline", referenceMoneyline.provider ? `${referenceMoneyline.provider} · ${game.away?.team} ${number(referenceMoneyline.away_price,0,true)} / ${game.home?.team} ${number(referenceMoneyline.home_price,0,true)}` : "—")}
       </div>
-      ${marketBooks.length ? `<div class="cbb-panel cbb-table-wrap"><table class="cbb-table" style="min-width:760px"><thead><tr><th>Sportsbook</th><th>${escapeHtml(game.away?.team)} ML</th><th>${escapeHtml(game.home?.team)} ML</th><th>Home spread</th><th>Total</th></tr></thead><tbody>${marketBooks.map(book => `<tr><td><strong>${escapeHtml(book.provider || "Sportsbook")}</strong></td><td class="cbb-number">${Number.isFinite(Number(book.away_moneyline)) ? number(book.away_moneyline,0,true) : "—"}</td><td class="cbb-number">${Number.isFinite(Number(book.home_moneyline)) ? number(book.home_moneyline,0,true) : "—"}</td><td class="cbb-number">${Number.isFinite(Number(book.spread)) ? number(book.spread,1,true) : "—"}</td><td class="cbb-number">${Number.isFinite(Number(book.total)) ? number(book.total,1) : "—"}</td></tr>`).join("")}</tbody></table></div>` : ""}
+      ${cbbOddsGrid(game, marketBooks)}
       ${rows ? `<div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Capture</th><th>Time</th><th>Spread</th><th>Total</th><th>Source</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="cbb-coverage-note">No market chronology is available yet. This panel will populate automatically as books release and move CBB lines.</div>`}
       <div class="cbb-model-sub">“First captured” means THI's first recorded observation; it is not presented as an official sportsbook opener.</div>
     </section>`;
@@ -850,7 +891,7 @@
         <div class="cbb-kicker">Player-level basketball intelligence</div>
         <h1 class="page-title">CBB Player Ratings</h1>
         <p class="page-subtitle">THI's projected-impact layer translates prior production through competition, destination, role, pedigree and sample context without feeding these ratings into public game projections.</p>
-        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Research v1.3</span><strong>${state.playerLoading ? "Loading the player board" : "Player board available"}</strong><p>${state.playerLoading ? "Reading the roster-verified player layer…" : "Open this tab to load active-roster players with qualified prior-season production and THI's competition-adjusted projected-impact grade."}</p></div>
+        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Roster audit</span><strong>${state.playerLoading ? "Checking current-roster verification" : "Player board pending verified rosters"}</strong><p>${state.playerLoading ? "Rejecting stale and incomplete roster feeds…" : "THI publishes player ratings only after the current roster source clears the national verification gate."}</p></div>
       `;
       return;
     }
@@ -891,8 +932,8 @@
     state.playerLoading = fetchJson(PLAYER_PATH)
       .then(payload => {
         if (!Array.isArray(payload.players)) throw new Error("Player ratings payload is missing players.");
-        if (payload.meta?.version !== "thi-cbb-player-research-v1.3" || !Array.isArray(payload.team_rosters) || payload.players.some(player => player.current_roster_verified !== true)) {
-          throw new Error("The roster-verified player rebuild has not completed. Historical-only ratings are withheld.");
+        if (payload.meta?.version !== "thi-cbb-player-research-v1.3" || payload.meta?.roster_verification_status !== "provider_verified" || !Array.isArray(payload.team_rosters) || payload.players.some(player => player.current_roster_verified !== true)) {
+          throw new Error("Current rosters have not cleared THI's verification gate. Stale fallback players and their ratings are withheld.");
         }
         state.playerData = payload;
         state.playerBandCache = {};

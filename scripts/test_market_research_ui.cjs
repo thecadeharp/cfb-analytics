@@ -10,12 +10,14 @@ assert(market.includes('Start tracking play'));
 assert(market.includes('Sportsbook'));
 assert(market.includes('American odds'));
 assert(market.includes('Units risked'));
-assert(market.includes('Current Odds Screen'));
-assert(market.includes('Price reference'));
-assert(market.includes('public ticket and handle percentages will appear only after a licensed splits feed is connected'));
-assert(market.includes("window.THITrackPlay({game_id:button.dataset.trackGame"));
+assert(!market.includes('Current Odds Screen'));
+assert(!market.includes('research-odds'));
 assert(football.includes('Track a Play'));
 assert(basketball.includes('Track a Play'));
+assert(football.includes('sportsbookGrid(game, bookLines)'));
+assert(basketball.includes('cbbOddsGrid(game, marketBooks)'));
+assert(football.includes('thi-book-badge'));
+assert(basketball.includes('thi-book-badge'));
 assert(!football.includes('>Save game</button>'));
 assert(!basketball.includes('>Save game</button>'));
 

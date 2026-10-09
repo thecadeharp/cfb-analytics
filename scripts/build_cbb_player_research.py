@@ -39,6 +39,9 @@ def normalize_espn_roster(team: dict[str, Any], conference: str | None, payload:
     season = payload.get("season") or {}
     if finite(season.get("year")) != float(roster_season):
         return None
+    returned_team = payload.get("team") or {}
+    if str(returned_team.get("id") or "") != str(team.get("sourceId") or ""):
+        return None
     athletes = payload.get("athletes") or []
     if not isinstance(athletes, list) or not athletes:
         return None
@@ -218,6 +221,10 @@ def build_player_research(
 
     recruits = recruits or []
     portal = portal or []
+    # CBBD is the contracted current-roster source. ESPN is only a coverage
+    # fallback and can expose a new season label before schools finish updating
+    # player membership, so it must never be represented as roster-verified.
+    roster_verified = roster_source == "cbbd"
     team_context = {
         str(row.get("teamId")): {
             "games": finite(row.get("games")),
@@ -265,6 +272,7 @@ def build_player_research(
     active_by_source: dict[str, dict[str, Any]] = {}
     active_records: dict[str, dict[str, Any]] = {}
     roster_player_keys: set[str] = set()
+    roster_player_record_count = 0
     for team_roster in rosters:
         if not isinstance(team_roster, dict):
             continue
@@ -295,6 +303,7 @@ def build_player_research(
             else:
                 continue
             roster_player_keys.add(roster_key)
+            roster_player_record_count += 1
             if source_id:
                 active_by_source[str(source_id)] = roster_record
             active_records[roster_key] = roster_record
@@ -387,7 +396,7 @@ def build_player_research(
             "position": roster_player.get("position") or source.get("position"),
             "position_group": position_group(roster_player.get("position") or source.get("position")),
             "jersey": roster_player.get("jersey"),
-            "current_roster_verified": True,
+            "current_roster_verified": roster_verified,
             "source_season": source_season,
             "source_team_id": source_team_id,
             "source_team": source.get("team"),
@@ -526,7 +535,7 @@ def build_player_research(
             "position": active.get("position"),
             "position_group": position_group(active.get("position")),
             "jersey": active.get("jersey"),
-            "current_roster_verified": True,
+            "current_roster_verified": roster_verified,
             "source_season": source_season,
             "source_team_id": None,
             "source_team": None,
@@ -635,6 +644,7 @@ def build_player_research(
             str(row.get("name") or ""),
         ))
         team_roster["player_count"] = len(team_roster["players"])
+        team_roster["verification_status"] = "provider_verified" if roster_verified else "withheld_unverified_fallback"
         team_roster["rated_player_count"] = sum(row["prior_state"] in ("rated", "projected_newcomer") for row in team_roster["players"])
         team_roster["transfer_count"] = sum(row["transfer_between_seasons"] for row in team_roster["players"])
         team_roster["prior_team_minutes"] = round(source_team_minutes.get(str(team_roster.get("team_id")), 0.0), 1)
@@ -654,7 +664,8 @@ def build_player_research(
             "source_season": source_season,
             "roster_season": roster_season,
             "roster_source": roster_source,
-            "activation_state": "research_reference_only",
+            "activation_state": "research_reference_only" if roster_verified else "withheld_pending_verified_rosters",
+            "roster_verification_status": "provider_verified" if roster_verified else "withheld_unverified_fallback",
             "player_count": len(prepared),
             "team_count": team_count,
             "minimum_minutes": min_minutes,
@@ -664,7 +675,7 @@ def build_player_research(
             "espn_request_count": espn_request_count,
             "raw_api_data_stored": False,
             "source_attribution": "Data provided by CollegeBasketballData.com; ratings and calculations by The Hammer Index.",
-            "methodology": "Active-roster players are ranked by projected impact. For veterans, THI begins with robust prior production and efficiency, regresses for sample reliability, translates production through the source team's adjusted strength, and adds destination and matched pedigree context. Verified newcomers without a qualified prior use a lower-reliability recruiting or portal projection and show no fabricated prior statistics. Prior Production remains visible separately. This research rating is not a lineup-adjusted game projection.",
+            "methodology": "Provider-verified active-roster players are ranked by projected impact. For veterans, THI begins with robust prior production and efficiency, regresses for sample reliability, translates production through the source team's adjusted strength, and adds destination and matched pedigree context. A third-party fallback may be audited for coverage, but is withheld from the product and model until current membership is verified. This research rating is not a lineup-adjusted game projection.",
         },
         "coverage": {
             "provider_player_rows": len(players),
@@ -683,6 +694,10 @@ def build_player_research(
             "statistical_prior_players": statistical_prior_count,
             "projected_newcomers": projected_newcomer_count,
             "position_groups": dict(Counter(row["position_group"] for row in prepared)),
+            "roster_team_sizes": dict(Counter(str(row.get("player_count")) for row in team_rosters)),
+            "teams_with_ten_or_more_players": sum(row.get("player_count", 0) >= 10 for row in team_rosters),
+            "duplicate_roster_source_ids": roster_player_record_count - len(roster_player_keys),
+            "publication_allowed": roster_verified,
         },
         "team_rosters": team_rosters,
         "players": prepared,

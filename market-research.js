@@ -47,7 +47,6 @@
     <p class="page-subtitle">First-snapshot model accountability and a private workspace for evaluating your line selection.</p>
     <div id="research-scorecard" aria-live="polite"><p class="research-muted">Loading weekly scorecard…</p></div>
     <div id="research-backtest" aria-live="polite"><p class="research-muted">Loading historical research audit…</p></div>
-    <div id="research-odds" aria-live="polite"><p class="research-muted">Loading current odds board…</p></div>
     <div class="research-card"><h2>Private portfolio</h2><div id="research-private" aria-live="polite"></div></div>`;
   main.append(view);
   const $ = selector => view.querySelector(selector);
@@ -172,63 +171,7 @@
       <p class="research-muted"><strong>${esc(cfb.verdict)}.</strong> ${esc(cfb.validation_note)} ${esc(data.meta?.price_policy)} ${esc(data.meta?.promotion_rule)}</p></section>`;
   }).catch(() => { $('#research-backtest').innerHTML = '<p class="research-muted">Historical research audit is temporarily unavailable.</p>'; });
 
-  Promise.all([
-    fetch('./data/odds.json', {cache:'no-store'}).then(r => r.ok ? r.json() : {}),
-    fetch('./data/cbb/projection_board.json', {cache:'no-store'}).then(r => r.ok ? r.json() : {}),
-    fetch('./data/projections.json', {cache:'no-store'}).then(r => r.ok ? r.json() : {}),
-    fetch('./data/market/sharp_line_state.json', {cache:'no-store'}).then(r => r.ok ? r.json() : {}).catch(() => ({})),
-  ]).then(([data,cbb,cfb,sharp]) => {
-    const cfbGames = cfb.games || cfb.projections || [];
-    const projected = (data.games || []).map(row => {
-      const match = cfbGames.find(game => game.home?.team === row.home_team && game.away?.team === row.away_team && Math.abs(new Date(game.start_date) - new Date(row.commence_time)) <= 129600000);
-      return {...row,sport:'CFB',game_id:match?.game_id,start_date:row.commence_time,consensus_home_spread:row.spread_home,consensus_total:row.total,book_count:Math.max(row.spread_books || 0,row.total_books || 0)};
-    });
-    const basketball = (cbb.games || []).filter(row => row.market).map(row => ({...row,sport:'CBB',home_team:row.home?.team,away_team:row.away?.team,consensus_home_spread:row.market?.consensus_home_spread,consensus_total:row.market?.consensus_total,book_count:row.market?.book_count,bookmaker:row.market?.source || 'CBBD consensus',reference_moneyline:row.market?.reference_moneyline,opening_home_spread:row.market?.opening_home_spread,spread_move:row.market?.spread_move}));
-    const sharpRows = Object.values(sharp.events || {});
-    const rows = [...projected,...basketball].filter(row => row.home_team && row.away_team).sort((a,b) => new Date(a.start_date) - new Date(b.start_date));
-    const american = value => finiteNumber(value) === null ? '—' : `${Number(value) > 0 ? '+' : ''}${Number(value)}`;
-    const spread = row => {
-      const value = finiteNumber(row.consensus_home_spread);
-      if (value === null) return '—';
-      const team = value <= 0 ? row.home_team : row.away_team;
-      return `${team} -${Math.abs(value).toFixed(1)}`;
-    };
-    const movement = row => {
-      const observed = sharpRows.find(item => String(item.sport || '').toUpperCase() === row.sport && item.home_team === row.home_team && item.away_team === row.away_team);
-      const opening = finiteNumber(observed?.opening_home_spread ?? row.opening_home_spread);
-      const current = finiteNumber(observed?.current_home_spread ?? row.consensus_home_spread);
-      if (opening === null || current === null) return 'Awaiting history';
-      return `${line(opening)} → ${line(current)}${opening === current ? ' · unchanged' : ''}`;
-    };
-    const reference = row => {
-      const quote = row.reference_spread;
-      if (quote) return `<span class="research-quote"><strong>${esc(quote.bookmaker || 'Reference book')}</strong><br>${esc(row.away_team)} ${line(quote.away_spread)} (${american(quote.away_price)})<br>${esc(row.home_team)} ${line(quote.home_spread)} (${american(quote.home_price)})</span>`;
-      const moneyline = row.reference_moneyline;
-      if (moneyline) return `<span class="research-quote"><strong>${esc(moneyline.provider || 'Reference book')} moneyline</strong><br>${esc(row.away_team)} ${american(moneyline.away_price)} · ${esc(row.home_team)} ${american(moneyline.home_price)}</span>`;
-      return '<span class="research-muted">Price unavailable</span>';
-    };
-    const noVig = row => {
-      const probabilities = row.reference_spread?.no_vig_probability || row.reference_moneyline?.no_vig_probability;
-      return probabilities ? `${esc(row.away_team)} ${number(100 * probabilities.away)}%<br>${esc(row.home_team)} ${number(100 * probabilities.home)}%` : '—';
-    };
-    const bookLines = row => !row.book_lines?.length ? '' : `<details class="research-book-lines"><summary>${row.book_lines.length} book quotes</summary>${row.book_lines.map(book => {
-      const quote=book.spread; const total=book.total;
-      return `<div>${esc(book.bookmaker)} · ${quote ? `${esc(row.home_team)} ${line(quote.home_spread)} (${american(quote.home_price)})` : 'spread —'} · ${total ? `O/U ${number(total.total)} (${american(total.over_price)}/${american(total.under_price)})` : 'total —'}</div>`;
-    }).join('')}</details>`;
-    const paint = query => {
-      const terms = String(query || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
-      const shown = rows.filter(row => terms.every(term => `${row.away_team} ${row.home_team}`.toLowerCase().includes(term))).slice(0,100);
-      $('#research-odds-body').innerHTML = shown.length ? shown.map(row => `<tr><td>${esc(row.sport)}</td><td><strong>${esc(row.away_team)} at ${esc(row.home_team)}</strong>${bookLines(row)}</td><td>${esc(time(row.start_date))}</td><td>${esc(spread(row))}<br>O/U ${finiteNumber(row.consensus_total) === null ? '—' : number(row.consensus_total)}<br><span class="research-muted">${esc(row.bookmaker || `${row.book_count || 0} books`)}</span></td><td>${reference(row)}</td><td>${esc(movement(row))}</td><td>${noVig(row)}</td><td><button class="research-track" type="button" data-track-sport="${esc(row.sport.toLowerCase())}" data-track-game="${esc(row.game_id || '')}" ${row.game_id ? '' : 'disabled'}>Track</button></td></tr>`).join('') : '<tr><td colspan="8">No current games match.</td></tr>';
-      $('#research-odds-count').textContent = `${shown.length} of ${rows.length} current games`;
-    };
-    $('#research-odds').innerHTML = `<section class="research-summary"><h3>Current Odds Screen</h3><p class="research-muted">Consensus, named two-sided prices, line history and no-vig probabilities. Pinnacle and BetOnline are preferred when available. Prices remain separate from Model A; public ticket and handle percentages will appear only after a licensed splits feed is connected.</p><input id="research-odds-search" class="research-search" type="search" placeholder="Search either team"><span id="research-odds-count" class="research-muted"></span><div class="research-table-wrap"><table class="research-table" style="min-width:1280px"><thead><tr><th>Sport</th><th>Matchup / books</th><th>Start</th><th>Consensus</th><th>Price reference</th><th>Movement</th><th>No-vig</th><th>Play slip</th></tr></thead><tbody id="research-odds-body"></tbody></table></div><p class="research-muted">CFB feed updated ${esc(time(data.meta?.generated_at_utc || data.meta?.generated))}. Line movement by itself is not labeled sharp money or RLM.</p></section>`;
-    $('#research-odds-search').addEventListener('input', event => paint(event.target.value)); paint('');
-    $('#research-odds-body').addEventListener('click', event => {
-      const button = event.target.closest('[data-track-game]');
-      if (!button || !button.dataset.trackGame) return;
-      window.THITrackPlay({game_id:button.dataset.trackGame,sport:button.dataset.trackSport,market:'spread'});
-    });
-  }).catch(() => { $('#research-odds').innerHTML = '<p class="research-muted">The current odds board will populate when market lines are available.</p>'; });
+  // Live book comparisons are rendered inside each projection matchup view.
 
   if (!config.enabled || !/^https:\/\/[^/]+\.supabase\.co$/.test(config.url || '') || !config.publishableKey) {
     privateBox.innerHTML = '<p class="research-muted">Private play logging is being set up. The weekly scorecard above is available now.</p>';

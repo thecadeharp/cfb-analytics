@@ -138,7 +138,8 @@ def project_players(players: dict[str, Any], priors: dict[str, Any]) -> tuple[li
     return projections, rotations
 
 def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[str, Any], board: dict[str, Any], tracking: dict[str, Any], model: dict[str, Any], home_court: dict[str, Any] | None = None) -> dict[str, Any]:
-    player_rows, rotations = project_players(players, priors)
+    rosters_verified = players.get("meta", {}).get("roster_verification_status") in (None, "provider_verified")
+    player_rows, rotations = project_players(players if rosters_verified else {"players": []}, priors)
     prior_rows = priors.get("teams") or []
     prior_map = {str(row.get("team_id")): row for row in prior_rows}
     profile_map = {str(row.get("team_id")): row for row in profiles.get("teams") or []}
@@ -301,7 +302,7 @@ def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[
             {"factor": "Opponent-adjusted team efficiency", "status": "active", "model_usage": "projection_input", "evidence": "Chronological team state built from possessions completed before tipoff."},
             {"factor": "Tempo and Four Factors", "status": "active", "model_usage": "projection_input", "evidence": "Neutral preseason baselines transition into chronological current-season observations."},
             {"factor": "Program-specific home-court effect", "status": "active", "model_usage": "projection_input", "evidence": f"Five-season regularized estimates shrink toward a {hca_national:.2f}-point national mean; neutral sites receive zero."},
-            {"factor": "Roster continuity and personnel", "status": "active_prior", "model_usage": "preseason_prior", "evidence": "Verified returners, recruiting and matched transfer production shape the opening prior."},
+            {"factor": "Roster continuity and personnel", "status": "active_prior" if rosters_verified else "withheld", "model_usage": "preseason_prior" if rosters_verified else "no_adjustment", "evidence": "Verified returners, recruiting and matched transfer production shape the opening prior." if rosters_verified else "The current fallback roster failed THI's verification gate, so no player or continuity adjustment is active."},
             {"factor": "Market disagreement", "status": "evaluation_only", "model_usage": "signal_and_accountability", "evidence": "Lines define signals, ATS grades and CLV; market prices do not fit the team-strength model."},
             {"factor": "Rest and situational flags", "status": "research_only", "model_usage": "display_only", "evidence": "Back-to-back, short-rest, lookahead, letdown and bounce-back states require incremental walk-forward validation."},
             {"factor": "Totals signal", "status": "withheld", "model_usage": "no_public_play", "evidence": "Independent totals promotion checks have not cleared."},
@@ -313,9 +314,10 @@ def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[
     return {
         "meta": {
             "version": VERSION, "season": priors.get("meta", {}).get("season"), "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-            "methodology": "THI uses regressed preseason priors, roster continuity and personnel quality, possession-based opponent-adjusted efficiency, chronological Four Factors, pace, regularized program-specific home-court effects and walk-forward updates. Market prices remain evaluation fields. Situational flags are displayed as research context until each feature clears out-of-sample validation.",
+            "methodology": "THI uses regressed preseason priors, verified roster continuity when available, possession-based opponent-adjusted efficiency, chronological Four Factors, pace, regularized program-specific home-court effects and walk-forward updates. Market prices remain evaluation fields. Situational flags are displayed as research context until each feature clears out-of-sample validation.",
             "inspiration_note": "Away-from-home performance, record quality, quadrant-style records, rating movement and recent form are THI calculations inspired by useful public dossier concepts; no external proprietary rating is copied or used as a model input.",
-            "player_projection_policy": "Qualified prior production receives per-game counting-stat projections; unverified statistical profiles receive role and impact context only.",
+            "player_projection_policy": "Qualified prior production receives per-game counting-stat projections only after the current roster source clears THI's verification gate. The active fallback is withheld.",
+            "roster_verification_status": players.get("meta", {}).get("roster_verification_status") or "legacy_verified_contract",
             "home_court_policy": "Program effects use five seasons of conference games, recency weighting and shrinkage toward the national mean; neutral-site games receive zero.",
             "situational_policy": "Rest, back-to-back, lookahead and result-response flags are research context only. Injury and travel adjustments remain unavailable until verified feeds and out-of-sample validation exist.",
             "market_policy": "Market prices are comparison and accountability fields, never predictive features.",

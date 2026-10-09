@@ -59,7 +59,9 @@ jobs:
           CBBD_API_KEY: ${{ secrets.CBBD_API_KEY }}
           CBB_PLAYER_SOURCE_SEASON: ${{ inputs.source_season }}
           CBB_PLAYER_ROSTER_SEASON: ${{ inputs.roster_season }}
-        run: python scripts/build_cbb_player_research.py
+        run: |
+          python scripts/build_cbb_player_research.py
+          python scripts/audit_cbb_roster_integrity.py
 
       - name: Validate output and isolation
         run: |
@@ -74,7 +76,8 @@ jobs:
           print("CBB player metadata:", json.dumps(meta, indent=2))
           print("CBB player coverage:", json.dumps(payload["coverage"], indent=2))
           assert meta["version"] == "thi-cbb-player-research-v1.3"
-          assert meta["activation_state"] == "research_reference_only"
+          verified = meta["roster_verification_status"] == "provider_verified"
+          assert meta["activation_state"] == ("research_reference_only" if verified else "withheld_pending_verified_rosters")
           assert meta["raw_api_data_stored"] is False
           assert meta["cbbd_request_count"] in (5, 6)
           assert meta["roster_source"] in ("cbbd", "espn_current_roster_fallback")
@@ -88,7 +91,7 @@ jobs:
           assert sum((row["returning_minutes_pct"] or 0) > 0 for row in payload["team_rosters"]) >= 250
           assert len(players) == meta["player_count"]
           assert len({row["player_season_id"] for row in players}) == len(players)
-          assert all(row["current_roster_verified"] is True for row in players)
+          assert all(row["current_roster_verified"] is verified for row in players)
           assert all(row["source_season"] == meta["source_season"] for row in players)
           assert all(
               row["sample"]["minutes"] >= meta["minimum_minutes"]
@@ -106,7 +109,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/cbb/player_ratings.json
+          git add data/cbb/player_ratings.json data/cbb/roster_audit.json
           git diff --cached --quiet && exit 0
           git commit -m "Build CBB player research layer"
           git pull --rebase origin main
