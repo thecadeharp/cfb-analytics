@@ -567,6 +567,14 @@
     return `<span class="cbb-team-logo cbb-team-logo-${size}">${profile?.logo_url ? `<img src="${escapeHtml(profile.logo_url)}" alt="" loading="lazy">` : `<b>${escapeHtml(initials)}</b>`}</span>`;
   }
 
+  function spreadTeamLabel(team, formattedLine) {
+    const fullName = String(team?.team || "—");
+    const abbreviation = String(teamProfile(team?.team_id)?.abbreviation || "").trim();
+    return `${fullName} ${formattedLine}`.length > 18 && abbreviation
+      ? abbreviation
+      : fullName;
+  }
+
   function projectionRow(game) {
     const projection = game.projection || {};
     const start = new Date(game.start_date);
@@ -575,18 +583,28 @@
     const gameType = game.conference_game ? "Conference" : "Nonconference";
     const margin = Number(projection.home_margin);
     const favoredTeam = margin >= 0 ? game.home : game.away;
-    const projectedLine = `${favoredTeam?.team || "—"} -${number(Math.abs(margin),1)}`;
+    const projectedNumber = `-${number(Math.abs(margin),1)}`;
+    const projectedLine = `${spreadTeamLabel(favoredTeam, projectedNumber)} ${projectedNumber}`;
+    const projectedLineFull = `${favoredTeam?.team || "—"} ${projectedNumber}`;
     const marketLine = game.market?.consensus_home_spread == null ? NaN : Number(game.market.consensus_home_spread);
     const marketTeam = Number.isFinite(marketLine) ? (marketLine <= 0 ? game.home : game.away) : null;
-    const marketText = marketTeam ? `${marketTeam.team} -${number(Math.abs(marketLine),1)}` : "Not posted";
+    const marketNumber = Number.isFinite(marketLine) ? `-${number(Math.abs(marketLine),1)}` : "";
+    const marketText = marketTeam ? `${spreadTeamLabel(marketTeam, marketNumber)} ${marketNumber}` : "Not posted";
+    const marketTextFull = marketTeam ? `${marketTeam.team} ${marketNumber}` : "Not posted";
     const edge = projection.spread_edge == null ? NaN : Number(projection.spread_edge);
     const edgeTeam = Number.isFinite(edge) ? (edge >= 0 ? game.home : game.away) : null;
     const tier = signalTier(game);
     const edgeMarketNumber = edgeTeam && tier !== "aligned" && Number.isFinite(marketLine)
       ? (String(edgeTeam.team_id) === String(game.home?.team_id) ? marketLine : -marketLine)
       : NaN;
-    const edgeMarketText = edgeTeam && Number.isFinite(edgeMarketNumber)
-      ? `${edgeTeam.team} ${edgeMarketNumber > 0 ? "+" : ""}${number(edgeMarketNumber,1)}`
+    const edgeMarketFormatted = Number.isFinite(edgeMarketNumber)
+      ? `${edgeMarketNumber > 0 ? "+" : ""}${number(edgeMarketNumber,1)}`
+      : "";
+    const edgeMarketText = edgeTeam && edgeMarketFormatted
+      ? `${spreadTeamLabel(edgeTeam, edgeMarketFormatted)} ${edgeMarketFormatted}`
+      : null;
+    const edgeMarketTextFull = edgeTeam && edgeMarketFormatted
+      ? `${edgeTeam.team} ${edgeMarketFormatted}`
       : null;
     const confidence = confidenceTier(game);
     const totalMarket = validMarketTotal(game.market?.consensus_total) ? Number(game.market.consensus_total) : null;
@@ -603,8 +621,8 @@
     return `<tr class="cbb-projection-row" data-cbb-game-id="${escapeHtml(game.game_id)}">
       <td><div class="cbb-matchup-team">${teamLogo(game.away,"small")}<div class="cbb-matchup-name"><strong>${escapeHtml(game.away?.team || "—")}</strong>${awayRank ? `<small>#${awayRank}</small>` : ""}</div><span>${gameStatus(game) === "final" ? integer(game.away?.score) : ""}</span></div><div class="cbb-matchup-team">${teamLogo(game.home,"small")}<div class="cbb-matchup-name"><strong>${escapeHtml(game.home?.team || "—")}</strong>${homeRank ? `<small>#${homeRank}</small>` : ""}</div><span>${gameStatus(game) === "final" ? integer(game.home?.score) : ""}</span></div><div class="cbb-team-meta">${escapeHtml(time)} · ${escapeHtml(network)} · ${gameType}</div>${varianceMarkup}</td>
       <td><span class="cbb-watch-score">${integer(watch)}</span><div class="cbb-team-meta">${watchLabel}</div></td>
-      <td class="cbb-line-cell"><strong class="cbb-number cbb-line-value" title="${escapeHtml(edgeMarketText || projectedLine)}">${escapeHtml(edgeMarketText || projectedLine)}</strong><div class="cbb-team-meta">${edgeMarketText ? "THI preferred side at current market" : "THI projected spread"}</div></td>
-      <td class="cbb-line-cell"><strong class="cbb-number cbb-line-value" title="${escapeHtml(marketText)}">${escapeHtml(marketText)}</strong><div class="cbb-team-meta">${game.market?.book_count ? `${integer(game.market.book_count)} books` : "No consensus line"}</div></td>
+      <td class="cbb-line-cell"><strong class="cbb-number cbb-line-value" title="${escapeHtml(edgeMarketTextFull || projectedLineFull)}">${escapeHtml(edgeMarketText || projectedLine)}</strong><div class="cbb-team-meta">${edgeMarketText ? "THI preferred side at current market" : "THI projected spread"}</div></td>
+      <td class="cbb-line-cell"><strong class="cbb-number cbb-line-value" title="${escapeHtml(marketTextFull)}">${escapeHtml(marketText)}</strong><div class="cbb-team-meta">${game.market?.book_count ? `${integer(game.market.book_count)} books` : "No consensus line"}</div></td>
       <td><strong class="cbb-number">${Number.isFinite(projectedTotal) && projectedTotal > 0 ? number(projectedTotal,1) : "—"}</strong><div class="cbb-team-meta">Market ${totalMarket !== null ? number(totalMarket,1) : "—"}</div>${totalFlag}</td>
       <td><strong class="cbb-edge-value">${Number.isFinite(edge) ? `${number(Math.abs(edge),1)} pts` : "—"}</strong><div class="cbb-team-meta">${edgeTeam ? `Model favors ${escapeHtml(edgeTeam.team)}` : "No market comparison"}</div></td>
       <td><span class="cbb-signal cbb-signal-${tier}">${escapeHtml(signalLabel(tier))}</span></td>
