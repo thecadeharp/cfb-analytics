@@ -36,6 +36,9 @@ jobs:
         run: |
           python scripts/build_projections.py
 
+      - name: Enrich confirmed kickoff, broadcast and venue metadata
+        run: python scripts/enrich_cfb_schedule.py
+
       - name: Commit refreshed projections
         run: |
           git config user.name "github-actions[bot]"
@@ -43,6 +46,7 @@ jobs:
 
           git add data/odds.json
           git add data/projections.json
+          git add data/schedule.json
 
           if git diff --cached --quiet; then
             echo "No projection changes to commit."

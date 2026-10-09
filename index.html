@@ -181,7 +181,7 @@
 
     .tape-controls {
       display: grid;
-      grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(180px, 0.8fr) auto;
+      grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(180px, 0.8fr) auto auto;
       gap: 12px;
       align-items: end;
       padding: 18px;
@@ -228,6 +228,103 @@
     .tape-button:hover {
       opacity: 0.88;
     }
+
+    .tape-button-secondary {
+      color: var(--text);
+      background: transparent;
+      border-color: var(--border);
+    }
+
+    .luck-table-wrap {
+      margin-top: 12px;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .luck-table {
+      width: 100%;
+      min-width: 680px;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .luck-table th,
+    .luck-table td {
+      padding: 13px 14px;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .luck-table tr:last-child th,
+    .luck-table tr:last-child td { border-bottom: none; }
+    .luck-table th:last-child,
+    .luck-table td:last-child { border-right: none; }
+
+    .luck-table thead th {
+      background: color-mix(in srgb, var(--surface) 86%, var(--text) 4%);
+    }
+
+    .luck-table thead th:first-child,
+    .luck-table tbody th { width: 28%; }
+
+    .luck-table tbody th > span,
+    .luck-split-name {
+      display: block;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .luck-table tbody th small,
+    .luck-split-meta {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 500;
+      line-height: 1.35;
+    }
+
+    .luck-developing {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 2px 6px;
+      color: #9a6c00;
+      background: rgba(214, 164, 31, 0.12);
+      border: 1px solid rgba(214, 164, 31, 0.3);
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .luck-value {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .luck-value.positive { color: #15976f; }
+    .luck-value.negative { color: #c45b58; }
+
+    .luck-bar {
+      height: 4px;
+      margin-top: 8px;
+      overflow: hidden;
+      background: rgba(127, 137, 148, 0.15);
+      border-radius: 999px;
+    }
+
+    .luck-bar span { display: block; height: 100%; border-radius: inherit; background: #778391; }
+    .luck-bar span.positive { background: #15976f; }
+    .luck-bar span.negative { background: #c45b58; }
+    .luck-empty { color: var(--muted); }
 
     .tape-result {
       margin-top: 16px;
@@ -1538,7 +1635,7 @@
 
   </main>
 
-  <script src="app.js?v=2026-book-branding-v03"></script>
+  <script src="app.js?v=2026-cfb-schedule-luck-v01"></script>
   <script src="thi-ratings-hub.js?v=2026-ux-cleanup-v01"></script>
   <script src="portfolio-config.js"></script>
   <script src="account-access.js?v=2026-track-play-v01"></script>

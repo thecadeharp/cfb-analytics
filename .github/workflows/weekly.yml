@@ -48,6 +48,9 @@ jobs:
         run: |
           python scripts/build_projections.py
 
+      - name: Enrich confirmed kickoff, broadcast and venue metadata
+        run: python scripts/enrich_cfb_schedule.py
+
       - name: Build display-only THI season outlook
         run: |
           sha256sum \

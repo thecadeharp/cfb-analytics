@@ -302,6 +302,10 @@ function gameBroadcastText(game) {
   ).trim();
 }
 
+function gameVenueText(game) {
+  return String(game?.venue ?? "").trim();
+}
+
 function metricRank(team, section, rankField, value) {
   if (!hasValue(value)) return "";
   const rank = team?.[section]?.[rankField];
@@ -2540,7 +2544,8 @@ function renderProjectionRow(game) {
     : "No market line";
 
   const gameId = String(game.game_id ?? "");
-  const broadcast = gameBroadcastText(game);
+  const broadcast = gameBroadcastText(game) || "TV TBD";
+  const venue = gameVenueText(game) || "Venue TBD";
 
   return `
     <tr
@@ -2570,7 +2575,10 @@ function renderProjectionRow(game) {
         </div>
 
         <div class="team-meta" style="margin-top:5px;">
-          ${escapeHtml(gameDateText(game.start_date))}${broadcast ? ` · ${escapeHtml(broadcast)}` : ""}
+          ${escapeHtml(gameDateText(game.start_date))} · ${escapeHtml(broadcast)}
+        </div>
+        <div class="team-meta" style="margin-top:3px;">
+          ${escapeHtml(venue)}
         </div>
       </td>
 
@@ -3474,7 +3482,8 @@ function renderMatchup(game) {
 
   const fairLine = favoredLine(homeName, awayName, modelSpread);
   const marketLine = favoredLine(homeName, awayName, marketSpread);
-  const broadcast = gameBroadcastText(game);
+  const broadcast = gameBroadcastText(game) || "TV TBD";
+  const venue = gameVenueText(game) || "Venue TBD";
 
   const modelEdgeSide =
     preferred && hasValue(marketSpread)
@@ -3491,8 +3500,8 @@ function renderMatchup(game) {
         <div class="matchup-subtitle">
           Week ${game.week ?? "—"}
           · ${escapeHtml(gameDateText(game.start_date))}
-          ${broadcast ? ` · ${escapeHtml(broadcast)}` : ""}
-          ${game.venue ? ` · ${escapeHtml(game.venue)}` : ""}
+          · ${escapeHtml(broadcast)}
+          · ${escapeHtml(venue)}
         </div>
       </div>
 
@@ -5046,6 +5055,14 @@ function renderMatchupAnalysis(errorMessage = "") {
       >
         Run Analysis
       </button>
+
+      <button
+        class="tape-button tape-button-secondary"
+        type="button"
+        onclick="clearMatchupAnalysis()"
+      >
+        Clear
+      </button>
     </div>
 
     ${
@@ -5108,6 +5125,16 @@ function runMatchupAnalysis() {
     : "neutral";
 
   renderMatchupAnalysis();
+}
+
+function clearMatchupAnalysis() {
+  tapeTeamA = null;
+  tapeTeamB = null;
+  tapeVenue = "neutral";
+  renderMatchupAnalysis();
+  window.requestAnimationFrame(() => {
+    document.getElementById("matchup-team-a")?.focus();
+  });
 }
 
 
@@ -5919,6 +5946,7 @@ function renderSeasonOutlook(team) {
   const scheduleRows = (season.schedule ?? []).map(game => {
     const gameId = String(game?.game_id ?? "");
     const official = scheduleGameRecord(gameId);
+    const broadcast = String(official?.network ?? "").trim() || "TV TBD";
     const context = scheduleTeamContext(team.team, gameId);
     const result = scheduleResult(team.team, official);
     const completed = String(official?.status ?? game?.status ?? "").toLowerCase() === "completed";
@@ -5935,6 +5963,7 @@ function renderSeasonOutlook(team) {
         <td data-label="Week / Date">
           <strong>Week ${game.week ?? "—"}</strong>
           <div class="schedule-date">${escapeHtml(gameDateText(game.start_date))}</div>
+          <div class="schedule-secondary">${escapeHtml(broadcast)}</div>
         </td>
 
         <td data-label="Opponent">
@@ -6405,33 +6434,63 @@ function teamLuckMarkup(teamName) {
   const payload = teamIntelligenceData?.teams?.[teamName];
   const splits = payload?.splits;
   if (!splits?.all) return "";
-  const card = (label, value, note = "") => `
-    <div class="stat-card">
-      <div class="stat-label">${escapeHtml(label)}</div>
-      <div class="stat-value">${value}</div>
-      ${note ? `<div class="stat-note">${escapeHtml(note)}</div>` : ""}
-    </div>`;
   const split = (name, label) => {
     const row = splits[name] ?? {};
-    const luck = row.luck ?? {};
     const developing = name !== "all" && (
       Number(row.games || 0) < 2 || Number(row.offensive_plays || 0) < 120 || Number(row.defensive_plays || 0) < 120
     );
-    return `<section class="panel" style="padding:14px;">
-      <div class="panel-title">${escapeHtml(label)}</div>
-      <div class="team-meta" style="margin:5px 0 12px;">${escapeHtml(row.record ?? "0-0")} · ${formatNumber(row.games, 0)} games${developing ? " · developing sample" : ""}</div>
-      <div class="metric-grid">
-        ${card("Net EPA / Play", formatSigned(row.net_epa_per_play, 3))}
-        ${card("Scoreboard Luck", formatSigned(luck.net_scoreboard_luck, 1), "Actual margin − deserved margin")}
-        ${card("Points Left on Field", formatNumber(luck.points_left_on_field, 1))}
-        ${card("TO Points Recredited", formatNumber(luck.turnover_points_recredited, 1))}
-      </div>
-    </section>`;
+    return { name, label, row, luck: row.luck ?? {}, developing };
+  };
+  const columns = [
+    split("all", "All Games"),
+    split("conference", "Conference"),
+    split("nonconference", "Nonconference")
+  ];
+  const metrics = [
+    { label: "Net EPA / Play", note: "Efficiency margin per play", key: "net_epa_per_play", digits: 3, signed: true },
+    { label: "Scoreboard Luck", note: "Actual margin − deserved margin", key: "net_scoreboard_luck", digits: 1, signed: true, luck: true },
+    { label: "Points Left on Field", note: "Expected points not converted", key: "points_left_on_field", digits: 1, luck: true },
+    { label: "TO Points Recredited", note: "Turnover-driven points normalized", key: "turnover_points_recredited", digits: 1, luck: true }
+  ];
+  const valueFor = (column, metric) => {
+    const raw = metric.luck ? column.luck?.[metric.key] : column.row?.[metric.key];
+    return raw === null || raw === undefined || raw === "" ? Number.NaN : Number(raw);
+  };
+  const cell = (column, metric, maxAbsolute) => {
+    const value = valueFor(column, metric);
+    if (!Number.isFinite(value)) return `<td><span class="luck-empty">—</span></td>`;
+    const width = maxAbsolute > 0 ? Math.max(4, Math.round(Math.abs(value) / maxAbsolute * 100)) : 0;
+    const tone = metric.signed ? (value > 0 ? "positive" : value < 0 ? "negative" : "neutral") : "neutral";
+    const display = metric.signed ? formatSigned(value, metric.digits) : formatNumber(value, metric.digits);
+    return `<td>
+      <div class="luck-value ${tone}">${display}</div>
+      <div class="luck-bar" aria-hidden="true"><span class="${tone}" style="width:${width}%"></span></div>
+    </td>`;
   };
   return `<section class="panel" style="margin-top:12px; padding:16px;">
     <div class="panel-header"><div><div class="panel-title">Luck & Conversion</div>
       <div class="team-meta" style="margin-top:5px;">Descriptive beta · actual versus THI deserved scoring · no Model A effect</div></div></div>
-    <div class="dossier-layout" style="margin-top:12px;">${split("all", "All Games")}${split("conference", "Conference")}${split("nonconference", "Nonconference")}</div>
+    <div class="luck-table-wrap">
+      <table class="luck-table" aria-label="Luck and conversion by schedule split">
+        <thead><tr>
+          <th scope="col">Metric</th>
+          ${columns.map(column => `<th scope="col">
+            <span class="luck-split-name">${escapeHtml(column.label)}</span>
+            <span class="luck-split-meta">${escapeHtml(column.row.record ?? "0-0")} · ${formatNumber(column.row.games, 0)} games</span>
+            ${column.developing ? `<span class="luck-developing">Developing</span>` : ""}
+          </th>`).join("")}
+        </tr></thead>
+        <tbody>
+          ${metrics.map(metric => {
+            const maxAbsolute = Math.max(...columns.map(column => Math.abs(valueFor(column, metric))).filter(Number.isFinite), 0);
+            return `<tr>
+              <th scope="row"><span>${escapeHtml(metric.label)}</span><small>${escapeHtml(metric.note)}</small></th>
+              ${columns.map(column => cell(column, metric, maxAbsolute)).join("")}
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
     <div class="thi-roster-source-note">Positive scoreboard luck means the final margins were more favorable than the underlying game-quality profile. Conference samples remain labeled developing until two games and 120 plays on both sides.</div>
   </section>`;
 }

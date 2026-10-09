@@ -126,6 +126,9 @@ jobs:
         run: |
           python scripts/build_market_layer.py
 
+      - name: Enrich confirmed kickoff, broadcast and venue metadata
+        run: python scripts/enrich_cfb_schedule.py
+
       - name: Commit THI market layer
         run: |
           git config user.name "github-actions[bot]"
@@ -134,6 +137,7 @@ jobs:
           git add data/odds.json
           git add data/projections.json
           git add data/market_history.json
+          git add data/schedule.json
 
           if git diff --cached --quiet; then
             echo "No THI market-layer changes to commit."
