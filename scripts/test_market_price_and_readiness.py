@@ -25,8 +25,10 @@ class PriceContractTest(unittest.TestCase):
         self.assertEqual(len(books), 10)
         self.assertIn("novig", books)
         self.assertIn("prophetx", books)
+        self.assertIn("espnbet", books)
         self.assertNotIn("lowvig", books)
         self.assertNotIn("mybookieag", books)
+        self.assertNotIn("bovada", books)
 
     def test_cfb_reference_quote_is_two_sided_and_prefers_sharp_book(self):
         raw = {

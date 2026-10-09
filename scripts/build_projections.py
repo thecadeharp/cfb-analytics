@@ -49,7 +49,7 @@ SCHEDULE_PATH = "data/schedule.json"
 ODDS_PATH = "data/odds.json"
 ODDS_SCREEN_BOOKMAKERS = (
     "betonlineag,draftkings,fanduel,fanatics,betmgm,betrivers,"
-    "williamhill_us,bovada,novig,prophetx"
+    "williamhill_us,espnbet,novig,prophetx"
 )
 PROJECTIONS_PATH = "data/projections.json"
 

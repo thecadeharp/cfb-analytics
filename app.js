@@ -3746,9 +3746,9 @@ function sportsbookBadge(book) {
   const brands = {
     pinnacle: ["PIN", "Pinnacle"], betonlineag: ["BOL", "BetOnline"], betonline: ["BOL", "BetOnline"],
     draftkings: ["DK", "DraftKings"], fanduel: ["FD", "FanDuel"], betmgm: ["MGM", "BetMGM"],
-    betrivers: ["BR", "BetRivers"], caesars: ["CZR", "Caesars"], fanatics: ["FAN", "Fanatics"],
+    betrivers: ["BR", "BetRivers"], caesars: ["CZR", "Caesars"], caesarssportsbook: ["CZR", "Caesars"], williamhillus: ["CZR", "Caesars"], fanatics: ["FAN", "Fanatics"],
     bet365: ["365", "bet365"], hardrockbet: ["HR", "Hard Rock Bet"],
-    bovada: ["BOV", "Bovada"], novig: ["NVG", "Novig"], prophetx: ["PX", "ProphetX"], bookmaker: ["BKR", "Bookmaker"]
+    bovada: ["BOV", "Bovada"], espnbet: ["SCR", "theScore Bet"], thescorebet: ["SCR", "theScore Bet"], novig: ["NVG", "Novig"], prophetx: ["PX", "ProphetX"], bookmaker: ["BKR", "Bookmaker"]
   };
   const brand = brands[key] || [String(book?.bookmaker || book?.provider || "BOOK").slice(0, 4).toUpperCase(), book?.bookmaker || book?.provider || "Sportsbook"];
   return `<span class="thi-book-badge thi-book-${escapeHtml(key)}" title="${escapeHtml(brand[1])}" aria-label="${escapeHtml(brand[1])}">${escapeHtml(brand[0])}</span>`;
@@ -3788,7 +3788,7 @@ function marketMovementMarkup(game) {
   const reference = current.reference_spread ?? {};
   const total = current.reference_total ?? {};
   const bookLines = Array.isArray(current.book_lines) ? current.book_lines.slice().sort((a,b) => {
-    const priority = {pinnacle:0,circasports:1,betonlineag:2,bookmaker:3,novig:4,prophetx:5};
+    const priority = {pinnacle:0,circasports:1,betonlineag:2,bookmaker:3,novig:4,prophetx:5,espnbet:6};
     return (priority[a.bookmaker_key] ?? 50) - (priority[b.bookmaker_key] ?? 50);
   }) : [];
   const rows = snapshots.slice(-24).reverse().map((snapshot, index) => {

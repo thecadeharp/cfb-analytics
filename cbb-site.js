@@ -660,8 +660,8 @@
     const key = String(book?.bookmaker_key || book?.provider || book?.bookmaker || "book").toLowerCase().replace(/[^a-z0-9]/g, "");
     const brands = {
       pinnacle:["PIN","Pinnacle"],betonlineag:["BOL","BetOnline"],betonline:["BOL","BetOnline"],draftkings:["DK","DraftKings"],
-      fanduel:["FD","FanDuel"],betmgm:["MGM","BetMGM"],betrivers:["BR","BetRivers"],caesars:["CZR","Caesars"],
-      fanatics:["FAN","Fanatics"],bet365:["365","bet365"],hardrockbet:["HR","Hard Rock Bet"],novig:["NVG","Novig"],prophetx:["PX","ProphetX"]
+      fanduel:["FD","FanDuel"],betmgm:["MGM","BetMGM"],betrivers:["BR","BetRivers"],caesars:["CZR","Caesars"],caesarssportsbook:["CZR","Caesars"],williamhillus:["CZR","Caesars"],
+      fanatics:["FAN","Fanatics"],bet365:["365","bet365"],hardrockbet:["HR","Hard Rock Bet"],espnbet:["SCR","theScore Bet"],thescorebet:["SCR","theScore Bet"],novig:["NVG","Novig"],prophetx:["PX","ProphetX"]
     };
     const brand = brands[key] || [String(book?.provider || book?.bookmaker || "BOOK").slice(0,4).toUpperCase(),book?.provider || book?.bookmaker || "Sportsbook"];
     return `<span class="thi-book-badge thi-book-${escapeHtml(key)}" title="${escapeHtml(brand[1])}" aria-label="${escapeHtml(brand[1])}">${escapeHtml(brand[0])}</span>`;
