@@ -135,7 +135,7 @@ def candidate_table(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def build(history_dir: Path, personnel_dir: Path) -> dict[str, Any]:
     seasons = load_seasons(history_dir)
     personnel = load_personnel(personnel_dir)
-    rows, _states = generate_rows(seasons, personnel)
+    rows = generate_rows(seasons, personnel)
     add_challenger_features(rows)
     candidates = candidate_table(rows)
     selected = candidates[0]

@@ -197,7 +197,11 @@ jobs:
           assert "active-roster quality" in bracket["meta"]["methodology"]
           assert all("roster_adjustment" in row for row in bracket["field"])
           assert intelligence["meta"]["version"] == "thi-cbb-intelligence-suite-v1.3"
-          assert len(intelligence["player_projections"]) >= 1500
+          if roster_audit["meta"]["status"] == "passed":
+              assert len(intelligence["player_projections"]) >= 1500
+          else:
+              assert len(intelligence["player_projections"]) == 0
+              assert intelligence["meta"]["roster_verification_status"] == "withheld_unverified_fallback"
           assert len(intelligence["team_dossiers"]) >= 300
           assert len(intelligence["game_context"]) == projections["meta"]["game_count"]
           assert all("schedule_strength" in row and "projected_core_lineup" in row for row in intelligence["team_dossiers"])
