@@ -1,5 +1,10 @@
 # THI pregame operations runbook
 
+## Permanent decision records
+
+- [Commercial launch readiness](commercial-launch-readiness.md) records the source-rights, paywall architecture, customer-policy, affiliate, and legal-review gates that must clear before THI accepts payment.
+- [CBB model version review](cbb-model-version-review.md) preserves the v0.6 rollback request and the prospective evidence required to compare it fairly with v0.7.
+
 ## Weekly CFBD challenger audit
 
 Keep each licensed Model Training Pack in `data/private/cfbd_training_packs/`. The directory is gitignored. Audit the new pack, then build its aggregate scorecard:
