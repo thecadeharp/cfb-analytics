@@ -1,5 +1,5 @@
 {
-  "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+  "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
   "model_version": "production-model-a-2026-week1-freeze-v1",
   "snapshots_added": 69,
   "excluded_untracked_games": 127,
@@ -7,10 +7,10 @@
   "note": "Prospective timestamped Model A model/market snapshot. Closing lines are evaluation targets only. tracking_eligible=false and FCS fallback games are excluded.",
   "snapshots": [
     {
-      "snapshot_id": "5ddff024d56c061076e41c66",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "8ee06deb7ccf7bc267cae183",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858254,
@@ -30,7 +30,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "79\u00b0F \u00b7 5 mph wind \u00b7 Dry",
+        "conditions_line": "78\u00b0F \u00b7 3 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -44,36 +44,38 @@
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
           "home_spread": -3.5,
-          "home_price": -116,
+          "home_price": -109,
           "away_spread": 3.5,
-          "away_price": -104,
+          "away_price": -111,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
-            "home": 0.53703704,
-            "away": 0.50980392
+            "home": 0.5215311,
+            "away": 0.52606635
           },
           "no_vig_probability": {
-            "home": 0.51300728,
-            "away": 0.48699272
+            "home": 0.4978354,
+            "away": 0.5021646
           },
-          "overround": 0.04684096,
+          "overround": 0.04759745,
           "price_format": "american"
         },
         "reference_total": {
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "total": 59.0,
-          "under_total": 59.0,
-          "over_price": -115,
-          "under_price": -105,
+          "total": 60.0,
+          "under_total": 60.0,
+          "over_price": -109,
+          "under_price": -111,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
-            "over": 0.53488372,
-            "under": 0.51219512
+            "over": 0.5215311,
+            "under": 0.52606635
           },
           "no_vig_probability": {
-            "over": 0.51083424,
-            "under": 0.48916576
+            "over": 0.4978354,
+            "under": 0.5021646
           },
-          "overround": 0.04707884,
+          "overround": 0.04759745,
           "price_format": "american"
         },
         "price_policy": "single_book_two_sided_quote_only"
@@ -99,10 +101,10 @@
       }
     },
     {
-      "snapshot_id": "c716e84bf089b6460fe7e5ce",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "cc19f5b0408dd8d31b065b16",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858487,
@@ -122,32 +124,33 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "52\u00b0F \u00b7 4 mph wind \u00b7 gusts 12 \u00b7 Dry",
+        "conditions_line": "52\u00b0F \u00b7 7 mph wind \u00b7 gusts 12 \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
       "market_at_snapshot": {
-        "home_spread": -3.0,
-        "total": 41.5,
+        "home_spread": -2.5,
+        "total": 41.0,
         "bookmaker": "Consensus (11 books)",
         "reference_spread": {
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
           "home_spread": -3.0,
-          "home_price": -107,
+          "home_price": 105,
           "away_spread": 3.0,
-          "away_price": -113,
+          "away_price": -125,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
-            "home": 0.51690821,
-            "away": 0.53051643
+            "home": 0.48780488,
+            "away": 0.55555556
           },
           "no_vig_probability": {
-            "home": 0.49350396,
-            "away": 0.50649604
+            "home": 0.46753247,
+            "away": 0.53246753
           },
-          "overround": 0.04742464,
+          "overround": 0.04336043,
           "price_format": "american"
         },
         "reference_total": {
@@ -157,6 +160,7 @@
           "under_total": 41.0,
           "over_price": -115,
           "under_price": -105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51219512
@@ -171,7 +175,7 @@
         "price_policy": "single_book_two_sided_quote_only"
       },
       "comparison_at_snapshot": {
-        "disagreement": 1.5,
+        "disagreement": 2.0,
         "preferred_side": "Washington",
         "market_disagreement_status": "ALIGNED",
         "status_system": "v2_the_signal"
@@ -191,10 +195,10 @@
       }
     },
     {
-      "snapshot_id": "4a3e552696af5bf0033b6120",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "a49f9d18f9d4ba892a1a0e41",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401860922,
@@ -214,7 +218,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "73\u00b0F \u00b7 8 mph wind \u00b7 Dry",
+        "conditions_line": "72\u00b0F \u00b7 7 mph wind \u00b7 gusts 14 \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -231,6 +235,7 @@
           "home_price": -110,
           "away_spread": 5.5,
           "away_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -247,17 +252,18 @@
           "bookmaker_key": "betonlineag",
           "total": 43.5,
           "under_total": 43.5,
-          "over_price": -116,
-          "under_price": -104,
+          "over_price": -112,
+          "under_price": -108,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
-            "over": 0.53703704,
-            "under": 0.50980392
+            "over": 0.52830189,
+            "under": 0.51923077
           },
           "no_vig_probability": {
-            "over": 0.51300728,
-            "under": 0.48699272
+            "over": 0.50432975,
+            "under": 0.49567025
           },
-          "overround": 0.04684096,
+          "overround": 0.04753266,
           "price_format": "american"
         },
         "price_policy": "single_book_two_sided_quote_only"
@@ -283,10 +289,10 @@
       }
     },
     {
-      "snapshot_id": "e91f9c94ba81db0a8f8ea563",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "20c79ed22eeaa89092c24bcb",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401864519,
@@ -306,7 +312,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "70\u00b0F \u00b7 7 mph wind \u00b7 Dry",
+        "conditions_line": "70\u00b0F \u00b7 6 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -320,18 +326,19 @@
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
           "home_spread": -4.5,
-          "home_price": -110,
+          "home_price": -104,
           "away_spread": 4.5,
-          "away_price": -110,
+          "away_price": -116,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
-            "home": 0.52380952,
-            "away": 0.52380952
+            "home": 0.50980392,
+            "away": 0.53703704
           },
           "no_vig_probability": {
-            "home": 0.5,
-            "away": 0.5
+            "home": 0.48699272,
+            "away": 0.51300728
           },
-          "overround": 0.04761905,
+          "overround": 0.04684096,
           "price_format": "american"
         },
         "reference_total": {
@@ -341,6 +348,7 @@
           "under_total": 42.5,
           "over_price": -110,
           "under_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -375,10 +383,10 @@
       }
     },
     {
-      "snapshot_id": "eb9f69202e4d1e65abdacaef",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "8f9a8b28617ec934bde18906",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856826,
@@ -398,7 +406,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "74\u00b0F \u00b7 8 mph wind \u00b7 Dry",
+        "conditions_line": "74\u00b0F \u00b7 7 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -406,7 +414,7 @@
       },
       "market_at_snapshot": {
         "home_spread": -10.5,
-        "total": 46.5,
+        "total": 45.5,
         "bookmaker": "Consensus (11 books)",
         "reference_spread": {
           "bookmaker": "BetOnline.ag",
@@ -415,6 +423,7 @@
           "home_price": -118,
           "away_spread": 10.0,
           "away_price": -102,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.5412844,
             "away": 0.5049505
@@ -429,19 +438,20 @@
         "reference_total": {
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "total": 46.5,
-          "under_total": 46.5,
-          "over_price": -105,
-          "under_price": -115,
+          "total": 46.0,
+          "under_total": 46.0,
+          "over_price": -107,
+          "under_price": -113,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
-            "over": 0.51219512,
-            "under": 0.53488372
+            "over": 0.51690821,
+            "under": 0.53051643
           },
           "no_vig_probability": {
-            "over": 0.48916576,
-            "under": 0.51083424
+            "over": 0.49350396,
+            "under": 0.50649604
           },
-          "overround": 0.04707884,
+          "overround": 0.04742464,
           "price_format": "american"
         },
         "price_policy": "single_book_two_sided_quote_only"
@@ -467,10 +477,10 @@
       }
     },
     {
-      "snapshot_id": "e914fc73032a6122095f156b",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "45a36bb4cfef9eba412b88cc",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856823,
@@ -486,13 +496,13 @@
       },
       "public_projection": {
         "home_spread": 6.0,
-        "total": 52.5,
+        "total": 52.0,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "73\u00b0F \u00b7 8 mph wind \u00b7 gusts 14 \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
+        "conditions_line": "73\u00b0F \u00b7 12 mph wind \u00b7 gusts 20 \u00b7 Dry",
+        "impact": "Moderate",
+        "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
@@ -507,6 +517,7 @@
           "home_price": -107,
           "away_spread": -3.0,
           "away_price": -113,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.51690821,
             "away": 0.53051643
@@ -525,6 +536,7 @@
           "under_total": 61.5,
           "over_price": -105,
           "under_price": -115,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.51219512,
             "under": 0.53488372
@@ -559,10 +571,10 @@
       }
     },
     {
-      "snapshot_id": "d91a649f2c4616e094083f64",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "7b6375c35010b2f2a081a2bd",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858481,
@@ -595,19 +607,20 @@
         "reference_spread": {
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "home_spread": 7.5,
-          "home_price": -113,
-          "away_spread": -7.5,
-          "away_price": -107,
+          "home_spread": 7.0,
+          "home_price": -103,
+          "away_spread": -7.0,
+          "away_price": -117,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
-            "home": 0.53051643,
-            "away": 0.51690821
+            "home": 0.50738916,
+            "away": 0.53917051
           },
           "no_vig_probability": {
-            "home": 0.50649604,
-            "away": 0.49350396
+            "home": 0.48481628,
+            "away": 0.51518372
           },
-          "overround": 0.04742464,
+          "overround": 0.04655967,
           "price_format": "american"
         },
         "reference_total": {
@@ -617,6 +630,7 @@
           "under_total": 48.0,
           "over_price": -103,
           "under_price": -117,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.50738916,
             "under": 0.53917051
@@ -651,10 +665,10 @@
       }
     },
     {
-      "snapshot_id": "3083507ae077d0be1ba70bb2",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "e5e0e5a85cae066f76174e54",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858256,
@@ -674,7 +688,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "70\u00b0F \u00b7 7 mph wind \u00b7 gusts 12 \u00b7 Dry",
+        "conditions_line": "71\u00b0F \u00b7 8 mph wind \u00b7 gusts 15 \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -691,6 +705,7 @@
           "home_price": -115,
           "away_spread": 3.5,
           "away_price": -105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.53488372,
             "away": 0.51219512
@@ -709,6 +724,7 @@
           "under_total": 47.0,
           "over_price": -110,
           "under_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -743,10 +759,10 @@
       }
     },
     {
-      "snapshot_id": "c737f981572bc65c3532196c",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "091feea867b49c8777c8e1d2",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401866436,
@@ -762,18 +778,18 @@
       },
       "public_projection": {
         "home_spread": -4.0,
-        "total": 46.5,
+        "total": 47.0,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "73\u00b0F \u00b7 10 mph wind \u00b7 gusts 19 \u00b7 Dry",
-        "impact": "Moderate",
-        "total_adjustment": -0.5,
+        "conditions_line": "74\u00b0F \u00b7 9 mph wind \u00b7 gusts 18 \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
       "market_at_snapshot": {
-        "home_spread": -7.5,
+        "home_spread": -8.5,
         "total": 44.0,
         "bookmaker": "Consensus (11 books)",
         "reference_spread": {
@@ -783,6 +799,7 @@
           "home_price": -116,
           "away_spread": 7.5,
           "away_price": -104,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.53703704,
             "away": 0.50980392
@@ -801,6 +818,7 @@
           "under_total": 44.0,
           "over_price": -105,
           "under_price": -115,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.51219512,
             "under": 0.53488372
@@ -815,7 +833,7 @@
         "price_policy": "single_book_two_sided_quote_only"
       },
       "comparison_at_snapshot": {
-        "disagreement": 3.5,
+        "disagreement": 4.5,
         "preferred_side": "Sacramento State",
         "market_disagreement_status": "SLIGHT EDGE",
         "status_system": "v2_the_signal"
@@ -835,10 +853,10 @@
       }
     },
     {
-      "snapshot_id": "3a551f6591331ee42de94d5b",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "9748317e63678d82532b0134",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856716,
@@ -858,7 +876,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "78\u00b0F \u00b7 7 mph wind \u00b7 gusts 14 \u00b7 Dry",
+        "conditions_line": "78\u00b0F \u00b7 7 mph wind \u00b7 gusts 13 \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -872,18 +890,19 @@
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
           "home_spread": -3.5,
-          "home_price": -105,
+          "home_price": -110,
           "away_spread": 3.5,
-          "away_price": -115,
+          "away_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
-            "home": 0.51219512,
-            "away": 0.53488372
+            "home": 0.52380952,
+            "away": 0.52380952
           },
           "no_vig_probability": {
-            "home": 0.48916576,
-            "away": 0.51083424
+            "home": 0.5,
+            "away": 0.5
           },
-          "overround": 0.04707884,
+          "overround": 0.04761905,
           "price_format": "american"
         },
         "reference_total": {
@@ -893,6 +912,7 @@
           "under_total": 47.5,
           "over_price": -125,
           "under_price": 105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.55555556,
             "under": 0.48780488
@@ -927,10 +947,10 @@
       }
     },
     {
-      "snapshot_id": "975a8bffa6648826c6dfb717",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "ff19b2d179c06c2ee35ef191",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401862795,
@@ -950,7 +970,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "59\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+        "conditions_line": "62\u00b0F \u00b7 2 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -967,6 +987,7 @@
           "home_price": -115,
           "away_spread": 3.0,
           "away_price": -105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.53488372,
             "away": 0.51219512
@@ -985,6 +1006,7 @@
           "under_total": 48.0,
           "over_price": -115,
           "under_price": -105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51219512
@@ -1019,10 +1041,10 @@
       }
     },
     {
-      "snapshot_id": "b042d305ad077425886021d5",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "b64b7e6ac4f3c44a16fb4db9",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856824,
@@ -1042,7 +1064,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "79\u00b0F \u00b7 8 mph wind \u00b7 gusts 16 \u00b7 Dry",
+        "conditions_line": "79\u00b0F \u00b7 6 mph wind \u00b7 gusts 17 \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -1059,6 +1081,7 @@
           "home_price": -115,
           "away_spread": 10.5,
           "away_price": -105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.53488372,
             "away": 0.51219512
@@ -1077,6 +1100,7 @@
           "under_total": 53.0,
           "over_price": -115,
           "under_price": -105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51219512
@@ -1111,10 +1135,10 @@
       }
     },
     {
-      "snapshot_id": "3b0e3a63888f8de5d5fc2dbe",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "416ca32c806e6e8dabf89d95",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858260,
@@ -1130,13 +1154,13 @@
       },
       "public_projection": {
         "home_spread": 4.5,
-        "total": 51.0,
+        "total": 52.0,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "71\u00b0F \u00b7 15 mph wind \u00b7 gusts 32 \u00b7 Dry",
+        "conditions_line": "74\u00b0F \u00b7 14 mph wind \u00b7 gusts 26 \u00b7 Dry",
         "impact": "Moderate",
-        "total_adjustment": -1.5,
+        "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
@@ -1151,6 +1175,7 @@
           "home_price": -115,
           "away_spread": -3.5,
           "away_price": -105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.53488372,
             "away": 0.51219512
@@ -1169,6 +1194,7 @@
           "under_total": 60.0,
           "over_price": -105,
           "under_price": -115,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.51219512,
             "under": 0.53488372
@@ -1203,10 +1229,10 @@
       }
     },
     {
-      "snapshot_id": "2f57fc750c1a3ba2fbfcbb5b",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "55ea625d21a25737dc4bb721",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858482,
@@ -1226,7 +1252,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "71\u00b0F \u00b7 11 mph wind \u00b7 gusts 23 \u00b7 Dry",
+        "conditions_line": "71\u00b0F \u00b7 11 mph wind \u00b7 gusts 21 \u00b7 Dry",
         "impact": "Moderate",
         "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
@@ -1243,6 +1269,7 @@
           "home_price": -110,
           "away_spread": 35.0,
           "away_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -1261,6 +1288,7 @@
           "under_total": 52.5,
           "over_price": -105,
           "under_price": -115,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.51219512,
             "under": 0.53488372
@@ -1295,10 +1323,10 @@
       }
     },
     {
-      "snapshot_id": "a24acb10b7d7cb213de773c6",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "b2403241f970af62123c4a01",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856714,
@@ -1314,19 +1342,19 @@
       },
       "public_projection": {
         "home_spread": -6.5,
-        "total": 52.5,
+        "total": 52.0,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "85\u00b0F \u00b7 10 mph wind \u00b7 gusts 16 \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
+        "conditions_line": "83\u00b0F \u00b7 12 mph wind \u00b7 gusts 21 \u00b7 Dry",
+        "impact": "Moderate",
+        "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
       "market_at_snapshot": {
         "home_spread": -11.5,
-        "total": 59.5,
+        "total": 58.5,
         "bookmaker": "Consensus (11 books)",
         "reference_spread": {
           "bookmaker": "BetOnline.ag",
@@ -1335,6 +1363,7 @@
           "home_price": -110,
           "away_spread": 11.5,
           "away_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -1349,10 +1378,11 @@
         "reference_total": {
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "total": 59.0,
-          "under_total": 59.0,
+          "total": 58.5,
+          "under_total": 58.5,
           "over_price": -110,
           "under_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -1387,10 +1417,10 @@
       }
     },
     {
-      "snapshot_id": "394f61e0ac6f128da15b2d92",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "9e4303c41c5d7d2473fbcb98",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401869843,
@@ -1406,19 +1436,19 @@
       },
       "public_projection": {
         "home_spread": -8.5,
-        "total": 48.5,
+        "total": 49.0,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "51\u00b0F \u00b7 15 mph wind \u00b7 gusts 35 \u00b7 Light rain",
+        "conditions_line": "58\u00b0F \u00b7 20 mph wind \u00b7 gusts 40 \u00b7 Dry",
         "impact": "Moderate",
-        "total_adjustment": -2.0,
+        "total_adjustment": -1.5,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
       "market_at_snapshot": {
         "home_spread": -9.5,
-        "total": 48.0,
+        "total": 47.5,
         "bookmaker": "Consensus (11 books)",
         "reference_spread": {
           "bookmaker": "BetOnline.ag",
@@ -1427,6 +1457,7 @@
           "home_price": -115,
           "away_spread": 9.5,
           "away_price": -105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.53488372,
             "away": 0.51219512
@@ -1441,10 +1472,11 @@
         "reference_total": {
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "total": 48.0,
-          "under_total": 48.0,
+          "total": 47.5,
+          "under_total": 47.5,
           "over_price": -110,
           "under_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -1479,10 +1511,10 @@
       }
     },
     {
-      "snapshot_id": "19f6645d456b001b75155c69",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "cc17dc8d28eb4f7d8b01b0f1",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401866440,
@@ -1502,7 +1534,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "63\u00b0F \u00b7 3 mph wind \u00b7 Dry",
+        "conditions_line": "63\u00b0F \u00b7 0 mph wind \u00b7 gusts 8 \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -1519,6 +1551,7 @@
           "home_price": -108,
           "away_spread": -2.0,
           "away_price": -112,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.51923077,
             "away": 0.52830189
@@ -1537,6 +1570,7 @@
           "under_total": 47.5,
           "over_price": -110,
           "under_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -1571,10 +1605,10 @@
       }
     },
     {
-      "snapshot_id": "65d1fd316edf62b98aa4a6c9",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "261f239ed1dfd3cd76d3bd5e",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401866437,
@@ -1590,36 +1624,37 @@
       },
       "public_projection": {
         "home_spread": -10.0,
-        "total": 51.5,
+        "total": 52.0,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "78\u00b0F \u00b7 10 mph wind \u00b7 Dry",
-        "impact": "Moderate",
-        "total_adjustment": -0.5,
+        "conditions_line": "81\u00b0F \u00b7 9 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
       "market_at_snapshot": {
-        "home_spread": -21.0,
+        "home_spread": -20.5,
         "total": 55.5,
         "bookmaker": "Consensus (11 books)",
         "reference_spread": {
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "home_spread": -20.5,
-          "home_price": -117,
-          "away_spread": 20.5,
-          "away_price": -103,
+          "home_spread": -20.0,
+          "home_price": -110,
+          "away_spread": 20.0,
+          "away_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
-            "home": 0.53917051,
-            "away": 0.50738916
+            "home": 0.52380952,
+            "away": 0.52380952
           },
           "no_vig_probability": {
-            "home": 0.51518372,
-            "away": 0.48481628
+            "home": 0.5,
+            "away": 0.5
           },
-          "overround": 0.04655967,
+          "overround": 0.04761905,
           "price_format": "american"
         },
         "reference_total": {
@@ -1629,6 +1664,7 @@
           "under_total": 56.0,
           "over_price": -110,
           "under_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -1643,7 +1679,7 @@
         "price_policy": "single_book_two_sided_quote_only"
       },
       "comparison_at_snapshot": {
-        "disagreement": 11.0,
+        "disagreement": 10.5,
         "preferred_side": "Buffalo",
         "market_disagreement_status": "OUTLIER",
         "status_system": "v2_the_signal"
@@ -1663,10 +1699,10 @@
       }
     },
     {
-      "snapshot_id": "c524d26bc37169d16d3f7e9e",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "2bc56fa2ba886bf8d41df2e1",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401866438,
@@ -1686,7 +1722,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "71\u00b0F \u00b7 8 mph wind \u00b7 gusts 16 \u00b7 Dry",
+        "conditions_line": "73\u00b0F \u00b7 10 mph wind \u00b7 gusts 18 \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -1703,6 +1739,7 @@
           "home_price": -110,
           "away_spread": 3.0,
           "away_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -1721,6 +1758,7 @@
           "under_total": 46.0,
           "over_price": -110,
           "under_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -1755,10 +1793,10 @@
       }
     },
     {
-      "snapshot_id": "921f3ac14de2d362c796e25b",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "10ed4757b9059266c1b0ee73",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401862796,
@@ -1778,7 +1816,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "86\u00b0F \u00b7 5 mph wind \u00b7 Dry",
+        "conditions_line": "88\u00b0F \u00b7 9 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -1795,6 +1833,7 @@
           "home_price": -115,
           "away_spread": 28.5,
           "away_price": -105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.53488372,
             "away": 0.51219512
@@ -1813,6 +1852,7 @@
           "under_total": 57.5,
           "over_price": -115,
           "under_price": -105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51219512
@@ -1847,10 +1887,10 @@
       }
     },
     {
-      "snapshot_id": "35efc6d607ebf38da58f3d24",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "32f09d65366df3aebca2fc48",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858255,
@@ -1866,13 +1906,13 @@
       },
       "public_projection": {
         "home_spread": 5.0,
-        "total": 52.0,
+        "total": 53.0,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "59\u00b0F \u00b7 18 mph wind \u00b7 gusts 41 \u00b7 Light rain",
+        "conditions_line": "68\u00b0F \u00b7 15 mph wind \u00b7 gusts 28 \u00b7 Light rain",
         "impact": "Moderate",
-        "total_adjustment": -2.0,
+        "total_adjustment": -1.0,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
@@ -1887,6 +1927,7 @@
           "home_price": -107,
           "away_spread": -6.5,
           "away_price": -113,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.51690821,
             "away": 0.53051643
@@ -1905,6 +1946,7 @@
           "under_total": 43.5,
           "over_price": -108,
           "under_price": -112,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.51923077,
             "under": 0.52830189
@@ -1939,10 +1981,10 @@
       }
     },
     {
-      "snapshot_id": "8e826bcae76a688df796d2ca",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "ca0bb68eeb188c18d662fd6f",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401866435,
@@ -1958,13 +2000,13 @@
       },
       "public_projection": {
         "home_spread": 11.5,
-        "total": 51.0,
+        "total": 50.5,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "75\u00b0F \u00b7 7 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
+        "conditions_line": "77\u00b0F \u00b7 10 mph wind \u00b7 Dry",
+        "impact": "Moderate",
+        "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
@@ -1979,6 +2021,7 @@
           "home_price": -115,
           "away_spread": -7.0,
           "away_price": -105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.53488372,
             "away": 0.51219512
@@ -1997,6 +2040,7 @@
           "under_total": 52.0,
           "over_price": -115,
           "under_price": -105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51219512
@@ -2031,10 +2075,10 @@
       }
     },
     {
-      "snapshot_id": "5e8a4aef9bfaf347bda262b6",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "5601e90279a66e2f744206c2",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856825,
@@ -2050,13 +2094,13 @@
       },
       "public_projection": {
         "home_spread": -2.5,
-        "total": 52.5,
+        "total": 53.5,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "84\u00b0F \u00b7 18 mph wind \u00b7 Dry",
+        "conditions_line": "81\u00b0F \u00b7 13 mph wind \u00b7 gusts 25 \u00b7 Dry",
         "impact": "Moderate",
-        "total_adjustment": -1.5,
+        "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
@@ -2071,6 +2115,7 @@
           "home_price": -115,
           "away_spread": 2.5,
           "away_price": -105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.53488372,
             "away": 0.51219512
@@ -2089,6 +2134,7 @@
           "under_total": 55.0,
           "over_price": -110,
           "under_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -2123,10 +2169,10 @@
       }
     },
     {
-      "snapshot_id": "361b38ec1be75612ebffca44",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "31960bade66e31ae1698bd79",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858480,
@@ -2146,7 +2192,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "73\u00b0F \u00b7 14 mph wind \u00b7 gusts 20 \u00b7 Dry",
+        "conditions_line": "79\u00b0F \u00b7 11 mph wind \u00b7 gusts 19 \u00b7 Dry",
         "impact": "Moderate",
         "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
@@ -2163,6 +2209,7 @@
           "home_price": 100,
           "away_spread": -2.5,
           "away_price": -120,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.5,
             "away": 0.54545455
@@ -2181,6 +2228,7 @@
           "under_total": 48.0,
           "over_price": -105,
           "under_price": -115,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.51219512,
             "under": 0.53488372
@@ -2215,10 +2263,10 @@
       }
     },
     {
-      "snapshot_id": "e281516b194c65237ca02531",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "f4633bb95189bb4f099ebb2f",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401866439,
@@ -2238,14 +2286,14 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "74\u00b0F \u00b7 12 mph wind \u00b7 gusts 20 \u00b7 Dry",
+        "conditions_line": "80\u00b0F \u00b7 10 mph wind \u00b7 gusts 19 \u00b7 Dry",
         "impact": "Moderate",
         "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
       "market_at_snapshot": {
-        "home_spread": -13.5,
+        "home_spread": -14.0,
         "total": 43.5,
         "bookmaker": "Consensus (11 books)",
         "reference_spread": {
@@ -2255,6 +2303,7 @@
           "home_price": -115,
           "away_spread": 13.5,
           "away_price": -105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.53488372,
             "away": 0.51219512
@@ -2273,6 +2322,7 @@
           "under_total": 43.5,
           "over_price": -110,
           "under_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -2287,7 +2337,7 @@
         "price_policy": "single_book_two_sided_quote_only"
       },
       "comparison_at_snapshot": {
-        "disagreement": 1.5,
+        "disagreement": 2.0,
         "preferred_side": "Kent State",
         "market_disagreement_status": "ALIGNED",
         "status_system": "v2_the_signal"
@@ -2307,10 +2357,10 @@
       }
     },
     {
-      "snapshot_id": "18eb8c0871ab8a19a31b8659",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "f2cb9c1a61a8b039842f6e38",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856718,
@@ -2326,19 +2376,19 @@
       },
       "public_projection": {
         "home_spread": 2.5,
-        "total": 54.0,
+        "total": 54.5,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "68\u00b0F \u00b7 14 mph wind \u00b7 gusts 32 \u00b7 Light rain",
+        "conditions_line": "62\u00b0F \u00b7 13 mph wind \u00b7 gusts 29 \u00b7 Dry",
         "impact": "Moderate",
-        "total_adjustment": -1.0,
+        "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
       "market_at_snapshot": {
         "home_spread": 9.5,
-        "total": 55.0,
+        "total": 54.5,
         "bookmaker": "Consensus (10 books)",
         "reference_spread": {
           "bookmaker": "BetOnline.ag",
@@ -2347,6 +2397,7 @@
           "home_price": -112,
           "away_spread": -9.5,
           "away_price": -108,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.52830189,
             "away": 0.51923077
@@ -2365,6 +2416,7 @@
           "under_total": 55.0,
           "over_price": -105,
           "under_price": -115,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.51219512,
             "under": 0.53488372
@@ -2399,10 +2451,10 @@
       }
     },
     {
-      "snapshot_id": "601eeaaa89e65d263f0bff87",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "e914a393883b97c7a46175b5",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858257,
@@ -2418,13 +2470,13 @@
       },
       "public_projection": {
         "home_spread": -26.0,
-        "total": 53.5,
+        "total": 54.0,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "75\u00b0F \u00b7 12 mph wind \u00b7 Dry",
-        "impact": "Moderate",
-        "total_adjustment": -0.5,
+        "conditions_line": "79\u00b0F \u00b7 9 mph wind \u00b7 gusts 19 \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
@@ -2439,6 +2491,7 @@
           "home_price": -110,
           "away_spread": 39.0,
           "away_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -2457,6 +2510,7 @@
           "under_total": 54.0,
           "over_price": -115,
           "under_price": -105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51219512
@@ -2491,10 +2545,10 @@
       }
     },
     {
-      "snapshot_id": "792c520477168bfbe8100c9f",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "dc1bbba6da836c2a4e2485da",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856717,
@@ -2514,7 +2568,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "87\u00b0F \u00b7 5 mph wind \u00b7 Dry",
+        "conditions_line": "86\u00b0F \u00b7 6 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -2531,6 +2585,7 @@
           "home_price": -113,
           "away_spread": -7.5,
           "away_price": -107,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.53051643,
             "away": 0.51690821
@@ -2549,6 +2604,7 @@
           "under_total": 39.0,
           "over_price": -108,
           "under_price": -112,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.51923077,
             "under": 0.52830189
@@ -2583,10 +2639,10 @@
       }
     },
     {
-      "snapshot_id": "b11e7ed856741ccd7a31433f",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "cd399d29d85a33d91ee465ac",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401862799,
@@ -2606,7 +2662,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "68\u00b0F \u00b7 5 mph wind \u00b7 Dry",
+        "conditions_line": "74\u00b0F \u00b7 6 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -2619,10 +2675,11 @@
         "reference_spread": {
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "home_spread": -1.5,
+          "home_spread": -1.0,
           "home_price": -110,
-          "away_spread": 1.5,
+          "away_spread": 1.0,
           "away_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -2641,6 +2698,7 @@
           "under_total": 48.5,
           "over_price": -110,
           "under_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -2675,10 +2733,10 @@
       }
     },
     {
-      "snapshot_id": "d78f1187ede8b974a072359a",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "2e50afc0ab5cdfef88578637",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858484,
@@ -2698,7 +2756,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "60\u00b0F \u00b7 3 mph wind \u00b7 Dry",
+        "conditions_line": "56\u00b0F \u00b7 5 mph wind \u00b7 gusts 12 \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -2712,16 +2770,17 @@
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
           "home_spread": -11.0,
-          "home_price": -112,
+          "home_price": -108,
           "away_spread": 11.0,
-          "away_price": -108,
+          "away_price": -112,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
-            "home": 0.52830189,
-            "away": 0.51923077
+            "home": 0.51923077,
+            "away": 0.52830189
           },
           "no_vig_probability": {
-            "home": 0.50432975,
-            "away": 0.49567025
+            "home": 0.49567025,
+            "away": 0.50432975
           },
           "overround": 0.04753266,
           "price_format": "american"
@@ -2731,17 +2790,18 @@
           "bookmaker_key": "betonlineag",
           "total": 59.5,
           "under_total": 59.5,
-          "over_price": -110,
-          "under_price": -110,
+          "over_price": -105,
+          "under_price": -115,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
-            "over": 0.52380952,
-            "under": 0.52380952
+            "over": 0.51219512,
+            "under": 0.53488372
           },
           "no_vig_probability": {
-            "over": 0.5,
-            "under": 0.5
+            "over": 0.48916576,
+            "under": 0.51083424
           },
-          "overround": 0.04761905,
+          "overround": 0.04707884,
           "price_format": "american"
         },
         "price_policy": "single_book_two_sided_quote_only"
@@ -2767,10 +2827,10 @@
       }
     },
     {
-      "snapshot_id": "078274af8e3ac2fc26014ff0",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "2a355fa750363ffe36e2b600",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858259,
@@ -2786,13 +2846,13 @@
       },
       "public_projection": {
         "home_spread": 8.5,
-        "total": 49.5,
+        "total": 50.5,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "61\u00b0F \u00b7 17 mph wind \u00b7 Dry",
+        "conditions_line": "62\u00b0F \u00b7 14 mph wind \u00b7 gusts 20 \u00b7 Dry",
         "impact": "Moderate",
-        "total_adjustment": -1.5,
+        "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
@@ -2807,6 +2867,7 @@
           "home_price": 102,
           "away_spread": -9.5,
           "away_price": -122,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.4950495,
             "away": 0.54954955
@@ -2825,6 +2886,7 @@
           "under_total": 53.0,
           "over_price": -110,
           "under_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -2859,10 +2921,10 @@
       }
     },
     {
-      "snapshot_id": "bf8f729348a2a0cc2b8ecda9",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "2de83a56b52daa38906e26a0",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401861964,
@@ -2882,7 +2944,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "74\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+        "conditions_line": "73\u00b0F \u00b7 5 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -2899,6 +2961,7 @@
           "home_price": -108,
           "away_spread": 3.5,
           "away_price": -112,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.51923077,
             "away": 0.52830189
@@ -2917,6 +2980,7 @@
           "under_total": 55.0,
           "over_price": -105,
           "under_price": -115,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.51219512,
             "under": 0.53488372
@@ -2951,10 +3015,10 @@
       }
     },
     {
-      "snapshot_id": "8c267e82393195ad0ecae1e5",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "d83e49af6dee8cc228165908",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401862797,
@@ -2970,19 +3034,19 @@
       },
       "public_projection": {
         "home_spread": -6.5,
-        "total": 50.0,
+        "total": 50.5,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "70\u00b0F \u00b7 11 mph wind \u00b7 gusts 26 \u00b7 Light rain",
+        "conditions_line": "78\u00b0F \u00b7 15 mph wind \u00b7 gusts 25 \u00b7 Dry",
         "impact": "Moderate",
-        "total_adjustment": -1.0,
+        "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
       "market_at_snapshot": {
         "home_spread": -10.0,
-        "total": 47.0,
+        "total": 47.5,
         "bookmaker": "Consensus (11 books)",
         "reference_spread": {
           "bookmaker": "BetOnline.ag",
@@ -2991,6 +3055,7 @@
           "home_price": -110,
           "away_spread": 10.0,
           "away_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -3009,6 +3074,7 @@
           "under_total": 47.0,
           "over_price": -110,
           "under_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -3043,10 +3109,10 @@
       }
     },
     {
-      "snapshot_id": "a9a2097df5bcf873fe21d310",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "d117e0002949305519a0eb01",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858483,
@@ -3066,7 +3132,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "76\u00b0F \u00b7 13 mph wind \u00b7 gusts 19 \u00b7 Dry",
+        "conditions_line": "77\u00b0F \u00b7 12 mph wind \u00b7 gusts 21 \u00b7 Dry",
         "impact": "Moderate",
         "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
@@ -3083,6 +3149,7 @@
           "home_price": -116,
           "away_spread": 31.5,
           "away_price": -104,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.53703704,
             "away": 0.50980392
@@ -3101,6 +3168,7 @@
           "under_total": 56.5,
           "over_price": -108,
           "under_price": -112,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.51923077,
             "under": 0.52830189
@@ -3135,10 +3203,10 @@
       }
     },
     {
-      "snapshot_id": "214823e5c1f17fdeb6c2e102",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "e3f7bd9f1794804c27d9354e",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856713,
@@ -3158,7 +3226,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "85\u00b0F \u00b7 2 mph wind \u00b7 Dry",
+        "conditions_line": "87\u00b0F \u00b7 4 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -3175,6 +3243,7 @@
           "home_price": -107,
           "away_spread": -13.5,
           "away_price": -113,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.51690821,
             "away": 0.53051643
@@ -3193,6 +3262,7 @@
           "under_total": 51.0,
           "over_price": -115,
           "under_price": -105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51219512
@@ -3227,10 +3297,10 @@
       }
     },
     {
-      "snapshot_id": "7f6f2ac453ccf7ea5e3a90ef",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "7930266f94f3914fa0fa9e45",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401860902,
@@ -3246,13 +3316,13 @@
       },
       "public_projection": {
         "home_spread": -8.5,
-        "total": 51.5,
+        "total": 52.0,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "58\u00b0F \u00b7 7 mph wind \u00b7 Light rain",
-        "impact": "Moderate",
-        "total_adjustment": -0.5,
+        "conditions_line": "55\u00b0F \u00b7 1 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
@@ -3267,6 +3337,7 @@
           "home_price": -110,
           "away_spread": 15.5,
           "away_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -3285,6 +3356,7 @@
           "under_total": 53.5,
           "over_price": -105,
           "under_price": -115,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.51219512,
             "under": 0.53488372
@@ -3319,10 +3391,10 @@
       }
     },
     {
-      "snapshot_id": "f59ef07eec056bd876612ea2",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "3034faa1d0309ce87cc495e1",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401869943,
@@ -3338,13 +3410,13 @@
       },
       "public_projection": {
         "home_spread": -4.5,
-        "total": 50.5,
+        "total": 51.0,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "57\u00b0F \u00b7 9 mph wind \u00b7 gusts 35 \u00b7 Light rain",
-        "impact": "Moderate",
-        "total_adjustment": -0.5,
+        "conditions_line": "71\u00b0F \u00b7 7 mph wind \u00b7 gusts 22 \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
@@ -3359,6 +3431,7 @@
           "home_price": -105,
           "away_spread": 4.0,
           "away_price": -115,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.51219512,
             "away": 0.53488372
@@ -3377,6 +3450,7 @@
           "under_total": 57.0,
           "over_price": -130,
           "under_price": 110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.56521739,
             "under": 0.47619048
@@ -3411,10 +3485,10 @@
       }
     },
     {
-      "snapshot_id": "5a7b58d53e52340bcb8d8246",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "1e46884c969be3fdc570ffc4",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856715,
@@ -3429,15 +3503,15 @@
         "home_win_probability": 32.0
       },
       "public_projection": {
-        "home_spread": 7.1,
-        "total": 51.0,
+        "home_spread": 6.8,
+        "total": 50.0,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "58\u00b0F \u00b7 21 mph wind \u00b7 gusts 36 \u00b7 Light rain",
-        "impact": "Moderate",
-        "total_adjustment": -3.0,
-        "spread_adjustment": -0.4,
+        "conditions_line": "59\u00b0F \u00b7 23 mph wind \u00b7 gusts 42 \u00b7 Heavy rain",
+        "impact": "Significant",
+        "total_adjustment": -4.0,
+        "spread_adjustment": -0.7,
         "spread_status": "ACTIVE"
       },
       "market_at_snapshot": {
@@ -3451,6 +3525,7 @@
           "home_price": -110,
           "away_spread": -8.0,
           "away_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -3469,6 +3544,7 @@
           "under_total": 51.5,
           "over_price": -110,
           "under_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -3503,10 +3579,10 @@
       }
     },
     {
-      "snapshot_id": "788f286542c0f3b5c06c1c18",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "fb5a0c737021d34ee5d47d52",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401864517,
@@ -3522,13 +3598,13 @@
       },
       "public_projection": {
         "home_spread": 12.0,
-        "total": 48.0,
+        "total": 48.5,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "86\u00b0F \u00b7 14 mph wind \u00b7 Dry",
-        "impact": "Moderate",
-        "total_adjustment": -0.5,
+        "conditions_line": "85\u00b0F \u00b7 6 mph wind \u00b7 gusts 12 \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
@@ -3543,6 +3619,7 @@
           "home_price": -110,
           "away_spread": -10.0,
           "away_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -3561,6 +3638,7 @@
           "under_total": 49.5,
           "over_price": -105,
           "under_price": -115,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.51219512,
             "under": 0.53488372
@@ -3595,10 +3673,10 @@
       }
     },
     {
-      "snapshot_id": "532d4e4f057ac2c401e87707",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "dc722ffb1e54064e98393298",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401864518,
@@ -3614,13 +3692,13 @@
       },
       "public_projection": {
         "home_spread": 1.0,
-        "total": 48.0,
+        "total": 48.5,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "90\u00b0F \u00b7 18 mph wind \u00b7 gusts 24 \u00b7 Dry",
+        "conditions_line": "90\u00b0F \u00b7 19 mph wind \u00b7 gusts 27 \u00b7 Dry",
         "impact": "Moderate",
-        "total_adjustment": -2.0,
+        "total_adjustment": -1.5,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
@@ -3635,6 +3713,7 @@
           "home_price": -105,
           "away_spread": -3.0,
           "away_price": -115,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.51219512,
             "away": 0.53488372
@@ -3653,6 +3732,7 @@
           "under_total": 48.0,
           "over_price": -107,
           "under_price": -113,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.51690821,
             "under": 0.53051643
@@ -3687,10 +3767,10 @@
       }
     },
     {
-      "snapshot_id": "d9c0f0d43e08ead8ed63816d",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "a9b102ddf413131209e7ef5f",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401862798,
@@ -3706,13 +3786,13 @@
       },
       "public_projection": {
         "home_spread": -16.5,
-        "total": 52.5,
+        "total": 51.5,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "62\u00b0F \u00b7 13 mph wind \u00b7 gusts 27 \u00b7 Light rain",
+        "conditions_line": "62\u00b0F \u00b7 17 mph wind \u00b7 gusts 36 \u00b7 Light rain",
         "impact": "Moderate",
-        "total_adjustment": -1.0,
+        "total_adjustment": -2.0,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
@@ -3727,6 +3807,7 @@
           "home_price": -110,
           "away_spread": 14.0,
           "away_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -3745,6 +3826,7 @@
           "under_total": 52.0,
           "over_price": -125,
           "under_price": 105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.55555556,
             "under": 0.48780488
@@ -3779,10 +3861,10 @@
       }
     },
     {
-      "snapshot_id": "f5d0d87c07dbb62e6eb4acea",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "0d0e415c57ddf0c38d81ad56",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401864516,
@@ -3802,7 +3884,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "66\u00b0F \u00b7 7 mph wind \u00b7 gusts 19 \u00b7 Dry",
+        "conditions_line": "72\u00b0F \u00b7 8 mph wind \u00b7 gusts 17 \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -3816,18 +3898,19 @@
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
           "home_spread": 7.5,
-          "home_price": -113,
+          "home_price": -116,
           "away_spread": -7.5,
-          "away_price": -107,
+          "away_price": -104,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
-            "home": 0.53051643,
-            "away": 0.51690821
+            "home": 0.53703704,
+            "away": 0.50980392
           },
           "no_vig_probability": {
-            "home": 0.50649604,
-            "away": 0.49350396
+            "home": 0.51300728,
+            "away": 0.48699272
           },
-          "overround": 0.04742464,
+          "overround": 0.04684096,
           "price_format": "american"
         },
         "reference_total": {
@@ -3837,6 +3920,7 @@
           "under_total": 46.0,
           "over_price": -112,
           "under_price": -108,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.52830189,
             "under": 0.51923077
@@ -3871,10 +3955,10 @@
       }
     },
     {
-      "snapshot_id": "cc06a489c4e7bb13ffdc15a1",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "41e5e8d33a4fd579d61a567f",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856712,
@@ -3890,13 +3974,13 @@
       },
       "public_projection": {
         "home_spread": -0.5,
-        "total": 57.0,
+        "total": 56.5,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "66\u00b0F \u00b7 10 mph wind \u00b7 gusts 23 \u00b7 Light rain",
+        "conditions_line": "62\u00b0F \u00b7 14 mph wind \u00b7 gusts 32 \u00b7 Light rain",
         "impact": "Moderate",
-        "total_adjustment": -0.5,
+        "total_adjustment": -1.0,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
@@ -3908,18 +3992,19 @@
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
           "home_spread": -1.5,
-          "home_price": -110,
+          "home_price": -108,
           "away_spread": 1.5,
-          "away_price": -110,
+          "away_price": -112,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
-            "home": 0.52380952,
-            "away": 0.52380952
+            "home": 0.51923077,
+            "away": 0.52830189
           },
           "no_vig_probability": {
-            "home": 0.5,
-            "away": 0.5
+            "home": 0.49567025,
+            "away": 0.50432975
           },
-          "overround": 0.04761905,
+          "overround": 0.04753266,
           "price_format": "american"
         },
         "reference_total": {
@@ -3929,6 +4014,7 @@
           "under_total": 51.5,
           "over_price": -105,
           "under_price": -115,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.51219512,
             "under": 0.53488372
@@ -3963,10 +4049,10 @@
       }
     },
     {
-      "snapshot_id": "74b219348f43b5169187b466",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "737c515a53eb6ec3592527ce",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401869949,
@@ -3986,7 +4072,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "76\u00b0F \u00b7 11 mph wind \u00b7 gusts 22 \u00b7 Light rain",
+        "conditions_line": "77\u00b0F \u00b7 10 mph wind \u00b7 gusts 22 \u00b7 Light rain",
         "impact": "Moderate",
         "total_adjustment": -1.0,
         "spread_adjustment": 0.0,
@@ -3994,7 +4080,7 @@
       },
       "market_at_snapshot": {
         "home_spread": 7.5,
-        "total": 52.0,
+        "total": 51.5,
         "bookmaker": "Consensus (11 books)",
         "reference_spread": {
           "bookmaker": "BetOnline.ag",
@@ -4003,6 +4089,7 @@
           "home_price": -115,
           "away_spread": -7.5,
           "away_price": -105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.53488372,
             "away": 0.51219512
@@ -4021,6 +4108,7 @@
           "under_total": 52.0,
           "over_price": -105,
           "under_price": -115,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.51219512,
             "under": 0.53488372
@@ -4055,10 +4143,10 @@
       }
     },
     {
-      "snapshot_id": "21eec348f049c305a4b1ab49",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "098f11d5ac8d27dee1aa6c0b",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401869965,
@@ -4078,7 +4166,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "78\u00b0F \u00b7 5 mph wind \u00b7 gusts 10 \u00b7 Dry",
+        "conditions_line": "85\u00b0F \u00b7 6 mph wind \u00b7 gusts 13 \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -4086,7 +4174,7 @@
       },
       "market_at_snapshot": {
         "home_spread": -3.0,
-        "total": 47.0,
+        "total": 48.0,
         "bookmaker": "Consensus (11 books)",
         "reference_spread": {
           "bookmaker": "BetOnline.ag",
@@ -4095,6 +4183,7 @@
           "home_price": -125,
           "away_spread": 2.5,
           "away_price": 105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.55555556,
             "away": 0.48780488
@@ -4109,10 +4198,11 @@
         "reference_total": {
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "total": 47.0,
-          "under_total": 47.0,
+          "total": 48.0,
+          "under_total": 48.0,
           "over_price": -110,
           "under_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -4147,10 +4237,10 @@
       }
     },
     {
-      "snapshot_id": "dc0861d22134ae2aee470853",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "5ec1333d956a2ee46c7cd37e",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858258,
@@ -4166,13 +4256,13 @@
       },
       "public_projection": {
         "home_spread": -6.5,
-        "total": 51.5,
+        "total": 52.0,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "55\u00b0F \u00b7 3 mph wind \u00b7 Light rain",
-        "impact": "Moderate",
-        "total_adjustment": -0.5,
+        "conditions_line": "70\u00b0F \u00b7 8 mph wind \u00b7 gusts 21 \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
@@ -4187,6 +4277,7 @@
           "home_price": -116,
           "away_spread": 9.5,
           "away_price": -104,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.53703704,
             "away": 0.50980392
@@ -4205,6 +4296,7 @@
           "under_total": 50.5,
           "over_price": -115,
           "under_price": -105,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51219512
@@ -4239,10 +4331,10 @@
       }
     },
     {
-      "snapshot_id": "6f432145fcecf7db90fc5ed4",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "daea57c4d5653836ae147ba0",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858485,
@@ -4262,7 +4354,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "55\u00b0F \u00b7 4 mph wind \u00b7 Dry",
+        "conditions_line": "60\u00b0F \u00b7 6 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -4279,6 +4371,7 @@
           "home_price": -111,
           "away_spread": 1.5,
           "away_price": -109,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.52606635,
             "away": 0.5215311
@@ -4297,6 +4390,7 @@
           "under_total": 55.0,
           "over_price": -105,
           "under_price": -115,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.51219512,
             "under": 0.53488372
@@ -4331,10 +4425,10 @@
       }
     },
     {
-      "snapshot_id": "8ea49a6062cbea948efa9afe",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "fcd7367941ca9fcda52adbd6",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858486,
@@ -4354,7 +4448,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "66\u00b0F \u00b7 9 mph wind \u00b7 gusts 22 \u00b7 Dry",
+        "conditions_line": "71\u00b0F \u00b7 6 mph wind \u00b7 gusts 16 \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -4371,6 +4465,7 @@
           "home_price": -110,
           "away_spread": -2.5,
           "away_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -4389,6 +4484,7 @@
           "under_total": 50.0,
           "over_price": -110,
           "under_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -4423,10 +4519,10 @@
       }
     },
     {
-      "snapshot_id": "7394b72cd4df5930e17bb134",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "ffe2faec6bfec177ce3b6d80",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856808,
@@ -4446,7 +4542,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "88\u00b0F \u00b7 2 mph wind \u00b7 Light rain",
+        "conditions_line": "81\u00b0F \u00b7 4 mph wind \u00b7 Light rain",
         "impact": "Moderate",
         "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
@@ -4463,6 +4559,7 @@
           "home_price": -113,
           "away_spread": 20.5,
           "away_price": -107,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.53051643,
             "away": 0.51690821
@@ -4481,6 +4578,7 @@
           "under_total": 50.5,
           "over_price": -110,
           "under_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -4515,10 +4613,10 @@
       }
     },
     {
-      "snapshot_id": "d00816723cf41e9a7a8299b0",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "7678d419ffb89a3a57286fa8",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856827,
@@ -4534,13 +4632,13 @@
       },
       "public_projection": {
         "home_spread": -15.0,
-        "total": 55.5,
+        "total": 56.0,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "75\u00b0F \u00b7 13 mph wind \u00b7 gusts 36 \u00b7 Light rain",
+        "conditions_line": "70\u00b0F \u00b7 12 mph wind \u00b7 gusts 36 \u00b7 Dry",
         "impact": "Moderate",
-        "total_adjustment": -1.0,
+        "total_adjustment": -0.5,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
@@ -4555,6 +4653,7 @@
           "home_price": -110,
           "away_spread": 15.5,
           "away_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -4573,6 +4672,7 @@
           "under_total": 50.0,
           "over_price": -120,
           "under_price": 100,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.54545455,
             "under": 0.5
@@ -4607,10 +4707,10 @@
       }
     },
     {
-      "snapshot_id": "8eb751d17aa8a22b616c3afb",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "496001a22f2fac4c8dae5ba7",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401860901,
@@ -4630,7 +4730,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "85\u00b0F \u00b7 2 mph wind \u00b7 Dry",
+        "conditions_line": "76\u00b0F \u00b7 4 mph wind \u00b7 gusts 15 \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -4644,18 +4744,19 @@
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
           "home_spread": 6.5,
-          "home_price": -107,
+          "home_price": 105,
           "away_spread": -6.5,
-          "away_price": -113,
+          "away_price": -125,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
-            "home": 0.51690821,
-            "away": 0.53051643
+            "home": 0.48780488,
+            "away": 0.55555556
           },
           "no_vig_probability": {
-            "home": 0.49350396,
-            "away": 0.50649604
+            "home": 0.46753247,
+            "away": 0.53246753
           },
-          "overround": 0.04742464,
+          "overround": 0.04336043,
           "price_format": "american"
         },
         "reference_total": {
@@ -4665,6 +4766,7 @@
           "under_total": 48.5,
           "over_price": -110,
           "under_price": -110,
+          "last_update": "2026-10-09T14:44:42Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -4699,10 +4801,10 @@
       }
     },
     {
-      "snapshot_id": "08d98720616860bf210db055",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "b1522e659bab6d606401956a",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401871067,
@@ -4722,7 +4824,7 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "78\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+        "conditions_line": "77\u00b0F \u00b7 5 mph wind \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
@@ -4730,7 +4832,7 @@
       },
       "market_at_snapshot": {
         "home_spread": -1.5,
-        "total": 46.5,
+        "total": 47.0,
         "bookmaker": "Consensus (2 books)",
         "reference_spread": {
           "bookmaker": "FanDuel",
@@ -4739,6 +4841,7 @@
           "home_price": -110,
           "away_spread": 1.5,
           "away_price": -110,
+          "last_update": "2026-10-09T14:44:43Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -4753,19 +4856,20 @@
         "reference_total": {
           "bookmaker": "FanDuel",
           "bookmaker_key": "fanduel",
-          "total": 46.5,
-          "under_total": 46.5,
-          "over_price": -110,
-          "under_price": -112,
+          "total": 47.5,
+          "under_total": 47.5,
+          "over_price": -106,
+          "under_price": -114,
+          "last_update": "2026-10-09T14:44:43Z",
           "implied_probability": {
-            "over": 0.52380952,
-            "under": 0.52830189
+            "over": 0.51456311,
+            "under": 0.53271028
           },
           "no_vig_probability": {
-            "over": 0.49786507,
-            "under": 0.50213493
+            "over": 0.49133599,
+            "under": 0.50866401
           },
-          "overround": 0.05211141,
+          "overround": 0.04727339,
           "price_format": "american"
         },
         "price_policy": "single_book_two_sided_quote_only"
@@ -4791,10 +4895,10 @@
       }
     },
     {
-      "snapshot_id": "9cca0c140c5f6a2ea0dc28b9",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "7e4ef3a8294a16a448ee5fd4",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401871053,
@@ -4822,7 +4926,7 @@
       },
       "market_at_snapshot": {
         "home_spread": -2.5,
-        "total": 45.5,
+        "total": 46.5,
         "bookmaker": "Consensus (2 books)",
         "reference_spread": {
           "bookmaker": "FanDuel",
@@ -4831,6 +4935,7 @@
           "home_price": -112,
           "away_spread": 2.5,
           "away_price": -108,
+          "last_update": "2026-10-09T14:44:43Z",
           "implied_probability": {
             "home": 0.52830189,
             "away": 0.51923077
@@ -4845,19 +4950,20 @@
         "reference_total": {
           "bookmaker": "FanDuel",
           "bookmaker_key": "fanduel",
-          "total": 45.5,
-          "under_total": 45.5,
-          "over_price": -115,
-          "under_price": -105,
+          "total": 46.5,
+          "under_total": 46.5,
+          "over_price": -110,
+          "under_price": -110,
+          "last_update": "2026-10-09T14:44:43Z",
           "implied_probability": {
-            "over": 0.53488372,
-            "under": 0.51219512
+            "over": 0.52380952,
+            "under": 0.52380952
           },
           "no_vig_probability": {
-            "over": 0.51083424,
-            "under": 0.48916576
+            "over": 0.5,
+            "under": 0.5
           },
-          "overround": 0.04707884,
+          "overround": 0.04761905,
           "price_format": "american"
         },
         "price_policy": "single_book_two_sided_quote_only"
@@ -4883,10 +4989,10 @@
       }
     },
     {
-      "snapshot_id": "51abcdd5de2afe33bdf36160",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "c3cb7f429fbdc3533b749411",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401860923,
@@ -4902,18 +5008,18 @@
       },
       "public_projection": {
         "home_spread": -9.0,
-        "total": 52.5,
+        "total": 53.0,
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "80\u00b0F \u00b7 13 mph wind \u00b7 gusts 20 \u00b7 Dry",
-        "impact": "Moderate",
-        "total_adjustment": -0.5,
+        "conditions_line": "81\u00b0F \u00b7 5 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
       "market_at_snapshot": {
-        "home_spread": -11.5,
+        "home_spread": -12.5,
         "total": 65.5,
         "bookmaker": "Consensus (2 books)",
         "reference_spread": {
@@ -4923,6 +5029,7 @@
           "home_price": -106,
           "away_spread": 11.5,
           "away_price": -114,
+          "last_update": "2026-10-09T14:44:43Z",
           "implied_probability": {
             "home": 0.51456311,
             "away": 0.53271028
@@ -4939,25 +5046,26 @@
           "bookmaker_key": "fanduel",
           "total": 65.5,
           "under_total": 65.5,
-          "over_price": -105,
-          "under_price": -115,
+          "over_price": -112,
+          "under_price": -108,
+          "last_update": "2026-10-09T14:44:43Z",
           "implied_probability": {
-            "over": 0.51219512,
-            "under": 0.53488372
+            "over": 0.52830189,
+            "under": 0.51923077
           },
           "no_vig_probability": {
-            "over": 0.48916576,
-            "under": 0.51083424
+            "over": 0.50432975,
+            "under": 0.49567025
           },
-          "overround": 0.04707884,
+          "overround": 0.04753266,
           "price_format": "american"
         },
         "price_policy": "single_book_two_sided_quote_only"
       },
       "comparison_at_snapshot": {
-        "disagreement": 2.5,
+        "disagreement": 3.5,
         "preferred_side": "Colorado State",
-        "market_disagreement_status": "ALIGNED",
+        "market_disagreement_status": "SLIGHT EDGE",
         "status_system": "v2_the_signal"
       },
       "clv": {
@@ -4975,10 +5083,10 @@
       }
     },
     {
-      "snapshot_id": "2de581b2a2500dbe7acef3b0",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "b4954b804a89b726a4c3b0a8",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856723,
@@ -4995,9 +5103,15 @@
       "public_projection": {
         "home_spread": 2.0,
         "total": 56.0,
-        "weather_applied": false
+        "weather_applied": true
       },
-      "weather_at_snapshot": null,
+      "weather_at_snapshot": {
+        "conditions_line": "Forecast unavailable",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
       "market_at_snapshot": {
         "home_spread": 5.5,
         "total": 56.5,
@@ -5009,6 +5123,7 @@
           "home_price": -113,
           "away_spread": -5.5,
           "away_price": -109,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "home": 0.53051643,
             "away": 0.5215311
@@ -5027,6 +5142,7 @@
           "under_total": 56.5,
           "over_price": -114,
           "under_price": -109,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "over": 0.53271028,
             "under": 0.5215311
@@ -5061,10 +5177,10 @@
       }
     },
     {
-      "snapshot_id": "1ced37583380a84247804e21",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "35700cbc035f565d09fa1fe7",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856719,
@@ -5081,9 +5197,15 @@
       "public_projection": {
         "home_spread": -17.5,
         "total": 55.5,
-        "weather_applied": false
+        "weather_applied": true
       },
-      "weather_at_snapshot": null,
+      "weather_at_snapshot": {
+        "conditions_line": "Forecast unavailable",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
       "market_at_snapshot": {
         "home_spread": -18.5,
         "total": 50.5,
@@ -5095,6 +5217,7 @@
           "home_price": -112,
           "away_spread": 18.5,
           "away_price": -112,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "home": 0.52830189,
             "away": 0.52830189
@@ -5113,6 +5236,7 @@
           "under_total": 50.5,
           "over_price": -114,
           "under_price": -109,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "over": 0.53271028,
             "under": 0.5215311
@@ -5147,10 +5271,10 @@
       }
     },
     {
-      "snapshot_id": "4d4edf9bef8bdcf18820d821",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "352493642b0005895347feaa",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856724,
@@ -5167,9 +5291,15 @@
       "public_projection": {
         "home_spread": -6.5,
         "total": 53.5,
-        "weather_applied": false
+        "weather_applied": true
       },
-      "weather_at_snapshot": null,
+      "weather_at_snapshot": {
+        "conditions_line": "Forecast unavailable",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
       "market_at_snapshot": {
         "home_spread": -9.5,
         "total": 54.5,
@@ -5181,6 +5311,7 @@
           "home_price": -113,
           "away_spread": 9.5,
           "away_price": -110,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "home": 0.53051643,
             "away": 0.52380952
@@ -5199,6 +5330,7 @@
           "under_total": 54.5,
           "over_price": -114,
           "under_price": -109,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "over": 0.53271028,
             "under": 0.5215311
@@ -5233,10 +5365,10 @@
       }
     },
     {
-      "snapshot_id": "413f95e855fb831bfc1f26e9",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "522b77543e9c4ece01c93488",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858263,
@@ -5253,9 +5385,15 @@
       "public_projection": {
         "home_spread": -12.0,
         "total": 56.0,
-        "weather_applied": false
+        "weather_applied": true
       },
-      "weather_at_snapshot": null,
+      "weather_at_snapshot": {
+        "conditions_line": "Forecast unavailable",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
       "market_at_snapshot": {
         "home_spread": -19.5,
         "total": 55.5,
@@ -5267,6 +5405,7 @@
           "home_price": -112,
           "away_spread": 20.5,
           "away_price": -112,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "home": 0.52830189,
             "away": 0.52830189
@@ -5285,6 +5424,7 @@
           "under_total": 55.5,
           "over_price": -115,
           "under_price": -108,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51923077
@@ -5319,10 +5459,10 @@
       }
     },
     {
-      "snapshot_id": "ff3170361f78831d9cee0b95",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "f08be0212eef0828d9acefb7",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856830,
@@ -5339,9 +5479,15 @@
       "public_projection": {
         "home_spread": -6.5,
         "total": 54.0,
-        "weather_applied": false
+        "weather_applied": true
       },
-      "weather_at_snapshot": null,
+      "weather_at_snapshot": {
+        "conditions_line": "Forecast unavailable",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
       "market_at_snapshot": {
         "home_spread": -9.0,
         "total": 55.5,
@@ -5353,6 +5499,7 @@
           "home_price": -112,
           "away_spread": 8.0,
           "away_price": -112,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "home": 0.52830189,
             "away": 0.52830189
@@ -5371,6 +5518,7 @@
           "under_total": 55.5,
           "over_price": -115,
           "under_price": -108,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51923077
@@ -5405,10 +5553,10 @@
       }
     },
     {
-      "snapshot_id": "e18ef11f33a5b392a0ace29f",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "8c3f1d9767ddbb3b32c60c35",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856722,
@@ -5425,9 +5573,15 @@
       "public_projection": {
         "home_spread": -6.5,
         "total": 53.0,
-        "weather_applied": false
+        "weather_applied": true
       },
-      "weather_at_snapshot": null,
+      "weather_at_snapshot": {
+        "conditions_line": "Forecast unavailable",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
       "market_at_snapshot": {
         "home_spread": -6.5,
         "total": 41.5,
@@ -5439,6 +5593,7 @@
           "home_price": -112,
           "away_spread": 6.5,
           "away_price": -112,
+          "last_update": "2026-10-09T14:44:14Z",
           "implied_probability": {
             "home": 0.52830189,
             "away": 0.52830189
@@ -5457,6 +5612,7 @@
           "under_total": 41.5,
           "over_price": -112,
           "under_price": -110,
+          "last_update": "2026-10-09T14:44:14Z",
           "implied_probability": {
             "over": 0.52830189,
             "under": 0.52380952
@@ -5491,10 +5647,10 @@
       }
     },
     {
-      "snapshot_id": "026872ae5d88d7651c894306",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "99d105dd5b67c94479e1d7ed",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856720,
@@ -5511,9 +5667,15 @@
       "public_projection": {
         "home_spread": -11.5,
         "total": 54.0,
-        "weather_applied": false
+        "weather_applied": true
       },
-      "weather_at_snapshot": null,
+      "weather_at_snapshot": {
+        "conditions_line": "Forecast unavailable",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
       "market_at_snapshot": {
         "home_spread": -12.0,
         "total": 59.5,
@@ -5525,6 +5687,7 @@
           "home_price": -110,
           "away_spread": 12.0,
           "away_price": -113,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.53051643
@@ -5543,6 +5706,7 @@
           "under_total": 59.5,
           "over_price": -113,
           "under_price": -110,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "over": 0.53051643,
             "under": 0.52380952
@@ -5577,10 +5741,10 @@
       }
     },
     {
-      "snapshot_id": "4db052ef76ccb2ed1367793e",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "6bd793b277a2ea4bd7cfa89d",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856721,
@@ -5597,9 +5761,15 @@
       "public_projection": {
         "home_spread": -1.0,
         "total": 55.0,
-        "weather_applied": false
+        "weather_applied": true
       },
-      "weather_at_snapshot": null,
+      "weather_at_snapshot": {
+        "conditions_line": "Forecast unavailable",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
       "market_at_snapshot": {
         "home_spread": -6.5,
         "total": 57.5,
@@ -5611,6 +5781,7 @@
           "home_price": -115,
           "away_spread": 6.5,
           "away_price": -108,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "home": 0.53488372,
             "away": 0.51923077
@@ -5629,6 +5800,7 @@
           "under_total": 57.5,
           "over_price": -115,
           "under_price": -108,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51923077
@@ -5663,10 +5835,10 @@
       }
     },
     {
-      "snapshot_id": "b56fc493699a410404d58db5",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "f0fadd5ba1ac9cf015a21ab9",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858492,
@@ -5683,9 +5855,15 @@
       "public_projection": {
         "home_spread": -7.5,
         "total": 55.0,
-        "weather_applied": false
+        "weather_applied": true
       },
-      "weather_at_snapshot": null,
+      "weather_at_snapshot": {
+        "conditions_line": "Forecast unavailable",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
       "market_at_snapshot": {
         "home_spread": -12.5,
         "total": 58.5,
@@ -5697,6 +5875,7 @@
           "home_price": -113,
           "away_spread": 12.5,
           "away_price": -110,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "home": 0.53051643,
             "away": 0.52380952
@@ -5715,6 +5894,7 @@
           "under_total": 58.5,
           "over_price": -108,
           "under_price": -115,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "over": 0.51923077,
             "under": 0.53488372
@@ -5749,10 +5929,10 @@
       }
     },
     {
-      "snapshot_id": "9d6e0e2815c56ce5d935afdc",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "695c62885e6c0b5a77bcb8be",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858266,
@@ -5769,9 +5949,15 @@
       "public_projection": {
         "home_spread": -9.5,
         "total": 53.0,
-        "weather_applied": false
+        "weather_applied": true
       },
-      "weather_at_snapshot": null,
+      "weather_at_snapshot": {
+        "conditions_line": "Forecast unavailable",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
       "market_at_snapshot": {
         "home_spread": -4.5,
         "total": 46.5,
@@ -5783,6 +5969,7 @@
           "home_price": -114,
           "away_spread": 4.5,
           "away_price": -109,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "home": 0.53271028,
             "away": 0.5215311
@@ -5801,6 +5988,7 @@
           "under_total": 46.5,
           "over_price": -114,
           "under_price": -109,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "over": 0.53271028,
             "under": 0.5215311
@@ -5835,10 +6023,10 @@
       }
     },
     {
-      "snapshot_id": "4bcb2035492f8cf8ffcfdb16",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "f24f3601cf67eaa8b98b3399",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856809,
@@ -5855,9 +6043,15 @@
       "public_projection": {
         "home_spread": 5.0,
         "total": 57.0,
-        "weather_applied": false
+        "weather_applied": true
       },
-      "weather_at_snapshot": null,
+      "weather_at_snapshot": {
+        "conditions_line": "Forecast unavailable",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
       "market_at_snapshot": {
         "home_spread": 12.5,
         "total": 48.5,
@@ -5869,6 +6063,7 @@
           "home_price": -112,
           "away_spread": -12.5,
           "away_price": -110,
+          "last_update": "2026-10-09T14:44:14Z",
           "implied_probability": {
             "home": 0.52830189,
             "away": 0.52380952
@@ -5887,6 +6082,7 @@
           "under_total": 48.5,
           "over_price": -112,
           "under_price": -112,
+          "last_update": "2026-10-09T14:44:14Z",
           "implied_probability": {
             "over": 0.52830189,
             "under": 0.52830189
@@ -5921,10 +6117,10 @@
       }
     },
     {
-      "snapshot_id": "ef2be58fd21cd2f03a5ce4c5",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "080adc5079eb46d90d91b6ef",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858488,
@@ -5941,9 +6137,15 @@
       "public_projection": {
         "home_spread": 1.0,
         "total": 59.0,
-        "weather_applied": false
+        "weather_applied": true
       },
-      "weather_at_snapshot": null,
+      "weather_at_snapshot": {
+        "conditions_line": "Forecast unavailable",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
       "market_at_snapshot": {
         "home_spread": 3.0,
         "total": 48.5,
@@ -5955,6 +6157,7 @@
           "home_price": -117,
           "away_spread": -3.0,
           "away_price": -107,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "home": 0.53917051,
             "away": 0.51690821
@@ -5973,6 +6176,7 @@
           "under_total": 48.5,
           "over_price": -115,
           "under_price": -108,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51923077
@@ -6007,10 +6211,10 @@
       }
     },
     {
-      "snapshot_id": "e44c947eb8e09b4ca041bc3f",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "ce0a2a99dde2f6ec33913269",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856831,
@@ -6027,9 +6231,15 @@
       "public_projection": {
         "home_spread": -5.0,
         "total": 52.5,
-        "weather_applied": false
+        "weather_applied": true
       },
-      "weather_at_snapshot": null,
+      "weather_at_snapshot": {
+        "conditions_line": "Forecast unavailable",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
       "market_at_snapshot": {
         "home_spread": -3.5,
         "total": 57.5,
@@ -6041,6 +6251,7 @@
           "home_price": -110,
           "away_spread": 3.5,
           "away_price": -113,
+          "last_update": "2026-10-09T14:44:14Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.53051643
@@ -6059,6 +6270,7 @@
           "under_total": 57.5,
           "over_price": -110,
           "under_price": -113,
+          "last_update": "2026-10-09T14:44:14Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.53051643
@@ -6093,10 +6305,10 @@
       }
     },
     {
-      "snapshot_id": "74a03066bb59fd8341a66ca7",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "89ea48eecd8808ba3b7b5421",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858490,
@@ -6113,9 +6325,15 @@
       "public_projection": {
         "home_spread": -4.5,
         "total": 54.0,
-        "weather_applied": false
+        "weather_applied": true
       },
-      "weather_at_snapshot": null,
+      "weather_at_snapshot": {
+        "conditions_line": "Forecast unavailable",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
       "market_at_snapshot": {
         "home_spread": -5.5,
         "total": 43.5,
@@ -6127,6 +6345,7 @@
           "home_price": -112,
           "away_spread": 5.5,
           "away_price": -112,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "home": 0.52830189,
             "away": 0.52830189
@@ -6145,6 +6364,7 @@
           "under_total": 43.5,
           "over_price": -110,
           "under_price": -112,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52830189
@@ -6179,10 +6399,10 @@
       }
     },
     {
-      "snapshot_id": "bf16611fd22ba98629b51acc",
-      "captured_at_utc": "2026-10-09T02:09:23.780797+00:00",
+      "snapshot_id": "3a51851f273e504e11d5df30",
+      "captured_at_utc": "2026-10-09T14:45:09.841752+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-09T02:09:23.495621",
+      "projection_source_generated": "2026-10-09T14:45:09.543660",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858494,
@@ -6199,9 +6419,15 @@
       "public_projection": {
         "home_spread": -3.5,
         "total": 53.0,
-        "weather_applied": false
+        "weather_applied": true
       },
-      "weather_at_snapshot": null,
+      "weather_at_snapshot": {
+        "conditions_line": "Forecast unavailable",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "LOCKED"
+      },
       "market_at_snapshot": {
         "home_spread": -3.5,
         "total": 49.5,
@@ -6213,6 +6439,7 @@
           "home_price": -107,
           "away_spread": 3.5,
           "away_price": -117,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "home": 0.51690821,
             "away": 0.53917051
@@ -6231,6 +6458,7 @@
           "under_total": 49.5,
           "over_price": -114,
           "under_price": -109,
+          "last_update": "2026-10-09T14:44:13Z",
           "implied_probability": {
             "over": 0.53271028,
             "under": 0.5215311
