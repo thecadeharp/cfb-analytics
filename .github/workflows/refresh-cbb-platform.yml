@@ -194,8 +194,12 @@ jobs:
           assert bracket["meta"]["version"] == "thi-cbb-bracketology-v0.3"
           assert bracket["meta"]["forecast_type"] in {"preseason_strength_scenario", "live_resume_projection"}
           assert len(bracket["field"]) == 68
-          assert "active-roster quality" in bracket["meta"]["methodology"]
           assert all("roster_adjustment" in row for row in bracket["field"])
+          if roster_audit["meta"]["status"] == "passed":
+              assert "active-roster quality" in bracket["meta"]["methodology"]
+          else:
+              assert "without a roster adjustment" in bracket["meta"]["methodology"]
+              assert all(float(row["roster_adjustment"]) == 0 for row in bracket["field"])
           assert intelligence["meta"]["version"] == "thi-cbb-intelligence-suite-v1.3"
           if roster_audit["meta"]["status"] == "passed":
               assert len(intelligence["player_projections"]) >= 1500
