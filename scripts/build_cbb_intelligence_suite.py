@@ -299,7 +299,7 @@ def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[
         },
         "factors": [
             {"factor": "Opponent-adjusted team efficiency", "status": "active", "model_usage": "projection_input", "evidence": "Chronological team state built from possessions completed before tipoff."},
-            {"factor": "Tempo and Four Factors", "status": "active", "model_usage": "projection_input", "evidence": "Regressed preseason priors transition into opponent-adjusted current-season observations."},
+            {"factor": "Tempo and Four Factors", "status": "active", "model_usage": "projection_input", "evidence": "Neutral preseason baselines transition into chronological current-season observations."},
             {"factor": "Program-specific home-court effect", "status": "active", "model_usage": "projection_input", "evidence": f"Five-season regularized estimates shrink toward a {hca_national:.2f}-point national mean; neutral sites receive zero."},
             {"factor": "Roster continuity and personnel", "status": "active_prior", "model_usage": "preseason_prior", "evidence": "Verified returners, recruiting and matched transfer production shape the opening prior."},
             {"factor": "Market disagreement", "status": "evaluation_only", "model_usage": "signal_and_accountability", "evidence": "Lines define signals, ATS grades and CLV; market prices do not fit the team-strength model."},
@@ -313,7 +313,7 @@ def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[
     return {
         "meta": {
             "version": VERSION, "season": priors.get("meta", {}).get("season"), "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-            "methodology": "THI uses regressed preseason priors, roster continuity and personnel quality, possession-based opponent-adjusted efficiency, Four Factors, pace, regularized program-specific home-court effects and chronological walk-forward updates. Market prices remain evaluation fields. Situational flags are displayed as research context until each feature clears out-of-sample validation.",
+            "methodology": "THI uses regressed preseason priors, roster continuity and personnel quality, possession-based opponent-adjusted efficiency, chronological Four Factors, pace, regularized program-specific home-court effects and walk-forward updates. Market prices remain evaluation fields. Situational flags are displayed as research context until each feature clears out-of-sample validation.",
             "inspiration_note": "Away-from-home performance, record quality, quadrant-style records, rating movement and recent form are THI calculations inspired by useful public dossier concepts; no external proprietary rating is copied or used as a model input.",
             "player_projection_policy": "Qualified prior production receives per-game counting-stat projections; unverified statistical profiles receive role and impact context only.",
             "home_court_policy": "Program effects use five seasons of conference games, recency weighting and shrinkage toward the national mean; neutral-site games receive zero.",

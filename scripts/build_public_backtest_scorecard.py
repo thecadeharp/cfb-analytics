@@ -262,17 +262,17 @@ def cbb_scorecard(predictions_path: Path, card_path: Path, history_dir: Path | N
     ])
     return {
         "status": "not_validated", "verdict": "Research model did not validate", "seasons": [2025, 2026],
-        "model": "THI CBB walk-forward v0.7 research",
+        "model": "THI CBB walk-forward v0.6 selected research model",
         "market": "Archived closing-spread field; two-sided prices are unavailable",
         "price_assumption": PRICE,
         "selection_policy": "All five predeclared signal tiers, the combined >5-point group and three team-quality sensitivity cohorts are shown and corrected as one nine-test family.",
-        "validation_note": "The combined >5-point sample loses at a hypothetical flat -110 price, no displayed tier clears the corrected significance test, and the market has lower margin error in both held-out seasons.",
+        "validation_note": "The combined >5-point sample is positive at a hypothetical flat -110 price, but it does not clear the corrected significance test and the market has lower margin error in both held-out seasons.",
         "actionable_over_5": actionable, "yearly": yearly, "buckets": buckets, "market_accuracy": accuracy,
         "short_favorites": short_favorite_summary(rows),
         "data_integrity": {"source_rows": len(rows), "duplicate_game_keys": len(identities) - len(set(identities))},
         "robustness": {
             "without_outlier_tier": summarize(rows, lambda row: 5 < edge(row) <= 10, cbb_result),
-            "interpretation": "Removing >10-point outliers leaves the combined sample negative.",
+            "interpretation": "Removing >10-point outliers tests whether the result depends on the largest model disagreements; the displayed result remains descriptive until prospective validation clears every gate.",
         },
         "team_quality_sensitivity": quality_sensitivity,
     }

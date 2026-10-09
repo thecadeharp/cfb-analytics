@@ -18,7 +18,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 HISTORY_DIR = ROOT / "data" / "cbb" / "history"
 OUTPUT_DIR = ROOT / "data" / "cbb" / "model"
-MODEL_VERSION = "thi-cbb-walk-forward-v0.7-research"
+MODEL_VERSION = "thi-cbb-walk-forward-v0.6-research"
 TRAIN_SEASONS = set(range(2019, 2025))
 VALIDATION_SEASONS = {2025}
 TEST_SEASONS = {2026}
@@ -194,23 +194,12 @@ def initial_states(
         prior_offense = finite(previous.get("adjusted_offense"))
         prior_defense = finite(previous.get("adjusted_defense"))
         prior_tempo = finite(previous.get("pace"))
-        prior_factors = previous.get("four_factors") or {}
-        prior_factor_offense = prior_factors.get("offense") or {}
-        prior_factor_defense = prior_factors.get("defense") or {}
         weight = 3.0 + 4.0 * clip((returning or 0.0) / 100.0, 0.0, 1.0)
         states[team_id] = TeamState(
             offense=league_efficiency + carry * ((prior_offense or league_efficiency) - league_efficiency),
             defense=league_efficiency + carry * ((prior_defense or league_efficiency) - league_efficiency),
             tempo=league_tempo + (0.50 + 0.25 * carry) * ((prior_tempo or league_tempo) - league_tempo),
             weight=weight,
-            efg_for=50.0 + carry * ((finite(prior_factor_offense.get("effective_fg_pct")) or 50.0) - 50.0),
-            efg_allowed=50.0 + carry * ((finite(prior_factor_defense.get("effective_fg_pct")) or 50.0) - 50.0),
-            turnover_for=20.0 + carry * ((finite(prior_factor_offense.get("turnover_pct")) or 20.0) - 20.0),
-            turnover_forced=20.0 + carry * ((finite(prior_factor_defense.get("turnover_pct")) or 20.0) - 20.0),
-            rebound_for=30.0 + carry * ((finite(prior_factor_offense.get("offensive_rebound_pct")) or 30.0) - 30.0),
-            rebound_allowed=30.0 + carry * ((finite(prior_factor_defense.get("offensive_rebound_pct")) or 30.0) - 30.0),
-            free_throw_for=30.0 + carry * ((finite(prior_factor_offense.get("free_throw_rate")) or 30.0) - 30.0),
-            free_throw_allowed=30.0 + carry * ((finite(prior_factor_defense.get("free_throw_rate")) or 30.0) - 30.0),
         )
     return states
 
@@ -284,32 +273,25 @@ def update_states(game: dict[str, Any], home: TeamState, away: TeamState, league
     home.update("tempo", pace)
     away.update("tempo", pace)
     factor_pairs = (
-        ("effective_fg_pct", "efg_for", "efg_allowed", 50.0),
-        ("turnover_pct", "turnover_for", "turnover_forced", 20.0),
-        ("offensive_rebound_pct", "rebound_for", "rebound_allowed", 30.0),
-        ("free_throw_rate", "free_throw_for", "free_throw_allowed", 30.0),
+        ("effective_fg_pct", "efg_for", "efg_allowed"),
+        ("turnover_pct", "turnover_for", "turnover_forced"),
+        ("offensive_rebound_pct", "rebound_for", "rebound_allowed"),
+        ("free_throw_rate", "free_throw_for", "free_throw_allowed"),
     )
-    for source, offense_field, defense_field, baseline in factor_pairs:
+    for source, offense_field, defense_field in factor_pairs:
         home_value = finite(home_box.get(source))
         away_value = finite(away_box.get(source))
-        home_offense_before = getattr(home, offense_field)
-        home_defense_before = getattr(home, defense_field)
-        away_offense_before = getattr(away, offense_field)
-        away_defense_before = getattr(away, defense_field)
-        if home_value is not None:
-            home.update(offense_field, baseline + home_value - away_defense_before)
-            away.update(defense_field, baseline + home_value - home_offense_before)
-        if away_value is not None:
-            away.update(offense_field, baseline + away_value - home_defense_before)
-            home.update(defense_field, baseline + away_value - away_offense_before)
+        home.update(offense_field, home_value)
+        away.update(defense_field, home_value)
+        away.update(offense_field, away_value)
+        home.update(defense_field, away_value)
     home.finish_game(when)
     away.finish_game(when)
 
 
-def generate_rows(seasons: dict[int, dict[str, Any]], personnel: dict[Any, Any]) -> tuple[list[dict[str, Any]], dict[str, dict[str, dict[str, float]]]]:
+def generate_rows(seasons: dict[int, dict[str, Any]], personnel: dict[Any, Any]) -> list[dict[str, Any]]:
     rows = []
     prior_teams: list[dict[str, Any]] = []
-    latest_factor_states: dict[str, dict[str, dict[str, float]]] = {}
     for season in sorted(seasons):
         payload = seasons[season]
         current_teams = payload.get("season_end_teams") or []
@@ -360,28 +342,8 @@ def generate_rows(seasons: dict[int, dict[str, Any]], personnel: dict[Any, Any])
                     observed_efficiencies.append(value)
             if observed_efficiencies:
                 league_efficiency += 0.01 * (statistics.fmean(observed_efficiencies[-40:]) - league_efficiency)
-        latest_factor_states = {
-            team_id: {
-                "offense": {
-                    "effective_fg_pct": round(state.efg_for, 4),
-                    "turnover_pct": round(state.turnover_for, 4),
-                    "offensive_rebound_pct": round(state.rebound_for, 4),
-                    "free_throw_rate": round(state.free_throw_for, 4),
-                },
-                "defense": {
-                    "effective_fg_pct": round(state.efg_allowed, 4),
-                    "turnover_pct": round(state.turnover_forced, 4),
-                    "offensive_rebound_pct": round(state.rebound_allowed, 4),
-                    "free_throw_rate": round(state.free_throw_allowed, 4),
-                },
-            }
-            for team_id, state in states.items()
-        }
-        prior_teams = [
-            {**row, "four_factors": latest_factor_states.get(str(row.get("team_id"))) or {}}
-            for row in current_teams
-        ]
-    return rows, latest_factor_states
+        prior_teams = current_teams
+    return rows
 
 
 def solve(matrix: list[list[float]], vector: list[float]) -> list[float]:
@@ -572,7 +534,6 @@ def current_priors(
     previous_teams: list[dict[str, Any]],
     personnel: dict[Any, Any],
     player_path: Path | None = None,
-    opponent_adjusted_factors: dict[str, dict[str, dict[str, float]]] | None = None,
 ) -> dict[str, Any]:
     profiles = json.loads(profile_path.read_text()) if profile_path.exists() else {"meta": {}, "teams": []}
     player_payload = json.loads(player_path.read_text()) if player_path and player_path.exists() else {"meta": {}, "team_rosters": []}
@@ -599,13 +560,6 @@ def current_priors(
         offense = finite(adjusted.get("offense")) or league_efficiency
         defense = finite(adjusted.get("defense")) or league_efficiency
         prior_tempo = finite((previous_by_id.get(str(profile.get("team_id"))) or {}).get("pace")) or league_tempo
-        prior_factors = (opponent_adjusted_factors or {}).get(str(profile.get("team_id"))) or prior.get("four_factors") or {}
-
-        def carried_factor(side: str, key: str, baseline: float) -> float:
-            value = finite((prior_factors.get(side) or {}).get(key))
-            observed = baseline if value is None else value
-            return round(baseline + carry * (observed - baseline), 4)
-
         rows.append({
             "team_id": profile.get("team_id"),
             "team": profile.get("team"),
@@ -614,20 +568,6 @@ def current_priors(
             "prior_defense": round(league_efficiency + carry * (defense - league_efficiency), 4),
             "prior_net": round(carry * (offense - defense), 4),
             "prior_tempo": round(prior_tempo, 4),
-            "prior_four_factors": {
-                "offense": {
-                    "effective_fg_pct": carried_factor("offense", "effective_fg_pct", 50.0),
-                    "turnover_pct": carried_factor("offense", "turnover_pct", 20.0),
-                    "offensive_rebound_pct": carried_factor("offense", "offensive_rebound_pct", 30.0),
-                    "free_throw_rate": carried_factor("offense", "free_throw_rate", 30.0),
-                },
-                "defense": {
-                    "effective_fg_pct": carried_factor("defense", "effective_fg_pct", 50.0),
-                    "turnover_pct": carried_factor("defense", "turnover_pct", 20.0),
-                    "offensive_rebound_pct": carried_factor("defense", "offensive_rebound_pct", 30.0),
-                    "free_throw_rate": carried_factor("defense", "free_throw_rate", 30.0),
-                },
-            },
             "returning_minutes_pct": returning,
             "continuity_known": returning is not None,
             "continuity_source": continuity_source,
@@ -643,7 +583,6 @@ def current_priors(
             "positive_continuity_count": sum((row["returning_minutes_pct"] or 0) > 0 for row in rows),
             "verified_roster_continuity_count": sum(row["continuity_source"] == "verified_current_roster_join" for row in rows),
             "personnel_team_count": sum(bool(row["personnel"]) for row in rows),
-            "four_factor_source": "completed-season chronological opponent adjustment, regressed by current roster continuity",
             "status": "preseason_prior; not a current-season adjusted rating",
         },
         "teams": rows,
@@ -669,7 +608,7 @@ def build(history_dir: Path, personnel_dir: Path, profile_path: Path, output_dir
     missing_personnel = sorted(set(seasons) - {key for key in personnel if isinstance(key, int)})
     if missing_personnel:
         raise RuntimeError(f"missing personnel features for seasons: {missing_personnel}")
-    rows, opponent_adjusted_factors = generate_rows(seasons, personnel)
+    rows = generate_rows(seasons, personnel)
     training = [row for row in rows if row["season"] in TRAIN_SEASONS]
     margin_model = fit_ridge(training, MARGIN_FEATURES, "actual_home_margin")
     total_model = fit_ridge(training, TOTAL_FEATURES, "actual_total")
@@ -697,7 +636,7 @@ def build(history_dir: Path, personnel_dir: Path, profile_path: Path, output_dir
         },
     }
     latest = seasons[max(seasons)]["season_end_teams"]
-    priors = current_priors(profile_path, latest, personnel, player_path, opponent_adjusted_factors)
+    priors = current_priors(profile_path, latest, personnel, player_path)
     validation = evaluation["validation"]
     test = evaluation["out_of_time_test"]
     gate_checks = {
@@ -721,7 +660,7 @@ def build(history_dir: Path, personnel_dir: Path, profile_path: Path, output_dir
             "same_season_end_ratings_used_as_pregame_features": False,
             "personnel_features_known_before_season": True,
             "historical_laboratory_version": "thi-cbb-historical-lab-v1.0",
-            "four_factor_engine_version": "thi-cbb-opponent-adjusted-four-factors-v1.0",
+            "four_factor_engine_version": "thi-cbb-chronological-four-factors-v0.6",
             "leakage_audit": {
                 "strict_chronological_team_state_updates": True,
                 "same_game_outcome_excluded_from_features": True,
@@ -746,9 +685,9 @@ def build(history_dir: Path, personnel_dir: Path, profile_path: Path, output_dir
         ],
     }
     predictions = {"meta": card["meta"], "games": evaluated}
-    atomic_json(output_dir / "model_card.json", card, compressed=False, compact=True)
+    atomic_json(output_dir / "model_card.json", card, compact=True)
     atomic_json(output_dir / "walk_forward_predictions.json.gz", predictions, compressed=True)
-    atomic_json(output_dir / "current_priors.json", priors, compressed=False, compact=True)
+    atomic_json(output_dir / "current_priors.json", priors, compact=True)
     return card
 
 

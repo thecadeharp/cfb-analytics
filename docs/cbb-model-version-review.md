@@ -1,6 +1,6 @@
 # CBB model version review
 
-Decision recorded: 2026-10-09
+Decision recorded: 2026-10-09; production selection updated 2026-10-09
 
 ## Why this record exists
 
@@ -12,8 +12,8 @@ Both versions are strict chronological walk-forward research models trained on 2
 
 | Model | Historical role | Record | Hit rate | Hypothetical flat -110 return | Exact p vs. 52.381% |
 | --- | --- | ---: | ---: | ---: | ---: |
-| v0.6 | Previous published research model | 1158–1020–2 | 53.168% | +1.501% | 0.237657 |
-| v0.7 | Current published research model | 1231–1144–3 | 51.832% | -1.047% | 0.711177 |
+| v0.6 | Selected production research model | 1158–1020–2 | 53.168% | +1.501% | 0.237657 |
+| v0.7 | Archived challenger | 1231–1144–3 | 51.832% | -1.047% | 0.711177 |
 
 The v0.6 95% Wilson interval is 51.069%–55.256%. Its positive hypothetical return is descriptive and did not establish corrected statistical significance or realized ROI. Historical two-sided prices are unavailable.
 
@@ -21,13 +21,13 @@ The v0.6 95% Wilson interval is 51.069%–55.256%. Its positive hypothetical ret
 
 Version 0.7 introduced chronological opponent-adjusted Four Factor states, carried those states into preseason priors with regression, and expanded the qualifying sample. It is a methodological change rather than a recalculation of the same predictions.
 
-## Decision
+## Production decision
 
-Do not replace the current public v0.7 result with the v0.6 result while continuing to run v0.7 projections. That would attribute one model's historical performance to another model.
+THI now uses and displays v0.6 as the selected CBB research model. The projection engine, generated model card, current priors, bracketology input, and public historical audit must carry the same v0.6 version identifier.
 
-Do not select v0.6 for production solely because it performed better on 2025–2026. Those outcomes are now exposed to the selection process, so choosing between versions on that basis would create model-selection leakage.
+This selection was made after observing the 2025–2026 comparison and therefore carries model-selection risk. The public result remains labeled historical research and not validated; it cannot be presented as independent proof of future profitability.
 
-Preserve v0.6 as the official rollback challenger. Generate v0.6 and v0.7 projections in parallel against identical frozen 2027 markets without changing the published model. Reconsider production only after a predeclared prospective sample compares:
+Preserve v0.7 as the challenger. Generate v0.6 and v0.7 projections in parallel against identical frozen 2027 markets. Reconsider production only after a predeclared prospective sample compares:
 
 - exact selection and closing prices from the same named book;
 - ATS return and no-vig probability per play;
@@ -36,4 +36,4 @@ Preserve v0.6 as the official rollback challenger. Generate v0.6 and v0.7 projec
 - rolling stability and outlier dependency; and
 - performance by month, market range, venue type, and team-quality cohort.
 
-A rollback may occur earlier only if an implementation or data-integrity defect is independently found in v0.7. Better exposed historical returns alone are not sufficient.
+The selected model can change earlier if an implementation or data-integrity defect is independently confirmed. Historical return comparisons remain descriptive rather than an independent validation sample.

@@ -53,7 +53,7 @@ jobs:
           payload = json.loads(Path("data/cbb/model_tracking.json").read_text())
           assert payload["meta"]["version"] == "thi-cbb-model-tracking-v0.1"
           assert payload["meta"]["projection_board_version"] == "thi-cbb-projection-board-v0.5"
-          assert payload["meta"]["model_version"] == "thi-cbb-walk-forward-v0.7-research"
+          assert payload["meta"]["model_version"] == "thi-cbb-walk-forward-v0.6-research"
           spread = payload["summary"]["spread"]
           assert spread["games"] == len(payload["spread_decisions"])
           assert spread["wins"] + spread["losses"] + spread["pushes"] == spread["games"]

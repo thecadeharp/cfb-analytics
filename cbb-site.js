@@ -1233,7 +1233,7 @@
           ${methodCard("Accountability", "Track before promotion", "ATS, total, calibration and error results must generalize out of time before public signals appear.")}
         </div>
       </section>
-      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">2025–2026 · held-out research</div><h2 class="cbb-section-title">Historical Research Audit</h2></div><div class="cbb-section-note">Every game with a &gt;5-point model edge is shown. Flat −110 returns are hypothetical because per-play prices are unavailable.</div></div>
+      <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">2025–2026 · held-out research</div><h2 class="cbb-section-title">Historical Research Audit</h2></div><div class="cbb-section-note"><strong>${escapeHtml(backtest.model || "THI CBB research model")}</strong><br>Every game with a &gt;5-point model edge is shown. Flat −110 returns are hypothetical because per-play prices are unavailable.</div></div>
         <div class="cbb-stat-grid">
           ${statCard("ATS record", backtestResult.record || "—", `${integer(backtestResult.games)} historical decisions`)}
           ${statCard("Hit rate", pct(backtestResult.hit_rate), `95% CI ${(backtestResult.hit_rate_ci_95 || []).map(value=>number(value,1)).join("–")}%`)}

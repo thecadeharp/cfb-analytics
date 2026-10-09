@@ -155,8 +155,8 @@ def build_bracketology(
     players_payload: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     model_version = priors_payload.get("meta", {}).get("model_version")
-    if model_version != "thi-cbb-walk-forward-v0.7-research":
-        raise RuntimeError("bracketology requires thi-cbb-walk-forward-v0.7-research priors")
+    if model_version != "thi-cbb-walk-forward-v0.6-research":
+        raise RuntimeError("bracketology requires thi-cbb-walk-forward-v0.6-research priors")
     profiles = {str(row.get("team_id")): row for row in (profiles_payload or {}).get("teams") or []}
     profile_records = [row.get("record") or {} for row in profiles.values()]
     current_game_count = sum(int(record.get("games") or 0) for record in profile_records)

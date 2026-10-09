@@ -119,7 +119,7 @@ def team_state(profile: dict[str, Any], prior: dict[str, Any], league_tempo: flo
             side: {key: blended_factor(side, key) for key in baselines}
             for side in ("offense", "defense")
         },
-        "factor_source": "opponent_adjusted_prior_blended_with_current" if current_ready else "opponent_adjusted_prior",
+        "factor_source": "neutral_prior_blended_with_current" if current_ready else "neutral_preseason_prior",
         "personnel": prior.get("personnel") or {},
     }
 
@@ -220,8 +220,8 @@ def build_board(
     home_court_payload: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     model_version = model_card.get("meta", {}).get("model_version")
-    if model_version != "thi-cbb-walk-forward-v0.7-research":
-        raise RuntimeError("projection board requires thi-cbb-walk-forward-v0.7-research")
+    if model_version != "thi-cbb-walk-forward-v0.6-research":
+        raise RuntimeError("projection board requires thi-cbb-walk-forward-v0.6-research")
     if priors_payload.get("meta", {}).get("model_version") != model_version:
         raise RuntimeError("current priors and model card versions do not match")
 
@@ -375,7 +375,7 @@ def build_board(
             "spread_signal_policy": "Only tracked-sample games with at least a five-point model-versus-market disagreement are eligible.",
             "totals_signal_policy": "Withheld until totals validation clears its independent promotion gate.",
             "projection_state": "research projections; sample-gated spread signals",
-            "four_factor_method": "Opponent-adjusted historical states with continuity-regressed priors blended toward current-season offense and defense factor observations.",
+            "four_factor_method": "Neutral preseason Four Factor baselines blend toward chronological current-season offense and defense observations.",
             "home_court_method": "Program-specific five-season regularized conference-game estimates replace the model's national campus coefficient; neutral-site games receive zero.",
         },
         "games": output,
