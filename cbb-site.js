@@ -665,6 +665,8 @@
     const firstTotal = stored.first_captured_total ?? stored.open_total ?? market.opening_total;
     const currentTotal = stored.current_total ?? market.consensus_total;
     const spreadMove = Number.isFinite(Number(firstSpread)) && Number.isFinite(Number(currentSpread)) ? Number(currentSpread) - Number(firstSpread) : null;
+    const referenceMoneyline = market.reference_moneyline || {};
+    const marketBooks = Array.isArray(market.book_lines) ? market.book_lines : [];
     const lineFor = value => {
       if (!Number.isFinite(Number(value))) return "—";
       const home = Number(value) <= 0;
@@ -680,7 +682,9 @@
         ${detailStat("First captured total", Number.isFinite(Number(firstTotal)) ? number(firstTotal,1) : "—")}
         ${detailStat("Current total", Number.isFinite(Number(currentTotal)) ? number(currentTotal,1) : "—")}
         ${detailStat("Captured updates", integer(snapshots.length))}
+        ${detailStat("Reference moneyline", referenceMoneyline.provider ? `${referenceMoneyline.provider} · ${game.away?.team} ${number(referenceMoneyline.away_price,0,true)} / ${game.home?.team} ${number(referenceMoneyline.home_price,0,true)}` : "—")}
       </div>
+      ${marketBooks.length ? `<div class="cbb-panel cbb-table-wrap"><table class="cbb-table" style="min-width:760px"><thead><tr><th>Sportsbook</th><th>${escapeHtml(game.away?.team)} ML</th><th>${escapeHtml(game.home?.team)} ML</th><th>Home spread</th><th>Total</th></tr></thead><tbody>${marketBooks.map(book => `<tr><td><strong>${escapeHtml(book.provider || "Sportsbook")}</strong></td><td class="cbb-number">${Number.isFinite(Number(book.away_moneyline)) ? number(book.away_moneyline,0,true) : "—"}</td><td class="cbb-number">${Number.isFinite(Number(book.home_moneyline)) ? number(book.home_moneyline,0,true) : "—"}</td><td class="cbb-number">${Number.isFinite(Number(book.spread)) ? number(book.spread,1,true) : "—"}</td><td class="cbb-number">${Number.isFinite(Number(book.total)) ? number(book.total,1) : "—"}</td></tr>`).join("")}</tbody></table></div>` : ""}
       ${rows ? `<div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Capture</th><th>Time</th><th>Spread</th><th>Total</th><th>Source</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="cbb-coverage-note">No market chronology is available yet. This panel will populate automatically as books release and move CBB lines.</div>`}
       <div class="cbb-model-sub">“First captured” means THI's first recorded observation; it is not presented as an official sportsbook opener.</div>
     </section>`;
@@ -715,7 +719,7 @@
     const styleCell = value => value == null ? "Coverage unavailable" : pct(value);
     panel.innerHTML = `
       <button class="cbb-detail-close cbb-game-back" type="button" data-cbb-close>← Back to projections</button>
-      <button class="thi-account-button" type="button" data-cbb-save-game>Save game</button>
+      <button class="thi-account-button" type="button" data-cbb-track-play>Track a Play</button>
       <div class="cbb-kicker">THI CBB matchup analysis</div>
       <div class="cbb-matchup-page-title"><div>${teamLogo(game.away,"large")}<span>${escapeHtml(game.away?.team)}</span></div><b>${matchupWord(game)}</b><div>${teamLogo(game.home,"large")}<span>${escapeHtml(game.home?.team)}</span></div></div>
       <div class="cbb-detail-sub">${escapeHtml(date)} · ${escapeHtml(game.venue?.name || (game.neutral_site ? "Neutral site" : "Venue TBD"))} · ${escapeHtml(game.broadcasts?.map(item => item.network || item).filter(Boolean).join(", ") || "TV TBD")}${game.neutral_site ? ' · <strong class="cbb-neutral-label">NEUTRAL FLOOR · NO HOME-COURT INPUT</strong>' : ""}</div>
@@ -792,9 +796,13 @@
     detail.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
     panel.scrollTop = 0;
-    panel.querySelector("[data-cbb-save-game]")?.addEventListener("click", event => {
-      window.THIAccount?.saveGame({id:String(game.game_id),game_id:String(game.game_id),sport:"cbb",away_team:game.away?.team,home_team:game.home?.team,start_date:game.start_date});
-      event.currentTarget.textContent="Saved";
+    panel.querySelector("[data-cbb-track-play]")?.addEventListener("click", () => {
+      const homeSpread=Number(game.market?.consensus_home_spread);
+      const edge=Number(projection.spread_edge);
+      const selection=Number.isFinite(edge) ? (edge > 0 ? "home" : "away") : null;
+      const selectedLine=Number.isFinite(homeSpread)&&selection ? (selection==="home"?homeSpread:-homeSpread) : null;
+      closeTeamDetail();
+      window.THITrackPlay?.({game_id:String(game.game_id),sport:"cbb",market:"spread",selection,line:selectedLine});
     });
     panel.querySelector("[data-cbb-close]")?.focus();
   }

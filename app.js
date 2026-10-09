@@ -2640,11 +2640,14 @@ function openMatchup(gameId) {
   enterDetailView("matchup", { gameId: String(gameId) });
 }
 
-function saveMatchupToAccount(gameId, button) {
+function trackMatchupPlay(gameId) {
   const game = findGame(gameId);
-  if (!game || !window.THIAccount) return;
-  window.THIAccount.saveGame({id:String(game.game_id),game_id:String(game.game_id),sport:"cfb",away_team:game.away?.team,home_team:game.home?.team,start_date:game.start_date});
-  if (button) button.textContent = "Saved";
+  if (!game || !window.THITrackPlay) return;
+  const preferred = game.comparison?.preferred_side;
+  const homeSpread = Number(game.market?.home_spread);
+  const selection = preferred === game.home?.team ? "home" : preferred === game.away?.team ? "away" : null;
+  const selectedLine = Number.isFinite(homeSpread) && selection ? (selection === "home" ? homeSpread : -homeSpread) : null;
+  window.THITrackPlay({game_id:String(game.game_id),sport:"cfb",market:"spread",selection,line:selectedLine});
 }
 
 function saveTeamToAccount(teamName, sport, button) {
@@ -3494,7 +3497,7 @@ function renderMatchup(game) {
       </div>
 
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
-        <button class="thi-account-button" type="button" onclick="saveMatchupToAccount('${escapeJsString(String(game.game_id ?? ""))}',this)">Save game</button>
+        <button class="thi-account-button" type="button" onclick="trackMatchupPlay('${escapeJsString(String(game.game_id ?? ""))}')">Track a Play</button>
         <span class="status ${statusCss}">
           ${escapeHtml(displayStatus(status))}
         </span>
@@ -3749,6 +3752,10 @@ function marketMovementMarkup(game) {
   const movement = hasValue(firstSpread) && hasValue(currentSpread) ? Number(currentSpread) - Number(firstSpread) : null;
   const reference = current.reference_spread ?? {};
   const total = current.reference_total ?? {};
+  const bookLines = Array.isArray(current.book_lines) ? current.book_lines.slice().sort((a,b) => {
+    const priority = {pinnacle:0,circasports:1,betonlineag:2,bookmaker:3};
+    return (priority[a.bookmaker_key] ?? 50) - (priority[b.bookmaker_key] ?? 50);
+  }) : [];
   const rows = snapshots.slice(-24).reverse().map((snapshot, index) => {
     const when = new Date(snapshot.captured_at);
     const captured = Number.isNaN(when.getTime()) ? "Time unavailable" : when.toLocaleString("en-US", {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
@@ -3764,6 +3771,11 @@ function marketMovementMarkup(game) {
         <div class="analysis-card"><div class="analysis-label">Reference price</div><div class="analysis-value">${hasValue(reference.home_spread) ? americanPrice(reference.home_price) : "—"}</div><div class="analysis-small">${escapeHtml(reference.bookmaker || "Awaiting a paired sharp-book quote")}${hasValue(reference.away_price) ? ` · away ${americanPrice(reference.away_price)}` : ""}</div></div>
       </div>
       ${rows ? `<div style="overflow:auto"><table class="data-table" style="min-width:520px"><thead><tr><th>Capture</th><th>Time</th><th>Consensus spread</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="sample-warning">Line chronology will appear after THI captures at least one market snapshot for this game.</div>`}
+      ${bookLines.length ? `<div style="overflow:auto;margin-top:14px"><table class="data-table" style="min-width:860px"><thead><tr><th>Sportsbook</th><th>${escapeHtml(game.away.team)} spread</th><th>${escapeHtml(game.home.team)} spread</th><th>Total</th><th>Updated</th></tr></thead><tbody>${bookLines.map(book => {
+        const spread = book.spread || {}; const bookTotal = book.total || {}; const updated = new Date(book.last_update || spread.last_update || bookTotal.last_update);
+        const updatedLabel = Number.isNaN(updated.getTime()) ? "—" : updated.toLocaleString("en-US", {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+        return `<tr><td><strong>${escapeHtml(book.bookmaker || book.bookmaker_key || "Sportsbook")}</strong></td><td>${hasValue(spread.away_spread) ? `${formatSigned(spread.away_spread,1)} · ${americanPrice(spread.away_price)}` : "—"}</td><td>${hasValue(spread.home_spread) ? `${formatSigned(spread.home_spread,1)} · ${americanPrice(spread.home_price)}` : "—"}</td><td>${hasValue(bookTotal.total) ? `${formatNumber(bookTotal.total,1)} · O ${americanPrice(bookTotal.over_price)} / U ${americanPrice(bookTotal.under_price)}` : "—"}</td><td>${escapeHtml(updatedLabel)}</td></tr>`;
+      }).join("")}</tbody></table></div>` : `<div class="sample-warning" style="margin-top:14px">Sportsbook-by-sportsbook prices will appear after the next market refresh.</div>`}
       <div class="analysis-row"><div class="analysis-row-label">Current reference total</div><div class="analysis-row-value">${hasValue(total.total) ? `${formatNumber(total.total,1)} · over ${americanPrice(total.over_price)} / under ${americanPrice(total.under_price)}` : "—"}</div></div>
       <p class="team-meta" style="margin:10px 0 0;">This screen tracks THI's timestamped observations. It does not claim sportsbook opening or closing lines unless the capture is explicitly labeled that way.</p>
     </div>

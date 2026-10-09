@@ -33,6 +33,8 @@
     .research-table th,.research-table td{padding:10px 12px;border-bottom:1px solid var(--border,#ddd);text-align:left;white-space:nowrap}
     .research-table th{font:700 9px var(--mono,monospace);letter-spacing:.6px;text-transform:uppercase;color:var(--muted,#5b6974)}
     .research-negative{color:#b4414e;font-weight:700}.research-search{width:min(100%,360px);padding:10px 12px;margin:8px 0 12px;border:1px solid var(--border,#ddd);border-radius:8px;background:var(--surface,#fff);color:var(--text,#1d2730)}
+    .research-track{border:1px solid #22866b;border-radius:7px;background:transparent;color:#42b996;padding:7px 10px;cursor:pointer;font:700 10px var(--mono,monospace);text-transform:uppercase;letter-spacing:.5px}
+    .research-track:disabled{opacity:.45;cursor:not-allowed}.research-quote{display:block;font-size:11px;line-height:1.55}.research-book-lines summary{cursor:pointer;color:var(--muted,#5b6974)}
   `;
   document.head.appendChild(style);
   const button = document.createElement('button');
@@ -57,6 +59,42 @@
   const line = value => Number(value) > 0 ? `+${number(value)}` : number(value);
   const finiteNumber = value => value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value)) ? Number(value) : null;
   let client, games = [], history = {}, closings = {};
+  const PENDING_PLAY_KEY = 'thi:pending-play:v1';
+
+  function pendingPlay() {
+    try { return JSON.parse(sessionStorage.getItem(PENDING_PLAY_KEY) || 'null'); }
+    catch (_) { return null; }
+  }
+
+  function applyPendingPlay() {
+    const draft = pendingPlay();
+    const entry = $('#research-entry');
+    if (!draft || !entry || entry.dataset.pendingApplied === 'true') return;
+    const game = games.find(row => String(row.game_id) === String(draft.game_id) && (!draft.sport || row.sport === draft.sport));
+    if (!game) return;
+    entry.dataset.pendingApplied = 'true';
+    const search = $('#research-game-search');
+    search.value = `${game.away?.team || ''} ${game.home?.team || ''}`.trim();
+    search.dispatchEvent(new Event('input', {bubbles:true}));
+    entry.elements.game_id.value = String(game.game_id);
+    entry.elements.market.value = ['spread','moneyline','total'].includes(draft.market) ? draft.market : 'spread';
+    entry.dispatchEvent(new Event('change', {bubbles:true}));
+    if (draft.selection) entry.elements.selection.value = draft.selection;
+    if (draft.line !== null && draft.line !== undefined && draft.line !== '') entry.elements.line.value = draft.line;
+    entry.dispatchEvent(new Event('input', {bubbles:true}));
+    $('#research-message').textContent = 'Matchup loaded. Enter your sportsbook, accepted price and units to begin tracking this play.';
+    entry.scrollIntoView({behavior:'smooth',block:'center'});
+    entry.elements.sportsbook.focus({preventScroll:true});
+  }
+
+  window.THITrackPlay = draft => {
+    sessionStorage.setItem(PENDING_PLAY_KEY, JSON.stringify({...draft, created_at_utc:new Date().toISOString()}));
+    const entry = $('#research-entry');
+    if (entry) delete entry.dataset.pendingApplied;
+    window.thiSetSport?.('cfb');
+    window.switchView?.('research');
+    setTimeout(applyPendingPlay, 0);
+  };
 
   function comparisonFor(play) {
     if (play.market !== 'spread' && play.market !== 'total') return null;
@@ -134,24 +172,62 @@
       <p class="research-muted"><strong>${esc(cfb.verdict)}.</strong> ${esc(cfb.validation_note)} ${esc(data.meta?.price_policy)} ${esc(data.meta?.promotion_rule)}</p></section>`;
   }).catch(() => { $('#research-backtest').innerHTML = '<p class="research-muted">Historical research audit is temporarily unavailable.</p>'; });
 
-  fetch('./data/odds.json', {cache:'no-store'}).then(r => {
-    if (!r.ok) throw Error('Odds board unavailable'); return r.json();
-  }).then(data => {
-    const rows = (data.games || []).slice().sort((a,b) => new Date(a.commence_time) - new Date(b.commence_time));
+  Promise.all([
+    fetch('./data/odds.json', {cache:'no-store'}).then(r => r.ok ? r.json() : {}),
+    fetch('./data/cbb/projection_board.json', {cache:'no-store'}).then(r => r.ok ? r.json() : {}),
+    fetch('./data/projections.json', {cache:'no-store'}).then(r => r.ok ? r.json() : {}),
+    fetch('./data/market/sharp_line_state.json', {cache:'no-store'}).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+  ]).then(([data,cbb,cfb,sharp]) => {
+    const cfbGames = cfb.games || cfb.projections || [];
+    const projected = (data.games || []).map(row => {
+      const match = cfbGames.find(game => game.home?.team === row.home_team && game.away?.team === row.away_team && Math.abs(new Date(game.start_date) - new Date(row.commence_time)) <= 129600000);
+      return {...row,sport:'CFB',game_id:match?.game_id,start_date:row.commence_time,consensus_home_spread:row.spread_home,consensus_total:row.total,book_count:Math.max(row.spread_books || 0,row.total_books || 0)};
+    });
+    const basketball = (cbb.games || []).filter(row => row.market).map(row => ({...row,sport:'CBB',home_team:row.home?.team,away_team:row.away?.team,consensus_home_spread:row.market?.consensus_home_spread,consensus_total:row.market?.consensus_total,book_count:row.market?.book_count,bookmaker:row.market?.source || 'CBBD consensus',reference_moneyline:row.market?.reference_moneyline,opening_home_spread:row.market?.opening_home_spread,spread_move:row.market?.spread_move}));
+    const sharpRows = Object.values(sharp.events || {});
+    const rows = [...projected,...basketball].filter(row => row.home_team && row.away_team).sort((a,b) => new Date(a.start_date) - new Date(b.start_date));
+    const american = value => finiteNumber(value) === null ? '—' : `${Number(value) > 0 ? '+' : ''}${Number(value)}`;
     const spread = row => {
-      const value = finiteNumber(row.spread_home);
+      const value = finiteNumber(row.consensus_home_spread);
       if (value === null) return '—';
       const team = value <= 0 ? row.home_team : row.away_team;
       return `${team} -${Math.abs(value).toFixed(1)}`;
     };
+    const movement = row => {
+      const observed = sharpRows.find(item => String(item.sport || '').toUpperCase() === row.sport && item.home_team === row.home_team && item.away_team === row.away_team);
+      const opening = finiteNumber(observed?.opening_home_spread ?? row.opening_home_spread);
+      const current = finiteNumber(observed?.current_home_spread ?? row.consensus_home_spread);
+      if (opening === null || current === null) return 'Awaiting history';
+      return `${line(opening)} → ${line(current)}${opening === current ? ' · unchanged' : ''}`;
+    };
+    const reference = row => {
+      const quote = row.reference_spread;
+      if (quote) return `<span class="research-quote"><strong>${esc(quote.bookmaker || 'Reference book')}</strong><br>${esc(row.away_team)} ${line(quote.away_spread)} (${american(quote.away_price)})<br>${esc(row.home_team)} ${line(quote.home_spread)} (${american(quote.home_price)})</span>`;
+      const moneyline = row.reference_moneyline;
+      if (moneyline) return `<span class="research-quote"><strong>${esc(moneyline.provider || 'Reference book')} moneyline</strong><br>${esc(row.away_team)} ${american(moneyline.away_price)} · ${esc(row.home_team)} ${american(moneyline.home_price)}</span>`;
+      return '<span class="research-muted">Price unavailable</span>';
+    };
+    const noVig = row => {
+      const probabilities = row.reference_spread?.no_vig_probability || row.reference_moneyline?.no_vig_probability;
+      return probabilities ? `${esc(row.away_team)} ${number(100 * probabilities.away)}%<br>${esc(row.home_team)} ${number(100 * probabilities.home)}%` : '—';
+    };
+    const bookLines = row => !row.book_lines?.length ? '' : `<details class="research-book-lines"><summary>${row.book_lines.length} book quotes</summary>${row.book_lines.map(book => {
+      const quote=book.spread; const total=book.total;
+      return `<div>${esc(book.bookmaker)} · ${quote ? `${esc(row.home_team)} ${line(quote.home_spread)} (${american(quote.home_price)})` : 'spread —'} · ${total ? `O/U ${number(total.total)} (${american(total.over_price)}/${american(total.under_price)})` : 'total —'}</div>`;
+    }).join('')}</details>`;
     const paint = query => {
       const terms = String(query || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
       const shown = rows.filter(row => terms.every(term => `${row.away_team} ${row.home_team}`.toLowerCase().includes(term))).slice(0,100);
-      $('#research-odds-body').innerHTML = shown.length ? shown.map(row => `<tr><td><strong>${esc(row.away_team)} at ${esc(row.home_team)}</strong></td><td>${esc(time(row.commence_time))}</td><td>${esc(spread(row))}</td><td>${finiteNumber(row.total) === null ? '—' : number(row.total)}</td><td>${esc(row.bookmaker || 'Consensus')}</td></tr>`).join('') : '<tr><td colspan="5">No current games match.</td></tr>';
+      $('#research-odds-body').innerHTML = shown.length ? shown.map(row => `<tr><td>${esc(row.sport)}</td><td><strong>${esc(row.away_team)} at ${esc(row.home_team)}</strong>${bookLines(row)}</td><td>${esc(time(row.start_date))}</td><td>${esc(spread(row))}<br>O/U ${finiteNumber(row.consensus_total) === null ? '—' : number(row.consensus_total)}<br><span class="research-muted">${esc(row.bookmaker || `${row.book_count || 0} books`)}</span></td><td>${reference(row)}</td><td>${esc(movement(row))}</td><td>${noVig(row)}</td><td><button class="research-track" type="button" data-track-sport="${esc(row.sport.toLowerCase())}" data-track-game="${esc(row.game_id || '')}" ${row.game_id ? '' : 'disabled'}>Track</button></td></tr>`).join('') : '<tr><td colspan="8">No current games match.</td></tr>';
       $('#research-odds-count').textContent = `${shown.length} of ${rows.length} current games`;
     };
-    $('#research-odds').innerHTML = `<section class="research-summary"><h3>Current Odds Screen</h3><p class="research-muted">Current consensus spread and total inventory. Prices are informational and remain separate from Model A.</p><input id="research-odds-search" class="research-search" type="search" placeholder="Search either team"><span id="research-odds-count" class="research-muted"></span><div class="research-table-wrap"><table class="research-table"><thead><tr><th>Matchup</th><th>Start</th><th>Spread</th><th>Total</th><th>Source</th></tr></thead><tbody id="research-odds-body"></tbody></table></div><p class="research-muted">Feed updated ${esc(time(data.meta?.generated_at_utc || data.meta?.generated))}. The separate Pinnacle movement collector appears in Variance Lab.</p></section>`;
+    $('#research-odds').innerHTML = `<section class="research-summary"><h3>Current Odds Screen</h3><p class="research-muted">Consensus, named two-sided prices, line history and no-vig probabilities. Pinnacle and BetOnline are preferred when available. Prices remain separate from Model A; public ticket and handle percentages will appear only after a licensed splits feed is connected.</p><input id="research-odds-search" class="research-search" type="search" placeholder="Search either team"><span id="research-odds-count" class="research-muted"></span><div class="research-table-wrap"><table class="research-table" style="min-width:1280px"><thead><tr><th>Sport</th><th>Matchup / books</th><th>Start</th><th>Consensus</th><th>Price reference</th><th>Movement</th><th>No-vig</th><th>Play slip</th></tr></thead><tbody id="research-odds-body"></tbody></table></div><p class="research-muted">CFB feed updated ${esc(time(data.meta?.generated_at_utc || data.meta?.generated))}. Line movement by itself is not labeled sharp money or RLM.</p></section>`;
     $('#research-odds-search').addEventListener('input', event => paint(event.target.value)); paint('');
+    $('#research-odds-body').addEventListener('click', event => {
+      const button = event.target.closest('[data-track-game]');
+      if (!button || !button.dataset.trackGame) return;
+      window.THITrackPlay({game_id:button.dataset.trackGame,sport:button.dataset.trackSport,market:'spread'});
+    });
   }).catch(() => { $('#research-odds').innerHTML = '<p class="research-muted">The current odds board will populate when market lines are available.</p>'; });
 
   if (!config.enabled || !/^https:\/\/[^/]+\.supabase\.co$/.test(config.url || '') || !config.publishableKey) {
@@ -193,7 +269,7 @@
     privateBox.innerHTML = `<p class="research-muted">Signed in as ${esc(user.email)}. These entries are self-reported; the server timestamp records when you logged them, not when a sportsbook accepted a wager.</p>
       <button type="button" id="research-logout">Sign out</button>
       ${portfolioSummary(plays)}
-      <div class="research-stack"><div><h3>Log a line</h3>
+      <div class="research-stack"><div><h3>Track a play</h3>
       <form id="research-entry" class="research-form">
       <label class="research-wide">Find a game by team<input id="research-game-search" type="search" placeholder="Type either team (or both)" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
       <label class="research-wide">Upcoming game<select name="game_id" required></select><span id="research-game-count" class="research-muted"></span></label>
@@ -205,7 +281,7 @@
       <label>Units risked<input name="units_risked" type="number" min="0.01" max="1000" step="0.01" placeholder="1.00" required></label>
       <div id="research-preview" class="research-preview" aria-live="polite"></div>
       <label class="research-wide">Private research notes<textarea name="note" maxlength="5000"></textarea></label>
-      <button class="research-action" type="submit">Save private entry</button></form><p id="research-message" role="status"></p></div>
+      <button class="research-action" type="submit">Start tracking play</button></form><p id="research-message" role="status"></p></div>
       <div><h3>Your entries</h3><div id="research-entries"></div></div></div>`;
     $('#research-logout').onclick = () => client.auth.signOut();
     const entry = $('#research-entry');
@@ -228,8 +304,8 @@
     const updateEntry = () => {
       const market = marketInput.value;
       const selectedGame = future.find(g => String(g.game_id) === entry.elements.game_id.value);
-      const options = market === 'total' ? [['over', 'Over'], ['under', 'Under']] :
-        [['away', selectedGame?.away?.team || 'Away'], ['home', selectedGame?.home?.team || 'Home']];
+      const options = market === 'total' ? [['', 'Choose a selection'], ['over', 'Over'], ['under', 'Under']] :
+        [['', 'Choose a selection'], ['away', selectedGame?.away?.team || 'Away'], ['home', selectedGame?.home?.team || 'Home']];
       const previous = sideInput.value;
       sideInput.innerHTML = options.map(([value, label]) => `<option value="${value}">${esc(label)}</option>`).join('');
       if (options.some(([value]) => value === previous)) sideInput.value = previous;
@@ -251,6 +327,7 @@
     ['change', 'input'].forEach(eventName => entry.addEventListener(eventName, updateEntry));
     updateGameOptions();
     updateEntry();
+    applyPendingPlay();
     $('#research-entry').onsubmit = async ev => {
       ev.preventDefault(); const form = new FormData(ev.currentTarget);
       const game = future.find(g => String(g.game_id) === form.get('game_id'));
@@ -271,7 +348,7 @@
         american_odds:price, units_risked:units};
       const {error: saveError} = await client.from('portfolio_plays').insert(item);
       if (saveError) $('#research-message').textContent = saveError.message;
-      else await refresh();
+      else { sessionStorage.removeItem(PENDING_PLAY_KEY); await refresh(); }
     };
     $('#research-entries').innerHTML = plays.length ? plays.map(p => {
       const result = comparisonFor(p);
@@ -310,8 +387,13 @@
 
   async function loadGames() {
     if (games.length) return;
-    const response = await fetch('./data/projections.json');
-    if (response.ok) { const data = await response.json(); games = data.games || data.projections || []; }
+    const [cfbResponse,cbbResponse] = await Promise.all([fetch('./data/projections.json'),fetch('./data/cbb/projection_board.json')]);
+    const cfb = cfbResponse.ok ? await cfbResponse.json() : {};
+    const cbb = cbbResponse.ok ? await cbbResponse.json() : {};
+    games = [
+      ...(cfb.games || cfb.projections || []).map(row => ({...row,sport:'cfb'})),
+      ...(cbb.games || []).map(row => ({...row,sport:'cbb'})),
+    ];
   }
   async function loadMarket() {
     if (!Object.keys(history).length) {

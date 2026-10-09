@@ -977,6 +977,7 @@ def extract_market(raw_game):
     total_quotes = []
     reference_spreads = []
     reference_totals = []
+    book_lines = []
 
     # A validation price must come from one named sportsbook with both sides
     # captured at the same time. It cannot be inferred from the display
@@ -995,6 +996,8 @@ def extract_market(raw_game):
 
         spread = None
         total = None
+        spread_detail = None
+        total_detail = None
 
         for market in book.get("markets", []) or []:
             market_key = market.get("key")
@@ -1019,14 +1022,16 @@ def extract_market(raw_game):
                     home_price = optional_number(home_outcome.get("price"))
                     away_price = optional_number(away_outcome.get("price"))
                     if None not in (home_point, away_point, home_price, away_price) and abs(home_price) >= 100 and abs(away_price) >= 100:
-                        reference_spreads.append({
+                        spread_detail = {
                             "bookmaker": book_title,
                             "bookmaker_key": book_key,
                             "home_spread": home_point,
                             "home_price": int(home_price),
                             "away_spread": away_point,
                             "away_price": int(away_price),
-                        })
+                            "last_update": market.get("last_update") or book.get("last_update"),
+                        }
+                        reference_spreads.append(spread_detail)
 
             elif market_key == "totals":
                 outcomes = market.get("outcomes", []) or []
@@ -1042,14 +1047,16 @@ def extract_market(raw_game):
                     over_price = optional_number(over.get("price"))
                     under_price = optional_number(under.get("price"))
                     if None not in (over_total, under_total, over_price, under_price) and abs(over_price) >= 100 and abs(under_price) >= 100:
-                        reference_totals.append({
+                        total_detail = {
                             "bookmaker": book_title,
                             "bookmaker_key": book_key,
                             "total": over_total,
                             "under_total": under_total,
                             "over_price": int(over_price),
                             "under_price": int(under_price),
-                        })
+                            "last_update": market.get("last_update") or book.get("last_update"),
+                        }
+                        reference_totals.append(total_detail)
 
         if spread is not None:
             spread_quotes.append({
@@ -1063,6 +1070,15 @@ def extract_market(raw_game):
                 "bookmaker": book_title,
                 "bookmaker_key": book_key,
                 "value": total,
+            })
+
+        if spread_detail or total_detail:
+            book_lines.append({
+                "bookmaker": book_title,
+                "bookmaker_key": book_key,
+                "last_update": book.get("last_update"),
+                "spread": spread_detail,
+                "total": total_detail,
             })
 
     spread_consensus = market_consensus(
@@ -1141,6 +1157,7 @@ def extract_market(raw_game):
         ],
         "reference_spread": reference_spread,
         "reference_total": reference_total,
+        "book_lines": book_lines,
     }
 
 
@@ -1209,6 +1226,7 @@ def fetch_odds(
             "total_outliers_removed": market["total_outliers_removed"],
             "reference_spread": market["reference_spread"],
             "reference_total": market["reference_total"],
+            "book_lines": market["book_lines"],
         })
 
     matched = sum(
@@ -1846,6 +1864,7 @@ def market_payload(market):
             "total_outliers_removed": [],
             "reference_spread": None,
             "reference_total": None,
+            "book_lines": [],
         }
 
     return {
@@ -1865,6 +1884,7 @@ def market_payload(market):
         ),
         "reference_spread": market.get("reference_spread"),
         "reference_total": market.get("reference_total"),
+        "book_lines": market.get("book_lines", []),
     }
 
 

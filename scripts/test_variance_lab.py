@@ -2,6 +2,7 @@ import unittest
 from datetime import datetime, timezone
 from scripts.build_rlm_monitor import analyze,select_authoritative_rows,sharp_line_moves
 from scripts.poll_free_sharp_lines import merge_events
+from scripts.poll_owls_rlm import build_capture
 from scripts.build_trends_lab import evidence_state
 from scripts.build_variance_context import utc_datetime
 from scripts.build_variance_prospective_tracker import build
@@ -31,6 +32,18 @@ class VarianceLabTests(unittest.TestCase):
   self.assertEqual(move["movement_toward_team"],"Away")
   self.assertNotIn("public_ticket_pct",move)
   self.assertIn("not an RLM",move["definition"])
+ def test_owls_capture_joins_dk_splits_to_pinnacle(self):
+  odds={"data":{"pinnacle":[{"event_id":"ncaaf:Away@Home-20261010","commence_time":"2026-10-10T23:00:00Z","away_team":"Away","home_team":"Home","bookmakers":[{"key":"pinnacle","last_update":"2026-10-08T12:00:00Z","markets":[{"key":"spreads","outcomes":[{"name":"Away","point":7.0,"price":-110},{"name":"Home","point":-7.0,"price":-110}]}]}]}]}}
+  splits={"data":[{"event_id":"ncaaf:Away@Home-20261010","away_team":"Away","home_team":"Home","splits":[{"book":"dk","title":"DraftKings","as_of":"2026-10-08T12:03:00Z","spread":{"away_line":7.0,"home_line":-7.0,"away_bets_pct":72,"home_bets_pct":28,"away_handle_pct":64,"home_handle_pct":36}}]}]}
+  state,rows=build_capture({"events":{}},"ncaaf",odds,splits,"2026-10-08T12:04:00Z")
+  self.assertEqual(len(rows),1);self.assertEqual(rows[0]["public_side"],"away")
+  self.assertEqual(rows[0]["public_ticket_pct"],72);self.assertEqual(rows[0]["sharp_book"],"pinnacle")
+  self.assertIn("cfb:ncaaf:Away@Home-20261010",state["events"])
+ def test_owls_capture_rejects_stale_pair(self):
+  odds={"data":{"pinnacle":[{"event_id":"x","away_team":"Away","home_team":"Home","bookmakers":[{"key":"pinnacle","last_update":"2026-10-08T12:00:00Z","markets":[{"key":"spreads","outcomes":[{"name":"Home","point":-3}]}]}]}]}}
+  splits={"data":[{"event_id":"x","away_team":"Away","home_team":"Home","splits":[{"book":"dk","as_of":"2026-10-08T12:10:01Z","spread":{"away_bets_pct":60,"home_bets_pct":40}}]}]}
+  _,rows=build_capture({"events":{}},"ncaaf",odds,splits,"2026-10-08T12:11:00Z")
+  self.assertEqual(rows,[])
  def test_rank_dates_are_normalized_to_utc(self):
   self.assertEqual(utc_datetime("2025-01-06T12:00:00").tzinfo,timezone.utc)
   self.assertEqual(utc_datetime("2025-01-06T07:00:00-05:00").hour,12)

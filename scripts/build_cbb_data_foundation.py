@@ -113,6 +113,18 @@ def market_summary(lines: list[dict[str, Any]]) -> dict[str, Any] | None:
         "total_move": rounded(total - open_total) if total is not None and open_total is not None else None,
         "reference_moneyline": reference_moneyline,
         "spread_price_status": "unavailable_from_provider_contract",
+        "book_lines": [
+            {
+                "provider": row.get("provider"),
+                "spread": finite(row.get("spread")),
+                "total": finite(row.get("overUnder")),
+                "home_moneyline": finite(row.get("homeMoneyline")),
+                "away_moneyline": finite(row.get("awayMoneyline")),
+                "opening_spread": finite(row.get("spreadOpen")),
+                "opening_total": finite(row.get("overUnderOpen")),
+            }
+            for row in lines
+        ],
     }
 
 

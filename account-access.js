@@ -47,7 +47,7 @@
   }
   function librarySummary() {
     const data=readLibrary();
-    return `<div class="thi-account-library"><section><h3>Saved teams</h3><p>${data.teams.length} saved</p></section><section><h3>Saved games</h3><p>${data.games.length} saved</p></section><section><h3>Logged plays</h3><p>${data.plays.length} private entries on this device</p></section></div>`;
+    return `<div class="thi-account-library"><section><h3>Saved teams</h3><p>${data.teams.length} saved</p></section><section><h3>Tracked plays</h3><p>Managed securely in Market Research</p></section></div>`;
   }
   function exportLibrary() {
     const blob=new Blob([JSON.stringify(readLibrary(),null,2)],{type:'application/json'}); const link=document.createElement('a');
