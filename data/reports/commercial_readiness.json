@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "thi-commercial-readiness-v1.0",
-    "generated_at_utc": "2026-10-10T00:53:18.732077Z",
+    "generated_at_utc": "2026-10-10T06:43:04.577345Z",
     "scope": "Operational and evidence readiness for a paid THI research product; this is not a claim that a betting edge has validated."
   },
   "verdict": {
@@ -15,14 +15,14 @@
       "id": "prospective_validation",
       "label": "Prospective validation",
       "status": "in_progress",
-      "summary": "CFB has 6,475 immutable observations across 367 frozen games and 268 settled games. CBB automation is ready but has 0 settled 2027 spread decisions.",
+      "summary": "CFB has 6,475 immutable observations across 367 frozen games and 273 settled games. CBB automation is ready but has 0 settled 2027 spread decisions.",
       "pass_condition": "A full predeclared sample settles with complete price records, stability checks and corrected significance tests."
     },
     {
       "id": "real_prices",
       "label": "Exact market prices",
       "status": "collector_upgraded_history_incomplete",
-      "summary": "Existing CFB history has 349/6,475 opening snapshots and 0/173 near-kickoff captures with paired single-book prices. New CFB captures preserve them. CBBD exposes paired moneyline prices but not spread juice, so CBB ATS price validation still needs a two-sided sportsbook feed.",
+      "summary": "Existing CFB history has 349/6,475 opening snapshots and 1/174 near-kickoff captures with paired single-book prices. New CFB captures preserve them. CBBD exposes paired moneyline prices but not spread juice, so CBB ATS price validation still needs a two-sided sportsbook feed.",
       "pass_condition": "Every evaluated play stores one named book, exact line, both prices and timestamp at selection and close."
     },
     {
@@ -36,7 +36,7 @@
       "id": "operational_proof",
       "label": "Operational proof",
       "status": "in_progress",
-      "summary": "CFB collection, closing capture and settlement are active. CBB platform health is healthy with 877 scheduled games and 0 market observations; live CBB proof begins when books post lines.",
+      "summary": "CFB collection, closing capture and settlement are active. CBB platform health is healthy with 931 scheduled games and 0 market observations; live CBB proof begins when books post lines.",
       "pass_condition": "Complete a season with scheduled jobs healthy, no silent gaps, reconciled finals and published incident notes for material failures."
     },
     {
