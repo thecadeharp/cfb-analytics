@@ -1,12 +1,85 @@
 {
-  "captured_at_utc": "2026-10-09T19:33:30.242197+00:00",
+  "captured_at_utc": "2026-10-10T01:47:45.775796+00:00",
   "window": {
     "pre_kickoff_minutes": 90,
     "post_kickoff_grace_minutes": 10
   },
-  "closing_lines_added": 0,
+  "closing_lines_added": 1,
   "excluded_untracked_games": 127,
   "ledger_path": "data/snapshots/closing_lines.jsonl",
   "note": "Official Model A closing-line capture. tracking_eligible=false and FCS fallback games are excluded.",
-  "captures": []
+  "captures": [
+    {
+      "closing_id": "15299c675d0a353f8f1ed524",
+      "game_key": "401856826",
+      "captured_at_utc": "2026-10-10T01:47:45.775796+00:00",
+      "scheduled_kickoff_utc": "2026-10-10T02:15:00+00:00",
+      "minutes_to_kickoff": 27.2,
+      "capture_type": "near_kickoff_closing_proxy",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-10T01:47:45.264226",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401856826,
+      "week": 6,
+      "home_team": "BYU",
+      "away_team": "Iowa State",
+      "neutral_site": false,
+      "model_reference": {
+        "home_spread": -14.5,
+        "total": 54.5
+      },
+      "closing_market": {
+        "home_spread": -11.5,
+        "total": 46.5,
+        "bookmaker": "Consensus (10 books)",
+        "reference_spread": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "home_spread": -11.0,
+          "home_price": -115,
+          "away_spread": 11.0,
+          "away_price": -105,
+          "last_update": "2026-10-10T01:47:42Z",
+          "implied_probability": {
+            "home": 0.53488372,
+            "away": 0.51219512
+          },
+          "no_vig_probability": {
+            "home": 0.51083424,
+            "away": 0.48916576
+          },
+          "overround": 0.04707884,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "total": 46.5,
+          "under_total": 46.5,
+          "over_price": -116,
+          "under_price": -104,
+          "last_update": "2026-10-10T01:47:42Z",
+          "implied_probability": {
+            "over": 0.53703704,
+            "under": 0.50980392
+          },
+          "no_vig_probability": {
+            "over": 0.51300728,
+            "under": 0.48699272
+          },
+          "overround": 0.04684096,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "signal_at_close": {
+        "disagreement": 3.0,
+        "preferred_side": "BYU",
+        "signal": "SLIGHT EDGE",
+        "bet_status": "TRACKING",
+        "status_system": "v2_the_signal"
+      }
+    }
+  ]
 }
