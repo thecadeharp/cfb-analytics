@@ -1190,10 +1190,12 @@
     const windowEnd = now + 24 * 60 * 60 * 1000;
     const rows = games.map(game => ({ game, conditions: conditionsForGame(game) }))
       .filter(({ game, conditions }) => {
+        if (settledResultForGame(game)) return false;
         const kickoff = new Date(game?.start_date || conditions?.kickoff_utc || "").getTime();
         return Number.isFinite(kickoff) && kickoff >= windowStart && kickoff <= windowEnd && weatherAffected(conditions);
       })
       .sort((a, b) => new Date(a.game.start_date) - new Date(b.game.start_date));
+    if (!rows.length) return "";
     return `
       <details class="weather-board">
         <summary><span>Game-Day Weather Board</span><span class="weather-board-count">${rows.length} affected outdoor ${rows.length === 1 ? "game" : "games"}</span></summary>

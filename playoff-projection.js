@@ -204,7 +204,7 @@
 
     container.innerHTML = `
       <div class="thi-cfp-summary">
-        <div><div class="eyebrow">Research simulation · through Week ${html(week)}</div><h2>Projected 12-Team Field</h2></div>
+        <div><div class="eyebrow">Current results · THI Power through Week ${html(week)}</div><h2>Projected 12-Team Field</h2></div>
         <div class="thi-cfp-summary-copy">Selection score: 50% THI projected record, 30% THI power, 15% strength of record and 5% strength of schedule. At-large teams must project to at least nine wins; conference champion slots follow the 2026 CFP format.</div>
       </div>
       <div class="thi-cfp-layout">
