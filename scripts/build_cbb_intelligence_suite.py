@@ -137,8 +137,19 @@ def project_players(players: dict[str, Any], priors: dict[str, Any]) -> tuple[li
     rotations.sort(key=lambda row: str(row.get("team") or ""))
     return projections, rotations
 
-def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[str, Any], board: dict[str, Any], tracking: dict[str, Any], model: dict[str, Any], home_court: dict[str, Any] | None = None) -> dict[str, Any]:
-    rosters_verified = players.get("meta", {}).get("roster_verification_status") in (None, "provider_verified")
+def build_suite(
+    profiles: dict[str, Any],
+    priors: dict[str, Any],
+    players: dict[str, Any],
+    board: dict[str, Any],
+    tracking: dict[str, Any],
+    model: dict[str, Any],
+    home_court: dict[str, Any] | None = None,
+    roster_audit: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    provider_verified = players.get("meta", {}).get("roster_verification_status") in (None, "provider_verified")
+    audit_status = (roster_audit or {}).get("meta", {}).get("status")
+    rosters_verified = provider_verified and audit_status in (None, "passed")
     player_rows, rotations = project_players(players if rosters_verified else {"players": []}, priors)
     prior_rows = priors.get("teams") or []
     prior_map = {str(row.get("team_id")): row for row in prior_rows}
@@ -317,7 +328,8 @@ def build_suite(profiles: dict[str, Any], priors: dict[str, Any], players: dict[
             "methodology": "THI uses regressed preseason priors, verified roster continuity when available, possession-based opponent-adjusted efficiency, chronological Four Factors, pace, regularized program-specific home-court effects and walk-forward updates. Market prices remain evaluation fields. Situational flags are displayed as research context until each feature clears out-of-sample validation.",
             "inspiration_note": "Away-from-home performance, record quality, quadrant-style records, rating movement and recent form are THI calculations inspired by useful public dossier concepts; no external proprietary rating is copied or used as a model input.",
             "player_projection_policy": "Qualified prior production receives per-game counting-stat projections only after the current roster source clears THI's verification gate. The active fallback is withheld.",
-            "roster_verification_status": players.get("meta", {}).get("roster_verification_status") or "legacy_verified_contract",
+            "roster_verification_status": "provider_verified" if rosters_verified else "withheld_unverified_fallback",
+            "roster_audit_status": audit_status or "legacy_contract",
             "home_court_policy": "Program effects use five seasons of conference games, recency weighting and shrinkage toward the national mean; neutral-site games receive zero.",
             "situational_policy": "Rest, back-to-back, lookahead and result-response flags are research context only. Injury and travel adjustments remain unavailable until verified feeds and out-of-sample validation exist.",
             "market_policy": "Market prices are comparison and accountability fields, never predictive features.",
@@ -340,7 +352,17 @@ def main() -> None:
     args = parser.parse_args(); root = args.root
     load = lambda path: json.loads(path.read_text())
     hca_path = root/"home_court_advantage.json"
-    payload = build_suite(load(root/"team_profiles.json"), load(root/"model/current_priors.json"), load(root/"player_ratings.json"), load(root/"projection_board.json"), load(root/"model_tracking.json"), load(root/"model/model_card.json"), load(hca_path) if hca_path.exists() else None)
+    audit_path = root/"roster_audit.json"
+    payload = build_suite(
+        load(root/"team_profiles.json"),
+        load(root/"model/current_priors.json"),
+        load(root/"player_ratings.json"),
+        load(root/"projection_board.json"),
+        load(root/"model_tracking.json"),
+        load(root/"model/model_card.json"),
+        load(hca_path) if hca_path.exists() else None,
+        load(audit_path) if audit_path.exists() else None,
+    )
     write(args.output, payload); print(f"{VERSION}: {len(payload['player_projections'])} players, {len(payload['team_dossiers'])} dossiers")
 
 if __name__ == "__main__": main()

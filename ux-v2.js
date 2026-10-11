@@ -471,6 +471,21 @@
       }
       .thi-variance-context{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}.thi-variance-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 6px;border:1px solid var(--border);border-radius:999px;color:var(--muted);font:700 8px var(--mono);text-transform:uppercase}.thi-variance-chip.verified{color:#43c999;border-color:#286b56;background:rgba(20,184,121,.08)}.thi-variance-chip.developing{color:#d8b552;border-color:#6f5b2a;background:rgba(221,178,56,.08)}.thi-variance-chip.failed_hypothesis{color:#e37a86;border-color:#71343c;background:rgba(230,80,97,.07)}
 
+      .thi-availability-hold{display:inline-flex;margin-top:7px;padding:4px 7px;border:1px solid #e2a1a1;border-radius:999px;background:#fdeaea;color:#b71c1c;font:800 8px var(--mono);letter-spacing:.45px;text-transform:uppercase}
+
+      .weather-board{margin:0 0 14px;border:1px solid var(--border);border-radius:11px;background:var(--surface);overflow:hidden}
+      .weather-board summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px;cursor:pointer;list-style:none;font-weight:800}
+      .weather-board summary::-webkit-details-marker{display:none}
+      .weather-board-count{color:var(--muted);font:700 9px var(--mono);letter-spacing:.5px;text-transform:uppercase}
+      .weather-board-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--border)}
+      .weather-board-game{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;padding:12px 15px;border-bottom:1px solid var(--border)}
+      .weather-board-game:nth-child(odd){border-right:1px solid var(--border)}
+      .weather-board-game strong{font-size:11px}.weather-board-game span{color:var(--muted);font:600 9px var(--mono)}
+      .weather-board-impact{align-self:start;padding:4px 7px;border:1px solid var(--border);border-radius:999px;text-transform:uppercase}
+      .weather-board-impact.moderate{color:#806000;border-color:#a88724;background:rgba(221,178,56,.08)}
+      .weather-board-impact.significant{color:#b71c1c;border-color:#9d3b3b;background:rgba(215,25,32,.07)}
+      .weather-board-empty{padding:13px 15px;border-top:1px solid var(--border);color:var(--muted);font-size:11px}
+
       .weather-adjusted-dot {
         display:inline-block;
         width:6px;
@@ -801,6 +816,7 @@
 
         .weather-output-grid { grid-template-columns:1fr; }
         .final-result-grid { grid-template-columns:1fr 1fr; }
+        .weather-board-grid{grid-template-columns:1fr}.weather-board-game:nth-child(odd){border-right:0}
       }
 
       @media (max-width:600px) {
@@ -1147,6 +1163,51 @@
     }).join("")}</div>`;
   }
 
+  function criticalAvailabilityNotes(game) {
+    if (typeof currentAvailabilityNotes !== "function") return [];
+    return [game?.away?.team, game?.home?.team]
+      .filter(Boolean)
+      .flatMap(team => currentAvailabilityNotes(team).map(note => ({ team, ...note })))
+      .filter(note => note?.withhold_public_signal === true);
+  }
+
+  function weatherAffected(conditions) {
+    const forecast = conditions?.forecast || {};
+    const impact = String(conditions?.impact || "").toLowerCase();
+    return !conditions?.indoor && (
+      impact === "moderate" || impact === "significant" ||
+      Number(forecast.precip_probability_pct || 0) >= 30 ||
+      Number(forecast.wind_mph || 0) >= 12 ||
+      Number(forecast.temperature_f || 70) <= 35 ||
+      Number(forecast.temperature_f || 70) >= 90
+    );
+  }
+
+  function gameDayWeatherBoardMarkup(games) {
+    const now = Date.now();
+    const windowStart = now - 8 * 60 * 60 * 1000;
+    const windowEnd = now + 24 * 60 * 60 * 1000;
+    const rows = games.map(game => ({ game, conditions: conditionsForGame(game) }))
+      .filter(({ game, conditions }) => {
+        const kickoff = new Date(game?.start_date || conditions?.kickoff_utc || "").getTime();
+        return Number.isFinite(kickoff) && kickoff >= windowStart && kickoff <= windowEnd && weatherAffected(conditions);
+      })
+      .sort((a, b) => new Date(a.game.start_date) - new Date(b.game.start_date));
+    return `
+      <details class="weather-board" open>
+        <summary><span>Game-Day Weather Board</span><span class="weather-board-count">${rows.length} affected outdoor ${rows.length === 1 ? "game" : "games"}</span></summary>
+        ${rows.length ? `<div class="weather-board-grid">${rows.map(({ game, conditions }) => {
+          const impact = String(conditions.impact || "Moderate");
+          return `<div class="weather-board-game">
+            <strong>${escapeHtml(game?.away?.team || "Away")} at ${escapeHtml(game?.home?.team || "Home")}</strong>
+            <span class="weather-board-impact ${conditionImpactClass(impact)}">${escapeHtml(impact)}</span>
+            <span>${escapeHtml(gameDateText(game.start_date))} · ${escapeHtml(conditions.conditions_line || "Forecast pending")}${hasValue(conditions?.forecast?.precip_probability_pct) ? ` · ${formatNumber(conditions.forecast.precip_probability_pct, 0)}% precip` : ""}</span>
+            <span>${escapeHtml(adjustmentDisplay(conditions?.adjustments?.total_points))} total</span>
+          </div>`;
+        }).join("")}</div>` : `<div class="weather-board-empty">No outdoor games inside the current game-day window meet THI's wind, precipitation or extreme-temperature monitoring thresholds.</div>`}
+      </details>`;
+  }
+
   projectionGamesForCurrentView = function projectionGamesForCurrentViewWeatherV1() {
     return projections
       .filter(game => {
@@ -1294,7 +1355,9 @@
     const disagreementNote = hasValue(disagreement)
       ? (preferred ? `Model favors ${preferred}` : "Model agrees with market")
       : "No market line";
-    const recommendedSide = preferred && status !== "ALIGNED" && hasValue(marketSpread)
+    const availabilityHolds = criticalAvailabilityNotes(game);
+    const availabilityHold = availabilityHolds.length > 0;
+    const recommendedSide = !availabilityHold && preferred && status !== "ALIGNED" && hasValue(marketSpread)
       ? marketSideForTeam(preferred, homeName, awayName, marketSpread)
       : null;
 
@@ -1324,6 +1387,7 @@
             ${escapeHtml(gameDateText(game.start_date))}
           </div>
           ${varianceContextMarkup(game)}
+          ${availabilityHold ? `<div class="thi-availability-hold" title="${escapeHtml(availabilityHolds.map(note => `${note.team}: ${note.text}`).join(" · "))}">Critical QB availability · signal held</div>` : ""}
         </td>
 
         <td>${window.THIIntelligence?.watchMarkup?.(game) ?? "—"}</td>
@@ -1334,7 +1398,7 @@
             ${spreadWeatherApplied ? `<span class="weather-adjusted-dot" title="Weather-adjusted spread"></span>` : ""}
           </div>
           <div class="line-secondary">
-            ${recommendedSide ? "THI preferred side at current market" : "THI projected spread"}
+            ${availabilityHold ? "Raw Model A · availability unresolved" : recommendedSide ? "THI preferred side at current market" : "THI projected spread"}
           </div>
         </td>
 
@@ -1357,19 +1421,19 @@
 
         <td class="disagreement">
           <div class="disagreement-number ${cssStatus}">
-            ${hasValue(disagreement) ? `${formatNumber(disagreement, 1)} pts` : "—"}
+            ${availabilityHold ? "WITHHELD" : hasValue(disagreement) ? `${formatNumber(disagreement, 1)} pts` : "—"}
           </div>
-          <div class="disagreement-note">${escapeHtml(disagreementNote)}</div>
+          <div class="disagreement-note">${availabilityHold ? "Awaiting verified quarterback status" : escapeHtml(disagreementNote)}</div>
         </td>
 
         <td class="status-cell">
-          <span class="status ${cssStatus}">${escapeHtml(displayStatus(status))}</span>
+          <span class="status ${availabilityHold ? "signal-untracked" : cssStatus}">${availabilityHold ? "AVAILABILITY HOLD" : escapeHtml(displayStatus(status))}</span>
         </td>
 
         <td class="status-cell">
-          <span class="status ${confidenceCss}">${escapeHtml(confidence)}</span>
+          <span class="status ${availabilityHold ? "signal-untracked" : confidenceCss}">${availabilityHold ? "SOURCE REVIEW" : escapeHtml(confidence)}</span>
           <div class="signal-record">
-            ${escapeHtml(signalRecordText(status))} · ${escapeHtml(signalAtsText(status))}
+            ${availabilityHold ? "No public play while critical status is unresolved" : `${escapeHtml(signalRecordText(status))} · ${escapeHtml(signalAtsText(status))}`}
           </div>
         </td>
       </tr>
@@ -1414,7 +1478,9 @@
       return;
     }
 
+    const weatherGames = projections.filter(game => currentWeek === null || Number(game.week) === Number(currentWeek));
     container.innerHTML = `
+      ${gameDayWeatherBoardMarkup(weatherGames)}
       <table class="projection-table">
         <thead>
           <tr>

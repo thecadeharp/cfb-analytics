@@ -29,6 +29,9 @@
   const RESULTS_URL =
     "./data/results.json";
 
+  const ESPN_SCOREBOARD_URL =
+    "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard";
+
   const state =
     new WeakMap();
 
@@ -41,9 +44,12 @@
   const GAME_WINDOW_MAX_MS = 5.5 * 60 * 60 * 1000;
 
   let statusRefreshTimer = null;
+  let staticStatusRefreshTimer = null;
   let statusRefreshInFlight = false;
+  let directRefreshInFlight = false;
   let decorationQueued = false;
   let decorating = false;
+  const originalLiveCells = new WeakMap();
 
   // ==========================================================================
   // TEAM NAME NORMALIZATION
@@ -180,6 +186,21 @@
       .hammer-live-pending-row:hover {
         background: #fff6f6 !important;
         box-shadow: inset 3px 0 0 #c62828 !important;
+      }
+
+      .hammer-live-row .thi-variance-context,
+      .hammer-live-pending-row .thi-variance-context {
+        display:none !important;
+      }
+
+      .hammer-live-withheld {
+        color:var(--muted);
+        font-family:var(--mono);
+        font-size:9px;
+        font-weight:700;
+        letter-spacing:.35px;
+        line-height:1.45;
+        text-transform:uppercase;
       }
 
       .hammer-live-badge {
@@ -738,6 +759,14 @@
   }
 
   function removeStatusArtifacts(row) {
+    const savedCells = originalLiveCells.get(row);
+    if (savedCells && savedCells.length === row.cells.length) {
+      Array.from(row.cells).forEach((cell, index) => {
+        cell.innerHTML = savedCells[index];
+      });
+      originalLiveCells.delete(row);
+    }
+
     row.querySelectorAll(
       ".hammer-live-score, " +
       ".hammer-final-score, " +
@@ -759,6 +788,9 @@
   function decoratePendingRow(row, stateName) {
     removeStatusArtifacts(row);
     const isLive = stateName === "live-pending";
+    if (isLive) {
+      originalLiveCells.set(row, Array.from(row.cells).map(cell => cell.innerHTML));
+    }
     row.dataset.hammerGameState = isLive ? "live" : "final";
     row.classList.add(isLive ? "hammer-live-pending-row" : "hammer-final-pending-row");
     const meta = statusMetaContainer(row);
@@ -768,6 +800,28 @@
       label.textContent = isLive ? "LIVE · SCORE PENDING" : "FINAL STATUS PENDING";
       meta.appendChild(label);
     }
+    if (isLive) {
+      withholdLiveMarketCells(row, "Score pending");
+    }
+  }
+
+  function withholdLiveMarketCells(row, scoreSource) {
+    const cells = row.cells;
+    if (cells?.[1]) {
+      cells[1].innerHTML = `<div class="line-primary">LIVE SCORE</div><div class="line-secondary">${cleanText(scoreSource || "Scoreboard")}</div>`;
+    }
+    const messages = [
+      "Pregame projection hidden while live",
+      "No live odds or lines",
+      "Live total withheld",
+      "Scoreboard only",
+      "No in-game recommendation",
+      "Pregame signal frozen"
+    ];
+    messages.forEach((message, index) => {
+      const cell = cells?.[index + 2];
+      if (cell) cell.innerHTML = `<div class="hammer-live-withheld">${message}</div>`;
+    });
   }
 
   function appendTeamScores(
@@ -818,6 +872,11 @@
   function decorateLiveRow(row, game) {
     removeStatusArtifacts(row);
 
+    originalLiveCells.set(
+      row,
+      Array.from(row.cells).map(cell => cell.innerHTML)
+    );
+
     row.dataset.hammerGameState = "live";
     row.classList.add("hammer-live-row");
 
@@ -847,38 +906,7 @@
       }
     }
 
-    const cells = row.cells;
-
-    setSecondary(cells?.[1], "Pregame Hammer fair line");
-
-    const marketPrimary = cleanText(
-      cells?.[2]
-        ?.querySelector(".line-primary")
-        ?.textContent
-    );
-
-    setSecondary(
-      cells?.[2],
-      isMissing(marketPrimary)
-        ? "Pregame market unavailable"
-        : "Pregame market snapshot"
-    );
-
-    setSecondary(
-      cells?.[3],
-      "Pregame projected total"
-    );
-
-    const note =
-      cells?.[4]?.querySelector(".disagreement-note");
-
-    if (
-      note &&
-      !note.textContent.startsWith("Pregame · ")
-    ) {
-      note.textContent =
-        `Pregame · ${cleanText(note.textContent)}`;
-    }
+    withholdLiveMarketCells(row, game?.source || "Scoreboard");
   }
 
   function decorateUntrackedFinalRow(row, game) {
@@ -1096,6 +1124,86 @@
     }
   }
 
+  function easternDate(offsetDays = 0) {
+    const shifted = new Date(Date.now() + offsetDays * 86400000);
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/New_York",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(shifted).reduce((result, part) => {
+      result[part.type] = part.value;
+      return result;
+    }, {});
+    return `${parts.year}${parts.month}${parts.day}`;
+  }
+
+  function easternHour() {
+    return Number(new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/New_York",
+      hour: "2-digit",
+      hourCycle: "h23"
+    }).format(new Date()));
+  }
+
+  function espnScoreboardRows(payload) {
+    const rows = [];
+    (payload?.events || []).forEach(event => {
+      const competition = event?.competitions?.[0] || {};
+      const competitors = competition?.competitors || [];
+      const home = competitors.find(team => team?.homeAway === "home");
+      const away = competitors.find(team => team?.homeAway === "away");
+      if (!home || !away) return;
+      const state = String(event?.status?.type?.state || "").toLowerCase();
+      if (!(["in", "post"].includes(state))) return;
+      const teamName = side => cleanText(
+        side?.team?.location || side?.team?.shortDisplayName || side?.team?.displayName
+      );
+      rows.push({
+        game_id: event?.id || competition?.id,
+        away_team: teamName(away),
+        home_team: teamName(home),
+        away_points: Number(away?.score),
+        home_points: Number(home?.score),
+        start_date: event?.date || competition?.date,
+        period: event?.status?.period,
+        clock: event?.status?.displayClock,
+        provider_status: event?.status?.type?.shortDetail || event?.status?.type?.detail,
+        status: state === "post" ? "completed" : "live",
+        game_state: state === "post" ? "final" : "live",
+        final_message: state === "post" ? (event?.status?.type?.shortDetail || "FINAL") : null,
+        source: "ESPN live scoreboard",
+        source_updated_at: new Date().toISOString()
+      });
+    });
+    return rows;
+  }
+
+  async function refreshDirectScoreboard() {
+    if (document.hidden || directRefreshInFlight) return;
+    directRefreshInFlight = true;
+    try {
+      const dates = easternHour() < 5
+        ? [easternDate(-1), easternDate(0)]
+        : [easternDate(0)];
+      const responses = await Promise.allSettled(dates.map(date =>
+        fetchJson(`${ESPN_SCOREBOARD_URL}?dates=${date}&groups=80&limit=1000`)
+      ));
+      const rows = responses.flatMap(result =>
+        result.status === "fulfilled" ? espnScoreboardRows(result.value) : []
+      );
+      if (!rows.length) return;
+      const directLive = rows.filter(game => game.game_state === "live");
+      const directFinal = rows.filter(game => game.game_state === "final");
+      livePayloadGeneratedAt = new Date().toISOString();
+      liveGames = [...liveGames, ...directLive];
+      completedGames = [...completedGames, ...directFinal];
+      queueProjectionDecoration();
+    } finally {
+      directRefreshInFlight = false;
+    }
+  }
+
   function observeProjectionRows() {
     const target =
       document.getElementById(
@@ -1168,6 +1276,7 @@
 
   function startGameStatusPolling() {
     refreshGameStatusData().catch(() => {});
+    refreshDirectScoreboard().catch(() => {});
 
     if (statusRefreshTimer) {
       window.clearInterval(statusRefreshTimer);
@@ -1176,12 +1285,20 @@
     statusRefreshTimer =
       window.setInterval(
         () => {
-          refreshGameStatusData().catch(() => {});
+          refreshDirectScoreboard().catch(() => {});
         },
-        30_000
+        20_000
       );
+    if (staticStatusRefreshTimer) window.clearInterval(staticStatusRefreshTimer);
+    staticStatusRefreshTimer = window.setInterval(
+      () => refreshGameStatusData().catch(() => {}),
+      60_000
+    );
     document.addEventListener("visibilitychange", () => {
-      if (!document.hidden) refreshGameStatusData().catch(() => {});
+      if (!document.hidden) {
+        refreshGameStatusData().catch(() => {});
+        refreshDirectScoreboard().catch(() => {});
+      }
     });
   }
 

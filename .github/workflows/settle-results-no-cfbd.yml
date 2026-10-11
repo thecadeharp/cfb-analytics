@@ -42,6 +42,20 @@ jobs:
         run: |
           python scripts/fetch_results_no_cfbd.py
 
+      - name: Publish scoreboard state immediately
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/results.json data/live_scores.json
+
+          if git diff --cached --quiet; then
+            echo "No scoreboard changes to publish."
+          else
+            git commit -m "Refresh live scores and finals"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+
       - name: Settle prospective projections
         run: |
           python scripts/settle_results.py
@@ -80,8 +94,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add data/results.json
-          git add data/live_scores.json
           git add data/postgame_analytics.json
           git add data/reports/settled_results.json
           git add data/reports/weekly_model_scorecard.json

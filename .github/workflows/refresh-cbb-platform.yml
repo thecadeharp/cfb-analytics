@@ -209,6 +209,7 @@ jobs:
           else:
               assert len(intelligence["player_projections"]) == 0
               assert intelligence["meta"]["roster_verification_status"] == "withheld_unverified_fallback"
+              assert intelligence["meta"]["roster_audit_status"] == "withheld"
           assert len(intelligence["team_dossiers"]) >= 300
           assert len(intelligence["game_context"]) == projections["meta"]["game_count"]
           assert all("schedule_strength" in row and "projected_core_lineup" in row for row in intelligence["team_dossiers"])

@@ -35,4 +35,15 @@ class IntelligenceSuiteTests(unittest.TestCase):
         self.assertEqual(dossier["resume"]["games_graded"],0)
         self.assertEqual(dossier["projected_core_lineup"]["state"],"projected_rotation_not_observed_lineup")
 
+    def test_integrity_audit_controls_player_publication(self):
+        profiles={"teams":[]}; priors={"meta":{"season":2027},"teams":[]}
+        players={"meta":{"roster_verification_status":"provider_verified"},"players":[{"player_season_id":"p1","team_id":1,"team":"Alpha","name":"Unverified","sample":{},"metrics":{},"research_scores":{"thi_player_rating":70},"data_quality":{"reliability":20}}]}
+        board={"games":[]}; tracking={"summary":{}}
+        model={"models":{"margin":{"feature_names":["home_court"],"coefficients":[0,3],"scales":{"home_court":1}}},"promotion_gate":{"checks":{}}}
+        audit={"meta":{"status":"withheld"},"checks":{"official_spot_checks":False}}
+        payload=build_suite(profiles,priors,players,board,tracking,model,roster_audit=audit)
+        self.assertEqual(payload["player_projections"],[])
+        self.assertEqual(payload["meta"]["roster_verification_status"],"withheld_unverified_fallback")
+        self.assertEqual(payload["meta"]["roster_audit_status"],"withheld")
+
 if __name__ == "__main__": unittest.main()

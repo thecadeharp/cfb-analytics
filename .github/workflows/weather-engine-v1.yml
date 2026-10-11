@@ -3,8 +3,10 @@ name: Weather Engine v1
 on:
   workflow_dispatch:
   schedule:
-    # Rebuild forecast + adjustments every 3 hours.
-    - cron: "17 */3 * * *"
+    # Rebuild every three hours early in the week, then hourly across the
+    # primary college-football game window (Friday through Sunday UTC).
+    - cron: "17 */3 * * 1-4"
+    - cron: "17 * * * 5,6,0"
 
 permissions:
   contents: write

@@ -7,10 +7,10 @@
     "notes_policy": "Only ESPN records updated within seven days are retained. Empty or expired notes imply unknown status, not full availability.",
     "model_usage": "display_only_not_used_by_model_a",
     "adjustment_policy": "ESPN statuses are never assigned point values automatically. A point scenario is retained only from a fresh manual note with a public HTTPS source and is capped at +/-10 team-value points.",
-    "team_count_with_current_notes": 0,
-    "current_note_count": 0,
+    "team_count_with_current_notes": 2,
+    "current_note_count": 2,
     "espn_current_note_count": 0,
-    "retained_manual_note_count": 0
+    "retained_manual_note_count": 2
   },
   "conference_sources": {
     "ACC": {
@@ -29,5 +29,36 @@
       "url": "https://pac-12.com/news/2026/9/11/2026-football-reports.aspx"
     }
   },
-  "teams": {}
+  "teams": {
+    "Massachusetts": [
+      {
+        "manual_id": "umass-qb-2026-w7",
+        "player": "Quarterback room",
+        "position": "QB",
+        "status": "Critical uncertainty",
+        "text": "Starter Pop Watson III was unavailable on Oct. 10; first-time starter Aedan McCarthy then left with an injury, and Logan Inagawa finished the game. Week 7 starter status requires a fresh team update.",
+        "source_label": "UMass Athletics",
+        "source_url": "https://umassathletics.com/news/2026/10/10/football-minutemen-comeback-falls-one-point-short-to-miami-oh-20-19",
+        "verified_at_utc": "2026-10-11T04:12:58Z",
+        "valid_until_utc": "2026-10-18T04:12:58Z",
+        "withhold_public_signal": true,
+        "adjustment_status": "withheld_pending_verified_depth_chart"
+      }
+    ],
+    "Miami (OH)": [
+      {
+        "manual_id": "miami-oh-qb-2026-w7",
+        "player": "Quarterback room",
+        "position": "QB",
+        "status": "Third-string starter",
+        "text": "Thomas Gotkowski and David McComb are out for the season. Caleb Heavner has taken over after both quarterbacks ahead of him were lost.",
+        "source_label": "Miami Athletics",
+        "source_url": "https://miamiredhawks.com/news/2026/10/6/football-redhawks-hit-the-road-for-tilt-at-umass",
+        "verified_at_utc": "2026-10-11T04:12:58Z",
+        "valid_until_utc": "2026-10-18T04:12:58Z",
+        "withhold_public_signal": true,
+        "adjustment_status": "withheld_pending_validated_qb_value"
+      }
+    ]
+  }
 }
