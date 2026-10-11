@@ -506,8 +506,8 @@
 
       if (sortMode === "top25") {
         const rank = game => Math.min(
-          Number(game?.home?.power_rating_rank || 999),
-          Number(game?.away?.power_rating_rank || 999)
+          Number(window.THICfbIndexRankByTeam?.get(game?.home?.team) || 999),
+          Number(window.THICfbIndexRankByTeam?.get(game?.away?.team) || 999)
         );
         const aRank = rank(aGame);
         const bRank = rank(bGame);

@@ -1,7 +1,7 @@
 /* THI's independent research surface. Reads the existing display-only ratings. */
 (() => {
   let search = "";
-  let sort = "power_rank";
+  let sort = "index_rank";
   let sortDirection = "asc";
   let conferenceFilter = "ALL";
   const RATING_CONFERENCE_GROUPS = {
@@ -141,11 +141,11 @@
   view.innerHTML = `
     <div class="eyebrow">Calculated by The Hammer Index</div>
     <h1 class="page-title">THI Ratings</h1>
-    <p class="page-subtitle thi-hub-intro">An independent power rating combining roster strength, completed-game results and opponent-adjusted performance. Compare teams here or open a Team Dossier for the complete breakdown.</p>
+    <p class="page-subtitle thi-hub-intro">The resume-aware THI Index alongside predictive power, current form, schedule strength and team-specific home advantage. Compare teams here or open a Team Dossier for the complete breakdown.</p>
     <div class="thi-ratings-difference" aria-label="Difference between Team Data and THI Ratings">
       <div><strong>Team Data</strong><span>Observed efficiency, schedule and resume context, market performance, and team dossiers.</span></div>
-      <div><strong>THI Ratings</strong><span>THI's predictive weekly power order, blending roster foundation with opponent-adjusted performance and results.</span></div>
-      <p>Both are independent research layers. Model A projections remain separately frozen.</p>
+      <div><strong>THI Index</strong><span>A results-first weekly order. Predictive Power remains a separate comparison lens and does not determine the Index by itself.</span></div>
+      <p>The Index excludes roster contribution. Model A projections remain separately frozen.</p>
     </div>
     <div id="thi-ratings-container" aria-live="polite"></div>`;
   section.after(view);
@@ -185,9 +185,9 @@
       <div class="thi-weekly-pulse-value">${escapeHtml(value)}</div>
     </article>`;
     return `<div class="thi-weekly-pulse" aria-label="Weekly THI ratings movement">
-      ${card("riser", "Biggest Riser", riser, riser ? `${riser.spots > 0 ? "+" : ""}${riser.spots} spots · now #${riser.rank}` : "—")}
-      ${card("schedule", "Toughest Schedule", schedule, schedule ? `SOS #${schedule.sosRank} · THI #${schedule.rank}` : "—")}
-      ${card("faller", "Biggest Faller", faller, faller ? `${faller.spots > 0 ? "+" : ""}${faller.spots} spots · now #${faller.rank}` : "—")}
+      ${card("riser", "Power Riser", riser, riser ? `${riser.spots > 0 ? "+" : ""}${riser.spots} power spots · now #${riser.rank}` : "—")}
+      ${card("schedule", "Toughest Schedule", schedule, schedule ? `SOS #${schedule.sosRank} · power #${schedule.rank}` : "—")}
+      ${card("faller", "Power Faller", faller, faller ? `${faller.spots > 0 ? "+" : ""}${faller.spots} power spots · now #${faller.rank}` : "—")}
     </div>`;
   }
 
@@ -237,7 +237,7 @@
   }
 
   function ratingTimestamp() {
-    const raw = thiPowerRatingsData?.meta?.generated_at;
+    const raw = cfbIndexTop25Data?.meta?.generated_at;
     if (!raw) return "Timestamp unavailable";
     const parsed = new Date(raw);
     return Number.isNaN(parsed.getTime()) ? String(raw) : new Intl.DateTimeFormat("en-US", { dateStyle:"medium", timeStyle:"short" }).format(parsed);
@@ -266,12 +266,12 @@
     const conferences = conferenceStrengthRows().slice(0,6);
     const lens = (label, title, copy) => `<article class="thi-decomposition-lens"><span>${escapeHtml(label)}</span><strong>${escapeHtml(title)}</strong><p>${escapeHtml(copy)}</p></article>`;
     return `<section class="thi-decomposition" aria-label="THI rating decomposition">
-      <div class="thi-decomposition-head"><div><div class="eyebrow">THI Rating Decomposition</div><h2>Five lenses, one transparent rating page</h2></div><div class="thi-decomposition-stamp">Through Week ${escapeHtml(thiPowerRatingsData?.meta?.through_week ?? "—")}<br>Rated ${escapeHtml(ratingTimestamp())}</div></div>
+      <div class="thi-decomposition-head"><div><div class="eyebrow">THI Rating Decomposition</div><h2>Five lenses, one transparent rating page</h2></div><div class="thi-decomposition-stamp">Through Week ${escapeHtml(cfbIndexTop25Data?.meta?.through_week ?? "—")}<br>Rated ${escapeHtml(ratingTimestamp())}</div></div>
       <div class="thi-decomposition-lenses">
-        ${lens("Overall", "THI blended rating", "Roster foundation, completed-game results and opponent-adjusted performance on a scoring-margin scale.")}
+        ${lens("Index", "Resume-aware order", "Results, record, predictive strength, opponent-adjusted performance and schedule strength; no roster contribution.")}
         ${lens("Predictive", "Model A power rating", "The production rating in CFB Metrics that currently powers published game projections.")}
         ${lens("Recent form", "Performance contribution", "Current-season opponent-adjusted performance within the research rating; compare it with Overall to spot disagreement.")}
-        ${lens("Schedule", "SOS + quality record", "External schedule rank plus the team's completed record against the current THI top 25.")}
+        ${lens("Schedule", "SOS + quality record", "External schedule rank plus the team's completed record against the current Index top 25.")}
         ${lens("Home advantage", "Team-specific points", "The production home edge used by Model A; neutral-site games receive zero.")}
       </div>
       <div class="thi-conference-strength"><strong>Conference strength · neutral-field team benchmark</strong>${conferences.map(row => `<span>${escapeHtml(row.conference)} <b>${formatSigned(row.robust,1)}</b> robust · ${formatSigned(row.win50,1)} WIN50</span>`).join("")}</div>
@@ -336,14 +336,15 @@
     if (!target) return;
     const query = search.trim().toLocaleLowerCase();
     const observed = thiObservedRatingsData?.teams ?? {};
-    const topRanks = new Set((thiPowerRatingsData?.teams ?? []).filter(row => Number(row.rank) <= 25).map(row => row.team));
+    const indexByTeam = new Map((cfbIndexTop25Data?.teams ?? []).map(row => [row.team, row]));
+    const topRanks = new Set((cfbIndexTop25Data?.top_25 ?? []).map(row => row.team));
     const sourceData = (thiPowerRatingsData?.teams ?? []).map(power => {
       const profile = observed[power.team] ?? {};
       const intelligence = teamIntelligenceData?.teams?.[power.team]?.splits?.[gameTypeSplit] ?? {};
       const sosRank = Number(externalRatingsData?.teams?.[power.team]?.sos_rank);
       const hfa = Number(hfaData?.teams?.[power.team] ?? hfaData?.meta?.default_hfa);
       return {
-        power, profile, intelligence, team: power.team,
+        power, profile, intelligence, index: indexByTeam.get(power.team), team: power.team,
         conference: profile.conference || teams[power.team]?.conference || "FBS Independents",
         predictive: modelARating(power.team),
         sosRank: Number.isFinite(sosRank) ? sosRank : null,
@@ -355,6 +356,7 @@
     data.sort((a, b) => {
       const value = row => {
         if (sort === "team") return row.team;
+        if (sort === "index_rank") return Number(row.index?.rank);
         if (sort === "power_rank") return Number(row.power.rank);
         if (sort === "predictive") return Number(row.predictive);
         if (sort === "recent") return Number(row.power.performance_contribution);
@@ -390,12 +392,12 @@
     const priorRanks = priorRankMap();
 
     target.innerHTML = data.length ? `<div class="thi-hub-table-wrap"><table class="thi-hub-table">
-      <thead><tr>${sortHeader("power_rank", "Rank", "asc")}${sortHeader("team", "Team", "asc")}${sortHeader("rating", "Overall")}${sortHeader("predictive", "Predictive")}${sortHeader("recent", "Recent Form")}${sortHeader("performance_only_weekly_change", "Weekly Δ")}${sortHeader("sos", "SOS", "asc")}<th>vs THI Top 25</th>${sortHeader("hfa", "Home Edge")}</tr></thead>
+      <thead><tr>${sortHeader("index_rank", "Index", "asc")}${sortHeader("team", "Team", "asc")}${sortHeader("rating", "Power")}${sortHeader("predictive", "Predictive")}${sortHeader("recent", "Recent Form")}${sortHeader("performance_only_weekly_change", "Weekly Δ")}${sortHeader("sos", "SOS", "asc")}<th>vs Index Top 25</th>${sortHeader("hfa", "Home Edge")}</tr></thead>
       <tbody>${data.map(row => {
         const { power, profile } = row;
         const rating = profile.ratings ?? {};
         return `<tr>
-          <td data-label="Rank"><span class="thi-hub-number">#${formatNumber(power.rank, 0)}</span>${(() => { const move = Number(priorRanks.get(row.team)) - Number(power.rank); return move ? `<span class="thi-hub-rank-move ${move > 0 ? "up" : "down"}">${move > 0 ? "▲" : "▼"}${Math.abs(move)}</span>` : ""; })()}</td>
+          <td data-label="Index"><span class="thi-hub-number">${row.index?.rank ? `#${formatNumber(row.index.rank, 0)}` : "—"}</span></td>
           <td data-label="Team"><span class="thi-hub-team-wrap">${teamLogoMarkup(row.team, "projection")}
               <button type="button" class="thi-hub-team" data-thi-team="${escapeHtml(row.team)}">${escapeHtml(row.team)}</button></span></td>
           ${metricCell("Overall", formatAxisNumber(power.rating, 2), power.rating, allValues("rating"))}
@@ -403,7 +405,7 @@
           ${metricCell("Recent Form", formatAxisNumber(power.performance_contribution, 2), power.performance_contribution, allValues("recent"))}
           ${metricCell("Weekly Δ", formatAxisNumber(power.performance_only_weekly_change, 2), power.performance_only_weekly_change, allValues("performance_only_weekly_change"))}
           <td data-label="SOS"><span class="thi-hub-rank">${Number.isFinite(row.sosRank) ? `#${row.sosRank}` : "—"}</span></td>
-          <td data-label="vs THI Top 25"><span class="thi-hub-number">${escapeHtml(row.qualityRecord)}</span></td>
+          <td data-label="vs Index Top 25"><span class="thi-hub-number">${escapeHtml(row.qualityRecord)}</span></td>
           ${metricCell("Home Edge", formatAxisNumber(row.hfa, 1), row.hfa, allValues("hfa"), "context")}
         </tr>`;
       }).join("")}</tbody></table></div>` :
@@ -447,7 +449,7 @@
     const container = document.getElementById("thi-ratings-container");
     const meta = thiObservedRatingsData?.meta;
     const powerMeta = thiPowerRatingsData?.meta;
-    if (!meta || !thiObservedRatingsData?.teams || !powerMeta || !Array.isArray(thiPowerRatingsData?.teams)) {
+    if (!meta || !thiObservedRatingsData?.teams || !powerMeta || !Array.isArray(thiPowerRatingsData?.teams) || !Array.isArray(cfbIndexTop25Data?.teams)) {
       container.innerHTML = `<div class="empty-state">THI power and observed ratings are awaiting their next matching refresh.</div>`;
       return;
     }
@@ -470,12 +472,13 @@
               `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("")}
           </select>
         </div>
-        <span class="conference-filter-count">${escapeHtml(thiPowerRatingsData.teams.length)} teams</span>
+        <span class="conference-filter-count">${escapeHtml(cfbIndexTop25Data.teams.length)} teams</span>
       </div>
-      <p class="thi-hub-note">Overall research ratings are through Week ${escapeHtml(powerMeta.through_week ?? "—")}. Predictive is the production CFB power rating that feeds Model A. Recent Form is the independent rating's opponent-adjusted performance contribution; it does not silently alter Model A.</p>
+      <p class="thi-hub-note">The THI Index is through Week ${escapeHtml(cfbIndexTop25Data?.meta?.through_week ?? "—")} and is ordered by completed results, record, predictive strength, observed performance and schedule strength. Power is the separate experimental blended rating. Predictive feeds Model A; the Index does not alter projections.</p>
       <div id="thi-ratings-rows"></div>
       <details class="thi-hub-method"><summary>How to read these ratings</summary>
-        <p>Power Rating is a research scoring-margin scale that combines roster foundation, completed-game result Elo, and opponent-adjusted rate performance. It is separate from Model A and does not change any projection.</p>
+        <p>The THI Index weights results 35%, record 20%, predictive strength 20%, observed performance 15% and schedule strength 10%. It excludes roster contribution and market inputs.</p>
+        <p>Power Rating is a separate research scoring-margin scale that combines roster foundation, completed-game result Elo, and opponent-adjusted rate performance. It does not change any projection.</p>
         <p>${escapeHtml(meta.methodology?.description ?? "Observed ratings describe current on-field performance.")}</p>
         <p>Offense and defense use a scoring-scale index. Pace is indexed to the FBS average of 1.00. Observed Rank is the old net observed rank, retained for comparison.</p>
       </details>`;

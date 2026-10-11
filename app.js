@@ -22,6 +22,7 @@ const DATA_URLS = {
   scheduleContext: "./data/schedule_context.json",
   thiObservedRatings: "./data/thi_observed_ratings.json",
   thiPowerRatings: "./data/thi_power_ratings.json",
+  cfbIndexTop25: "./data/cfb_index_top25.json",
   rosterNotes: "./data/roster_notes.json",
   teamIntelligence: "./data/team_intelligence.json",
   marketHistory: "./data/market_history.json",
@@ -46,6 +47,7 @@ let teamMarketPerformanceData = null;
 let scheduleContextData = null;
 let thiObservedRatingsData = null;
 let thiPowerRatingsData = null;
+let cfbIndexTop25Data = null;
 let rosterNotesData = null;
 let teamIntelligenceData = null;
 let marketHistoryData = null;
@@ -316,6 +318,11 @@ function metricRank(team, section, rankField, value) {
 function powerRank(team) {
   const rank = team?.power_rating_rank;
   return rank ? `#${rank}` : "—";
+}
+
+function cfbIndexRank(teamName) {
+  const rank = Number(window.THICfbIndexRankByTeam?.get(String(teamName)));
+  return Number.isFinite(rank) && rank > 0 ? rank : null;
 }
 
 function spPlusRank(team, field) {
@@ -2285,6 +2292,7 @@ async function init() {
       scheduleContextData,
       thiObservedRatingsData,
       thiPowerRatingsData,
+      cfbIndexTop25Data,
       rosterNotesData,
       teamIntelligenceData,
       marketHistoryData
@@ -2306,6 +2314,7 @@ async function init() {
       loadJson(DATA_URLS.scheduleContext).catch(() => null),
       loadJson(DATA_URLS.thiObservedRatings).catch(() => null),
       loadJson(DATA_URLS.thiPowerRatings).catch(() => null),
+      loadJson(DATA_URLS.cfbIndexTop25).catch(() => null),
       loadJson(DATA_URLS.rosterNotes).catch(() => null),
       loadJson(DATA_URLS.teamIntelligence).catch(() => null),
       loadJson(DATA_URLS.marketHistory).catch(() => ({ games: {} })),
@@ -2316,6 +2325,9 @@ async function init() {
     seasonProjections = projectionsData?.season_projections ?? {};
     window.THIProjectionsPayload = projectionsData;
     window.THIProjectionGames = projections;
+    window.THICfbIndexRankByTeam = new Map(
+      (cfbIndexTop25Data?.teams ?? []).map(row => [row.team, Number(row.rank)])
+    );
 
     updateHeader();
     buildWeekTabs();
@@ -2504,8 +2516,8 @@ function projectionGamesForCurrentView() {
         if (bWatch !== aWatch) return bWatch - aWatch;
       }
       if (currentProjectionSort === "top25") {
-        const aRank = Math.min(Number(a?.home?.power_rating_rank || 999), Number(a?.away?.power_rating_rank || 999));
-        const bRank = Math.min(Number(b?.home?.power_rating_rank || 999), Number(b?.away?.power_rating_rank || 999));
+        const aRank = Math.min(cfbIndexRank(a?.home?.team) || 999, cfbIndexRank(a?.away?.team) || 999);
+        const bRank = Math.min(cfbIndexRank(b?.home?.team) || 999, cfbIndexRank(b?.away?.team) || 999);
         const aTop25 = aRank <= 25 ? 1 : 0;
         const bTop25 = bRank <= 25 ? 1 : 0;
         if (bTop25 !== aTop25) return bTop25 - aTop25;
@@ -2587,8 +2599,8 @@ function renderProjectionRow(game) {
   const homeName = game?.home?.team ?? "Unknown";
   const awayName = game?.away?.team ?? "Unknown";
 
-  const homeRank = game?.home?.power_rating_rank;
-  const awayRank = game?.away?.power_rating_rank;
+  const homeRank = cfbIndexRank(homeName);
+  const awayRank = cfbIndexRank(awayName);
 
   const modelSpread = game?.projection?.home_spread;
   const modelTotal = game?.projection?.total;
@@ -2628,7 +2640,7 @@ function renderProjectionRow(game) {
           >
             ${escapeHtml(awayName)}
           </span>
-          <span class="team-meta">${awayRank ? `THI #${awayRank}` : ""}</span>
+          <span class="team-meta">${awayRank && awayRank <= 25 ? `INDEX #${awayRank}` : ""}</span>
         </div>
 
         <div class="team-line">
@@ -2639,7 +2651,7 @@ function renderProjectionRow(game) {
           >
             ${escapeHtml(homeName)}
           </span>
-          <span class="team-meta">${homeRank ? `THI #${homeRank}` : ""}</span>
+          <span class="team-meta">${homeRank && homeRank <= 25 ? `INDEX #${homeRank}` : ""}</span>
         </div>
 
         <div class="team-meta" style="margin-top:5px;">
