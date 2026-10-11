@@ -6,7 +6,12 @@ from datetime import datetime,timezone
 from pathlib import Path
 from urllib.parse import urlencode
 from urllib.request import Request,urlopen
-from build_game_conditions import weather_neutral_venue
+try:
+ from scripts.build_game_conditions import weather_neutral_venue
+except ModuleNotFoundError:
+ # Direct script execution adds scripts/ rather than the repository root to
+ # sys.path, while unittest imports this module through the scripts package.
+ from build_game_conditions import weather_neutral_venue
 ROOT=Path(__file__).resolve().parents[1];CFB_BASE="https://api.collegefootballdata.com";CBB_BASE="https://api.collegebasketballdata.com";P4={"ACC","Big 12","Big Ten","SEC","Pac-12"}
 def fetch(path,params,key,base=CFB_BASE):
  req=Request(f"{base}{path}?{urlencode(params)}",headers={"Authorization":f"Bearer {key}","User-Agent":"THI-Variance-Lab/2.0"})
