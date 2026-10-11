@@ -59,13 +59,28 @@ class CbbBracketologyTests(unittest.TestCase):
                     "team_id": team["team_id"],
                     "research_scores": {"thi_player_rating": base - number / 10},
                 })
-        result = build_bracketology(payload, players_payload=players)
+        audit = {"meta": {"status": "passed"}, "checks": {"provider": True, "coverage": True}}
+        result = build_bracketology(payload, players_payload=players, roster_audit_payload=audit)
         rows = result["field"] + result["bubble"]["first_four_out"] + result["bubble"]["next_four_out"]
         selected = next(row for row in rows if row["team_id"] == target["team_id"])
         original = next(row for row in payload["teams"] if row["team_id"] == target["team_id"])
         self.assertEqual(selected["prior_net"], original["prior_net"])
         self.assertGreater(selected["roster_adjustment"], 0)
         self.assertGreater(selected["selection_score"], selected["prior_net"])
+
+    def test_withheld_roster_audit_disables_player_adjustments(self):
+        payload = priors()
+        players = {"players": []}
+        for team in payload["teams"]:
+            for number in range(8):
+                players["players"].append({
+                    "team_id": team["team_id"],
+                    "research_scores": {"thi_player_rating": 80.0 - number / 10},
+                })
+        audit = {"meta": {"status": "withheld"}, "checks": {"provider": True, "coverage": False}}
+        result = build_bracketology(payload, players_payload=players, roster_audit_payload=audit)
+        self.assertIn("without a roster adjustment", result["meta"]["methodology"])
+        self.assertTrue(all(row["roster_adjustment"] == 0 for row in result["field"]))
 
     def test_live_bracket_requires_broad_current_resume_sample(self):
         payload = priors(teams_each=10)

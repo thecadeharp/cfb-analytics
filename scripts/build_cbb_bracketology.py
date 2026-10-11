@@ -157,6 +157,7 @@ def build_bracketology(
     priors_payload: dict[str, Any],
     profiles_payload: dict[str, Any] | None = None,
     players_payload: dict[str, Any] | None = None,
+    roster_audit_payload: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     model_version = priors_payload.get("meta", {}).get("model_version")
     if model_version != "thi-cbb-walk-forward-v0.6-research":
@@ -166,7 +167,16 @@ def build_bracketology(
     current_game_count = sum(int(record.get("games") or 0) for record in profile_records)
     teams_with_resume_sample = sum(int(record.get("games") or 0) >= 8 for record in profile_records)
     live_resume_ready = teams_with_resume_sample >= 300
-    roster_by_team, roster_center, roster_spread = roster_scores(players_payload)
+    roster_audit = roster_audit_payload or {}
+    roster_checks = roster_audit.get("checks") or {}
+    roster_verified = (
+        roster_audit.get("meta", {}).get("status") == "passed"
+        and bool(roster_checks)
+        and all(bool(value) for value in roster_checks.values())
+    )
+    roster_by_team, roster_center, roster_spread = (
+        roster_scores(players_payload) if roster_verified else ({}, 0.0, 1.0)
+    )
     roster_active = bool(roster_by_team)
     source = []
     for original in priors_payload.get("teams") or []:
@@ -307,12 +317,14 @@ def main() -> None:
     parser.add_argument("--priors", type=Path, default=ROOT / "data" / "cbb" / "model" / "current_priors.json")
     parser.add_argument("--profiles", type=Path, default=ROOT / "data" / "cbb" / "team_profiles.json")
     parser.add_argument("--players", type=Path, default=ROOT / "data" / "cbb" / "player_ratings.json")
+    parser.add_argument("--roster-audit", type=Path, default=ROOT / "data" / "cbb" / "roster_audit.json")
     parser.add_argument("--output", type=Path, default=ROOT / "data" / "cbb" / "bracketology.json")
     args = parser.parse_args()
     payload = build_bracketology(
         json.loads(args.priors.read_text()),
         json.loads(args.profiles.read_text()) if args.profiles.exists() else None,
         json.loads(args.players.read_text()) if args.players.exists() else None,
+        json.loads(args.roster_audit.read_text()) if args.roster_audit.exists() else None,
     )
     atomic_write(args.output, payload)
     print(f"{VERSION}: {len(payload['field'])} teams, {len(payload['conference_bids'])} conferences")
