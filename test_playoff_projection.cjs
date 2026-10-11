@@ -1,8 +1,8 @@
 const assert = require('node:assert/strict');
-const core = require('../playoff-projection.js');
+const core = require('./playoff-projection.js');
 
 function row(team, conference, projectedRank) {
-  return { team, conference, projectedRank, selectionScore: 1 - projectedRank / 100 };
+  return { team, conference, projectedRank, selectionScore: 1 - projectedRank / 100, atLargeEligible: true };
 }
 
 const ranked = [
@@ -36,4 +36,19 @@ assert.ok(result.field.some(team => team.team === 'Notre Dame' && team.notreDame
 assert.equal(result.field[11].team, 'Boise State');
 assert.equal(result.firstOut.team, 'Penn State');
 assert.equal(result.secondOut.team, 'Michigan');
+
+const recordGate = core.selectField(
+  [
+    row('ACC Champion', 'ACC', 1),
+    row('Big Ten Champion', 'Big Ten', 2),
+    row('Big 12 Champion', 'Big 12', 3),
+    row('SEC Champion', 'SEC', 4),
+    row('Mountain West Champion', 'Mountain West', 20),
+    ...Array.from({ length: 8 }, (_, index) => row(`Eligible ${index + 1}`, 'FBS Independents', index + 5)),
+    { ...row('Seven Win Power Team', 'FBS Independents', 5), atLargeEligible: false },
+  ],
+  ['ACC', 'Big Ten', 'Big 12', 'SEC'],
+  ['American Athletic', 'Conference USA', 'Mid-American', 'Mountain West', 'Pac-12', 'Sun Belt']
+);
+assert.ok(!recordGate.field.some(team => team.team === 'Seven Win Power Team'));
 console.log('playoff projection contract passed');

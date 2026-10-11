@@ -615,7 +615,8 @@
     const watchLabel = watch >= 75 ? "Prime window" : watch >= 60 ? "On the radar" : "Standard";
     const varianceRows = (state.data?.varianceTracker?.frozen || []).filter(row => row.sport === "cbb" && String(row.game_id) === String(game.game_id));
     const varianceCards = new Map((state.data?.trends?.sports?.cbb?.cards || []).map(card => [card.id, card]));
-    const varianceMarkup = varianceRows.length ? `<div class="cbb-variance-context">${varianceRows.slice(0,2).map(row => { const card = varianceCards.get(row.system_id) || {}; const evidence = card.state === "failed_hypothesis" ? "did not validate" : humanize(card.state || "prospective"); return `<span title="Historical context only; does not affect the THI projection">${escapeHtml(card.name || humanize(row.system_id))} · ${escapeHtml(evidence)}</span>`; }).join("")}</div>` : "";
+    const verifiedVarianceRows = varianceRows.filter(row => String(varianceCards.get(row.system_id)?.state || "").toLowerCase() === "verified");
+    const varianceMarkup = verifiedVarianceRows.length ? `<div class="cbb-variance-context">${verifiedVarianceRows.slice(0,2).map(row => { const card = varianceCards.get(row.system_id) || {}; return `<span title="Verified historical system; does not affect the THI projection">${escapeHtml(card.name || humanize(row.system_id))} · Verified</span>`; }).join("")}</div>` : "";
     const awayRank = cbbThiRank(game.away?.team_id);
     const homeRank = cbbThiRank(game.home?.team_id);
     return `<tr class="cbb-projection-row" data-cbb-game-id="${escapeHtml(game.game_id)}">

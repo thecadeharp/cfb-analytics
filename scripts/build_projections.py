@@ -887,6 +887,12 @@ def verify_known_schedule_errors(schedule):
             if not date.startswith("2026-10-10"):
                 bad.append(("Florida/South Carolina", date))
 
+        if {home, away} == {"Texas", "Oklahoma"}:
+            if not bool(game.get("neutral_site")):
+                bad.append(("Texas/Oklahoma neutral site", game.get("neutral_site")))
+            if str(game.get("venue") or "").strip().lower() != "cotton bowl":
+                bad.append(("Texas/Oklahoma venue", game.get("venue")))
+
     if bad:
         print("❌ Known schedule sanity check failed.")
         print(bad[:10])

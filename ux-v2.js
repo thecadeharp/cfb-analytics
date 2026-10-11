@@ -1153,7 +1153,8 @@
   }
 
   function varianceContextMarkup(game) {
-    const qualifiers = varianceQualifiersByGame.get(String(game?.game_id ?? "")) || [];
+    const qualifiers = (varianceQualifiersByGame.get(String(game?.game_id ?? "")) || [])
+      .filter(row => String(varianceCardsById.get(row.system_id)?.state || "").toLowerCase() === "verified");
     if (!qualifiers.length) return "";
     return `<div class="thi-variance-context" aria-label="Variance Lab context">${qualifiers.slice(0,2).map(row => {
       const card = varianceCardsById.get(row.system_id) || {};
@@ -1194,7 +1195,7 @@
       })
       .sort((a, b) => new Date(a.game.start_date) - new Date(b.game.start_date));
     return `
-      <details class="weather-board" open>
+      <details class="weather-board">
         <summary><span>Game-Day Weather Board</span><span class="weather-board-count">${rows.length} affected outdoor ${rows.length === 1 ? "game" : "games"}</span></summary>
         ${rows.length ? `<div class="weather-board-grid">${rows.map(({ game, conditions }) => {
           const impact = String(conditions.impact || "Moderate");

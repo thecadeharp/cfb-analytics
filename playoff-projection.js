@@ -54,12 +54,12 @@
       const sorRank = safe(resume.sor_rank, powerRank);
       const sosRank = safe(resume.sos_rank, Math.ceil(fieldSize / 2));
 
-      // Projected results and THI quality lead; resume and schedule break ties.
+      // Projected results and résumé lead; team quality breaks close calls.
       const selectionScore = (
-        (projectedWinPct * 0.40) +
-        (rankPercentile(sorRank, fieldSize) * 0.10) +
-        (rankPercentile(powerRank, fieldSize) * 0.40) +
-        (rankPercentile(sosRank, fieldSize) * 0.10)
+        (projectedWinPct * 0.50) +
+        (rankPercentile(sorRank, fieldSize) * 0.15) +
+        (rankPercentile(powerRank, fieldSize) * 0.30) +
+        (rankPercentile(sosRank, fieldSize) * 0.05)
       );
 
       return {
@@ -73,6 +73,9 @@
         sorRank,
         sosRank,
         selectionScore,
+        // An eight-win projection can still enter as a projected conference
+        // champion, but it cannot win an at-large place on power rating alone.
+        atLargeEligible: expectedWins >= 9,
       };
     }).sort((a, b) =>
       b.selectionScore - a.selectionScore ||
@@ -202,7 +205,7 @@
     container.innerHTML = `
       <div class="thi-cfp-summary">
         <div><div class="eyebrow">Research simulation · through Week ${html(week)}</div><h2>Projected 12-Team Field</h2></div>
-        <div class="thi-cfp-summary-copy">Selection score: 40% THI projected record, 40% THI power, 10% strength of record and 10% strength of schedule. Conference champion slots follow the 2026 CFP format.</div>
+        <div class="thi-cfp-summary-copy">Selection score: 50% THI projected record, 30% THI power, 15% strength of record and 5% strength of schedule. At-large teams must project to at least nine wins; conference champion slots follow the 2026 CFP format.</div>
       </div>
       <div class="thi-cfp-layout">
         <section class="thi-cfp-field"><h3>Projected field</h3>${data.field.map(fieldRow).join('')}
@@ -304,14 +307,14 @@
     if (notreDame) byTeam.set(notreDame.team, { ...notreDame, notreDameAuto: true });
     for (const row of ranked) {
       if (byTeam.size >= 12) break;
-      if (!byTeam.has(row.team)) byTeam.set(row.team, { ...row });
+      if (!byTeam.has(row.team) && row.atLargeEligible !== false) byTeam.set(row.team, { ...row });
     }
     const field = Array.from(byTeam.values())
       .sort((a, b) => a.projectedRank - b.projectedRank)
       .slice(0, 12)
       .map((row, index) => ({ ...row, seed: index + 1 }));
     const selected = new Set(field.map(row => row.team));
-    const bubble = ranked.filter(row => !selected.has(row.team));
+    const bubble = ranked.filter(row => !selected.has(row.team) && row.atLargeEligible !== false);
     return { field, firstOut: bubble[0] ?? null, secondOut: bubble[1] ?? null };
   }
 
