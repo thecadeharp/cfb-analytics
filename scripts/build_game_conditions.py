@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 import sys
 import time
 import urllib.parse
@@ -54,6 +55,47 @@ SPREAD_CAP = 1.5
 
 MIN_TENDENCY_PLAYS = 100
 MIN_PASS_LEAN_GAP = 0.15
+
+# ESPN's event payload occasionally reports ``indoor: false`` for a roofed
+# venue (Allegiant Stadium is the production example). Venue identity is the
+# safer fallback for facilities whose playing surface is protected from
+# precipitation and ambient wind. Retractable-roof buildings remain weather
+# neutral unless a future source explicitly provides a verified open-roof
+# state for that event.
+WEATHER_NEUTRAL_VENUES = {
+    "allegiant stadium",
+    "alamodome",
+    "alerus center",
+    "at t stadium",
+    "caesars superdome",
+    "dakotadome",
+    "fargodome",
+    "ford field",
+    "hollywood casino at greektown field",
+    "holt arena",
+    "iccu dome",
+    "jma wireless dome",
+    "kibbie dome",
+    "lucas oil stadium",
+    "mercedes benz stadium",
+    "nrg stadium",
+    "state farm stadium",
+    "uni dome",
+    "u s bank stadium",
+    "walkup skydome",
+}
+
+
+def normalized_venue_name(value: str | None) -> str:
+    return " ".join(re.sub(r"[^a-z0-9]+", " ", str(value or "").lower()).split())
+
+
+def weather_neutral_venue(venue_name: str | None, provider_indoor=None) -> tuple[bool, str | None]:
+    if provider_indoor is True:
+        return True, "provider"
+    if normalized_venue_name(venue_name) in WEATHER_NEUTRAL_VENUES:
+        return True, "venue_registry"
+    return False, None
 
 
 def fetch_json(url: str) -> dict:
@@ -726,6 +768,7 @@ def main() -> int:
             "venue": game.get("venue"),
             "network": None,
             "indoor": False,
+            "indoor_source": None,
             "forecast": None,
             "conditions_line": "Forecast unavailable",
             "impact": "Minimal",
@@ -760,8 +803,12 @@ def main() -> int:
                 entry["venue"] = venue["name"]
             entry["network"] = venue.get("network")
 
-            indoor = bool(venue.get("indoor"))
+            indoor, indoor_source = weather_neutral_venue(
+                entry.get("venue"),
+                venue.get("indoor"),
+            )
             entry["indoor"] = indoor
+            entry["indoor_source"] = indoor_source
 
             weather = None
             precip_label = "Dry"

@@ -6,6 +6,7 @@ from datetime import datetime,timezone
 from pathlib import Path
 from urllib.parse import urlencode
 from urllib.request import Request,urlopen
+from build_game_conditions import weather_neutral_venue
 ROOT=Path(__file__).resolve().parents[1];CFB_BASE="https://api.collegefootballdata.com";CBB_BASE="https://api.collegebasketballdata.com";P4={"ACC","Big 12","Big Ten","SEC","Pac-12"}
 def fetch(path,params,key,base=CFB_BASE):
  req=Request(f"{base}{path}?{urlencode(params)}",headers={"Authorization":f"Bearer {key}","User-Agent":"THI-Variance-Lab/2.0"})
@@ -71,7 +72,8 @@ def main():
     dt=datetime.fromisoformat(start.replace("Z","+00:00")).astimezone(ZoneInfo("America/New_York"));hour=dt.hour+dt.minute/60
    except Exception:pass
    week=int(g.get("week")or 0);hr=ranks.get((week,g.get("homeTeam")),ranks.get((max(0,week-1),g.get("homeTeam"))));ar=ranks.get((week,g.get("awayTeam")),ranks.get((max(0,week-1),g.get("awayTeam"))))
-   games.append({"game_id":gid,"sport":"cfb","season":season,"start_date":start,"eastern_hour":hour,"home_conference":g.get("homeConference"),"away_conference":g.get("awayConference"),"home_classification":group(g.get("homeConference"),g.get("homeClassification")),"away_classification":group(g.get("awayConference"),g.get("awayClassification")),"home_rank":hr,"away_rank":ar,"indoor":wx.get("gameIndoors"),"temperature_f":wx.get("temperature"),"wind_mph":wx.get("windSpeed"),"precipitation":wx.get("precipitation"),"weather_condition":wx.get("weatherCondition")})
+   indoor,indoor_source=weather_neutral_venue(g.get("venue"),wx.get("gameIndoors"))
+   games.append({"game_id":gid,"sport":"cfb","season":season,"start_date":start,"eastern_hour":hour,"home_conference":g.get("homeConference"),"away_conference":g.get("awayConference"),"home_classification":group(g.get("homeConference"),g.get("homeClassification")),"away_classification":group(g.get("awayConference"),g.get("awayClassification")),"home_rank":hr,"away_rank":ar,"indoor":indoor,"indoor_source":indoor_source,"temperature_f":wx.get("temperature"),"wind_mph":wx.get("windSpeed"),"precipitation":wx.get("precipitation"),"weather_condition":wx.get("weatherCondition")})
  try:cbb_games,cbb_ranking_seasons,cbb_ranking_failures=cbb_ranked_games(cbb_key,a.start_season,a.end_season)
  except Exception as exc:
   cbb_games=[];cbb_ranking_seasons=[];cbb_ranking_failures=[{"error":f"{type(exc).__name__}: {exc}"}];rankings_ok=False

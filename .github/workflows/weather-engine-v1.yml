@@ -82,7 +82,12 @@ jobs:
           PY
 
       - name: Build Weather Engine v1
-        run: python scripts/build_game_conditions.py
+        run: |
+          python -m unittest discover \
+            -s scripts \
+            -p 'test_build_game_conditions.py' \
+            -v
+          python scripts/build_game_conditions.py
 
       - name: Verify protected Model A files were not modified
         run: |
