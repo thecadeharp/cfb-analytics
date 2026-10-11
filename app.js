@@ -931,6 +931,61 @@ function ensureMatchupView() {
       color:var(--muted); margin-top:9px; font-size:12px;
     }
 
+    .cfb-script-simulator {
+      margin:18px 0; padding:20px; border:1px solid var(--border-dark);
+      border-radius:12px; background:var(--surface);
+    }
+    .cfb-script-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; }
+    .cfb-script-display-only {
+      flex:0 0 auto; padding:6px 9px; border:1px solid var(--border);
+      border-radius:999px; color:var(--muted); font:700 8px var(--mono);
+      letter-spacing:.7px; text-transform:uppercase;
+    }
+    .cfb-script-intro {
+      max-width:920px; margin:9px 0 16px; color:var(--muted);
+      font-size:11px; line-height:1.55;
+    }
+    .cfb-script-results {
+      display:grid; grid-template-columns:repeat(5,minmax(0,1fr));
+      border:1px solid var(--border); border-radius:10px; overflow:hidden;
+    }
+    .cfb-script-score, .cfb-script-stat { min-width:0; padding:14px; border-right:1px solid var(--border); }
+    .cfb-script-results > :last-child { border-right:0; }
+    .cfb-script-score span, .cfb-script-stat span {
+      display:block; overflow:hidden; color:var(--muted); font:700 8px var(--mono);
+      letter-spacing:.45px; text-overflow:ellipsis; text-transform:uppercase; white-space:nowrap;
+    }
+    .cfb-script-score strong, .cfb-script-stat strong {
+      display:block; margin-top:7px; font:800 20px var(--mono);
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    }
+    .cfb-script-controls {
+      display:grid; grid-template-columns:auto minmax(280px,1fr); align-items:center;
+      gap:22px; margin-top:16px;
+    }
+    .cfb-script-presets { display:flex; gap:7px; }
+    .cfb-script-presets button {
+      min-width:76px; padding:9px 12px; border:1px solid var(--border);
+      border-radius:8px; background:transparent; color:var(--text); cursor:pointer;
+      font:700 9px var(--mono); text-transform:uppercase;
+    }
+    .cfb-script-presets button:hover, .cfb-script-presets button.is-active {
+      border-color:var(--green); background:var(--green); color:#fff;
+    }
+    .cfb-script-slider { display:grid; gap:7px; }
+    .cfb-script-slider > span {
+      display:flex; justify-content:space-between; gap:16px; color:var(--muted);
+      font:700 9px var(--mono); text-transform:uppercase;
+    }
+    .cfb-script-slider > span strong { color:var(--text); font-size:12px; }
+    .cfb-script-slider input { width:100%; accent-color:var(--green); }
+    .cfb-script-slider small { color:var(--muted); font:600 8px var(--mono); }
+    .cfb-script-method {
+      display:flex; justify-content:space-between; gap:16px; margin-top:13px;
+      padding-top:12px; border-top:1px solid var(--border); color:var(--muted);
+      font-size:9px; line-height:1.5;
+    }
+
     .model-edge-banner {
       background:var(--surface); border:1px solid var(--border-dark);
       border-radius:12px; padding:18px 20px; margin-bottom:18px;
@@ -2090,6 +2145,10 @@ function ensureMatchupView() {
       .thi-stands-out-grid { grid-template-columns:1fr; }
       .thi-metric-guide-grid { grid-template-columns:1fr; }
       .thi-context-facts { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .cfb-script-results { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .cfb-script-results > :nth-child(3) { border-right:0; }
+      .cfb-script-results > :nth-child(n+4) { border-top:1px solid var(--border); }
+      .cfb-script-controls { grid-template-columns:1fr; }
       .thi-team-summary:first-child { order:1; }
       .thi-team-summary:last-child { order:2; }
       .thi-unit-matchup:nth-child(2) { order:3; }
@@ -2125,6 +2184,15 @@ function ensureMatchupView() {
       .thi-metric-scale { grid-template-columns:repeat(2,minmax(0,1fr)); }
       .thi-context-grid { grid-template-columns:1fr; }
       .thi-context-facts { grid-template-columns:1fr; }
+      .cfb-script-results { grid-template-columns:1fr 1fr; }
+      .cfb-script-results > * { border-top:1px solid var(--border); }
+      .cfb-script-results > :first-child, .cfb-script-results > :nth-child(2) { border-top:0; }
+      .cfb-script-results > :nth-child(odd) { border-right:1px solid var(--border); }
+      .cfb-script-results > :nth-child(even) { border-right:0; }
+      .cfb-script-results > :last-child { grid-column:1 / -1; border-right:0; }
+      .cfb-script-presets { display:grid; grid-template-columns:repeat(3,1fr); }
+      .cfb-script-presets button { min-width:0; }
+      .cfb-script-method { flex-direction:column; }
       .thi-context-fact { border-right:none; border-bottom:1px solid #eeeeeb; }
       .thi-context-fact:last-child { border-bottom:none; }
       .thi-team-summary:first-child,
@@ -3422,6 +3490,109 @@ function scheduleContextMarkup(game) {
   `;
 }
 
+function cfbGameScriptMarkup(game) {
+  const engine = window.THICfbGameScript;
+  const projection = game?.projection ?? {};
+  if (!engine || !hasValue(projection.home_spread) || !hasValue(projection.total)) return "";
+
+  const awayName = game?.away?.team ?? "Away";
+  const homeName = game?.home?.team ?? "Home";
+  const baseline = engine.buildBaseline({
+    total: projection.total,
+    homeSpread: projection.home_spread,
+    awayProfile: advancedMetricsData?.teams?.[awayName]?.non_garbage?.offense,
+    homeProfile: advancedMetricsData?.teams?.[homeName]?.non_garbage?.offense,
+    awayObservedRating: thiObservedRatingsData?.teams?.[awayName],
+    homeObservedRating: thiObservedRatingsData?.teams?.[homeName],
+  });
+  if (!baseline) return "";
+
+  const initial = engine.simulate(
+    baseline,
+    baseline.drives,
+    projectionsData?.meta?.win_probability_std_dev
+  );
+  const sourceText = baseline.source === "both_teams_current_sample"
+    ? "Estimated from both teams’ current non-garbage drive volume"
+    : baseline.source === "one_team_current_sample"
+      ? "Estimated from one qualifying current-season drive sample"
+      : "National drive-volume fallback; current samples unavailable";
+  window.THICfbScriptState = { baseline, game };
+
+  return `
+    <section class="cfb-script-simulator" aria-labelledby="cfb-script-title">
+      <div class="cfb-script-heading">
+        <div>
+          <div class="eyebrow">Variance Lab · user scenario</div>
+          <div class="thi-matchup-section-title" id="cfb-script-title">Game Script Simulator</div>
+        </div>
+        <span class="cfb-script-display-only">Display only</span>
+      </div>
+      <p class="cfb-script-intro">
+        Test a slower or faster possession environment while holding THI’s published scoring efficiency constant. This scenario never changes the official projection, signal, tracked play, or model record.
+      </p>
+      <div class="cfb-script-results" aria-live="polite">
+        <div class="cfb-script-score"><span>${escapeHtml(awayName)}</span><strong id="cfb-script-away-score">${formatNumber(initial.awayPoints, 1)}</strong></div>
+        <div class="cfb-script-score"><span>${escapeHtml(homeName)}</span><strong id="cfb-script-home-score">${formatNumber(initial.homePoints, 1)}</strong></div>
+        <div class="cfb-script-stat"><span>Simulated spread</span><strong id="cfb-script-spread">${escapeHtml(favoredLine(homeName, awayName, initial.homeSpread))}</strong></div>
+        <div class="cfb-script-stat"><span>Simulated total</span><strong id="cfb-script-total">${formatNumber(initial.total, 1)}</strong></div>
+        <div class="cfb-script-stat"><span>${escapeHtml(homeName)} win</span><strong id="cfb-script-win">${formatPercent(initial.homeWinProbability)}</strong></div>
+      </div>
+      <div class="cfb-script-controls">
+        <div class="cfb-script-presets" role="group" aria-label="Drive-script presets">
+          <button type="button" data-drives="${baseline.drives - 2}" onclick="setCfbGameScriptPreset(${baseline.drives - 2})">Slow</button>
+          <button type="button" class="is-active" data-drives="${baseline.drives}" onclick="setCfbGameScriptPreset(${baseline.drives})">Baseline</button>
+          <button type="button" data-drives="${baseline.drives + 2}" onclick="setCfbGameScriptPreset(${baseline.drives + 2})">Fast</button>
+        </div>
+        <label class="cfb-script-slider">
+          <span>Projected drives per team <strong id="cfb-script-drive-label">${formatNumber(baseline.drives, 1)}</strong></span>
+          <input id="cfb-script-drive-input" type="range" min="${baseline.minimumDrives}" max="${baseline.maximumDrives}" step="0.5" value="${baseline.drives}" oninput="updateCfbGameScriptSimulator(this.value)">
+          <small>${formatNumber(baseline.minimumDrives, 1)} slow · ${formatNumber(baseline.drives, 1)} THI baseline · ${formatNumber(baseline.maximumDrives, 1)} fast</small>
+        </label>
+      </div>
+      <div class="cfb-script-method">
+        <span>${escapeHtml(sourceText)}.</span>
+        <span>${escapeHtml(awayName)} ${formatNumber(baseline.awayPointsPerDrive, 2)} projected points/drive · ${escapeHtml(homeName)} ${formatNumber(baseline.homePointsPerDrive, 2)}.</span>
+      </div>
+    </section>
+  `;
+}
+
+function updateCfbGameScriptSimulator(value) {
+  const state = window.THICfbScriptState;
+  const engine = window.THICfbGameScript;
+  if (!state?.baseline || !engine) return;
+  const result = engine.simulate(
+    state.baseline,
+    value,
+    projectionsData?.meta?.win_probability_std_dev
+  );
+  if (!result) return;
+  const awayName = state.game?.away?.team ?? "Away";
+  const homeName = state.game?.home?.team ?? "Home";
+  const values = {
+    "cfb-script-away-score": formatNumber(result.awayPoints, 1),
+    "cfb-script-home-score": formatNumber(result.homePoints, 1),
+    "cfb-script-spread": favoredLine(homeName, awayName, result.homeSpread),
+    "cfb-script-total": formatNumber(result.total, 1),
+    "cfb-script-win": formatPercent(result.homeWinProbability),
+    "cfb-script-drive-label": formatNumber(result.drives, 1),
+  };
+  Object.entries(values).forEach(([id, text]) => {
+    const element = document.getElementById(id);
+    if (element) element.textContent = text;
+  });
+  document.querySelectorAll(".cfb-script-presets button").forEach(button => {
+    button.classList.toggle("is-active", Math.abs(Number(button.dataset.drives) - result.drives) < 0.01);
+  });
+}
+
+function setCfbGameScriptPreset(value) {
+  const input = document.getElementById("cfb-script-drive-input");
+  if (input) input.value = value;
+  updateCfbGameScriptSimulator(value);
+}
+
 function renderMatchup(game) {
   const container = document.getElementById("matchup-container");
   if (!container) return;
@@ -3587,6 +3758,8 @@ function renderMatchup(game) {
     ${taleOfTapeMarkup(awayName, homeName)}
 
     ${scheduleContextMarkup(game)}
+
+    ${cfbGameScriptMarkup(game)}
 
     ${marketMovementMarkup(game)}
 
