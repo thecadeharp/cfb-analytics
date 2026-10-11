@@ -77,6 +77,8 @@ jobs:
             scripts/build_operations_readiness.py \
             scripts/run_cbb_opening_night_rehearsal.py \
             scripts/refresh_cbb_markets.py \
+            scripts/build_cbb_market_contract.py \
+            scripts/build_static_cache_manifest.py \
             scripts/validation_framework.py \
             scripts/build_trends_lab.py \
             scripts/build_variance_prospective_tracker.py \
@@ -102,6 +104,7 @@ jobs:
             scripts/test_cbb_release_foundations.py \
             scripts/test_pregame_completion.py \
             scripts/test_refresh_cbb_markets.py \
+            scripts/test_cbb_market_contract.py \
             scripts/test_validation_framework.py \
             scripts/test_variance_lab.py
 
@@ -136,6 +139,8 @@ jobs:
           python scripts/build_rlm_monitor.py
           python scripts/build_prediction_archive.py
           python scripts/build_operations_readiness.py
+          python scripts/build_cbb_market_contract.py
+          python scripts/build_static_cache_manifest.py
 
       - name: Validate the coordinated release
         run: |
@@ -164,6 +169,8 @@ jobs:
           venue_audit = json.loads((root / "venue_audit.json").read_text())
           rehearsal = json.loads((root / "opening_night_rehearsal.json").read_text())
           trends = json.loads(Path("data/trends_lab.json").read_text())
+          market_contract = json.loads((root / "market_contract.json").read_text())
+          cache_manifest = json.loads((root / "cache_manifest.json").read_text())
 
           assert len(profiles["teams"]) >= 300
           assert sum(bool(team.get("logo_url")) for team in profiles["teams"]) >= 300
@@ -238,6 +245,11 @@ jobs:
           assert rehearsal["meta"]["status"] == "passed"
           assert trends["meta"]["version"] == "thi-variance-systems-lab-v2.0"
           assert trends["sports"]["cfb"]["cards"] and trends["sports"]["cbb"]["cards"]
+          assert market_contract["meta"]["version"] == "thi-cbb-market-contract-v1.0"
+          assert market_contract["meta"]["game_count"] == projections["meta"]["game_count"]
+          assert market_contract["meta"]["model_isolation"].endswith("never model features.")
+          assert cache_manifest["meta"]["version"] == "thi-static-cache-manifest-v1.0"
+          assert "data/cbb/projection_board.json" in cache_manifest["assets"]
           PY
 
       - name: Commit the coordinated CBB outputs
@@ -263,6 +275,8 @@ jobs:
             data/cbb/research/model_v02_challenger.json \
             data/cbb/game_day_readiness.json
           git add \
+            data/cbb/market_contract.json \
+            data/cbb/cache_manifest.json \
             data/cbb/operations_context.json \
             data/cbb/platform_health.json \
             data/cbb/venue_audit.json \

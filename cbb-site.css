@@ -618,6 +618,19 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
 .cbb-detail-stat strong { display: block; margin-top: 6px; font: 800 17px var(--mono); }
 .cbb-detail-section { margin-top: 20px; padding: 16px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); }
 .cbb-detail-section h3 { margin: 0 0 12px; font-size: 15px; }
+.cbb-possession-simulator { border-color: rgba(80, 200, 163, .38); background: linear-gradient(135deg, rgba(80, 200, 163, .07), var(--surface) 44%); }
+.cbb-simulator-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.cbb-simulator-heading h3 { margin: 5px 0 10px; font-size: 18px; }
+.cbb-simulator-controls { display: grid; grid-template-columns: minmax(240px,.7fr) minmax(280px,1.3fr); gap: 16px; margin-top: 16px; }
+.cbb-simulator-presets { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
+.cbb-simulator-presets button { min-height: 42px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg); color: var(--muted); font: 700 10px var(--mono); text-transform: uppercase; letter-spacing: .05em; cursor: pointer; }
+.cbb-simulator-presets button:hover,
+.cbb-simulator-presets button.is-active { border-color: var(--accent); background: rgba(80, 200, 163, .12); color: var(--text); }
+.cbb-simulator-controls label { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; color: var(--muted); font: 700 10px var(--mono); text-transform: uppercase; letter-spacing: .05em; }
+.cbb-simulator-controls label strong { color: var(--text); font-size: 12px; }
+.cbb-simulator-controls input[type="range"] { grid-column: 1 / -1; width: 100%; accent-color: var(--accent); cursor: ew-resize; }
+.cbb-simulator-results { margin-top: 14px; }
+.cbb-simulator-footnote { margin-top: 12px; color: var(--muted); font: 500 10px/1.55 var(--mono); }
 .cbb-detail-row { display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
 .cbb-detail-row:last-child { border-bottom: 0; }
 .cbb-detail-row span { color: var(--muted); }
@@ -810,6 +823,7 @@ html[data-theme="dark"] .cbb-error { background: #3a2020; border-color: #76443e;
   .cbb-section-head { align-items: flex-start; flex-direction: column; }
   .cbb-section-note { text-align: left; }
   .cbb-detail-grid { grid-template-columns: repeat(2, 1fr); }
+  .cbb-simulator-controls { grid-template-columns: 1fr; }
   .cbb-validation-status-grid { grid-template-columns: 1fr; }
   .cbb-matchup-summary,
   .cbb-advantage-grid { grid-template-columns: 1fr; }

@@ -36,8 +36,8 @@ jobs:
 
       - name: Verify market capture and neutral-site contracts
         run: |
-          python -m py_compile scripts/refresh_cbb_markets.py scripts/build_cbb_venue_audit.py scripts/build_cbb_projection_board.py scripts/build_cbb_platform_health.py scripts/run_cbb_opening_night_rehearsal.py
-          python -m unittest scripts/test_refresh_cbb_markets.py scripts/test_cbb_venue_audit.py scripts/test_cbb_venue_geocodes.py scripts/test_cbb_projection_board.py scripts/test_cbb_game_day_readiness.py scripts/test_cbb_platform_health.py scripts/test_cbb_opening_night_rehearsal.py
+          python -m py_compile scripts/refresh_cbb_markets.py scripts/build_cbb_market_contract.py scripts/build_static_cache_manifest.py scripts/build_cbb_venue_audit.py scripts/build_cbb_projection_board.py scripts/build_cbb_platform_health.py scripts/run_cbb_opening_night_rehearsal.py
+          python -m unittest scripts/test_refresh_cbb_markets.py scripts/test_cbb_market_contract.py scripts/test_cbb_venue_audit.py scripts/test_cbb_venue_geocodes.py scripts/test_cbb_projection_board.py scripts/test_cbb_game_day_readiness.py scripts/test_cbb_platform_health.py scripts/test_cbb_opening_night_rehearsal.py
 
       - name: Capture near-term consensus market
         id: market
@@ -67,6 +67,8 @@ jobs:
           python scripts/build_variance_prospective_tracker.py
           python scripts/build_commercial_readiness.py
           python scripts/build_operations_readiness.py
+          python scripts/build_cbb_market_contract.py
+          python scripts/build_static_cache_manifest.py
 
       - name: Validate refreshed market contract
         if: steps.market.outputs.changed == 'true'
@@ -79,10 +81,14 @@ jobs:
           history=json.loads(Path("data/cbb/market_snapshots.json").read_text())
           venue_audit=json.loads(Path("data/cbb/venue_audit.json").read_text())
           rehearsal=json.loads(Path("data/cbb/opening_night_rehearsal.json").read_text())
+          market_contract=json.loads(Path("data/cbb/market_contract.json").read_text())
+          cache_manifest=json.loads(Path("data/cbb/cache_manifest.json").read_text())
           assert history["meta"]["version"] == "thi-cbb-market-capture-v1.0"
           assert health["checks"]["neutral_site_home_context_zero"] is True
           assert venue_audit["meta"]["status"] == "healthy"
           assert rehearsal["meta"]["status"] == "passed"
+          assert market_contract["meta"]["version"] == "thi-cbb-market-contract-v1.0"
+          assert cache_manifest["meta"]["version"] == "thi-static-cache-manifest-v1.0"
           assert all(float((((g.get("projection") or {}).get("matchup_context") or {}).get("home_court") or {}).get("points") or 0) == 0 for g in board["games"] if g.get("neutral_site"))
           PY
 
@@ -94,6 +100,8 @@ jobs:
           git add \
             data/cbb/game_board.json \
             data/cbb/market_snapshots.json \
+            data/cbb/market_contract.json \
+            data/cbb/cache_manifest.json \
             data/cbb/projection_board.json \
             data/cbb/intelligence_suite.json \
             data/cbb/model_tracking.json \

@@ -23,10 +23,13 @@
     varianceTracker: "data/variance/prospective_tracker.json",
     rlmMonitor: "data/market/rlm_monitor.json",
     publicBacktest: "data/reports/public_backtest_scorecard.json",
-    marketSnapshots: "data/cbb/market_snapshots.json"
+    marketSnapshots: "data/cbb/market_snapshots.json",
+    marketContract: "data/cbb/market_contract.json"
   };
+  const CACHE_MANIFEST_PATH = "data/cbb/cache_manifest.json";
   const PLAYER_PATH = "data/cbb/player_ratings.json";
-  const CORE_DATA_KEYS = new Set(["profiles", "foundation", "model", "priors", "homeCourt", "history", "projectionBoard", "tracking", "bracketology", "readiness", "health", "trends", "varianceTracker", "publicBacktest", "marketSnapshots"]);
+  const CORE_DATA_KEYS = new Set(["profiles", "foundation", "model", "priors", "homeCourt", "history", "projectionBoard", "tracking", "bracketology", "readiness", "health", "trends", "varianceTracker", "publicBacktest", "marketSnapshots", "marketContract"]);
+  const memoryCache = new Map();
   const DEFERRED_VIEW_KEYS = {
     "cbb-projections": ["intelligence", "matchups", "operations"],
     "cbb-team-data": ["intelligence"],
@@ -54,6 +57,7 @@
     playerLoading: null,
     playerBandCache: {},
     deferredLoads: {},
+    cacheManifest: { meta: {}, assets: {} },
     projectionQuery: "",
     projectionConference: "all",
     projectionSignal: "all",
@@ -181,17 +185,45 @@
     window.thiSetSport = setSport;
   }
 
+  async function loadCacheManifest() {
+    try {
+      const response = await fetch(`${CACHE_MANIFEST_PATH}?manifest=1`, { cache: "no-store" });
+      if (response.ok) state.cacheManifest = await response.json();
+    } catch (_error) {
+      state.cacheManifest = { meta: {}, assets: {} };
+    }
+  }
+
   async function fetchJson(path) {
-    const response = await fetch(path, { cache: "no-store" });
+    const asset = state.cacheManifest?.assets?.[path] || {};
+    const version = asset.version || "unversioned";
+    const ttl = Number(asset.ttl_seconds || 0);
+    const key = `thi-static:${path}:${version}`;
+    const now = Date.now();
+    const inMemory = memoryCache.get(key);
+    if (inMemory && (!ttl || now - inMemory.savedAt < ttl * 1000)) return inMemory.value;
+    try {
+      const stored = JSON.parse(sessionStorage.getItem(key) || "null");
+      if (stored && (!ttl || now - Number(stored.savedAt || 0) < ttl * 1000)) {
+        memoryCache.set(key, stored);
+        return stored.value;
+      }
+    } catch (_error) {}
+    const separator = path.includes("?") ? "&" : "?";
+    const response = await fetch(`${path}${separator}v=${encodeURIComponent(version)}`, { cache: version === "unversioned" ? "no-store" : "force-cache" });
     if (!response.ok) throw new Error(`${path} returned ${response.status}`);
-    return response.json();
+    const value = await response.json();
+    const stored = { savedAt: now, value };
+    memoryCache.set(key, stored);
+    try { sessionStorage.setItem(key, JSON.stringify(stored)); } catch (_error) {}
+    return value;
   }
 
   async function loadData() {
     if (state.loaded) return state.data;
     if (state.loading) return state.loading;
-    state.loading = Promise.all(Object.entries(PATHS).filter(([key]) => CORE_DATA_KEYS.has(key)).map(async ([key, path]) => {
-      if (["projectionBoard", "tracking", "bracketology", "playStyle", "matchups", "intelligence", "challenger", "readiness", "operations", "health", "trends", "varianceTracker", "rlmMonitor", "publicBacktest", "marketSnapshots"].includes(key)) {
+    state.loading = loadCacheManifest().then(() => Promise.all(Object.entries(PATHS).filter(([key]) => CORE_DATA_KEYS.has(key)).map(async ([key, path]) => {
+      if (["projectionBoard", "tracking", "bracketology", "playStyle", "matchups", "intelligence", "challenger", "readiness", "operations", "health", "trends", "varianceTracker", "rlmMonitor", "publicBacktest", "marketSnapshots", "marketContract"].includes(key)) {
         try { return [key, await fetchJson(path)]; }
         catch (_error) {
           if (key === "projectionBoard") return [key, { meta: {}, games: [] }];
@@ -203,11 +235,12 @@
           if (key === "readiness") return [key, { meta: {}, checks: {}, coverage: {}, automation: {}, exceptions: [] }];
           if (key === "publicBacktest") return [key, { meta: {}, sports: {} }];
           if (key === "marketSnapshots") return [key, { meta: {}, games: {} }];
+          if (key === "marketContract") return [key, { meta: {}, games: {} }];
           return [key, { meta: {}, games: [] }];
         }
       }
       return [key, await fetchJson(path)];
-    }))
+    })))
       .then(entries => {
         state.data = { ...Object.fromEntries(Object.keys(PATHS).map(key => [key, {}])), ...Object.fromEntries(entries) };
         state.loaded = true;
@@ -719,37 +752,115 @@
   }
 
   function cbbMarketMovement(game) {
-    const stored = state.data?.marketSnapshots?.games?.[String(game.game_id)] || {};
-    const snapshots = Array.isArray(stored.snapshots) ? stored.snapshots : [];
-    const market = game.market || {};
-    const firstSpread = stored.first_captured_home_spread ?? stored.open_home_spread ?? market.opening_home_spread;
-    const currentSpread = stored.current_home_spread ?? market.consensus_home_spread;
-    const firstTotal = stored.first_captured_total ?? stored.open_total ?? market.opening_total;
-    const currentTotal = stored.current_total ?? market.consensus_total;
-    const spreadMove = Number.isFinite(Number(firstSpread)) && Number.isFinite(Number(currentSpread)) ? Number(currentSpread) - Number(firstSpread) : null;
+    const contract = state.data?.marketContract?.games?.[String(game.game_id)] || {};
+    const snapshots = Array.isArray(contract.history) ? contract.history : [];
+    const market = contract.market || {};
+    const opening = market.opening || {};
+    const current = market.current || {};
+    const movement = market.movement || {};
+    const firstSpread = opening.home_spread;
+    const currentSpread = current.home_spread;
+    const firstTotal = opening.total;
+    const currentTotal = current.total;
+    const spreadMove = movement.home_spread_points;
     const referenceMoneyline = market.reference_moneyline || {};
     const marketBooks = Array.isArray(market.book_lines) ? market.book_lines : [];
     const lineFor = value => {
-      if (!Number.isFinite(Number(value))) return "—";
+      if (value === null || value === undefined || value === "" || !Number.isFinite(Number(value))) return "—";
+      if (Math.abs(Number(value)) < .01) return "Pick'em";
       const home = Number(value) <= 0;
       return `${home ? game.home?.team : game.away?.team} ${number(-Math.abs(Number(value)),1,true)}`;
     };
-    const rows = snapshots.slice(-24).reverse().map((row,index) => `<tr><td>${index === 0 ? "Latest" : index === snapshots.slice(-24).length - 1 ? "First captured" : "Update"}</td><td>${escapeHtml(formatTimestamp(row.captured_at || row.captured_at_utc))}</td><td class="cbb-number">${lineFor(row.home_spread)}</td><td class="cbb-number">${Number.isFinite(Number(row.total)) ? number(row.total,1) : "—"}</td><td>${escapeHtml(row.bookmaker || row.source || "Consensus")}</td></tr>`).join("");
+    const pressure = movement.spread_direction === "unavailable" ? "Awaiting market" : movement.spread_direction === "unchanged" ? "No observed move" : `${humanize(movement.spread_direction)}${movement.toward_thi === true ? " · toward THI" : movement.toward_thi === false ? " · away from THI" : ""}`;
+    const rows = snapshots.slice(-24).reverse().map((row,index) => `<tr><td>${index === 0 ? "Latest" : index === snapshots.slice(-24).length - 1 ? "First captured" : "Update"}</td><td>${escapeHtml(formatTimestamp(row.captured_at_utc))}</td><td class="cbb-number">${lineFor(row.home_spread)}</td><td class="cbb-number">${row.total !== null && row.total !== undefined && Number.isFinite(Number(row.total)) ? number(row.total,1) : "—"}</td><td class="cbb-number">${integer(row.book_count)}</td></tr>`).join("");
     return `<section class="cbb-detail-section"><h3>Odds &amp; line movement</h3>
-      <div class="cbb-model-sub">Timestamped market observations for this game. Movement remains separate from the projection model.</div>
+      <div class="cbb-model-sub">Standardized, timestamped market observations. These prices remain separate from the projection model.</div>
       <div class="cbb-detail-grid">
         ${detailStat("First captured spread", lineFor(firstSpread))}
         ${detailStat("Current spread", lineFor(currentSpread))}
+        ${detailStat("THI spread", lineFor(contract.model?.thi_home_spread))}
+        ${detailStat("Observed pressure", pressure)}
         ${detailStat("Home-side move", spreadMove == null ? "—" : `${number(spreadMove,1,true)} pts`)}
-        ${detailStat("First captured total", Number.isFinite(Number(firstTotal)) ? number(firstTotal,1) : "—")}
-        ${detailStat("Current total", Number.isFinite(Number(currentTotal)) ? number(currentTotal,1) : "—")}
+        ${detailStat("First captured total", firstTotal !== null && firstTotal !== undefined && Number.isFinite(Number(firstTotal)) ? number(firstTotal,1) : "—")}
+        ${detailStat("Current total", currentTotal !== null && currentTotal !== undefined && Number.isFinite(Number(currentTotal)) ? number(currentTotal,1) : "—")}
         ${detailStat("Captured updates", integer(snapshots.length))}
         ${detailStat("Reference moneyline", referenceMoneyline.provider ? `${referenceMoneyline.provider} · ${game.away?.team} ${number(referenceMoneyline.away_price,0,true)} / ${game.home?.team} ${number(referenceMoneyline.home_price,0,true)}` : "—")}
       </div>
       ${cbbOddsGrid(game, marketBooks)}
-      ${rows ? `<div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Capture</th><th>Time</th><th>Spread</th><th>Total</th><th>Source</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="cbb-coverage-note">No market chronology is available yet. This panel will populate automatically as books release and move CBB lines.</div>`}
+      ${rows ? `<div class="cbb-panel cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Capture</th><th>Time</th><th>Spread</th><th>Total</th><th>Books</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="cbb-coverage-note">No market chronology is available yet. This panel will populate automatically as books release and move CBB lines.</div>`}
       <div class="cbb-model-sub">“First captured” means THI's first recorded observation; it is not presented as an official sportsbook opener.</div>
     </section>`;
+  }
+
+  function normalCdf(value) {
+    const sign = value < 0 ? -1 : 1;
+    const x = Math.abs(value) / Math.sqrt(2);
+    const t = 1 / (1 + .3275911 * x);
+    const erf = sign * (1 - (((((1.061405429*t - 1.453152027)*t) + 1.421413741)*t - .284496736)*t + .254829592)*t*Math.exp(-x*x));
+    return .5 * (1 + erf);
+  }
+
+  function possessionSimulatorHtml(game) {
+    const projection = game.projection || {};
+    const baseline = Number(projection.projected_possessions);
+    if (!Number.isFinite(baseline) || baseline <= 0) return "";
+    const low = Math.max(40, baseline - 5), high = baseline + 5;
+    const simulatorStat = (label, attribute, value) => `<div class="cbb-detail-stat"><span>${escapeHtml(label)}</span><strong ${attribute}>${escapeHtml(value)}</strong></div>`;
+    return `<section class="cbb-detail-section cbb-possession-simulator" data-cbb-possession-simulator>
+      <div class="cbb-simulator-heading"><div><span class="cbb-kicker">Variance Lab · user scenario</span><h3>Possession Script Simulator</h3></div><span class="cbb-context-pending">Display only</span></div>
+      <div class="cbb-model-sub">Stress-test the same projected points per possession at a slower or faster game script. This does not change Model A, signals, tracked plays or the official projection.</div>
+      <div class="cbb-simulator-controls">
+        <div class="cbb-simulator-presets" role="group" aria-label="Possession scenarios">
+          <button type="button" data-possession-preset="${low.toFixed(1)}">Slow</button>
+          <button type="button" class="is-active" data-possession-preset="${baseline.toFixed(1)}">THI baseline</button>
+          <button type="button" data-possession-preset="${high.toFixed(1)}">Fast</button>
+        </div>
+        <label><span>Selected pace</span><strong data-possession-value>${baseline.toFixed(1)} possessions</strong><input type="range" min="${low.toFixed(1)}" max="${high.toFixed(1)}" step="0.5" value="${baseline.toFixed(1)}" data-possession-range aria-label="Selected possessions"></label>
+      </div>
+      <div class="cbb-detail-grid cbb-simulator-results">
+        ${simulatorStat("Scenario score", "data-scenario-score", `${number(projection.away_points,1)}–${number(projection.home_points,1)}`)}
+        ${simulatorStat("Scenario spread", "data-scenario-spread", "—")}
+        ${simulatorStat("Scenario total", "data-scenario-total", number(projection.total,1))}
+        ${simulatorStat("Home win probability", "data-scenario-win", pct(projection.home_win_probability))}
+        ${simulatorStat("Total vs. official", "data-scenario-total-delta", "0.0 pts")}
+        ${simulatorStat("Spread vs. official", "data-scenario-spread-delta", "0.0 pts")}
+      </div>
+      <div class="cbb-simulator-footnote">Scenario math holds each team’s calibrated matchup PPP constant and changes possessions only. It is a sensitivity test, not a new forecast.</div>
+    </section>`;
+  }
+
+  function wirePossessionSimulator(panel, game) {
+    const root = panel.querySelector("[data-cbb-possession-simulator]");
+    const range = root?.querySelector("[data-possession-range]");
+    if (!root || !range) return;
+    const projection = game.projection || {};
+    const baseline = Number(projection.projected_possessions);
+    const awayPpp = Number(projection.away_points) / baseline;
+    const homePpp = Number(projection.home_points) / baseline;
+    const residualSd = Math.max(1, Number(state.data?.model?.models?.margin_residual_sd) || 12.894042);
+    const deltaText = value => `${number(Math.abs(value) < .05 ? 0 : value,1,true)} pts`;
+    const render = value => {
+      const possessions = Number(value);
+      const awayPoints = awayPpp * possessions;
+      const homePoints = homePpp * possessions;
+      const margin = homePoints - awayPoints;
+      const total = homePoints + awayPoints;
+      const side = margin >= 0 ? game.home?.team : game.away?.team;
+      root.querySelector("[data-possession-value]").textContent = `${possessions.toFixed(1)} possessions`;
+      root.querySelector("[data-scenario-score]").textContent = `${awayPoints.toFixed(1)}–${homePoints.toFixed(1)}`;
+      root.querySelector("[data-scenario-spread]").textContent = `${side} -${Math.abs(margin).toFixed(1)}`;
+      root.querySelector("[data-scenario-total]").textContent = total.toFixed(1);
+      root.querySelector("[data-scenario-win]").textContent = `${(100 * normalCdf(margin / residualSd)).toFixed(1)}%`;
+      root.querySelector("[data-scenario-total-delta]").textContent = deltaText(total - Number(projection.total));
+      root.querySelector("[data-scenario-spread-delta]").textContent = deltaText(margin - Number(projection.home_margin));
+      root.querySelectorAll("[data-possession-preset]").forEach(button => button.classList.toggle("is-active", Math.abs(Number(button.dataset.possessionPreset) - possessions) < .01));
+    };
+    range.addEventListener("input", event => render(event.target.value));
+    root.querySelectorAll("[data-possession-preset]").forEach(button => button.addEventListener("click", () => {
+      range.value = button.dataset.possessionPreset;
+      render(range.value);
+    }));
+    render(baseline);
   }
 
   function openGameDetail(gameId) {
@@ -843,6 +954,7 @@
           <div class="cbb-model-sub">Transition rate uses explicit CBBD play-type labels only. THI does not infer transition from the period clock when shot-clock context is absent.</div>
         ` : `<div class="cbb-coverage-note">Matchup-engine data will appear after the next coordinated CBB refresh.</div>`}
       </section>
+      ${possessionSimulatorHtml(game)}
       <section class="cbb-detail-section"><h3>Largest margin drivers</h3>
         ${game.neutral_site ? '<div class="cbb-neutral-audit">Neutral-site audit passed · 0.00 home-court points · no home-context drivers</div>' : ""}
         <div class="cbb-model-sub">Point contributions explain this projection relative to the model baseline. Positive values favor ${escapeHtml(game.home?.team)}; negative values favor ${escapeHtml(game.away?.team)}.</div>
@@ -865,6 +977,7 @@
     detail.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
     panel.scrollTop = 0;
+    wirePossessionSimulator(panel, game);
     panel.querySelector("[data-cbb-track-play]")?.addEventListener("click", () => {
       const homeSpread=Number(game.market?.consensus_home_spread);
       const edge=Number(projection.spread_edge);
