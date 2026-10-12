@@ -22,7 +22,7 @@ const DATA_URLS = {
   scheduleContext: "./data/schedule_context.json",
   thiObservedRatings: "./data/thi_observed_ratings.json",
   thiPowerRatings: "./data/thi_power_ratings.json",
-  cfbPublicRankings: "./data/cfb_public_rankings.json",
+  cfbThiIndex: "./data/cfb_thi_index.json",
   rosterNotes: "./data/roster_notes.json",
   teamIntelligence: "./data/team_intelligence.json",
   marketHistory: "./data/market_history.json",
@@ -47,7 +47,7 @@ let teamMarketPerformanceData = null;
 let scheduleContextData = null;
 let thiObservedRatingsData = null;
 let thiPowerRatingsData = null;
-let cfbPublicRankingsData = null;
+let cfbThiIndexData = null;
 let rosterNotesData = null;
 let teamIntelligenceData = null;
 let marketHistoryData = null;
@@ -320,8 +320,8 @@ function powerRank(team) {
   return rank ? `#${rank}` : "—";
 }
 
-function cfbPublicRank(teamName) {
-  const rank = Number(window.THICfbPublicRankByTeam?.get(String(teamName)));
+function cfbThiRank(teamName) {
+  const rank = Number(window.THICfbIndexRankByTeam?.get(String(teamName)));
   return Number.isFinite(rank) && rank > 0 ? rank : null;
 }
 
@@ -2292,7 +2292,7 @@ async function init() {
       scheduleContextData,
       thiObservedRatingsData,
       thiPowerRatingsData,
-      cfbPublicRankingsData,
+      cfbThiIndexData,
       rosterNotesData,
       teamIntelligenceData,
       marketHistoryData
@@ -2314,7 +2314,7 @@ async function init() {
       loadJson(DATA_URLS.scheduleContext).catch(() => null),
       loadJson(DATA_URLS.thiObservedRatings).catch(() => null),
       loadJson(DATA_URLS.thiPowerRatings).catch(() => null),
-      loadJson(DATA_URLS.cfbPublicRankings).catch(() => null),
+      loadJson(DATA_URLS.cfbThiIndex).catch(() => null),
       loadJson(DATA_URLS.rosterNotes).catch(() => null),
       loadJson(DATA_URLS.teamIntelligence).catch(() => null),
       loadJson(DATA_URLS.marketHistory).catch(() => ({ games: {} })),
@@ -2325,8 +2325,8 @@ async function init() {
     seasonProjections = projectionsData?.season_projections ?? {};
     window.THIProjectionsPayload = projectionsData;
     window.THIProjectionGames = projections;
-    window.THICfbPublicRankByTeam = new Map(
-      (cfbPublicRankingsData?.teams ?? []).map(row => [row.team, Number(row.rank)])
+    window.THICfbIndexRankByTeam = new Map(
+      (cfbThiIndexData?.teams ?? []).map(row => [row.team, Number(row.rank)])
     );
 
     updateHeader();
@@ -2516,8 +2516,8 @@ function projectionGamesForCurrentView() {
         if (bWatch !== aWatch) return bWatch - aWatch;
       }
       if (currentProjectionSort === "top25") {
-        const aRank = Math.min(cfbPublicRank(a?.home?.team) || 999, cfbPublicRank(a?.away?.team) || 999);
-        const bRank = Math.min(cfbPublicRank(b?.home?.team) || 999, cfbPublicRank(b?.away?.team) || 999);
+        const aRank = Math.min(cfbThiRank(a?.home?.team) || 999, cfbThiRank(a?.away?.team) || 999);
+        const bRank = Math.min(cfbThiRank(b?.home?.team) || 999, cfbThiRank(b?.away?.team) || 999);
         const aTop25 = aRank <= 25 ? 1 : 0;
         const bTop25 = bRank <= 25 ? 1 : 0;
         if (bTop25 !== aTop25) return bTop25 - aTop25;
@@ -2599,8 +2599,8 @@ function renderProjectionRow(game) {
   const homeName = game?.home?.team ?? "Unknown";
   const awayName = game?.away?.team ?? "Unknown";
 
-  const homeRank = cfbPublicRank(homeName);
-  const awayRank = cfbPublicRank(awayName);
+  const homeRank = cfbThiRank(homeName);
+  const awayRank = cfbThiRank(awayName);
 
   const modelSpread = game?.projection?.home_spread;
   const modelTotal = game?.projection?.total;
@@ -2640,7 +2640,7 @@ function renderProjectionRow(game) {
           >
             ${escapeHtml(awayName)}
           </span>
-          <span class="team-meta">${awayRank && awayRank <= 25 ? `AP #${awayRank}` : ""}</span>
+          <span class="team-meta">${awayRank && awayRank <= 25 ? `THI #${awayRank}` : ""}</span>
         </div>
 
         <div class="team-line">
@@ -2651,7 +2651,7 @@ function renderProjectionRow(game) {
           >
             ${escapeHtml(homeName)}
           </span>
-          <span class="team-meta">${homeRank && homeRank <= 25 ? `AP #${homeRank}` : ""}</span>
+          <span class="team-meta">${homeRank && homeRank <= 25 ? `THI #${homeRank}` : ""}</span>
         </div>
 
         <div class="team-meta" style="margin-top:5px;">

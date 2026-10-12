@@ -1,7 +1,7 @@
 /* THI's independent research surface. Reads the existing display-only ratings. */
 (() => {
   let search = "";
-  let sort = "public_rank";
+  let sort = "index_rank";
   let sortDirection = "asc";
   let conferenceFilter = "ALL";
   const RATING_CONFERENCE_GROUPS = {
@@ -141,10 +141,10 @@
   view.innerHTML = `
     <div class="eyebrow">Calculated by The Hammer Index</div>
     <h1 class="page-title">THI Ratings</h1>
-    <p class="page-subtitle thi-hub-intro">THI predictive power, current form, schedule strength and team-specific home advantage, shown beside the current AP Top 25 for sourced public context.</p>
+    <p class="page-subtitle thi-hub-intro">THI predictive power, current form, schedule strength and team-specific home advantage, shown beside the independent THI Index and its underlying components.</p>
     <div class="thi-ratings-difference" aria-label="Difference between Team Data and THI Ratings">
       <div><strong>Team Data</strong><span>Observed efficiency, schedule and resume context, market performance, and team dossiers.</span></div>
-      <div><strong>Public ranking</strong><span>The current AP Top 25 supplies ranking badges and board sorting. It is sourced context, not a THI model output.</span></div>
+      <div><strong>THI Index</strong><span>THI’s results-first ranking combines résumé quality, opponent-adjusted results, predictive strength and observed efficiency.</span></div>
       <p>THI Power remains a separate research lens. Model A projections remain separately frozen.</p>
     </div>
     <div id="thi-ratings-container" aria-live="polite"></div>`;
@@ -237,7 +237,7 @@
   }
 
   function ratingTimestamp() {
-    const raw = cfbPublicRankingsData?.meta?.source_updated_at;
+    const raw = cfbThiIndexData?.meta?.generated_at;
     if (!raw) return "Timestamp unavailable";
     const parsed = new Date(raw);
     return Number.isNaN(parsed.getTime()) ? String(raw) : new Intl.DateTimeFormat("en-US", { dateStyle:"medium", timeStyle:"short" }).format(parsed);
@@ -266,12 +266,12 @@
     const conferences = conferenceStrengthRows().slice(0,6);
     const lens = (label, title, copy) => `<article class="thi-decomposition-lens"><span>${escapeHtml(label)}</span><strong>${escapeHtml(title)}</strong><p>${escapeHtml(copy)}</p></article>`;
     return `<section class="thi-decomposition" aria-label="THI rating decomposition">
-      <div class="thi-decomposition-head"><div><div class="eyebrow">THI Rating Decomposition</div><h2>Five lenses, one transparent rating page</h2></div><div class="thi-decomposition-stamp">AP Week ${escapeHtml(cfbPublicRankingsData?.meta?.week ?? "—")}<br>Updated ${escapeHtml(ratingTimestamp())}</div></div>
+      <div class="thi-decomposition-head"><div><div class="eyebrow">THI Rating Decomposition</div><h2>Five lenses, one transparent rating page</h2></div><div class="thi-decomposition-stamp">THI Index · Week ${escapeHtml(cfbThiIndexData?.meta?.through_week ?? "—")}<br>Updated ${escapeHtml(ratingTimestamp())}</div></div>
       <div class="thi-decomposition-lenses">
-        ${lens("Poll context", "Current AP Top 25", "A sourced public ranking used for badges and sorting; it is never a model feature.")}
+        ${lens("THI Index", "Independent results-first rank", "Résumé quality, opponent-adjusted results, predictive strength and observed efficiency; polls and markets are excluded.")}
         ${lens("Predictive", "Model A power rating", "The production rating in CFB Metrics that currently powers published game projections.")}
         ${lens("Recent form", "Performance contribution", "Current-season opponent-adjusted performance within the research rating; compare it with Overall to spot disagreement.")}
-        ${lens("Schedule", "SOS + quality record", "External schedule rank plus the team's completed record against the current AP top 25.")}
+        ${lens("Schedule", "SOS + quality record", "External schedule rank plus the team's completed record against the current THI top 25.")}
         ${lens("Home advantage", "Team-specific points", "The production home edge used by Model A; neutral-site games receive zero.")}
       </div>
       <div class="thi-conference-strength"><strong>Conference strength · neutral-field team benchmark</strong>${conferences.map(row => `<span>${escapeHtml(row.conference)} <b>${formatSigned(row.robust,1)}</b> robust · ${formatSigned(row.win50,1)} WIN50</span>`).join("")}</div>
@@ -336,15 +336,15 @@
     if (!target) return;
     const query = search.trim().toLocaleLowerCase();
     const observed = thiObservedRatingsData?.teams ?? {};
-    const publicRankByTeam = new Map((cfbPublicRankingsData?.teams ?? []).map(row => [row.team, row]));
-    const topRanks = new Set((cfbPublicRankingsData?.teams ?? []).map(row => row.team));
+    const indexRankByTeam = new Map((cfbThiIndexData?.teams ?? []).map(row => [row.team, row]));
+    const topRanks = new Set((cfbThiIndexData?.teams ?? []).filter(row => Number(row.rank) <= 25).map(row => row.team));
     const sourceData = (thiPowerRatingsData?.teams ?? []).map(power => {
       const profile = observed[power.team] ?? {};
       const intelligence = teamIntelligenceData?.teams?.[power.team]?.splits?.[gameTypeSplit] ?? {};
       const sosRank = Number(externalRatingsData?.teams?.[power.team]?.sos_rank);
       const hfa = Number(hfaData?.teams?.[power.team] ?? hfaData?.meta?.default_hfa);
       return {
-        power, profile, intelligence, publicRank: publicRankByTeam.get(power.team), team: power.team,
+        power, profile, intelligence, indexRank: indexRankByTeam.get(power.team), team: power.team,
         conference: profile.conference || teams[power.team]?.conference || "FBS Independents",
         predictive: modelARating(power.team),
         sosRank: Number.isFinite(sosRank) ? sosRank : null,
@@ -356,7 +356,11 @@
     data.sort((a, b) => {
       const value = row => {
         if (sort === "team") return row.team;
-        if (sort === "public_rank") return Number(row.publicRank?.rank);
+        if (sort === "index_rank") return Number(row.indexRank?.rank);
+        if (sort === "index_score") return Number(row.indexRank?.index_score);
+        if (sort === "resume_rank") return Number(row.indexRank?.components?.resume?.rank);
+        if (sort === "results_rank") return Number(row.indexRank?.components?.opponent_adjusted_results?.rank);
+        if (sort === "observed_rank") return Number(row.indexRank?.components?.observed_efficiency?.rank);
         if (sort === "power_rank") return Number(row.power.rank);
         if (sort === "predictive") return Number(row.predictive);
         if (sort === "recent") return Number(row.power.performance_contribution);
@@ -392,20 +396,20 @@
     const priorRanks = priorRankMap();
 
     target.innerHTML = data.length ? `<div class="thi-hub-table-wrap"><table class="thi-hub-table">
-      <thead><tr>${sortHeader("public_rank", "AP Rank", "asc")}${sortHeader("team", "Team", "asc")}${sortHeader("rating", "Power")}${sortHeader("predictive", "Predictive")}${sortHeader("recent", "Recent Form")}${sortHeader("performance_only_weekly_change", "Weekly Δ")}${sortHeader("sos", "SOS", "asc")}<th>vs AP Top 25</th>${sortHeader("hfa", "Home Edge")}</tr></thead>
+      <thead><tr>${sortHeader("index_rank", "THI Rank", "asc")}${sortHeader("team", "Team", "asc")}${sortHeader("index_score", "Index")}${sortHeader("resume_rank", "Résumé", "asc")}${sortHeader("results_rank", "Adj Results", "asc")}${sortHeader("predictive", "Predictive")}${sortHeader("observed_rank", "Observed", "asc")}<th>vs THI Top 25</th>${sortHeader("hfa", "Home Edge")}</tr></thead>
       <tbody>${data.map(row => {
         const { power, profile } = row;
         const rating = profile.ratings ?? {};
         return `<tr>
-          <td data-label="AP Rank"><span class="thi-hub-number">${row.publicRank?.rank ? `#${formatNumber(row.publicRank.rank, 0)}` : "—"}</span></td>
+          <td data-label="THI Rank"><span class="thi-hub-number">${row.indexRank?.rank ? `#${formatNumber(row.indexRank.rank, 0)}` : "—"}</span></td>
           <td data-label="Team"><span class="thi-hub-team-wrap">${teamLogoMarkup(row.team, "projection")}
               <button type="button" class="thi-hub-team" data-thi-team="${escapeHtml(row.team)}">${escapeHtml(row.team)}</button></span></td>
-          ${metricCell("Overall", formatAxisNumber(power.rating, 2), power.rating, allValues("rating"))}
+          <td data-label="Index"><span class="thi-hub-number">${formatAxisNumber(row.indexRank?.index_score, 0)}</span></td>
+          <td data-label="Résumé"><span class="thi-hub-rank">${row.indexRank?.components?.resume?.rank ? `#${row.indexRank.components.resume.rank}` : "—"}</span></td>
+          <td data-label="Adj Results"><span class="thi-hub-rank">${row.indexRank?.components?.opponent_adjusted_results?.rank ? `#${row.indexRank.components.opponent_adjusted_results.rank}` : "—"}</span></td>
           ${metricCell("Predictive", formatAxisNumber(row.predictive, 3), row.predictive, allValues("predictive"))}
-          ${metricCell("Recent Form", formatAxisNumber(power.performance_contribution, 2), power.performance_contribution, allValues("recent"))}
-          ${metricCell("Weekly Δ", formatAxisNumber(power.performance_only_weekly_change, 2), power.performance_only_weekly_change, allValues("performance_only_weekly_change"))}
-          <td data-label="SOS"><span class="thi-hub-rank">${Number.isFinite(row.sosRank) ? `#${row.sosRank}` : "—"}</span></td>
-          <td data-label="vs AP Top 25"><span class="thi-hub-number">${escapeHtml(row.qualityRecord)}</span></td>
+          <td data-label="Observed"><span class="thi-hub-rank">${row.indexRank?.components?.observed_efficiency?.rank ? `#${row.indexRank.components.observed_efficiency.rank}` : "—"}</span></td>
+          <td data-label="vs THI Top 25"><span class="thi-hub-number">${escapeHtml(row.qualityRecord)}</span></td>
           ${metricCell("Home Edge", formatAxisNumber(row.hfa, 1), row.hfa, allValues("hfa"), "context")}
         </tr>`;
       }).join("")}</tbody></table></div>` :
@@ -449,7 +453,7 @@
     const container = document.getElementById("thi-ratings-container");
     const meta = thiObservedRatingsData?.meta;
     const powerMeta = thiPowerRatingsData?.meta;
-    if (!meta || !thiObservedRatingsData?.teams || !powerMeta || !Array.isArray(thiPowerRatingsData?.teams) || !Array.isArray(cfbPublicRankingsData?.teams)) {
+    if (!meta || !thiObservedRatingsData?.teams || !powerMeta || !Array.isArray(thiPowerRatingsData?.teams) || !Array.isArray(cfbThiIndexData?.teams)) {
       container.innerHTML = `<div class="empty-state">THI power and observed ratings are awaiting their next matching refresh.</div>`;
       return;
     }
@@ -474,10 +478,10 @@
         </div>
         <span class="conference-filter-count">${escapeHtml(thiPowerRatingsData.teams.length)} teams</span>
       </div>
-      <p class="thi-hub-note">AP Rank is the sourced Week ${escapeHtml(cfbPublicRankingsData?.meta?.week ?? "—")} poll and is used only for public ranking context. Power is the separate experimental THI blended rating. Predictive feeds Model A; the AP poll does not alter projections.</p>
+      <p class="thi-hub-note">THI Rank is an independent display ranking through Week ${escapeHtml(cfbThiIndexData?.meta?.through_week ?? "—")}. It excludes polls, betting markets and roster inputs. Model A remains separate and unchanged.</p>
       <div id="thi-ratings-rows"></div>
       <details class="thi-hub-method"><summary>How to read these ratings</summary>
-        <p>AP Rank is sourced public context for badges, sorting and quality-record splits. It is not a THI calculation and is never supplied to Model A.</p>
+        <p>THI Rank blends résumé quality (35%), opponent-adjusted capped scoring margin (25%), Model A predictive strength (25%) and observed efficiency (15%). A head-to-head result breaks a near tie when blend scores are within one point. Polls and betting markets are excluded, and the Index is never supplied back to Model A.</p>
         <p>Power Rating is a separate research scoring-margin scale that combines roster foundation, completed-game result Elo, and opponent-adjusted rate performance. It does not change any projection.</p>
         <p>${escapeHtml(meta.methodology?.description ?? "Observed ratings describe current on-field performance.")}</p>
         <p>Offense and defense use a scoring-scale index. Pace is indexed to the FBS average of 1.00. Observed Rank is the old net observed rank, retained for comparison.</p>

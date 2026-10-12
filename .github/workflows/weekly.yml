@@ -51,11 +51,6 @@ jobs:
       - name: Enrich confirmed kickoff, broadcast and venue metadata
         run: python scripts/enrich_cfb_schedule.py
 
-      - name: Refresh sourced AP Top 25 context
-        run: |
-          python -m unittest discover -s scripts -p 'test_build_cfb_public_rankings.py' -v
-          python scripts/build_cfb_public_rankings.py
-
       - name: Build display-only THI season outlook
         run: |
           sha256sum \
@@ -91,7 +86,6 @@ jobs:
           git add data/schedule.json
           git add data/odds.json
           git add data/projections.json
-          git add data/cfb_public_rankings.json
           git add data/thi_season_outlook.json
 
           if git diff --staged --quiet; then

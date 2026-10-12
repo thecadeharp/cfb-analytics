@@ -1,0 +1,217 @@
+#!/usr/bin/env python3
+"""Build an independent, results-first THI CFB Index.
+
+The index deliberately excludes polls, betting markets and roster/recruiting data.
+It is a public ranking layer; it does not feed Model A projections.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+from datetime import datetime, timezone
+from functools import cmp_to_key
+from pathlib import Path
+
+
+MARGIN_CAP = 28.0
+HOME_EDGE = 2.5
+SHRINKAGE_GAMES = 2.5
+WEIGHTS = {
+    "resume": 0.35,
+    "opponent_adjusted_results": 0.25,
+    "predictive": 0.25,
+    "observed_efficiency": 0.15,
+}
+
+
+def percentile_map(values: dict[str, float]) -> dict[str, float]:
+    ordered = sorted(values.items(), key=lambda item: (item[1], item[0]))
+    count = len(ordered)
+    if count <= 1:
+        return {team: 50.0 for team, _ in ordered}
+    return {team: round(100.0 * index / (count - 1), 3) for index, (team, _) in enumerate(ordered)}
+
+
+def completed_games(schedule: dict, teams: set[str], through_week: int) -> list[dict]:
+    return [
+        game for game in schedule.get("games", [])
+        if game.get("status") == "completed"
+        and int(game.get("week") or 0) <= through_week
+        and game.get("home_team") in teams
+        and game.get("away_team") in teams
+        and game.get("home_points") is not None
+        and game.get("away_points") is not None
+    ]
+
+
+def adjusted_home_margin(game: dict) -> float:
+    margin = max(-MARGIN_CAP, min(MARGIN_CAP, float(game["home_points"]) - float(game["away_points"])))
+    return margin if game.get("neutral_site") else margin - HOME_EDGE
+
+
+def solve_srs(team_names: list[str], games: list[dict]) -> tuple[dict[str, float], dict[str, int]]:
+    by_team = {team: [] for team in team_names}
+    for game in games:
+        home, away = game["home_team"], game["away_team"]
+        margin = adjusted_home_margin(game)
+        by_team[home].append((away, margin))
+        by_team[away].append((home, -margin))
+
+    ratings = {team: 0.0 for team in team_names}
+    for _ in range(200):
+        updated = {}
+        for team in team_names:
+            rows = by_team[team]
+            if not rows:
+                updated[team] = 0.0
+                continue
+            raw = sum(margin + ratings[opponent] for opponent, margin in rows) / len(rows)
+            updated[team] = raw * len(rows) / (len(rows) + SHRINKAGE_GAMES)
+        center = sum(updated.values()) / max(1, len(updated))
+        ratings = {team: value - center for team, value in updated.items()}
+    return ratings, {team: len(rows) for team, rows in by_team.items()}
+
+
+def build(metrics: dict, observed: dict, schedule: dict) -> dict:
+    metric_teams = metrics.get("teams", {})
+    observed_teams = observed.get("teams", {})
+    team_names = sorted(set(metric_teams) & set(observed_teams))
+    if len(team_names) < 100:
+        raise ValueError("THI Index requires a complete FBS metrics and observed-ratings universe")
+
+    metrics_week = int(metrics.get("meta", {}).get("through_week") or 0)
+    observed_week = int(observed.get("meta", {}).get("through_week") or 0)
+    if metrics_week != observed_week:
+        raise ValueError(f"Input weeks do not match: metrics={metrics_week}, observed={observed_week}")
+    through_week = metrics_week
+    games = completed_games(schedule, set(team_names), through_week)
+    srs, fbs_games = solve_srs(team_names, games)
+
+    predictive = {team: float(metric_teams[team]["power_rating"]) for team in team_names}
+    observed_net = {
+        team: float(observed_teams[team].get("ratings", {}).get("net", {}).get("value") or 0.0)
+        for team in team_names
+    }
+    predictive_pct = percentile_map(predictive)
+    srs_pct = percentile_map(srs)
+
+    resume = {team: 0.0 for team in team_names}
+    fbs_wins = {team: 0 for team in team_names}
+    fbs_losses = {team: 0 for team in team_names}
+    for game in games:
+        home, away = game["home_team"], game["away_team"]
+        home_score, away_score = float(game["home_points"]), float(game["away_points"])
+        if home_score == away_score:
+            continue
+        winner, loser = (home, away) if home_score > away_score else (away, home)
+        opponent_strength_for_winner = (srs_pct[loser] + predictive_pct[loser]) / 200.0
+        opponent_strength_for_loser = (srs_pct[winner] + predictive_pct[winner]) / 200.0
+        resume[winner] += 0.35 + 1.15 * opponent_strength_for_winner
+        resume[loser] -= 0.35 + 1.15 * (1.0 - opponent_strength_for_loser)
+        fbs_wins[winner] += 1
+        fbs_losses[loser] += 1
+
+    fcs_wins, fcs_losses = {}, {}
+    for team in team_names:
+        record = metric_teams[team].get("record", {})
+        fcs_wins[team] = max(0, int(record.get("wins") or 0) - fbs_wins[team])
+        fcs_losses[team] = max(0, int(record.get("losses") or 0) - fbs_losses[team])
+        resume[team] += 0.18 * fcs_wins[team] - 1.50 * fcs_losses[team]
+
+    resume_pct = percentile_map(resume)
+    observed_pct = percentile_map(observed_net)
+    scores = {
+        team: sum((
+            WEIGHTS["resume"] * resume_pct[team],
+            WEIGHTS["opponent_adjusted_results"] * srs_pct[team],
+            WEIGHTS["predictive"] * predictive_pct[team],
+            WEIGHTS["observed_efficiency"] * observed_pct[team],
+        ))
+        for team in team_names
+    }
+
+    head_to_head = {}
+    for game in games:
+        if float(game["home_points"]) == float(game["away_points"]):
+            continue
+        winner = game["home_team"] if float(game["home_points"]) > float(game["away_points"]) else game["away_team"]
+        loser = game["away_team"] if winner == game["home_team"] else game["home_team"]
+        head_to_head[(winner, loser)] = True
+
+    def compare(left: str, right: str) -> int:
+        difference = scores[left] - scores[right]
+        if abs(difference) <= 1.0:
+            if head_to_head.get((left, right)): return -1
+            if head_to_head.get((right, left)): return 1
+        if difference != 0: return -1 if difference > 0 else 1
+        return -1 if left < right else (1 if left > right else 0)
+
+    ordered = sorted(team_names, key=cmp_to_key(compare))
+    component_ranks = {}
+    for key, values in {
+        "resume": resume,
+        "opponent_adjusted_results": srs,
+        "predictive": predictive,
+        "observed_efficiency": observed_net,
+    }.items():
+        component_ranks[key] = {
+            team: rank for rank, team in enumerate(sorted(team_names, key=lambda name: (-values[name], name)), 1)
+        }
+
+    rows = []
+    for rank, team in enumerate(ordered, 1):
+        record = metric_teams[team].get("record", {})
+        rows.append({
+            "rank": rank,
+            "team": team,
+            "conference": metric_teams[team].get("conference"),
+            "record": f"{int(record.get('wins') or 0)}-{int(record.get('losses') or 0)}",
+            "index_score": round(scores[team], 3),
+            "components": {
+                "resume": {"rank": component_ranks["resume"][team], "percentile": resume_pct[team], "value": round(resume[team], 3)},
+                "opponent_adjusted_results": {"rank": component_ranks["opponent_adjusted_results"][team], "percentile": srs_pct[team], "value": round(srs[team], 3)},
+                "predictive": {"rank": component_ranks["predictive"][team], "percentile": predictive_pct[team], "value": round(predictive[team], 3)},
+                "observed_efficiency": {"rank": component_ranks["observed_efficiency"][team], "percentile": observed_pct[team], "value": round(observed_net[team], 3)},
+            },
+            "sample": {"fbs_games": fbs_games[team], "fbs_wins": fbs_wins[team], "fbs_losses": fbs_losses[team], "fcs_wins": fcs_wins[team], "fcs_losses": fcs_losses[team]},
+        })
+
+    return {
+        "meta": {
+            "version": "thi_cfb_index_v2.0",
+            "status": "INDEPENDENT_BETA",
+            "season": int(metrics.get("meta", {}).get("year") or schedule.get("meta", {}).get("year")),
+            "through_week": through_week,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "poll_inputs": False,
+            "market_inputs": False,
+            "roster_inputs": False,
+            "model_a_touched": False,
+            "model_usage": "public_ranking_display_and_sort_only",
+            "margin_cap_points": MARGIN_CAP,
+            "neutral_site_home_adjustment": 0.0,
+            "non_neutral_home_adjustment": HOME_EDGE,
+            "weights": WEIGHTS,
+            "head_to_head_tiebreak_window": 1.0,
+            "methodology": "Results-first blend of resume quality, opponent-adjusted capped scoring margin, Model A predictive strength and current observed efficiency. Polls are excluded.",
+        },
+        "teams": rows,
+    }
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--metrics", type=Path, default=Path("data/cfb_metrics.json"))
+    parser.add_argument("--observed", type=Path, default=Path("data/thi_observed_ratings.json"))
+    parser.add_argument("--schedule", type=Path, default=Path("data/schedule.json"))
+    parser.add_argument("--output", type=Path, default=Path("data/cfb_thi_index.json"))
+    args = parser.parse_args()
+    output = build(json.loads(args.metrics.read_text()), json.loads(args.observed.read_text()), json.loads(args.schedule.read_text()))
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(output, separators=(",", ":")) + "\n")
+    print(f"Wrote {args.output}: {len(output['teams'])} teams through Week {output['meta']['through_week']}")
+
+
+if __name__ == "__main__":
+    main()
