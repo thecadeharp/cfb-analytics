@@ -881,6 +881,35 @@
     render(baseline);
   }
 
+  function cbbResultBadge(value, kind = "ats") {
+    if (!value) return `<span class="cbb-result-badge is-pending">—</span>`;
+    const label = kind === "total" ? ({ O: "OVER", U: "UNDER", P: "PUSH" }[value] || value) : ({ W: "COVER", L: "NO COVER", P: "PUSH" }[value] || value);
+    const css = kind === "total" ? (value === "O" ? "is-over" : value === "U" ? "is-under" : "is-push") : (value === "W" ? "is-positive" : value === "L" ? "is-negative" : "is-push");
+    return `<span class="cbb-result-badge ${css}">${escapeHtml(label)}</span>`;
+  }
+
+  function cbbRecentResultsTable(teamId, limit = 5) {
+    const dossier = state.data?.intelligence?.team_dossiers?.find(row => String(row.team_id) === String(teamId));
+    const rows = (dossier?.recent_games || []).slice(0, limit);
+    if (!rows.length) return `<div class="cbb-empty">No current-season finals yet.</div>`;
+    return `<div class="cbb-recent-market-wrap"><table class="cbb-table cbb-recent-market-table"><thead><tr><th>Date</th><th>Opponent</th><th>Final</th><th>Spread</th><th>ATS</th><th>Total</th><th>O/U</th></tr></thead><tbody>${rows.map(game => {
+      const teamScore = Number(game.team_score), opponentScore = Number(game.opponent_score);
+      const result = teamScore > opponentScore ? "W" : teamScore < opponentScore ? "L" : "T";
+      const date = new Date(game.start_date);
+      const dateText = Number.isNaN(date.getTime()) ? String(game.start_date || "").slice(0, 10) : new Intl.DateTimeFormat("en-US", { month:"short", day:"numeric" }).format(date);
+      const site = game.site === "away" ? "@" : game.site === "neutral" ? "vs" : "vs";
+      return `<tr><td>${escapeHtml(dateText)}</td><td class="cbb-team-name">${escapeHtml(site)} ${escapeHtml(game.opponent)}</td><td><strong class="${result === "W" ? "cbb-final-win" : result === "L" ? "cbb-final-loss" : ""}">${result} ${integer(teamScore)}–${integer(opponentScore)}</strong></td><td>${game.market_spread == null ? "—" : number(game.market_spread,1,true)}</td><td>${cbbResultBadge(game.ats_result)}</td><td>${game.market_total == null ? "—" : number(game.market_total,1)}</td><td>${cbbResultBadge(game.total_result,"total")}</td></tr>`;
+    }).join("")}</tbody></table></div>`;
+  }
+
+  function cbbMatchupRecentResults(game) {
+    return `<section class="cbb-detail-section cbb-recent-results-section"><div class="cbb-simulator-heading"><div><span class="cbb-kicker">Spot-betting context</span><h3>Last 5 · Results &amp; market outcomes</h3></div><span class="cbb-context-pending">Descriptive only</span></div>
+      <div class="cbb-model-sub">Final score, closing or last-captured spread, ATS result, market total and over/under result.</div>
+      <div class="cbb-recent-results-grid"><article><h4>${escapeHtml(game.away?.team)}</h4>${cbbRecentResultsTable(game.away?.team_id)}</article><article><h4>${escapeHtml(game.home?.team)}</h4>${cbbRecentResultsTable(game.home?.team_id)}</article></div>
+      <div class="cbb-simulator-footnote">When an explicit closing price is unavailable, THI uses the last captured pregame consensus and labels that state in the compiled data. Missing prices remain blank.</div>
+    </section>`;
+  }
+
   function openGameDetail(gameId) {
     const game = state.data?.projectionBoard?.games?.find(row => String(row.game_id) === String(gameId));
     if (!game?.projection) return;
@@ -940,6 +969,7 @@
           <article><span>Situational usage</span><strong>Research context</strong><div><span class="cbb-context-pending">Not priced into line</span></div><small>B2B, lookahead, letdown and bounce-back flags must pass validation first.</small></article>
         </div>
       </section>
+      ${cbbMatchupRecentResults(game)}
       <div class="cbb-matchup-brain-grid">
       <section class="cbb-detail-section"><h3>Team efficiency state</h3>
         <div class="cbb-panel cbb-table-wrap"><table class="cbb-table cbb-matchup-table"><thead><tr><th>Team</th><th>Adj offense</th><th>Adj defense</th><th>Tempo</th><th>Games</th><th>Source</th></tr></thead><tbody>
@@ -1700,8 +1730,10 @@
           <tr><td>Defense allowed</td><td class="cbb-number">${pct(factors.defense?.effective_fg_pct)}</td><td class="cbb-number">${pct(factors.defense?.turnover_pct)}</td><td class="cbb-number">${pct(factors.defense?.offensive_rebound_pct)}</td><td class="cbb-number">${pct(factors.defense?.free_throw_rate)}</td></tr>
         </tbody></table></div>
       </section>
-      <section class="cbb-detail-section"><h3>Recent games</h3>
-        <div class="cbb-roster-list">${dossier?.recent_games?.length ? dossier.recent_games.map(game => `<div class="cbb-detail-row"><span>${escapeHtml(String(game.start_date || "").slice(0,10))} · ${escapeHtml(humanize(game.site))} vs ${escapeHtml(game.opponent)}</span><strong>${integer(game.team_score)}–${integer(game.opponent_score)}</strong></div>`).join("") : `<div class="cbb-empty">No current-season finals yet.</div>`}</div>
+      <section class="cbb-detail-section cbb-dossier-wide"><h3>Last 5 · Results &amp; market outcomes</h3>
+        <div class="cbb-model-sub">Final score, closing or last-captured spread, ATS result, market total and over/under result.</div>
+        ${cbbRecentResultsTable(prior.team_id)}
+        <div class="cbb-simulator-footnote">Market outcomes are descriptive schedule context and do not change the team rating or Model A.</div>
       </section>
       <section class="cbb-detail-section cbb-methodology-panel cbb-dossier-wide" id="cbb-dossier-methodology"><h3>How THI builds this rating</h3>
         <div class="cbb-methodology-flow"><span>Regressed prior</span><b>→</b><span>Roster + personnel</span><b>→</b><span>Opponent-adjusted possessions</span><b>→</b><span>Four Factors + pace</span><b>→</b><span>Walk-forward update</span></div>

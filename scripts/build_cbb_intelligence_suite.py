@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "thi-cbb-intelligence-suite-v1.3"
+VERSION = "thi-cbb-intelligence-suite-v1.4"
 
 def num(value: Any) -> float | None:
     try:
@@ -187,6 +187,17 @@ def build_suite(
     games = board.get("games") or []
     for game in games:
         projection = game.get("projection") or {}
+        market = game.get("market") or {}
+        closing_home_spread = num(market.get("closing_home_spread"))
+        spread_source = "closing"
+        if closing_home_spread is None:
+            closing_home_spread = num(market.get("consensus_home_spread"))
+            spread_source = "last_captured" if closing_home_spread is not None else None
+        closing_total = num(market.get("closing_total"))
+        total_source = "closing"
+        if closing_total is None:
+            closing_total = num(market.get("consensus_total"))
+            total_source = "last_captured" if closing_total is not None else None
         start = instant(game.get("start_date"))
         for side in ("home", "away"):
             team = game.get(side) or {}
@@ -196,6 +207,11 @@ def build_suite(
             win_probability = num(projection.get("home_win_probability"))
             if side == "away" and win_probability is not None:
                 win_probability = 100.0 - win_probability
+            team_score = num(team.get("score"))
+            opponent_score = num(opponent.get("score"))
+            team_spread = closing_home_spread * (1 if side == "home" else -1) if closing_home_spread is not None else None
+            cover_margin = team_score - opponent_score + team_spread if team_score is not None and opponent_score is not None and team_spread is not None else None
+            total_margin = team_score + opponent_score - closing_total if team_score is not None and opponent_score is not None and closing_total is not None else None
             item = {
                 "game_id": game.get("game_id"),
                 "start_date": game.get("start_date"),
@@ -209,12 +225,17 @@ def build_suite(
                 "status": game_status(game),
                 "team_score": team.get("score"),
                 "opponent_score": opponent.get("score"),
+                "market_spread": round(team_spread, 2) if team_spread is not None else None,
+                "spread_price_state": spread_source,
+                "ats_result": "W" if cover_margin is not None and cover_margin > .001 else "L" if cover_margin is not None and cover_margin < -.001 else "P" if cover_margin is not None else None,
+                "market_total": round(closing_total, 2) if closing_total is not None else None,
+                "total_price_state": total_source,
+                "total_result": "O" if total_margin is not None and total_margin > .001 else "U" if total_margin is not None and total_margin < -.001 else "P" if total_margin is not None else None,
             }
             schedules[team_id].append(item)
             projection_by_team[team_id].append({key: value for key, value in item.items() if key != "start"})
             if item["status"] in {"final", "completed", "complete"}:
                 recent_by_team[team_id].append({key: value for key, value in item.items() if key != "start"})
-        market = game.get("market") or {}
         market_rows.append({"game_id": game.get("game_id"), "start_date": game.get("start_date"), "away_team": (game.get("away") or {}).get("team"), "home_team": (game.get("home") or {}).get("team"), "neutral_site": bool(game.get("neutral_site")), "opening_spread": market.get("opening_home_spread"), "current_spread": market.get("consensus_home_spread"), "spread_move": market.get("spread_move"), "opening_total": market.get("opening_total"), "current_total": market.get("consensus_total"), "total_move": market.get("total_move"), "model_edge": projection.get("spread_edge"), "signal": projection.get("spread_signal_tier"), "confidence": projection.get("signal_confidence")})
 
     for rows in schedules.values():

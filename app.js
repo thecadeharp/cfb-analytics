@@ -26,6 +26,7 @@ const DATA_URLS = {
   rosterNotes: "./data/roster_notes.json",
   teamIntelligence: "./data/team_intelligence.json",
   marketHistory: "./data/market_history.json",
+  predictionArchive: "./data/reports/prediction_archive.json",
 };
 
 let metricsData = null;
@@ -51,6 +52,7 @@ let cfbThiIndexData = null;
 let rosterNotesData = null;
 let teamIntelligenceData = null;
 let marketHistoryData = null;
+let predictionArchiveData = null;
 
 let teams = {};
 let projections = [];
@@ -2133,6 +2135,25 @@ function ensureMatchupView() {
       background:#fafaf7;
     }
 
+    .recent-results-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .recent-results-grid > div { min-width:0; }
+    .recent-results-grid h4 { margin:0 0 8px; font-size:12px; }
+    .recent-market-wrap { width:100%; overflow-x:auto; border:1px solid var(--border); border-radius:8px; }
+    .recent-market-table { width:100%; min-width:650px; border-collapse:collapse; font-size:10px; }
+    .recent-market-table th, .recent-market-table td { padding:9px 8px; border-bottom:1px solid var(--border); text-align:left; white-space:nowrap; }
+    .recent-market-table tr:last-child td { border-bottom:0; }
+    .recent-market-table th { color:var(--muted); font-family:var(--mono); font-size:7px; letter-spacing:.08em; text-transform:uppercase; }
+    .recent-market-table td { font-family:var(--mono); }
+    .recent-result-badge { display:inline-flex; padding:4px 6px; border:1px solid var(--border); border-radius:999px; font-size:7px; font-weight:800; letter-spacing:.04em; }
+    .recent-result-badge.is-positive { border-color:#6da58e; background:var(--green-light); color:var(--green); }
+    .recent-result-badge.is-negative { border-color:#d39a92; background:var(--red-light); color:var(--red); }
+    .recent-result-badge.is-over { border-color:#7f9fc5; background:rgba(53,95,145,.10); color:var(--blue); }
+    .recent-result-badge.is-under { border-color:#d1a66d; background:var(--amber-light); color:var(--amber); }
+    .recent-result-badge.is-push, .recent-result-badge.is-pending { color:var(--muted); background:var(--surface-soft); }
+    .recent-final-win { color:var(--green); }
+    .recent-final-loss { color:var(--red); }
+    .recent-market-note { padding:9px 12px; border-top:1px solid var(--border); color:var(--muted); font:500 8px/1.5 var(--mono); }
+
     .schedule-date, .schedule-secondary {
       color:var(--muted); font-family:var(--mono); font-size:9px; margin-top:3px;
     }
@@ -2231,6 +2252,7 @@ function ensureMatchupView() {
       .thi-metric-guide-subtitle { text-align:left; }
       .thi-metric-scale { grid-template-columns:repeat(2,minmax(0,1fr)); }
       .thi-context-grid { grid-template-columns:1fr; }
+      .recent-results-grid { grid-template-columns:1fr; }
       .thi-context-facts { grid-template-columns:1fr; }
       .cfb-script-results { grid-template-columns:1fr 1fr; }
       .cfb-script-results > * { border-top:1px solid var(--border); }
@@ -2336,7 +2358,8 @@ async function init() {
       cfbThiIndexData,
       rosterNotesData,
       teamIntelligenceData,
-      marketHistoryData
+      marketHistoryData,
+      predictionArchiveData
     ] = await Promise.all([
       loadJson(DATA_URLS.metrics),
       loadJson(DATA_URLS.schedule),
@@ -2359,6 +2382,7 @@ async function init() {
       loadJson(DATA_URLS.rosterNotes).catch(() => null),
       loadJson(DATA_URLS.teamIntelligence).catch(() => null),
       loadJson(DATA_URLS.marketHistory).catch(() => ({ games: {} })),
+      loadJson(DATA_URLS.predictionArchive).catch(() => ({ rows: [] })),
     ]);
 
     teams = metricsData?.teams ?? {};
@@ -3657,6 +3681,82 @@ function setCfbGameScriptPreset(value) {
   updateCfbGameScriptSimulator(value);
 }
 
+function cfbRecentMarketResults(teamName, limit = 5) {
+  const teamKey = resultTeamKey(teamName);
+  const latestByGame = new Map();
+  (predictionArchiveData?.rows ?? []).filter(row => row?.sport === "cfb").forEach(row => {
+    const homeKey = resultTeamKey(row?.home_team);
+    const awayKey = resultTeamKey(row?.away_team);
+    if (teamKey !== homeKey && teamKey !== awayKey) return;
+    const homePoints = Number(row?.home_points);
+    const awayPoints = Number(row?.away_points);
+    if (!Number.isFinite(homePoints) || !Number.isFinite(awayPoints)) return;
+    const key = String(row?.game_key ?? row?.game_id ?? `${row?.start_date}-${row?.home_team}`);
+    const previous = latestByGame.get(key);
+    const captured = Date.parse(row?.closing_captured_at_utc ?? row?.captured_at_utc ?? "") || 0;
+    const previousCaptured = Date.parse(previous?.closing_captured_at_utc ?? previous?.captured_at_utc ?? "") || 0;
+    if (!previous || captured >= previousCaptured) latestByGame.set(key, row);
+  });
+
+  return [...latestByGame.values()].map(row => {
+    const isHome = resultTeamKey(row.home_team) === teamKey;
+    const teamPoints = Number(isHome ? row.home_points : row.away_points);
+    const opponentPoints = Number(isHome ? row.away_points : row.home_points);
+    const opponent = isHome ? row.away_team : row.home_team;
+    const closingHomeSpread = hasValue(row.closing_home_spread) ? Number(row.closing_home_spread) : null;
+    const closingTotal = hasValue(row.closing_total) ? Number(row.closing_total) : null;
+    const teamSpread = Number.isFinite(closingHomeSpread) ? (isHome ? closingHomeSpread : -closingHomeSpread) : null;
+    const coverMargin = Number.isFinite(teamSpread) ? teamPoints - opponentPoints + teamSpread : null;
+    const totalMargin = Number.isFinite(closingTotal) ? teamPoints + opponentPoints - closingTotal : null;
+    return {
+      gameId: String(row.game_key ?? row.game_id ?? ""),
+      startDate: row.start_date,
+      opponent,
+      site: isHome ? "vs" : "@",
+      teamPoints,
+      opponentPoints,
+      result: teamPoints > opponentPoints ? "W" : teamPoints < opponentPoints ? "L" : "T",
+      teamSpread,
+      ats: coverMargin == null ? null : coverMargin > .001 ? "W" : coverMargin < -.001 ? "L" : "P",
+      closingTotal: Number.isFinite(closingTotal) ? closingTotal : null,
+      totalResult: totalMargin == null ? null : totalMargin > .001 ? "O" : totalMargin < -.001 ? "U" : "P",
+    };
+  }).sort((a, b) => (Date.parse(b.startDate) || 0) - (Date.parse(a.startDate) || 0)).slice(0, limit);
+}
+
+function recentResultBadge(value, kind = "ats") {
+  if (!value) return `<span class="recent-result-badge is-pending">—</span>`;
+  const label = kind === "total" ? ({ O: "OVER", U: "UNDER", P: "PUSH" }[value] || value) : ({ W: "COVER", L: "NO COVER", P: "PUSH" }[value] || value);
+  const css = kind === "total" ? (value === "O" ? "is-over" : value === "U" ? "is-under" : "is-push") : (value === "W" ? "is-positive" : value === "L" ? "is-negative" : "is-push");
+  return `<span class="recent-result-badge ${css}">${escapeHtml(label)}</span>`;
+}
+
+function cfbRecentResultsTable(teamName, limit = 5) {
+  const rows = cfbRecentMarketResults(teamName, limit);
+  if (!rows.length) return `<div class="sample-warning">No completed games with a preserved closing market are available yet.</div>`;
+  return `<div class="recent-market-wrap"><table class="recent-market-table"><thead><tr><th>Date</th><th>Opponent</th><th>Final</th><th>Closing spread</th><th>ATS</th><th>Closing total</th><th>O/U</th></tr></thead><tbody>${rows.map(row => `
+    <tr>
+      <td>${escapeHtml(gameDateText(row.startDate))}</td>
+      <td><strong>${escapeHtml(row.site)} ${escapeHtml(row.opponent)}</strong></td>
+      <td><strong class="${row.result === "W" ? "recent-final-win" : row.result === "L" ? "recent-final-loss" : ""}">${row.result} ${row.teamPoints}-${row.opponentPoints}</strong></td>
+      <td>${row.teamSpread == null ? "—" : formatSigned(row.teamSpread, 1)}</td>
+      <td>${recentResultBadge(row.ats)}</td>
+      <td>${row.closingTotal == null ? "—" : formatNumber(row.closingTotal, 1)}</td>
+      <td>${recentResultBadge(row.totalResult, "total")}</td>
+    </tr>`).join("")}</tbody></table></div>`;
+}
+
+function cfbMatchupRecentResultsMarkup(awayName, homeName) {
+  return `<section class="analysis-panel wide recent-results-panel">
+    <div class="analysis-panel-header"><div><div class="analysis-panel-title">Last 5 · Results &amp; market outcomes</div><div class="team-meta">Final score · closing spread · ATS · closing total · O/U</div></div></div>
+    <div class="analysis-panel-body recent-results-grid">
+      <div><h4>${escapeHtml(awayName)}</h4>${cfbRecentResultsTable(awayName)}</div>
+      <div><h4>${escapeHtml(homeName)}</h4>${cfbRecentResultsTable(homeName)}</div>
+    </div>
+    <div class="recent-market-note">Closing prices use THI's preserved near-kickoff market capture. Missing prices remain blank rather than being reconstructed.</div>
+  </section>`;
+}
+
 function renderMatchup(game) {
   const container = document.getElementById("matchup-container");
   if (!container) return;
@@ -3822,6 +3922,8 @@ function renderMatchup(game) {
     ${taleOfTapeMarkup(awayName, homeName)}
 
     ${scheduleContextMarkup(game)}
+
+    ${cfbMatchupRecentResultsMarkup(awayName, homeName)}
 
     ${cfbGameScriptMarkup(game)}
 
@@ -7081,6 +7183,12 @@ function renderDossier(team) {
     </div>
 
     ${renderThiObservedRatings(team.team)}
+
+    <section class="analysis-panel recent-results-panel" style="margin-top:12px;">
+      <div class="analysis-panel-header"><div><div class="analysis-panel-title">Last 5 · Results &amp; market outcomes</div><div class="team-meta">Final · closing spread · ATS · closing total · O/U</div></div></div>
+      <div class="analysis-panel-body">${cfbRecentResultsTable(team.team)}</div>
+      <div class="recent-market-note">Closing prices use THI's preserved near-kickoff market capture. Missing prices remain blank.</div>
+    </section>
 
     ${renderScoringOpportunityProfile(team.team)}
 

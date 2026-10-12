@@ -10,7 +10,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def build(cfb: dict, cbb: dict) -> dict:
+def build(cfb: dict, cbb: dict, clv: dict | None = None) -> dict:
+    closing_totals = {}
+    for row in (clv or {}).get("rows", []):
+        key = str(row.get("game_key") or "")
+        if key and row.get("closing_total") is not None:
+            closing_totals[key] = row.get("closing_total")
     first: dict[str, dict] = {}
     for row in cfb.get("rows", []):
         key = str(row.get("game_key") or row.get("snapshot_id"))
@@ -26,7 +31,7 @@ def build(cfb: dict, cbb: dict) -> dict:
             "model_version": row.get("model_version"), "model_home_spread": row.get("model_home_spread"),
             "model_total": row.get("model_total"), "market_home_spread": row.get("snapshot_home_spread"),
             "market_total": row.get("snapshot_total"), "market_book": row.get("snapshot_bookmaker"),
-            "closing_home_spread": row.get("closing_home_spread"), "preferred_side": row.get("preferred_side"),
+            "closing_home_spread": row.get("closing_home_spread"), "closing_total": closing_totals.get(key), "preferred_side": row.get("preferred_side"),
             "signal": row.get("signal"), "settled": bool(row.get("result_settled")),
             "home_points": row.get("home_points"), "away_points": row.get("away_points"),
             "ats_result": row.get("ats_result"), "total_result": row.get("total_result"),
@@ -53,9 +58,10 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--cfb", type=Path, default=ROOT / "data/reports/settled_results.json")
     parser.add_argument("--cbb", type=Path, default=ROOT / "data/cbb/model_tracking.json")
+    parser.add_argument("--clv", type=Path, default=ROOT / "data/reports/clv_report.json")
     parser.add_argument("--output", type=Path, default=ROOT / "data/reports/prediction_archive.json")
     args = parser.parse_args()
-    payload = build(json.loads(args.cfb.read_text()), json.loads(args.cbb.read_text()))
+    payload = build(json.loads(args.cfb.read_text()), json.loads(args.cbb.read_text()), json.loads(args.clv.read_text()) if args.clv.exists() else None)
     if args.output.exists():
         previous = json.loads(args.output.read_text())
         if previous.get("rows") == payload.get("rows"):
