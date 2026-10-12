@@ -115,6 +115,23 @@ jobs:
             --through-week "$RESOLVED_WEEK" \
             --output data/research/situational_profiles_2026.json
 
+      - name: Refresh THI CFB Index when weekly inputs align
+        env:
+          RESOLVED_WEEK: ${{ steps.cutoff.outputs.week }}
+        run: |
+          python -m unittest discover -s scripts -p 'test_build_cfb_thi_index.py' -v
+          OBSERVED_WEEK=$(python - <<'PY'
+          import json
+          from pathlib import Path
+          print(json.loads(Path('data/thi_observed_ratings.json').read_text())['meta']['through_week'])
+          PY
+          )
+          if [ "$OBSERVED_WEEK" = "$RESOLVED_WEEK" ]; then
+            python scripts/build_cfb_thi_index.py
+          else
+            echo "THI Index deferred: observed Week $OBSERVED_WEEK, predictive Week $RESOLVED_WEEK."
+          fi
+
       - name: Verify output and isolation contracts
         env:
           RESOLVED_WEEK: ${{ steps.cutoff.outputs.week }}
@@ -142,6 +159,13 @@ jobs:
           assert len(power['teams']) == 138
           assert [row['rank'] for row in power['teams']] == list(range(1, 139))
 
+          index = json.loads(Path('data/cfb_thi_index.json').read_text())
+          if index['meta']['through_week'] == week:
+              assert index['meta']['version'] == 'thi_cfb_index_v4.0'
+              assert index['meta']['power_source_version'] == power['meta']['version']
+              assert index['meta']['power_source_status'] == power['meta']['status']
+              assert index['meta']['poll_inputs'] is False
+
           assert profiles['meta']['status'] == 'research_only_situational_profiles_v1'
           assert profiles['meta']['season'] == 2026
           assert profiles['meta']['through_week'] == week
@@ -163,7 +187,7 @@ jobs:
           PY
 
           changed=$(git status --porcelain --untracked-files=all | grep -vE '^\?\? .*/__pycache__/' || true)
-          unexpected=$(printf '%s\n' "$changed" | grep -vE '^( M|\?\?) (data/thi_power_ratings.json|data/research/situational_profiles_2026.json)$' || true)
+          unexpected=$(printf '%s\n' "$changed" | grep -vE '^( M|\?\?) (data/thi_power_ratings.json|data/research/situational_profiles_2026.json|data/cfb_thi_index.json)$' || true)
           if [ -n "$unexpected" ]; then
             echo 'Unexpected files changed during weekly research refresh'
             printf '%s\n' "$unexpected"
@@ -177,6 +201,7 @@ jobs:
           path: |
             data/thi_power_ratings.json
             data/research/situational_profiles_2026.json
+            data/cfb_thi_index.json
           if-no-files-found: error
           retention-days: 90
 
@@ -188,7 +213,8 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add \
             data/thi_power_ratings.json \
-            data/research/situational_profiles_2026.json
+            data/research/situational_profiles_2026.json \
+            data/cfb_thi_index.json
 
           if git diff --staged --quiet; then
             echo 'No weekly research changes to commit.'
@@ -202,11 +228,14 @@ jobs:
             if ! git diff --quiet "$GITHUB_SHA" origin/main -- \
               scripts/research_thi_power.py \
               scripts/research_thi_power_v03.py \
+              scripts/build_cfb_thi_index.py \
+              scripts/test_build_cfb_thi_index.py \
               scripts/build_situational_profiles.py \
               scripts/build_verified_possession_ledger.py \
               scripts/reconstruct_scoring_events.py \
               scripts/research_expected_points_score_margin.py \
               data/research/repaired_expected_points_candidate.json \
+              data/thi_observed_ratings.json \
               .github/workflows/weekly-research-refresh.yml; then
               echo 'Research inputs changed during the run; start a fresh workflow.'
               exit 1

@@ -40,7 +40,7 @@
     .thi-hub-search { min-width:210px; }
     .thi-hub-note { font-size:12px; line-height:1.55; color:var(--muted); margin:0 0 18px; }
     .thi-hub-table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
-    .thi-hub-table { width:100%; border-collapse:collapse; }
+    .thi-hub-table { width:100%; min-width:1180px; border-collapse:collapse; }
     .thi-hub-table th, .thi-hub-table td { text-align:left; padding:14px 16px; border-bottom:1px solid var(--border); }
     .thi-hub-table th { font:600 11px var(--mono); letter-spacing:.05em; color:var(--muted); white-space:nowrap; }
     .thi-hub-sort-button { display:inline-flex; align-items:center; gap:3px; border:0; padding:0; background:transparent; color:inherit; font:inherit; letter-spacing:inherit; cursor:pointer; }
@@ -102,6 +102,7 @@
     .thi-situational-sample { color:var(--muted); font-size:11px; line-height:1.5; margin-top:4px; }
     .thi-situational-explainer { margin:12px 0 0; color:var(--muted); font-size:12px; line-height:1.55; }
     @media (max-width:700px) {
+      .thi-hub-table { min-width:0; }
       .thi-hub-table thead { display:none; }
       .thi-hub-table tbody tr { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); padding:14px; gap:10px 16px; border-bottom:1px solid var(--border); }
       .thi-hub-table td { padding:0; border:0; min-width:0; }
@@ -141,10 +142,10 @@
   view.innerHTML = `
     <div class="eyebrow">Calculated by The Hammer Index</div>
     <h1 class="page-title">THI Ratings</h1>
-    <p class="page-subtitle thi-hub-intro">Two independent answers to two different questions: who is strongest today, and who has earned the strongest season.</p>
+    <p class="page-subtitle thi-hub-intro">Three distinct lenses: predictive neutral-field strength, opponent-adjusted current form, and season accomplishment.</p>
     <div class="thi-ratings-difference" aria-label="Difference between Team Data and THI Ratings">
       <div><strong>Team Data</strong><span>Observed efficiency, schedule and resume context, market performance, and team dossiers.</span></div>
-      <div><strong>THI Power</strong><span>Current neutral-field strength from opponent-adjusted efficiency, live performance and capped game control.</span></div>
+      <div><strong>THI Power</strong><span>Predictive neutral-field strength from a fitted, poll-free scoring-margin model.</span></div>
       <div><strong>THI Résumé</strong><span>Season accomplishment from opponent quality, results, game location and capped scoring margin.</span></div>
       <p>THI Power supplies projection-page ranking badges. Neither ranking changes Model A projections.</p>
     </div>
@@ -176,9 +177,9 @@
     })).filter(row => Number.isFinite(row.spots));
     const riser = movement.slice().sort((a, b) => b.spots - a.spots || a.rank - b.rank)[0];
     const faller = movement.slice().sort((a, b) => a.spots - b.spots || a.rank - b.rank)[0];
-    const schedule = power.map(row => ({
+    const schedule = (cfbThiIndexData?.teams ?? []).map(row => ({
       ...row,
-      sosRank: Number(externalRatingsData?.teams?.[row.team]?.sos_rank),
+      sosRank: Number(row.components?.schedule_strength?.rank),
     })).filter(row => Number.isFinite(row.sosRank)).sort((a, b) => a.sosRank - b.sosRank || a.rank - b.rank)[0];
     const card = (kind, label, row, value) => `<article class="thi-weekly-pulse-card ${kind}">
       <div class="thi-weekly-pulse-label">${escapeHtml(label)}</div>
@@ -269,9 +270,9 @@
     return `<section class="thi-decomposition" aria-label="THI rating decomposition">
       <div class="thi-decomposition-head"><div><div class="eyebrow">THI Rating Decomposition</div><h2>Power and résumé, kept separate</h2></div><div class="thi-decomposition-stamp">Through Week ${escapeHtml(cfbThiIndexData?.meta?.through_week ?? "—")}<br>Updated ${escapeHtml(ratingTimestamp())}</div></div>
       <div class="thi-decomposition-lenses">
-        ${lens("Power", "Neutral-field strength", "50% opponent-adjusted observed efficiency, 30% current live performance and 20% capped game control.")}
+        ${lens("Power", "Predictive neutral-field strength", "Poll-free fitted scoring-margin rating using result Elo, decaying roster priors and opponent-adjusted performance.")}
         ${lens("Résumé", "Season accomplishment", "Opponent quality, wins and losses, location and capped scoring margin; weak-schedule wins receive less credit.")}
-        ${lens("Observed", "Opponent-adjusted efficiency", "Current-season performance with sample-size regression and no preseason rating input.")}
+        ${lens("Current Form", "Opponent-adjusted efficiency", "Current-season performance with sample-size regression and no preseason rating input.")}
         ${lens("Game control", "Capped adjusted margin", "Scoring margin is capped and corrected for location before opponents are iteratively adjusted.")}
         ${lens("Home advantage", "Team-specific points", "The production home edge used by Model A; neutral-site games receive zero.")}
       </div>
@@ -361,7 +362,7 @@
         if (sort === "power_score") return Number(row.indexRank?.power_score);
         if (sort === "resume_rank") return Number(row.indexRank?.resume_rank);
         if (sort === "game_control_rank") return Number(row.indexRank?.components?.game_control?.rank);
-        if (sort === "live_rank") return Number(row.indexRank?.components?.live_performance?.rank);
+        if (sort === "schedule_strength_rank") return Number(row.indexRank?.components?.schedule_strength?.rank);
         if (sort === "observed_rank") return Number(row.indexRank?.components?.observed_efficiency?.rank);
         if (sort === "power_rank") return Number(row.power.rank);
         if (sort === "predictive") return Number(row.predictive);
@@ -398,7 +399,7 @@
     const priorRanks = priorRankMap();
 
     target.innerHTML = data.length ? `<div class="thi-hub-table-wrap"><table class="thi-hub-table">
-      <thead><tr>${sortHeader("index_rank", "Power", "asc")}${sortHeader("resume_rank", "Résumé", "asc")}${sortHeader("team", "Team", "asc")}${sortHeader("power_score", "Power Score")}${sortHeader("observed_rank", "Observed", "asc")}${sortHeader("live_rank", "Live Form", "asc")}${sortHeader("game_control_rank", "Game Control", "asc")}<th>vs Power Top 25</th>${sortHeader("hfa", "Home Edge")}</tr></thead>
+      <thead><tr>${sortHeader("index_rank", "Power", "asc")}${sortHeader("resume_rank", "Résumé", "asc")}${sortHeader("team", "Team", "asc")}${sortHeader("power_score", "Power Rating")}${sortHeader("observed_rank", "Current Form", "asc")}${sortHeader("schedule_strength_rank", "SOS", "asc")}${sortHeader("game_control_rank", "Game Control", "asc")}<th>FBS Sample</th><th>vs Power Top 25</th>${sortHeader("hfa", "Home Edge")}</tr></thead>
       <tbody>${data.map(row => {
         const { power, profile } = row;
         const rating = profile.ratings ?? {};
@@ -407,10 +408,11 @@
           <td data-label="Résumé"><span class="thi-hub-number">${row.indexRank?.resume_rank ? `#${formatNumber(row.indexRank.resume_rank, 0)}` : "—"}</span></td>
           <td data-label="Team"><span class="thi-hub-team-wrap">${teamLogoMarkup(row.team, "projection")}
               <button type="button" class="thi-hub-team" data-thi-team="${escapeHtml(row.team)}">${escapeHtml(row.team)}</button></span></td>
-          <td data-label="Power Score"><span class="thi-hub-number">${formatAxisNumber(row.indexRank?.power_score, 1)}</span></td>
-          <td data-label="Observed"><span class="thi-hub-rank">${row.indexRank?.components?.observed_efficiency?.rank ? `#${row.indexRank.components.observed_efficiency.rank}` : "—"}</span></td>
-          <td data-label="Live Form"><span class="thi-hub-rank">${row.indexRank?.components?.live_performance?.rank ? `#${row.indexRank.components.live_performance.rank}` : "—"}</span></td>
+          <td data-label="Power Rating"><span class="thi-hub-number">${formatAxisNumber(row.indexRank?.power_score, 1)}</span></td>
+          <td data-label="Current Form"><span class="thi-hub-rank">${row.indexRank?.components?.observed_efficiency?.rank ? `#${row.indexRank.components.observed_efficiency.rank}` : "—"}</span></td>
+          <td data-label="SOS"><span class="thi-hub-rank">${row.indexRank?.components?.schedule_strength?.rank ? `#${row.indexRank.components.schedule_strength.rank}` : "—"}</span></td>
           <td data-label="Game Control"><span class="thi-hub-rank">${row.indexRank?.components?.game_control?.rank ? `#${row.indexRank.components.game_control.rank}` : "—"}</span></td>
+          <td data-label="FBS Sample"><span class="thi-hub-number">${Number.isFinite(Number(row.indexRank?.sample?.fbs_games)) ? `${row.indexRank.sample.fbs_games} G` : "—"}</span></td>
           <td data-label="vs Power Top 25"><span class="thi-hub-number">${escapeHtml(row.qualityRecord)}</span></td>
           ${metricCell("Home Edge", formatAxisNumber(row.hfa, 1), row.hfa, allValues("hfa"), "context")}
         </tr>`;
@@ -480,13 +482,14 @@
         </div>
         <span class="conference-filter-count">${escapeHtml(thiPowerRatingsData.teams.length)} teams</span>
       </div>
-      <p class="thi-hub-note">Power ranks current neutral-field strength; Résumé ranks season accomplishment through Week ${escapeHtml(cfbThiIndexData?.meta?.through_week ?? "—")}. Both exclude polls, betting markets, rosters and preseason ratings. Model A remains separate and unchanged.</p>
+      <p class="thi-hub-note">Power ranks predictive neutral-field strength; Current Form isolates opponent-adjusted in-season performance; Résumé ranks accomplishment through Week ${escapeHtml(cfbThiIndexData?.meta?.through_week ?? "—")}. Polls and betting markets are excluded. Power remains an independent beta, and Model A remains separate and unchanged.</p>
       <div id="thi-ratings-rows"></div>
       <details class="thi-hub-method"><summary>How to read these ratings</summary>
-        <p>THI Power uses current-season data only: opponent-adjusted observed efficiency (50%), live performance (30%) and capped game control (20%). It answers who is strongest today on a neutral field.</p>
+        <p>THI Power is a fitted neutral-field scoring-margin rating using current-season result Elo, talent and returning-production priors that decay every week, and opponent-adjusted performance. It is independent of the AP poll and betting market.</p>
+        <p>SOS is the average final THI Power percentile of FBS opponents already played. It is displayed for schedule context and is not added again to Power because the predictive performance features are already opponent-adjusted.</p>
         <p>THI Résumé scores actual wins and losses against THI Power opponent quality, with explicit location and capped-margin adjustments. It answers who has earned the strongest season.</p>
         <p>${escapeHtml(meta.methodology?.description ?? "Observed ratings describe current on-field performance.")}</p>
-        <p>Offense and defense use a scoring-scale index. Pace is indexed to the FBS average of 1.00. Observed Rank is the old net observed rank, retained for comparison.</p>
+        <p>Offense and defense use a scoring-scale index. Pace is indexed to the FBS average of 1.00. Current Form is the opponent-adjusted net observed rank.</p>
       </details>`;
     const input = document.getElementById("thi-ratings-search");
     input.value = search;

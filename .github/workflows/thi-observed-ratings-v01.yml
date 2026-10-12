@@ -91,9 +91,29 @@ jobs:
           )
           PY
 
-      - name: Build independent THI CFB Index
+      - name: Check THI Index input alignment
+        id: index-inputs
         run: |
           python -m unittest discover -s scripts -p 'test_build_cfb_thi_index.py' -v
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          observed = json.loads(Path("data/thi_observed_ratings.json").read_text())
+          predictive = json.loads(Path("data/thi_power_ratings.json").read_text())
+          ready = observed["meta"]["through_week"] == predictive["meta"]["through_week"]
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
+              handle.write(f"ready={'true' if ready else 'false'}\n")
+          print(
+              "THI Index inputs aligned." if ready else
+              "THI Index deferred until the predictive refresh reaches the observed week."
+          )
+          PY
+
+      - name: Build independent THI CFB Index
+        if: steps.index-inputs.outputs.ready == 'true'
+        run: |
           python scripts/build_cfb_thi_index.py
           python - <<'PY'
           import json
@@ -103,10 +123,14 @@ jobs:
           assert payload["meta"]["status"] == "INDEPENDENT_BETA"
           assert payload["meta"]["poll_inputs"] is False
           assert payload["meta"]["market_inputs"] is False
-          assert payload["meta"]["roster_inputs"] is False
-          assert payload["meta"]["preseason_inputs"] is False
+          assert payload["meta"]["roster_inputs"] is True
+          assert payload["meta"]["preseason_inputs"] is True
+          assert payload["meta"]["poll_based_preseason_inputs"] is False
           assert payload["meta"]["model_a_touched"] is False
           assert payload["meta"]["primary_surface"] == "power_rank"
+          assert payload["meta"]["power_source_version"] == "thi_power_research_v0.3"
+          assert payload["meta"]["power_source_status"] == "RESEARCH_ONLY"
+          assert all("schedule_strength" in team["components"] for team in payload["teams"])
           assert len(payload["teams"]) == 138
           PY
 

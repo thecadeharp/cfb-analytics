@@ -1,6 +1,6 @@
 import unittest
 
-from build_cfb_thi_index import adjusted_home_margin, percentile_map, resume_result_values
+from build_cfb_thi_index import adjusted_home_margin, percentile_map, resume_result_values, schedule_strength_map
 
 
 class ThiIndexTests(unittest.TestCase):
@@ -19,6 +19,16 @@ class ThiIndexTests(unittest.TestCase):
     def test_percentile_orders_values(self):
         result = percentile_map({"A": 3.0, "B": 1.0, "C": 2.0})
         self.assertEqual(result, {"B": 0.0, "C": 50.0, "A": 100.0})
+
+    def test_schedule_strength_is_average_opponent_power(self):
+        games = [
+            {"home_team": "A", "away_team": "B"},
+            {"home_team": "A", "away_team": "C"},
+        ]
+        result = schedule_strength_map(
+            ["A", "B", "C"], games, {"A": 50.0, "B": 100.0, "C": 20.0}
+        )
+        self.assertEqual(result, {"A": 60.0, "B": 50.0, "C": 50.0})
 
     def test_road_win_gets_more_resume_credit_than_home_win(self):
         home, _ = resume_result_values(.8, .8, winner_is_away=False, neutral_site=False, margin=7)
