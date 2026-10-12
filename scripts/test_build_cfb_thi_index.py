@@ -1,6 +1,6 @@
 import unittest
 
-from build_cfb_thi_index import adjusted_home_margin, percentile_map
+from build_cfb_thi_index import adjusted_home_margin, percentile_map, resume_result_values
 
 
 class ThiIndexTests(unittest.TestCase):
@@ -19,6 +19,16 @@ class ThiIndexTests(unittest.TestCase):
     def test_percentile_orders_values(self):
         result = percentile_map({"A": 3.0, "B": 1.0, "C": 2.0})
         self.assertEqual(result, {"B": 0.0, "C": 50.0, "A": 100.0})
+
+    def test_road_win_gets_more_resume_credit_than_home_win(self):
+        home, _ = resume_result_values(.8, .8, winner_is_away=False, neutral_site=False, margin=7)
+        road, _ = resume_result_values(.8, .8, winner_is_away=True, neutral_site=False, margin=7)
+        self.assertAlmostEqual(road - home, .18)
+
+    def test_resume_margin_credit_is_capped(self):
+        close, _ = resume_result_values(.5, .5, winner_is_away=False, neutral_site=False, margin=21)
+        blowout, _ = resume_result_values(.5, .5, winner_is_away=False, neutral_site=False, margin=70)
+        self.assertEqual(close, blowout)
 
 
 if __name__ == "__main__":

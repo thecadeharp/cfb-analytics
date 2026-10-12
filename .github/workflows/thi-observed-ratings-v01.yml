@@ -104,7 +104,9 @@ jobs:
           assert payload["meta"]["poll_inputs"] is False
           assert payload["meta"]["market_inputs"] is False
           assert payload["meta"]["roster_inputs"] is False
+          assert payload["meta"]["preseason_inputs"] is False
           assert payload["meta"]["model_a_touched"] is False
+          assert payload["meta"]["primary_surface"] == "power_rank"
           assert len(payload["teams"]) == 138
           PY
 

@@ -321,7 +321,7 @@ function powerRank(team) {
 }
 
 function cfbThiRank(teamName) {
-  const rank = Number(window.THICfbIndexRankByTeam?.get(String(teamName)));
+  const rank = Number(window.THICfbPowerRankByTeam?.get(String(teamName)));
   return Number.isFinite(rank) && rank > 0 ? rank : null;
 }
 
@@ -2325,7 +2325,7 @@ async function init() {
     seasonProjections = projectionsData?.season_projections ?? {};
     window.THIProjectionsPayload = projectionsData;
     window.THIProjectionGames = projections;
-    window.THICfbIndexRankByTeam = new Map(
+    window.THICfbPowerRankByTeam = new Map(
       (cfbThiIndexData?.teams ?? []).map(row => [row.team, Number(row.rank)])
     );
 
@@ -2640,7 +2640,7 @@ function renderProjectionRow(game) {
           >
             ${escapeHtml(awayName)}
           </span>
-          <span class="team-meta">${awayRank && awayRank <= 25 ? `THI #${awayRank}` : ""}</span>
+          <span class="team-meta">${awayRank && awayRank <= 25 ? `THI PWR #${awayRank}` : ""}</span>
         </div>
 
         <div class="team-line">
@@ -2651,7 +2651,7 @@ function renderProjectionRow(game) {
           >
             ${escapeHtml(homeName)}
           </span>
-          <span class="team-meta">${homeRank && homeRank <= 25 ? `THI #${homeRank}` : ""}</span>
+          <span class="team-meta">${homeRank && homeRank <= 25 ? `THI PWR #${homeRank}` : ""}</span>
         </div>
 
         <div class="team-meta" style="margin-top:5px;">

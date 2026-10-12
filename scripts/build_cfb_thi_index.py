@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build an independent, results-first THI CFB Index.
+"""Build independent THI CFB Power and Resume rankings.
 
 The index deliberately excludes polls, betting markets and roster/recruiting data.
 It is a public ranking layer; it does not feed Model A projections.
@@ -10,18 +10,16 @@ from __future__ import annotations
 import argparse
 import json
 from datetime import datetime, timezone
-from functools import cmp_to_key
 from pathlib import Path
 
 
 MARGIN_CAP = 28.0
 HOME_EDGE = 2.5
 SHRINKAGE_GAMES = 2.5
-WEIGHTS = {
-    "resume": 0.35,
-    "opponent_adjusted_results": 0.25,
-    "predictive": 0.25,
-    "observed_efficiency": 0.15,
+POWER_WEIGHTS = {
+    "observed_efficiency": 0.50,
+    "live_performance": 0.30,
+    "game_control": 0.20,
 }
 
 
@@ -48,6 +46,21 @@ def completed_games(schedule: dict, teams: set[str], through_week: int) -> list[
 def adjusted_home_margin(game: dict) -> float:
     margin = max(-MARGIN_CAP, min(MARGIN_CAP, float(game["home_points"]) - float(game["away_points"])))
     return margin if game.get("neutral_site") else margin - HOME_EDGE
+
+
+def resume_result_values(
+    opponent_strength_for_winner: float,
+    opponent_strength_for_loser: float,
+    *,
+    winner_is_away: bool,
+    neutral_site: bool,
+    margin: float,
+) -> tuple[float, float]:
+    location_bonus = 0.18 if winner_is_away else (0.08 if neutral_site else 0.0)
+    capped_margin = min(abs(margin), 21.0) / 21.0
+    win_credit = 0.35 + 1.15 * opponent_strength_for_winner + location_bonus + 0.12 * capped_margin
+    loss_penalty = 0.35 + 1.15 * (1.0 - opponent_strength_for_loser) + 0.12 * capped_margin
+    return win_credit, loss_penalty
 
 
 def solve_srs(team_names: list[str], games: list[dict]) -> tuple[dict[str, float], dict[str, int]]:
@@ -88,13 +101,26 @@ def build(metrics: dict, observed: dict, schedule: dict) -> dict:
     games = completed_games(schedule, set(team_names), through_week)
     srs, fbs_games = solve_srs(team_names, games)
 
-    predictive = {team: float(metric_teams[team]["power_rating"]) for team in team_names}
+    live_performance = {
+        team: float(metric_teams[team].get("live_2026_power_rating") or 0.0)
+        for team in team_names
+    }
     observed_net = {
         team: float(observed_teams[team].get("ratings", {}).get("net", {}).get("value") or 0.0)
         for team in team_names
     }
-    predictive_pct = percentile_map(predictive)
+    live_performance_pct = percentile_map(live_performance)
     srs_pct = percentile_map(srs)
+    observed_pct = percentile_map(observed_net)
+    power_scores = {
+        team: (
+            POWER_WEIGHTS["observed_efficiency"] * observed_pct[team]
+            + POWER_WEIGHTS["live_performance"] * live_performance_pct[team]
+            + POWER_WEIGHTS["game_control"] * srs_pct[team]
+        )
+        for team in team_names
+    }
+    power_pct = percentile_map(power_scores)
 
     resume = {team: 0.0 for team in team_names}
     fbs_wins = {team: 0 for team in team_names}
@@ -105,10 +131,17 @@ def build(metrics: dict, observed: dict, schedule: dict) -> dict:
         if home_score == away_score:
             continue
         winner, loser = (home, away) if home_score > away_score else (away, home)
-        opponent_strength_for_winner = (srs_pct[loser] + predictive_pct[loser]) / 200.0
-        opponent_strength_for_loser = (srs_pct[winner] + predictive_pct[winner]) / 200.0
-        resume[winner] += 0.35 + 1.15 * opponent_strength_for_winner
-        resume[loser] -= 0.35 + 1.15 * (1.0 - opponent_strength_for_loser)
+        opponent_strength_for_winner = power_pct[loser] / 100.0
+        opponent_strength_for_loser = power_pct[winner] / 100.0
+        win_credit, loss_penalty = resume_result_values(
+            opponent_strength_for_winner,
+            opponent_strength_for_loser,
+            winner_is_away=winner == away and not game.get("neutral_site"),
+            neutral_site=bool(game.get("neutral_site")),
+            margin=home_score - away_score,
+        )
+        resume[winner] += win_credit
+        resume[loser] -= loss_penalty
         fbs_wins[winner] += 1
         fbs_losses[loser] += 1
 
@@ -120,39 +153,15 @@ def build(metrics: dict, observed: dict, schedule: dict) -> dict:
         resume[team] += 0.18 * fcs_wins[team] - 1.50 * fcs_losses[team]
 
     resume_pct = percentile_map(resume)
-    observed_pct = percentile_map(observed_net)
-    scores = {
-        team: sum((
-            WEIGHTS["resume"] * resume_pct[team],
-            WEIGHTS["opponent_adjusted_results"] * srs_pct[team],
-            WEIGHTS["predictive"] * predictive_pct[team],
-            WEIGHTS["observed_efficiency"] * observed_pct[team],
-        ))
-        for team in team_names
-    }
-
-    head_to_head = {}
-    for game in games:
-        if float(game["home_points"]) == float(game["away_points"]):
-            continue
-        winner = game["home_team"] if float(game["home_points"]) > float(game["away_points"]) else game["away_team"]
-        loser = game["away_team"] if winner == game["home_team"] else game["home_team"]
-        head_to_head[(winner, loser)] = True
-
-    def compare(left: str, right: str) -> int:
-        difference = scores[left] - scores[right]
-        if abs(difference) <= 1.0:
-            if head_to_head.get((left, right)): return -1
-            if head_to_head.get((right, left)): return 1
-        if difference != 0: return -1 if difference > 0 else 1
-        return -1 if left < right else (1 if left > right else 0)
-
-    ordered = sorted(team_names, key=cmp_to_key(compare))
+    ordered_power = sorted(team_names, key=lambda team: (-power_scores[team], team))
+    ordered_resume = sorted(team_names, key=lambda team: (-resume[team], team))
+    power_ranks = {team: rank for rank, team in enumerate(ordered_power, 1)}
+    resume_ranks = {team: rank for rank, team in enumerate(ordered_resume, 1)}
     component_ranks = {}
     for key, values in {
         "resume": resume,
-        "opponent_adjusted_results": srs,
-        "predictive": predictive,
+        "game_control": srs,
+        "live_performance": live_performance,
         "observed_efficiency": observed_net,
     }.items():
         component_ranks[key] = {
@@ -160,18 +169,21 @@ def build(metrics: dict, observed: dict, schedule: dict) -> dict:
         }
 
     rows = []
-    for rank, team in enumerate(ordered, 1):
+    for team in ordered_power:
         record = metric_teams[team].get("record", {})
         rows.append({
-            "rank": rank,
+            "rank": power_ranks[team],
+            "power_rank": power_ranks[team],
+            "resume_rank": resume_ranks[team],
             "team": team,
             "conference": metric_teams[team].get("conference"),
             "record": f"{int(record.get('wins') or 0)}-{int(record.get('losses') or 0)}",
-            "index_score": round(scores[team], 3),
+            "power_score": round(power_scores[team], 3),
+            "resume_score": round(resume_pct[team], 3),
             "components": {
                 "resume": {"rank": component_ranks["resume"][team], "percentile": resume_pct[team], "value": round(resume[team], 3)},
-                "opponent_adjusted_results": {"rank": component_ranks["opponent_adjusted_results"][team], "percentile": srs_pct[team], "value": round(srs[team], 3)},
-                "predictive": {"rank": component_ranks["predictive"][team], "percentile": predictive_pct[team], "value": round(predictive[team], 3)},
+                "game_control": {"rank": component_ranks["game_control"][team], "percentile": srs_pct[team], "value": round(srs[team], 3)},
+                "live_performance": {"rank": component_ranks["live_performance"][team], "percentile": live_performance_pct[team], "value": round(live_performance[team], 3)},
                 "observed_efficiency": {"rank": component_ranks["observed_efficiency"][team], "percentile": observed_pct[team], "value": round(observed_net[team], 3)},
             },
             "sample": {"fbs_games": fbs_games[team], "fbs_wins": fbs_wins[team], "fbs_losses": fbs_losses[team], "fcs_wins": fcs_wins[team], "fcs_losses": fcs_losses[team]},
@@ -179,7 +191,7 @@ def build(metrics: dict, observed: dict, schedule: dict) -> dict:
 
     return {
         "meta": {
-            "version": "thi_cfb_index_v2.0",
+            "version": "thi_cfb_index_v3.0",
             "status": "INDEPENDENT_BETA",
             "season": int(metrics.get("meta", {}).get("year") or schedule.get("meta", {}).get("year")),
             "through_week": through_week,
@@ -187,14 +199,16 @@ def build(metrics: dict, observed: dict, schedule: dict) -> dict:
             "poll_inputs": False,
             "market_inputs": False,
             "roster_inputs": False,
+            "preseason_inputs": False,
             "model_a_touched": False,
-            "model_usage": "public_ranking_display_and_sort_only",
+            "model_usage": "power_badges_sorting_and_ratings_display_only",
             "margin_cap_points": MARGIN_CAP,
             "neutral_site_home_adjustment": 0.0,
             "non_neutral_home_adjustment": HOME_EDGE,
-            "weights": WEIGHTS,
-            "head_to_head_tiebreak_window": 1.0,
-            "methodology": "Results-first blend of resume quality, opponent-adjusted capped scoring margin, Model A predictive strength and current observed efficiency. Polls are excluded.",
+            "primary_surface": "power_rank",
+            "power_weights": POWER_WEIGHTS,
+            "resume_method": "Opponent quality from THI Power, result, capped margin and location. FCS wins receive limited credit; FCS losses receive a major penalty.",
+            "methodology": "THI Power estimates current neutral-field strength from current-season opponent-adjusted efficiency, live performance and capped game control. THI Resume separately ranks accomplishment. Polls, markets and preseason ratings are excluded.",
         },
         "teams": rows,
     }
