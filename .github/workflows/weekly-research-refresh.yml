@@ -67,11 +67,9 @@ jobs:
           python -m py_compile \
             scripts/research_thi_power.py \
             scripts/research_thi_power_v03.py \
-            scripts/build_cfb_index_top25.py \
             scripts/build_situational_profiles.py
           python -m unittest discover -s scripts -p 'test_research_thi_power.py' -v
           python -m unittest discover -s scripts -p 'test_research_thi_power_v03.py' -v
-          python -m unittest discover -s scripts -p 'test_build_cfb_index_top25.py' -v
           python -m unittest discover -s scripts -p 'test_situational_profiles.py' -v
           node scripts/test_situational_profiles_ui.cjs
 
@@ -108,8 +106,6 @@ jobs:
             /tmp/thi-power-v03/thi_power_candidate_v03.json \
             data/thi_power_ratings.json
 
-          python scripts/build_cfb_index_top25.py
-
       - name: Build verified situational profiles
         env:
           RESOLVED_WEEK: ${{ steps.cutoff.outputs.week }}
@@ -132,7 +128,6 @@ jobs:
 
           week = int(os.environ['RESOLVED_WEEK'])
           power = json.loads(Path('data/thi_power_ratings.json').read_text())
-          index = json.loads(Path('data/cfb_index_top25.json').read_text())
           profiles = json.loads(
               Path('data/research/situational_profiles_2026.json').read_text()
           )
@@ -146,16 +141,6 @@ jobs:
           assert power['meta']['selected_decay_rate'] == 0.15
           assert len(power['teams']) == 138
           assert [row['rank'] for row in power['teams']] == list(range(1, 139))
-
-          assert index['meta']['version'] == 'thi_cfb_index_v1.0'
-          assert index['meta']['status'] == 'RESUME_AWARE_BETA'
-          assert index['meta']['through_week'] == week
-          assert index['meta']['model_a_touched'] is False
-          assert index['meta']['market_inputs'] is False
-          assert index['meta']['roster_inputs'] is False
-          assert len(index['top_25']) == 25
-          assert len(index['teams']) == 138
-          assert [row['rank'] for row in index['teams']] == list(range(1, 139))
 
           assert profiles['meta']['status'] == 'research_only_situational_profiles_v1'
           assert profiles['meta']['season'] == 2026
@@ -178,7 +163,7 @@ jobs:
           PY
 
           changed=$(git status --porcelain --untracked-files=all | grep -vE '^\?\? .*/__pycache__/' || true)
-          unexpected=$(printf '%s\n' "$changed" | grep -vE '^( M|\?\?) (data/thi_power_ratings.json|data/cfb_index_top25.json|data/research/situational_profiles_2026.json)$' || true)
+          unexpected=$(printf '%s\n' "$changed" | grep -vE '^( M|\?\?) (data/thi_power_ratings.json|data/research/situational_profiles_2026.json)$' || true)
           if [ -n "$unexpected" ]; then
             echo 'Unexpected files changed during weekly research refresh'
             printf '%s\n' "$unexpected"
@@ -191,7 +176,6 @@ jobs:
           name: thi-research-week-${{ steps.cutoff.outputs.week }}
           path: |
             data/thi_power_ratings.json
-            data/cfb_index_top25.json
             data/research/situational_profiles_2026.json
           if-no-files-found: error
           retention-days: 90
@@ -204,7 +188,6 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add \
             data/thi_power_ratings.json \
-            data/cfb_index_top25.json \
             data/research/situational_profiles_2026.json
 
           if git diff --staged --quiet; then
@@ -219,8 +202,6 @@ jobs:
             if ! git diff --quiet "$GITHUB_SHA" origin/main -- \
               scripts/research_thi_power.py \
               scripts/research_thi_power_v03.py \
-              scripts/build_cfb_index_top25.py \
-              scripts/test_build_cfb_index_top25.py \
               scripts/build_situational_profiles.py \
               scripts/build_verified_possession_ledger.py \
               scripts/reconstruct_scoring_events.py \
