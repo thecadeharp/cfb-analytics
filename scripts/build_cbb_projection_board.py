@@ -22,6 +22,8 @@ ROOT = Path(__file__).resolve().parents[1]
 VERSION = "thi-cbb-projection-board-v0.5"
 SETTLED_MIN_GAMES = 6
 SPREAD_SIGNAL_EDGE = 5.0
+MINIMUM_SIGNAL_BOOKS = 3
+STANDARDIZED_FEATURE_CLIP = 3.0
 
 
 def finite(value: Any) -> float | None:
@@ -40,7 +42,12 @@ def predict(features: dict[str, float], model: dict[str, Any]) -> float:
     value = float(model["coefficients"][0])
     for coefficient, name in zip(model["coefficients"][1:], model["feature_names"]):
         feature = features.get(name, float(model["means"][name]))
-        value += float(coefficient) * (feature - float(model["means"][name])) / float(model["scales"][name])
+        standardized = clip(
+            (feature - float(model["means"][name])) / float(model["scales"][name]),
+            -STANDARDIZED_FEATURE_CLIP,
+            STANDARDIZED_FEATURE_CLIP,
+        )
+        value += float(coefficient) * standardized
     return value
 
 
@@ -65,7 +72,12 @@ def feature_contributions(
         if name in excluded:
             continue
         feature = features.get(name, float(model["means"][name]))
-        points = float(coefficient) * (feature - float(model["means"][name])) / float(model["scales"][name])
+        standardized = clip(
+            (feature - float(model["means"][name])) / float(model["scales"][name]),
+            -STANDARDIZED_FEATURE_CLIP,
+            STANDARDIZED_FEATURE_CLIP,
+        )
+        points = float(coefficient) * standardized
         rows.append({"feature": name, "value": round(feature, 3), "margin_points": round(points, 2)})
     rows.sort(key=lambda row: (-abs(row["margin_points"]), row["feature"]))
     return rows[:limit]
@@ -288,7 +300,9 @@ def build_board(
         edge = margin + market_spread if market_spread is not None else None
         market_total = finite(market.get("consensus_total"))
         total_edge = total - market_total if market_total is not None else None
-        signal_eligible = state == "tracked_sample" and edge is not None and abs(edge) >= SPREAD_SIGNAL_EDGE
+        book_count = int(market.get("book_count") or 0)
+        market_coverage_state = "consensus" if book_count >= MINIMUM_SIGNAL_BOOKS else "isolated" if market_spread is not None else "no_line"
+        signal_eligible = state == "tracked_sample" and edge is not None and abs(edge) >= SPREAD_SIGNAL_EDGE and book_count >= MINIMUM_SIGNAL_BOOKS
         home_quality = home["offense"] - home["defense"]
         away_quality = away["offense"] - away["defense"]
         watchability = round(clip(62.0 - abs(margin) * 2.0 + max(0.0, (home_quality + away_quality) / 2.0), 1.0, 99.0))
@@ -308,6 +322,7 @@ def build_board(
                 "home_rating_source": home["rating_source"],
                 "away_rating_source": away["rating_source"],
                 "spread_signal_eligible": signal_eligible,
+                "market_coverage_state": market_coverage_state,
                 "spread_edge": round(edge, 1) if edge is not None else None,
                 "spread_signal_tier": spread_signal_tier(edge),
                 "signal_confidence": "developing" if signal_eligible else "research",
@@ -372,11 +387,13 @@ def build_board(
             "status_counts": status_counts,
             "settled_minimum_games": SETTLED_MIN_GAMES,
             "spread_signal_minimum_edge": SPREAD_SIGNAL_EDGE,
-            "spread_signal_policy": "Only tracked-sample games with at least a five-point model-versus-market disagreement are eligible.",
+            "minimum_books_for_signal": MINIMUM_SIGNAL_BOOKS,
+            "spread_signal_policy": "Only tracked-sample games with at least a five-point model-versus-market disagreement and a consensus from three or more books are eligible.",
             "totals_signal_policy": "Withheld until totals validation clears its independent promotion gate.",
             "projection_state": "research projections; sample-gated spread signals",
             "four_factor_method": "Neutral preseason Four Factor baselines blend toward chronological current-season offense and defense observations.",
             "home_court_method": "Program-specific five-season regularized conference-game estimates replace the model's national campus coefficient; neutral-site games receive zero.",
+            "inference_standardized_feature_clip": STANDARDIZED_FEATURE_CLIP,
         },
         "games": output,
     }

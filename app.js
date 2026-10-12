@@ -236,6 +236,47 @@ function signalConfidence(status) {
   return signalStats(status)?.confidence ?? "DEVELOPING";
 }
 
+function signalSampleSize(status) {
+  if (canonicalSignal(status) === "NO LINE") return null;
+  const value = Number(signalStats(status)?.sample?.ats_decisions);
+  return Number.isFinite(value) ? value : null;
+}
+
+function marketCoverage(game) {
+  const books = Number(game?.market?.spread_books || 0);
+  if (!hasValue(game?.market?.home_spread)) return { books: 0, state: "no-market", label: "No market" };
+  if (books < 3) return { books, state: "isolated", label: `ISOLATED PRICE [${books} book${books === 1 ? "" : "s"}]` };
+  return { books, state: "consensus", label: `${books} books` };
+}
+
+function marketDisagreementDriver(game) {
+  const status = canonicalSignal(game?.comparison?.signal ?? game?.comparison?.status);
+  if (status !== "OUTLIER") return null;
+  const history = marketHistoryData?.games?.[String(game?.game_id)] ?? {};
+  const first = history.first_captured_home_spread ?? history.open_home_spread;
+  const current = history.current_home_spread ?? game?.market?.home_spread;
+  const model = game?.projection?.home_spread;
+  if (![first, current, model].every(hasValue)) return "Origin unavailable";
+  const openingGap = Math.abs(Number(model) - Number(first));
+  const currentGap = Math.abs(Number(model) - Number(current));
+  const move = Math.abs(Number(current) - Number(first));
+  if (move < 0.25) return "Opening disagreement";
+  if (currentGap >= openingGap + 1) return "Market move amplified gap";
+  if (currentGap <= openingGap - 1) return "Market moved toward THI";
+  return "Mixed opening + movement gap";
+}
+
+function updateProjectionDataAnchor() {
+  const node = document.getElementById("projection-data-anchor");
+  if (!node) return;
+  const generated = projectionsData?.meta?.generated || oddsData?.meta?.generated;
+  const parsed = generated ? new Date(generated) : null;
+  const snapshot = parsed && !Number.isNaN(parsed.getTime())
+    ? parsed.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/New_York", timeZoneName: "short" })
+    : "awaiting refresh";
+  node.textContent = `${currentWeek === null ? "Active week" : `Week ${currentWeek}`} · all times Eastern · market snapshot ${snapshot}`;
+}
+
 function confidenceClass(confidence) {
   switch (String(confidence || "").toUpperCase()) {
     case "ESTABLISHED": return "confidence-established";
@@ -2546,13 +2587,17 @@ function renderProjections() {
   const summary = document.getElementById("projection-summary");
   if (!container) return;
 
+  updateProjectionDataAnchor();
+
   const games = projectionGamesForCurrentView();
   const marketGames = games.filter(game => hasValue(game?.market?.home_spread));
+  const consensusGames = games.filter(game => marketCoverage(game).state === "consensus");
+  const isolatedGames = games.filter(game => marketCoverage(game).state === "isolated");
 
-  const material = statusCount(games, "STRONG EDGE", "MATERIAL DISAGREEMENT");
-  const plays = statusCount(games, "EDGE", "PLAY");
-  const smallEdges = statusCount(games, "SLIGHT EDGE", "LEAN", "SMALL EDGE");
-  const outliers = statusCount(games, "OUTLIER");
+  const material = statusCount(consensusGames, "STRONG EDGE", "MATERIAL DISAGREEMENT");
+  const plays = statusCount(consensusGames, "EDGE", "PLAY");
+  const smallEdges = statusCount(consensusGames, "SLIGHT EDGE", "LEAN", "SMALL EDGE");
+  const outliers = statusCount(consensusGames, "OUTLIER");
 
   if (summary) {
     summary.innerHTML = `
@@ -2562,6 +2607,7 @@ function renderProjections() {
       · <span class="summary-play">${plays} plays</span>
       · <span class="summary-small">${smallEdges} small edges</span>
       ${outliers ? `· <span class="summary-outlier">${outliers} outliers</span>` : ""}
+      ${isolatedGames.length ? `· <span class="summary-outlier">${isolatedGames.length} isolated prices excluded</span>` : ""}
     `;
   }
 
@@ -2579,7 +2625,7 @@ function renderProjections() {
       <thead>
         <tr>
           <th>Matchup</th>
-          <th>THI Watch</th>
+          <th>Watchability</th>
           <th>Our Line</th>
           <th>Market</th>
           <th>Total</th>
@@ -2615,7 +2661,11 @@ function renderProjectionRow(game) {
   const recommendedSide = preferred && status !== "ALIGNED" && hasValue(marketSpread)
     ? marketSideForTeam(preferred, homeName, awayName, marketSpread)
     : null;
-  const confidence = signalConfidence(status);
+  const baseConfidence = signalConfidence(status);
+  const confidenceSample = signalSampleSize(status);
+  const coverage = marketCoverage(game);
+  const confidence = coverage.state === "isolated" ? "UNVERIFIED" : baseConfidence;
+  const disagreementDriver = marketDisagreementDriver(game);
   const cssStatus = statusClass(status);
   const confidenceCss = confidenceClass(confidence);
 
@@ -2675,6 +2725,7 @@ function renderProjectionRow(game) {
         <div class="line-primary">${escapeHtml(shortSpread(marketSpread))}</div>
         <div class="line-secondary">
           ${bookmaker ? escapeHtml(bookmaker) : "No current market"}
+          ${coverage.state === "isolated" ? `<br><span class="summary-outlier">${escapeHtml(coverage.label)}</span>` : ""}
         </div>
       </td>
 
@@ -2698,14 +2749,15 @@ function renderProjectionRow(game) {
         <span class="status ${cssStatus}">
           ${escapeHtml(displayStatus(status))}
         </span>
+        ${disagreementDriver ? `<div class="signal-record">${escapeHtml(disagreementDriver)}</div>` : ""}
       </td>
 
       <td class="status-cell">
         <span class="status ${confidenceCss}">
-          ${escapeHtml(confidence)}
+          ${escapeHtml(confidence)}${coverage.state !== "isolated" && confidenceSample !== null ? ` [n=${confidenceSample}]` : ""}
         </span>
         <div class="signal-record">
-          ${escapeHtml(signalRecordText(status))} · ${escapeHtml(signalAtsText(status))}
+          ${coverage.state === "isolated" ? "Excluded from qualified signal record" : `${escapeHtml(signalRecordText(status))} · ${escapeHtml(signalAtsText(status))}`}
         </div>
       </td>
     </tr>

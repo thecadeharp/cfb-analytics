@@ -575,6 +575,15 @@
       font-weight: 500;
     }
 
+    .projection-data-anchor {
+      margin-top: 10px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+
     /* =========================
        PROJECTION TABLE
     ========================== */
@@ -1388,6 +1397,10 @@
         separately measures how much prospective evidence supports each tier.
       </div>
 
+      <div class="projection-data-anchor" id="projection-data-anchor" aria-live="polite">
+        Active week · all times Eastern · loading market snapshot
+      </div>
+
       <details class="signal-guide">
         <summary>
           <span>How Signals Work</span>
@@ -1484,7 +1497,7 @@
 
         <select class="team-search projection-sort" id="projection-sort" aria-label="Sort projection games">
           <option value="edge">Sort: Game time</option>
-          <option value="watch">Sort: THI Watch</option>
+          <option value="watch">Sort: Watchability</option>
           <option value="top25">Sort: THI Power Top 25</option>
         </select>
 
@@ -1568,7 +1581,7 @@
 
       <div class="thi-ratings-difference" aria-label="Difference between Team Data and THI Ratings">
         <div><strong>Team Data</strong><span>Observed efficiency, schedule and resume context, market performance, and team dossiers.</span></div>
-        <div><strong>THI Ratings</strong><span>Separate Power and Résumé orders: who is strongest today on a neutral field, and who has earned the best season.</span></div>
+        <div><strong>THI Ratings</strong><span>Four distinct lenses: predictive neutral-field Power, opponent-adjusted Current Form, earned Résumé accomplishment, and internal Schedule Strength (SOS).</span></div>
         <p>Both are independent research layers. Model A projections remain separately frozen.</p>
       </div>
 

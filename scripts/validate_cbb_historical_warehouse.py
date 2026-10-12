@@ -55,7 +55,9 @@ def validate_season(path: Path) -> dict[str, Any]:
     meta = payload.get("meta") or {}
     games = payload.get("games") or []
     teams = payload.get("season_end_teams") or []
-    assert meta.get("builder_version") == "cbb-history-v1.1", f"{path}: wrong builder"
+    assert meta.get("builder_version") in {"cbb-history-v1.1", "cbb-history-v1.2"}, f"{path}: wrong builder"
+    if meta.get("builder_version") == "cbb-history-v1.2":
+        assert meta.get("division_one_registry_enforced") is True, f"{path}: D-I registry barrier missing"
     assert meta.get("raw_api_data_stored") is False, f"{path}: raw-data flag is not false"
     assert len(games) == meta.get("game_count") and len(games) >= 3000, f"{path}: invalid game count"
     assert len(teams) == meta.get("team_count") and len(teams) >= 300, f"{path}: invalid team count"
@@ -63,6 +65,7 @@ def validate_season(path: Path) -> dict[str, Any]:
     assert forbidden is None, f"{path}: raw box-score key persisted: {forbidden}"
 
     game_ids: set[str] = set()
+    division_one_team_ids = {str(team.get("team_id")) for team in teams if team.get("team_id") is not None}
     prior_sort_key: tuple[str, str] | None = None
     market_count = 0
     for game in games:
@@ -73,6 +76,9 @@ def validate_season(path: Path) -> dict[str, Any]:
         assert prior_sort_key is None or sort_key >= prior_sort_key, f"{path}: games are not sorted"
         prior_sort_key = sort_key
         assert game.get("home_team_id") != game.get("away_team_id"), f"{path}: identical team IDs"
+        if meta.get("builder_version") == "cbb-history-v1.2":
+            assert str(game.get("home_team_id")) in division_one_team_ids, f"{path}: non-D-I home team retained"
+            assert str(game.get("away_team_id")) in division_one_team_ids, f"{path}: non-D-I away team retained"
         outcome = game.get("outcome") or {}
         home_points = outcome.get("home_points")
         away_points = outcome.get("away_points")

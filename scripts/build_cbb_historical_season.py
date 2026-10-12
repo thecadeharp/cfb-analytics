@@ -31,7 +31,7 @@ except ModuleNotFoundError:
 ROOT = Path(__file__).resolve().parents[1]
 HISTORY_DIR = ROOT / "data" / "cbb" / "history"
 SCHEMA_VERSION = "1.0"
-BUILDER_VERSION = "cbb-history-v1.1"
+BUILDER_VERSION = "cbb-history-v1.2"
 
 
 def finite(value: Any) -> float | None:
@@ -103,9 +103,18 @@ def unit_features(unit: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def paired_game(row: dict[str, Any], line_record: dict[str, Any] | None) -> dict[str, Any] | None:
+def paired_game(
+    row: dict[str, Any],
+    line_record: dict[str, Any] | None,
+    division_one_team_ids: set[str] | None = None,
+) -> dict[str, Any] | None:
     if row.get("isHome") is not True:
         return None
+    if division_one_team_ids is not None:
+        home_id = str(row.get("teamId"))
+        away_id = str(row.get("opponentId"))
+        if home_id not in division_one_team_ids or away_id not in division_one_team_ids:
+            return None
     home = unit_features(row.get("teamStats") or {})
     away = unit_features(row.get("opponentStats") or {})
     home_points = finite(home.get("points"))
@@ -188,6 +197,11 @@ def build_season(
             raise RuntimeError(f"invalid {name} response")
     if len(directory["teams"]) < 300 or len(leaderboard) < 300:
         raise RuntimeError(f"season {season} does not have full Division I coverage")
+    division_one_team_ids = {
+        str(team.get("id"))
+        for team in directory["teams"]
+        if isinstance(team, dict) and team.get("id") is not None
+    }
 
     game_rows: dict[str, dict[str, Any]] = {}
     line_rows: dict[str, dict[str, Any]] = {}
@@ -206,7 +220,7 @@ def build_season(
 
     games = []
     for game_id, row in game_rows.items():
-        paired = paired_game(row, line_rows.get(game_id))
+        paired = paired_game(row, line_rows.get(game_id), division_one_team_ids)
         if paired:
             games.append(paired)
     games.sort(key=lambda row: (str(row.get("start_date") or ""), str(row.get("game_id") or "")))
@@ -226,6 +240,7 @@ def build_season(
             "game_count": len(games),
             "team_count": len(team_rows),
             "games_with_market": sum(row["market"]["book_count"] > 0 for row in games),
+            "division_one_registry_enforced": True,
             "raw_api_data_stored": False,
             "feature_timing": "postgame_realized_features; walk_forward_pregame_features_not_yet_built",
             "source_attribution": "Data provided by CollegeBasketballData.com; feature engineering by The Hammer Index.",

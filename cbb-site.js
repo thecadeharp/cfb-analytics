@@ -388,7 +388,7 @@
         <select id="cbb-projection-conference" class="cbb-select"><option value="all">All conferences</option>${conferences.map(conf => `<option value="${escapeHtml(conf)}" ${state.projectionConference === conf ? "selected" : ""}>${escapeHtml(conf)}</option>`).join("")}</select>
         <select id="cbb-projection-signal" class="cbb-select"><option value="all">All signals</option>${[['no_line','No line'],['aligned','Aligned'],['small','Small edge'],['play','Play'],['material','Material disagreement'],['outlier','Outlier']].map(([value,label]) => `<option value="${value}" ${state.projectionSignal === value ? "selected" : ""}>${label}</option>`).join("")}</select>
         <select id="cbb-projection-confidence" class="cbb-select"><option value="all">All confidence</option>${[['research','Research only'],['developing','Developing'],['validated','Validated'],['established','Established']].map(([value,label]) => `<option value="${value}" ${state.projectionConfidence === value ? "selected" : ""}>${label}</option>`).join("")}</select>
-        <select id="cbb-projection-sort" class="cbb-select"><option value="time" ${state.projectionSort === "time" ? "selected" : ""}>Sort: Game time</option><option value="watch" ${state.projectionSort === "watch" ? "selected" : ""}>Sort: THI Watch</option><option value="top25" ${state.projectionSort === "top25" ? "selected" : ""}>Sort: THI Top 25 first</option></select>
+        <select id="cbb-projection-sort" class="cbb-select"><option value="time" ${state.projectionSort === "time" ? "selected" : ""}>Sort: Game time</option><option value="watch" ${state.projectionSort === "watch" ? "selected" : ""}>Sort: Watchability</option><option value="top25" ${state.projectionSort === "top25" ? "selected" : ""}>Sort: THI Top 25 first</option></select>
         <button id="cbb-projection-clear" class="cbb-clear-button" type="button">Clear</button>
       </div>
 
@@ -401,7 +401,7 @@
 
       <div class="cbb-panel cbb-table-wrap cbb-projection-table-wrap">
         <table class="cbb-table cbb-projection-table" aria-label="THI college basketball game projections"><thead><tr>
-          <th>Matchup</th><th>THI Watch</th><th>THI Spread</th><th>Market</th><th>Total</th><th>Model Edge</th><th>Model Signal</th><th>Signal Confidence</th>
+          <th>Matchup</th><th>Watchability</th><th>THI Spread</th><th>Market</th><th>Total</th><th>Model Edge</th><th>Model Signal</th><th>Signal Confidence</th>
         </tr></thead><tbody id="cbb-projection-body"></tbody></table>
       </div>
       <div class="cbb-projection-footer"><span id="cbb-projection-summary"></span><button id="cbb-projection-more" type="button">Show more games</button></div>
@@ -640,6 +640,24 @@
       ? `${edgeTeam.team} ${edgeMarketFormatted}`
       : null;
     const confidence = confidenceTier(game);
+    const bookCount = Number(game.market?.book_count || 0);
+    const isolatedMarket = Number.isFinite(marketLine) && bookCount < 3;
+    const contract = state.data?.marketContract?.games?.[String(game.game_id)] || {};
+    const firstCapturedValue = contract.market?.opening?.home_spread;
+    const firstCaptured = firstCapturedValue === null || firstCapturedValue === undefined ? NaN : Number(firstCapturedValue);
+    const currentGap = Number.isFinite(edge) ? Math.abs(edge) : NaN;
+    const openingGap = Number.isFinite(firstCaptured) ? Math.abs(margin + firstCaptured) : NaN;
+    const observedMoveValue = contract.market?.movement?.home_spread_points;
+    const observedMove = observedMoveValue === null || observedMoveValue === undefined ? NaN : Number(observedMoveValue);
+    const outlierDriver = tier !== "outlier" ? "" : !Number.isFinite(openingGap) || !Number.isFinite(currentGap)
+      ? "Origin unavailable"
+      : !Number.isFinite(observedMove) || Math.abs(observedMove) < .25
+        ? "Opening disagreement"
+        : currentGap >= openingGap + 1
+          ? "Market move amplified gap"
+          : currentGap <= openingGap - 1
+            ? "Market moved toward THI"
+            : "Mixed opening + movement gap";
     const totalMarket = validMarketTotal(game.market?.consensus_total) ? Number(game.market.consensus_total) : null;
     const projectedTotal = Number(projection.total);
     const totalEdge = totalMarket !== null && Number.isFinite(projectedTotal) && projectedTotal > 0 ? projectedTotal - totalMarket : null;
@@ -656,11 +674,11 @@
       <td><div class="cbb-matchup-team">${teamLogo(game.away,"small")}<div class="cbb-matchup-name"><strong>${escapeHtml(game.away?.team || "—")}</strong>${awayRank ? `<small>#${awayRank}</small>` : ""}</div><span>${gameStatus(game) === "final" ? integer(game.away?.score) : ""}</span></div><div class="cbb-matchup-team">${teamLogo(game.home,"small")}<div class="cbb-matchup-name"><strong>${escapeHtml(game.home?.team || "—")}</strong>${homeRank ? `<small>#${homeRank}</small>` : ""}</div><span>${gameStatus(game) === "final" ? integer(game.home?.score) : ""}</span></div><div class="cbb-team-meta">${escapeHtml(time)} · ${escapeHtml(network)} · ${gameType}</div>${varianceMarkup}</td>
       <td><span class="cbb-watch-score">${integer(watch)}</span><div class="cbb-team-meta">${watchLabel}</div></td>
       <td class="cbb-line-cell"><strong class="cbb-number cbb-line-value" title="${escapeHtml(edgeMarketTextFull || projectedLineFull)}">${escapeHtml(edgeMarketText || projectedLine)}</strong><div class="cbb-team-meta">${edgeMarketText ? "THI preferred side at current market" : "THI projected spread"}</div></td>
-      <td class="cbb-line-cell"><strong class="cbb-number cbb-line-value" title="${escapeHtml(marketTextFull)}">${escapeHtml(marketText)}</strong><div class="cbb-team-meta">${game.market?.book_count ? `${integer(game.market.book_count)} books` : "No consensus line"}</div></td>
+      <td class="cbb-line-cell"><strong class="cbb-number cbb-line-value" title="${escapeHtml(marketTextFull)}">${escapeHtml(marketText)}</strong><div class="cbb-team-meta">${game.market?.book_count ? `${integer(game.market.book_count)} books` : "No consensus line"}${isolatedMarket ? " · ISOLATED PRICE" : ""}</div></td>
       <td><strong class="cbb-number">${Number.isFinite(projectedTotal) && projectedTotal > 0 ? number(projectedTotal,1) : "—"}</strong><div class="cbb-team-meta">Market ${totalMarket !== null ? number(totalMarket,1) : "—"}</div>${totalFlag}</td>
       <td><strong class="cbb-edge-value">${Number.isFinite(edge) ? `${number(Math.abs(edge),1)} pts` : "—"}</strong><div class="cbb-team-meta">${edgeTeam ? `Model favors ${escapeHtml(edgeTeam.team)}` : "No market comparison"}</div></td>
-      <td><span class="cbb-signal cbb-signal-${tier}">${escapeHtml(signalLabel(tier))}</span></td>
-      <td><span class="cbb-confidence cbb-confidence-${confidence}">${escapeHtml(confidence === "research" ? "Research only" : humanize(confidence))}</span><div class="cbb-team-meta">${projection.spread_signal_eligible ? "Qualified decision" : "Not in prospective record"}</div></td>
+      <td><span class="cbb-signal cbb-signal-${tier}">${escapeHtml(signalLabel(tier))}</span>${outlierDriver ? `<div class="cbb-team-meta">${escapeHtml(outlierDriver)}</div>` : ""}</td>
+      <td><span class="cbb-confidence cbb-confidence-${isolatedMarket ? "research" : confidence}">${escapeHtml(isolatedMarket ? "Unverified" : confidence === "research" ? "Research only" : humanize(confidence))}</span><div class="cbb-team-meta">${projection.spread_signal_eligible ? "Qualified decision" : isolatedMarket ? "Fewer than 3 books" : "Not in prospective record"}</div></td>
     </tr>`;
   }
 

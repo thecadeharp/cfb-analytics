@@ -14,6 +14,7 @@ from scripts.build_cbb_historical_season import (
     season_windows,
 )
 from scripts.validate_cbb_historical_warehouse import validate_warehouse
+from scripts.filter_cbb_history_to_division_one import filter_payload
 
 
 class CbbHistoricalSeasonTests(unittest.TestCase):
@@ -26,6 +27,33 @@ class CbbHistoricalSeasonTests(unittest.TestCase):
             "pace": 0,
         }
         self.assertIsNone(paired_game(row, None))
+
+    def test_rejects_game_when_either_team_is_outside_division_one_registry(self):
+        row = {
+            "gameId": 100,
+            "isHome": True,
+            "teamId": 1,
+            "opponentId": 999,
+            "teamStats": {"points": {"total": 80}, "possessions": 70},
+            "opponentStats": {"points": {"total": 55}, "possessions": 70},
+            "pace": 70,
+        }
+        self.assertIsNone(paired_game(row, None, {"1", "2"}))
+
+    def test_filters_existing_derived_history_to_division_one(self):
+        payload = {
+            "meta": {"builder_version": "cbb-history-v1.1", "games_with_market": 2},
+            "season_end_teams": [{"team_id": 1}, {"team_id": 2}],
+            "games": [
+                {"home_team_id": 1, "away_team_id": 2, "market": {"book_count": 1}},
+                {"home_team_id": 1, "away_team_id": 999, "market": {"book_count": 1}},
+            ],
+        }
+        filtered, removed = filter_payload(payload)
+        self.assertEqual(removed, 1)
+        self.assertEqual(filtered["meta"]["game_count"], 1)
+        self.assertEqual(filtered["meta"]["games_with_market"], 1)
+        self.assertTrue(filtered["meta"]["division_one_registry_enforced"])
 
     def test_month_windows_cover_regular_season_without_overlap(self):
         windows = season_windows(2024)
@@ -77,7 +105,8 @@ class CbbHistoricalSeasonTests(unittest.TestCase):
             self.assertEqual(manifest["meta"]["game_count"], 3000)
             with gzip.open(root / "season_2024.json.gz", "rt", encoding="utf-8") as handle:
                 saved = json.load(handle)
-            self.assertEqual(saved["meta"]["builder_version"], "cbb-history-v1.1")
+            self.assertEqual(saved["meta"]["builder_version"], "cbb-history-v1.2")
+            self.assertTrue(saved["meta"]["division_one_registry_enforced"])
             self.assertEqual(validate_warehouse(root), {"season_count": 1, "game_count": 3000})
 
 

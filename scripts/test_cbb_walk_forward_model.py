@@ -80,7 +80,7 @@ class CbbWalkForwardModelTests(unittest.TestCase):
             path = Path(tmp) / "season_2026.json.gz"
             with gzip.open(path, "wt", encoding="utf-8") as handle:
                 json.dump({"meta": {"season": 2026, "builder_version": "cbb-history-v1.0"}}, handle)
-            with self.assertRaisesRegex(RuntimeError, "clean cbb-history-v1.1"):
+            with self.assertRaisesRegex(RuntimeError, "clean supported CBB history"):
                 load_seasons(Path(tmp))
 
     def test_current_priors_prefer_verified_roster_continuity(self):

@@ -2,7 +2,7 @@
 
 import unittest
 
-from scripts.build_cbb_projection_board import build_board
+from scripts.build_cbb_projection_board import build_board, predict
 
 
 def profile(team_id: int, games: int) -> dict:
@@ -35,12 +35,17 @@ def prior(team_id: int) -> dict:
 
 
 class CbbProjectionBoardTests(unittest.TestCase):
+    def test_clips_out_of_distribution_standardized_features(self):
+        model = {"feature_names": ["x"], "means": {"x": 0}, "scales": {"x": 1}, "coefficients": [0, 2]}
+        self.assertEqual(predict({"x": 100}, model), 6)
+        self.assertEqual(predict({"x": -100}, model), -6)
+
     def test_builds_sample_gated_spread_projections_and_withholds_totals_signals(self):
         games = {
             "meta": {"season": 2027},
             "games": [
-                {"game_id": 1, "status": "scheduled", "neutral_site": False, "conference_game": False, "home": {"team_id": 1, "team": "Team 1"}, "away": {"team_id": 2, "team": "Team 2"}, "market": {"consensus_home_spread": -1}},
-                {"game_id": 2, "status": "scheduled", "neutral_site": True, "conference_game": True, "home": {"team_id": 3, "team": "Team 3"}, "away": {"team_id": 4, "team": "Team 4"}, "market": {"consensus_home_spread": 10}},
+                {"game_id": 1, "status": "scheduled", "neutral_site": False, "conference_game": False, "home": {"team_id": 1, "team": "Team 1"}, "away": {"team_id": 2, "team": "Team 2"}, "market": {"consensus_home_spread": -1, "book_count": 3}},
+                {"game_id": 2, "status": "scheduled", "neutral_site": True, "conference_game": True, "home": {"team_id": 3, "team": "Team 3"}, "away": {"team_id": 4, "team": "Team 4"}, "market": {"consensus_home_spread": 10, "book_count": 3}},
                 {"game_id": 3, "status": "final", "home": {"team_id": 1}, "away": {"team_id": 2}},
             ],
         }
@@ -65,6 +70,7 @@ class CbbProjectionBoardTests(unittest.TestCase):
         self.assertEqual(opening["model_input_label"], "prior_based")
         self.assertEqual(opening["game_classification"], "nonconference")
         self.assertEqual(opening["signal_confidence"], "research")
+        self.assertEqual(opening["market_coverage_state"], "consensus")
         self.assertTrue(1 <= opening["watchability_score"] <= 99)
         self.assertEqual(opening["matchup_context"]["home_court"]["points"], 4.2)
         self.assertEqual(opening["matchup_context"]["home_court"]["source"], "team_specific_regularized")
@@ -80,6 +86,11 @@ class CbbProjectionBoardTests(unittest.TestCase):
         self.assertEqual(tracked["matchup_context"]["home"]["games"], 6)
         self.assertIn("four_factor_matchup", tracked["matchup_context"])
         self.assertEqual(tracked["matchup_context"]["home_court"]["points"], 0.0)
+
+        thin_games = {"meta": {"season": 2027}, "games": [{"game_id": 4, "status": "scheduled", "neutral_site": False, "conference_game": False, "home": {"team_id": 3, "team": "Team 3"}, "away": {"team_id": 4, "team": "Team 4"}, "market": {"consensus_home_spread": 10, "book_count": 1}}]}
+        thin = build_board(thin_games, profiles, priors, model, home_court_payload=hca)["games"][0]["projection"]
+        self.assertEqual(thin["market_coverage_state"], "isolated")
+        self.assertFalse(thin["spread_signal_eligible"])
 
         frozen_margin = opening["home_margin"]
         games["games"][0]["status"] = "final"

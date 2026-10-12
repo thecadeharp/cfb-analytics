@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 HISTORY_DIR = ROOT / "data" / "cbb" / "history"
 OUTPUT_DIR = ROOT / "data" / "cbb" / "model"
 MODEL_VERSION = "thi-cbb-walk-forward-v0.6-research"
+STANDARDIZED_FEATURE_CLIP = 3.0
 TRAIN_SEASONS = set(range(2019, 2025))
 VALIDATION_SEASONS = {2025}
 TEST_SEASONS = {2026}
@@ -88,8 +89,8 @@ def load_seasons(history_dir: Path) -> dict[int, dict[str, Any]]:
     for path in sorted(history_dir.glob("season_*.json.gz")):
         with gzip.open(path, "rt", encoding="utf-8") as handle:
             payload = json.load(handle)
-        if payload.get("meta", {}).get("builder_version") != "cbb-history-v1.1":
-            raise RuntimeError(f"{path} is not a clean cbb-history-v1.1 archive")
+        if payload.get("meta", {}).get("builder_version") not in {"cbb-history-v1.1", "cbb-history-v1.2"}:
+            raise RuntimeError(f"{path} is not a clean supported CBB history archive")
         payloads[int(payload["meta"]["season"])] = payload
     if not payloads:
         raise RuntimeError(f"no historical seasons found in {history_dir}")
@@ -397,7 +398,11 @@ def fit_ridge(rows: list[dict[str, Any]], feature_names: tuple[str, ...], target
 def predict(row: dict[str, Any], model: dict[str, Any]) -> float:
     values = [1.0]
     for name in model["feature_names"]:
-        values.append((row["features"][name] - model["means"][name]) / model["scales"][name])
+        values.append(clip(
+            (row["features"][name] - model["means"][name]) / model["scales"][name],
+            -STANDARDIZED_FEATURE_CLIP,
+            STANDARDIZED_FEATURE_CLIP,
+        ))
     return sum(coefficient * value for coefficient, value in zip(model["coefficients"], values))
 
 
@@ -662,6 +667,7 @@ def build(history_dir: Path, personnel_dir: Path, profile_path: Path, output_dir
             "personnel_features_known_before_season": True,
             "historical_laboratory_version": "thi-cbb-historical-lab-v1.0",
             "four_factor_engine_version": "thi-cbb-chronological-four-factors-v0.6",
+            "inference_standardized_feature_clip": STANDARDIZED_FEATURE_CLIP,
             "leakage_audit": {
                 "strict_chronological_team_state_updates": True,
                 "same_game_outcome_excluded_from_features": True,
