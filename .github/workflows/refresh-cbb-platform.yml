@@ -60,6 +60,7 @@ jobs:
             scripts/enrich_cbb_schedule.py \
             scripts/build_cbb_player_research.py \
             scripts/build_cbb_walk_forward_model.py \
+            scripts/build_cbb_preseason_index.py \
             scripts/build_cbb_home_court.py \
             scripts/build_cbb_venue_audit.py \
             scripts/resolve_cbb_venue_geocodes.py \
@@ -88,6 +89,7 @@ jobs:
             scripts/test_enrich_cbb_schedule.py \
             scripts/test_cbb_player_research.py \
             scripts/test_cbb_walk_forward_model.py \
+            scripts/test_cbb_preseason_index.py \
             scripts/test_cbb_home_court.py \
             scripts/test_cbb_venue_audit.py \
             scripts/test_cbb_venue_geocodes.py \
@@ -121,6 +123,7 @@ jobs:
           python scripts/build_cbb_player_research.py
           python scripts/audit_cbb_roster_integrity.py
           python scripts/build_cbb_walk_forward_model.py
+          python scripts/build_cbb_preseason_index.py
           python scripts/build_cbb_home_court.py
           python scripts/build_cbb_venue_audit.py
           python scripts/build_cbb_projection_board.py
@@ -155,6 +158,7 @@ jobs:
           roster_audit = json.loads((root / "roster_audit.json").read_text())
           model = json.loads((root / "model/model_card.json").read_text())
           priors = json.loads((root / "model/current_priors.json").read_text())
+          preseason_candidate = json.loads((root / "model/preseason_index_candidate.json").read_text())
           projections = json.loads((root / "projection_board.json").read_text())
           home_court = json.loads((root / "home_court_advantage.json").read_text())
           play_style = json.loads((root / "play_style.json").read_text())
@@ -185,6 +189,11 @@ jobs:
           assert all(model["meta"]["leakage_audit"].values())
           assert len(model["evaluation"]["by_season"]) >= 8
           assert priors["meta"]["model_version"] == model["meta"]["model_version"]
+          assert preseason_candidate["meta"]["version"] == "thi-cbb-preseason-index-v2.0-research"
+          assert preseason_candidate["evaluation"]["promotion_eligible"] is False
+          assert preseason_candidate["evaluation"]["beats_carry_forward_on_validation"] is True
+          assert preseason_candidate["evaluation"]["beats_carry_forward_on_test"] is True
+          assert "conference" not in preseason_candidate["models"]["net"]["feature_names"]
           assert projections["meta"]["version"] == "thi-cbb-projection-board-v0.5"
           assert home_court["meta"]["version"] == "thi-cbb-home-court-v1.0"
           assert len(home_court["teams"]) >= 300
@@ -269,6 +278,7 @@ jobs:
             data/cbb/roster_audit.json \
             data/cbb/model/model_card.json \
             data/cbb/model/current_priors.json \
+            data/cbb/model/preseason_index_candidate.json \
             data/cbb/model/walk_forward_predictions.json.gz \
             data/cbb/projection_board.json \
             data/cbb/home_court_advantage.json \

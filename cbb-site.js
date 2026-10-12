@@ -1496,9 +1496,10 @@
     const conferences = [...new Set(priors.map(team => team.conference?.abbreviation || team.conference?.name).filter(Boolean))].sort();
     const view = document.getElementById("view-cbb-ratings");
     view.innerHTML = `
-      <div class="cbb-kicker">2027 preseason research</div>
+      <div class="cbb-kicker">Preseason Model v1 · provisional research</div>
       <h1 class="page-title">CBB THI Ratings</h1>
-      <p class="page-subtitle">THI's modeled estimate of team strength, decomposed into the rating lenses and context that will update as the 2027 season develops.</p>
+      <p class="page-subtitle">A conservative carry-forward strength baseline. This board is not THI's official preseason Index 25 and no team is manually rearranged.</p>
+      <div class="cbb-readiness-banner"><span class="cbb-status-pill">Calibration in progress</span><strong>Official preseason Index 25 withheld</strong><p>The visible order carries forward opponent-adjusted 2026 efficiency and scales it by verified returning minutes. Recruiting and transfer context are displayed in team research, but do not yet reorder this table because the historical personnel archive has not cleared point-in-time validation.</p></div>
       ${cbbRatingDecomposition(priors)}
       <div class="cbb-definition-banner"><strong>THI Ratings</strong><span>How strong the model believes a team is beneath its record.</span><strong>Team Data</strong><span>Observed results, box-score performance and roster facts.</span></div>
       <div class="cbb-controls">
@@ -1513,7 +1514,7 @@
           <tbody id="cbb-rating-body"></tbody>
         </table>
       </div>
-      <div class="cbb-stat-note" style="margin-top:9px">Overall and Predictive share the verified preseason prior until 2027 results create separate lenses. Recent form, schedule strength and quality records activate only after games are played. Lower defensive efficiency is better.</div>
+      <div class="cbb-stat-note" style="margin-top:9px">Overall and Predictive currently share the provisional carry-forward baseline until 2027 results create separate lenses. Recent form, schedule strength and quality records activate only after games are played. Lower defensive efficiency is better.</div>
     `;
 
     view.querySelector("#cbb-rating-search").addEventListener("input", event => { state.query = event.target.value; paintRatingRows(); });
@@ -1551,8 +1552,8 @@
     return `<section class="cbb-rating-decomposition" aria-label="THI rating decomposition">
       <div class="cbb-rating-decomposition-head"><div><div class="cbb-label">THI Rating Decomposition</div><h2>What each rating means now</h2></div><span>Rated ${escapeHtml(stamp)}</span></div>
       <div class="cbb-rating-lenses">
-        ${methodCard("Overall", "2027 preseason net efficiency", "The full prior blends last season's opponent-adjusted efficiency with verified continuity and personnel context.")}
-        ${methodCard("Predictive", "Powers current projections", "The same preseason team state feeds the walk-forward score model now. It will separate from Overall after completed 2027 games update team state.")}
+        ${methodCard("Overall", "Provisional carry-forward", "Last season's opponent-adjusted efficiency is regressed toward average according to verified returning minutes. Personnel is not yet part of this displayed order.")}
+        ${methodCard("Predictive", "Projection baseline", "The game model uses the same regressed team state plus its separately trained matchup features. This ranking does not independently alter Model A.")}
         ${methodCard("Recent form", "Awaiting 2027 games", "No recent-form rating is published before a qualified current-season sample exists.")}
         ${methodCard("Schedule + opponent quality", "Awaiting 2027 games", "Schedule strength and records against top-25 and top-50 THI teams begin only after games are played.")}
         ${methodCard("Dynamic home advantage", Number.isFinite(home) ? `${number(home,2)}-point national mean` : "Awaiting estimate", "Every program receives its own five-season regularized value; neutral courts receive zero.")}
@@ -1669,7 +1670,7 @@
         ${detailRow("Nonconference opponent THI net", number(dossier?.schedule_strength?.nonconference_average_opponent_thi_net,2,true))}
         ${detailRow("Games in projection window", integer(dossier?.schedule_strength?.scheduled_games))}
         ${detailRow("Expected wins in window", number(dossier?.forecast?.expected_wins_in_window,2))}
-        <div class="cbb-model-sub">Schedule strength uses THI opponent ratings from the published schedule window. Résumé outcomes and quadrant-style detail will phase in with current-season results.</div>
+        <div class="cbb-model-sub">Schedule strength uses THI opponent ratings from the published schedule window. Résumé outcomes and quadrant-style detail will phase in with current-season results. The preseason rank remains provisional until the personnel calibration clears a fresh holdout.</div>
       </section>
       <section class="cbb-detail-section"><h3>Performance and résumé profile</h3>
         ${detailRow("Overall record", recordText(resume.overall_record))}

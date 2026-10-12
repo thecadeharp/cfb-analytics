@@ -32,7 +32,11 @@ class CbbModelV02Tests(unittest.TestCase):
         report = score([row for row in rows if row["season"] == 2024], {
             "feature_names": ["raw_margin"], "means": {"raw_margin": 0}, "scales": {"raw_margin": 1}, "coefficients": [1, 1.5],
         })
-        self.assertEqual(report["margin_mae"], 0)
+        # The production predictor clips standardized inference features at
+        # +/-3 to prevent extreme extrapolation.  The synthetic row at +4 is
+        # intentionally clipped, producing 1.5 points of error across eight
+        # rows instead of an impossible perfect-fit expectation.
+        self.assertEqual(report["margin_mae"], 0.1875)
 
     def test_build_accepts_current_single_list_row_generator_contract(self):
         rows = [{"season": season} for season in (2019, 2025, 2026)]
