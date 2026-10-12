@@ -12,6 +12,7 @@ import argparse
 import gzip
 import json
 import math
+import random
 import statistics
 from datetime import datetime, timezone
 from pathlib import Path
@@ -151,16 +152,31 @@ def spearman(rows: list[dict[str, Any]], predicted_key: str, target_key: str) ->
 
 
 def evaluation(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    paired_improvements = [
+        abs(row["carry_forward_net"] - row["target_net"])
+        - abs(row["predicted_net"] - row["target_net"])
+        for row in rows
+    ]
+    rng = random.Random(20271012)
+    bootstrap = sorted(
+        statistics.fmean(paired_improvements[rng.randrange(len(rows))] for _ in rows)
+        for _ in range(5000)
+    ) if rows else []
+    lower = bootstrap[int(0.025 * len(bootstrap))] if bootstrap else None
+    upper = bootstrap[min(len(bootstrap) - 1, int(0.975 * len(bootstrap)))] if bootstrap else None
     return {
         "teams": len(rows),
         "rating_mae": round(statistics.fmean(abs(row["predicted_net"] - row["target_net"]) for row in rows), 4),
         "carry_forward_mae": round(statistics.fmean(abs(row["carry_forward_net"] - row["target_net"]) for row in rows), 4),
         "rank_correlation": round(spearman(rows, "predicted_net", "target_net"), 4),
-        "top_25_overlap": len(
+        "descriptive_end_season_top_25_overlap": len(
             {row["team_id"] for row in sorted(rows, key=lambda row: -row["predicted_net"])[:25]}
             & {row["team_id"] for row in sorted(rows, key=lambda row: -row["target_net"])[:25]}
         ),
         "bias": round(statistics.fmean(row["predicted_net"] - row["target_net"] for row in rows), 4),
+        "paired_team_season_mae_improvement": round(statistics.fmean(paired_improvements), 4),
+        "paired_team_season_bootstrap_95_interval": [round(lower, 4), round(upper, 4)] if lower is not None else None,
+        "overlap_interpretation": "Descriptive only. End-of-season top-25 membership is not the preseason power-rating target and is not a promotion criterion.",
     }
 
 
@@ -319,6 +335,24 @@ def build(history_dir: Path, personnel_dir: Path, profiles_path: Path, players_p
             ],
         },
         "models": models,
+        "prospective_protocol": {
+            "candidate_state": "research_awaiting_preseason_freeze",
+            "target": "game-level scoring margin for Division I versus Division I games",
+            "primary_comparison": "paired absolute-error difference versus the frozen production baseline",
+            "primary_interval": "95% game-level bootstrap interval",
+            "secondary_cohorts": [
+                "first 100 eligible games", "early season", "midseason", "neutral site",
+                "campus site", "conference", "projected spread band", "team-strength tier",
+            ],
+            "checkpoints": [
+                {"name": "preseason_freeze", "decision_allowed": False, "retuning_allowed": False},
+                {"name": "100_eligible_games", "decision_allowed": False, "retuning_allowed": False},
+                {"name": "midseason", "decision_allowed": False, "retuning_allowed": False},
+                {"name": "end_of_season", "decision_allowed": True, "retuning_allowed": False},
+            ],
+            "versioning_rule": "Any parameter or input-rule change creates a new candidate and starts a new prospective clock.",
+            "governance_document": "docs/model-validation-promotion-standard.md",
+        },
         "teams": rows,
     }
 

@@ -32,6 +32,8 @@ class CbbPreseasonIndexTests(unittest.TestCase):
         self.assertEqual(report["teams"], 2)
         self.assertLess(report["rating_mae"], report["carry_forward_mae"])
         self.assertEqual(report["rank_correlation"], 1.0)
+        self.assertEqual(report["descriptive_end_season_top_25_overlap"], 2)
+        self.assertEqual(report["paired_team_season_bootstrap_95_interval"], [3.0, 3.0])
 
 
 if __name__ == "__main__":

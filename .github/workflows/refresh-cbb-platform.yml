@@ -194,6 +194,8 @@ jobs:
           assert preseason_candidate["evaluation"]["beats_carry_forward_on_validation"] is True
           assert preseason_candidate["evaluation"]["beats_carry_forward_on_test"] is True
           assert "conference" not in preseason_candidate["models"]["net"]["feature_names"]
+          assert preseason_candidate["prospective_protocol"]["candidate_state"] == "research_awaiting_preseason_freeze"
+          assert preseason_candidate["prospective_protocol"]["checkpoints"][-1]["name"] == "end_of_season"
           assert projections["meta"]["version"] == "thi-cbb-projection-board-v0.5"
           assert home_court["meta"]["version"] == "thi-cbb-home-court-v1.0"
           assert len(home_court["teams"]) >= 300
