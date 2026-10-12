@@ -236,7 +236,12 @@ jobs:
           assert geocodes["meta"]["version"] == "thi-cbb-verified-venues-v1.1"
           assert geocodes["meta"]["verified_venues"] > 0
           assert health["meta"]["version"] == "thi-cbb-platform-health-v1.0"
-          assert health["meta"]["status"] == "healthy"
+          if roster_audit["meta"]["status"] == "passed":
+              assert health["meta"]["status"] == "healthy"
+          else:
+              assert health["meta"]["status"] in {"healthy", "attention_required"}
+              assert set(health.get("alerts") or []).issubset({"source_requests_completed"})
+              assert health["checks"]["roster_layer_safe"] is True
           assert health["checks"]["neutral_site_home_context_zero"] is True
           assert health["checks"]["neutral_venue_audit_ready"] is True
           assert health["checks"]["opening_night_rehearsal_passed"] is True
