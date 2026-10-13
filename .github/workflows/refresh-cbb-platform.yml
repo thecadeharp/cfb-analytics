@@ -221,7 +221,7 @@ jobs:
           else:
               assert "without a roster adjustment" in bracket["meta"]["methodology"]
               assert all(float(row["roster_adjustment"]) == 0 for row in bracket["field"])
-          assert intelligence["meta"]["version"] == "thi-cbb-intelligence-suite-v1.3"
+          assert intelligence["meta"]["version"] == "thi-cbb-intelligence-suite-v1.4"
           if roster_audit["meta"]["status"] == "passed":
               assert len(intelligence["player_projections"]) >= 1500
           else:
