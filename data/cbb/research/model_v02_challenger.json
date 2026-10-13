@@ -1,14 +1,14 @@
 {
   "meta": {
     "version": "thi-cbb-model-v0.2-challenger-lab",
-    "generated_at_utc": "2026-10-11T18:13:49.086712Z",
+    "generated_at_utc": "2026-10-13T03:58:56.516386Z",
     "status": "research_only_no_promotion",
     "selection_policy": "Candidate family and ridge are selected only on rolling 2022-2024 inner folds. The 2025 validation and previously exposed 2026 audit are post-selection gates, never selection inputs.",
     "published_model_unchanged": true
   },
   "selected_candidate": {
     "name": "incumbent_plus_schedule_context",
-    "ridge": 12.0,
+    "ridge": 40.0,
     "feature_names": [
       "raw_margin",
       "raw_margin_curve",
@@ -33,129 +33,129 @@
       "away_back_to_back",
       "conference_game"
     ],
-    "mean_margin_mae": 9.9539,
-    "worst_margin_mae": 10.0748,
+    "mean_margin_mae": 9.116,
+    "worst_margin_mae": 9.3584,
     "folds": [
       {
         "season": 2022,
-        "games": 5727,
-        "margin_mae": 9.8419,
-        "margin_rmse": 12.7665,
-        "winner_accuracy": 74.577,
-        "margin_bias": 0.045,
-        "edge_5_games": 1052,
-        "edge_5_record": "568-475-9",
-        "edge_5_hit_rate": 54.458
+        "games": 5257,
+        "margin_mae": 8.8834,
+        "margin_rmse": 11.2915,
+        "winner_accuracy": 72.551,
+        "margin_bias": 0.5262,
+        "edge_5_games": 571,
+        "edge_5_record": "329-238-4",
+        "edge_5_hit_rate": 58.025
       },
       {
         "season": 2023,
-        "games": 6113,
-        "margin_mae": 9.9451,
-        "margin_rmse": 12.8075,
-        "winner_accuracy": 73.532,
-        "margin_bias": -0.5801,
-        "edge_5_games": 1100,
-        "edge_5_record": "583-507-10",
-        "edge_5_hit_rate": 53.486
+        "games": 5630,
+        "margin_mae": 9.1063,
+        "margin_rmse": 11.4087,
+        "winner_accuracy": 71.261,
+        "margin_bias": -0.2403,
+        "edge_5_games": 442,
+        "edge_5_record": "222-218-2",
+        "edge_5_hit_rate": 50.455
       },
       {
         "season": 2024,
-        "games": 6150,
-        "margin_mae": 10.0748,
-        "margin_rmse": 12.8481,
-        "winner_accuracy": 73.057,
-        "margin_bias": -0.396,
-        "edge_5_games": 1215,
-        "edge_5_record": "643-572-0",
-        "edge_5_hit_rate": 52.922
+        "games": 5644,
+        "margin_mae": 9.3584,
+        "margin_rmse": 11.8248,
+        "winner_accuracy": 71.013,
+        "margin_bias": -0.3816,
+        "edge_5_games": 743,
+        "edge_5_record": "360-383-0",
+        "edge_5_hit_rate": 48.452
       }
     ]
   },
   "incumbent_inner_folds": {
     "name": "incumbent_full",
     "ridge": 4.0,
-    "mean_margin_mae": 9.9593,
-    "worst_margin_mae": 10.0804,
+    "mean_margin_mae": 9.1178,
+    "worst_margin_mae": 9.3587,
     "folds": [
       {
         "season": 2022,
-        "games": 5727,
-        "margin_mae": 9.8469,
-        "margin_rmse": 12.7719,
-        "winner_accuracy": 74.437,
-        "margin_bias": 0.0202,
-        "edge_5_games": 1055,
-        "edge_5_record": "574-472-9",
-        "edge_5_hit_rate": 54.876
+        "games": 5257,
+        "margin_mae": 8.887,
+        "margin_rmse": 11.2938,
+        "winner_accuracy": 72.589,
+        "margin_bias": 0.5268,
+        "edge_5_games": 583,
+        "edge_5_record": "336-243-4",
+        "edge_5_hit_rate": 58.031
       },
       {
         "season": 2023,
-        "games": 6113,
-        "margin_mae": 9.9505,
-        "margin_rmse": 12.811,
-        "winner_accuracy": 73.417,
-        "margin_bias": -0.6113,
-        "edge_5_games": 1097,
-        "edge_5_record": "584-503-10",
-        "edge_5_hit_rate": 53.726
+        "games": 5630,
+        "margin_mae": 9.1077,
+        "margin_rmse": 11.4116,
+        "winner_accuracy": 71.226,
+        "margin_bias": -0.235,
+        "edge_5_games": 445,
+        "edge_5_record": "222-221-2",
+        "edge_5_hit_rate": 50.113
       },
       {
         "season": 2024,
-        "games": 6150,
-        "margin_mae": 10.0804,
-        "margin_rmse": 12.8547,
-        "winner_accuracy": 72.78,
-        "margin_bias": -0.4293,
-        "edge_5_games": 1209,
-        "edge_5_record": "639-570-0",
-        "edge_5_hit_rate": 52.854
+        "games": 5644,
+        "margin_mae": 9.3587,
+        "margin_rmse": 11.8265,
+        "winner_accuracy": 71.013,
+        "margin_bias": -0.3931,
+        "edge_5_games": 739,
+        "edge_5_record": "357-382-0",
+        "edge_5_hit_rate": 48.309
       }
     ]
   },
-  "inner_fold_mae_improvement": 0.0054,
+  "inner_fold_mae_improvement": 0.0018,
   "post_selection_comparison": {
     "validation_2025": {
       "incumbent": {
-        "games": 6118,
-        "margin_mae": 9.9176,
-        "margin_rmse": 12.9385,
-        "winner_accuracy": 73.684,
-        "margin_bias": -0.2833,
-        "edge_5_games": 1099,
-        "edge_5_record": "578-521-0",
-        "edge_5_hit_rate": 52.593
+        "games": 5638,
+        "margin_mae": 9.0739,
+        "margin_rmse": 11.5791,
+        "winner_accuracy": 72.136,
+        "margin_bias": -0.1193,
+        "edge_5_games": 529,
+        "edge_5_record": "260-269-0",
+        "edge_5_hit_rate": 49.149
       },
       "challenger": {
-        "games": 6118,
-        "margin_mae": 9.9199,
-        "margin_rmse": 12.9345,
-        "winner_accuracy": 73.602,
-        "margin_bias": -0.2618,
-        "edge_5_games": 1097,
-        "edge_5_record": "582-515-0",
-        "edge_5_hit_rate": 53.054
+        "games": 5638,
+        "margin_mae": 9.0776,
+        "margin_rmse": 11.5811,
+        "winner_accuracy": 72.029,
+        "margin_bias": -0.1162,
+        "edge_5_games": 519,
+        "edge_5_record": "259-260-0",
+        "edge_5_hit_rate": 49.904
       }
     },
     "audit_2026": {
       "incumbent": {
-        "games": 6142,
-        "margin_mae": 10.0419,
-        "margin_rmse": 13.0394,
-        "winner_accuracy": 74.064,
-        "margin_bias": -0.2641,
-        "edge_5_games": 1081,
-        "edge_5_record": "580-499-2",
-        "edge_5_hit_rate": 53.753
+        "games": 5622,
+        "margin_mae": 9.217,
+        "margin_rmse": 11.6922,
+        "winner_accuracy": 71.932,
+        "margin_bias": 0.1842,
+        "edge_5_games": 513,
+        "edge_5_record": "272-239-2",
+        "edge_5_hit_rate": 53.229
       },
       "challenger": {
-        "games": 6142,
-        "margin_mae": 10.0294,
-        "margin_rmse": 13.0287,
-        "winner_accuracy": 73.917,
-        "margin_bias": -0.2463,
-        "edge_5_games": 1070,
-        "edge_5_record": "571-497-2",
-        "edge_5_hit_rate": 53.464
+        "games": 5622,
+        "margin_mae": 9.2144,
+        "margin_rmse": 11.6924,
+        "winner_accuracy": 71.985,
+        "margin_bias": 0.1957,
+        "edge_5_games": 521,
+        "edge_5_record": "279-240-2",
+        "edge_5_hit_rate": 53.757
       }
     }
   },
@@ -174,71 +174,6 @@
   "leaderboard": [
     {
       "name": "incumbent_plus_schedule_context",
-      "ridge": 12.0,
-      "feature_names": [
-        "raw_margin",
-        "raw_margin_curve",
-        "home_court",
-        "experience_diff",
-        "experience_sum",
-        "early_strength_margin",
-        "early_home",
-        "nonconference_home",
-        "efg_edge",
-        "turnover_edge",
-        "rebound_edge",
-        "free_throw_edge",
-        "personnel_recruit_rating",
-        "personnel_transfer_minutes",
-        "personnel_transfer_points",
-        "personnel_transfer_rating",
-        "personnel_recruit_count",
-        "personnel_transfer_count",
-        "rest_advantage",
-        "home_back_to_back",
-        "away_back_to_back",
-        "conference_game"
-      ],
-      "folds": [
-        {
-          "season": 2022,
-          "games": 5727,
-          "margin_mae": 9.8419,
-          "margin_rmse": 12.7665,
-          "winner_accuracy": 74.577,
-          "margin_bias": 0.045,
-          "edge_5_games": 1052,
-          "edge_5_record": "568-475-9",
-          "edge_5_hit_rate": 54.458
-        },
-        {
-          "season": 2023,
-          "games": 6113,
-          "margin_mae": 9.9451,
-          "margin_rmse": 12.8075,
-          "winner_accuracy": 73.532,
-          "margin_bias": -0.5801,
-          "edge_5_games": 1100,
-          "edge_5_record": "583-507-10",
-          "edge_5_hit_rate": 53.486
-        },
-        {
-          "season": 2024,
-          "games": 6150,
-          "margin_mae": 10.0748,
-          "margin_rmse": 12.8481,
-          "winner_accuracy": 73.057,
-          "margin_bias": -0.396,
-          "edge_5_games": 1215,
-          "edge_5_record": "643-572-0",
-          "edge_5_hit_rate": 52.922
-        }
-      ],
-      "mean_margin_mae": 9.9539,
-      "worst_margin_mae": 10.0748
-    },
-    {
-      "name": "incumbent_plus_schedule_context",
       "ridge": 40.0,
       "feature_names": [
         "raw_margin",
@@ -267,40 +202,294 @@
       "folds": [
         {
           "season": 2022,
-          "games": 5727,
-          "margin_mae": 9.8434,
-          "margin_rmse": 12.7681,
-          "winner_accuracy": 74.524,
-          "margin_bias": 0.0399,
-          "edge_5_games": 1050,
-          "edge_5_record": "566-475-9",
-          "edge_5_hit_rate": 54.371
+          "games": 5257,
+          "margin_mae": 8.8834,
+          "margin_rmse": 11.2915,
+          "winner_accuracy": 72.551,
+          "margin_bias": 0.5262,
+          "edge_5_games": 571,
+          "edge_5_record": "329-238-4",
+          "edge_5_hit_rate": 58.025
         },
         {
           "season": 2023,
-          "games": 6113,
-          "margin_mae": 9.9437,
-          "margin_rmse": 12.806,
-          "winner_accuracy": 73.483,
-          "margin_bias": -0.5831,
-          "edge_5_games": 1089,
-          "edge_5_record": "581-498-10",
-          "edge_5_hit_rate": 53.846
+          "games": 5630,
+          "margin_mae": 9.1063,
+          "margin_rmse": 11.4087,
+          "winner_accuracy": 71.261,
+          "margin_bias": -0.2403,
+          "edge_5_games": 442,
+          "edge_5_record": "222-218-2",
+          "edge_5_hit_rate": 50.455
         },
         {
           "season": 2024,
-          "games": 6150,
-          "margin_mae": 10.0748,
-          "margin_rmse": 12.8465,
-          "winner_accuracy": 73.089,
-          "margin_bias": -0.3956,
-          "edge_5_games": 1212,
-          "edge_5_record": "642-570-0",
-          "edge_5_hit_rate": 52.97
+          "games": 5644,
+          "margin_mae": 9.3584,
+          "margin_rmse": 11.8248,
+          "winner_accuracy": 71.013,
+          "margin_bias": -0.3816,
+          "edge_5_games": 743,
+          "edge_5_record": "360-383-0",
+          "edge_5_hit_rate": 48.452
         }
       ],
-      "mean_margin_mae": 9.954,
-      "worst_margin_mae": 10.0748
+      "mean_margin_mae": 9.116,
+      "worst_margin_mae": 9.3584
+    },
+    {
+      "name": "incumbent_plus_rest",
+      "ridge": 40.0,
+      "feature_names": [
+        "raw_margin",
+        "raw_margin_curve",
+        "home_court",
+        "experience_diff",
+        "experience_sum",
+        "early_strength_margin",
+        "early_home",
+        "nonconference_home",
+        "efg_edge",
+        "turnover_edge",
+        "rebound_edge",
+        "free_throw_edge",
+        "personnel_recruit_rating",
+        "personnel_transfer_minutes",
+        "personnel_transfer_points",
+        "personnel_transfer_rating",
+        "personnel_recruit_count",
+        "personnel_transfer_count",
+        "rest_advantage",
+        "home_back_to_back",
+        "away_back_to_back"
+      ],
+      "folds": [
+        {
+          "season": 2022,
+          "games": 5257,
+          "margin_mae": 8.8834,
+          "margin_rmse": 11.2915,
+          "winner_accuracy": 72.551,
+          "margin_bias": 0.5263,
+          "edge_5_games": 573,
+          "edge_5_record": "330-239-4",
+          "edge_5_hit_rate": 57.996
+        },
+        {
+          "season": 2023,
+          "games": 5630,
+          "margin_mae": 9.1063,
+          "margin_rmse": 11.4087,
+          "winner_accuracy": 71.261,
+          "margin_bias": -0.2403,
+          "edge_5_games": 442,
+          "edge_5_record": "222-218-2",
+          "edge_5_hit_rate": 50.455
+        },
+        {
+          "season": 2024,
+          "games": 5644,
+          "margin_mae": 9.3586,
+          "margin_rmse": 11.8247,
+          "winner_accuracy": 70.996,
+          "margin_bias": -0.383,
+          "edge_5_games": 745,
+          "edge_5_record": "361-384-0",
+          "edge_5_hit_rate": 48.456
+        }
+      ],
+      "mean_margin_mae": 9.1161,
+      "worst_margin_mae": 9.3586
+    },
+    {
+      "name": "incumbent_plus_schedule_context",
+      "ridge": 12.0,
+      "feature_names": [
+        "raw_margin",
+        "raw_margin_curve",
+        "home_court",
+        "experience_diff",
+        "experience_sum",
+        "early_strength_margin",
+        "early_home",
+        "nonconference_home",
+        "efg_edge",
+        "turnover_edge",
+        "rebound_edge",
+        "free_throw_edge",
+        "personnel_recruit_rating",
+        "personnel_transfer_minutes",
+        "personnel_transfer_points",
+        "personnel_transfer_rating",
+        "personnel_recruit_count",
+        "personnel_transfer_count",
+        "rest_advantage",
+        "home_back_to_back",
+        "away_back_to_back",
+        "conference_game"
+      ],
+      "folds": [
+        {
+          "season": 2022,
+          "games": 5257,
+          "margin_mae": 8.8831,
+          "margin_rmse": 11.2908,
+          "winner_accuracy": 72.57,
+          "margin_bias": 0.5302,
+          "edge_5_games": 575,
+          "edge_5_record": "335-236-4",
+          "edge_5_hit_rate": 58.669
+        },
+        {
+          "season": 2023,
+          "games": 5630,
+          "margin_mae": 9.1084,
+          "margin_rmse": 11.4108,
+          "winner_accuracy": 71.137,
+          "margin_bias": -0.2379,
+          "edge_5_games": 440,
+          "edge_5_record": "221-217-2",
+          "edge_5_hit_rate": 50.457
+        },
+        {
+          "season": 2024,
+          "games": 5644,
+          "margin_mae": 9.3587,
+          "margin_rmse": 11.8253,
+          "winner_accuracy": 70.996,
+          "margin_bias": -0.383,
+          "edge_5_games": 742,
+          "edge_5_record": "360-382-0",
+          "edge_5_hit_rate": 48.518
+        }
+      ],
+      "mean_margin_mae": 9.1167,
+      "worst_margin_mae": 9.3587
+    },
+    {
+      "name": "incumbent_plus_rest",
+      "ridge": 12.0,
+      "feature_names": [
+        "raw_margin",
+        "raw_margin_curve",
+        "home_court",
+        "experience_diff",
+        "experience_sum",
+        "early_strength_margin",
+        "early_home",
+        "nonconference_home",
+        "efg_edge",
+        "turnover_edge",
+        "rebound_edge",
+        "free_throw_edge",
+        "personnel_recruit_rating",
+        "personnel_transfer_minutes",
+        "personnel_transfer_points",
+        "personnel_transfer_rating",
+        "personnel_recruit_count",
+        "personnel_transfer_count",
+        "rest_advantage",
+        "home_back_to_back",
+        "away_back_to_back"
+      ],
+      "folds": [
+        {
+          "season": 2022,
+          "games": 5257,
+          "margin_mae": 8.8832,
+          "margin_rmse": 11.2908,
+          "winner_accuracy": 72.589,
+          "margin_bias": 0.5306,
+          "edge_5_games": 577,
+          "edge_5_record": "335-238-4",
+          "edge_5_hit_rate": 58.464
+        },
+        {
+          "season": 2023,
+          "games": 5630,
+          "margin_mae": 9.1084,
+          "margin_rmse": 11.4108,
+          "winner_accuracy": 71.155,
+          "margin_bias": -0.2378,
+          "edge_5_games": 440,
+          "edge_5_record": "221-217-2",
+          "edge_5_hit_rate": 50.457
+        },
+        {
+          "season": 2024,
+          "games": 5644,
+          "margin_mae": 9.3588,
+          "margin_rmse": 11.8252,
+          "winner_accuracy": 70.996,
+          "margin_bias": -0.3842,
+          "edge_5_games": 745,
+          "edge_5_record": "363-382-0",
+          "edge_5_hit_rate": 48.725
+        }
+      ],
+      "mean_margin_mae": 9.1168,
+      "worst_margin_mae": 9.3588
+    },
+    {
+      "name": "incumbent_full",
+      "ridge": 40.0,
+      "feature_names": [
+        "raw_margin",
+        "raw_margin_curve",
+        "home_court",
+        "experience_diff",
+        "experience_sum",
+        "early_strength_margin",
+        "early_home",
+        "nonconference_home",
+        "efg_edge",
+        "turnover_edge",
+        "rebound_edge",
+        "free_throw_edge",
+        "personnel_recruit_rating",
+        "personnel_transfer_minutes",
+        "personnel_transfer_points",
+        "personnel_transfer_rating",
+        "personnel_recruit_count",
+        "personnel_transfer_count"
+      ],
+      "folds": [
+        {
+          "season": 2022,
+          "games": 5257,
+          "margin_mae": 8.8873,
+          "margin_rmse": 11.2946,
+          "winner_accuracy": 72.513,
+          "margin_bias": 0.5212,
+          "edge_5_games": 580,
+          "edge_5_record": "333-243-4",
+          "edge_5_hit_rate": 57.812
+        },
+        {
+          "season": 2023,
+          "games": 5630,
+          "margin_mae": 9.1051,
+          "margin_rmse": 11.4089,
+          "winner_accuracy": 71.137,
+          "margin_bias": -0.2383,
+          "edge_5_games": 441,
+          "edge_5_record": "222-217-2",
+          "edge_5_hit_rate": 50.569
+        },
+        {
+          "season": 2024,
+          "games": 5644,
+          "margin_mae": 9.3583,
+          "margin_rmse": 11.8258,
+          "winner_accuracy": 71.084,
+          "margin_bias": -0.3914,
+          "edge_5_games": 738,
+          "edge_5_record": "357-381-0",
+          "edge_5_hit_rate": 48.374
+        }
+      ],
+      "mean_margin_mae": 9.1169,
+      "worst_margin_mae": 9.3583
     },
     {
       "name": "incumbent_plus_schedule_context",
@@ -332,40 +521,104 @@
       "folds": [
         {
           "season": 2022,
-          "games": 5727,
-          "margin_mae": 9.8415,
-          "margin_rmse": 12.7661,
-          "winner_accuracy": 74.594,
-          "margin_bias": 0.0465,
-          "edge_5_games": 1053,
-          "edge_5_record": "568-476-9",
-          "edge_5_hit_rate": 54.406
+          "games": 5257,
+          "margin_mae": 8.8831,
+          "margin_rmse": 11.2907,
+          "winner_accuracy": 72.589,
+          "margin_bias": 0.5315,
+          "edge_5_games": 573,
+          "edge_5_record": "335-234-4",
+          "edge_5_hit_rate": 58.875
         },
         {
           "season": 2023,
-          "games": 6113,
-          "margin_mae": 9.9455,
-          "margin_rmse": 12.8081,
-          "winner_accuracy": 73.548,
-          "margin_bias": -0.5793,
-          "edge_5_games": 1100,
-          "edge_5_record": "583-507-10",
-          "edge_5_hit_rate": 53.486
+          "games": 5630,
+          "margin_mae": 9.1091,
+          "margin_rmse": 11.4115,
+          "winner_accuracy": 71.155,
+          "margin_bias": -0.2373,
+          "edge_5_games": 442,
+          "edge_5_record": "221-219-2",
+          "edge_5_hit_rate": 50.227
         },
         {
           "season": 2024,
-          "games": 6150,
-          "margin_mae": 10.0749,
-          "margin_rmse": 12.8487,
-          "winner_accuracy": 73.057,
-          "margin_bias": -0.3962,
-          "edge_5_games": 1216,
-          "edge_5_record": "642-574-0",
-          "edge_5_hit_rate": 52.796
+          "games": 5644,
+          "margin_mae": 9.3588,
+          "margin_rmse": 11.8255,
+          "winner_accuracy": 70.996,
+          "margin_bias": -0.3834,
+          "edge_5_games": 743,
+          "edge_5_record": "361-382-0",
+          "edge_5_hit_rate": 48.587
         }
       ],
-      "mean_margin_mae": 9.954,
-      "worst_margin_mae": 10.0749
+      "mean_margin_mae": 9.117,
+      "worst_margin_mae": 9.3588
+    },
+    {
+      "name": "incumbent_plus_rest",
+      "ridge": 4.0,
+      "feature_names": [
+        "raw_margin",
+        "raw_margin_curve",
+        "home_court",
+        "experience_diff",
+        "experience_sum",
+        "early_strength_margin",
+        "early_home",
+        "nonconference_home",
+        "efg_edge",
+        "turnover_edge",
+        "rebound_edge",
+        "free_throw_edge",
+        "personnel_recruit_rating",
+        "personnel_transfer_minutes",
+        "personnel_transfer_points",
+        "personnel_transfer_rating",
+        "personnel_recruit_count",
+        "personnel_transfer_count",
+        "rest_advantage",
+        "home_back_to_back",
+        "away_back_to_back"
+      ],
+      "folds": [
+        {
+          "season": 2022,
+          "games": 5257,
+          "margin_mae": 8.8832,
+          "margin_rmse": 11.2907,
+          "winner_accuracy": 72.627,
+          "margin_bias": 0.5319,
+          "edge_5_games": 575,
+          "edge_5_record": "335-236-4",
+          "edge_5_hit_rate": 58.669
+        },
+        {
+          "season": 2023,
+          "games": 5630,
+          "margin_mae": 9.109,
+          "margin_rmse": 11.4115,
+          "winner_accuracy": 71.155,
+          "margin_bias": -0.237,
+          "edge_5_games": 442,
+          "edge_5_record": "221-219-2",
+          "edge_5_hit_rate": 50.227
+        },
+        {
+          "season": 2024,
+          "games": 5644,
+          "margin_mae": 9.3589,
+          "margin_rmse": 11.8254,
+          "winner_accuracy": 71.031,
+          "margin_bias": -0.3847,
+          "edge_5_games": 745,
+          "edge_5_record": "363-382-0",
+          "edge_5_hit_rate": 48.725
+        }
+      ],
+      "mean_margin_mae": 9.117,
+      "worst_margin_mae": 9.3589
     },
     {
       "name": "incumbent_plus_schedule_context",
@@ -397,296 +650,40 @@
       "folds": [
         {
           "season": 2022,
-          "games": 5727,
-          "margin_mae": 9.8414,
-          "margin_rmse": 12.7659,
-          "winner_accuracy": 74.611,
-          "margin_bias": 0.0471,
-          "edge_5_games": 1053,
-          "edge_5_record": "568-476-9",
-          "edge_5_hit_rate": 54.406
+          "games": 5257,
+          "margin_mae": 8.8831,
+          "margin_rmse": 11.2906,
+          "winner_accuracy": 72.627,
+          "margin_bias": 0.5319,
+          "edge_5_games": 575,
+          "edge_5_record": "335-236-4",
+          "edge_5_hit_rate": 58.669
         },
         {
           "season": 2023,
-          "games": 6113,
-          "margin_mae": 9.9457,
-          "margin_rmse": 12.8084,
-          "winner_accuracy": 73.548,
-          "margin_bias": -0.579,
-          "edge_5_games": 1100,
-          "edge_5_record": "583-507-10",
-          "edge_5_hit_rate": 53.486
+          "games": 5630,
+          "margin_mae": 9.1093,
+          "margin_rmse": 11.4118,
+          "winner_accuracy": 71.155,
+          "margin_bias": -0.237,
+          "edge_5_games": 442,
+          "edge_5_record": "221-219-2",
+          "edge_5_hit_rate": 50.227
         },
         {
           "season": 2024,
-          "games": 6150,
-          "margin_mae": 10.075,
-          "margin_rmse": 12.849,
-          "winner_accuracy": 73.073,
-          "margin_bias": -0.3963,
-          "edge_5_games": 1217,
-          "edge_5_record": "642-575-0",
-          "edge_5_hit_rate": 52.753
+          "games": 5644,
+          "margin_mae": 9.3588,
+          "margin_rmse": 11.8255,
+          "winner_accuracy": 70.996,
+          "margin_bias": -0.3836,
+          "edge_5_games": 743,
+          "edge_5_record": "361-382-0",
+          "edge_5_hit_rate": 48.587
         }
       ],
-      "mean_margin_mae": 9.954,
-      "worst_margin_mae": 10.075
-    },
-    {
-      "name": "incumbent_plus_rest",
-      "ridge": 40.0,
-      "feature_names": [
-        "raw_margin",
-        "raw_margin_curve",
-        "home_court",
-        "experience_diff",
-        "experience_sum",
-        "early_strength_margin",
-        "early_home",
-        "nonconference_home",
-        "efg_edge",
-        "turnover_edge",
-        "rebound_edge",
-        "free_throw_edge",
-        "personnel_recruit_rating",
-        "personnel_transfer_minutes",
-        "personnel_transfer_points",
-        "personnel_transfer_rating",
-        "personnel_recruit_count",
-        "personnel_transfer_count",
-        "rest_advantage",
-        "home_back_to_back",
-        "away_back_to_back"
-      ],
-      "folds": [
-        {
-          "season": 2022,
-          "games": 5727,
-          "margin_mae": 9.8442,
-          "margin_rmse": 12.7699,
-          "winner_accuracy": 74.559,
-          "margin_bias": 0.0148,
-          "edge_5_games": 1057,
-          "edge_5_record": "575-473-9",
-          "edge_5_hit_rate": 54.866
-        },
-        {
-          "season": 2023,
-          "games": 6113,
-          "margin_mae": 9.9483,
-          "margin_rmse": 12.808,
-          "winner_accuracy": 73.417,
-          "margin_bias": -0.6159,
-          "edge_5_games": 1090,
-          "edge_5_record": "587-494-9",
-          "edge_5_hit_rate": 54.302
-        },
-        {
-          "season": 2024,
-          "games": 6150,
-          "margin_mae": 10.0788,
-          "margin_rmse": 12.8481,
-          "winner_accuracy": 72.959,
-          "margin_bias": -0.4232,
-          "edge_5_games": 1205,
-          "edge_5_record": "637-568-0",
-          "edge_5_hit_rate": 52.863
-        }
-      ],
-      "mean_margin_mae": 9.9571,
-      "worst_margin_mae": 10.0788
-    },
-    {
-      "name": "incumbent_plus_rest",
-      "ridge": 12.0,
-      "feature_names": [
-        "raw_margin",
-        "raw_margin_curve",
-        "home_court",
-        "experience_diff",
-        "experience_sum",
-        "early_strength_margin",
-        "early_home",
-        "nonconference_home",
-        "efg_edge",
-        "turnover_edge",
-        "rebound_edge",
-        "free_throw_edge",
-        "personnel_recruit_rating",
-        "personnel_transfer_minutes",
-        "personnel_transfer_points",
-        "personnel_transfer_rating",
-        "personnel_recruit_count",
-        "personnel_transfer_count",
-        "rest_advantage",
-        "home_back_to_back",
-        "away_back_to_back"
-      ],
-      "folds": [
-        {
-          "season": 2022,
-          "games": 5727,
-          "margin_mae": 9.8429,
-          "margin_rmse": 12.7684,
-          "winner_accuracy": 74.559,
-          "margin_bias": 0.019,
-          "edge_5_games": 1053,
-          "edge_5_record": "571-473-9",
-          "edge_5_hit_rate": 54.693
-        },
-        {
-          "season": 2023,
-          "games": 6113,
-          "margin_mae": 9.9499,
-          "margin_rmse": 12.8095,
-          "winner_accuracy": 73.352,
-          "margin_bias": -0.6138,
-          "edge_5_games": 1101,
-          "edge_5_record": "594-498-9",
-          "edge_5_hit_rate": 54.396
-        },
-        {
-          "season": 2024,
-          "games": 6150,
-          "margin_mae": 10.0789,
-          "margin_rmse": 12.8496,
-          "winner_accuracy": 72.927,
-          "margin_bias": -0.4243,
-          "edge_5_games": 1202,
-          "edge_5_record": "638-564-0",
-          "edge_5_hit_rate": 53.078
-        }
-      ],
-      "mean_margin_mae": 9.9572,
-      "worst_margin_mae": 10.0789
-    },
-    {
-      "name": "incumbent_plus_rest",
-      "ridge": 1.0,
-      "feature_names": [
-        "raw_margin",
-        "raw_margin_curve",
-        "home_court",
-        "experience_diff",
-        "experience_sum",
-        "early_strength_margin",
-        "early_home",
-        "nonconference_home",
-        "efg_edge",
-        "turnover_edge",
-        "rebound_edge",
-        "free_throw_edge",
-        "personnel_recruit_rating",
-        "personnel_transfer_minutes",
-        "personnel_transfer_points",
-        "personnel_transfer_rating",
-        "personnel_recruit_count",
-        "personnel_transfer_count",
-        "rest_advantage",
-        "home_back_to_back",
-        "away_back_to_back"
-      ],
-      "folds": [
-        {
-          "season": 2022,
-          "games": 5727,
-          "margin_mae": 9.8424,
-          "margin_rmse": 12.7679,
-          "winner_accuracy": 74.542,
-          "margin_bias": 0.0206,
-          "edge_5_games": 1052,
-          "edge_5_record": "570-473-9",
-          "edge_5_hit_rate": 54.65
-        },
-        {
-          "season": 2023,
-          "games": 6113,
-          "margin_mae": 9.9505,
-          "margin_rmse": 12.8104,
-          "winner_accuracy": 73.352,
-          "margin_bias": -0.6131,
-          "edge_5_games": 1098,
-          "edge_5_record": "592-497-9",
-          "edge_5_hit_rate": 54.362
-        },
-        {
-          "season": 2024,
-          "games": 6150,
-          "margin_mae": 10.0791,
-          "margin_rmse": 12.8506,
-          "winner_accuracy": 72.911,
-          "margin_bias": -0.4248,
-          "edge_5_games": 1201,
-          "edge_5_record": "637-564-0",
-          "edge_5_hit_rate": 53.039
-        }
-      ],
-      "mean_margin_mae": 9.9573,
-      "worst_margin_mae": 10.0791
-    },
-    {
-      "name": "incumbent_plus_rest",
-      "ridge": 4.0,
-      "feature_names": [
-        "raw_margin",
-        "raw_margin_curve",
-        "home_court",
-        "experience_diff",
-        "experience_sum",
-        "early_strength_margin",
-        "early_home",
-        "nonconference_home",
-        "efg_edge",
-        "turnover_edge",
-        "rebound_edge",
-        "free_throw_edge",
-        "personnel_recruit_rating",
-        "personnel_transfer_minutes",
-        "personnel_transfer_points",
-        "personnel_transfer_rating",
-        "personnel_recruit_count",
-        "personnel_transfer_count",
-        "rest_advantage",
-        "home_back_to_back",
-        "away_back_to_back"
-      ],
-      "folds": [
-        {
-          "season": 2022,
-          "games": 5727,
-          "margin_mae": 9.8425,
-          "margin_rmse": 12.768,
-          "winner_accuracy": 74.559,
-          "margin_bias": 0.0202,
-          "edge_5_games": 1053,
-          "edge_5_record": "571-473-9",
-          "edge_5_hit_rate": 54.693
-        },
-        {
-          "season": 2023,
-          "games": 6113,
-          "margin_mae": 9.9503,
-          "margin_rmse": 12.8101,
-          "winner_accuracy": 73.352,
-          "margin_bias": -0.6133,
-          "edge_5_games": 1099,
-          "edge_5_record": "593-497-9",
-          "edge_5_hit_rate": 54.404
-        },
-        {
-          "season": 2024,
-          "games": 6150,
-          "margin_mae": 10.0791,
-          "margin_rmse": 12.8503,
-          "winner_accuracy": 72.927,
-          "margin_bias": -0.4247,
-          "edge_5_games": 1201,
-          "edge_5_record": "637-564-0",
-          "edge_5_hit_rate": 53.039
-        }
-      ],
-      "mean_margin_mae": 9.9573,
-      "worst_margin_mae": 10.0791
+      "mean_margin_mae": 9.1171,
+      "worst_margin_mae": 9.3588
     }
   ]
 }
