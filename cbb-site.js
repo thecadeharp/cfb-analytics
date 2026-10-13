@@ -1530,6 +1530,7 @@
       <h1 class="page-title">CBB THI Ratings</h1>
       <p class="page-subtitle">A conservative carry-forward strength baseline. This board is not THI's official preseason Index 25 and no team is manually rearranged.</p>
       <div class="cbb-readiness-banner"><span class="cbb-status-pill">Calibration in progress</span><strong>Official preseason Index 25 withheld</strong><p>The visible order carries forward opponent-adjusted 2026 efficiency and scales it by verified returning minutes. Recruiting and transfer context are displayed in team research, but do not yet reorder this table because the historical personnel archive has not cleared point-in-time validation.</p></div>
+      ${cbbEfficiencyLandscape(priors)}
       ${cbbRatingDecomposition(priors)}
       <div class="cbb-definition-banner"><strong>THI Ratings</strong><span>How strong the model believes a team is beneath its record.</span><strong>Team Data</strong><span>Observed results, box-score performance and roster facts.</span></div>
       <div class="cbb-controls">
@@ -1561,7 +1562,69 @@
       const row = event.target.closest("[data-team-id]");
       if (row) { await loadDeferred(["intelligence"]); openTeamDetail(Number(row.dataset.teamId)); }
     });
+    const openLandscapeTeam = async point => {
+      if (!point) return;
+      await loadDeferred(["intelligence"]);
+      openTeamDetail(Number(point.dataset.landscapeTeamId));
+    };
+    view.querySelector("#cbb-efficiency-landscape")?.addEventListener("click", event => {
+      openLandscapeTeam(event.target.closest("[data-landscape-team-id]"));
+    });
+    view.querySelector("#cbb-efficiency-landscape")?.addEventListener("keydown", event => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      const point = event.target.closest("[data-landscape-team-id]");
+      if (!point) return;
+      event.preventDefault();
+      openLandscapeTeam(point);
+    });
     paintRatingRows();
+  }
+
+  function cbbEfficiencyLandscape(teams) {
+    const eligible = teams.filter(team => Number.isFinite(Number(team.prior_offense)) && Number.isFinite(Number(team.prior_defense)));
+    if (!eligible.length) return "";
+    const width = 1000, height = 590;
+    const plot = { left:72, top:28, right:978, bottom:520 };
+    const offenses = eligible.map(team => Number(team.prior_offense));
+    const defenses = eligible.map(team => Number(team.prior_defense));
+    const xMin = Math.floor(Math.min(...offenses) - 2), xMax = Math.ceil(Math.max(...offenses) + 2);
+    const yMin = Math.floor(Math.min(...defenses) - 2), yMax = Math.ceil(Math.max(...defenses) + 2);
+    const sx = value => plot.left + (Number(value) - xMin) / Math.max(1, xMax - xMin) * (plot.right - plot.left);
+    const sy = value => plot.top + (Number(value) - yMin) / Math.max(1, yMax - yMin) * (plot.bottom - plot.top);
+    const rankedTeams = [...eligible].sort((a,b) => Number(b.prior_net) - Number(a.prior_net));
+    const ranks = new Map(rankedTeams.map((team,index) => [String(team.team_id), index + 1]));
+    const xTicks = Array.from({length:6}, (_,index) => xMin + (xMax-xMin) * index / 5);
+    const yTicks = Array.from({length:6}, (_,index) => yMin + (yMax-yMin) * index / 5);
+    const grid = [
+      ...xTicks.map(value => `<line x1="${sx(value)}" y1="${plot.top}" x2="${sx(value)}" y2="${plot.bottom}"/><text x="${sx(value)}" y="${plot.bottom+23}" text-anchor="middle">${number(value,0)}</text>`),
+      ...yTicks.map(value => `<line x1="${plot.left}" y1="${sy(value)}" x2="${plot.right}" y2="${sy(value)}"/><text x="${plot.left-12}" y="${sy(value)+4}" text-anchor="end">${number(value,0)}</text>`),
+    ].join("");
+    const points = eligible.map(team => {
+      const profile = teamProfile(team.team_id);
+      const rank = ranks.get(String(team.team_id));
+      const net = Number(team.prior_net);
+      const tier = net >= 15 ? "elite" : net >= 10 ? "strong" : net >= 5 ? "competitive" : "developing";
+      const label = profile?.abbreviation || team.team;
+      const logo = profile?.logo_url;
+      const x = sx(team.prior_offense), y = sy(team.prior_defense);
+      const visual = rank <= 40 && logo
+        ? `<circle r="15" class="cbb-landscape-logo-backdrop"/><image href="${escapeHtml(logo)}" x="-12" y="-12" width="24" height="24" preserveAspectRatio="xMidYMid meet"/>`
+        : `<circle r="5"/><text x="8" y="4" class="cbb-landscape-point-label">${rank <= 75 ? escapeHtml(label) : ""}</text>`;
+      return `<g class="cbb-landscape-point cbb-landscape-${tier}" transform="translate(${x.toFixed(1)} ${y.toFixed(1)})" data-landscape-team-id="${escapeHtml(team.team_id)}" role="button" tabindex="0"><title>#${rank} ${escapeHtml(team.team)} · Off ${number(team.prior_offense,1)} · Def ${number(team.prior_defense,1)} · Net ${number(net,1,true)}</title>${visual}</g>`;
+    }).join("");
+    return `<section class="cbb-efficiency-landscape" aria-labelledby="cbb-landscape-title">
+      <div class="cbb-rating-decomposition-head"><div><div class="cbb-label">THI Efficiency Landscape</div><h2 id="cbb-landscape-title">Where every team wins its possessions</h2></div><span>Better offense → · Better defense ↑</span></div>
+      <p class="cbb-model-sub">THI's own preseason offensive and defensive efficiency estimates. Logos identify the current top 40 by THI net rating; every point opens that team's dossier.</p>
+      <div class="cbb-landscape-frame"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="College basketball projected offensive and defensive efficiency landscape">
+        <rect x="${plot.left}" y="${plot.top}" width="${plot.right-plot.left}" height="${plot.bottom-plot.top}" rx="12" class="cbb-landscape-plot"/>
+        <g class="cbb-landscape-grid">${grid}</g>
+        <g class="cbb-landscape-points">${points}</g>
+        <text x="${(plot.left+plot.right)/2}" y="574" text-anchor="middle" class="cbb-landscape-axis-title">PROJECTED OFFENSIVE EFFICIENCY</text>
+        <text x="18" y="${(plot.top+plot.bottom)/2}" text-anchor="middle" transform="rotate(-90 18 ${(plot.top+plot.bottom)/2})" class="cbb-landscape-axis-title">PROJECTED DEFENSIVE EFFICIENCY · LOWER IS BETTER</text>
+      </svg></div>
+      <div class="cbb-landscape-legend"><span class="is-elite"><b>Elite two-way</b> +15 net or better</span><span class="is-strong"><b>Strong profile</b> +10 to +14.9</span><span class="is-competitive"><b>Competitive profile</b> +5 to +9.9</span><span class="is-developing"><b>Development range</b> below +5</span></div>
+      <div class="cbb-simulator-footnote">Profile bands describe THI rating ranges; they are not tournament probabilities and do not change Model A.</div>
+    </section>`;
   }
 
   function cbbRatingDecomposition(priors) {
