@@ -749,6 +749,17 @@ def main():
         first_by_game.setdefault(row["game_key"], row)
 
     initial_rows = list(first_by_game.values())
+    now = datetime.now(timezone.utc)
+    pending_future = []
+    past_due_unmatched = []
+    for row in initial_rows:
+        if row.get("result_settled"):
+            continue
+        kickoff = extract_datetime(row)
+        if kickoff is not None and kickoff > now:
+            pending_future.append(row)
+        else:
+            past_due_unmatched.append(row)
 
     by_signal_groups = defaultdict(list)
     for row in initial_rows:
@@ -794,6 +805,8 @@ def main():
             "completed_games_found": len(results),
             "initial_snapshots_settled": sum(1 for r in initial_rows if r["result_settled"]),
             "initial_snapshots_unmatched": sum(1 for r in initial_rows if not r["result_settled"]),
+            "initial_snapshots_pending_future": len(pending_future),
+            "initial_snapshots_past_due_unmatched": len(past_due_unmatched),
         },
         "result_match_methods_initial": dict(sorted(initial_match_counts.items())),
         "result_match_methods_all_snapshots": dict(sorted(match_method_counts.items())),
@@ -838,7 +851,8 @@ def main():
     print("Results source:", report["results_source"] or "NONE — waiting for completed-game data")
     print("Completed results found:", len(results))
     print("Initial snapshots settled:", report["counts"]["initial_snapshots_settled"])
-    print("Initial snapshots unmatched:", report["counts"]["initial_snapshots_unmatched"])
+    print("Initial snapshots pending future games:", report["counts"]["initial_snapshots_pending_future"])
+    print("Initial snapshots past due without results:", report["counts"]["initial_snapshots_past_due_unmatched"])
     print("Initial match methods:", dict(sorted(initial_match_counts.items())))
     print("JSON:", REPORT_JSON.relative_to(ROOT))
     print("CSV:", REPORT_CSV.relative_to(ROOT))

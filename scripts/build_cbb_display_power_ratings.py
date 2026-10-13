@@ -157,7 +157,7 @@ def validate_order(history: dict[int, list[dict[str, Any]]], target: int) -> dic
     }
 
 
-def build(history_dir: Path, profiles_path: Path) -> dict[str, Any]:
+def build(history_dir: Path, profiles_path: Path, frozen_path: Path | None = None) -> dict[str, Any]:
     history = load_history(history_dir)
     profiles = json.loads(profiles_path.read_text(encoding="utf-8"))
     latest = max(history)
@@ -167,6 +167,8 @@ def build(history_dir: Path, profiles_path: Path) -> dict[str, Any]:
     centers = {season: season_center(history[season]) for season in source_seasons}
     maps = {season: {str(row.get("team_id")): row for row in history[season]} for season in source_seasons}
     current_center = centers[latest]
+    frozen = json.loads(frozen_path.read_text(encoding="utf-8")) if frozen_path and frozen_path.exists() else {}
+    frozen_by_team = {str(row.get("team_id")): row for row in frozen.get("teams") or []}
     teams = []
     for profile in profiles.get("teams", []):
         team_id = profile.get("team_id")
@@ -176,15 +178,32 @@ def build(history_dir: Path, profiles_path: Path) -> dict[str, Any]:
         ], current_center)
         if not rating:
             continue
+        preseason = dict(rating)
+        current = ((profile.get("current_efficiency") or {}).get("adjusted") or {})
+        games = int((profile.get("record") or {}).get("games") or 0)
+        current_offense = finite(current.get("offense"))
+        current_defense = finite(current.get("defense"))
+        live_weight = min(0.85, (games / 12.0) * 0.85) if games and current_offense is not None and current_defense is not None else 0.0
+        if live_weight:
+            rating["prior_offense"] = round((1.0 - live_weight) * preseason["prior_offense"] + live_weight * current_offense, 4)
+            rating["prior_defense"] = round((1.0 - live_weight) * preseason["prior_defense"] + live_weight * current_defense, 4)
+            rating["prior_net"] = round(rating["prior_offense"] - rating["prior_defense"], 4)
+        frozen_row = frozen_by_team.get(str(team_id)) or {}
         teams.append({
             **rating,
             "team": profile.get("team"),
             "conference": profile.get("conference"),
             "rating_type": "display_only_structural_power",
+            "preseason_net": frozen_row.get("prior_net", preseason["prior_net"]),
+            "preseason_rank": frozen_row.get("power_rank"),
+            "current_games": games,
+            "current_form_net": round(current_offense - current_defense, 4) if games >= 5 and current_offense is not None and current_defense is not None else None,
+            "current_season_weight": round(live_weight, 4),
         })
     teams.sort(key=lambda row: (-row["prior_net"], str(row.get("team") or "")))
     for rank, row in enumerate(teams, 1):
         row["power_rank"] = rank
+        row["rank_movement_from_preseason"] = (int(row["preseason_rank"]) - rank) if row.get("preseason_rank") else None
     validations = [result for target in (latest - 1, latest) if (result := validate_order(history, target))]
     return {
         "meta": {
@@ -201,6 +220,8 @@ def build(history_dir: Path, profiles_path: Path) -> dict[str, Any]:
             "methodology": "Three-season blend of THI opponent-adjusted offensive and defensive efficiency, centered within each season's scoring environment and conservatively shrunk 12% toward the national mean.",
             "excluded_inputs": ["polls", "market prices", "third-party ratings", "unverified current rosters", "returning-minutes multipliers"],
             "validation_target": "future-season rank ordering, not betting ROI",
+            "current_season_update_policy": "Verified current-season adjusted efficiency blends from 0% to an 85% cap over the first 12 games. The immutable preseason board remains the movement reference.",
+            "frozen_baseline": "data/cbb/frozen/preseason_power_2027.json",
             "validation": validations,
         },
         "teams": teams,
@@ -221,8 +242,9 @@ def main() -> None:
     parser.add_argument("--history-dir", type=Path, default=ROOT / "data/cbb/history")
     parser.add_argument("--profiles", type=Path, default=ROOT / "data/cbb/team_profiles.json")
     parser.add_argument("--output", type=Path, default=ROOT / "data/cbb/model/display_power_ratings.json")
+    parser.add_argument("--frozen", type=Path, default=ROOT / "data/cbb/frozen/preseason_power_2027.json")
     args = parser.parse_args()
-    payload = build(args.history_dir, args.profiles)
+    payload = build(args.history_dir, args.profiles, args.frozen)
     atomic_write(args.output, payload)
     leader = payload["teams"][0]
     print(f"{VERSION}: {len(payload['teams'])} teams · #1 {leader['team']} {leader['prior_net']:+.2f}")

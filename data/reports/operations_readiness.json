@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "thi-operations-readiness-v1.0",
-    "generated_at_utc": "2026-10-13T17:34:59.027148Z",
+    "generated_at_utc": "2026-10-13T18:03:02.443968Z",
     "audience": "internal",
     "public_navigation": false
   },
@@ -19,7 +19,8 @@
     ],
     "frozen_snapshot_games": 408,
     "settled_initial_snapshots": 319,
-    "unmatched_initial_snapshots": 89,
+    "pending_future_snapshots": 89,
+    "past_due_unmatched_snapshots": 0,
     "cfbd_training_pack": {
       "status": "PASS",
       "week": [
@@ -30,6 +31,9 @@
   },
   "cbb": {
     "platform_status": "healthy",
+    "verified_venues": 103,
+    "target_venues": 340,
+    "venue_coverage_pct": 30.29,
     "games": 1027,
     "finals": 0,
     "neutral_site_games": 154,
@@ -37,8 +41,10 @@
     "neutral_site_unresolved_reviews": 0,
     "teams": 365,
     "roster_source_players": 3452,
-    "published_roster_players": 3452,
-    "roster_verification_status": "provider_verified",
+    "published_roster_players": 0,
+    "provider_roster_status": "provider_verified",
+    "roster_audit_status": "withheld",
+    "roster_verification_status": "withheld_by_thi_audit",
     "games_with_market": 0,
     "games_with_broadcast": 190,
     "team_game_sides": 2054,
@@ -87,7 +93,9 @@
   "open_items": [
     "CFB Week 7: 1 games do not have a spread.",
     "CBB books have not posted board lines yet.",
+    "CBB venue registry is partial: 103/340 venues verified; unverified travel mileage remains inactive.",
     "CBB verified player availability reports are not loaded.",
+    "CBB player ratings and lineup research remain withheld until the independent roster audit passes.",
     "True RLM remains inactive until a licensed public-splits feed is configured."
   ]
 }

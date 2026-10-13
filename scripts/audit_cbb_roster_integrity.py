@@ -12,10 +12,21 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = "thi-cbb-roster-audit-v1.0"
+POSITION_ALIASES = {
+    "guard": "G", "point guard": "PG", "shooting guard": "SG",
+    "forward": "F", "small forward": "SF", "power forward": "PF",
+    "center": "C", "guard forward": "G-F", "forward guard": "F-G",
+    "forward center": "F-C", "center forward": "C-F",
+}
 
 
 def normalized(value: Any) -> str:
     return " ".join("".join(ch.lower() if ch.isalnum() else " " for ch in str(value or "")).split())
+
+
+def normalized_position(value: Any) -> str:
+    text = normalized(value)
+    return POSITION_ALIASES.get(text, str(value or "").upper().replace("/", "-").replace(" ", ""))
 
 
 def audit(payload: dict[str, Any], spot_checks: dict[str, Any] | None = None, expected_teams: int = 350) -> dict[str, Any]:
@@ -31,7 +42,7 @@ def audit(payload: dict[str, Any], spot_checks: dict[str, Any] | None = None, ex
     invalid_positions = [
         {"team": roster.get("team"), "name": player.get("name"), "position": player.get("position")}
         for roster in rosters for player in roster.get("players") or []
-        if str(player.get("position") or "").upper() not in {"G", "PG", "SG", "F", "SF", "PF", "C", "G-F", "F-G", "F-C", "C-F"}
+        if normalized_position(player.get("position")) not in {"G", "PG", "SG", "F", "SF", "PF", "C", "G-F", "F-G", "F-C", "C-F"}
     ]
     spot_results = []
     for check in (spot_checks or {}).get("teams") or []:

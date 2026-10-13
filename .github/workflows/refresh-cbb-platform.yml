@@ -75,6 +75,9 @@ jobs:
             scripts/build_cbb_game_day_readiness.py \
             scripts/build_cbb_operations_context.py \
             scripts/build_cbb_platform_health.py \
+            scripts/audit_cbb_roster_integrity.py \
+            scripts/enforce_cbb_public_roster_gate.py \
+            scripts/validate_cbb_availability.py \
             scripts/build_prediction_archive.py \
             scripts/build_operations_readiness.py \
             scripts/run_cbb_opening_night_rehearsal.py \
@@ -104,6 +107,7 @@ jobs:
             scripts/test_cbb_model_v02.py \
             scripts/test_cbb_game_day_readiness.py \
             scripts/test_cbb_platform_health.py \
+            scripts/test_release_safety.py \
             scripts/test_cbb_opening_night_rehearsal.py \
             scripts/test_cbb_release_foundations.py \
             scripts/test_pregame_completion.py \
@@ -137,6 +141,7 @@ jobs:
           python scripts/build_cbb_intelligence_suite.py
           python scripts/research_cbb_model_v02.py
           python scripts/build_cbb_game_day_readiness.py
+          python scripts/validate_cbb_availability.py
           python scripts/build_cbb_operations_context.py
           python scripts/run_cbb_opening_night_rehearsal.py
           python scripts/build_cbb_platform_health.py
@@ -187,6 +192,10 @@ jobs:
           assert all("prior_production_rating" in row["research_scores"] for row in players["players"])
           assert roster_audit["meta"]["status"] in ("passed", "withheld")
           assert (roster_audit["meta"]["status"] == "passed") == (players["meta"]["roster_verification_status"] == "provider_verified" and all(roster_audit["checks"].values()))
+          assert health["coverage"]["roster_audit_status"] == roster_audit["meta"]["status"]
+          if roster_audit["meta"]["status"] != "passed":
+              assert health["coverage"]["roster_verification_status"] == "withheld_by_thi_audit"
+              assert health["coverage"]["published_roster_players"] == 0
           assert model["meta"]["model_version"] == "thi-cbb-walk-forward-v0.6-research"
           assert model["meta"]["historical_laboratory_version"] == "thi-cbb-historical-lab-v1.0"
           assert model["meta"]["four_factor_engine_version"] == "thi-cbb-chronological-four-factors-v0.6"
@@ -276,6 +285,12 @@ jobs:
           assert "data/cbb/projection_board.json" in cache_manifest["assets"]
           PY
 
+      - name: Enforce the public roster verification gate
+        run: |
+          python scripts/enforce_cbb_public_roster_gate.py
+          python scripts/build_static_cache_manifest.py
+          python scripts/verify_public_release.py --root .
+
       - name: Commit the coordinated CBB outputs
         run: |
           git config user.name "github-actions[bot]"
@@ -300,6 +315,7 @@ jobs:
             data/cbb/intelligence_suite.json \
             data/cbb/research/model_v02_challenger.json \
             data/cbb/game_day_readiness.json
+          git add data/cbb/verified_availability.json
           git add \
             data/cbb/market_contract.json \
             data/cbb/cache_manifest.json \

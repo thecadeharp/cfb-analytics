@@ -1115,7 +1115,8 @@
     state.playerLoading = fetchJson(PLAYER_PATH)
       .then(payload => {
         if (!Array.isArray(payload.players)) throw new Error("Player ratings payload is missing players.");
-        if (payload.meta?.version !== "thi-cbb-player-research-v1.3" || payload.meta?.roster_verification_status !== "provider_verified" || !Array.isArray(payload.team_rosters) || payload.players.some(player => player.current_roster_verified !== true)) {
+        const independentRosterStatus = state.data?.health?.coverage?.roster_verification_status;
+        if (independentRosterStatus !== "provider_verified" || payload.meta?.version !== "thi-cbb-player-research-v1.3" || payload.meta?.roster_verification_status !== "provider_verified" || !Array.isArray(payload.team_rosters) || payload.players.some(player => player.current_roster_verified !== true)) {
           throw new Error("Current rosters have not cleared THI's verification gate. Stale fallback players and their ratings are withheld.");
         }
         state.playerData = payload;
@@ -1685,10 +1686,17 @@
     const defBand = quantileBands(all, "prior_defense", true);
     const home = cbbNationalHomeAdvantage();
     const homeByTeam = new Map((state.data?.homeCourt?.teams || []).map(row => [Number(row.team_id), row]));
+    const dossiers = new Map((state.data?.intelligence?.team_dossiers || []).map(row => [Number(row.team_id), row]));
     const globalRank = new Map([...all].sort((a,b) => b.prior_net - a.prior_net).map((team,index) => [team.team_id,index+1]));
     body.innerHTML = rows.length ? rows.map(team => {
       const programHome = homeByTeam.get(Number(team.team_id));
-      return `<tr data-team-id="${team.team_id}"><td class="cbb-rank">#${globalRank.get(team.team_id) || "—"}</td><td><div class="cbb-team-cell">${teamLogo(team,"normal")}<div><div class="cbb-team-name">${escapeHtml(team.team)}</div><div class="cbb-team-meta">View team profile →</div></div></div></td><td>${escapeHtml(team.conference?.abbreviation || "—")}</td><td class="cbb-number cbb-metric-cell cbb-band-${netBand(team)}">${number(team.prior_net,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${netBand(team)}">${number(team.prior_net,2)}</td><td class="cbb-number cbb-rating-pending">Preseason</td><td class="cbb-number cbb-rating-pending">—</td><td class="cbb-number cbb-rating-pending">0–0</td><td class="cbb-number cbb-metric-cell cbb-band-${offBand(team)}">${number(team.prior_offense,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${defBand(team)}">${number(team.prior_defense,2)}</td><td class="cbb-number cbb-rating-context">${number(programHome?.home_court_points ?? home,2)}</td></tr>`;
+      const dossier = dossiers.get(Number(team.team_id));
+      const top25 = dossier?.resume?.opponent_quality_records?.top_25;
+      const top25Record = top25 ? `${integer(top25.wins)}–${integer(top25.losses)}` : "0–0";
+      const sos = dossier?.schedule_strength?.average_opponent_thi_net;
+      const movement = Number(team.rank_movement_from_preseason);
+      const movementText = Number.isFinite(movement) && movement !== 0 ? `${movement > 0 ? "↑" : "↓"}${Math.abs(movement)}` : "";
+      return `<tr data-team-id="${team.team_id}"><td class="cbb-rank">#${globalRank.get(team.team_id) || "—"}${movementText ? `<small>${movementText}</small>` : ""}</td><td><div class="cbb-team-cell">${teamLogo(team,"normal")}<div><div class="cbb-team-name">${escapeHtml(team.team)}</div><div class="cbb-team-meta">View team profile →</div></div></div></td><td>${escapeHtml(team.conference?.abbreviation || "—")}</td><td class="cbb-number cbb-metric-cell cbb-band-${netBand(team)}">${number(team.prior_net,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${netBand(team)}">${number(team.prior_net,2)}</td><td class="cbb-number ${team.current_form_net == null ? "cbb-rating-pending" : "cbb-rating-context"}">${team.current_form_net == null ? "Developing" : number(team.current_form_net,2,true)}</td><td class="cbb-number ${sos == null ? "cbb-rating-pending" : "cbb-rating-context"}">${sos == null ? "—" : number(sos,2,true)}</td><td class="cbb-number cbb-rating-context">${top25Record}</td><td class="cbb-number cbb-metric-cell cbb-band-${offBand(team)}">${number(team.prior_offense,2)}</td><td class="cbb-number cbb-metric-cell cbb-band-${defBand(team)}">${number(team.prior_defense,2)}</td><td class="cbb-number cbb-rating-context">${number(programHome?.home_court_points ?? home,2)}</td></tr>`;
     }).join("") : `<tr><td colspan="11" class="cbb-empty">No teams match those filters.</td></tr>`;
   }
 
