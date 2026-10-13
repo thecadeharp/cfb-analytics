@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "thi-public-backtest-v2.1",
-    "generated_at_utc": "2026-10-09T15:22:41.620428Z",
+    "generated_at_utc": "2026-10-13T18:43:18.605865Z",
     "audit_standard": "Exact one-sided binomial test against the 52.381% break-even rate implied by a hypothetical flat -110 price; Holm correction across each sport's complete displayed comparison family; 95% Wilson hit-rate intervals; season, outlier and CBB team-quality sensitivity checks.",
     "financial_claim": false,
     "price_policy": "Historical per-play prices and no-vig probabilities are unavailable. Return figures are hypothetical flat -110 arithmetic, not realized ROI.",
@@ -221,56 +221,56 @@
       "selection_policy": "All five predeclared signal tiers, the combined >5-point group and three team-quality sensitivity cohorts are shown and corrected as one nine-test family.",
       "validation_note": "The combined >5-point sample is positive at a hypothetical flat -110 price, but it does not clear the corrected significance test and the market has lower margin error in both held-out seasons.",
       "actionable_over_5": {
-        "games": 2180,
-        "decisions": 2178,
-        "wins": 1158,
-        "losses": 1020,
+        "games": 1042,
+        "decisions": 1040,
+        "wins": 532,
+        "losses": 508,
         "pushes": 2,
-        "record": "1158-1020-2",
-        "hit_rate": 53.168,
+        "record": "532-508-2",
+        "hit_rate": 51.154,
         "hit_rate_ci_95": [
-          51.069,
-          55.256
+          48.117,
+          54.182
         ],
-        "hypothetical_return_pct": 1.501,
-        "hypothetical_units": 32.727,
-        "p_value_vs_flat_minus_110": 0.237657,
+        "hypothetical_return_pct": -2.338,
+        "hypothetical_units": -24.364,
+        "p_value_vs_flat_minus_110": 0.7949,
         "holm_adjusted_p": 1.0
       },
       "yearly": [
         {
           "season": 2025,
-          "games": 1099,
-          "decisions": 1099,
-          "wins": 578,
-          "losses": 521,
+          "games": 529,
+          "decisions": 529,
+          "wins": 260,
+          "losses": 269,
           "pushes": 0,
-          "record": "578-521-0",
-          "hit_rate": 52.593,
+          "record": "260-269-0",
+          "hit_rate": 49.149,
           "hit_rate_ci_95": [
-            49.637,
-            55.531
+            44.911,
+            53.4
           ],
-          "hypothetical_return_pct": 0.405,
-          "hypothetical_units": 4.455,
-          "p_value_vs_flat_minus_110": 0.456106
+          "hypothetical_return_pct": -6.169,
+          "hypothetical_units": -32.636,
+          "p_value_vs_flat_minus_110": 0.937134
         },
         {
           "season": 2026,
-          "games": 1081,
-          "decisions": 1079,
-          "wins": 580,
-          "losses": 499,
+          "games": 513,
+          "decisions": 511,
+          "wins": 272,
+          "losses": 239,
           "pushes": 2,
-          "record": "580-499-2",
-          "hit_rate": 53.753,
+          "record": "272-239-2",
+          "hit_rate": 53.229,
           "hit_rate_ci_95": [
-            50.77,
-            56.71
+            48.895,
+            57.515
           ],
-          "hypothetical_return_pct": 2.615,
-          "hypothetical_units": 28.273,
-          "p_value_vs_flat_minus_110": 0.191574
+          "hypothetical_return_pct": 1.613,
+          "hypothetical_units": 8.273,
+          "p_value_vs_flat_minus_110": 0.367355
         }
       ],
       "buckets": [
@@ -278,115 +278,115 @@
           "key": "aligned",
           "label": "Aligned",
           "edge_range": "0 to 2.5",
-          "games": 5685,
-          "decisions": 5674,
-          "wins": 2942,
-          "losses": 2732,
-          "pushes": 11,
-          "record": "2942-2732-11",
-          "hit_rate": 51.851,
+          "games": 7008,
+          "decisions": 6993,
+          "wins": 3611,
+          "losses": 3382,
+          "pushes": 15,
+          "record": "3611-3382-15",
+          "hit_rate": 51.637,
           "hit_rate_ci_95": [
-            50.55,
-            53.149
+            50.466,
+            52.807
           ],
-          "hypothetical_return_pct": -1.011,
-          "hypothetical_units": -57.455,
-          "p_value_vs_flat_minus_110": 0.791986,
+          "hypothetical_return_pct": -1.417,
+          "hypothetical_units": -99.273,
+          "p_value_vs_flat_minus_110": 0.895613,
           "holm_adjusted_p": 1.0
         },
         {
           "key": "small_edge",
           "label": "Small edge",
           "edge_range": ">2.5 to 5",
-          "games": 3064,
-          "decisions": 3057,
-          "wins": 1563,
-          "losses": 1494,
-          "pushes": 7,
-          "record": "1563-1494-7",
-          "hit_rate": 51.129,
+          "games": 2879,
+          "decisions": 2876,
+          "wins": 1456,
+          "losses": 1420,
+          "pushes": 3,
+          "record": "1456-1420-3",
+          "hit_rate": 50.626,
           "hit_rate_ci_95": [
-            49.356,
-            52.898
+            48.799,
+            52.451
           ],
-          "hypothetical_return_pct": -2.385,
-          "hypothetical_units": -73.091,
-          "p_value_vs_flat_minus_110": 0.919891,
+          "hypothetical_return_pct": -3.347,
+          "hypothetical_units": -96.364,
+          "p_value_vs_flat_minus_110": 0.971455,
           "holm_adjusted_p": 1.0
         },
         {
           "key": "play",
           "label": "Play",
           "edge_range": ">5 to 7",
-          "games": 975,
-          "decisions": 974,
-          "wins": 521,
-          "losses": 453,
+          "games": 618,
+          "decisions": 617,
+          "wins": 310,
+          "losses": 307,
           "pushes": 1,
-          "record": "521-453-1",
-          "hit_rate": 53.491,
+          "record": "310-307-1",
+          "hit_rate": 50.243,
           "hit_rate_ci_95": [
-            50.351,
-            56.603
+            46.309,
+            54.175
           ],
-          "hypothetical_return_pct": 2.117,
-          "hypothetical_units": 20.636,
-          "p_value_vs_flat_minus_110": 0.254271,
+          "hypothetical_return_pct": -4.075,
+          "hypothetical_units": -25.182,
+          "p_value_vs_flat_minus_110": 0.865087,
           "holm_adjusted_p": 1.0
         },
         {
           "key": "material_disagreement",
           "label": "Material disagreement",
           "edge_range": ">7 to 10",
-          "games": 660,
-          "decisions": 660,
-          "wins": 355,
-          "losses": 305,
-          "pushes": 0,
-          "record": "355-305-0",
-          "hit_rate": 53.788,
+          "games": 284,
+          "decisions": 283,
+          "wins": 145,
+          "losses": 138,
+          "pushes": 1,
+          "record": "145-138-1",
+          "hit_rate": 51.237,
           "hit_rate_ci_95": [
-            49.973,
-            57.559
+            45.436,
+            57.005
           ],
-          "hypothetical_return_pct": 2.686,
-          "hypothetical_units": 17.727,
-          "p_value_vs_flat_minus_110": 0.246871,
+          "hypothetical_return_pct": -2.177,
+          "hypothetical_units": -6.182,
+          "p_value_vs_flat_minus_110": 0.672047,
           "holm_adjusted_p": 1.0
         },
         {
           "key": "outlier",
           "label": "Outlier",
           "edge_range": ">10",
-          "games": 545,
-          "decisions": 544,
-          "wins": 282,
-          "losses": 262,
-          "pushes": 1,
-          "record": "282-262-1",
-          "hit_rate": 51.838,
+          "games": 140,
+          "decisions": 140,
+          "wins": 77,
+          "losses": 63,
+          "pushes": 0,
+          "record": "77-63-0",
+          "hit_rate": 55.0,
           "hit_rate_ci_95": [
-            47.641,
-            56.009
+            46.735,
+            62.998
           ],
-          "hypothetical_return_pct": -1.034,
-          "hypothetical_units": -5.636,
-          "p_value_vs_flat_minus_110": 0.61675,
+          "hypothetical_return_pct": 5.0,
+          "hypothetical_units": 7.0,
+          "p_value_vs_flat_minus_110": 0.296436,
           "holm_adjusted_p": 1.0
         }
       ],
       "market_accuracy": [
         {
           "season": 2025,
-          "thi_margin_mae": 9.9176,
+          "thi_margin_mae": 9.0739,
           "market_margin_mae": 8.7258,
-          "market_advantage_points": 1.1918
+          "market_advantage_points": 0.3481
         },
         {
           "season": 2026,
-          "thi_margin_mae": 10.042,
+          "thi_margin_mae": 9.217,
           "market_margin_mae": 8.9729,
-          "market_advantage_points": 1.0691
+          "market_advantage_points": 0.2441
         }
       ],
       "short_favorites": {
@@ -404,20 +404,20 @@
       },
       "robustness": {
         "without_outlier_tier": {
-          "games": 1635,
-          "decisions": 1634,
-          "wins": 876,
-          "losses": 758,
-          "pushes": 1,
-          "record": "876-758-1",
-          "hit_rate": 53.611,
+          "games": 902,
+          "decisions": 900,
+          "wins": 455,
+          "losses": 445,
+          "pushes": 2,
+          "record": "455-445-2",
+          "hit_rate": 50.556,
           "hit_rate_ci_95": [
-            51.187,
-            56.017
+            47.294,
+            53.813
           ],
-          "hypothetical_return_pct": 2.346,
-          "hypothetical_units": 38.364,
-          "p_value_vs_flat_minus_110": 0.165876
+          "hypothetical_return_pct": -3.477,
+          "hypothetical_units": -31.364,
+          "p_value_vs_flat_minus_110": 0.870706
         },
         "interpretation": "Removing >10-point outliers tests whether the result depends on the largest model disagreements; the displayed result remains descriptive until prospective validation clears every gate."
       },
@@ -431,56 +431,56 @@
             "maximum_prior_season_rank": 300,
             "eligible_market_games": 7787,
             "actionable_over_5": {
-              "games": 1467,
-              "decisions": 1465,
-              "wins": 758,
-              "losses": 707,
+              "games": 688,
+              "decisions": 686,
+              "wins": 343,
+              "losses": 343,
               "pushes": 2,
-              "record": "758-707-2",
-              "hit_rate": 51.741,
+              "record": "343-343-2",
+              "hit_rate": 50.0,
               "hit_rate_ci_95": [
-                49.181,
-                54.292
+                46.269,
+                53.731
               ],
-              "hypothetical_return_pct": -1.221,
-              "hypothetical_units": -17.909,
-              "p_value_vs_flat_minus_110": 0.697484,
+              "hypothetical_return_pct": -4.532,
+              "hypothetical_units": -31.182,
+              "p_value_vs_flat_minus_110": 0.900877,
               "holm_adjusted_p": 1.0
             },
             "yearly": [
               {
                 "season": 2025,
-                "games": 756,
-                "decisions": 756,
-                "wins": 386,
-                "losses": 370,
+                "games": 361,
+                "decisions": 361,
+                "wins": 167,
+                "losses": 194,
                 "pushes": 0,
-                "record": "386-370-0",
-                "hit_rate": 51.058,
+                "record": "167-194-0",
+                "hit_rate": 46.26,
                 "hit_rate_ci_95": [
-                  47.499,
-                  54.607
+                  41.183,
+                  51.416
                 ],
-                "hypothetical_return_pct": -2.525,
-                "hypothetical_units": -19.091,
-                "p_value_vs_flat_minus_110": 0.777815
+                "hypothetical_return_pct": -11.685,
+                "hypothetical_units": -42.182,
+                "p_value_vs_flat_minus_110": 0.991339
               },
               {
                 "season": 2026,
-                "games": 711,
-                "decisions": 709,
-                "wins": 372,
-                "losses": 337,
+                "games": 327,
+                "decisions": 325,
+                "wins": 176,
+                "losses": 149,
                 "pushes": 2,
-                "record": "372-337-2",
-                "hit_rate": 52.468,
+                "record": "176-149-2",
+                "hit_rate": 54.154,
                 "hit_rate_ci_95": [
-                  48.789,
-                  56.121
+                  48.72,
+                  59.491
                 ],
-                "hypothetical_return_pct": 0.166,
-                "hypothetical_units": 1.182,
-                "p_value_vs_flat_minus_110": 0.496667
+                "hypothetical_return_pct": 3.364,
+                "hypothetical_units": 11.0,
+                "p_value_vs_flat_minus_110": 0.279698
               }
             ]
           },
@@ -489,56 +489,56 @@
             "maximum_prior_season_rank": 200,
             "eligible_market_games": 4269,
             "actionable_over_5": {
-              "games": 699,
-              "decisions": 698,
-              "wins": 373,
-              "losses": 325,
-              "pushes": 1,
-              "record": "373-325-1",
-              "hit_rate": 53.438,
+              "games": 371,
+              "decisions": 369,
+              "wins": 199,
+              "losses": 170,
+              "pushes": 2,
+              "record": "199-170-2",
+              "hit_rate": 53.93,
               "hit_rate_ci_95": [
-                49.729,
-                57.11
+                48.829,
+                58.949
               ],
-              "hypothetical_return_pct": 2.016,
-              "hypothetical_units": 14.091,
-              "p_value_vs_flat_minus_110": 0.301182,
+              "hypothetical_return_pct": 2.94,
+              "hypothetical_units": 10.909,
+              "p_value_vs_flat_minus_110": 0.293622,
               "holm_adjusted_p": 1.0
             },
             "yearly": [
               {
                 "season": 2025,
-                "games": 350,
-                "decisions": 350,
-                "wins": 184,
-                "losses": 166,
+                "games": 201,
+                "decisions": 201,
+                "wins": 96,
+                "losses": 105,
                 "pushes": 0,
-                "record": "184-166-0",
-                "hit_rate": 52.571,
+                "record": "96-105-0",
+                "hit_rate": 47.761,
                 "hit_rate_ci_95": [
-                  47.341,
-                  57.746
+                  40.963,
+                  54.644
                 ],
-                "hypothetical_return_pct": 0.364,
-                "hypothetical_units": 1.273,
-                "p_value_vs_flat_minus_110": 0.493225
+                "hypothetical_return_pct": -8.82,
+                "hypothetical_units": -17.727,
+                "p_value_vs_flat_minus_110": 0.916442
               },
               {
                 "season": 2026,
-                "games": 349,
-                "decisions": 348,
-                "wins": 189,
-                "losses": 159,
-                "pushes": 1,
-                "record": "189-159-1",
-                "hit_rate": 54.31,
+                "games": 170,
+                "decisions": 168,
+                "wins": 103,
+                "losses": 65,
+                "pushes": 2,
+                "record": "103-65-2",
+                "hit_rate": 61.31,
                 "hit_rate_ci_95": [
-                  49.058,
-                  59.469
+                  53.77,
+                  68.343
                 ],
-                "hypothetical_return_pct": 3.673,
-                "hypothetical_units": 12.818,
-                "p_value_vs_flat_minus_110": 0.252567
+                "hypothetical_return_pct": 16.845,
+                "hypothetical_units": 28.636,
+                "p_value_vs_flat_minus_110": 0.01224
               }
             ]
           },
@@ -547,56 +547,56 @@
             "maximum_prior_season_rank": 100,
             "eligible_market_games": 1867,
             "actionable_over_5": {
-              "games": 220,
-              "decisions": 220,
-              "wins": 119,
-              "losses": 101,
-              "pushes": 0,
-              "record": "119-101-0",
-              "hit_rate": 54.091,
+              "games": 150,
+              "decisions": 149,
+              "wins": 81,
+              "losses": 68,
+              "pushes": 1,
+              "record": "81-68-1",
+              "hit_rate": 54.362,
               "hit_rate_ci_95": [
-                47.492,
-                60.549
+                46.355,
+                62.15
               ],
-              "hypothetical_return_pct": 3.264,
-              "hypothetical_units": 7.182,
-              "p_value_vs_flat_minus_110": 0.33021,
+              "hypothetical_return_pct": 3.758,
+              "hypothetical_units": 5.636,
+              "p_value_vs_flat_minus_110": 0.344216,
               "holm_adjusted_p": 1.0
             },
             "yearly": [
               {
                 "season": 2025,
-                "games": 108,
-                "decisions": 108,
-                "wins": 49,
-                "losses": 59,
+                "games": 78,
+                "decisions": 78,
+                "wins": 34,
+                "losses": 44,
                 "pushes": 0,
-                "record": "49-59-0",
-                "hit_rate": 45.37,
+                "record": "34-44-0",
+                "hit_rate": 43.59,
                 "hit_rate_ci_95": [
-                  36.301,
-                  54.757
+                  33.143,
+                  54.638
                 ],
-                "hypothetical_return_pct": -13.384,
-                "hypothetical_units": -14.455,
-                "p_value_vs_flat_minus_110": 0.939984
+                "hypothetical_return_pct": -16.783,
+                "hypothetical_units": -13.091,
+                "p_value_vs_flat_minus_110": 0.952333
               },
               {
                 "season": 2026,
-                "games": 112,
-                "decisions": 112,
-                "wins": 70,
-                "losses": 42,
-                "pushes": 0,
-                "record": "70-42-0",
-                "hit_rate": 62.5,
+                "games": 72,
+                "decisions": 71,
+                "wins": 47,
+                "losses": 24,
+                "pushes": 1,
+                "record": "47-24-1",
+                "hit_rate": 66.197,
                 "hit_rate_ci_95": [
-                  53.26,
-                  70.911
+                  54.617,
+                  76.115
                 ],
-                "hypothetical_return_pct": 19.318,
-                "hypothetical_units": 21.636,
-                "p_value_vs_flat_minus_110": 0.019722
+                "hypothetical_return_pct": 26.01,
+                "hypothetical_units": 18.727,
+                "p_value_vs_flat_minus_110": 0.012865
               }
             ]
           }
