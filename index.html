@@ -1331,6 +1331,82 @@
     .thi-observed-ratings .thi-rating-card.thi-band-missing .thi-rating-card-label {
       color: #4c5660;
     }
+
+    .cfb-bye-board {
+      margin: 0 0 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .cfb-bye-board > summary,
+    .cfb-personnel-summary {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      padding:12px 15px;
+      cursor:pointer;
+      list-style:none;
+      font-family:var(--mono);
+      font-size:10px;
+      color:var(--muted);
+    }
+    .cfb-bye-board > summary::-webkit-details-marker,
+    .cfb-personnel-summary::-webkit-details-marker { display:none; }
+    .cfb-bye-board > summary strong { color:var(--ink); font-family:"Inter",sans-serif; font-size:13px; }
+    .cfb-bye-board-action { color:var(--green); font-weight:700; text-transform:uppercase; letter-spacing:.6px; }
+    .cfb-bye-grid {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:1px;
+      border-top:1px solid var(--border);
+      background:var(--border);
+    }
+    .cfb-bye-card { min-width:0; padding:12px 14px; background:var(--surface); }
+    .cfb-bye-team { display:flex; align-items:center; gap:8px; min-width:0; }
+    .cfb-bye-team strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .cfb-bye-next { margin-top:8px; font-size:12px; font-weight:800; }
+    .cfb-bye-meta,.cfb-bye-source { margin-top:4px; color:var(--muted); font:9px/1.45 var(--mono); }
+    .cfb-bye-source { margin:0; padding:9px 14px; border-top:1px solid var(--border); background:var(--surface-soft); }
+
+    .cfb-personnel-matchup { padding:0 !important; overflow:hidden; }
+    .cfb-personnel-summary { padding:14px 16px; border-bottom:1px solid transparent; }
+    .cfb-personnel-matchup[open] .cfb-personnel-summary { border-bottom-color:var(--border); }
+    .cfb-personnel-summary > span:first-child { display:grid; gap:4px; }
+    .cfb-personnel-summary strong { color:var(--ink); font-size:17px; font-family:"Inter",sans-serif; }
+    .cfb-personnel-body { padding:14px; }
+    .cfb-personnel-lane + .cfb-personnel-lane { margin-top:16px; padding-top:16px; border-top:1px solid var(--border); }
+    .cfb-personnel-lane-title { margin-bottom:10px; font-size:14px; font-weight:900; }
+    .cfb-personnel-lane-title span { margin:0 5px; color:var(--muted); font:9px var(--mono); text-transform:uppercase; }
+    .cfb-personnel-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .cfb-personnel-unit { min-width:0; border:1px solid var(--border); border-radius:10px; background:var(--surface); overflow:hidden; }
+    .cfb-personnel-unit-title { display:flex; align-items:center; gap:8px; padding:10px 12px; border-bottom:1px solid var(--border); background:var(--surface-soft); }
+    .cfb-personnel-group { display:grid; grid-template-columns:86px minmax(0,1fr); gap:10px; padding:10px 12px; border-bottom:1px solid var(--border); }
+    .cfb-personnel-group-label { color:var(--muted); font:800 8px/1.4 var(--mono); letter-spacing:.6px; text-transform:uppercase; }
+    .cfb-personnel-cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+    .cfb-personnel-card { display:flex; align-items:center; gap:8px; min-width:0; padding:7px; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--ink); text-align:left; cursor:pointer; }
+    .cfb-personnel-card:hover { border-color:var(--green); }
+    .cfb-personnel-headshot { display:flex; align-items:center; justify-content:center; flex:0 0 34px; width:34px; height:34px; overflow:hidden; border-radius:50%; background:var(--surface-soft); color:var(--muted); font:700 9px var(--mono); }
+    .cfb-personnel-headshot img { width:100%; height:100%; object-fit:cover; }
+    .cfb-personnel-copy,.cfb-personnel-name { display:grid; min-width:0; }
+    .cfb-personnel-name { overflow:hidden; font-size:11px; font-weight:800; text-overflow:ellipsis; white-space:nowrap; }
+    .cfb-personnel-name small,.cfb-personnel-workload,.cfb-personnel-rating { overflow:hidden; color:var(--muted); font:8px/1.45 var(--mono); text-overflow:ellipsis; white-space:nowrap; }
+    .cfb-personnel-rating { color:var(--green); font-weight:700; }
+    .cfb-personnel-empty,.cfb-personnel-line-note,.cfb-personnel-method { color:var(--muted); font:9px/1.5 var(--mono); }
+    .cfb-personnel-line-note { padding:9px 12px; background:var(--surface-soft); }
+    .cfb-personnel-method { margin-top:12px; padding:10px 12px; border:1px solid var(--border); border-radius:8px; background:var(--surface-soft); }
+
+    @media (max-width:900px) {
+      .cfb-bye-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .cfb-personnel-grid { grid-template-columns:1fr; }
+    }
+    @media (max-width:620px) {
+      .cfb-bye-grid { grid-template-columns:1fr; }
+      .cfb-personnel-group { grid-template-columns:1fr; }
+      .cfb-personnel-cards { grid-template-columns:1fr; }
+      .cfb-bye-board > summary,.cfb-personnel-summary { align-items:flex-start; flex-direction:column; }
+    }
   </style>
 </head>
 
@@ -1507,6 +1583,8 @@
 
       </div>
 
+      <div id="cfb-bye-board" aria-live="polite"></div>
+
       <div class="table-card">
         <div class="table-scroll">
           <div id="projections-container">
@@ -1649,14 +1727,14 @@
   </main>
 
   <script src="cfb-game-script.js?v=2026-drive-script-v01"></script>
-  <script src="app.js?v=2026-recent-market-results-v01"></script>
+  <script src="app.js?v=2026-personnel-bye-board-v02"></script>
   <script src="thi-ratings-hub.js?v=2026-ux-cleanup-v01"></script>
   <script src="portfolio-config.js"></script>
   <script src="account-access.js?v=2026-track-play-v01"></script>
   <script src="market-research.js?v=2026-matchup-odds-v01"></script>
   <script src="last-updated-timestamp.js"></script>
   <script src="dossier-ranks.js"></script>
-  <script src="ux-v2.js?v=2026-projection-cleanup-v04"></script>
+  <script src="ux-v2.js?v=2026-personnel-bye-board-v01"></script>
   <script src="portal-variance.js?v=2026-free-market-monitor-v01"></script>
   <script src="mobile.js?v=2026-intelligence-v01"></script>
   <script src="sort-tables.js?v=2026-live-score-v02"></script>
@@ -1673,7 +1751,7 @@
   <link rel="stylesheet" href="thi-intelligence.css?v=2026-intelligence-v01">
   <script src="thi-intelligence.js?v=2026-intelligence-v01"></script>
   <link rel="stylesheet" href="player-intelligence.css?v=2026-ux-cleanup-v01">
-  <script src="player-intelligence.js?v=2026-player-bands-v02"></script>
+  <script src="player-intelligence.js?v=2026-personnel-bye-board-v02"></script>
   <link rel="stylesheet" href="cbb-site.css?v=2027-efficiency-landscape-v01">
   <link rel="stylesheet" href="dark-mode.css?v=2026-dark-v05">
   <script src="dark-mode.js?v=2026-dark-v01"></script>

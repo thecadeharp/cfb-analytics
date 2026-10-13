@@ -2553,6 +2553,55 @@ function selectWeek(week) {
   renderProjections();
 }
 
+function byeWeekRows(week) {
+  const schedules = scheduleData?.team_schedules ?? {};
+  if (!Number.isFinite(Number(week))) return [];
+  const scheduledTeams = new Set();
+  projections.filter(game => Number(game?.week) === Number(week)).forEach(game => {
+    if (game?.home?.team) scheduledTeams.add(game.home.team);
+    if (game?.away?.team) scheduledTeams.add(game.away.team);
+  });
+  const teamNames = Object.keys(teams ?? {}).length ? Object.keys(teams) : Object.keys(schedules);
+  return teamNames.map(team => {
+    if (scheduledTeams.has(team)) return null;
+    const teamSchedule = Array.isArray(schedules?.[team]) ? schedules[team] : [];
+    const next = teamSchedule
+      .filter(game => Number(game?.week) > Number(week))
+      .sort((a, b) => Number(a?.week ?? 999) - Number(b?.week ?? 999)
+        || (Date.parse(a?.start_date ?? "") || 0) - (Date.parse(b?.start_date ?? "") || 0))[0];
+    if (!next) return null;
+    return { team, next };
+  }).filter(Boolean).sort((a, b) => a.team.localeCompare(b.team));
+}
+
+function renderByeWeekBoard() {
+  const root = document.getElementById("cfb-bye-board");
+  if (!root) return;
+  const rows = byeWeekRows(currentWeek);
+  if (!rows.length) {
+    root.innerHTML = "";
+    return;
+  }
+  root.innerHTML = `
+    <details class="cfb-bye-board">
+      <summary>
+        <span><strong>Week ${escapeHtml(currentWeek)} Bye Board</strong> · ${rows.length} FBS teams off</span>
+        <span class="cfb-bye-board-action">View next opponents</span>
+      </summary>
+      <div class="cfb-bye-grid">
+        ${rows.map(({ team, next }) => {
+          const location = next?.location === "away" ? "at" : next?.location === "neutral" ? "vs · neutral" : "vs";
+          return `<div class="cfb-bye-card">
+            <div class="cfb-bye-team">${teamLogoMarkup(team, "projection")}<strong>${escapeHtml(team)}</strong></div>
+            <div class="cfb-bye-next">Next: ${escapeHtml(location)} ${escapeHtml(next?.opponent ?? "TBD")}</div>
+            <div class="cfb-bye-meta">Week ${escapeHtml(next?.week ?? "—")} · ${escapeHtml(gameDateText(next?.start_date))} · ${escapeHtml(next?.network || "TV TBD")}</div>
+          </div>`;
+        }).join("")}
+      </div>
+      <div class="cfb-bye-source">Calculated from THI's current FBS schedule file. Postponements and newly announced games update with the next schedule refresh.</div>
+    </details>`;
+}
+
 
 // ============================================================================
 // PROJECTION BOARD
@@ -2612,6 +2661,7 @@ function renderProjections() {
   if (!container) return;
 
   updateProjectionDataAnchor();
+  renderByeWeekBoard();
 
   const games = projectionGamesForCurrentView();
   const marketGames = games.filter(game => hasValue(game?.market?.home_spread));
@@ -2802,6 +2852,16 @@ function openMatchup(gameId) {
   if (!game) return;
   renderMatchup(game);
   enterDetailView("matchup", { gameId: String(gameId) });
+  Promise.all([
+    ensureRosterAssetsLoaded(),
+    typeof window.THIEnsurePlayerIntelligence === "function"
+      ? window.THIEnsurePlayerIntelligence().catch(() => null)
+      : Promise.resolve(null)
+  ]).then(() => {
+    if (history.state?.view === "matchup" && String(history.state?.detail?.gameId) === String(gameId)) {
+      renderMatchup(game);
+    }
+  });
 }
 
 function trackMatchupPlay(gameId) {
@@ -3757,6 +3817,130 @@ function cfbMatchupRecentResultsMarkup(awayName, homeName) {
   </section>`;
 }
 
+function personnelActivity(player, profile) {
+  const usage = player?.usage ?? {};
+  const values = [
+    profile?.primary_volume,
+    profile?.opportunities,
+    usage?.pass_attempts,
+    usage?.rush_attempts,
+    usage?.targets,
+    usage?.receptions,
+    usage?.tackles,
+    usage?.sacks,
+  ].map(Number).filter(Number.isFinite);
+  return values.length ? Math.max(...values) : 0;
+}
+
+function observedPersonnel(teamName, positions, limit) {
+  const roster = rosterAssetsData?.teams?.[teamName]?.players ?? [];
+  const intelligence = window.THIPlayerIntelligence?.players ?? {};
+  const allowed = new Set(positions);
+  return roster.map(player => {
+    const profile = intelligence?.[String(player?.athlete_id)] ?? null;
+    return { player, profile, activity: personnelActivity(player, profile) };
+  }).filter(row => allowed.has(String(row.player?.position ?? "").toUpperCase()))
+    .filter(row => row.activity > 0 || hasValue(row.profile?.rating))
+    .sort((a, b) => b.activity - a.activity
+      || Number(hasValue(b.profile?.rating) ? b.profile.rating : -999) - Number(hasValue(a.profile?.rating) ? a.profile.rating : -999)
+      || String(a.player?.name ?? "").localeCompare(String(b.player?.name ?? "")))
+    .slice(0, limit);
+}
+
+function personnelWorkload(row) {
+  const profile = row?.profile;
+  const player = row?.player ?? {};
+  const usage = player?.usage ?? {};
+  const position = String(player?.position ?? "").toUpperCase();
+  if (profile) {
+    const traditional = profile?.traditional ?? {};
+    if (position === "QB") return `${traditional.pass_attempts ?? usage.pass_attempts ?? 0} att · ${traditional.pass_yards ?? usage.pass_yards ?? 0} pass yds`;
+    if (position === "RB") return `${traditional.rush_attempts ?? usage.rush_attempts ?? 0} car · ${traditional.rush_yards ?? usage.rush_yards ?? 0} rush yds`;
+    if (["WR", "TE"].includes(position)) return `${usage.receptions ?? traditional.receptions ?? 0} rec · ${usage.receiving_yards ?? traditional.receiving_yards ?? 0} yds`;
+    if (["DL", "LB", "DB"].includes(position)) {
+      const disruptions = Number(traditional.defensive_disruptions ?? 0);
+      const sacks = Number(traditional.sacks ?? 0);
+      return `${disruptions} ${disruptions === 1 ? "disruption" : "disruptions"}${sacks ? ` · ${sacks} ${sacks === 1 ? "sack" : "sacks"}` : ""}`;
+    }
+  }
+  return rosterUsageText(player);
+}
+
+function personnelRatingMatchesPosition(player, profile) {
+  const position = String(player?.position ?? "").toUpperCase();
+  const group = String(profile?.position_group ?? "").toUpperCase();
+  if (["DL", "LB", "DB"].includes(position)) return group === "DEF";
+  return position === group;
+}
+
+function personnelCardMarkup(row) {
+  const player = row?.player ?? {};
+  const profile = row?.profile ?? {};
+  const athleteId = String(player?.athlete_id ?? "");
+  const matchingRole = personnelRatingMatchesPosition(player, profile);
+  const rating = matchingRole && hasValue(profile?.rating) ? Number(profile.rating) : null;
+  const rank = matchingRole && hasValue(profile?.national_position_rank) ? Number(profile.national_position_rank) : null;
+  const headshot = /^https:\/\//i.test(String(player?.headshot ?? ""))
+    ? `<img src="${escapeHtml(player.headshot)}" alt="" loading="lazy" onerror="this.hidden=true">`
+    : `<span>${escapeHtml(teamLogoInitials(player?.name ?? ""))}</span>`;
+  return `<button type="button" class="cfb-personnel-card" ${athleteId ? `data-thi-player-id="${escapeHtml(athleteId)}"` : "disabled"}>
+    <span class="cfb-personnel-headshot">${headshot}</span>
+    <span class="cfb-personnel-copy">
+      <span class="cfb-personnel-name"><small>#${escapeHtml(player?.jersey ?? "—")} ${escapeHtml(player?.position ?? "—")}</small>${escapeHtml(player?.name ?? "Unknown")}</span>
+      <span class="cfb-personnel-workload">${escapeHtml(personnelWorkload(row))}</span>
+      <span class="cfb-personnel-rating">${rating !== null ? `THI ${formatNumber(rating, 1)}` : "THI rating pending"}${rank !== null ? ` · #${rank} ${escapeHtml(profile?.position_group ?? player?.position ?? "position")}` : ""}</span>
+    </span>
+  </button>`;
+}
+
+function personnelUnitMarkup(teamName, side) {
+  const offense = side === "offense";
+  const groups = offense
+    ? [
+        ["Quarterback", ["QB"], 1],
+        ["Backfield", ["RB"], 2],
+        ["Pass catchers", ["WR", "TE"], 4],
+      ]
+    : [
+        ["Front", ["DL"], 3],
+        ["Linebackers", ["LB"], 3],
+        ["Secondary", ["DB"], 4],
+      ];
+  const roster = rosterAssetsData?.teams?.[teamName]?.players ?? [];
+  const lineCount = offense ? roster.filter(player => player?.position === "OL").length : 0;
+  return `<div class="cfb-personnel-unit">
+    <div class="cfb-personnel-unit-title">${teamLogoMarkup(teamName, "projection")}<strong>${escapeHtml(teamName)} ${offense ? "offense" : "defense"}</strong></div>
+    ${groups.map(([label, positions, limit]) => {
+      const rows = observedPersonnel(teamName, positions, limit);
+      return `<div class="cfb-personnel-group"><div class="cfb-personnel-group-label">${escapeHtml(label)}</div><div class="cfb-personnel-cards">${rows.length ? rows.map(personnelCardMarkup).join("") : `<span class="cfb-personnel-empty">No verified workload leader yet</span>`}</div></div>`;
+    }).join("")}
+    ${offense ? `<div class="cfb-personnel-line-note">Offensive line: ${lineCount || "—"} rostered · official starters and snap counts unavailable</div>` : ""}
+  </div>`;
+}
+
+function cfbPersonnelMatchupMarkup(awayName, homeName) {
+  if (!rosterAssetsData) {
+    return `<section class="thi-matchup-section cfb-personnel-matchup"><div class="thi-matchup-section-header"><div><div class="eyebrow">Personnel intelligence</div><div class="thi-matchup-section-title">Observed Personnel Matchup</div></div><div class="thi-matchup-section-note">Loading current rosters and recorded workload…</div></div></section>`;
+  }
+  return `<details class="thi-matchup-section cfb-personnel-matchup" open>
+    <summary class="cfb-personnel-summary">
+      <span><span class="eyebrow">Personnel intelligence · display only</span><strong>Observed Personnel Matchup</strong></span>
+      <span>Roster + workload view</span>
+    </summary>
+    <div class="cfb-personnel-body">
+      <div class="cfb-personnel-lane">
+        <div class="cfb-personnel-lane-title">${escapeHtml(awayName)} offense <span>vs</span> ${escapeHtml(homeName)} defense</div>
+        <div class="cfb-personnel-grid">${personnelUnitMarkup(awayName, "offense")}${personnelUnitMarkup(homeName, "defense")}</div>
+      </div>
+      <div class="cfb-personnel-lane">
+        <div class="cfb-personnel-lane-title">${escapeHtml(homeName)} offense <span>vs</span> ${escapeHtml(awayName)} defense</div>
+        <div class="cfb-personnel-grid">${personnelUnitMarkup(homeName, "offense")}${personnelUnitMarkup(awayName, "defense")}</div>
+      </div>
+      <div class="cfb-personnel-method">Observed contributors are ordered by recorded workload, then position-specific THI evidence. This is not an official depth chart, does not infer offensive-line starters, and does not affect Model A. Source: ESPN roster identity + CFBD/SportsDataverse production through Week ${escapeHtml(rosterAssetsData?.meta?.through_week ?? "—")}.</div>
+    </div>
+  </details>`;
+}
+
 function renderMatchup(game) {
   const container = document.getElementById("matchup-container");
   if (!container) return;
@@ -3920,6 +4104,8 @@ function renderMatchup(game) {
     ${availabilityReportMarkup(awayName, homeName, game)}
 
     ${taleOfTapeMarkup(awayName, homeName)}
+
+    ${cfbPersonnelMatchupMarkup(awayName, homeName)}
 
     ${scheduleContextMarkup(game)}
 

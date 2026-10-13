@@ -1448,6 +1448,9 @@
     const summary = document.getElementById("projection-summary");
     if (!container) return;
 
+    updateProjectionDataAnchor();
+    renderByeWeekBoard();
+
     const games = projectionGamesForCurrentView();
     const marketGames = games.filter(game => hasValue(game?.market?.home_spread));
     const completedGames = games.filter(game => settledResultForGame(game));

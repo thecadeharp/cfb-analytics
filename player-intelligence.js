@@ -40,6 +40,8 @@
     return dataPromise;
   }
 
+  window.THIEnsurePlayerIntelligence = loadData;
+
   function install() {
     const nav = document.querySelector(".main-nav");
     const ratings = document.getElementById("view-ratings");
