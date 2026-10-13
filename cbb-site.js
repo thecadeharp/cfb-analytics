@@ -811,6 +811,48 @@
     </section>`;
   }
 
+  function cbbChangeSummary(game) {
+    const contract = state.data?.marketContract?.games?.[String(game.game_id)] || {};
+    const opening = contract.market?.opening || {};
+    const current = contract.market?.current || {};
+    const contractModel = contract.model?.thi_home_spread;
+    const projectedMargin = Number(game.projection?.home_margin);
+    const model = contractModel !== null && contractModel !== undefined
+      ? Number(contractModel)
+      : Number.isFinite(projectedMargin) ? -projectedMargin : NaN;
+    const first = opening.home_spread === null || opening.home_spread === undefined || opening.home_spread === "" ? NaN : Number(opening.home_spread);
+    const latest = current.home_spread === null || current.home_spread === undefined || current.home_spread === "" ? NaN : Number(current.home_spread);
+    const history = Array.isArray(contract.history) ? contract.history : [];
+    let headline = "Market has not opened";
+    let explanation = "THI is showing its independent projection; no market comparison or movement claim is available yet.";
+    if (Number.isFinite(first) && Number.isFinite(latest)) {
+      const move = latest - first;
+      const toward = move < 0 ? game.home?.team : move > 0 ? game.away?.team : null;
+      const openingGap = Number.isFinite(model) ? Math.abs(model - first) : null;
+      const currentGap = Number.isFinite(model) ? Math.abs(model - latest) : null;
+      if (Math.abs(move) < .05) {
+        headline = "Market unchanged since first capture";
+        explanation = Number.isFinite(currentGap) ? `The current market remains ${number(currentGap,1)} points from THI.` : "No consensus spread movement has been observed.";
+      } else {
+        const alignment = currentGap == null || openingGap == null ? "" : currentGap < openingGap - .05 ? " and moved toward THI" : currentGap > openingGap + .05 ? " and increased the disagreement" : " without materially changing the THI gap";
+        headline = `${number(Math.abs(move),1)}-point move toward ${toward}`;
+        explanation = `Consensus moved from ${number(first,1,true)} to ${number(latest,1,true)} on the home spread${alignment}.`;
+      }
+    }
+    const latestCapture = history.at(-1)?.captured_at_utc;
+    return `<section class="cbb-detail-section cbb-change-summary"><div class="cbb-simulator-heading"><div><span class="cbb-kicker">Since THI's first capture</span><h3>What changed?</h3></div><span class="cbb-context-pending">${integer(history.length)} observations</span></div><strong>${escapeHtml(headline)}</strong><p>${escapeHtml(explanation)}</p><small>${latestCapture ? `Latest observation ${escapeHtml(formatTimestamp(latestCapture))}` : "Awaiting the first synchronized market observation."}</small></section>`;
+  }
+
+  function copyCbbMatchupLink(gameId, button) {
+    const url = new URL(window.location.href);
+    url.hash = "";
+    url.searchParams.set("sport", "cbb");
+    url.searchParams.set("game", String(gameId));
+    const done = () => { if (button) { button.textContent = "Link copied"; setTimeout(() => { button.textContent = "Share matchup"; }, 1800); } };
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(url.toString()).then(done).catch(() => window.prompt("Copy matchup link", url.toString()));
+    else window.prompt("Copy matchup link", url.toString());
+  }
+
   function normalCdf(value) {
     const sign = value < 0 ? -1 : 1;
     const x = Math.abs(value) / Math.sqrt(2);
@@ -947,7 +989,7 @@
     const styleCell = value => value == null ? "Coverage unavailable" : pct(value);
     panel.innerHTML = `
       <button class="cbb-detail-close cbb-game-back" type="button" data-cbb-close>← Back to projections</button>
-      <button class="thi-account-button" type="button" data-cbb-track-play>Track a Play</button>
+      <div class="cbb-detail-actions"><button class="thi-account-button" type="button" data-cbb-share>Share matchup</button><button class="thi-account-button" type="button" data-cbb-track-play>Track a Play</button></div>
       <div class="cbb-kicker">THI CBB matchup analysis</div>
       <div class="cbb-matchup-page-title"><div>${teamLogo(game.away,"large")}<span>${escapeHtml(game.away?.team)}</span></div><b>${matchupWord(game)}</b><div>${teamLogo(game.home,"large")}<span>${escapeHtml(game.home?.team)}</span></div></div>
       <div class="cbb-detail-sub">${escapeHtml(date)} · ${escapeHtml(game.venue?.name || (game.neutral_site ? "Neutral site" : "Venue TBD"))} · ${escapeHtml(game.broadcasts?.map(item => item.network || item).filter(Boolean).join(", ") || "TV TBD")}${game.neutral_site ? ' · <strong class="cbb-neutral-label">NEUTRAL FLOOR · NO HOME-COURT INPUT</strong>' : ""}</div>
@@ -959,6 +1001,7 @@
         ${detailStat("Projected total", number(projection.total,1))}
         ${detailStat("Model input", stateLabel)}
       </div>
+      ${cbbChangeSummary(game)}
       <section class="cbb-detail-section cbb-situational-section"><h3>Schedule, venue and availability context</h3>
         <div class="cbb-model-sub">These fields are shown separately from the published projection until each input clears historical out-of-sample testing.</div>
         <div class="cbb-situation-grid">
@@ -1027,6 +1070,7 @@
     document.body.style.overflow = "hidden";
     panel.scrollTop = 0;
     wirePossessionSimulator(panel, game);
+    panel.querySelector("[data-cbb-share]")?.addEventListener("click", event => copyCbbMatchupLink(game.game_id, event.currentTarget));
     panel.querySelector("[data-cbb-track-play]")?.addEventListener("click", () => {
       const homeSpread=Number(game.market?.consensus_home_spread);
       const edge=Number(projection.spread_edge);
@@ -1880,6 +1924,8 @@
       <td class="cbb-number">${row.hit_rate == null ? "—" : pct(row.hit_rate)}</td><td class="cbb-number">${row.average_clv == null ? "—" : number(row.average_clv,2,true)}</td>
       <td class="cbb-number">${row.beat_close_pct == null ? "—" : pct(row.beat_close_pct)}</td><td><span class="cbb-tracking-confidence">${confidence(row)}</span></td></tr>`).join("");
     const play = spreadSignals.play || spreadSignals.PLAY || {};
+    const decisions = (prospective.spread_decisions || []).slice().sort((a,b) => String(b.start_date || "").localeCompare(String(a.start_date || ""))).slice(0, 25);
+    const decisionRows = decisions.map(trackingDecisionRow).join("");
     const view = document.getElementById("view-cbb-tracking");
     view.innerHTML = `
       <div class="cbb-kicker">Prospective accountability</div>
@@ -1901,6 +1947,7 @@
         </div>
         <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Monthly Ledger</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Month</th><th>Games</th><th>ATS</th><th>Win %</th><th>Average CLV</th><th>Beat Close</th></tr></thead><tbody>${monthlyRows || `<tr><td colspan="6" class="cbb-empty">The ledger will populate after the first qualified CBB decision reaches final status.</td></tr>`}</tbody></table></div></div>
         <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Season-to-Date · Every Signal and Testing Key</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Signal / Key</th><th>Games</th><th>Record</th><th>Win %</th><th>Average CLV</th><th>Beat Close</th><th>Confidence</th></tr></thead><tbody>${signalRows || `<tr><td colspan="7" class="cbb-empty">Signal records will populate prospectively as qualified games are graded.</td></tr>`}</tbody></table></div></div>
+        <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Game-Level Accountability Ledger</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Date</th><th>Matchup</th><th>THI side</th><th>Frozen line</th><th>Closing line</th><th>CLV</th><th>Edge</th><th>Result</th><th>Final</th></tr></thead><tbody>${decisionRows || `<tr><td colspan="9" class="cbb-empty">Qualified decisions will appear here only after a pregame projection is frozen.</td></tr>`}</tbody></table></div></div>
       </section>
     `;
   }
@@ -1952,6 +1999,15 @@
     return value.replaceAll("_", " ").replace(/^./, letter => letter.toUpperCase()).replace("52 38 pct", "52.38% ");
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount, { once: true });
-  else mount();
+  function mountWithSharedMatchup() {
+    mount();
+    const params = new URLSearchParams(window.location.search);
+    const gameId = params.get("sport") === "cbb" ? params.get("game") : null;
+    if (!gameId) return;
+    setSport("cbb");
+    loadData().then(() => loadDeferred(DEFERRED_VIEW_KEYS["cbb-projections"] || [])).then(() => openGameDetail(gameId)).catch(() => {});
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mountWithSharedMatchup, { once: true });
+  else mountWithSharedMatchup();
 })();

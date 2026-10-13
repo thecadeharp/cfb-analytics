@@ -1206,6 +1206,12 @@ function ensureMatchupView() {
 
     .analysis-panel-body { padding:0 16px; }
 
+    .thi-change-summary { margin:0 0 18px; }
+    .thi-change-summary .analysis-panel-body { padding:15px 16px; }
+    .thi-change-summary strong { display:block; font-size:16px; }
+    .thi-change-summary p { margin:7px 0; color:var(--muted); font-size:12px; line-height:1.55; }
+    .thi-change-summary span { color:var(--muted); font:700 8px var(--mono); letter-spacing:.45px; text-transform:uppercase; }
+
     .analysis-row {
       display:grid; grid-template-columns:minmax(0,1fr) auto;
       gap:18px; align-items:center; min-height:48px;
@@ -2402,6 +2408,12 @@ async function init() {
     initializeMatchupAnalysis();
     attachEvents();
 
+    const sharedMatchup = window.location.hash.match(/^#matchup=([^&]+)$/);
+    if (sharedMatchup) {
+      const gameId = decodeURIComponent(sharedMatchup[1]);
+      if (findGame(gameId)) openMatchup(gameId, { updateHistory: false });
+    }
+
     document.dispatchEvent(new CustomEvent("hammer:data-ready"));
   } catch (error) {
     console.error("Frontend initialization failed:", error);
@@ -2847,18 +2859,35 @@ function findGame(gameId) {
   return projections.find(game => String(game.game_id) === String(gameId));
 }
 
-function openMatchup(gameId) {
+function openMatchup(gameId, options = {}) {
   const game = findGame(gameId);
   if (!game) return;
   renderMatchup(game);
-  enterDetailView("matchup", { gameId: String(gameId) });
+  if (options.updateHistory === false) {
+    detailReturnState = {
+      ...captureNavigationState("projections"),
+      view: "projections",
+      scrollY: 0
+    };
+    history.replaceState({
+      hammerNavigation: true,
+      view: "matchup",
+      scrollY: 0,
+      detail: { gameId: String(gameId) },
+      returnState: detailReturnState
+    }, "", window.location.href);
+    updateDetailBackButton("matchup", "projections");
+    switchView("matchup", { updateHistory: false });
+  } else {
+    enterDetailView("matchup", { gameId: String(gameId) });
+  }
   Promise.all([
     ensureRosterAssetsLoaded(),
     typeof window.THIEnsurePlayerIntelligence === "function"
       ? window.THIEnsurePlayerIntelligence().catch(() => null)
       : Promise.resolve(null)
   ]).then(() => {
-    if (history.state?.view === "matchup" && String(history.state?.detail?.gameId) === String(gameId)) {
+    if (document.getElementById("view-matchup")?.classList.contains("active")) {
       renderMatchup(game);
     }
   });
@@ -2872,6 +2901,63 @@ function trackMatchupPlay(gameId) {
   const selection = preferred === game.home?.team ? "home" : preferred === game.away?.team ? "away" : null;
   const selectedLine = Number.isFinite(homeSpread) && selection ? (selection === "home" ? homeSpread : -homeSpread) : null;
   window.THITrackPlay({game_id:String(game.game_id),sport:"cfb",market:"spread",selection,line:selectedLine});
+}
+
+function copyMatchupLink(gameId, button) {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("sport");
+  url.searchParams.delete("game");
+  url.hash = `matchup=${encodeURIComponent(String(gameId))}`;
+  const done = () => {
+    if (!button) return;
+    button.textContent = "Link copied";
+    setTimeout(() => { button.textContent = "Share matchup"; }, 1800);
+  };
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(url.toString()).then(done).catch(() => window.prompt("Copy matchup link", url.toString()));
+  } else {
+    window.prompt("Copy matchup link", url.toString());
+  }
+}
+
+function marketChangeSummaryMarkup(game) {
+  const history = marketHistoryData?.games?.[String(game?.game_id)] ?? {};
+  const snapshots = Array.isArray(history.snapshots) ? history.snapshots : [];
+  const firstRaw = history.first_captured_home_spread ?? history.open_home_spread;
+  const currentRaw = history.current_home_spread ?? game?.market?.home_spread;
+  const first = firstRaw === null || firstRaw === undefined || firstRaw === "" ? NaN : Number(firstRaw);
+  const current = currentRaw === null || currentRaw === undefined || currentRaw === "" ? NaN : Number(currentRaw);
+  const model = Number(game?.projection?.home_spread);
+  let headline = "Market has not opened";
+  let explanation = "THI is showing its independent projection; no market comparison or movement claim is available yet.";
+  if (Number.isFinite(first) && Number.isFinite(current)) {
+    const move = current - first;
+    const toward = move < 0 ? game?.home?.team : move > 0 ? game?.away?.team : null;
+    const openingGap = Number.isFinite(model) ? Math.abs(model - first) : null;
+    const currentGap = Number.isFinite(model) ? Math.abs(model - current) : null;
+    if (Math.abs(move) < .05) {
+      headline = "Market unchanged since first capture";
+      explanation = Number.isFinite(currentGap)
+        ? `The current market remains ${formatNumber(currentGap, 1)} points from THI.`
+        : "No consensus spread movement has been observed.";
+    } else {
+      const alignment = currentGap === null || openingGap === null
+        ? ""
+        : currentGap < openingGap - .05
+          ? " and moved toward THI"
+          : currentGap > openingGap + .05
+            ? " and increased the disagreement"
+            : " without materially changing the THI gap";
+      headline = `${formatNumber(Math.abs(move), 1)}-point move toward ${toward}`;
+      explanation = `The home spread moved from ${formatSigned(first, 1)} to ${formatSigned(current, 1)}${alignment}.`;
+    }
+  }
+  const latest = snapshots.at(-1)?.captured_at;
+  const freshness = latest ? new Date(latest).toLocaleString("en-US", {month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZone:"America/New_York",timeZoneName:"short"}) : "Awaiting first synchronized market observation";
+  return `<section class="analysis-panel wide thi-change-summary" aria-label="What changed since first capture">
+    <div class="analysis-panel-header"><div><div class="analysis-panel-title">What Changed?</div><div class="team-meta">Since THI's first market capture · ${snapshots.length} observations</div></div></div>
+    <div class="analysis-panel-body"><strong>${escapeHtml(headline)}</strong><p>${escapeHtml(explanation)}</p><span>${escapeHtml(freshness)}</span></div>
+  </section>`;
 }
 
 function saveTeamToAccount(teamName, sport, button) {
@@ -3745,11 +3831,12 @@ function cfbRecentMarketResults(teamName, limit = 5) {
   const teamKey = resultTeamKey(teamName);
   const latestByGame = new Map();
   (predictionArchiveData?.rows ?? []).filter(row => row?.sport === "cfb").forEach(row => {
+    if (row?.settled !== true) return;
     const homeKey = resultTeamKey(row?.home_team);
     const awayKey = resultTeamKey(row?.away_team);
     if (teamKey !== homeKey && teamKey !== awayKey) return;
-    const homePoints = Number(row?.home_points);
-    const awayPoints = Number(row?.away_points);
+    const homePoints = row?.home_points === null || row?.home_points === undefined ? NaN : Number(row.home_points);
+    const awayPoints = row?.away_points === null || row?.away_points === undefined ? NaN : Number(row.away_points);
     if (!Number.isFinite(homePoints) || !Number.isFinite(awayPoints)) return;
     const key = String(row?.game_key ?? row?.game_id ?? `${row?.start_date}-${row?.home_team}`);
     const previous = latestByGame.get(key);
@@ -4025,6 +4112,7 @@ function renderMatchup(game) {
       </div>
 
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+        <button class="thi-account-button" type="button" onclick="copyMatchupLink('${escapeJsString(String(game.game_id ?? ""))}', this)">Share matchup</button>
         <button class="thi-account-button" type="button" onclick="trackMatchupPlay('${escapeJsString(String(game.game_id ?? ""))}')">Track a Play</button>
         <span class="status ${statusCss}">
           ${escapeHtml(displayStatus(status))}
@@ -4100,6 +4188,8 @@ function renderMatchup(game) {
         </div>
       </div>
     </div>
+
+    ${marketChangeSummaryMarkup(game)}
 
     ${availabilityReportMarkup(awayName, homeName, game)}
 
