@@ -16,7 +16,7 @@ VERSION = "thi-static-cache-manifest-v1.0"
 
 CANDIDATES = [
     "data/cbb/team_profiles.json", "data/cbb/game_board.json", "data/cbb/foundation_status.json",
-    "data/cbb/model/model_card.json", "data/cbb/model/current_priors.json", "data/cbb/home_court_advantage.json",
+    "data/cbb/model/model_card.json", "data/cbb/model/current_priors.json", "data/cbb/model/display_power_ratings.json", "data/cbb/home_court_advantage.json",
     "data/cbb/history/manifest.json", "data/cbb/projection_board.json", "data/cbb/play_style.json",
     "data/cbb/matchup_engine.json", "data/cbb/intelligence_suite.json", "data/cbb/model_tracking.json",
     "data/cbb/bracketology.json", "data/cbb/research/model_v02_challenger.json", "data/cbb/game_day_readiness.json",

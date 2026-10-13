@@ -7,6 +7,7 @@
     foundation: "data/cbb/foundation_status.json",
     model: "data/cbb/model/model_card.json",
     priors: "data/cbb/model/current_priors.json",
+    powerRatings: "data/cbb/model/display_power_ratings.json",
     homeCourt: "data/cbb/home_court_advantage.json",
     history: "data/cbb/history/manifest.json",
     projectionBoard: "data/cbb/projection_board.json",
@@ -28,7 +29,7 @@
   };
   const CACHE_MANIFEST_PATH = "data/cbb/cache_manifest.json";
   const PLAYER_PATH = "data/cbb/player_ratings.json";
-  const CORE_DATA_KEYS = new Set(["profiles", "foundation", "model", "priors", "homeCourt", "history", "projectionBoard", "tracking", "bracketology", "readiness", "health", "trends", "varianceTracker", "publicBacktest", "marketSnapshots", "marketContract"]);
+  const CORE_DATA_KEYS = new Set(["profiles", "foundation", "model", "priors", "powerRatings", "homeCourt", "history", "projectionBoard", "tracking", "bracketology", "readiness", "health", "trends", "varianceTracker", "publicBacktest", "marketSnapshots", "marketContract"]);
   const memoryCache = new Map();
   const DEFERRED_VIEW_KEYS = {
     "cbb-projections": ["intelligence", "matchups", "operations"],
@@ -1485,7 +1486,7 @@
   }
 
   function ratingsRows() {
-    const priors = state.data.priors.teams || [];
+    const priors = state.data.powerRatings?.teams || state.data.priors.teams || [];
     const filtered = priors.filter(team => {
       const query = normalizeSearch(state.query);
       const matchesQuery = !query || normalizeSearch(`${team.team} ${team.conference?.name || ""}`).includes(query);
@@ -1522,14 +1523,15 @@
   }
 
   function renderRatings() {
-    const priors = state.data.priors.teams || [];
+    const priors = state.data.powerRatings?.teams || state.data.priors.teams || [];
+    const powerMeta = state.data.powerRatings?.meta || {};
     const conferences = [...new Set(priors.map(team => team.conference?.abbreviation || team.conference?.name).filter(Boolean))].sort();
     const view = document.getElementById("view-cbb-ratings");
     view.innerHTML = `
-      <div class="cbb-kicker">Preseason Model v1 · provisional research</div>
+      <div class="cbb-kicker">Preseason Power v2 · provisional research</div>
       <h1 class="page-title">CBB THI Ratings</h1>
-      <p class="page-subtitle">A conservative carry-forward strength baseline. This board is not THI's official preseason Index 25 and no team is manually rearranged.</p>
-      <div class="cbb-readiness-banner"><span class="cbb-status-pill">Calibration in progress</span><strong>Official preseason Index 25 withheld</strong><p>The visible order carries forward opponent-adjusted 2026 efficiency and scales it by verified returning minutes. Recruiting and transfer context are displayed in team research, but do not yet reorder this table because the historical personnel archive has not cleared point-in-time validation.</p></div>
+      <p class="page-subtitle">A three-season, opponent-adjusted view of program strength. No poll, market price, or outside rating determines this order.</p>
+      <div class="cbb-readiness-banner"><span class="cbb-status-pill">Structural power board</span><strong>Roster-aware Index 25 remains withheld</strong><p>This display blends completed-season THI efficiency at 70% / 20% / 10%, normalizes each season's scoring environment, and applies a 12% preseason shrink toward average. Unverified current personnel are excluded. This board is isolated from Model A, projections, signals, and bracketology.</p></div>
       ${cbbEfficiencyLandscape(priors)}
       ${cbbRatingDecomposition(priors)}
       <div class="cbb-definition-banner"><strong>THI Ratings</strong><span>How strong the model believes a team is beneath its record.</span><strong>Team Data</strong><span>Observed results, box-score performance and roster facts.</span></div>
@@ -1545,7 +1547,7 @@
           <tbody id="cbb-rating-body"></tbody>
         </table>
       </div>
-      <div class="cbb-stat-note" style="margin-top:9px">Overall and Predictive currently share the provisional carry-forward baseline until 2027 results create separate lenses. Recent form, schedule strength and quality records activate only after games are played. Lower defensive efficiency is better.</div>
+      <div class="cbb-stat-note" style="margin-top:9px">Overall and Predictive currently share the provisional structural baseline until 2027 results create separate lenses. Source seasons: ${(powerMeta.source_seasons || []).join(", ") || "2024–2026"}. Recent form, schedule strength and quality records activate only after games are played. Lower defensive efficiency is better.</div>
     `;
 
     view.querySelector("#cbb-rating-search").addEventListener("input", event => { state.query = event.target.value; paintRatingRows(); });
@@ -1628,7 +1630,7 @@
   }
 
   function cbbRatingDecomposition(priors) {
-    const generated = state.data?.profiles?.meta?.generated_at_utc || state.data?.model?.meta?.generated_at_utc;
+    const generated = state.data?.powerRatings?.meta?.generated_at_utc || state.data?.profiles?.meta?.generated_at_utc || state.data?.model?.meta?.generated_at_utc;
     const stamp = generated ? new Intl.DateTimeFormat("en-US", { dateStyle:"medium", timeStyle:"short" }).format(new Date(generated)) : "Awaiting refresh";
     const home = cbbNationalHomeAdvantage();
     const conferenceRows = new Map();
@@ -1645,8 +1647,8 @@
     return `<section class="cbb-rating-decomposition" aria-label="THI rating decomposition">
       <div class="cbb-rating-decomposition-head"><div><div class="cbb-label">THI Rating Decomposition</div><h2>What each rating means now</h2></div><span>Rated ${escapeHtml(stamp)}</span></div>
       <div class="cbb-rating-lenses">
-        ${methodCard("Overall", "Provisional carry-forward", "Last season's opponent-adjusted efficiency is regressed toward average according to verified returning minutes. Personnel is not yet part of this displayed order.")}
-        ${methodCard("Predictive", "Projection baseline", "The game model uses the same regressed team state plus its separately trained matchup features. This ranking does not independently alter Model A.")}
+        ${methodCard("Overall", "Three-season structural power", "THI blends completed-season opponent-adjusted efficiency at 70% / 20% / 10%, centers each season to its scoring environment, then shrinks the preseason scale 12% toward average.")}
+        ${methodCard("Predictive", "Display-only baseline", "The order excludes polls, market prices, outside ratings and unverified current rosters. It does not independently alter Model A.")}
         ${methodCard("Recent form", "Awaiting 2027 games", "No recent-form rating is published before a qualified current-season sample exists.")}
         ${methodCard("Schedule + opponent quality", "Awaiting 2027 games", "Schedule strength and records against top-25 and top-50 THI teams begin only after games are played.")}
         ${methodCard("Dynamic home advantage", Number.isFinite(home) ? `${number(home,2)}-point national mean` : "Awaiting estimate", "Every program receives its own five-season regularized value; neutral courts receive zero.")}
@@ -1676,7 +1678,7 @@
   function paintRatingRows() {
     const body = document.getElementById("cbb-rating-body");
     if (!body) return;
-    const all = state.data.priors.teams || [];
+    const all = state.data.powerRatings?.teams || state.data.priors.teams || [];
     const rows = ratingsRows();
     const netBand = quantileBands(all, "prior_net");
     const offBand = quantileBands(all, "prior_offense");
@@ -1692,6 +1694,7 @@
 
   async function openTeamDetail(teamId) {
     const prior = state.data.priors.teams.find(team => Number(team.team_id) === Number(teamId));
+    const power = state.data.powerRatings?.teams?.find(team => Number(team.team_id) === Number(teamId)) || prior;
     const profile = state.data.profiles.teams.find(team => Number(team.team_id) === Number(teamId));
     if (!prior) return;
     const detail = document.getElementById("cbb-team-detail");
@@ -1722,10 +1725,10 @@
       <div class="cbb-detail-team-title">${teamLogo({team_id:prior.team_id,team:prior.team},"large")}<h2 class="cbb-detail-title" id="cbb-detail-title">${escapeHtml(profile?.display_name || prior.team)}</h2></div>
       <div class="cbb-detail-sub">${escapeHtml(prior.conference?.name || "Independent")} · 2027 THI team dossier</div>
       <div class="cbb-detail-grid">
-        ${detailStat("Net efficiency", `${number(prior.prior_net,2,true)} · #${integer(dossier?.ratings?.ranks?.net)}`)}
-        ${detailStat("Adjusted offense", `${number(prior.prior_offense,2)} · #${integer(dossier?.ratings?.ranks?.offense)}`)}
-        ${detailStat("Adjusted defense", `${number(prior.prior_defense,2)} · #${integer(dossier?.ratings?.ranks?.defense)}`)}
-        ${detailStat("Adjusted tempo", `${number(prior.prior_tempo,1)} · #${integer(dossier?.ratings?.ranks?.tempo)}`)}
+        ${detailStat("Structural power", `${number(power.prior_net,2,true)} · #${integer(power.power_rank)}`)}
+        ${detailStat("Adjusted offense", number(power.prior_offense,2))}
+        ${detailStat("Adjusted defense", number(power.prior_defense,2))}
+        ${detailStat("Adjusted tempo", number(power.prior_tempo,1))}
         ${detailStat("Roster quality", dossier?.roster_quality?.top_eight_average == null ? "Awaiting ratings" : `${number(dossier.roster_quality.top_eight_average,1)} · #${integer(dossier.roster_quality.rank)}`)}
         ${detailStat("Expected wins", `${number(dossier?.forecast?.expected_wins_in_window,1)} / ${integer(dossier?.forecast?.games_in_window)}`)}
       </div>
@@ -1742,10 +1745,10 @@
         ${detailRow("Incoming prior points", integer(transfers.prior_points))}
       </section>
       <section class="cbb-detail-section" id="cbb-dossier-ratings"><h3>Rating provenance</h3>
-        ${detailRow("Source season", integer(preseason.source_season || 2026))}
-        ${detailRow("2026 source net", number(preseason.adjusted?.net,1,true))}
-        ${detailRow("Current rating state", "Preseason prior")}
-        ${detailRow("Returning-minutes signal", prior.returning_minutes_pct > 0 ? pct(prior.returning_minutes_pct) : "Unavailable in current feed")}
+        ${detailRow("Source seasons", escapeHtml((power.seasons_used || [2026,2025,2024]).join(" · ")))}
+        ${detailRow("Season weights", "70% · 20% · 10%")}
+        ${detailRow("Current rating state", "Provisional structural power")}
+        ${detailRow("Returning-minutes signal", "Displayed in personnel research; excluded from this power order")}
       </section>
       <section class="cbb-detail-section"><h3>Projection context</h3>
         ${detailRow("Program home-court value", programCourt?.home_court_points == null ? "Awaiting estimate" : `${number(programCourt.home_court_points,2)} points · ${escapeHtml(humanize(programCourt.tier || "standard"))}`)}
@@ -1799,8 +1802,8 @@
         <div class="cbb-simulator-footnote">Market outcomes are descriptive schedule context and do not change the team rating or Model A.</div>
       </section>
       <section class="cbb-detail-section cbb-methodology-panel cbb-dossier-wide" id="cbb-dossier-methodology"><h3>How THI builds this rating</h3>
-        <div class="cbb-methodology-flow"><span>Regressed prior</span><b>→</b><span>Roster + personnel</span><b>→</b><span>Opponent-adjusted possessions</span><b>→</b><span>Four Factors + pace</span><b>→</b><span>Walk-forward update</span></div>
-        <p>${escapeHtml(state.data?.intelligence?.meta?.methodology || "THI combines predictive team strength, possession efficiency and verified roster context in a chronological walk-forward model.")}</p>
+        <div class="cbb-methodology-flow"><span>2026 adjusted efficiency</span><b>70%</b><span>2025</span><b>20%</b><span>2024</span><b>10%</b><span>Season-centered output</span></div>
+        <p>The displayed power rating blends THI's completed-season opponent-adjusted efficiency. It excludes polls, market prices, outside ratings and unverified current personnel. Model A continues to use its separately tested production inputs.</p>
         <div class="cbb-model-sub">Concepts are informed by leading public basketball analytics, while THI publishes its own calculations, testing record and data-coverage limits.</div>
       </section>
       </div>
