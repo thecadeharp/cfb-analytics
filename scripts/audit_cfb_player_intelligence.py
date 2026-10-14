@@ -54,6 +54,7 @@ def audit(payload: dict[str, Any], roster: dict[str, Any]) -> dict[str, Any]:
     volume_mismatches = []
     rating_contract_mismatches = []
     invalid_ratings = []
+    component_mismatches = []
 
     for athlete_id, player in players.items():
         roster_player = roster_players.get(str(athlete_id))
@@ -97,6 +98,36 @@ def audit(payload: dict[str, Any], roster: dict[str, Any]) -> dict[str, Any]:
             })
         if rated and not 1 <= float(player["rating"]) <= 99:
             invalid_ratings.append({"athlete_id": athlete_id, "name": player.get("name"), "rating": player.get("rating")})
+        components = player.get("rating_components")
+        if rated:
+            required = ["workload_percentile", "raw_composite", "reliability_percent", "final_rating", "formula"]
+            missing = [key for key in required if not isinstance(components, dict) or components.get(key) is None]
+            numeric_keys = ["workload_percentile", "raw_composite", "reliability_percent", "final_rating"]
+            invalid = [
+                key for key in numeric_keys
+                if not isinstance(components, dict) or not finite(components.get(key))
+                or not 0 <= float(components[key]) <= 100
+            ]
+            if player.get("position_group") != "DEF":
+                for key in ("efficiency_percentile", "total_production_percentile", "success_percentile"):
+                    if not isinstance(components, dict) or not finite(components.get(key)) or not 0 <= float(components[key]) <= 100:
+                        invalid.append(key)
+            final_mismatch = (
+                isinstance(components, dict)
+                and finite(components.get("final_rating"))
+                and abs(float(components["final_rating"]) - float(player["rating"])) > 1e-9
+            )
+            if missing or invalid or final_mismatch:
+                component_mismatches.append({
+                    "athlete_id": athlete_id, "name": player.get("name"),
+                    "missing": missing, "invalid": sorted(set(invalid)),
+                    "rating": player.get("rating"), "components": components,
+                })
+        elif components is not None:
+            component_mismatches.append({
+                "athlete_id": athlete_id, "name": player.get("name"),
+                "reason": "unrated_player_has_components", "components": components,
+            })
 
     team_memberships: defaultdict[str, list[str]] = defaultdict(list)
     team_payload_mismatches = []
@@ -142,6 +173,7 @@ def audit(payload: dict[str, Any], roster: dict[str, Any]) -> dict[str, Any]:
         "position_specific_volume": not volume_mismatches,
         "rating_eligibility_contract": not rating_contract_mismatches,
         "finite_bounded_ratings": not invalid_ratings,
+        "rating_decomposition_integrity": not component_mismatches,
         "team_payload_integrity": not team_payload_mismatches and not duplicate_team_payload_memberships,
         "leaderboard_integrity": not leaderboard_mismatches,
         "national_coverage": len(teams) >= 130 and len(players) >= 3000,
@@ -169,6 +201,7 @@ def audit(payload: dict[str, Any], roster: dict[str, Any]) -> dict[str, Any]:
                 "volume_mismatches": len(volume_mismatches),
                 "rating_contract_mismatches": len(rating_contract_mismatches),
                 "invalid_ratings": len(invalid_ratings),
+                "component_mismatches": len(component_mismatches),
                 "team_payload_mismatches": len(team_payload_mismatches),
                 "duplicate_team_payload_memberships": len(duplicate_team_payload_memberships),
                 "leaderboard_mismatches": len(leaderboard_mismatches),
@@ -181,6 +214,7 @@ def audit(payload: dict[str, Any], roster: dict[str, Any]) -> dict[str, Any]:
             "volume_mismatches": volume_mismatches[:100],
             "rating_contract_mismatches": rating_contract_mismatches[:100],
             "invalid_ratings": invalid_ratings[:100],
+            "component_mismatches": component_mismatches[:100],
             "team_payload_mismatches": team_payload_mismatches[:100],
             "duplicate_team_payload_memberships": duplicate_team_payload_memberships,
             "leaderboard_mismatches": leaderboard_mismatches[:100],

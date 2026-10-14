@@ -3975,7 +3975,7 @@ function personnelCardMarkup(row) {
     <span class="cfb-personnel-copy">
       <span class="cfb-personnel-name"><small>#${escapeHtml(player?.jersey ?? "—")} ${escapeHtml(player?.position ?? "—")}</small>${escapeHtml(player?.name ?? "Unknown")}</span>
       <span class="cfb-personnel-workload">${escapeHtml(personnelWorkload(row))}</span>
-      <span class="cfb-personnel-rating">${rating !== null ? `THI ${formatNumber(rating, 1)}` : "THI rating pending"}${rank !== null ? ` · #${rank} ${escapeHtml(profile?.position_group ?? player?.position ?? "position")}` : ""}</span>
+      <span class="cfb-personnel-rating">${rating !== null ? `Production ${formatNumber(rating, 1)}` : "Production rating pending"}${rank !== null ? ` · #${rank} ${escapeHtml(profile?.position_group ?? player?.position ?? "position")}` : ""}</span>
     </span>
   </button>`;
 }
@@ -4023,7 +4023,7 @@ function cfbPersonnelMatchupMarkup(awayName, homeName) {
         <div class="cfb-personnel-lane-title">${escapeHtml(homeName)} offense <span>vs</span> ${escapeHtml(awayName)} defense</div>
         <div class="cfb-personnel-grid">${personnelUnitMarkup(homeName, "offense")}${personnelUnitMarkup(awayName, "defense")}</div>
       </div>
-      <div class="cfb-personnel-method">Observed contributors are ordered by recorded workload, then position-specific THI evidence. This is not an official depth chart, does not infer offensive-line starters, and does not affect Model A. Source: ESPN roster identity + CFBD/SportsDataverse production through Week ${escapeHtml(rosterAssetsData?.meta?.through_week ?? "—")}.</div>
+      <div class="cfb-personnel-method">Observed contributors are ordered by recorded workload, then the position-specific THI Production Rating. The rating measures current-season production within position; it is not a scouting grade, talent ranking or award probability. This is not an official depth chart, does not infer offensive-line starters, and does not affect Model A. Source: ESPN roster identity + CFBD/SportsDataverse production through Week ${escapeHtml(rosterAssetsData?.meta?.through_week ?? "—")}.</div>
     </div>
   </details>`;
 }

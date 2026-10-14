@@ -37,6 +37,21 @@ class CfbPlayerIntelligenceTests(unittest.TestCase):
         self.assertFalse(report["checks"]["position_cohort_consistency"])
         self.assertFalse(report["checks"]["position_specific_volume"])
 
+    def test_audit_requires_rating_decomposition_for_rated_players(self):
+        roster = {"teams":{"Ohio State":{"players":[{"athlete_id":"1","name":"Receiver","position":"WR"}]}}}
+        player = {
+            "athlete_id":"1", "name":"Receiver", "team":"Ohio State", "position":"WR",
+            "position_group":"WR", "traditional":{"targets":20}, "primary_volume":20,
+            "rating":75.0, "rating_components":None, "national_position_rank":1,
+        }
+        payload = {
+            "meta":{"model_usage":"display_only_not_used_by_model_a"},
+            "players":{"1":player}, "teams":{"Ohio State":["1"]},
+            "leaderboards":{"QB":[],"RB":[],"WR":["1"],"TE":[],"DEF":[]},
+        }
+        report = audit(payload, roster)
+        self.assertFalse(report["checks"]["rating_decomposition_integrity"])
+
 
 if __name__ == "__main__":
     unittest.main()

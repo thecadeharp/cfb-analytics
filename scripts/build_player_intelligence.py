@@ -70,6 +70,12 @@ POSITION_GROUPS = {
     "S": "DEF", "FS": "DEF", "SS": "DEF", "NB": "DEF",
 }
 RATING_MINIMUMS = {"QB": 35, "RB": 20, "WR": 15, "TE": 12, "DEF": 3}
+RATING_WEIGHTS = {
+    "efficiency_percentile": 0.45,
+    "total_production_percentile": 0.30,
+    "workload_percentile": 0.15,
+    "success_percentile": 0.10,
+}
 
 
 def position_group(position, stats):
@@ -276,7 +282,8 @@ def main():
                 "success_rate": round(100 * s["successes"] / opportunities, 1) if opportunities else None,
             },
             "primary_volume": primary_volume,
-            "rating": None, "national_position_rank": None, "conference_position_rank": None,
+            "rating": None, "rating_components": None,
+            "national_position_rank": None, "conference_position_rank": None,
         }
 
     team_totals = defaultdict(lambda: defaultdict(float))
@@ -301,18 +308,35 @@ def main():
         volumes = [row["primary_volume"] for row in pool]
         successes = [row["advanced"]["success_rate"] for row in pool if finite(row["advanced"]["success_rate"])]
         for row in pool:
+            workload_percentile = percentile(volumes, row["primary_volume"])
             if group == "DEF":
-                rating = percentile(volumes, row["primary_volume"])
+                component_values = {
+                    "efficiency_percentile": None,
+                    "total_production_percentile": None,
+                    "workload_percentile": workload_percentile,
+                    "success_percentile": None,
+                }
+                rating = workload_percentile
+                formula = "defensive_disruption_volume"
             else:
-                rating = (
-                    0.45 * percentile(effs, row["advanced"]["opponent_adjusted_epa_per_opportunity"])
-                    + 0.30 * percentile(totals, row["advanced"]["epa_total"])
-                    + 0.15 * percentile(volumes, row["primary_volume"])
-                    + 0.10 * percentile(successes, row["advanced"]["success_rate"])
-                )
+                component_values = {
+                    "efficiency_percentile": percentile(effs, row["advanced"]["opponent_adjusted_epa_per_opportunity"]),
+                    "total_production_percentile": percentile(totals, row["advanced"]["epa_total"]),
+                    "workload_percentile": workload_percentile,
+                    "success_percentile": percentile(successes, row["advanced"]["success_rate"]),
+                }
+                rating = sum(RATING_WEIGHTS[key] * component_values[key] for key in RATING_WEIGHTS)
+                formula = "offensive_weighted_production"
             reliability = min(1.0, number(row["primary_volume"]) / (minimums[group] * 2))
             row["rating"] = round(max(1.0, min(99.0, 50 + (rating - 50) * reliability)), 1)
             row["reliability"] = round(100 * reliability, 0)
+            row["rating_components"] = {
+                **{key: round(value, 1) if value is not None else None for key, value in component_values.items()},
+                "raw_composite": round(rating, 1),
+                "reliability_percent": round(100 * reliability, 0),
+                "final_rating": row["rating"],
+                "formula": formula,
+            }
         ordered = sorted(pool, key=lambda row: (-(row["rating"] or -999), row["name"]))
         for rank, row in enumerate(ordered, 1):
             row["national_position_rank"] = rank
@@ -367,7 +391,14 @@ def main():
             "source": "SportsDataverse/cfbfastR play-by-play joined to ESPN roster athlete IDs",
             "model_usage": "display_only_not_used_by_model_a",
             "rating_status": "research_beta",
-            "rating_version": "thi-cfb-player-production-v1.1",
+            "rating_version": "thi-cfb-player-production-v1.2",
+            "rating_method": {
+                "label": "position-specific production rating",
+                "offensive_weights": RATING_WEIGHTS,
+                "defensive_formula": "defensive disruption-volume percentile",
+                "reliability_rule": "regress the raw composite toward 50 until twice the position minimum is reached",
+                "not_a_measure_of": ["scouting talent", "draft grade", "award probability"],
+            },
             "heisman_status": calibration_status,
             "heisman_validation": {
                 "passed": bool(calibration_validation.get("passed")),
@@ -380,6 +411,7 @@ def main():
                 "Official roster positions define rating cohorts; incidental trick-play usage does not reclassify players.",
                 "Primary volume is position-specific usage: QB dropbacks/carries, RB carries/targets, receiver targets/carries and defensive disruptions.",
                 "THI player ratings are position-specific and should not be compared across positions as equivalent scouting grades.",
+                "The rating describes observed current-season production within position; it is not a talent grade or Heisman probability.",
                 "Award probabilities are withheld unless the leave-one-season-out historical calibration clears every publication gate.",
             ],
         },
