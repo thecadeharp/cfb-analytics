@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "weather-engine-v1",
-    "generated": "2026-10-14T00:17:04.147544+00:00",
+    "generated": "2026-10-14T04:59:59.303115+00:00",
     "forecast_source": "Open-Meteo",
     "venue_source": "ESPN event venue metadata",
     "broadcast_source": "ESPN event broadcast metadata",
@@ -47,13 +47,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-10-14T00:00Z",
-        "temperature_f": 84.6,
+        "temperature_f": 81.0,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 5.0,
-        "wind_gust_mph": 10.7,
+        "wind_mph": 3.1,
+        "wind_gust_mph": 5.1,
         "weather_code": 1,
         "summary": "Partly cloudy",
         "precipitation_label": "Dry",
@@ -66,7 +66,7 @@
           "query": "Murfreesboro, TN, USA"
         }
       },
-      "conditions_line": "85\u00b0F \u00b7 5 mph wind \u00b7 gusts 11 \u00b7 Dry",
+      "conditions_line": "81\u00b0F \u00b7 3 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -120,13 +120,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-10-14T00:00Z",
-        "temperature_f": 79.2,
+        "temperature_f": 73.4,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 4.5,
-        "wind_gust_mph": 5.1,
+        "wind_mph": 6.8,
+        "wind_gust_mph": 8.5,
         "weather_code": 0,
         "summary": "Clear",
         "precipitation_label": "Dry",
@@ -139,7 +139,7 @@
           "query": "Jacksonville, AL, USA"
         }
       },
-      "conditions_line": "79\u00b0F \u00b7 4 mph wind \u00b7 Dry",
+      "conditions_line": "73\u00b0F \u00b7 7 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -193,16 +193,16 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-10-14T23:00Z",
-        "temperature_f": 73.4,
-        "precip_probability_pct": 24.0,
-        "precipitation_in": 0.0,
-        "rain_in": 0.0,
+        "temperature_f": 71.4,
+        "precip_probability_pct": 16.0,
+        "precipitation_in": 0.016,
+        "rain_in": 0.016,
         "snowfall_in": 0.0,
-        "wind_mph": 1.9,
-        "wind_gust_mph": 5.8,
-        "weather_code": 3,
-        "summary": "Cloudy",
-        "precipitation_label": "Dry",
+        "wind_mph": 1.6,
+        "wind_gust_mph": 4.9,
+        "weather_code": 51,
+        "summary": "Drizzle",
+        "precipitation_label": "Light rain",
         "location": {
           "latitude": 37.21533,
           "longitude": -93.29824,
@@ -212,9 +212,9 @@
           "query": "Springfield, MO, USA"
         }
       },
-      "conditions_line": "73\u00b0F \u00b7 2 mph wind \u00b7 Dry",
-      "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
+      "conditions_line": "71\u00b0F \u00b7 2 mph wind \u00b7 Light rain",
+      "impact": "Moderate",
+      "note": "Rain may slightly suppress scoring efficiency.",
       "baseline": {
         "home_spread": 3.5,
         "total": 50.5
@@ -222,16 +222,16 @@
       "adjustments": {
         "breakdown": {
           "wind": 0.0,
-          "precipitation": 0.0,
+          "precipitation": -0.5,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 3.5,
-        "total": 50.5
+        "total": 50.0
       },
       "spread_logic": {
         "status": "ACTIVE",
@@ -271,10 +271,10 @@
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 5.7,
-        "wind_gust_mph": 17.4,
-        "weather_code": 2,
-        "summary": "Partly cloudy",
+        "wind_mph": 10.4,
+        "wind_gust_mph": 20.8,
+        "weather_code": 0,
+        "summary": "Clear",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 30.72353,
@@ -285,26 +285,26 @@
           "query": "Huntsville, TX, USA"
         }
       },
-      "conditions_line": "84\u00b0F \u00b7 6 mph wind \u00b7 gusts 17 \u00b7 Dry",
-      "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
+      "conditions_line": "84\u00b0F \u00b7 10 mph wind \u00b7 gusts 21 \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": -0.5,
         "total": 49.5
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -0.5,
-        "total": 49.5
+        "total": 49.0
       },
       "spread_logic": {
         "status": "ACTIVE",
@@ -339,13 +339,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-10-15T23:00Z",
-        "temperature_f": 80.0,
+        "temperature_f": 81.7,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 1.4,
-        "wind_gust_mph": 1.8,
+        "wind_mph": 2.8,
+        "wind_gust_mph": 4.8,
         "weather_code": 0,
         "summary": "Clear",
         "precipitation_label": "Dry",
@@ -358,7 +358,7 @@
           "query": "Birmingham, AL, USA"
         }
       },
-      "conditions_line": "80\u00b0F \u00b7 1 mph wind \u00b7 Dry",
+      "conditions_line": "82\u00b0F \u00b7 3 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -412,13 +412,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-10-15T23:00Z",
-        "temperature_f": 68.6,
+        "temperature_f": 67.8,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 8.6,
-        "wind_gust_mph": 13.2,
+        "wind_mph": 7.8,
+        "wind_gust_mph": 13.0,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -431,7 +431,7 @@
           "query": "Norfolk, VA, USA"
         }
       },
-      "conditions_line": "69\u00b0F \u00b7 9 mph wind \u00b7 Dry",
+      "conditions_line": "68\u00b0F \u00b7 8 mph wind \u00b7 gusts 13 \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -485,15 +485,15 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-10-16T00:00Z",
-        "temperature_f": 80.8,
+        "temperature_f": 82.0,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 8.7,
-        "wind_gust_mph": 13.6,
-        "weather_code": 1,
-        "summary": "Partly cloudy",
+        "wind_mph": 7.5,
+        "wind_gust_mph": 12.1,
+        "weather_code": 3,
+        "summary": "Cloudy",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 29.88327,
@@ -504,7 +504,7 @@
           "query": "San Marcos, TX, USA"
         }
       },
-      "conditions_line": "81\u00b0F \u00b7 9 mph wind \u00b7 Dry",
+      "conditions_line": "82\u00b0F \u00b7 8 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -559,7 +559,7 @@
       "forecast": {
         "forecast_time_utc": "2026-10-16T23:00Z",
         "temperature_f": 87.6,
-        "precip_probability_pct": 4.0,
+        "precip_probability_pct": 9.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -632,7 +632,7 @@
       "forecast": {
         "forecast_time_utc": "2026-10-17T00:00Z",
         "temperature_f": 72.3,
-        "precip_probability_pct": 1.0,
+        "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -705,7 +705,7 @@
       "forecast": {
         "forecast_time_utc": "2026-10-17T00:00Z",
         "temperature_f": 49.4,
-        "precip_probability_pct": 15.0,
+        "precip_probability_pct": 12.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -851,7 +851,7 @@
       "forecast": {
         "forecast_time_utc": "2026-10-17T16:00Z",
         "temperature_f": 49.1,
-        "precip_probability_pct": 1.0,
+        "precip_probability_pct": 2.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -997,7 +997,7 @@
       "forecast": {
         "forecast_time_utc": "2026-10-17T16:00Z",
         "temperature_f": 46.6,
-        "precip_probability_pct": 1.0,
+        "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -1070,7 +1070,7 @@
       "forecast": {
         "forecast_time_utc": "2026-10-17T16:00Z",
         "temperature_f": 50.2,
-        "precip_probability_pct": 1.0,
+        "precip_probability_pct": 2.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -1581,7 +1581,7 @@
       "forecast": {
         "forecast_time_utc": "2026-10-17T16:00Z",
         "temperature_f": 54.0,
-        "precip_probability_pct": 2.0,
+        "precip_probability_pct": 1.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -2019,7 +2019,7 @@
       "forecast": {
         "forecast_time_utc": "2026-10-17T19:00Z",
         "temperature_f": 57.5,
-        "precip_probability_pct": 1.0,
+        "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -2092,7 +2092,7 @@
       "forecast": {
         "forecast_time_utc": "2026-10-17T19:00Z",
         "temperature_f": 69.1,
-        "precip_probability_pct": 0.0,
+        "precip_probability_pct": 1.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -2311,7 +2311,7 @@
       "forecast": {
         "forecast_time_utc": "2026-10-17T19:00Z",
         "temperature_f": 64.9,
-        "precip_probability_pct": 1.0,
+        "precip_probability_pct": 2.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -3114,7 +3114,7 @@
       "forecast": {
         "forecast_time_utc": "2026-10-17T23:00Z",
         "temperature_f": 76.4,
-        "precip_probability_pct": 21.0,
+        "precip_probability_pct": 6.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -3401,7 +3401,7 @@
       "forecast": {
         "forecast_time_utc": "2026-10-17T23:00Z",
         "temperature_f": 67.8,
-        "precip_probability_pct": 1.0,
+        "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -3727,7 +3727,7 @@
       "forecast": {
         "forecast_time_utc": "2026-10-18T01:00Z",
         "temperature_f": 56.6,
-        "precip_probability_pct": 11.0,
+        "precip_probability_pct": 8.0,
         "precipitation_in": 0.004,
         "rain_in": 0.004,
         "snowfall_in": 0.0,
@@ -3873,7 +3873,7 @@
       "forecast": {
         "forecast_time_utc": "2026-10-18T02:00Z",
         "temperature_f": 55.5,
-        "precip_probability_pct": 1.0,
+        "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
@@ -4018,13 +4018,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-10-18T02:00Z",
-        "temperature_f": 78.4,
-        "precip_probability_pct": 2.0,
-        "precipitation_in": 0.008,
-        "rain_in": 0.008,
+        "temperature_f": 77.8,
+        "precip_probability_pct": 8.0,
+        "precipitation_in": 0.004,
+        "rain_in": 0.004,
         "snowfall_in": 0.0,
-        "wind_mph": 13.0,
-        "wind_gust_mph": 32.2,
+        "wind_mph": 13.1,
+        "wind_gust_mph": 33.1,
         "weather_code": 51,
         "summary": "Drizzle",
         "precipitation_label": "Light rain",
@@ -4037,7 +4037,7 @@
           "query": "Honolulu, HI, USA"
         }
       },
-      "conditions_line": "78\u00b0F \u00b7 13 mph wind \u00b7 gusts 32 \u00b7 Light rain",
+      "conditions_line": "78\u00b0F \u00b7 13 mph wind \u00b7 gusts 33 \u00b7 Light rain",
       "impact": "Moderate",
       "note": "Wind may modestly suppress passing and kicking efficiency; rain may slightly suppress scoring efficiency.",
       "baseline": {
@@ -4238,7 +4238,7 @@
       "forecast": {
         "forecast_time_utc": "2026-10-20T23:00Z",
         "temperature_f": 82.5,
-        "precip_probability_pct": 55.0,
+        "precip_probability_pct": 57.0,
         "precipitation_in": 0.004,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
