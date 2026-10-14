@@ -196,6 +196,8 @@ jobs:
           assert roster_audit["meta"]["version"] == "thi-cbb-roster-audit-v1.1"
           assert len(roster_audit["team_audit"]) >= 300
           assert roster_audit["coverage"]["official_sources_required"] == len(roster_audit["team_audit"])
+          assert roster_audit["coverage"]["verification_state_counts"].get("official_match", 0) >= 23
+          assert roster_audit["coverage"]["verification_state_counts"].get("official_mismatch", 0) == 0
           lsu_roster_audit = next(row for row in roster_audit["team_audit"] if row["team"] == "LSU")
           assert lsu_roster_audit["verification_state"] == "official_match"
           assert lsu_roster_audit["provider_player_count"] == 10

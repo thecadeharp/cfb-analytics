@@ -208,8 +208,47 @@ def apply_official_roster_overrides(
             "roster_only_players": len(replacement) - exact_id_matches,
             "source_url": official.get("source_url"),
         })
+    authoritative_team_ids = {str(row["team_id"]) for row in applied}
+    claimed_athlete_ids: dict[str, str] = {}
+    claimed_source_ids: dict[str, str] = {}
+    for team_id in authoritative_team_ids:
+        for player in by_team[team_id].get("players") or []:
+            athlete_id = player.get("id")
+            source_id = player.get("sourceId")
+            if athlete_id is not None:
+                owner = claimed_athlete_ids.setdefault(str(athlete_id), team_id)
+                if owner != team_id:
+                    raise RuntimeError(f"Official roster snapshots claim athlete {athlete_id} for multiple teams")
+            if source_id:
+                owner = claimed_source_ids.setdefault(str(source_id), team_id)
+                if owner != team_id:
+                    raise RuntimeError(f"Official roster snapshots claim source player {source_id} for multiple teams")
+
+    removed_stale_memberships = 0
+    cleaned_provider_teams = 0
+    for team_id, provider in by_team.items():
+        if team_id in authoritative_team_ids:
+            continue
+        original = [row for row in provider.get("players") or [] if isinstance(row, dict)]
+        cleaned = []
+        for player in original:
+            athlete_owner = claimed_athlete_ids.get(str(player.get("id"))) if player.get("id") is not None else None
+            source_owner = claimed_source_ids.get(str(player.get("sourceId"))) if player.get("sourceId") else None
+            if (athlete_owner and athlete_owner != team_id) or (source_owner and source_owner != team_id):
+                removed_stale_memberships += 1
+                continue
+            cleaned.append(player)
+        if len(cleaned) != len(original):
+            provider["players"] = cleaned
+            cleaned_provider_teams += 1
+
     output = [by_team[str(row.get("teamId"))] for row in rosters if isinstance(row, dict) and str(row.get("teamId")) in by_team]
-    return output, {"applied_team_count": len(applied), "teams": applied}
+    return output, {
+        "applied_team_count": len(applied),
+        "teams": applied,
+        "removed_stale_memberships": removed_stale_memberships,
+        "cleaned_provider_teams": cleaned_provider_teams,
+    }
 
 
 def robust_value_score(values: list[float], value: float | None, limit: float = 2.5) -> float:

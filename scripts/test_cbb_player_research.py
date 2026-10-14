@@ -232,6 +232,7 @@ class CbbPlayerResearchTests(unittest.TestCase):
         current = player(1, 4, 1)
         departed = player(2, 3, 1)
         provider = roster([departed], 1, "Alpha")
+        stale_old_team = roster([current], 2, "Beta")
         official = {"teams":[{
             "team_id":1,
             "team":"Alpha",
@@ -243,12 +244,14 @@ class CbbPlayerResearchTests(unittest.TestCase):
                 {"name":"True Freshman","position":"F","jersey":"5"},
             ],
         }]}
-        resolved, summary = apply_official_roster_overrides([provider], official, [current, departed])
+        resolved, summary = apply_official_roster_overrides([provider, stale_old_team], official, [current, departed])
         self.assertEqual([row["name"] for row in resolved[0]["players"]], [current["name"], "True Freshman"])
+        self.assertEqual(resolved[1]["players"], [])
         self.assertEqual(resolved[0]["players"][0]["id"], current["athleteId"])
         self.assertTrue(resolved[0]["players"][1]["sourceId"].startswith("official:1:"))
         self.assertEqual(summary["teams"][0]["exact_identity_matches"], 1)
         self.assertEqual(summary["teams"][0]["roster_only_players"], 1)
+        self.assertEqual(summary["removed_stale_memberships"], 1)
         payload = build_player_research(2026, 2027, [current, departed], [{"teamId":1}], resolved, min_minutes=0, min_games=0)
         self.assertIn(current["name"], {row["name"] for row in payload["players"]})
         self.assertNotIn(departed["name"], {row["name"] for row in payload["players"]})
