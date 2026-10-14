@@ -59,21 +59,47 @@ def percentile(values, target):
     return 100.0 * (less + 0.5 * equal) / len(values)
 
 
+POSITION_GROUPS = {
+    "QB": "QB",
+    "RB": "RB", "HB": "RB", "FB": "RB",
+    "WR": "WR", "TE": "TE",
+    "K": "ST", "P": "ST", "PK": "ST", "LS": "ST",
+    "OL": "OL", "OT": "OL", "OG": "OL", "C": "OL", "G": "OL", "T": "OL",
+    "DE": "DEF", "DL": "DEF", "DT": "DEF", "NT": "DEF", "EDGE": "DEF",
+    "LB": "DEF", "ILB": "DEF", "OLB": "DEF", "CB": "DEF", "DB": "DEF",
+    "S": "DEF", "FS": "DEF", "SS": "DEF", "NB": "DEF",
+}
+RATING_MINIMUMS = {"QB": 35, "RB": 20, "WR": 15, "TE": 12, "DEF": 3}
+
+
 def position_group(position, stats):
     pos = str(position or "").upper()
-    if pos == "QB" or stats["pass_attempts"]:
+    # The roster position is authoritative. Incidental carries, targets or
+    # trick-play passes must not move a player into another rating cohort.
+    if pos in POSITION_GROUPS:
+        return POSITION_GROUPS[pos]
+    if stats["pass_attempts"]:
         return "QB"
-    if pos in {"RB", "HB", "FB"} or stats["rush_attempts"]:
+    if stats["rush_attempts"]:
         return "RB"
-    if pos in {"WR", "TE"} or stats["targets"]:
-        return "TE" if pos == "TE" else "WR"
-    if pos in {"K", "P", "PK", "LS"}:
-        return "ST"
-    if pos in {"OL", "OT", "OG", "C", "G", "T"}:
-        return "OL"
-    if stats["defensive_disruptions"] or pos in {"DE", "DL", "DT", "NT", "EDGE", "LB", "ILB", "OLB", "CB", "DB", "S", "FS", "SS", "NB"}:
+    if stats["targets"]:
+        return "WR"
+    if stats["defensive_disruptions"]:
         return "DEF"
     return "OTHER"
+
+
+def usage_volume(group, stats):
+    """Return the opportunity count appropriate to a player's roster role."""
+    if group == "QB":
+        return number(stats.get("pass_attempts")) + number(stats.get("rush_attempts"))
+    if group == "RB":
+        return number(stats.get("rush_attempts")) + number(stats.get("targets"))
+    if group in {"WR", "TE"}:
+        return number(stats.get("targets")) + number(stats.get("rush_attempts"))
+    if group == "DEF":
+        return number(stats.get("defensive_disruptions"))
+    return 0.0
 
 
 def empty_stats():
@@ -226,7 +252,7 @@ def main():
             (s["epa_total"] - s["opponent_baseline_total"]) / opportunities
             if opportunities else None
         )
-        primary_volume = s["pass_attempts"] or s["rush_attempts"] or s["targets"] or s["defensive_disruptions"]
+        primary_volume = usage_volume(group, s)
         players[pid] = {
             "athlete_id": pid,
             "name": meta.get("name") or names.get(pid) or f"Player {pid}",
@@ -267,7 +293,7 @@ def main():
                 shares[out] = round(100 * value / total, 1)
         row["workload"] = shares
 
-    minimums = {"QB": 35, "RB": 20, "WR": 15, "TE": 12, "DEF": 3}
+    minimums = RATING_MINIMUMS
     for group in ("QB", "RB", "WR", "TE", "DEF"):
         pool = [row for row in players.values() if row["position_group"] == group and number(row["primary_volume"]) >= minimums[group]]
         effs = [row["advanced"]["opponent_adjusted_epa_per_opportunity"] for row in pool if finite(row["advanced"]["opponent_adjusted_epa_per_opportunity"])]
@@ -285,7 +311,7 @@ def main():
                     + 0.10 * percentile(successes, row["advanced"]["success_rate"])
                 )
             reliability = min(1.0, number(row["primary_volume"]) / (minimums[group] * 2))
-            row["rating"] = round(50 + (rating - 50) * reliability, 1)
+            row["rating"] = round(max(1.0, min(99.0, 50 + (rating - 50) * reliability)), 1)
             row["reliability"] = round(100 * reliability, 0)
         ordered = sorted(pool, key=lambda row: (-(row["rating"] or -999), row["name"]))
         for rank, row in enumerate(ordered, 1):
@@ -341,6 +367,7 @@ def main():
             "source": "SportsDataverse/cfbfastR play-by-play joined to ESPN roster athlete IDs",
             "model_usage": "display_only_not_used_by_model_a",
             "rating_status": "research_beta",
+            "rating_version": "thi-cfb-player-production-v1.1",
             "heisman_status": calibration_status,
             "heisman_validation": {
                 "passed": bool(calibration_validation.get("passed")),
@@ -350,6 +377,8 @@ def main():
             },
             "notes": [
                 "Observed role is based on recorded workload and is not an official depth chart.",
+                "Official roster positions define rating cohorts; incidental trick-play usage does not reclassify players.",
+                "Primary volume is position-specific usage: QB dropbacks/carries, RB carries/targets, receiver targets/carries and defensive disruptions.",
                 "THI player ratings are position-specific and should not be compared across positions as equivalent scouting grades.",
                 "Award probabilities are withheld unless the leave-one-season-out historical calibration clears every publication gate.",
             ],
