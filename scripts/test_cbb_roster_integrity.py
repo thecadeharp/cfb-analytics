@@ -15,8 +15,20 @@ class RosterIntegrityTests(unittest.TestCase):
     def test_passes_complete_provider_verified_sample(self):
         players=[{"athlete_source_id":str(i),"name":"Current Player" if i==0 else f"Player {i}","position":"F"} for i in range(10)]
         payload={"meta":{"roster_verification_status":"provider_verified","roster_season":2027},"team_rosters":[{"team_id":1,"team":"Alpha","players":players}]}
-        spots={"teams":[{"team_id":1,"team":"Alpha","official_players":["Current Player"]}]}
+        spots={"teams":[{"team_id":1,"team":"Alpha","official_roster_complete":True,"official_players":[{"name":row["name"]} for row in players]}]}
         self.assertEqual(audit(payload,spots,expected_teams=1)["meta"]["status"],"passed")
+
+    def test_every_team_receives_an_explicit_audit_state(self):
+        payload={"meta":{"roster_verification_status":"provider_verified","roster_season":2027},"team_rosters":[
+            {"team_id":1,"team":"Alpha","players":[{"athlete_source_id":f"a{i}","name":f"A {i}","position":"G"} for i in range(10)]},
+            {"team_id":2,"team":"Beta","players":[{"athlete_source_id":f"b{i}","name":f"B {i}","position":"F"} for i in range(10)]},
+        ]}
+        spots={"teams":[{"team_id":1,"team":"Alpha","official_roster_complete":True,"official_players":[f"A {i}" for i in range(10)]}]}
+        report=audit(payload,spots,expected_teams=2)
+        states={row["team"]:row["verification_state"] for row in report["team_audit"]}
+        self.assertEqual(states,{"Alpha":"official_match","Beta":"official_source_pending"})
+        self.assertFalse(report["checks"]["official_source_coverage"])
+        self.assertEqual(report["meta"]["status"],"withheld")
 
 
 if __name__ == "__main__": unittest.main()

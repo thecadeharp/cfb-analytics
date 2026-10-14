@@ -107,6 +107,7 @@ jobs:
             scripts/test_cbb_model_v02.py \
             scripts/test_cbb_game_day_readiness.py \
             scripts/test_cbb_platform_health.py \
+            scripts/test_cbb_roster_integrity.py \
             scripts/test_release_safety.py \
             scripts/test_cbb_opening_night_rehearsal.py \
             scripts/test_cbb_release_foundations.py \
@@ -191,6 +192,9 @@ jobs:
           assert players["meta"]["player_count"] >= 1500
           assert all("prior_production_rating" in row["research_scores"] for row in players["players"])
           assert roster_audit["meta"]["status"] in ("passed", "withheld")
+          assert roster_audit["meta"]["version"] == "thi-cbb-roster-audit-v1.1"
+          assert len(roster_audit["team_audit"]) >= 300
+          assert roster_audit["coverage"]["official_sources_required"] == len(roster_audit["team_audit"])
           assert (roster_audit["meta"]["status"] == "passed") == (players["meta"]["roster_verification_status"] == "provider_verified" and all(roster_audit["checks"].values()))
           assert health["coverage"]["roster_audit_status"] == roster_audit["meta"]["status"]
           if roster_audit["meta"]["status"] != "passed":
@@ -268,10 +272,18 @@ jobs:
               assert health["meta"]["status"] == "healthy"
           else:
               assert health["meta"]["status"] in {"healthy", "attention_required"}
-              assert set(health.get("alerts") or []).issubset({"source_requests_completed"})
               assert health["checks"]["roster_layer_safe"] is True
+              unexpected_alerts = set(health.get("alerts") or []) - {
+                  "source_requests_completed",
+                  "neutral_venue_audit_ready",
+              }
+              assert not unexpected_alerts, f"Unexpected CBB health alerts: {sorted(unexpected_alerts)}"
           assert health["checks"]["neutral_site_home_context_zero"] is True
-          assert health["checks"]["neutral_venue_audit_ready"] is True
+          assert health["checks"]["neutral_venue_audit_ready"] is True, (
+              "Unresolved neutral-site venue conflicts: "
+              f"{venue_audit.get('summary', {}).get('unresolved_reviews', 0)}. "
+              "Review the UNRESOLVED_NEUTRAL_VENUE log and add an official-source override."
+          )
           assert health["checks"]["opening_night_rehearsal_passed"] is True
           assert venue_audit["meta"]["status"] == "healthy"
           assert venue_audit["summary"]["unresolved_reviews"] == 0
