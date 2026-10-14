@@ -1,9 +1,27 @@
 #!/usr/bin/env python3
+import json
 import unittest
+from pathlib import Path
 from scripts.audit_cbb_roster_integrity import audit
 
 
 class RosterIntegrityTests(unittest.TestCase):
+    def test_authoritative_snapshots_are_complete_and_research_failures_stay_withheld(self):
+        root = Path(__file__).resolve().parents[1]
+        snapshots = json.loads((root / "data/cbb/roster_spot_checks.json").read_text())
+        research = json.loads((root / "data/cbb/official_roster_research_top25.json").read_text())
+        self.assertGreaterEqual(len(snapshots["teams"]), 23)
+        for team in snapshots["teams"]:
+            names = [row["name"].strip().lower() for row in team["official_players"]]
+            self.assertTrue(team["official_roster_complete"])
+            self.assertGreaterEqual(len(names), 8)
+            self.assertEqual(len(names), len(set(names)))
+            self.assertTrue(team["source_url"].startswith("https://"))
+        imported = {row["team"] for row in research["teams"] if row["import_eligible"]}
+        withheld = {row["team"] for row in research["teams"] if not row["import_eligible"]}
+        self.assertGreaterEqual(len(imported), 22)
+        self.assertEqual(withheld, {"Arkansas", "BYU", "Purdue"})
+
     def test_withholds_stale_fallback_and_failed_official_check(self):
         payload = {"meta":{"roster_verification_status":"withheld_unverified_fallback","roster_season":2027},"team_rosters":[{"team_id":136,"team":"LSU","players":[{"athlete_source_id":str(i),"name":f"Old {i}","position":"G"} for i in range(8)]}]}
         spots = {"teams":[{"team_id":136,"team":"LSU","official_players":["Current Player"],"source_url":"official"}]}

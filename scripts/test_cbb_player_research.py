@@ -3,7 +3,7 @@
 import math
 import unittest
 
-from scripts.build_cbb_player_research import build_player_research, normalize_espn_roster
+from scripts.build_cbb_player_research import apply_official_roster_overrides, build_player_research, normalize_espn_roster
 
 
 def player(index: int, quality: float, team_id: int = 1) -> dict:
@@ -227,6 +227,32 @@ class CbbPlayerResearchTests(unittest.TestCase):
         self.assertEqual(payload["meta"]["roster_verification_status"], "withheld_unverified_fallback")
         self.assertFalse(payload["coverage"]["publication_allowed"])
         self.assertTrue(all(row["current_roster_verified"] is False for row in payload["players"]))
+
+    def test_complete_official_roster_replaces_stale_provider_membership_with_exact_identity_joins(self):
+        current = player(1, 4, 1)
+        departed = player(2, 3, 1)
+        provider = roster([departed], 1, "Alpha")
+        official = {"teams":[{
+            "team_id":1,
+            "team":"Alpha",
+            "source_url":"https://alpha.example/roster",
+            "checked_at":"2026-10-13",
+            "official_roster_complete":True,
+            "official_players":[
+                {"name":current["name"],"position":"G","jersey":"4"},
+                {"name":"True Freshman","position":"F","jersey":"5"},
+            ],
+        }]}
+        resolved, summary = apply_official_roster_overrides([provider], official, [current, departed])
+        self.assertEqual([row["name"] for row in resolved[0]["players"]], [current["name"], "True Freshman"])
+        self.assertEqual(resolved[0]["players"][0]["id"], current["athleteId"])
+        self.assertTrue(resolved[0]["players"][1]["sourceId"].startswith("official:1:"))
+        self.assertEqual(summary["teams"][0]["exact_identity_matches"], 1)
+        self.assertEqual(summary["teams"][0]["roster_only_players"], 1)
+        payload = build_player_research(2026, 2027, [current, departed], [{"teamId":1}], resolved, min_minutes=0, min_games=0)
+        self.assertIn(current["name"], {row["name"] for row in payload["players"]})
+        self.assertNotIn(departed["name"], {row["name"] for row in payload["players"]})
+        self.assertEqual({row["name"] for row in payload["team_rosters"][0]["players"]}, {current["name"], "True Freshman"})
 
 
 if __name__ == "__main__":

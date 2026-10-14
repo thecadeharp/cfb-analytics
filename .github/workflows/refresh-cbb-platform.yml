@@ -191,10 +191,14 @@ jobs:
           assert players["meta"]["version"] == "thi-cbb-player-research-v1.3"
           assert players["meta"]["player_count"] >= 1500
           assert all("prior_production_rating" in row["research_scores"] for row in players["players"])
+          assert players["coverage"]["official_roster_overrides"]["applied_team_count"] >= 23
           assert roster_audit["meta"]["status"] in ("passed", "withheld")
           assert roster_audit["meta"]["version"] == "thi-cbb-roster-audit-v1.1"
           assert len(roster_audit["team_audit"]) >= 300
           assert roster_audit["coverage"]["official_sources_required"] == len(roster_audit["team_audit"])
+          lsu_roster_audit = next(row for row in roster_audit["team_audit"] if row["team"] == "LSU")
+          assert lsu_roster_audit["verification_state"] == "official_match"
+          assert lsu_roster_audit["provider_player_count"] == 10
           assert (roster_audit["meta"]["status"] == "passed") == (players["meta"]["roster_verification_status"] == "provider_verified" and all(roster_audit["checks"].values()))
           assert health["coverage"]["roster_audit_status"] == roster_audit["meta"]["status"]
           if roster_audit["meta"]["status"] != "passed":

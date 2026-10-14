@@ -29,6 +29,7 @@ except ModuleNotFoundError:
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "data" / "cbb" / "player_ratings.json"
+DEFAULT_OFFICIAL_ROSTERS = ROOT / "data" / "cbb" / "roster_spot_checks.json"
 VERSION = "thi-cbb-player-research-v1.3"
 MIN_MINUTES = 100.0
 MIN_GAMES = 5.0
@@ -122,6 +123,93 @@ def rounded(value: Any, digits: int = 3) -> float | None:
 
 def normalized(value: Any) -> str:
     return " ".join("".join(character.lower() if character.isalnum() else " " for character in str(value or "")).split())
+
+
+def apply_official_roster_overrides(
+    rosters: list[dict[str, Any]],
+    official_payload: dict[str, Any] | None,
+    historical_players: list[dict[str, Any]] | None = None,
+    recruits: list[dict[str, Any]] | None = None,
+    portal: list[dict[str, Any]] | None = None,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Replace a stale provider roster only from a complete official snapshot.
+
+    Exact normalized-name joins may carry stable identifiers into the official
+    roster. Ambiguous or unmatched names receive a deterministic official
+    source key and remain roster-only; they never inherit another player's
+    statistics through fuzzy matching.
+    """
+    by_team = {str(row.get("teamId")): dict(row) for row in rosters if isinstance(row, dict)}
+    identity_candidates: defaultdict[str, list[tuple[Any, Any]]] = defaultdict(list)
+    for row in historical_players or []:
+        if not isinstance(row, dict):
+            continue
+        name = normalized(row.get("name"))
+        if name:
+            identity_candidates[name].append((row.get("athleteId"), row.get("athleteSourceId")))
+    for row in (recruits or []) + (portal or []):
+        if not isinstance(row, dict):
+            continue
+        name = normalized(row.get("name") or f"{row.get('firstName') or ''} {row.get('lastName') or ''}")
+        if name:
+            identity_candidates[name].append((row.get("athleteId"), row.get("athleteSourceId") or row.get("sourceId")))
+
+    applied = []
+    for official in (official_payload or {}).get("teams") or []:
+        if not isinstance(official, dict) or official.get("official_roster_complete") is not True:
+            continue
+        team_id = str(official.get("team_id") or "")
+        provider = by_team.get(team_id)
+        official_players = [row for row in official.get("official_players") or [] if isinstance(row, dict) and row.get("name")]
+        if provider is None or not official_players:
+            continue
+        replacement = []
+        exact_id_matches = 0
+        for row in official_players:
+            name_key = normalized(row.get("name"))
+            candidates = {
+                (athlete_id, source_id)
+                for athlete_id, source_id in identity_candidates.get(name_key, [])
+                if athlete_id is not None or source_id
+            }
+            athlete_id = source_id = None
+            athlete_ids = {candidate[0] for candidate in candidates if candidate[0] is not None}
+            source_ids = {candidate[1] for candidate in candidates if candidate[1]}
+            if len(athlete_ids) == 1:
+                athlete_id = next(iter(athlete_ids))
+                matching_sources = {candidate[1] for candidate in candidates if candidate[0] == athlete_id and candidate[1]}
+                source_id = next(iter(matching_sources)) if len(matching_sources) == 1 else None
+                exact_id_matches += 1
+            elif not athlete_ids and len(source_ids) == 1:
+                source_id = next(iter(source_ids))
+                exact_id_matches += 1
+            replacement.append({
+                "id": athlete_id,
+                "sourceId": source_id or f"official:{team_id}:{name_key.replace(' ', '-')}",
+                "name": row.get("name"),
+                "position": row.get("position"),
+                "jersey": row.get("jersey"),
+                "class": row.get("class"),
+                "height": row.get("height"),
+                "weight": row.get("weight"),
+                "officialSourceUrl": official.get("source_url"),
+                "officialCheckedAt": official.get("checked_at"),
+            })
+        provider["players"] = replacement
+        provider["rosterSource"] = "official_athletic_department_override"
+        provider["officialSourceUrl"] = official.get("source_url")
+        provider["officialCheckedAt"] = official.get("checked_at")
+        by_team[team_id] = provider
+        applied.append({
+            "team_id": official.get("team_id"),
+            "team": official.get("team"),
+            "player_count": len(replacement),
+            "exact_identity_matches": exact_id_matches,
+            "roster_only_players": len(replacement) - exact_id_matches,
+            "source_url": official.get("source_url"),
+        })
+    output = [by_team[str(row.get("teamId"))] for row in rosters if isinstance(row, dict) and str(row.get("teamId")) in by_team]
+    return output, {"applied_team_count": len(applied), "teams": applied}
 
 
 def robust_value_score(values: list[float], value: float | None, limit: float = 2.5) -> float:
@@ -718,6 +806,7 @@ def main() -> None:
     parser.add_argument("--source-season", type=int, default=int(os.environ.get("CBB_PLAYER_SOURCE_SEASON", "2026")))
     parser.add_argument("--roster-season", type=int, default=int(os.environ.get("CBB_PLAYER_ROSTER_SEASON", "2027")))
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--official-rosters", type=Path, default=DEFAULT_OFFICIAL_ROSTERS)
     args = parser.parse_args()
     api_key = clean_key(os.environ.get("CBBD_API_KEY"))
     if not api_key:
@@ -738,6 +827,14 @@ def main() -> None:
         roster_fetch_errors = len(errors)
         roster_source = "espn_current_roster_fallback"
         print(f"CBBD roster feed was empty; ESPN fallback verified {len(rosters)} teams ({roster_fetch_errors} fetch errors).")
+    official_payload = json.loads(args.official_rosters.read_text()) if args.official_rosters.exists() else {}
+    rosters, official_override_summary = apply_official_roster_overrides(
+        rosters,
+        official_payload,
+        historical_players=players,
+        recruits=recruits,
+        portal=portal,
+    )
     payload = build_player_research(
         args.source_season,
         args.roster_season,
@@ -751,6 +848,8 @@ def main() -> None:
         recruits=recruits,
         portal=portal,
     )
+    payload["meta"]["official_roster_snapshot_season"] = (official_payload.get("meta") or {}).get("season")
+    payload["coverage"]["official_roster_overrides"] = official_override_summary
     atomic_write(args.output, payload)
     print(json.dumps({"meta": payload["meta"], "coverage": payload["coverage"]}, indent=2))
 
