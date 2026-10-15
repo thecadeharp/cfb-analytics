@@ -842,6 +842,42 @@
         .projection-filter-select,
         .clear-filter-button { width:100%; }
 
+        .signal-legend-grid {
+          grid-template-columns:repeat(2,minmax(0,1fr));
+        }
+
+        .signal-legend-item:last-child { grid-column:1 / -1; }
+
+        #view-projections .confidence-legend {
+          display:grid;
+          grid-template-columns:minmax(92px,auto) minmax(0,1fr);
+          align-items:start;
+          gap:8px 12px;
+        }
+
+        #view-projections .confidence-legend .status {
+          width:auto;
+          min-width:0;
+          padding-inline:8px;
+          white-space:normal;
+          text-align:center;
+          line-height:1.25;
+        }
+
+        #view-projections .projection-table .game-row .status {
+          justify-self:start;
+          max-width:100%;
+          white-space:normal;
+          text-align:center;
+          line-height:1.25;
+        }
+
+        #view-projections .projection-table .game-row .signal-record {
+          justify-self:start;
+          text-align:left;
+          white-space:normal;
+        }
+
         .projected-team-score { font-size:29px; }
       }
     `;

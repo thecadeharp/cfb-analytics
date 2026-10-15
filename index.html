@@ -1282,9 +1282,9 @@
       #view-projections .projection-table .game-row td:nth-child(8) {
         grid-column: 1 / -1;
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-items: center;
-        gap: 10px;
+        grid-template-columns: 1fr;
+        align-items: start;
+        gap: 7px;
         text-align: left;
       }
 
@@ -1303,14 +1303,19 @@
       }
 
       #view-projections .projection-table .game-row .status {
-        justify-self: end;
+        justify-self: start;
+        max-width: 100%;
+        white-space: normal;
+        text-align: center;
+        line-height: 1.25;
       }
 
       #view-projections .projection-table .game-row .signal-record {
         grid-column: 1 / -1;
-        justify-self: end;
-        text-align: right;
+        justify-self: start;
+        text-align: left;
         margin-top: 2px;
+        white-space: normal;
       }
 
       #view-projections .projection-table .disagreement {
@@ -1319,6 +1324,29 @@
 
       #view-projections .projection-table .disagreement-note {
         white-space: normal;
+      }
+
+      .signal-legend-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .signal-legend-item:last-child {
+        grid-column: 1 / -1;
+      }
+
+      .confidence-legend {
+        display: grid;
+        grid-template-columns: minmax(92px, auto) minmax(0, 1fr);
+        align-items: start;
+      }
+
+      .confidence-legend .status {
+        width: auto;
+        min-width: 0;
+        padding-inline: 8px;
+        white-space: normal;
+        text-align: center;
+        line-height: 1.25;
       }
     }
     /* Keep dossier rating labels legible on every rank color. */
@@ -1734,7 +1762,7 @@
   <script src="market-research.js?v=2026-matchup-odds-v01"></script>
   <script src="last-updated-timestamp.js"></script>
   <script src="dossier-ranks.js"></script>
-  <script src="ux-v2.js?v=2026-personnel-bye-board-v01"></script>
+  <script src="ux-v2.js?v=2026-mobile-projections-v02"></script>
   <script src="portal-variance.js?v=2026-free-market-monitor-v01"></script>
   <script src="mobile.js?v=2026-intelligence-v01"></script>
   <script src="sort-tables.js?v=2026-live-score-v02"></script>
@@ -1752,7 +1780,7 @@
   <script src="thi-intelligence.js?v=2026-intelligence-v01"></script>
   <link rel="stylesheet" href="player-intelligence.css?v=2026-ux-cleanup-v01">
   <script src="player-intelligence.js?v=2026-personnel-bye-board-v02"></script>
-  <link rel="stylesheet" href="cbb-site.css?v=2027-daily-game-intel-v01">
+  <link rel="stylesheet" href="cbb-site.css?v=2027-mobile-projections-v03">
   <link rel="stylesheet" href="dark-mode.css?v=2026-dark-v05">
   <script src="dark-mode.js?v=2026-dark-v01"></script>
   <script src="cbb-site.js?v=2027-daily-game-intel-v01"></script>

@@ -200,13 +200,13 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
 .cbb-rlm-status { display:inline-flex; margin-bottom:10px; border:1px solid var(--border); border-radius:999px; padding:6px 10px; color:#d7bc63; font:800 8px var(--mono); text-transform:uppercase; }
 .cbb-rlm-status.is-active { border-color:#287357; color:#6fd2aa; }
 .cbb-rlm-monitor p,.cbb-variance-ledger p { margin:8px 0 0; color:var(--muted); font-size:11px; }
-.cbb-projection-table { min-width: 1340px; table-layout: fixed; }
-.cbb-projection-table th:first-child { width: 240px; }
-.cbb-projection-table th:nth-child(2) { width: 100px; }
-.cbb-projection-table th:nth-child(3), .cbb-projection-table th:nth-child(4) { width: 195px; }
-.cbb-projection-table th:nth-child(5) { width: 135px; }
-.cbb-projection-table th:nth-child(6) { width: 145px; }
-.cbb-projection-table th:nth-child(7), .cbb-projection-table th:nth-child(8) { width: 160px; }
+.cbb-projection-table { min-width: 1080px; table-layout: fixed; }
+.cbb-projection-table th { white-space:normal; line-height:1.3; }
+.cbb-projection-table th:first-child { width: 210px; }
+.cbb-projection-table th:nth-child(2) { width: 80px; }
+.cbb-projection-table th:nth-child(3), .cbb-projection-table th:nth-child(4) { width: 155px; }
+.cbb-projection-table th:nth-child(5), .cbb-projection-table th:nth-child(6) { width: 110px; }
+.cbb-projection-table th:nth-child(7), .cbb-projection-table th:nth-child(8) { width: 130px; }
 .cbb-projection-row { cursor: pointer; }
 .cbb-projection-row:hover { background: rgba(87,160,132,.07); }
 .cbb-projection-table .cbb-line-cell { overflow: hidden; }
@@ -848,12 +848,77 @@ html[data-theme="dark"] .cbb-error { background: #3a2020; border-color: #76443e;
   .cbb-projection-score,
   .cbb-projection-meta { align-items: flex-start; flex-direction: column; }
   .cbb-projection-score span { text-align: left; }
+  .cbb-signal-guide-heading { align-items:flex-start; flex-wrap:wrap; }
+  .cbb-signal-guide-heading small { flex:1 1 150px; margin-left:0; white-space:normal; }
+  .cbb-signal-key { grid-template-columns:1fr; }
+  .cbb-confidence-key { display:grid; grid-template-columns:1fr; align-items:stretch; }
+  .cbb-confidence-key-item { display:grid; grid-template-columns:minmax(96px,auto) minmax(0,1fr); align-items:start; }
+  .cbb-confidence-key-item .cbb-confidence { width:100%; max-width:100%; white-space:normal; text-align:center; line-height:1.25; }
+  .cbb-confidence-key-item small { line-height:1.45; }
   .cbb-roster-player { align-items: flex-start; flex-direction: column; }
   .cbb-roster-player-state { justify-content: flex-start; }
   .cbb-matchup-page-title { align-items: flex-start; flex-direction: column; gap: 7px; }
   .cbb-situation-grid { grid-template-columns: 1fr; }
   .cbb-lineup-player { grid-template-columns: 20px minmax(0,1fr); }
   .cbb-lineup-player > small { grid-column: 2; }
+}
+
+@media (max-width: 1120px) {
+  .cbb-projection-table-wrap { overflow:visible; border:0; background:transparent; }
+  .cbb-projection-table-wrap table.cbb-table.cbb-projection-table { display:block; width:100%; min-width:0 !important; table-layout:auto; }
+  .cbb-projection-table thead { display:none; }
+  .cbb-projection-table tbody { display:grid; gap:12px; }
+  .cbb-projection-table .cbb-date-row { display:block; }
+  .cbb-projection-table .cbb-date-row td { display:block; width:100%; border-radius:8px; }
+  .cbb-projection-row {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    width:100%;
+    overflow:hidden;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:var(--surface);
+  }
+  .cbb-projection-table .cbb-projection-row > td {
+    display:block;
+    min-width:0;
+    padding:12px 13px;
+    border-bottom:1px solid var(--border);
+    text-align:left;
+  }
+  .cbb-projection-table .cbb-projection-row > td:first-child { grid-column:1 / -1; padding:15px; }
+  .cbb-projection-table .cbb-projection-row > td:nth-child(7),
+  .cbb-projection-table .cbb-projection-row > td:nth-child(8) {
+    grid-column:1 / -1;
+    display:grid;
+    grid-template-columns:1fr;
+    align-items:start;
+    gap:7px;
+  }
+  .cbb-projection-table .cbb-projection-row > td:last-child { border-bottom:0; }
+  .cbb-projection-table .cbb-projection-row > td::before {
+    display:block;
+    margin-bottom:7px;
+    color:var(--muted);
+    font:800 8px var(--mono);
+    letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+  .cbb-projection-table .cbb-projection-row > td:nth-child(2)::before { content:"Watchability"; }
+  .cbb-projection-table .cbb-projection-row > td:nth-child(3)::before { content:"THI Spread"; }
+  .cbb-projection-table .cbb-projection-row > td:nth-child(4)::before { content:"Market"; }
+  .cbb-projection-table .cbb-projection-row > td:nth-child(5)::before { content:"Total"; }
+  .cbb-projection-table .cbb-projection-row > td:nth-child(6)::before { content:"Model Edge"; }
+  .cbb-projection-table .cbb-projection-row > td:nth-child(7)::before { content:"Model Signal"; }
+  .cbb-projection-table .cbb-projection-row > td:nth-child(8)::before { content:"Signal Confidence"; }
+  .cbb-projection-table .cbb-projection-row .cbb-confidence {
+    width:fit-content;
+    max-width:100%;
+    white-space:normal;
+    text-align:center;
+    line-height:1.25;
+  }
+  .cbb-projection-table .cbb-projection-row .cbb-team-meta { white-space:normal; }
 }
 .cbb-rating-decomposition { margin:18px 0; padding:18px; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
 .cbb-efficiency-landscape { margin:18px 0; padding:18px; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
