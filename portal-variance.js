@@ -84,8 +84,32 @@
   }
 
   function starDots(n) {
+    if (n === null || n === undefined || n === "") return `<span class="stars">—</span>`;
     const count = Math.min(5, Math.max(0, Number(n) || 0));
     return `<span class="stars">${"★".repeat(count)}${"☆".repeat(5-count)}</span>`;
+  }
+
+  function portalRatingScore(row) {
+    const explicit = Number(row?.rating_score);
+    if (Number.isFinite(explicit)) return explicit;
+    const raw = Number(row?.rating);
+    if (!Number.isFinite(raw)) return null;
+    return Math.abs(raw) <= 1.5 ? raw * 100 : raw;
+  }
+
+  function portalRatingTier(score) {
+    if (!Number.isFinite(Number(score))) return "unrated";
+    if (Number(score) >= 90) return "elite";
+    if (Number(score) >= 87) return "high";
+    if (Number(score) >= 84) return "solid";
+    if (Number(score) >= 80) return "depth";
+    return "developmental";
+  }
+
+  function portalRatingMarkup(value) {
+    const score = Number(value);
+    if (!Number.isFinite(score)) return `<span class="portal-rating unrated">—</span>`;
+    return `<span class="portal-rating ${portalRatingTier(score)}">${pFmt(score,1)}</span>`;
   }
 
   function boomBustBadge(label) {
@@ -116,6 +140,8 @@
       .pv-subtab.active {
         background:var(--text); border-color:var(--text); color:#fff;
       }
+      .pv-subnav.portal-tabs { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); overflow:visible; }
+      .pv-subnav.portal-tabs .pv-subtab { width:100%; min-height:38px; padding:7px 8px; }
 
       .vl-coming-soon {
         min-height:190px;
@@ -248,6 +274,23 @@
       .pv-table tbody tr:last-child td { border-bottom:none; }
       .pv-team-name { font-weight:700; }
       .pv-conf { color:var(--muted); font-size:10px; }
+      .portal-rating {
+        display:inline-flex; min-width:48px; justify-content:center;
+        padding:4px 7px; border-radius:6px; border:1px solid var(--border);
+        font:800 10px var(--mono); color:var(--text); background:var(--surface);
+      }
+      .portal-rating.elite { color:#0b6840; background:rgba(42,190,123,.16); border-color:rgba(42,190,123,.42); }
+      .portal-rating.high { color:#176b55; background:rgba(54,176,153,.13); border-color:rgba(54,176,153,.36); }
+      .portal-rating.solid { color:#765700; background:rgba(232,190,63,.16); border-color:rgba(213,170,42,.42); }
+      .portal-rating.depth { color:#8a4c08; background:rgba(230,145,54,.13); border-color:rgba(230,145,54,.36); }
+      .portal-rating.developmental { color:#a22b20; background:rgba(224,73,73,.12); border-color:rgba(224,73,73,.34); }
+      .portal-rating.unrated { color:var(--muted); background:rgba(127,127,127,.08); }
+      .portal-legend { display:flex; flex-wrap:wrap; gap:7px 12px; align-items:center; margin:0 0 14px; color:var(--muted); font-size:10px; }
+      .portal-legend strong { color:var(--text); }
+      .portal-health { display:flex; gap:8px; flex-wrap:wrap; margin:-6px 0 16px; }
+      .portal-health span { padding:4px 8px; border:1px solid var(--border); border-radius:999px; color:var(--muted); font:700 9px var(--mono); }
+      .portal-card-positive { box-shadow:inset 3px 0 0 var(--green); }
+      .portal-card-negative { box-shadow:inset 3px 0 0 var(--red); }
 
       /* Grades */
       .grade-badge {
@@ -430,6 +473,7 @@
 
       /* Responsive */
       @media(max-width:900px){
+        .pv-subnav.portal-tabs { grid-template-columns:repeat(3,minmax(0,1fr)); }
         .pv-summary-grid { grid-template-columns:1fr 1fr; }
         .pv-split { grid-template-columns:1fr; }
         .vl-stats-bar { grid-template-columns:repeat(3,1fr); }
@@ -438,6 +482,7 @@
         .vl-compare-grid { grid-template-columns:1fr; }
       }
       @media(max-width:600px){
+        .pv-subnav.portal-tabs { grid-template-columns:repeat(2,minmax(0,1fr)); }
         .pv-summary-grid { grid-template-columns:1fr; }
         .vl-stats-bar { grid-template-columns:1fr 1fr; }
         .vl-teams-grid { grid-template-columns:1fr; }
@@ -451,13 +496,13 @@
   function renderPortalSubNav() {
     const tabs = [
       ["class","Class Rankings"],
-      ["offensive","Off. Portal"],
-      ["defensive","Def. Portal"],
-      ["conference","Conf. Summary"],
+      ["offensive","Offense"],
+      ["defensive","Defense"],
+      ["conference","Conferences"],
       ["juco","JUCO"],
       ["impact","Impact"],
     ];
-    return `<div class="pv-subnav">
+    return `<div class="pv-subnav portal-tabs" aria-label="Transfer Portal views">
       ${tabs.map(([id,label])=>`
         <button class="pv-subtab ${portalSubTab===id?"active":""}"
           onclick="pvPortalTab('${id}')">${pEsc(label)}</button>
@@ -467,7 +512,6 @@
 
   function renderPortalClassRankings() {
     const teams = portalData?.teams ?? [];
-    const positions = ["ALL","QB","RB","WR","TE","OL","DL","LB","DB"];
     const conferences = ["ALL", "P4", "G6", ...new Set(teams.map(t=>t.conference||"").filter(Boolean))].filter((c, i, values) => values.indexOf(c) === i);
 
     // Filter
@@ -481,6 +525,9 @@
     });
 
     const sorted = [...filtered].sort((a,b)=>(b.portal_index||0)-(a.portal_index||0));
+    const totalIn = teams.reduce((sum,t)=>sum+Number(t.in_count||0),0);
+    const totalOut = teams.reduce((sum,t)=>sum+Number(t.out_count||0),0);
+    const leader = [...teams].sort((a,b)=>(b.portal_index||0)-(a.portal_index||0))[0];
 
     const rows = sorted.map(t => {
       const netPlayers = Number(t.in_count||0) - Number(t.out_count||0);
@@ -501,6 +548,12 @@
       <div class="pv-section-header">
         <div class="pv-section-title">2026 Transfer Portal — Class Rankings</div>
         <div class="pv-section-sub">Incoming and outgoing roster movement ranked by the published On3 Portal Index. Ratings are portal evaluations—not Hammer Index model inputs. Source: On3, snapshot ${pEsc(portalData?.updated_label||"2026")}. ${filtered.length} of ${teams.length} ranked teams shown.</div>
+      </div>
+      <div class="pv-summary-grid">
+        <div class="pv-card"><div class="pv-card-label">Ranked classes</div><div class="pv-card-value">${teams.length}</div><div class="pv-card-sub">Published source snapshot</div></div>
+        <div class="pv-card"><div class="pv-card-label">Incoming</div><div class="pv-card-value net-pos">${totalIn}</div><div class="pv-card-sub">Across ranked classes</div></div>
+        <div class="pv-card"><div class="pv-card-label">Outgoing</div><div class="pv-card-value net-neg">${totalOut}</div><div class="pv-card-sub">Across ranked classes</div></div>
+        <div class="pv-card"><div class="pv-card-label">Class leader</div><div class="pv-card-value" style="font-size:18px">${pEsc(leader?.team||"—")}</div><div class="pv-card-sub">Portal Index ${pSign(leader?.portal_index,0)}</div></div>
       </div>
       <div class="pv-filters">
         <div class="pv-filter">
@@ -549,18 +602,37 @@
 
   function renderPortalPlayerTable(players, emptyNote) {
     if (!players.length) return renderPortalComingSoon(emptyNote);
-    const rows = [...players].sort((a,b)=>(Number(b.rating)||0)-(Number(a.rating)||0)).map(row => `<tr>
-      <td><div class="pv-team-name">${pEsc(row.name)}</div><div class="pv-conf">from ${pEsc(row.origin||"Unknown")}</div></td>
-      <td>${pEsc(row.position||"—")}</td>
-      <td><span class="team-with-logo">${pTeamLogo(row.destination)}<span class="pv-team-name">${pEsc(row.destination)}</span></span></td>
-      <td class="r">${pFmt(row.rating,3)}</td>
-      <td class="r">${row.juco?'<span class="vl-badge ten-w">JUCO</span>':"—"}</td>
-    </tr>`).join("");
-    return `<div class="pv-table-wrap"><table class="pv-table"><thead><tr><th>Player</th><th>Pos</th><th>Destination</th><th class="r">Rating</th><th class="r">Origin</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    const positions = ["ALL", ...new Set(players.map(row=>row.position).filter(Boolean))];
+    const query = portalSearch.trim().toLocaleLowerCase();
+    const visible = players.filter(row => {
+      if (portalPosFilter !== "ALL" && row.position !== portalPosFilter) return false;
+      if (!query) return true;
+      return `${row.name} ${row.origin} ${row.destination} ${row.position}`.toLocaleLowerCase().includes(query);
+    });
+    const rows = [...visible].sort((a,b)=>(portalRatingScore(b)||0)-(portalRatingScore(a)||0)).map(row => {
+      const date = row.transfer_date ? new Date(row.transfer_date) : null;
+      const dateLabel = date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString("en-US",{month:"short",day:"numeric"}) : "—";
+      return `<tr>
+        <td><div class="pv-team-name">${pEsc(row.name)}</div></td>
+        <td>${pEsc(row.position||"—")}</td>
+        <td><span class="team-with-logo">${pTeamLogo(row.origin)}<span>${pEsc(row.origin||"Unknown")}</span></span></td>
+        <td><span class="team-with-logo">${pTeamLogo(row.destination)}<span class="pv-team-name">${pEsc(row.destination)}</span></span></td>
+        <td class="r">${portalRatingMarkup(portalRatingScore(row))}</td>
+        <td class="r">${starDots(row.stars)}</td>
+        <td class="r">${pEsc(dateLabel)}</td>
+      </tr>`;
+    }).join("");
+    return `<div class="pv-filters">
+      <div class="pv-filter"><div class="pv-filter-label">Player or team</div><input type="search" placeholder="Search player, origin, destination..." value="${pEsc(portalSearch)}" oninput="pvPortalSearch(this.value)"></div>
+      <div class="pv-filter"><div class="pv-filter-label">Position</div><select onchange="pvPortalPos(this.value)">${positions.map(pos=>`<option value="${pEsc(pos)}" ${portalPosFilter===pos?"selected":""}>${pEsc(pos==="ALL"?"All Positions":pos)}</option>`).join("")}</select></div>
+    </div>
+    <div class="portal-legend"><strong>CFBD rating:</strong><span class="portal-rating elite">90+</span> Elite <span class="portal-rating high">87+</span> High <span class="portal-rating solid">84+</span> Solid <span class="portal-rating depth">80+</span> Depth <span class="portal-rating developmental">&lt;80</span> Developmental · ${visible.length.toLocaleString()} of ${players.length.toLocaleString()} shown</div>
+    <div class="pv-table-wrap"><table class="pv-table"><thead><tr><th>Player</th><th>Pos</th><th>From</th><th>Destination</th><th class="r">Rating /100</th><th class="r">Stars</th><th class="r">Date</th></tr></thead><tbody>${rows||`<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No players match these filters.</td></tr>`}</tbody></table></div>`;
   }
 
   function renderPortalConference() {
     const sourceTeams = portalData?.teams ?? [];
+    const publishedSummary = new Map((portalData?.conference_summary || []).map(row=>[row.conference,row]));
     const grouped = sourceTeams.reduce((acc, team) => {
       const name = team.conference || "Independent";
       (acc[name] ||= []).push(team);
@@ -572,6 +644,7 @@
       return {
         conference,
         verdict: `${ordered[0]?.team||"—"} leads the conference. Average published Portal Index: ${avg.toFixed(1)}.`,
+        summary: publishedSummary.get(conference),
         teams: ordered,
       };
     }).sort((a,b)=>a.conference.localeCompare(b.conference));
@@ -595,7 +668,7 @@
     }
 
     const teamCards = teams.map(t => `
-      <div class="pv-card">
+      <div class="pv-card ${Number(t.portal_index)>=0?"portal-card-positive":"portal-card-negative"}">
         <div class="team-with-logo" style="font-weight:800;font-size:14px;margin-bottom:5px">${pTeamLogo(t.team)}<span>${pEsc(t.team)}</span></div>
         <div class="pv-conf" style="margin-bottom:8px">National portal rank #${t.portal_rank??"—"}</div>
         <div style="font-size:11px;color:var(--muted)">IN: ${t.in_count||0} · OUT: ${t.out_count||0}</div>
@@ -606,9 +679,15 @@
     return `
       <div class="pv-section-header">
         <div class="pv-section-title">Conference Portal Summary</div>
-        <div class="pv-section-sub">Published portal rankings grouped by conference. Click a conference to view its teams.</div>
+        <div class="pv-section-sub">Published team-class rankings grouped by conference. Conference averages use only programs present in the current ranked-class snapshot.</div>
       </div>
       <div class="pv-subnav" style="margin-bottom:14px">${confTabs}</div>
+      <div class="pv-summary-grid">
+        <div class="pv-card"><div class="pv-card-label">Teams ranked</div><div class="pv-card-value">${conf.summary?.team_count??teams.length}</div><div class="pv-card-sub">Current source snapshot</div></div>
+        <div class="pv-card"><div class="pv-card-label">Average index</div><div class="pv-card-value ${netClass(conf.summary?.avg_portal_index)}">${pSign(conf.summary?.avg_portal_index,1)}</div><div class="pv-card-sub">Published Portal Index</div></div>
+        <div class="pv-card"><div class="pv-card-label">Roster flow</div><div class="pv-card-value">${conf.summary?.in_count??0} / ${conf.summary?.out_count??0}</div><div class="pv-card-sub">Incoming / outgoing</div></div>
+        <div class="pv-card"><div class="pv-card-label">Conference leader</div><div class="pv-card-value" style="font-size:18px">${pEsc(conf.summary?.leader||teams[0]?.team||"—")}</div><div class="pv-card-sub">Highest-ranked class</div></div>
+      </div>
       ${conf.verdict?`<div class="vl-analysis"><strong>${pEsc(conf.conference)} — Portal Verdict:</strong> ${pEsc(conf.verdict)}</div>`:""}
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">
         ${teamCards || `<div class="empty-state" style="padding:40px">No team data for this conference yet.</div>`}
@@ -616,29 +695,54 @@
   }
 
   function renderPortalJuco() {
-    const players = (portalData?.players || []).filter(row => row.juco);
-    const totalPlayers = (portalData?.players || []).length;
+    const players = portalData?.juco || [];
+    const positions = ["ALL", ...new Set(players.map(row=>row.position).filter(Boolean))];
+    const query = portalSearch.trim().toLocaleLowerCase();
+    const visible = players.filter(row => {
+      if (portalPosFilter !== "ALL" && row.position !== portalPosFilter) return false;
+      if (!query) return true;
+      return `${row.name} ${row.origin} ${row.destination} ${row.position}`.toLocaleLowerCase().includes(query);
+    });
+    const ranked = [...visible].sort((a,b)=>(a.rank??99999)-(b.rank??99999));
+    const rows = ranked.map(row=>`<tr>
+      <td class="r">${row.rank??"—"}</td>
+      <td><div class="pv-team-name">${pEsc(row.name)}</div></td>
+      <td>${pEsc(row.position||"—")}</td>
+      <td>${pEsc(row.origin||"Unknown JUCO")}</td>
+      <td><span class="team-with-logo">${pTeamLogo(row.destination)}<span class="pv-team-name">${pEsc(row.destination)}</span></span></td>
+      <td class="r">${starDots(row.stars)}</td>
+      <td class="r">${portalRatingMarkup(portalRatingScore(row))}</td>
+    </tr>`).join("");
     return `
       <div class="pv-section-header">
-        <div class="pv-section-title">JUCO Signees</div>
-        <div class="pv-section-sub">Transfers whose source record explicitly identifies a junior-college origin. Ambiguous origin schools are excluded. ${totalPlayers.toLocaleString()} player records were checked.</div>
+        <div class="pv-section-title">2026 JUCO Signees</div>
+        <div class="pv-section-sub">Verified junior-college recruits from CFBD's dedicated JUCO recruiting classification. This is a recruiting-class view, kept separate from the transfer-player feed so origin is never inferred from a school name.</div>
       </div>
-      ${renderPortalPlayerTable(players,"No source-verified JUCO classifications are present in the current player feed. The section is complete and will populate when the source begins identifying JUCO origin; THI will not guess from missing school metadata.")}`;
+      ${players.length ? `<div class="pv-summary-grid">
+        <div class="pv-card"><div class="pv-card-label">Verified signees</div><div class="pv-card-value">${players.length}</div><div class="pv-card-sub">CFBD classification: JUCO</div></div>
+        <div class="pv-card"><div class="pv-card-label">Destinations</div><div class="pv-card-value">${new Set(players.map(row=>row.destination)).size}</div><div class="pv-card-sub">Programs represented</div></div>
+        <div class="pv-card"><div class="pv-card-label">Rated players</div><div class="pv-card-value">${players.filter(row=>portalRatingScore(row)!==null).length}</div><div class="pv-card-sub">0–100 normalized scale</div></div>
+        <div class="pv-card"><div class="pv-card-label">Top-rated signee</div><div class="pv-card-value" style="font-size:16px">${pEsc([...players].sort((a,b)=>(portalRatingScore(b)||0)-(portalRatingScore(a)||0))[0]?.name||"—")}</div><div class="pv-card-sub">Verified class record</div></div>
+      </div>
+      <div class="pv-filters"><div class="pv-filter"><div class="pv-filter-label">Player or school</div><input type="search" placeholder="Search JUCO signees..." value="${pEsc(portalSearch)}" oninput="pvPortalSearch(this.value)"></div><div class="pv-filter"><div class="pv-filter-label">Position</div><select onchange="pvPortalPos(this.value)">${positions.map(pos=>`<option value="${pEsc(pos)}" ${portalPosFilter===pos?"selected":""}>${pEsc(pos==="ALL"?"All Positions":pos)}</option>`).join("")}</select></div></div>
+      <div class="portal-legend"><strong>Rating scale:</strong> normalized to 0–100 from the published CFBD recruit rating · ${visible.length} of ${players.length} shown</div>
+      <div class="pv-table-wrap"><table class="pv-table"><thead><tr><th class="r">JUCO Rank</th><th>Player</th><th>Pos</th><th>JUCO</th><th>Committed To</th><th class="r">Stars</th><th class="r">Rating /100</th></tr></thead><tbody>${rows||`<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No JUCO signees match these filters.</td></tr>`}</tbody></table></div>` : renderPortalComingSoon("The verified CFBD JUCO recruiting build has not completed yet. No school-name inference is used as a substitute.")}`;
   }
 
   function renderPortalImpact() {
-    const rows = (portalData?.position_impact || []).slice().sort((a,b) => {
-      const av = ((Number(a.offense?.avg_rating)||0) + (Number(a.defense?.avg_rating)||0)) / 2;
-      const bv = ((Number(b.offense?.avg_rating)||0) + (Number(b.defense?.avg_rating)||0)) / 2;
-      return bv-av;
-    });
-    const bestOffense = rows.slice().sort((a,b)=>(Number(b.offense?.avg_rating)||0)-(Number(a.offense?.avg_rating)||0))[0];
-    const bestDefense = rows.slice().sort((a,b)=>(Number(b.defense?.avg_rating)||0)-(Number(a.defense?.avg_rating)||0))[0];
-    const markup = rows.length ? `<div class="vl-system-stats"><div><strong>${rows.length}</strong><span>Teams covered</span></div><div><strong>${pEsc(bestOffense?.team||"—")}</strong><span>Top offensive average · ${pFmt(bestOffense?.offense?.avg_rating,3)}</span></div><div><strong>${pEsc(bestDefense?.team||"—")}</strong><span>Top defensive average · ${pFmt(bestDefense?.defense?.avg_rating,3)}</span></div><div><strong>Context</strong><span>Not a Model A input</span></div></div><div class="pv-table-wrap"><table class="pv-table"><thead><tr><th>Team</th><th class="r">Off arrivals</th><th class="r">Off avg</th><th class="r">Def arrivals</th><th class="r">Def avg</th><th class="r">Unit lean</th></tr></thead><tbody>${rows.map(row=>{const off=Number(row.offense?.avg_rating);const def=Number(row.defense?.avg_rating);const lean=Number.isFinite(off)&&Number.isFinite(def)?(off-def):null;return `<tr><td><span class="team-with-logo">${pTeamLogo(row.team)}<span class="pv-team-name">${pEsc(row.team)}</span></span></td><td class="r">${row.offense?.count||0}</td><td class="r">${pFmt(off,3)}</td><td class="r">${row.defense?.count||0}</td><td class="r">${pFmt(def,3)}</td><td class="r ${netClass(lean)}">${lean===null?"—":lean>0?`Off +${pFmt(lean,3)}`:lean<0?`Def ${pFmt(lean,3)}`:"Balanced"}</td></tr>`}).join("")}</tbody></table></div>` : renderPortalComingSoon("The verified player-level destination build has not completed yet.");
+    const query = portalSearch.trim().toLocaleLowerCase();
+    const allRows = (portalData?.position_impact || []).slice();
+    const rows = allRows.filter(row=>!query||String(row.team||"").toLocaleLowerCase().includes(query)).sort((a,b)=>(Number(b.combined_quality_points)||0)-(Number(a.combined_quality_points)||0));
+    const bestOffense = allRows.slice().sort((a,b)=>(Number(b.offense?.quality_points)||0)-(Number(a.offense?.quality_points)||0))[0];
+    const bestDefense = allRows.slice().sort((a,b)=>(Number(b.defense?.quality_points)||0)-(Number(a.defense?.quality_points)||0))[0];
+    const markup = allRows.length ? `<div class="pv-summary-grid"><div class="pv-card"><div class="pv-card-label">Destinations</div><div class="pv-card-value">${allRows.length}</div><div class="pv-card-sub">Verified transfer arrivals</div></div><div class="pv-card"><div class="pv-card-label">Offensive depth leader</div><div class="pv-card-value" style="font-size:16px">${pEsc(bestOffense?.team||"—")}</div><div class="pv-card-sub">${pFmt(bestOffense?.offense?.quality_points,1)} quality points</div></div><div class="pv-card"><div class="pv-card-label">Defensive depth leader</div><div class="pv-card-value" style="font-size:16px">${pEsc(bestDefense?.team||"—")}</div><div class="pv-card-sub">${pFmt(bestDefense?.defense?.quality_points,1)} quality points</div></div><div class="pv-card"><div class="pv-card-label">Model usage</div><div class="pv-card-value" style="font-size:16px">Context only</div><div class="pv-card-sub">Isolated from Model A</div></div></div>
+    <div class="pv-filters"><div class="pv-filter"><div class="pv-filter-label">Team</div><input type="search" placeholder="Search destination..." value="${pEsc(portalSearch)}" oninput="pvPortalSearch(this.value)"></div></div>
+    <div class="portal-legend"><strong>Quality points:</strong> cumulative rating points above 80 among rated arrivals. This combines quality and depth; averages and top-three averages remain visible so large classes do not hide player quality. ${rows.length} of ${allRows.length} teams shown.</div>
+    <div class="pv-table-wrap"><table class="pv-table"><thead><tr><th>Team</th><th class="r">Off arrivals</th><th class="r">Off avg</th><th class="r">Off top 3</th><th class="r">Off quality</th><th class="r">Def arrivals</th><th class="r">Def avg</th><th class="r">Def top 3</th><th class="r">Def quality</th><th class="r">Combined</th></tr></thead><tbody>${rows.map(row=>`<tr><td><span class="team-with-logo">${pTeamLogo(row.team)}<span class="pv-team-name">${pEsc(row.team)}</span></span></td><td class="r">${row.offense?.count||0}</td><td class="r">${portalRatingMarkup(row.offense?.avg_rating)}</td><td class="r">${portalRatingMarkup(row.offense?.top3_avg)}</td><td class="r net-pos">${pFmt(row.offense?.quality_points,1)}</td><td class="r">${row.defense?.count||0}</td><td class="r">${portalRatingMarkup(row.defense?.avg_rating)}</td><td class="r">${portalRatingMarkup(row.defense?.top3_avg)}</td><td class="r net-pos">${pFmt(row.defense?.quality_points,1)}</td><td class="r"><strong>${pFmt(row.combined_quality_points,1)}</strong></td></tr>`).join("")||`<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">No teams match this search.</td></tr>`}</tbody></table></div>` : renderPortalComingSoon("The verified player-level destination build has not completed yet.");
     return `
       <div class="pv-section-header">
-        <div class="pv-section-title">Portal Impact on 2026 Projections</div>
-        <div class="pv-section-sub">Offensive and defensive arrival volume with average portal rating, ranked by combined unit quality. Unit lean is the difference between the two averages. This is roster context only until player production and projected roles clear validation.</div>
+        <div class="pv-section-title">Portal Unit Impact</div>
+        <div class="pv-section-sub">Offensive and defensive arrival quality on a consistent 0–100 scale. Rankings balance rated depth and player quality without claiming playing time or changing THI projections.</div>
       </div>
       ${markup}`;
   }
@@ -672,7 +776,9 @@
     else if (portalSubTab === "juco")    body = renderPortalJuco();
     else if (portalSubTab === "impact")  body = renderPortalImpact();
 
-    container.innerHTML = renderPortalSubNav() + body;
+    const health = portalData?.data_health || {};
+    const healthMarkup = `<div class="portal-health"><span>${Number(health.portal_players||0).toLocaleString()} portal players</span><span>${Number(health.rated_portal_players||0).toLocaleString()} rated</span><span>${Number(health.juco_recruits||0).toLocaleString()} verified JUCO</span><span>${Number(health.destinations||0).toLocaleString()} destinations</span><span>Display only · Model A isolated</span></div>`;
+    container.innerHTML = renderPortalSubNav() + healthMarkup + body;
   }
 
   // ── VARIANCE LAB ────────────────────────────────────────────────────────────
@@ -980,6 +1086,7 @@
     portalSubTab = tab;
     if (tab === "conference" && PORTAL_CONFERENCE_GROUPS[portalConfFilter]) portalConfFilter = "ALL";
     portalSearch = "";
+    portalPosFilter = "ALL";
     renderPortal();
   };
   window.pvPortalSearch = function(val) {

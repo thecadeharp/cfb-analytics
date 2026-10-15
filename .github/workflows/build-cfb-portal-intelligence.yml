@@ -23,10 +23,30 @@ jobs:
         with: {python-version: "3.11"}
       - run: python -m pip install --disable-pip-version-check requests
       - run: python -m unittest scripts.test_cfb_portal_intelligence
-      - name: Build verified portal positions
+      - name: Build verified portal and JUCO intelligence
         env:
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
         run: python scripts/build_cfb_portal_intelligence.py
+      - name: Validate portal contract and Model A isolation
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("data/portal_2026.json").read_text())
+          assert data["schema_version"] == "2.0"
+          assert data["player_source"]["model_usage"] == "display_only_not_used_by_model_a"
+          assert len(data["players"]) >= 100
+          assert len(data["position_impact"]) >= 100
+          assert len(data["juco"]) >= 1
+          assert data["conference_summary"]
+          for row in data["players"] + data["juco"]:
+              score = row.get("rating_score")
+              assert score is None or 0 <= score <= 100
+          assert data["data_health"]["portal_players"] == len(data["players"])
+          assert data["data_health"]["juco_recruits"] == len(data["juco"])
+          PY
+          changed="$(git diff --name-only)"
+          test "$changed" = "data/portal_2026.json"
       - name: Commit artifact
         run: |
           git config user.name "github-actions[bot]"
