@@ -804,6 +804,112 @@
         display:block;
         text-align:left;
       }
+
+      @media (max-width:1120px) {
+        #view-projections .table-card {
+          overflow:visible;
+          border:0;
+          background:transparent;
+        }
+
+        #view-projections .table-scroll { overflow:visible; }
+
+        #view-projections .projection-table {
+          display:block;
+          width:100%;
+          min-width:0 !important;
+        }
+
+        #view-projections .projection-table thead { display:none; }
+
+        #view-projections .projection-table tbody {
+          display:grid;
+          gap:12px;
+        }
+
+        #view-projections .projection-table .game-row {
+          display:grid;
+          grid-template-columns:repeat(2,minmax(0,1fr));
+          width:100%;
+          overflow:hidden;
+          border:1px solid var(--border);
+          border-radius:var(--radius);
+          background:var(--surface);
+        }
+
+        #view-projections .projection-table .game-row:hover {
+          background:var(--surface);
+          box-shadow:none;
+        }
+
+        #view-projections .projection-table .game-row td {
+          display:block;
+          min-width:0;
+          padding:13px 14px;
+          border-bottom:1px solid var(--border);
+          text-align:left;
+        }
+
+        #view-projections .projection-table .matchup-cell {
+          grid-column:1 / -1;
+          padding:16px;
+        }
+
+        #view-projections .projection-table .game-row td:nth-child(2)::before { content:"THI WATCH"; }
+        #view-projections .projection-table .game-row td:nth-child(3)::before { content:"THI SPREAD"; }
+        #view-projections .projection-table .game-row td:nth-child(4)::before { content:"MARKET"; }
+        #view-projections .projection-table .game-row td:nth-child(5)::before { content:"PROJECTED TOTAL"; }
+        #view-projections .projection-table .game-row td:nth-child(6)::before { content:"MODEL EDGE"; }
+        #view-projections .projection-table .game-row td:nth-child(7)::before { content:"MODEL SIGNAL"; }
+        #view-projections .projection-table .game-row td:nth-child(8)::before { content:"SIGNAL CONFIDENCE"; }
+
+        #view-projections .projection-table .game-row td:nth-child(n+2)::before {
+          display:block;
+          margin-bottom:7px;
+          color:var(--muted);
+          font:700 8px var(--mono);
+          letter-spacing:1px;
+        }
+
+        #view-projections .projection-table .game-row td:nth-child(7),
+        #view-projections .projection-table .game-row td:nth-child(8) {
+          grid-column:1 / -1;
+          display:grid;
+          grid-template-columns:1fr;
+          align-items:start;
+          gap:7px;
+        }
+
+        #view-projections .projection-table .game-row td:nth-child(7)::before,
+        #view-projections .projection-table .game-row td:nth-child(8)::before { margin-bottom:0; }
+
+        #view-projections .projection-table .game-row td:nth-child(8) { border-bottom:0; }
+
+        #view-projections .projection-table .game-row .status,
+        #view-projections .projection-table .game-row .signal-record {
+          justify-self:start;
+          max-width:100%;
+          white-space:normal;
+          text-align:left;
+          line-height:1.3;
+        }
+
+        #view-projections .projection-table .game-row .disagreement,
+        #view-projections .projection-table .game-row .status-cell { text-align:left; }
+
+        #view-projections .projection-table .game-row .disagreement-note { white-space:normal; }
+
+        #view-projections .projection-table .hammer-day-divider-row {
+          display:block;
+          grid-column:1 / -1;
+        }
+
+        #view-projections .projection-table .hammer-day-divider-row td {
+          display:block;
+          width:100%;
+        }
+      }
+
       @media (max-width:900px) {
         #view-projections .projection-controls {
           grid-template-columns:1fr;
