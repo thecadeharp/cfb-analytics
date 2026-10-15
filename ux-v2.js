@@ -805,6 +805,51 @@
         text-align:left;
       }
 
+      @media (min-width:1501px) {
+        #view-projections .projection-table {
+          width:100%;
+          min-width:0;
+          table-layout:fixed;
+        }
+
+        #view-projections .projection-table th,
+        #view-projections .projection-table td {
+          box-sizing:border-box;
+          min-width:0;
+        }
+
+        #view-projections .projection-table th:nth-child(1),
+        #view-projections .projection-table td:nth-child(1) { width:18%; }
+        #view-projections .projection-table th:nth-child(2),
+        #view-projections .projection-table td:nth-child(2) { width:8%; }
+        #view-projections .projection-table th:nth-child(3),
+        #view-projections .projection-table td:nth-child(3) { width:11%; }
+        #view-projections .projection-table th:nth-child(4),
+        #view-projections .projection-table td:nth-child(4) { width:8%; }
+        #view-projections .projection-table th:nth-child(5),
+        #view-projections .projection-table td:nth-child(5) { width:14%; }
+        #view-projections .projection-table th:nth-child(6),
+        #view-projections .projection-table td:nth-child(6) { width:13%; }
+        #view-projections .projection-table th:nth-child(7),
+        #view-projections .projection-table td:nth-child(7) { width:12%; }
+        #view-projections .projection-table th:nth-child(8),
+        #view-projections .projection-table td:nth-child(8) { width:16%; }
+
+        #view-projections .projection-table .matchup-cell { min-width:0; }
+
+        #view-projections .projection-table .disagreement-note,
+        #view-projections .projection-table .signal-record {
+          white-space:normal;
+          overflow-wrap:anywhere;
+        }
+
+        #view-projections .projection-table .status {
+          max-width:100%;
+          white-space:normal;
+          line-height:1.25;
+        }
+      }
+
       @media (max-width:1500px) {
         #view-projections .table-card {
           overflow:visible;
