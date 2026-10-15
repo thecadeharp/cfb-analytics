@@ -609,7 +609,9 @@
       if (!query) return true;
       return `${row.name} ${row.origin} ${row.destination} ${row.position}`.toLocaleLowerCase().includes(query);
     });
-    const rows = [...visible].sort((a,b)=>(portalRatingScore(b)||0)-(portalRatingScore(a)||0)).map(row => {
+    const ordered = [...visible].sort((a,b)=>(portalRatingScore(b)||0)-(portalRatingScore(a)||0));
+    const displayed = ordered.slice(0,300);
+    const rows = displayed.map(row => {
       const date = row.transfer_date ? new Date(row.transfer_date) : null;
       const dateLabel = date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString("en-US",{month:"short",day:"numeric"}) : "—";
       return `<tr>
@@ -626,7 +628,7 @@
       <div class="pv-filter"><div class="pv-filter-label">Player or team</div><input type="search" placeholder="Search player, origin, destination..." value="${pEsc(portalSearch)}" oninput="pvPortalSearch(this.value)"></div>
       <div class="pv-filter"><div class="pv-filter-label">Position</div><select onchange="pvPortalPos(this.value)">${positions.map(pos=>`<option value="${pEsc(pos)}" ${portalPosFilter===pos?"selected":""}>${pEsc(pos==="ALL"?"All Positions":pos)}</option>`).join("")}</select></div>
     </div>
-    <div class="portal-legend"><strong>CFBD rating:</strong><span class="portal-rating elite">90+</span> Elite <span class="portal-rating high">87+</span> High <span class="portal-rating solid">84+</span> Solid <span class="portal-rating depth">80+</span> Depth <span class="portal-rating developmental">&lt;80</span> Developmental · ${visible.length.toLocaleString()} of ${players.length.toLocaleString()} shown</div>
+    <div class="portal-legend"><strong>CFBD rating:</strong><span class="portal-rating elite">90+</span> Elite <span class="portal-rating high">87+</span> High <span class="portal-rating solid">84+</span> Solid <span class="portal-rating depth">80+</span> Depth <span class="portal-rating developmental">&lt;80</span> Developmental · displaying ${displayed.length.toLocaleString()} of ${visible.length.toLocaleString()} matches (${players.length.toLocaleString()} total); search or filter to narrow the full dataset</div>
     <div class="pv-table-wrap"><table class="pv-table"><thead><tr><th>Player</th><th>Pos</th><th>From</th><th>Destination</th><th class="r">Rating /100</th><th class="r">Stars</th><th class="r">Date</th></tr></thead><tbody>${rows||`<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No players match these filters.</td></tr>`}</tbody></table></div>`;
   }
 
