@@ -805,7 +805,7 @@
         text-align:left;
       }
 
-      @media (max-width:1120px) {
+      @media (max-width:1500px) {
         #view-projections .table-card {
           overflow:visible;
           border:0;
