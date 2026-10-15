@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build THI's reproducible CFB/CBB Variance Lab and evidence registry."""
 from __future__ import annotations
-import argparse,csv,gzip,json,math
+import argparse,csv,gzip,json,math,random
 from datetime import datetime,timezone
 from pathlib import Path
 from typing import Any,Callable
@@ -10,7 +10,7 @@ try:
  from scripts.validation_framework import exact_binomial_tail, holm_bonferroni, monthly_results, validation_gate
 except ModuleNotFoundError:
  from validation_framework import exact_binomial_tail, holm_bonferroni, monthly_results, validation_gate
-ROOT=Path(__file__).resolve().parents[1];VERSION="thi-variance-systems-lab-v2.0";ACADEMIES={"Army","Navy","Air Force"};EASTERN=ZoneInfo("America/New_York")
+ROOT=Path(__file__).resolve().parents[1];VERSION="thi-variance-systems-lab-v2.1";ACADEMIES={"Army","Navy","Air Force"};EASTERN=ZoneInfo("America/New_York")
 def num(v:Any)->float|None:
  try:v=float(v);return v if math.isfinite(v) else None
  except(TypeError,ValueError):return None
@@ -90,10 +90,16 @@ def cbb_systems(r):
  cards=[system(r,"Double-digit road underdogs","Away underdogs catching 10 points or more",lambda x:num(x.get("spread"))is not None and x["spread"]<=-10,"ats","away","All qualifiers; no public-ticket condition is available."),system(r,"Sub-130 totals","Under when the closing total is below 130",lambda x:(num(x.get("market_total"))or 999)<130,"under",source_note="Blind-Under test; the cited system used the majority bettor's chosen side."),system(r,"November nonconference home favorites","Home favorites in November nonconference campus games",lambda x:x.get("month")==11 and not x.get("conference")and not x.get("neutral")and(num(x.get("spread"))or 0)<0,"ats"),system(r,"November nonconference home dogs","Home underdogs in November nonconference campus games",lambda x:x.get("month")==11 and not x.get("conference")and not x.get("neutral")and(num(x.get("spread"))or 0)>0,"ats"),system(r,"Home-side closing support","Home side ATS when the spread moves 1.5+ points toward home",lambda x:num(x.get("open_spread"))is not None and num(x.get("spread"))is not None and x["spread"]-x["open_spread"]<=-1.5,"ats",source_note="Line movement only; not RLM without public percentages.",family="market"),system(r,"Conference unders","Under in conference games",lambda x:x.get("conference")is True,"under"),system(r,"Primetime unders","Under in games tipping at 7:00 p.m. ET or later",lambda x:(num(x.get("eastern_hour"))or-1)>=19,"under",family="time"),system(r,"Primetime home dogs","Home underdog ATS in games tipping at 7:00 p.m. ET or later",lambda x:(num(x.get("eastern_hour"))or-1)>=19 and(num(x.get("spread"))or 0)>0,"ats",family="time")]
  if any(x.get("home_rank")or x.get("away_rank")for x in r):cards.append(system(r,"Unranked home dogs vs ranked visitors","Unranked home underdog ATS against a ranked road team using the pregame poll",lambda x:not x.get("home_rank")and x.get("away_rank")and(num(x.get("spread"))or 0)>0,"ats",family="ranking"))
  return cards
-def sections(cards):return {s:[x for x in cards if x["state"]==s]for s in("verified","developing","failed_hypothesis","source_pending")}
+def steam_reversal_card():
+ wins,losses,pushes=69,53,2;decisions=wins+losses;rate=wins/decisions
+ rng=random.Random(20261015);simulations=100000
+ simulated=sorted(sum(rng.random()<rate for _ in range(25)) for _ in range(simulations))
+ at_or_below=sum(value<=13 for value in simulated)/simulations
+ return {"id":"steam-reversal","name":"Steam Reversal","description":"CFB only: after the same sharp-book spread moves 3.0 points or more toward one team, track the opposite side at the first qualifying current number.","family":"market movement","market":"ATS","wins":wins,"losses":losses,"pushes":pushes,"decisions":decisions,"hit_rate":round(100*rate,1),"roi_pct_at_minus_110":round(100*(wins-1.1*losses)/(1.1*decisions),1),"units_at_minus_110":round(wins-1.1*losses,1),"seasons":[2025,2026],"state":"independent_verified","source_note":"Independently tracked historical ledger supplied by the system owner; aggregate arithmetic verified by THI. Game-level audit remains separate from THI's four-gate Validated label.","rule":{"sport":"cfb","minimum_move_points":3.0,"reference_books":["Pinnacle","BetOnline fallback"],"entry":"First captured price at or beyond the 3.0-point threshold","side":"Opposite the direction of the move"},"variance_analysis":{"method":"100,000-season Monte Carlo","seed":20261015,"assumed_true_win_rate_pct":round(100*rate,1),"season_decisions":25,"observed_wins":13,"probability_13_or_fewer_wins_pct":round(100*at_or_below,1),"central_95_win_range":[simulated[2499],simulated[97499]],"interpretation":"The 13-12 YTD result is within normal variance under the historical hit-rate assumption."}}
+def sections(cards):return {s:[x for x in cards if x["state"]==s]for s in("independent_verified","verified","developing","failed_hypothesis","source_pending")}
 def build(cfb,cbb,meta=None):
  meta=meta or {}
- a,b=apply_validation(cfb_systems(cfb)),apply_validation(cbb_systems(cbb))
+ a,b=apply_validation(cfb_systems(cfb)),apply_validation(cbb_systems(cbb));a.insert(0,steam_reversal_card())
  backlog=[{"name":"CFB kickoff-time systems","status":meta.get("cfb_games_status","source_pending"),"path":"CFBD historical start times; 7:00 p.m. ET threshold frozen before testing."},{"name":"Pregame ranking systems","status":meta.get("rankings_status","source_pending"),"path":"Poll published before the game; final-season rankings are prohibited."},{"name":"P4 / G5 / FCS systems","status":meta.get("classifications_status","source_pending"),"path":"Season-specific conference and subdivision labels joined by game ID."},{"name":"Historical weather systems","status":meta.get("weather_status","source_pending"),"path":"Kickoff wind, temperature and precipitation; indoor games excluded."},{"name":"External systems intake · Trendsperts","status":"source_pending","path":"Public rule definitions are leads only. THI independently rebuilds the sample, line convention, price, holdout and prospective record before publication. The current Discover board exposes four CFB cards and no CBB cards."},{"name":"Coach and prior-meeting systems","status":"source_pending","path":"The visible Trendsperts CFB lead uses coach identity, home-favorite status and previous-meeting result. THI needs chronological coach-tenure and prior-matchup joins before an honest backtest; a 13-game outside sample is not promoted."},{"name":"True reverse line movement","status":"source_pending","path":"Requires synchronized ticket percentages and sharp-book price snapshots."}]
  return {"meta":{"version":VERSION,"generated_at_utc":datetime.now(timezone.utc).isoformat().replace("+00:00","Z"),"policy":"Rules are frozen before evaluation. Validated requires a recorded per-play no-vig baseline, an exact binomial or Poisson-binomial test, Holm multiple-comparison control, and a passed bomb-dependency check. Rolling monthly results are retained for stability review."},"sports":{"cfb":{"settled_games":len(cfb),"cards":a,"sections":sections(a)},"cbb":{"settled_games":len(cbb),"cards":b,"sections":sections(b)}},"source_backlog":backlog}
 def main():

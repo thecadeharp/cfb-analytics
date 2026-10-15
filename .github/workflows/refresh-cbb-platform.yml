@@ -150,8 +150,8 @@ jobs:
           python scripts/run_cbb_opening_night_rehearsal.py
           python scripts/build_cbb_platform_health.py
           python scripts/build_trends_lab.py
-          python scripts/build_variance_prospective_tracker.py
           python scripts/build_rlm_monitor.py
+          python scripts/build_variance_prospective_tracker.py
           python scripts/build_prediction_archive.py
           python scripts/build_operations_readiness.py
           python scripts/build_cbb_market_contract.py
@@ -297,7 +297,7 @@ jobs:
           assert venue_audit["meta"]["status"] == "healthy"
           assert venue_audit["summary"]["unresolved_reviews"] == 0
           assert rehearsal["meta"]["status"] == "passed"
-          assert trends["meta"]["version"] == "thi-variance-systems-lab-v2.0"
+          assert trends["meta"]["version"] == "thi-variance-systems-lab-v2.1"
           assert trends["sports"]["cfb"]["cards"] and trends["sports"]["cbb"]["cards"]
           assert market_contract["meta"]["version"] == "thi-cbb-market-contract-v1.0"
           assert market_contract["meta"]["game_count"] == projections["meta"]["game_count"]

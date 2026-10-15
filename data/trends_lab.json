@@ -1,13 +1,56 @@
 {
   "meta": {
-    "version": "thi-variance-systems-lab-v2.0",
-    "generated_at_utc": "2026-10-14T22:16:42.821368Z",
+    "version": "thi-variance-systems-lab-v2.1",
+    "generated_at_utc": "2026-10-15T21:51:06.640587Z",
     "policy": "Rules are frozen before evaluation. Validated requires a recorded per-play no-vig baseline, an exact binomial or Poisson-binomial test, Holm multiple-comparison control, and a passed bomb-dependency check. Rolling monthly results are retained for stability review."
   },
   "sports": {
     "cfb": {
       "settled_games": 5669,
       "cards": [
+        {
+          "id": "steam-reversal",
+          "name": "Steam Reversal",
+          "description": "CFB only: after the same sharp-book spread moves 3.0 points or more toward one team, track the opposite side at the first qualifying current number.",
+          "family": "market movement",
+          "market": "ATS",
+          "wins": 69,
+          "losses": 53,
+          "pushes": 2,
+          "decisions": 122,
+          "hit_rate": 56.6,
+          "roi_pct_at_minus_110": 8.0,
+          "units_at_minus_110": 10.7,
+          "seasons": [
+            2025,
+            2026
+          ],
+          "state": "independent_verified",
+          "source_note": "Independently tracked historical ledger supplied by the system owner; aggregate arithmetic verified by THI. Game-level audit remains separate from THI's four-gate Validated label.",
+          "rule": {
+            "sport": "cfb",
+            "minimum_move_points": 3.0,
+            "reference_books": [
+              "Pinnacle",
+              "BetOnline fallback"
+            ],
+            "entry": "First captured price at or beyond the 3.0-point threshold",
+            "side": "Opposite the direction of the move"
+          },
+          "variance_analysis": {
+            "method": "100,000-season Monte Carlo",
+            "seed": 20261015,
+            "assumed_true_win_rate_pct": 56.6,
+            "season_decisions": 25,
+            "observed_wins": 13,
+            "probability_13_or_fewer_wins_pct": 39.6,
+            "central_95_win_range": [
+              9,
+              19
+            ],
+            "interpretation": "The 13-12 YTD result is within normal variance under the historical hit-rate assumption."
+          }
+        },
         {
           "id": "massive-home-favorites",
           "name": "Massive home favorites",
@@ -2604,6 +2647,51 @@
         }
       ],
       "sections": {
+        "independent_verified": [
+          {
+            "id": "steam-reversal",
+            "name": "Steam Reversal",
+            "description": "CFB only: after the same sharp-book spread moves 3.0 points or more toward one team, track the opposite side at the first qualifying current number.",
+            "family": "market movement",
+            "market": "ATS",
+            "wins": 69,
+            "losses": 53,
+            "pushes": 2,
+            "decisions": 122,
+            "hit_rate": 56.6,
+            "roi_pct_at_minus_110": 8.0,
+            "units_at_minus_110": 10.7,
+            "seasons": [
+              2025,
+              2026
+            ],
+            "state": "independent_verified",
+            "source_note": "Independently tracked historical ledger supplied by the system owner; aggregate arithmetic verified by THI. Game-level audit remains separate from THI's four-gate Validated label.",
+            "rule": {
+              "sport": "cfb",
+              "minimum_move_points": 3.0,
+              "reference_books": [
+                "Pinnacle",
+                "BetOnline fallback"
+              ],
+              "entry": "First captured price at or beyond the 3.0-point threshold",
+              "side": "Opposite the direction of the move"
+            },
+            "variance_analysis": {
+              "method": "100,000-season Monte Carlo",
+              "seed": 20261015,
+              "assumed_true_win_rate_pct": 56.6,
+              "season_decisions": 25,
+              "observed_wins": 13,
+              "probability_13_or_fewer_wins_pct": 39.6,
+              "central_95_win_range": [
+                9,
+                19
+              ],
+              "interpretation": "The 13-12 YTD result is within normal variance under the historical hit-rate assumption."
+            }
+          }
+        ],
         "verified": [],
         "developing": [
           {
@@ -7570,6 +7658,7 @@
         }
       ],
       "sections": {
+        "independent_verified": [],
         "verified": [],
         "developing": [
           {

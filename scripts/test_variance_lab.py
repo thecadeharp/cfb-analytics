@@ -1,6 +1,6 @@
 import unittest
 from datetime import datetime, timezone
-from scripts.build_rlm_monitor import analyze,select_authoritative_rows,sharp_line_moves
+from scripts.build_rlm_monitor import analyze,select_authoritative_rows,sharp_line_moves,steam_reversal_alerts
 from scripts.poll_free_sharp_lines import merge_events
 from scripts.poll_owls_rlm import build_capture
 from scripts.build_trends_lab import evidence_state
@@ -32,6 +32,13 @@ class VarianceLabTests(unittest.TestCase):
   self.assertEqual(move["movement_toward_team"],"Away")
   self.assertNotIn("public_ticket_pct",move)
   self.assertIn("not an RLM",move["definition"])
+ def test_cfb_three_point_move_triggers_opposite_side(self):
+  moves=[{"sport":"cfb","event_id":"1","away_team":"Away","home_team":"Home","opening_home_spread":-7,"current_home_spread":-10,"line_delta":-3,"sharp_book":"pinnacle"}]
+  alert=steam_reversal_alerts(moves)[0]
+  self.assertEqual(alert["fade_team"],"Away");self.assertEqual(alert["fade_spread"],10);self.assertEqual(alert["system_id"],"steam-reversal")
+ def test_steam_reversal_excludes_cbb_and_sub_three_moves(self):
+  moves=[{"sport":"cbb","opening_home_spread":-7,"current_home_spread":-10,"line_delta":-3},{"sport":"cfb","opening_home_spread":-7,"current_home_spread":-9.5,"line_delta":-2.5}]
+  self.assertEqual(steam_reversal_alerts(moves),[])
  def test_owls_capture_joins_dk_splits_to_pinnacle(self):
   odds={"data":{"pinnacle":[{"event_id":"ncaaf:Away@Home-20261010","commence_time":"2026-10-10T23:00:00Z","away_team":"Away","home_team":"Home","bookmakers":[{"key":"pinnacle","last_update":"2026-10-08T12:00:00Z","markets":[{"key":"spreads","outcomes":[{"name":"Away","point":7.0,"price":-110},{"name":"Home","point":-7.0,"price":-110}]}]}]}]}}
   splits={"data":[{"event_id":"ncaaf:Away@Home-20261010","away_team":"Away","home_team":"Home","splits":[{"book":"dk","title":"DraftKings","as_of":"2026-10-08T12:03:00Z","spread":{"away_line":7.0,"home_line":-7.0,"away_bets_pct":72,"home_bets_pct":28,"away_handle_pct":64,"home_handle_pct":36}}]}]}
@@ -51,7 +58,7 @@ class VarianceLabTests(unittest.TestCase):
   now=datetime(2026,10,6,12,tzinfo=timezone.utc)
   game={"game_id":1,"week":6,"start_date":"2026-10-07T23:00:00Z","status":"scheduled","home":{"team":"Home","conference":"American"},"away":{"team":"Away","conference":"ACC"},"market":{"home_spread":3.5,"total":50.5}}
   frozen=build({"frozen":[]},{"games":[game]},{"games":[]},{"games":[]},now)
-  self.assertEqual(frozen["meta"]["version"],"thi-variance-prospective-v1.1")
+  self.assertEqual(frozen["meta"]["version"],"thi-variance-prospective-v1.2")
   ids={row["system_id"] for row in frozen["frozen"]}
   self.assertIn("primetime-home-dogs",ids);self.assertIn("p4-at-g5-home-dogs",ids)
   game["market"]["home_spread"]=1.0
@@ -60,4 +67,15 @@ class VarianceLabTests(unittest.TestCase):
   row=next(row for row in settled["frozen"] if row["system_id"]=="primetime-home-dogs")
   self.assertEqual(row["spread_at_freeze"],3.5);self.assertEqual(row["result"],"W")
   self.assertEqual(settled["summary"]["cfb"]["systems"]["primetime-home-dogs"]["wins"],1)
+ def test_steam_reversal_freezes_fade_side_and_grades_it(self):
+  now=datetime(2026,10,6,12,tzinfo=timezone.utc)
+  game={"game_id":2,"week":6,"start_date":"2026-10-07T23:00:00Z","status":"scheduled","home":{"team":"Home","conference":"SEC"},"away":{"team":"Away","conference":"ACC"},"market":{"home_spread":-10,"total":50}}
+  monitor={"steam_reversal_alerts":[{"sport":"cfb","event_id":"market-2","away_team":"Away","home_team":"Home","opening_home_spread":-7,"current_home_spread":-10,"movement_points":3,"fade_side":"away","fade_team":"Away","sharp_book":"pinnacle"}]}
+  frozen=build({"frozen":[]},{"games":[game]},{"games":[]},{"games":[]},now,monitor)
+  row=next(row for row in frozen["frozen"] if row["system_id"]=="steam-reversal")
+  self.assertEqual(row["tracked_team"],"Away");self.assertEqual(row["spread_at_freeze"],-10)
+  results={"games":[{"game_id":2,"status":"completed","home_team":"Home","away_team":"Away","home_points":27,"away_points":20,"source":"test"}]}
+  settled=build(frozen,{"games":[game]},{"games":[]},results,datetime(2026,10,8,12,tzinfo=timezone.utc),monitor)
+  row=next(row for row in settled["frozen"] if row["system_id"]=="steam-reversal")
+  self.assertEqual(row["result"],"W")
 if __name__=="__main__":unittest.main()

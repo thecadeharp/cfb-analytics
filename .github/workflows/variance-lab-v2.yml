@@ -35,8 +35,8 @@ jobs:
         run: |
           python scripts/build_variance_context.py
           python scripts/build_trends_lab.py
-          python scripts/build_variance_prospective_tracker.py
           python scripts/build_rlm_monitor.py
+          python scripts/build_variance_prospective_tracker.py
           python scripts/build_public_backtest_scorecard.py
           python scripts/build_commercial_readiness.py
       - name: Validate generated evidence
@@ -50,14 +50,14 @@ jobs:
           rlm=json.loads(Path('data/market/rlm_monitor.json').read_text())
           backtest=json.loads(Path('data/reports/public_backtest_scorecard.json').read_text())
           readiness=json.loads(Path('data/reports/commercial_readiness.json').read_text())
-          assert lab['meta']['version']=='thi-variance-systems-lab-v2.0'
+          assert lab['meta']['version']=='thi-variance-systems-lab-v2.1'
           assert context['meta']['game_count']>1000
           assert context['meta']['rankings_status']=='ready', context['meta'].get('cbb_ranking_failures')
           assert context['meta']['cbb_ranked_games']>0
-          assert set(lab['sports']['cfb']['sections'])=={'verified','developing','failed_hypothesis','source_pending'}
-          assert tracker['meta']['version']=='thi-variance-prospective-v1.1'
+          assert set(lab['sports']['cfb']['sections'])=={'independent_verified','verified','developing','failed_hypothesis','source_pending'}
+          assert tracker['meta']['version']=='thi-variance-prospective-v1.2'
           assert 'summary' in tracker
-          assert rlm['meta']['version']=='thi-rlm-monitor-v1.2'
+          assert rlm['meta']['version']=='thi-rlm-monitor-v1.3'
           assert backtest['meta']['version']=='thi-public-backtest-v2.1'
           assert backtest['meta']['financial_claim'] is False
           assert all(sport['status']=='not_validated' for sport in backtest['sports'].values())

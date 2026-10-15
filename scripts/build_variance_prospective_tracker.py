@@ -20,7 +20,7 @@ from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data/variance/prospective_tracker.json"
 ET = ZoneInfo("America/New_York")
-VERSION = "thi-variance-prospective-v1.1"
+VERSION = "thi-variance-prospective-v1.2"
 ACADEMIES = {"Army", "Navy", "Air Force"}
 P4 = {"ACC", "Atlantic Coast", "Big Ten", "Big 12", "SEC", "Southeastern"}
 G5 = {"AAC", "American", "CUSA", "Conference USA", "MAC", "Mid-American", "Mountain West", "Pac-12", "Sun Belt"}
@@ -70,7 +70,19 @@ def canonical(value: Any) -> str:
         "utep": "texaselpaso", "ucf": "centralflorida", "byu": "brighamyoung",
         "lsu": "louisianastate", "smu": "southernmethodist", "tcu": "texaschristian",
     }
+    if text.startswith("lsu"): text = "louisianastate" + text[3:]
+    if text.startswith("umass"): text = "massachusetts" + text[5:]
     return aliases.get(text, text)
+
+
+def same_team(left: Any, right: Any) -> bool:
+    a, b = canonical(left), canonical(right)
+    return a == b or (min(len(a), len(b)) >= 4 and (a.startswith(b) or b.startswith(a)))
+
+
+def steam_for_game(alerts: list[dict[str, Any]], game: dict[str, Any]) -> dict[str, Any] | None:
+    away, home = team_name(game, "away"), team_name(game, "home")
+    return next((row for row in alerts if same_team(row.get("away_team"), away) and same_team(row.get("home_team"), home)), None)
 
 
 def matchup_key(away: Any, home: Any) -> str:
@@ -141,6 +153,7 @@ def grade(row: dict[str, Any], result: dict[str, Any]) -> str | None:
         line = number(row.get("total_at_freeze")); value = line - actual_total if line is not None else None
     else:
         line = number(row.get("spread_at_freeze")); value = actual_margin + line if line is not None else None
+        if row.get("tracked_side") == "away" and value is not None: value = -value
     if value is None: return None
     if abs(value) < 1e-9: return "P"
     return "W" if value > 0 else "L"
@@ -158,13 +171,19 @@ def summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return output
 
 
-def build(old: dict[str, Any], cfb_board: dict[str, Any], cbb_board: dict[str, Any], cfb_results: dict[str, Any], now: datetime) -> dict[str, Any]:
+def build(old: dict[str, Any], cfb_board: dict[str, Any], cbb_board: dict[str, Any], cfb_results: dict[str, Any], now: datetime, market_monitor: dict[str, Any] | None = None) -> dict[str, Any]:
     by_freeze = {row["freeze_id"]: dict(row) for row in old.get("frozen") or []}
+    steam_alerts = [row for row in (market_monitor or {}).get("steam_reversal_alerts") or [] if str(row.get("sport") or "").lower() == "cfb"]
     for sport, board in (("cfb", cfb_board), ("cbb", cbb_board)):
         for game in board.get("games") or []:
             start = instant(game.get("start_date"))
             if start is None or start <= now or str(game.get("status") or "").lower() not in {"scheduled", "upcoming"}: continue
             spread, total, opening = market_values(game); game_id = str(game.get("game_id"))
+            if sport == "cfb":
+                steam = steam_for_game(steam_alerts, game)
+                if steam:
+                    freeze_id = f"cfb:{game_id}:steam-reversal"
+                    by_freeze.setdefault(freeze_id, {"freeze_id": freeze_id, "sport": "cfb", "game_id": game_id, "system_id": "steam-reversal", "start_date": game.get("start_date"), "away_team": team_name(game, "away"), "home_team": team_name(game, "home"), "neutral_site": bool(game.get("neutral_site")), "spread_at_freeze": number(steam.get("current_home_spread")), "opening_spread_at_freeze": number(steam.get("opening_home_spread")), "tracked_side": steam.get("fade_side"), "tracked_team": steam.get("fade_team"), "movement_points_at_freeze": number(steam.get("movement_points")), "sharp_book": steam.get("sharp_book"), "market_event_id": steam.get("event_id"), "frozen_at_utc": now.isoformat().replace("+00:00", "Z"), "result": "pending"})
             for system_id in qualifying_systems(sport, game, start, spread, total, opening):
                 freeze_id = f"{sport}:{game_id}:{system_id}"
                 by_freeze.setdefault(freeze_id, {"freeze_id": freeze_id, "sport": sport, "game_id": game_id, "system_id": system_id, "start_date": game.get("start_date"), "away_team": team_name(game, "away"), "home_team": team_name(game, "home"), "neutral_site": bool(game.get("neutral_site")), "spread_at_freeze": spread, "total_at_freeze": total, "opening_spread_at_freeze": opening, "frozen_at_utc": now.isoformat().replace("+00:00", "Z"), "result": "pending"})
@@ -185,7 +204,7 @@ def build(old: dict[str, Any], cfb_board: dict[str, Any], cbb_board: dict[str, A
 
 def main() -> None:
     now = datetime.now(timezone.utc)
-    payload = build(load(OUT, {"frozen": []}), load(ROOT / "data/projections.json", {"games": []}), load(ROOT / "data/cbb/projection_board.json", {"games": []}), load(ROOT / "data/results.json", {"games": []}), now)
+    payload = build(load(OUT, {"frozen": []}), load(ROOT / "data/projections.json", {"games": []}), load(ROOT / "data/cbb/projection_board.json", {"games": []}), load(ROOT / "data/results.json", {"games": []}), now, load(ROOT / "data/market/rlm_monitor.json", {}))
     OUT.parent.mkdir(parents=True, exist_ok=True); OUT.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n")
     settled = sum(row.get("result") in {"W", "L", "P"} for row in payload["frozen"])
     print(f"{VERSION}: {len(payload['frozen'])} qualifiers, {settled} settled")

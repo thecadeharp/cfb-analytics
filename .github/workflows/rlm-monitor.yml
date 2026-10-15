@@ -67,9 +67,10 @@ jobs:
             exit 0
           fi
           python scripts/build_rlm_monitor.py
+          python scripts/build_variance_prospective_tracker.py
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add --all data/market/
+          git add --all data/market/ data/variance/prospective_tracker.json
           git diff --cached --quiet && exit 0
           git commit -m "Refresh RLM market monitor"
           git pull --rebase origin main
