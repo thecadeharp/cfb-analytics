@@ -769,9 +769,13 @@
       const awaiting = payload?.meta?.status === "awaiting_workflow";
       return `<div class="vl-cohort-header"><div class="vl-cohort-label">Coach ATS Trends</div><div class="vl-cohort-title">${awaiting ? "Ready for the first data build" : "No matching coaches"}</div><div class="vl-cohort-sub">${awaiting ? "Run Build Coach ATS Trends after these files are committed." : "Try another coach or team search."}</div></div>`;
     }
+    const sourceUrl = String(payload.meta?.source_url || "");
+    const sourceLink = /^https:\/\/www\.teamrankings\.com\//.test(sourceUrl)
+      ? ` · <a href="${pEsc(sourceUrl)}" target="_blank" rel="noopener noreferrer">TeamRankings source</a>`
+      : "";
     return `<div class="vl-cohort-header">
-      <div class="vl-cohort-label">${pEsc(payload.meta?.season || "Current season")} · closing-line results</div>
-      <div class="vl-cohort-title">Head Coach ATS Splits</div>
+      <div class="vl-cohort-label">${pEsc(payload.meta?.season || "Current season")} · team ATS · current head coach${sourceLink}</div>
+      <div class="vl-cohort-title">Current-Season Coach ATS View</div>
       <div class="vl-cohort-sub">${pEsc(payload.meta?.methodology || "Descriptive records against recorded closing spreads.")} Small samples are shown, never presented as predictive signals.</div>
     </div>
     <div class="vl-coach-controls"><div class="pv-filter"><label class="pv-filter-label" for="vl-coach-search">Coach or team</label><input id="vl-coach-search" type="search" value="${pEsc(coachSearch)}" placeholder="Search" oninput="pvCoachSearch(this.value)"></div></div>

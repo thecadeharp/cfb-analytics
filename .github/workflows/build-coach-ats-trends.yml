@@ -53,7 +53,11 @@ jobs:
           from pathlib import Path
           data = json.loads(Path("data/coach_ats_trends.json").read_text())
           assert data["meta"]["model_usage"] == "descriptive_only_not_used_by_model_a"
+          assert data["meta"]["schema_version"] == "2.0"
           assert data["meta"]["coach_count"] >= 100
+          assert data["meta"]["teamrankings_team_count"] >= 130
+          assert not data["meta"]["benchmark_unmatched_teams"]
+          assert not data["meta"]["benchmark_teams_without_assignment"]
           for row in data["coaches"]:
               assert row["coach"] and row["team"]
               assert row["overall"]["games"] >= 1
