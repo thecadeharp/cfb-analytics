@@ -14,6 +14,7 @@ import math
 import os
 import re
 import tempfile
+import unicodedata
 from collections import defaultdict
 from datetime import datetime, timezone
 from html.parser import HTMLParser
@@ -53,7 +54,8 @@ def normalized(value):
 
 def canonical_team(value):
     """Normalize TeamRankings display abbreviations to CFBD-style school names."""
-    text = re.sub(r"[^a-z0-9]+", " ", str(value or "").casefold()).strip()
+    ascii_text = unicodedata.normalize("NFKD", str(value or "")).encode("ascii", "ignore").decode()
+    text = re.sub(r"[^a-z0-9]+", " ", ascii_text.casefold()).strip()
     aliases = {
         "umass": "massachusetts",
         "mississippi": "ole miss",

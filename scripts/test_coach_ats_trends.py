@@ -13,6 +13,7 @@ class CoachATSTrendsTests(unittest.TestCase):
             ("Florida Intl", "Florida International"),
             ("UMass", "Massachusetts"),
             ("Mississippi", "Ole Miss"),
+            ("San Jose State", "San José State"),
         ]
         for public_name, internal_name in pairs:
             self.assertEqual(canonical_team(public_name), canonical_team(internal_name))
