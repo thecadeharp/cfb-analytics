@@ -25,7 +25,9 @@
     rlmMonitor: "data/market/rlm_monitor.json",
     publicBacktest: "data/reports/public_backtest_scorecard.json",
     marketSnapshots: "data/cbb/market_snapshots.json",
-    marketContract: "data/cbb/market_contract.json"
+    marketContract: "data/cbb/market_contract.json",
+    preseasonCandidate: "data/cbb/model/preseason_index_candidate.json",
+    preseasonSos: "data/cbb/frozen/preseason_sos_2027.json"
   };
   const CACHE_MANIFEST_PATH = "data/cbb/cache_manifest.json";
   const PLAYER_PATH = "data/cbb/player_ratings.json";
@@ -33,6 +35,7 @@
   const memoryCache = new Map();
   const DEFERRED_VIEW_KEYS = {
     "cbb-projections": ["intelligence", "matchups", "operations"],
+    "cbb-tracking": ["preseasonCandidate", "preseasonSos"],
     "cbb-team-data": ["intelligence"],
     "cbb-ratings": ["intelligence"],
     "cbb-market": ["intelligence", "rlmMonitor"],
@@ -354,12 +357,12 @@
       <details class="cbb-signal-guide" aria-labelledby="cbb-signal-guide-title">
         <summary class="cbb-signal-guide-heading"><strong id="cbb-signal-guide-title">How CBB signals work</strong><small>Methodology + confidence key</small></summary>
         <div class="cbb-signal-guide-body">
-          <p><strong>Model Signal</strong> measures the absolute difference between THI's fair spread and the consensus market. It measures disagreement, while <strong>Signal Confidence</strong> measures prospective evidence. A large disagreement is not automatically a qualified play.</p>
+          <p><strong>Model Signal</strong> measures the absolute difference between THI's fair spread and the consensus market. It measures disagreement, while <strong>Signal Confidence</strong> measures prospective evidence. A large disagreement is not automatically a qualified signal.</p>
           <div class="cbb-signal-key">
             ${signalKey("Aligned", "0–2.5 pts", "aligned")}
-            ${signalKey("Small edge", "2.6–5.0 pts", "small")}
-            ${signalKey("Play", "5.1–7.0 pts", "play")}
-            ${signalKey("Material disagreement", "7.1–10.0 pts", "material")}
+            ${signalKey("Small disagreement", "2.6–5.0 pts", "small")}
+            ${signalKey("Notable disagreement", "5.1–7.0 pts", "play")}
+            ${signalKey("Major disagreement", "7.1–10.0 pts", "material")}
             ${signalKey("Outlier", "10.1+ pts", "outlier")}
           </div>
           <div class="cbb-confidence-key">
@@ -368,7 +371,7 @@
             ${confidenceKey("Validated", "No-vig exact test · Holm corrected · outlier robust · positive CLV", "validated")}
             ${confidenceKey("Established", "Validated edge also remains stable across rolling windows", "established")}
           </div>
-          <p><strong>Totals key:</strong> 4.0–6.9 points from market is a Total Lean; 7.0+ is a Total Watch. No totals play is activated until the totals model clears its independent walk-forward and prospective gates.</p>
+          <p><strong>Totals key:</strong> 4.0–6.9 points from market is a Total Lean; 7.0+ is a Total Watch. No totals signal is activated until the totals model clears its independent walk-forward and prospective gates.</p>
           <p><strong>Prior-based model</strong> means the projection still relies on regressed preseason team priors. It does not mean the matchup is an exhibition or preseason game.</p>
         </div>
       </details>
@@ -387,7 +390,7 @@
       <div class="cbb-projection-controls">
         <input id="cbb-projection-search" class="cbb-input" type="search" placeholder="Search teams…" value="${escapeHtml(state.projectionQuery)}">
         <select id="cbb-projection-conference" class="cbb-select"><option value="all">All conferences</option>${conferences.map(conf => `<option value="${escapeHtml(conf)}" ${state.projectionConference === conf ? "selected" : ""}>${escapeHtml(conf)}</option>`).join("")}</select>
-        <select id="cbb-projection-signal" class="cbb-select"><option value="all">All signals</option>${[['no_line','No line'],['aligned','Aligned'],['small','Small edge'],['play','Play'],['material','Material disagreement'],['outlier','Outlier']].map(([value,label]) => `<option value="${value}" ${state.projectionSignal === value ? "selected" : ""}>${label}</option>`).join("")}</select>
+        <select id="cbb-projection-signal" class="cbb-select"><option value="all">All signals</option>${[['no_line','No line'],['aligned','Aligned'],['small','Small disagreement'],['play','Notable disagreement'],['material','Major disagreement'],['outlier','Outlier']].map(([value,label]) => `<option value="${value}" ${state.projectionSignal === value ? "selected" : ""}>${label}</option>`).join("")}</select>
         <select id="cbb-projection-confidence" class="cbb-select"><option value="all">All confidence</option>${[['research','Research only'],['developing','Developing'],['validated','Validated'],['established','Established']].map(([value,label]) => `<option value="${value}" ${state.projectionConfidence === value ? "selected" : ""}>${label}</option>`).join("")}</select>
         <select id="cbb-projection-sort" class="cbb-select"><option value="time" ${state.projectionSort === "time" ? "selected" : ""}>Sort: Game time</option><option value="watch" ${state.projectionSort === "watch" ? "selected" : ""}>Sort: Watchability</option><option value="top25" ${state.projectionSort === "top25" ? "selected" : ""}>Sort: THI Top 25 first</option></select>
         <button id="cbb-projection-clear" class="cbb-clear-button" type="button">Clear</button>
@@ -468,7 +471,18 @@
   }
 
   function signalLabel(tier) {
-    return ({ no_line: "No line", aligned: "Aligned", small: "Small edge", play: "Play", material: "Material disagreement", outlier: "Outlier" })[tier] || "Research";
+    return ({ no_line: "No line", aligned: "Aligned", small: "Small disagreement", play: "Notable disagreement", material: "Major disagreement", outlier: "Outlier" })[tier] || "Research";
+  }
+
+  function publicSignalLabel(value) {
+    const normalized = String(value || "").trim().toUpperCase().replaceAll("_", " ");
+    return ({
+      "ALIGNED": "Aligned",
+      "SMALL EDGE": "Small disagreement",
+      "PLAY": "Notable disagreement",
+      "MATERIAL DISAGREEMENT": "Major disagreement",
+      "OUTLIER": "Outlier",
+    })[normalized] || humanize(String(value || "Research"));
   }
 
   function confidenceTier(game) {
@@ -1573,10 +1587,10 @@
     const conferences = [...new Set(priors.map(team => team.conference?.abbreviation || team.conference?.name).filter(Boolean))].sort();
     const view = document.getElementById("view-cbb-ratings");
     view.innerHTML = `
-      <div class="cbb-kicker">Preseason Power v2 · provisional research</div>
+      <div class="cbb-kicker">2026–27 Preseason Model v2 · provisional research</div>
       <h1 class="page-title">CBB THI Ratings</h1>
       <p class="page-subtitle">A three-season, opponent-adjusted view of program strength. No poll, market price, or outside rating determines this order.</p>
-      <div class="cbb-readiness-banner"><span class="cbb-status-pill">Structural power board</span><strong>Roster-aware Index 25 remains withheld</strong><p>This display blends completed-season THI efficiency at 70% / 20% / 10%, normalizes each season's scoring environment, and applies a 12% preseason shrink toward average. Unverified current personnel are excluded. This board is isolated from Model A, projections, signals, and bracketology.</p></div>
+      <div class="cbb-readiness-banner"><span class="cbb-status-pill">Structural Power v2</span><strong>Official THI Index 25 withheld</strong><p>This is THI's displayed, opponent-adjusted structural preseason baseline. A separate roster-aware challenger remains research-only and does not influence this board, Model A, projections, signals, or bracketology. It must pass THI's prospective promotion standard before any official Index 25 is published.</p></div>
       ${cbbEfficiencyLandscape(priors)}
       ${cbbRatingDecomposition(priors)}
       <div class="cbb-definition-banner"><strong>THI Ratings</strong><span>How strong the model believes a team is beneath its record.</span><strong>Team Data</strong><span>Observed results, box-score performance and roster facts.</span></div>
@@ -1587,12 +1601,12 @@
       <div class="cbb-panel cbb-table-wrap">
         <table class="cbb-table" aria-label="2027 THI college basketball preseason ratings">
           <thead><tr>
-            <th>Rank</th>${ratingHeader("team", "Team")}${ratingHeader("conference", "Conf")}${ratingHeader("prior_net", "Overall")}<th>Predictive</th><th>Recent form</th><th>SOS</th><th>vs THI Top 25</th>${ratingHeader("prior_offense", "Adj off")}${ratingHeader("prior_defense", "Adj def")}<th>Home edge</th>
+            <th>Rank</th>${ratingHeader("team", "Team")}${ratingHeader("conference", "Conf")}${ratingHeader("prior_net", "Overall")}<th>Predictive</th><th>Recent form</th><th>Projected SOS</th><th>vs THI Top 25</th>${ratingHeader("prior_offense", "Adj off")}${ratingHeader("prior_defense", "Adj def")}<th>Home edge</th>
           </tr></thead>
           <tbody id="cbb-rating-body"></tbody>
         </table>
       </div>
-      <div class="cbb-stat-note" style="margin-top:9px">Overall and Predictive currently share the provisional structural baseline until 2027 results create separate lenses. Source seasons: ${(powerMeta.source_seasons || []).join(", ") || "2024–2026"}. Recent form, schedule strength and quality records activate only after games are played. Lower defensive efficiency is better.</div>
+      <div class="cbb-stat-note" style="margin-top:9px">Overall and Predictive currently share the provisional structural baseline until 2027 results create separate lenses. Projected SOS is the average Structural Power v2 rating of opponents in the currently confirmed published schedule; it is frozen separately as a preseason snapshot. Played SOS and Remaining SOS replace it once results begin. Source seasons: ${(powerMeta.source_seasons || []).join(", ") || "2024–2026"}. Recent form and quality records activate only after games are played. Lower defensive efficiency is better.</div>
     `;
 
     view.querySelector("#cbb-rating-search").addEventListener("input", event => { state.query = event.target.value; paintRatingRows(); });
@@ -1695,7 +1709,7 @@
         ${methodCard("Overall", "Three-season structural power", "THI blends completed-season opponent-adjusted efficiency at 70% / 20% / 10%, centers each season to its scoring environment, then shrinks the preseason scale 12% toward average.")}
         ${methodCard("Predictive", "Display-only baseline", "The order excludes polls, market prices, outside ratings and unverified current rosters. It does not independently alter Model A.")}
         ${methodCard("Recent form", "Awaiting 2027 games", "No recent-form rating is published before a qualified current-season sample exists.")}
-        ${methodCard("Schedule + opponent quality", "Awaiting 2027 games", "Schedule strength and records against top-25 and top-50 THI teams begin only after games are played.")}
+        ${methodCard("Projected SOS", "Confirmed published matchups", "Preseason difficulty is the average Structural Power v2 rating of opponents in THI's confirmed schedule window. The snapshot is frozen for reconstruction; Played SOS and Remaining SOS activate after games begin.")}
         ${methodCard("Dynamic home advantage", Number.isFinite(home) ? `${number(home,2)}-point national mean` : "Awaiting estimate", "Every program receives its own five-season regularized value; neutral courts receive zero.")}
       </div>
       <div class="cbb-conference-strip"><strong>Conference strength · neutral-floor team benchmark</strong>${conferences.map(row => `<span>${escapeHtml(row.name)} <b>${number(row.average,1,true)}</b> avg · ${number(row.median,1,true)} median</span>`).join("")}</div>
@@ -1893,6 +1907,11 @@
 
   function renderTracking() {
     const prospective = state.data.tracking || {};
+    const structural = state.data.powerRatings || {};
+    const candidate = state.data.preseasonCandidate || {};
+    const sosSnapshot = state.data.preseasonSos || {};
+    const candidateEvaluation = candidate.evaluation || {};
+    const candidateProtocol = candidate.prospective_protocol || {};
     const prospectiveSummary = prospective.summary || {};
     const spreadYtd = prospectiveSummary.spread || {};
     const totalsYtd = prospectiveSummary.totals || {};
@@ -1920,7 +1939,7 @@
       <td class="cbb-number">${row.hit_rate == null ? "—" : pct(row.hit_rate)}</td><td class="cbb-number">${row.average_clv == null ? "—" : number(row.average_clv,2,true)}</td>
       <td class="cbb-number">${row.beat_close_pct == null ? "—" : pct(row.beat_close_pct)}</td></tr>`).join("");
     const signalRows = Object.entries(spreadSignals).sort(([a],[b]) => a.localeCompare(b)).map(([signal,row]) => `<tr>
-      <td>${escapeHtml(humanize(signal))}</td><td class="cbb-number">${integer(row.games)}</td><td class="cbb-number">${record(row)}</td>
+      <td>${escapeHtml(publicSignalLabel(signal))}</td><td class="cbb-number">${integer(row.games)}</td><td class="cbb-number">${record(row)}</td>
       <td class="cbb-number">${row.hit_rate == null ? "—" : pct(row.hit_rate)}</td><td class="cbb-number">${row.average_clv == null ? "—" : number(row.average_clv,2,true)}</td>
       <td class="cbb-number">${row.beat_close_pct == null ? "—" : pct(row.beat_close_pct)}</td><td><span class="cbb-tracking-confidence">${confidence(row)}</span></td></tr>`).join("");
     const play = spreadSignals.play || spreadSignals.PLAY || {};
@@ -1931,6 +1950,25 @@
       <div class="cbb-kicker">Prospective accountability</div>
       <h1 class="page-title">Model Tracking</h1>
       <p class="page-subtitle">Every frozen THI projection graded after the final: winner accuracy, ATS results, tracked totals, closing-line value and projection error.</p>
+      <section class="cbb-panel cbb-tracking-shell" aria-labelledby="cbb-research-validation-title">
+        <header class="cbb-tracking-head"><div><div class="cbb-label">Research &amp; Validation</div><h2 id="cbb-research-validation-title">Model status and promotion record</h2></div><p>Software releases and model promotion are separate decisions. A passing deployment verifies delivery and data contracts; it never promotes an experimental model.</p></header>
+        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Official Index 25 withheld</span><strong>Structural Power v2 is provisional; the roster-aware challenger remains research-only</strong><p>The two models stay visibly separate after games begin. Neither a successful build nor an interesting retrospective result can change the challenger's production status.</p></div>
+        <div class="cbb-tracking-grid">
+          ${modelCard("Displayed board", "Structural Power v2", humanize(structural.meta?.status || "provisional_structural_power"), `${integer(structural.meta?.team_count)} teams · display-only`)}
+          ${modelCard("Research challenger", "Roster-aware candidate", candidateEvaluation.promotion_eligible === false ? "WITHHELD" : "UNRESOLVED", humanize(candidateProtocol.candidate_state || "research_only"))}
+          ${modelCard("Validation result", "2025 paired MAE change", candidateEvaluation.validation?.paired_team_season_mae_improvement == null ? "—" : `${number(candidateEvaluation.validation.paired_team_season_mae_improvement,2,true)} pts`, "Retrospective evidence; not promotion authority")}
+          ${modelCard("Out-of-time result", "2026 paired MAE change", candidateEvaluation.out_of_time_test?.paired_team_season_mae_improvement == null ? "—" : `${number(candidateEvaluation.out_of_time_test.paired_team_season_mae_improvement,2,true)} pts`, "Analyzed test; no longer untouched")}
+          ${modelCard("Frozen power", structural.meta?.version || "Awaiting version", structural.meta?.frozen_baseline ? "IMMUTABLE" : "CHECK", formatTimestamp(structural.meta?.generated_at_utc))}
+          ${modelCard("Frozen Projected SOS", sosSnapshot.meta?.version || "Awaiting snapshot", sosSnapshot.meta?.immutable ? "IMMUTABLE" : "CHECK", `${integer(sosSnapshot.meta?.game_count)} confirmed games · ${formatTimestamp(sosSnapshot.meta?.frozen_at_utc)}`)}
+        </div>
+        <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Predetermined promotion standard</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Requirement</th><th>Evidence required</th><th>Current state</th></tr></thead><tbody>
+          <tr><td>Point-in-time data</td><td>Timestamped roster, transfer and recruiting inputs frozen before games</td><td>2027 freeze required</td></tr>
+          <tr><td>Reproducibility</td><td>Immutable inputs, code version, parameters and output checksums</td><td>Infrastructure active</td></tr>
+          <tr><td>Predictive accuracy</td><td>Prospective paired MAE improvement versus frozen production baseline</td><td>Awaiting games</td></tr>
+          <tr><td>Statistical evidence</td><td>Paired error interval, calibration and no major conference or strength-tier bias</td><td>Awaiting games</td></tr>
+          <tr><td>Decision point</td><td>Preseason, 100-game and midseason reviews are descriptive; promotion is allowed only after the end-of-season gate</td><td>Locked</td></tr>
+        </tbody></table></div></div>
+      </section>
       <section class="cbb-panel cbb-tracking-shell">
         <header class="cbb-tracking-head"><div><div class="cbb-label">Transparent Model Tracking</div><h2>Season-to-Date Performance</h2></div><p>${escapeHtml(prospective.meta?.grading_policy || "The first coordinated refresh will initialize the frozen tracking ledger.")}</p></header>
         <div class="cbb-tracking-periods"><span>Season ${escapeHtml(prospective.meta?.season || "2027")}</span></div>
@@ -1943,7 +1981,7 @@
           ${modelCard("Average margin error", "Projection accuracy", accuracyYtd.margin_mae == null ? "—" : `${number(accuracyYtd.margin_mae,1)} pts`, "Absolute THI projection error")}
           ${modelCard("Average CLV", "Preferred side", spreadYtd.average_clv == null ? "—" : number(spreadYtd.average_clv,1,true), `${integer(spreadYtd.closing_line_games)} decisions with a close`)}
           ${modelCard("Beat close", "Spread CLV", spreadYtd.beat_close_pct == null ? "—" : pct(spreadYtd.beat_close_pct), "Directional closing-line decisions")}
-          ${modelCard("Play tier ATS", "Qualified plays", record(play), play.games ? `${pct(play.hit_rate)} ATS` : "No decisions")}
+          ${modelCard("Notable tier ATS", "Qualified disagreements", record(play), play.games ? `${pct(play.hit_rate)} ATS` : "No decisions")}
         </div>
         <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Monthly Ledger</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Month</th><th>Games</th><th>ATS</th><th>Win %</th><th>Average CLV</th><th>Beat Close</th></tr></thead><tbody>${monthlyRows || `<tr><td colspan="6" class="cbb-empty">The ledger will populate after the first qualified CBB decision reaches final status.</td></tr>`}</tbody></table></div></div>
         <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Season-to-Date · Every Signal and Testing Key</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Signal / Key</th><th>Games</th><th>Record</th><th>Win %</th><th>Average CLV</th><th>Beat Close</th><th>Confidence</th></tr></thead><tbody>${signalRows || `<tr><td colspan="7" class="cbb-empty">Signal records will populate prospectively as qualified games are graded.</td></tr>`}</tbody></table></div></div>

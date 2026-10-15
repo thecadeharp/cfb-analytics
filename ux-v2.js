@@ -42,9 +42,9 @@
   const SIGNAL_OPTIONS = [
     ["", "All Signals"],
     ["ALIGNED", "Aligned"],
-    ["SMALL EDGE", "Small Edge"],
-    ["PLAY", "Play"],
-    ["MATERIAL DISAGREEMENT", "Material Disagreement"],
+    ["SMALL EDGE", "Small Disagreement"],
+    ["PLAY", "Notable Disagreement"],
+    ["MATERIAL DISAGREEMENT", "Major Disagreement"],
     ["OUTLIER", "Outlier"],
   ];
 
@@ -1470,9 +1470,9 @@
         ${games.length} games
         · ${completedGames.length} final
         · ${marketGames.length} lined
-        · <button class="summary-filter summary-play" onclick="setSignalFilter('PLAY')">${plays} plays</button>
-        · <button class="summary-filter summary-small" onclick="setSignalFilter('SMALL EDGE')">${smallEdges} small edges</button>
-        · <button class="summary-filter summary-material" onclick="setSignalFilter('MATERIAL DISAGREEMENT')">${material} material disagreements</button>
+        · <button class="summary-filter summary-play" onclick="setSignalFilter('PLAY')">${plays} notable disagreements</button>
+        · <button class="summary-filter summary-small" onclick="setSignalFilter('SMALL EDGE')">${smallEdges} small disagreements</button>
+        · <button class="summary-filter summary-material" onclick="setSignalFilter('MATERIAL DISAGREEMENT')">${material} major disagreements</button>
         ${outliers ? `· <button class="summary-filter summary-outlier" onclick="setSignalFilter('OUTLIER')">${outliers} outliers</button>` : ""}
         · <span class="summary-small">${totalWatches} total watches</span>
         · <span>${totalLeans} total leans</span>

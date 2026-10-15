@@ -51,6 +51,8 @@ jobs:
             data/hfa_2026.json \
             scripts/build_projections.py \
             data/cbb/history/manifest.json \
+            data/cbb/frozen/preseason_power_2027.json \
+            data/cbb/frozen/preseason_sos_2027.json \
             > /tmp/cbb-platform-before.sha256
 
       - name: Test the complete CBB publishing contract
@@ -62,6 +64,7 @@ jobs:
             scripts/build_cbb_walk_forward_model.py \
             scripts/build_cbb_display_power_ratings.py \
             scripts/build_cbb_preseason_index.py \
+            scripts/freeze_cbb_preseason_sos.py \
             scripts/build_cbb_home_court.py \
             scripts/build_cbb_venue_audit.py \
             scripts/resolve_cbb_venue_geocodes.py \
@@ -323,6 +326,7 @@ jobs:
             data/cbb/model/current_priors.json \
             data/cbb/model/display_power_ratings.json \
             data/cbb/model/preseason_index_candidate.json \
+            data/cbb/frozen/preseason_sos_2027.json \
             data/cbb/model/walk_forward_predictions.json.gz \
             data/cbb/projection_board.json \
             data/cbb/home_court_advantage.json \

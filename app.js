@@ -225,7 +225,11 @@ function statusClass(status) {
 }
 
 function displayStatus(status) {
-  return canonicalSignal(status);
+  return ({
+    "SMALL EDGE": "SMALL DISAGREEMENT",
+    "PLAY": "NOTABLE DISAGREEMENT",
+    "MATERIAL DISAGREEMENT": "MAJOR DISAGREEMENT",
+  })[canonicalSignal(status)] || canonicalSignal(status);
 }
 
 function signalStats(status) {
@@ -2689,9 +2693,9 @@ function renderProjections() {
     summary.innerHTML = `
       ${games.length} games
       · ${marketGames.length} lined
-      · <span class="summary-material">${material} material disagreements</span>
-      · <span class="summary-play">${plays} plays</span>
-      · <span class="summary-small">${smallEdges} small edges</span>
+      · <span class="summary-material">${material} major disagreements</span>
+      · <span class="summary-play">${plays} notable disagreements</span>
+      · <span class="summary-small">${smallEdges} small disagreements</span>
       ${outliers ? `· <span class="summary-outlier">${outliers} outliers</span>` : ""}
       ${isolatedGames.length ? `· <span class="summary-outlier">${isolatedGames.length} isolated prices excluded</span>` : ""}
     `;

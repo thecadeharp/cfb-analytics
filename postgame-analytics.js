@@ -279,6 +279,14 @@
     return match?.[1] || raw || "UNCLASSIFIED";
   }
 
+  function publicSignalName(value) {
+    return ({
+      "SMALL EDGE": "SMALL DISAGREEMENT",
+      "PLAY": "NOTABLE DISAGREEMENT",
+      "MATERIAL DISAGREEMENT": "MAJOR DISAGREEMENT",
+    })[canonicalSignalName(value)] || canonicalSignalName(value);
+  }
+
   function activeProjectionWeek() {
     const label = document.querySelector("#week-tabs .week-tab.active")?.textContent || "";
     const match = label.match(/(?:Week\s*)?(\d+)/i);
@@ -354,7 +362,7 @@
       const beat = subset.filter(row => hasValue(row.clv_points) && Number(row.clv_points) > 0).length;
       const clvDecisions = subset.filter(row => hasValue(row.clv_points) && Number(row.clv_points) !== 0).length;
       const confidence = signalReport?.signals?.[signal]?.confidence || "DEVELOPING";
-      return { label:signal, sample:subset.length, rec, clv, beatPct:clvDecisions ? 100*beat/clvDecisions : null, confidence };
+      return { label:publicSignalName(signal), sample:subset.length, rec, clv, beatPct:clvDecisions ? 100*beat/clvDecisions : null, confidence };
     });
     const totalRows = ["TOTAL WATCH", "TOTAL LEAN"].map(tier => {
       const subset = rows.filter(row => String(row.total_tier || "").toUpperCase() === tier);
@@ -392,7 +400,7 @@
         ${perfStat("Tracked Totals",recordText(selected.totals),hasValue(selected.totals.pct) ? `${selected.totals.pct.toFixed(1)}%` : "No decisions")}
         ${perfStat("Totals Average CLV",hasValue(selected.totalClv) ? formatSigned(selected.totalClv,1," pts") : "—",`${selected.totalClvSamples} tracked totals with a close`)}
         ${perfStat("Totals Beat Close",hasValue(selected.totalBeatPct) ? `${selected.totalBeatPct.toFixed(1)}%` : "—",`${selected.totalBeatDecisions} directional decisions`)}
-        ${perfStat("Play Tier ATS",recordText(selected.play),hasValue(selected.play.pct) ? `${selected.play.pct.toFixed(1)}%` : "No decisions")}
+        ${perfStat("Notable Tier ATS",recordText(selected.play),hasValue(selected.play.pct) ? `${selected.play.pct.toFixed(1)}%` : "No decisions")}
         ${perfStat("Average Margin Error",hasValue(selected.error) ? `${selected.error.toFixed(1)} pts` : "—","Absolute THI projection error")}
         ${perfStat("Average CLV",hasValue(selected.clv) ? formatSigned(selected.clv,1," pts") : "—","Preferred-side closing value")}
       </div>

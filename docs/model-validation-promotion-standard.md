@@ -13,6 +13,20 @@ This standard governs every THI sport, rating, projection, betting signal, and e
 
 Betting signals have an additional requirement: actual recorded two-sided prices, per-play no-vig baselines, exact or Poisson-binomial testing, multiplicity correction, outlier-dependency checks, rolling stability, and positive price-aware returns. Hit rate alone never establishes profitability.
 
+## Software release is not model promotion
+
+A software or data release may ship when its tests, schemas, isolation assertions, and deployment smoke checks pass. That decision only establishes that the published system behaves as specified. It never changes a model's Research, Provisional, Validated, or Production status.
+
+Model promotion is a separate governed decision that requires the evidence in this standard and an explicit **Promote** record. Routine deployment automation is not authorized to create that record or change a model's status.
+
+## CBB schedule-strength labels
+
+- **Projected SOS** is the preseason average Structural Power v2 rating of opponents in the confirmed published schedule at the snapshot cutoff. Later schedule announcements are excluded from the frozen snapshot.
+- **Played SOS** is the difficulty of opponents already faced, calculated from the specified current rating snapshot.
+- **Remaining SOS** is the projected difficulty of confirmed future opponents, calculated from the specified current rating snapshot.
+
+THI preserves the preseason Projected SOS artifact, source hashes, schedule scope, game identifiers, and freeze time so the original information set can be reconstructed.
+
 ## Required frozen model card
 
 Before prospective evaluation begins, THI records:
