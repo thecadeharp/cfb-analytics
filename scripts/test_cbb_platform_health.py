@@ -40,6 +40,28 @@ class CbbPlatformHealthTests(unittest.TestCase):
         self.assertEqual(result["coverage"]["published_roster_players"], 0)
         self.assertTrue(result["checks"]["roster_layer_safe"])
 
+    def test_quarantined_neutral_venue_review_is_release_safe(self):
+        venue_audit = {
+            "meta": {"status": "attention_required", "release_safe": True},
+            "summary": {"unresolved_reviews": 1, "quarantined_reviews": 1, "unsafe_reviews": 0},
+        }
+        # Rebuild with the same minimal inputs and the quarantined audit.
+        board = {"games": [{
+            "game_id": 1, "neutral_site": True, "status": "scheduled",
+            "home": {"team_id": 1}, "away": {"team_id": 2},
+            "projection": {"matchup_context": {"home_court": {"points": 0.0}, "margin_drivers": []}},
+        }]}
+        result = build(
+            board, {"teams": [{"team_id": index} for index in range(300)]},
+            {"players": [{} for _ in range(1500)]}, {"spread_decisions": []},
+            {"games": [{}], "coverage": {}}, {"coverage": {"roster_fetch_errors": 0}},
+            {"meta": {"status": "ready"}}, venue_audit=venue_audit,
+            roster_audit={"meta": {"status": "withheld"}},
+        )
+        self.assertTrue(result["checks"]["neutral_venue_audit_ready"])
+        self.assertEqual(result["meta"]["status"], "healthy")
+        self.assertEqual(result["coverage"]["neutral_site_quarantined_reviews"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()

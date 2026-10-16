@@ -31,6 +31,19 @@ class CbbVenueAuditTests(unittest.TestCase):
         self.assertEqual(audit["summary"]["unresolved_reviews"], 0)
         self.assertEqual(audit["games"][0]["home_court_points_required"], 0.0)
 
+    def test_provider_campus_conflict_is_quarantined_without_blocking_release(self):
+        board = {"games": [
+            {"game_id": 10, "neutral_site": False, "home": {"team_id": 2, "team": "B"}, "away": {"team_id": 3, "team": "C"}, "venue": {"name": "B Arena", "city": "B", "state": "BB"}},
+            {"game_id": 11, "neutral_site": True, "home": {"team_id": 2, "team": "B"}, "away": {"team_id": 4, "team": "D"}, "venue": {"name": "B Arena", "city": "B", "state": "BB"}},
+        ]}
+        audit = build_audit(board, {"games": {}})
+        self.assertEqual(audit["meta"]["status"], "attention_required")
+        self.assertTrue(audit["meta"]["release_safe"])
+        self.assertEqual(audit["summary"]["unresolved_reviews"], 1)
+        self.assertEqual(audit["summary"]["quarantined_reviews"], 1)
+        self.assertEqual(audit["summary"]["unsafe_reviews"], 0)
+        self.assertEqual(audit["games"][0]["home_court_points_required"], 0.0)
+
     def test_official_schedules_can_exclude_phantom_provider_event(self):
         board = {"games": [{
             "game_id": 4,

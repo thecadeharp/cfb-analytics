@@ -289,13 +289,14 @@ jobs:
               assert not unexpected_alerts, f"Unexpected CBB health alerts: {sorted(unexpected_alerts)}"
           assert health["checks"]["neutral_site_home_context_zero"] is True
           assert health["checks"]["neutral_venue_audit_ready"] is True, (
-              "Unresolved neutral-site venue conflicts: "
-              f"{venue_audit.get('summary', {}).get('unresolved_reviews', 0)}. "
-              "Review the UNRESOLVED_NEUTRAL_VENUE log and add an official-source override."
+              "Unsafe neutral-site venue conflicts: "
+              f"{venue_audit.get('summary', {}).get('unsafe_reviews', 0)}. "
+              "The release may proceed only when every unresolved venue is quarantined with zero HCA."
           )
           assert health["checks"]["opening_night_rehearsal_passed"] is True
-          assert venue_audit["meta"]["status"] == "healthy"
-          assert venue_audit["summary"]["unresolved_reviews"] == 0
+          assert venue_audit["meta"]["version"] == "thi-cbb-venue-audit-v1.1"
+          assert venue_audit["meta"]["release_safe"] is True
+          assert venue_audit["summary"]["unsafe_reviews"] == 0
           assert rehearsal["meta"]["status"] == "passed"
           assert trends["meta"]["version"] == "thi-variance-systems-lab-v2.1"
           assert trends["sports"]["cfb"]["cards"] and trends["sports"]["cbb"]["cards"]

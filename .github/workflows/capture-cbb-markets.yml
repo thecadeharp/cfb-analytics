@@ -85,7 +85,9 @@ jobs:
           cache_manifest=json.loads(Path("data/cbb/cache_manifest.json").read_text())
           assert history["meta"]["version"] == "thi-cbb-market-capture-v1.0"
           assert health["checks"]["neutral_site_home_context_zero"] is True
-          assert venue_audit["meta"]["status"] == "healthy"
+          assert venue_audit["meta"]["version"] == "thi-cbb-venue-audit-v1.1"
+          assert venue_audit["meta"]["release_safe"] is True
+          assert venue_audit["summary"]["unsafe_reviews"] == 0
           assert rehearsal["meta"]["status"] == "passed"
           assert market_contract["meta"]["version"] == "thi-cbb-market-contract-v1.0"
           assert cache_manifest["meta"]["version"] == "thi-static-cache-manifest-v1.0"

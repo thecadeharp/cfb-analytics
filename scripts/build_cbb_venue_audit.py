@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "thi-cbb-venue-audit-v1.0"
+VERSION = "thi-cbb-venue-audit-v1.1"
 
 
 def apply_overrides(board: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any]:
@@ -92,12 +92,23 @@ def build_audit(raw: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any
         })
     counts = Counter(row["audit_state"] for row in rows)
     unresolved = counts["provider_neutral_campus_venue_review"]
+    # A provider venue conflict is operationally safe while its neutral flag is
+    # preserved: projections apply zero home-court points and the row remains in
+    # the audit for source verification. Only a row that can leak home-court
+    # value into a neutral game should block a coordinated refresh.
+    quarantined = unresolved
+    unsafe = sum(
+        1
+        for row in rows
+        if row["home_court_points_required"] != 0.0 or not row["neutral_site"]
+    )
     return {
         "meta": {
             "version": VERSION,
             "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "status": "healthy" if unresolved == 0 else "attention_required",
-            "policy": "Neutral games always receive zero home-court input. Official schedules resolve provider venue conflicts; unresolved conflicts stay visible and never receive campus points.",
+            "release_safe": unsafe == 0,
+            "policy": "Neutral games always receive zero home-court input. Official schedules resolve provider venue conflicts; unresolved conflicts are quarantined for review, stay visible and never receive campus points.",
         },
         "summary": {
             "neutral_games": len(rows),
@@ -105,6 +116,8 @@ def build_audit(raw: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any
             "provider_neutral_flags": counts["provider_neutral_flag"],
             "provider_neutral_venue_pending": counts["provider_neutral_venue_pending"],
             "unresolved_reviews": unresolved,
+            "quarantined_reviews": quarantined,
+            "unsafe_reviews": unsafe,
         },
         "games": rows,
     }
