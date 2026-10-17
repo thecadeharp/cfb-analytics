@@ -16,7 +16,7 @@ concurrency:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,7 +37,7 @@ jobs:
           name: thi-data-freshness-${{ github.run_id }}
           path: /tmp/thi-data-freshness.json
           retention-days: 14
-      - name: Recover stale CFB production inputs
+      - name: Recover stale production inputs
         if: steps.freshness.outcome == 'failure'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -49,20 +49,73 @@ jobs:
           print("\n".join(item for item in failed if item))
           PY
 
+          : > /tmp/thi-recovery-workflows.txt
+          dispatch_recovery() {
+            local workflow="$1"
+            local previous_run
+            previous_run=$(gh run list \
+              --workflow "$workflow" \
+              --event workflow_dispatch \
+              --limit 1 \
+              --json databaseId \
+              --jq '.[0].databaseId // empty')
+            gh workflow run "$workflow" --ref main
+            printf '%s|%s\n' "$workflow" "$previous_run" >> /tmp/thi-recovery-workflows.txt
+          }
+
           if grep -Eq '^(cfb_scores|cfb_live_scores)$' /tmp/thi-critical-datasets.txt; then
-            gh workflow run live-score-pulse.yml --ref main
+            dispatch_recovery live-score-pulse.yml
             echo "Dispatched live-score recovery."
           fi
 
           if grep -Eq '^cfb_projections$' /tmp/thi-critical-datasets.txt; then
-            gh workflow run refresh-projections-no-cfbd.yml --ref main
+            dispatch_recovery refresh-projections-no-cfbd.yml
             echo "Dispatched projection-board recovery."
           fi
 
           if grep -Eq '^cfb_availability$' /tmp/thi-critical-datasets.txt; then
-            gh workflow run refresh-availability-reports.yml --ref main
+            dispatch_recovery refresh-availability-reports.yml
             echo "Dispatched availability recovery."
           fi
-      - name: Preserve failing audit status
+
+          if [[ ! -s /tmp/thi-recovery-workflows.txt ]]; then
+            echo "No automatic recovery exists for the critical findings:"
+            cat /tmp/thi-critical-datasets.txt
+            exit 1
+          fi
+
+          while IFS='|' read -r workflow previous_run; do
+            run_id=""
+            for attempt in {1..12}; do
+              run_id=$(gh run list \
+                --workflow "$workflow" \
+                --event workflow_dispatch \
+                --limit 1 \
+                --json databaseId \
+                --jq '.[0].databaseId // empty')
+              [[ -n "$run_id" && "$run_id" != "$previous_run" ]] && break
+              run_id=""
+              sleep 5
+            done
+            if [[ -z "$run_id" ]]; then
+              echo "Could not locate the recovery run for $workflow."
+              exit 1
+            fi
+            echo "Waiting for $workflow recovery run $run_id."
+            gh run watch "$run_id" --exit-status
+          done < /tmp/thi-recovery-workflows.txt
+
+      - name: Verify recovered production datasets
         if: steps.freshness.outcome == 'failure'
-        run: exit 1
+        run: |
+          git fetch origin main
+          git checkout --force origin/main
+          python scripts/audit_data_freshness.py --strict --output /tmp/thi-data-freshness-recovered.json
+      - name: Upload recovery verification
+        if: ${{ steps.freshness.outcome == 'failure' && always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: thi-data-freshness-recovered-${{ github.run_id }}
+          path: /tmp/thi-data-freshness-recovered.json
+          if-no-files-found: ignore
+          retention-days: 14
