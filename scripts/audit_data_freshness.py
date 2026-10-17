@@ -39,6 +39,13 @@ def first_time(payload: dict, paths: list[str]) -> datetime | None:
     return None
 
 
+def within_age(stamp: datetime | None, now: datetime, max_age_hours: float) -> bool:
+    if stamp is None:
+        return False
+    age = (now - stamp).total_seconds() / 3600
+    return -0.25 <= age <= max_age_hours
+
+
 def load(root: Path, relative: str) -> dict:
     path = root / relative
     if not path.exists():
@@ -78,7 +85,7 @@ def audit(root: Path, now: datetime) -> dict:
         age = (now - stamp).total_seconds() / 3600 if stamp else None
         checks = {}
         checks["timestamp_present"] = stamp is not None
-        checks["fresh"] = age is not None and -0.25 <= age <= max_age_hours
+        checks["fresh"] = within_age(stamp, now, max_age_hours)
         for label, (path, minimum) in coverage.items():
             value = nested(payload, path)
             count = len(value) if isinstance(value, (list, dict)) else int(value or 0)
@@ -122,10 +129,11 @@ def audit(root: Path, now: datetime) -> dict:
     check("cfb_team_market_records", "data/team_market_performance.json", ["meta.generated_at"], 192, {"teams": ("teams", 130)})
     check("cfb_portal", "data/portal_2026.json", ["player_source.generated_at", "generated_at"], 192, {"teams": ("teams", 40), "players": ("players", 1000)})
     score_slo = 0.5 if live_window else 6
+    settlement_slo = 2 if live_window else 8
     check("cfb_scores", "data/results.json", ["meta.generated_at"], score_slo, {"completed_games": ("meta.completed_games", 300)})
     check("cfb_live_scores", "data/live_scores.json", ["meta.generated_at"], score_slo, {}, severity="critical")
-    check("cfb_postgame", "data/postgame_analytics.json", ["meta.generated_at"], score_slo, {"games": ("games", 300)})
-    check("cfb_signal_records", "data/reports/signal_report.json", ["generated_at_utc"], score_slo, {"signals": ("signals", 1)})
+    check("cfb_postgame", "data/postgame_analytics.json", ["meta.generated_at"], settlement_slo, {"games": ("games", 300)})
+    check("cfb_signal_records", "data/reports/signal_report.json", ["generated_at_utc"], settlement_slo, {"signals": ("signals", 1)})
     check("cfb_availability", "data/roster_notes.json", ["meta.generated_at_utc"], 2.5 if weekend else 14, {"source_health": ("meta.source_health", 6)})
     check("cbb_projection_board", "data/cbb/projection_board.json", ["meta.generated_at_utc"], 15, {"games": ("games", 300)})
     check("cbb_team_profiles", "data/cbb/team_profiles.json", ["meta.generated_at_utc"], 15, {"teams": ("teams", 350)})

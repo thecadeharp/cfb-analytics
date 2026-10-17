@@ -47,6 +47,20 @@ python scripts/build_operations_readiness.py
 
 The scheduled settlement and CBB refresh workflows run both builders automatically. `data/reports/prediction_archive.json` keeps one earliest frozen CFB forecast per game plus CBB frozen decisions. `data/reports/operations_readiness.json` is an internal artifact and is not linked in public navigation.
 
+## Live-score reliability
+
+The public CFB board has two independent refresh paths. `live-score-pulse.yml`
+publishes the static scoreboard on an offset five-minute schedule, while the
+browser refreshes active scores once per minute. `data-freshness-audit.yml`
+runs twice per hour and dispatches a recovery pulse when the static live files
+breach their game-window SLO. An external scheduler can call the workflow's
+`live-score-pulse` repository-dispatch event without changing the workflow.
+
+GitHub scheduled workflows are best-effort and can be delayed. Before a paid
+launch, move the authoritative live-score cache to a server scheduler such as a
+Supabase scheduled Edge Function or Cloudflare Worker cron. Keep the GitHub
+snapshot as the public fallback and release record.
+
 ## Market movement and RLM
 
 The free monitor records Pinnacle first and BetOnline only as a fallback. Line movement remains labeled as line movement. True RLM activates only when `THI_SPLITS_FEED_URL` and its optional token supply a licensed public-ticket feed synchronized to the odds feed within five minutes. DraftKings, FanDuel, Caesars, and BetMGM cannot serve as the sharp reference.

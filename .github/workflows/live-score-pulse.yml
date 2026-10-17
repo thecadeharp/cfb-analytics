@@ -2,8 +2,12 @@ name: CFB Live Score Pulse
 
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [live-score-pulse]
   schedule:
-    - cron: "*/5 * * * *"
+    # Offset from the top of the hour, where GitHub documents the heaviest
+    # schedule congestion. External monitors may use repository_dispatch.
+    - cron: "2-57/5 * * * *"
 
 permissions:
   contents: write

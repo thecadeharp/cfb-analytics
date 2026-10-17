@@ -3,10 +3,11 @@ name: Production Data Freshness Audit
 on:
   workflow_dispatch:
   schedule:
-    - cron: "7,37 * * * *"
+    - cron: "4,34 * * * *"
 
 permissions:
   contents: read
+  actions: write
 
 concurrency:
   group: thi-data-freshness-audit
@@ -26,6 +27,8 @@ jobs:
       - name: Test freshness contracts
         run: python -m unittest scripts.test_data_freshness -v
       - name: Audit production datasets
+        id: freshness
+        continue-on-error: true
         run: python scripts/audit_data_freshness.py --strict --output /tmp/thi-data-freshness.json
       - name: Upload audit evidence
         if: always()
@@ -34,3 +37,21 @@ jobs:
           name: thi-data-freshness-${{ github.run_id }}
           path: /tmp/thi-data-freshness.json
           retention-days: 14
+      - name: Recover a stale live scoreboard
+        if: steps.freshness.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if python - <<'PY'
+          import json, sys
+          audit=json.load(open("/tmp/thi-data-freshness.json", encoding="utf-8"))
+          failed={row.get("dataset") for row in audit.get("findings", []) if row.get("severity")=="critical"}
+          sys.exit(0 if failed & {"cfb_scores", "cfb_live_scores"} else 1)
+          PY
+          then
+            gh workflow run live-score-pulse.yml --ref main
+            echo "Dispatched live-score recovery."
+          fi
+      - name: Preserve failing audit status
+        if: steps.freshness.outcome == 'failure'
+        run: exit 1
