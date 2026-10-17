@@ -37,20 +37,31 @@ jobs:
           name: thi-data-freshness-${{ github.run_id }}
           path: /tmp/thi-data-freshness.json
           retention-days: 14
-      - name: Recover a stale live scoreboard
+      - name: Recover stale CFB production inputs
         if: steps.freshness.outcome == 'failure'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if python - <<'PY'
-          import json, sys
+          python - <<'PY' > /tmp/thi-critical-datasets.txt
+          import json
           audit=json.load(open("/tmp/thi-data-freshness.json", encoding="utf-8"))
-          failed={row.get("dataset") for row in audit.get("findings", []) if row.get("severity")=="critical"}
-          sys.exit(0 if failed & {"cfb_scores", "cfb_live_scores"} else 1)
+          failed=sorted({row.get("dataset") for row in audit.get("findings", []) if row.get("severity")=="critical"})
+          print("\n".join(item for item in failed if item))
           PY
-          then
+
+          if grep -Eq '^(cfb_scores|cfb_live_scores)$' /tmp/thi-critical-datasets.txt; then
             gh workflow run live-score-pulse.yml --ref main
             echo "Dispatched live-score recovery."
+          fi
+
+          if grep -Eq '^cfb_projections$' /tmp/thi-critical-datasets.txt; then
+            gh workflow run refresh-projections-no-cfbd.yml --ref main
+            echo "Dispatched projection-board recovery."
+          fi
+
+          if grep -Eq '^cfb_availability$' /tmp/thi-critical-datasets.txt; then
+            gh workflow run refresh-availability-reports.yml --ref main
+            echo "Dispatched availability recovery."
           fi
       - name: Preserve failing audit status
         if: steps.freshness.outcome == 'failure'

@@ -15,9 +15,15 @@ class ScheduledWriterWorkflowSafetyTest(unittest.TestCase):
         self.assertIn("repository_dispatch:", pulse)
         self.assertIn("types: [live-score-pulse]", pulse)
         self.assertIn("actions: write", audit)
-        self.assertIn("Recover a stale live scoreboard", audit)
+        self.assertIn("Recover stale CFB production inputs", audit)
         self.assertIn("gh workflow run live-score-pulse.yml --ref main", audit)
+        self.assertIn("gh workflow run refresh-projections-no-cfbd.yml --ref main", audit)
+        self.assertIn("gh workflow run refresh-availability-reports.yml --ref main", audit)
         self.assertIn("Preserve failing audit status", audit)
+
+    def test_projection_board_has_in_season_freshness_schedule(self):
+        source = (WORKFLOWS / "refresh-projections-no-cfbd.yml").read_text()
+        self.assertIn('cron: "11 0,6,12,18 * 8-12 *"', source)
 
     def test_scheduled_writers_are_serialized_and_checkout_current_main(self):
         dedicated_groups = {

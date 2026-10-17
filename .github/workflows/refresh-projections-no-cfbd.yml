@@ -2,12 +2,16 @@ name: Refresh Projections - No CFBD
 
 on:
   workflow_dispatch:
+  schedule:
+    # Keep the board inside its 10-hour freshness SLO during CFB season.
+    # The offset avoids GitHub's busiest top-of-hour scheduling boundary.
+    - cron: "11 0,6,12,18 * 8-12 *"
 
 permissions:
   contents: write
 
 concurrency:
-  group: refresh-projections-no-cfbd
+  group: thi-data-writer
   cancel-in-progress: false
 
 jobs:
@@ -18,6 +22,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Set up Python
         uses: actions/setup-python@v5
