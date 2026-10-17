@@ -1,13 +1,13 @@
 {
   "meta": {
     "version": "thi-variance-prospective-v1.2",
-    "generated_at_utc": "2026-10-17T19:42:46.531486Z",
+    "generated_at_utc": "2026-10-17T21:44:42.407727Z",
     "policy": "First eligible pregame capture is immutable. Every final is graded against its frozen line; later market moves cannot rewrite qualification or settlement."
   },
   "summary": {
     "cfb": {
       "qualifiers": 174,
-      "pending": 83,
+      "pending": 79,
       "systems": {
         "high-total-unders": {
           "qualifiers": 11,
@@ -21,13 +21,13 @@
         },
         "home-dogs-vs.-road-favorites": {
           "qualifiers": 57,
-          "pending": 29,
+          "pending": 27,
           "wins": 19,
-          "losses": 9,
-          "pushes": 0,
-          "decisions": 28,
-          "hit_rate": 67.9,
-          "roi_pct_at_minus_110": 29.5
+          "losses": 10,
+          "pushes": 1,
+          "decisions": 29,
+          "hit_rate": 65.5,
+          "roi_pct_at_minus_110": 25.1
         },
         "p4-vs-fcs-massive-favorites": {
           "qualifiers": 2,
@@ -61,13 +61,13 @@
         },
         "steam-reversal": {
           "qualifiers": 6,
-          "pending": 2,
+          "pending": 0,
           "wins": 2,
-          "losses": 2,
+          "losses": 4,
           "pushes": 0,
-          "decisions": 4,
-          "hit_rate": 50.0,
-          "roi_pct_at_minus_110": -4.5
+          "decisions": 6,
+          "hit_rate": 33.3,
+          "roi_pct_at_minus_110": -36.4
         }
       }
     },
@@ -1863,7 +1863,13 @@
       "total_at_freeze": 48.5,
       "opening_spread_at_freeze": null,
       "frozen_at_utc": "2026-10-07T00:52:33.708444Z",
-      "result": "pending"
+      "result": "L",
+      "settled_at_utc": "2026-10-17T21:44:42.407727Z",
+      "home_points": 15.0,
+      "away_points": 19.0,
+      "actual_home_margin": -4.0,
+      "actual_total": 34.0,
+      "settlement_source": "ESPN fallback"
     },
     {
       "freeze_id": "cfb:401856720:high-total-unders",
@@ -2128,10 +2134,16 @@
       "sharp_book": "pinnacle",
       "market_event_id": "f10a59f9dd66cb1aa169a293326449d9",
       "frozen_at_utc": "2026-10-17T15:33:17.522720Z",
-      "result": "pending",
+      "result": "L",
       "latest_market_context_status": "unclassified",
       "public_action_status": "monitor_only",
-      "latest_context_flags": []
+      "latest_context_flags": [],
+      "settled_at_utc": "2026-10-17T21:44:42.407727Z",
+      "home_points": 31.0,
+      "away_points": 38.0,
+      "actual_home_margin": -7.0,
+      "actual_total": 69.0,
+      "settlement_source": "NCAA"
     },
     {
       "freeze_id": "cfb:401866442:steam-reversal",
@@ -2150,7 +2162,7 @@
       "sharp_book": "pinnacle",
       "market_event_id": "7d7f757d2bf4cb7b6d8bbfe9589d25a2",
       "frozen_at_utc": "2026-10-15T21:51:05.499002Z",
-      "result": "pending",
+      "result": "L",
       "latest_market_context_status": "material_availability_overlap",
       "public_action_status": "context_hold",
       "latest_context_flags": [
@@ -2165,7 +2177,13 @@
           "source_url": "https://umassathletics.com/news/2026/10/10/football-minutemen-comeback-falls-one-point-short-to-miami-oh-20-19",
           "withhold_public_signal": true
         }
-      ]
+      ],
+      "settled_at_utc": "2026-10-17T21:44:42.407727Z",
+      "home_points": 25.0,
+      "away_points": 18.0,
+      "actual_home_margin": 7.0,
+      "actual_total": 43.0,
+      "settlement_source": "NCAA"
     },
     {
       "freeze_id": "cfb:401866443:home-dogs-vs.-road-favorites",
@@ -2180,7 +2198,13 @@
       "total_at_freeze": 43.0,
       "opening_spread_at_freeze": null,
       "frozen_at_utc": "2026-10-11T16:47:13.228516Z",
-      "result": "pending"
+      "result": "P",
+      "settled_at_utc": "2026-10-17T21:44:42.407727Z",
+      "home_points": 14.0,
+      "away_points": 21.0,
+      "actual_home_margin": -7.0,
+      "actual_total": 35.0,
+      "settlement_source": "ESPN fallback"
     },
     {
       "freeze_id": "cfb:401864524:home-dogs-vs.-road-favorites",
