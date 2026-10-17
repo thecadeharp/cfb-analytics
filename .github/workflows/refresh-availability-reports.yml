@@ -3,8 +3,8 @@ name: Refresh Player Availability Reports
 on:
   workflow_dispatch:
   schedule:
-    # One public ESPN request per run. Frequent late-week checks catch game-status changes.
-    - cron: "17 */2 * * 4,5,6"
+    # Poll hourly while official conference reports are being released/updated.
+    - cron: "17 * * * 4,5,6"
     - cron: "17 12,18 * * 0,1,2,3"
 
 permissions:
@@ -43,6 +43,9 @@ jobs:
       - name: Build fresh availability snapshot
         run: python scripts/build_availability_report.py
 
+      - name: Test official-report normalization
+        run: python -m unittest scripts.test_availability_report
+
       - name: Validate freshness and isolation
         run: |
           python - <<'PY'
@@ -52,8 +55,9 @@ jobs:
           with open("data/roster_notes.json", encoding="utf-8") as file:
               data = json.load(file)
 
-          assert data["meta"]["schema_version"] == "1.1"
-          assert data["meta"]["model_usage"] == "display_only_not_used_by_model_a"
+          assert data["meta"]["schema_version"] == "2.0"
+          assert data["meta"]["model_usage"] == "display_and_signal_hold_not_used_by_model_a"
+          assert set(data["meta"]["source_health"]) == {"ACC", "Big Ten", "Big 12", "SEC", "Pac-12", "ESPN"}
           now = datetime.now(timezone.utc)
           for notes in data.get("teams", {}).values():
               for note in notes:
@@ -67,6 +71,9 @@ jobs:
                   if adjustment is not None:
                       assert isinstance(adjustment, (int, float))
                       assert abs(adjustment) <= 10
+                  if note.get("source_type") == "official_conference":
+                      assert note.get("source_conference") in {"ACC", "Big Ten", "Big 12", "SEC", "Pac-12"}
+                      assert isinstance(note.get("withhold_public_signal"), bool)
           PY
           sha256sum --check /tmp/model-a-before.sha256
 
