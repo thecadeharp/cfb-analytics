@@ -1,0 +1,36 @@
+name: Production Data Freshness Audit
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "7,37 * * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: thi-data-freshness-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test freshness contracts
+        run: python -m unittest scripts.test_data_freshness -v
+      - name: Audit production datasets
+        run: python scripts/audit_data_freshness.py --strict --output /tmp/thi-data-freshness.json
+      - name: Upload audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: thi-data-freshness-${{ github.run_id }}
+          path: /tmp/thi-data-freshness.json
+          retention-days: 14

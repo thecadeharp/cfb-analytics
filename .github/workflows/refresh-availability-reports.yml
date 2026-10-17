@@ -11,8 +11,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: thi-data-writer
-  cancel-in-progress: false
+  group: thi-availability-writer
+  cancel-in-progress: true
 
 jobs:
   availability:
@@ -83,4 +83,10 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/roster_notes.json
           git diff --staged --quiet || git commit -m "Refresh player availability reports"
-          git push
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 2
+          done
+          exit 1

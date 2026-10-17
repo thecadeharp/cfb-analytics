@@ -9,6 +9,10 @@ WORKFLOWS = ROOT / ".github" / "workflows"
 
 class ScheduledWriterWorkflowSafetyTest(unittest.TestCase):
     def test_scheduled_writers_are_serialized_and_checkout_current_main(self):
+        dedicated_groups = {
+            "live-score-pulse.yml": "thi-live-score-pulse",
+            "refresh-availability-reports.yml": "thi-availability-writer",
+        }
         audited = []
         problems = []
         for path in sorted(WORKFLOWS.glob("*.yml")):
@@ -17,8 +21,9 @@ class ScheduledWriterWorkflowSafetyTest(unittest.TestCase):
                 continue
             audited.append(path.name)
             group = re.search(r"concurrency:\s*\n\s*group:\s*([^\n]+)", source)
-            if not group or group.group(1).strip() != "thi-data-writer":
-                problems.append(f"{path.name}: concurrency group is not thi-data-writer")
+            expected_group = dedicated_groups.get(path.name, "thi-data-writer")
+            if not group or group.group(1).strip() != expected_group:
+                problems.append(f"{path.name}: concurrency group is not {expected_group}")
 
             lines = source.splitlines()
             checkout_indexes = [

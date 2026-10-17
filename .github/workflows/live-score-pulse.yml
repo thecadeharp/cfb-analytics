@@ -1,0 +1,82 @@
+name: CFB Live Score Pulse
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thi-live-score-pulse
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install scoreboard dependencies
+        run: python -m pip install requests pandas pyarrow
+      - name: Fetch live and completed scores
+        env:
+          CFB_SEASON: "2026"
+        run: |
+          cp data/results.json /tmp/results-before.json
+          cp data/live_scores.json /tmp/live-before.json
+          python scripts/fetch_results_no_cfbd.py
+      - name: Suppress timestamp-only idle refreshes
+        run: |
+          python - <<'PY'
+          import json, shutil
+          pairs = [
+              ("/tmp/results-before.json", "data/results.json"),
+              ("/tmp/live-before.json", "data/live_scores.json"),
+          ]
+          def semantic(path):
+              payload=json.load(open(path, encoding="utf-8"))
+              payload.get("meta", {}).pop("generated_at", None)
+              return payload
+          live=json.load(open("data/live_scores.json", encoding="utf-8"))
+          unchanged=all(semantic(before)==semantic(after) for before,after in pairs)
+          if unchanged and not (live.get("games") or []):
+              for before,after in pairs: shutil.copyfile(before,after)
+              print("No active game or result change; suppressed timestamp-only commit.")
+          PY
+      - name: Validate scoreboard contracts
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          for path in ("data/results.json", "data/live_scores.json"):
+              payload=json.load(open(path, encoding="utf-8"))
+              stamp=datetime.fromisoformat(payload["meta"]["generated_at"].replace("Z", "+00:00"))
+              assert payload["meta"]["season"] == 2026
+          live=json.load(open("data/live_scores.json"))
+          if live.get("games"):
+              stamp=datetime.fromisoformat(live["meta"]["generated_at"].replace("Z", "+00:00"))
+              assert (datetime.now(timezone.utc)-stamp).total_seconds() < 600
+          assert json.load(open("data/results.json"))["meta"]["completed_games"] >= 300
+          PY
+      - name: Publish scoreboard pulse
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/results.json data/live_scores.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Refresh CFB live score pulse"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 2
+          done
+          exit 1

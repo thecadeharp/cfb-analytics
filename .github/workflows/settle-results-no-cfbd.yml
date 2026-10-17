@@ -3,9 +3,10 @@ name: Settle Results + Live Scores - No CFBD
 on:
   workflow_dispatch:
 
-  # Refresh scoreboard state every 5 minutes.
+  # Full settlement and downstream analytics run hourly. The dedicated
+  # live-score-pulse workflow refreshes the public scoreboard every 5 minutes.
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "45 * * * *"
 
 permissions:
   contents: write
