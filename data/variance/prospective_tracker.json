@@ -1,13 +1,13 @@
 {
   "meta": {
     "version": "thi-variance-prospective-v1.2",
-    "generated_at_utc": "2026-10-17T00:29:18.143563Z",
+    "generated_at_utc": "2026-10-17T04:20:39.477916Z",
     "policy": "First eligible pregame capture is immutable. Every final is graded against its frozen line; later market moves cannot rewrite qualification or settlement."
   },
   "summary": {
     "cfb": {
       "qualifiers": 169,
-      "pending": 93,
+      "pending": 90,
       "systems": {
         "high-total-unders": {
           "qualifiers": 11,
@@ -21,13 +21,13 @@
         },
         "home-dogs-vs.-road-favorites": {
           "qualifiers": 57,
-          "pending": 33,
-          "wins": 16,
+          "pending": 32,
+          "wins": 17,
           "losses": 8,
           "pushes": 0,
-          "decisions": 24,
-          "hit_rate": 66.7,
-          "roi_pct_at_minus_110": 27.3
+          "decisions": 25,
+          "hit_rate": 68.0,
+          "roi_pct_at_minus_110": 29.8
         },
         "p4-vs-fcs-massive-favorites": {
           "qualifiers": 2,
@@ -41,23 +41,23 @@
         },
         "primetime-home-dogs": {
           "qualifiers": 30,
-          "pending": 17,
-          "wins": 8,
+          "pending": 16,
+          "wins": 9,
           "losses": 5,
           "pushes": 0,
-          "decisions": 13,
-          "hit_rate": 61.5,
-          "roi_pct_at_minus_110": 17.5
+          "decisions": 14,
+          "hit_rate": 64.3,
+          "roi_pct_at_minus_110": 22.7
         },
         "primetime-unders": {
           "qualifiers": 65,
-          "pending": 33,
-          "wins": 17,
+          "pending": 32,
+          "wins": 18,
           "losses": 15,
           "pushes": 0,
-          "decisions": 32,
-          "hit_rate": 53.1,
-          "roi_pct_at_minus_110": 1.4
+          "decisions": 33,
+          "hit_rate": 54.5,
+          "roi_pct_at_minus_110": 4.1
         },
         "steam-reversal": {
           "qualifiers": 4,
@@ -1689,7 +1689,13 @@
       "total_at_freeze": 53.5,
       "opening_spread_at_freeze": null,
       "frozen_at_utc": "2026-10-11T16:47:13.228516Z",
-      "result": "pending"
+      "result": "W",
+      "settled_at_utc": "2026-10-17T04:20:39.477916Z",
+      "home_points": 31.0,
+      "away_points": 17.0,
+      "actual_home_margin": 14.0,
+      "actual_total": 48.0,
+      "settlement_source": "ESPN fallback"
     },
     {
       "freeze_id": "cfb:401862801:primetime-home-dogs",
@@ -1704,7 +1710,13 @@
       "total_at_freeze": 53.5,
       "opening_spread_at_freeze": null,
       "frozen_at_utc": "2026-10-11T16:47:13.228516Z",
-      "result": "pending"
+      "result": "W",
+      "settled_at_utc": "2026-10-17T04:20:39.477916Z",
+      "home_points": 31.0,
+      "away_points": 17.0,
+      "actual_home_margin": 14.0,
+      "actual_total": 48.0,
+      "settlement_source": "ESPN fallback"
     },
     {
       "freeze_id": "cfb:401862801:primetime-unders",
@@ -1719,7 +1731,13 @@
       "total_at_freeze": 53.5,
       "opening_spread_at_freeze": null,
       "frozen_at_utc": "2026-10-11T16:47:13.228516Z",
-      "result": "pending"
+      "result": "W",
+      "settled_at_utc": "2026-10-17T04:20:39.477916Z",
+      "home_points": 31.0,
+      "away_points": 17.0,
+      "actual_home_margin": 14.0,
+      "actual_total": 48.0,
+      "settlement_source": "ESPN fallback"
     },
     {
       "freeze_id": "cfb:401858493:primetime-unders",
@@ -1862,6 +1880,17 @@
         {
           "team": "Mississippi State",
           "side": "away",
+          "player": "Kamario Taylor",
+          "position": "QB",
+          "status": "Doubtful",
+          "text": "Kamario Taylor is listed doubtful on the official SEC availability report.",
+          "source_label": "Official SEC availability report",
+          "source_url": "https://www.secsports.com/fbreports",
+          "withhold_public_signal": true
+        },
+        {
+          "team": "Mississippi State",
+          "side": "away",
           "player": "Kamario Taylor / Fluff Bothwell",
           "position": "QB / RB",
           "status": "Questionable",
@@ -1911,12 +1940,45 @@
         {
           "team": "Kansas State",
           "side": "home",
+          "player": "Blake Barnett",
+          "position": "QB",
+          "status": "Out",
+          "text": "Blake Barnett is listed out on the official Big 12 availability report.",
+          "source_label": "Official Big 12 availability report",
+          "source_url": "https://big12sports.com/sports/2025/8/14/FBreporting.aspx",
+          "withhold_public_signal": true
+        },
+        {
+          "team": "Kansas State",
+          "side": "home",
+          "player": "Dillon Duff",
+          "position": "QB",
+          "status": "Questionable",
+          "text": "Dillon Duff is listed questionable on the official Big 12 availability report.",
+          "source_label": "Official Big 12 availability report",
+          "source_url": "https://big12sports.com/sports/2025/8/14/FBreporting.aspx",
+          "withhold_public_signal": true
+        },
+        {
+          "team": "Kansas State",
+          "side": "home",
           "player": "Quarterback room",
           "position": "QB",
           "status": "Critical uncertainty",
           "text": "Multiple Kansas State quarterbacks are listed questionable for Kansas, creating unresolved depth-chart uncertainty.",
           "source_label": "Covers injury report",
           "source_url": "https://www.covers.com/sport/football/ncaaf/injuries",
+          "withhold_public_signal": true
+        },
+        {
+          "team": "Kansas",
+          "side": "away",
+          "player": "Cole Ballard",
+          "position": "QB",
+          "status": "Questionable",
+          "text": "Cole Ballard is listed questionable on the official Big 12 availability report.",
+          "source_label": "Official Big 12 availability report",
+          "source_url": "https://big12sports.com/sports/2025/8/14/FBreporting.aspx",
           "withhold_public_signal": true
         }
       ]
