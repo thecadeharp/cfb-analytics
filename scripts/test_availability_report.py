@@ -51,6 +51,32 @@ class AvailabilityReportTests(unittest.TestCase):
         self.assertEqual(notes["Alpha"][0]["opponent"], "Beta")
         self.assertFalse(notes["Alpha"][0]["withhold_public_signal"])
 
+    def test_hdi_drops_report_after_game_expiration(self):
+        payload = {"101": {
+            "publishDate": "2026-10-15", "postedTime": "18:00:00", "conferenceTimeZone": "CT",
+            "ReportType": "Final", "footer": {"date": "2026-10-15"},
+            "games": [
+                {"teamDisplayName": "Alpha", "rows": [
+                    {"name": "QB #7 A. Quarterback", "status": "Out", "exemptStatus": "NonExempt"},
+                ]},
+                {"teamDisplayName": "Beta", "rows": []},
+            ],
+        }}
+        notes, reports = parse_hdi_payload(payload, "SEC", SOURCE, NOW)
+        self.assertEqual(notes, {})
+        self.assertEqual(reports, [])
+
+    def test_pac12_drops_report_after_game_expiration(self):
+        payload = {"games": [{
+            "gameId": "old-game", "dateISO": "2026-10-15", "updatedAtUTC": "2026-10-15T22:00:00Z",
+            "notes": "Final Report",
+            "away": {"name": "Alpha", "players": [{"name": "A. Quarterback", "position": "QB", "status": "Out"}]},
+            "home": {"name": "Beta", "players": []},
+        }]}
+        notes, reports = parse_pac12_payload(payload, "Pac-12", SOURCE, NOW)
+        self.assertEqual(notes, {})
+        self.assertEqual(reports, [])
+
 
 if __name__ == "__main__":
     unittest.main()

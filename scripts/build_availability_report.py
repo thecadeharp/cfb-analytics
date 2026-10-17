@@ -141,6 +141,8 @@ def parse_hdi_payload(payload, conference, source, now):
         if verified is None or verified > now + timedelta(minutes=10) or now - verified > MAX_AGE:
             continue
         game_date = report_game_date(report)
+        if valid_until(verified, game_date) <= now:
+            continue
         team_rows = report.get("games") or []
         names = [str(team.get("teamDisplayName") or team.get("teamName") or "").strip() for team in team_rows]
         report_note_count = 0
@@ -182,6 +184,8 @@ def parse_pac12_payload(payload, conference, source, now):
             game_date = date.fromisoformat(str(game.get("dateISO")))
         except (TypeError, ValueError):
             game_date = None
+        if valid_until(verified, game_date) <= now:
+            continue
         sides = [game.get("away") or {}, game.get("home") or {}]
         names = [str(side.get("name") or "").strip() for side in sides]
         report_note_count = 0
