@@ -183,7 +183,13 @@ def build(old: dict[str, Any], cfb_board: dict[str, Any], cbb_board: dict[str, A
                 steam = steam_for_game(steam_alerts, game)
                 if steam:
                     freeze_id = f"cfb:{game_id}:steam-reversal"
-                    by_freeze.setdefault(freeze_id, {"freeze_id": freeze_id, "sport": "cfb", "game_id": game_id, "system_id": "steam-reversal", "start_date": game.get("start_date"), "away_team": team_name(game, "away"), "home_team": team_name(game, "home"), "neutral_site": bool(game.get("neutral_site")), "spread_at_freeze": number(steam.get("current_home_spread")), "opening_spread_at_freeze": number(steam.get("opening_home_spread")), "tracked_side": steam.get("fade_side"), "tracked_team": steam.get("fade_team"), "movement_points_at_freeze": number(steam.get("movement_points")), "sharp_book": steam.get("sharp_book"), "market_event_id": steam.get("event_id"), "frozen_at_utc": now.isoformat().replace("+00:00", "Z"), "result": "pending"})
+                    frozen = by_freeze.setdefault(freeze_id, {"freeze_id": freeze_id, "sport": "cfb", "game_id": game_id, "system_id": "steam-reversal", "start_date": game.get("start_date"), "away_team": team_name(game, "away"), "home_team": team_name(game, "home"), "neutral_site": bool(game.get("neutral_site")), "spread_at_freeze": number(steam.get("current_home_spread")), "opening_spread_at_freeze": number(steam.get("opening_home_spread")), "tracked_side": steam.get("fade_side"), "tracked_team": steam.get("fade_team"), "movement_points_at_freeze": number(steam.get("movement_points")), "sharp_book": steam.get("sharp_book"), "market_event_id": steam.get("event_id"), "frozen_at_utc": now.isoformat().replace("+00:00", "Z"), "result": "pending"})
+                    # Price and side remain immutable after the trigger. Availability
+                    # context may arrive later, so expose it explicitly as the latest
+                    # sourced context instead of pretending it existed at freeze time.
+                    frozen["latest_market_context_status"] = steam.get("context_status")
+                    frozen["public_action_status"] = steam.get("action_status")
+                    frozen["latest_context_flags"] = steam.get("context_flags") or []
             for system_id in qualifying_systems(sport, game, start, spread, total, opening):
                 freeze_id = f"{sport}:{game_id}:{system_id}"
                 by_freeze.setdefault(freeze_id, {"freeze_id": freeze_id, "sport": sport, "game_id": game_id, "system_id": system_id, "start_date": game.get("start_date"), "away_team": team_name(game, "away"), "home_team": team_name(game, "home"), "neutral_site": bool(game.get("neutral_site")), "spread_at_freeze": spread, "total_at_freeze": total, "opening_spread_at_freeze": opening, "frozen_at_utc": now.isoformat().replace("+00:00", "Z"), "result": "pending"})

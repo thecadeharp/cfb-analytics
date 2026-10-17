@@ -7246,7 +7246,7 @@ function availabilityReportMarkup(awayName, homeName, game) {
         ${availabilityTeamMarkup(homeName)}
       </div>
       <div class="thi-availability-scenario">
-        <div><span>Published Model A</span><strong>${Number.isFinite(modelHomeSpread) ? `${escapeHtml(homeName)} ${escapeHtml(shortSpread(modelHomeSpread))}` : "—"}</strong></div>
+        <div><span>Published Model A · availability excluded</span><strong>${Number.isFinite(modelHomeSpread) ? `${escapeHtml(homeName)} ${escapeHtml(shortSpread(modelHomeSpread))}` : "—"}</strong></div>
         <div><span>Availability-adjusted scenario</span><strong>${hasScenario ? `${escapeHtml(homeName)} ${escapeHtml(shortSpread(scenarioHomeSpread))}` : "No sourced point adjustment active"}</strong></div>
         <div><span>Verified team-value inputs</span><strong>${escapeHtml(awayName)} ${formatSigned(awayAdjustment, 1)} · ${escapeHtml(homeName)} ${formatSigned(homeAdjustment, 1)}</strong></div>
       </div>

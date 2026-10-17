@@ -57,7 +57,7 @@ jobs:
           assert set(lab['sports']['cfb']['sections'])=={'independent_verified','verified','developing','failed_hypothesis','source_pending'}
           assert tracker['meta']['version']=='thi-variance-prospective-v1.2'
           assert 'summary' in tracker
-          assert rlm['meta']['version']=='thi-rlm-monitor-v1.3'
+          assert rlm['meta']['version']=='thi-rlm-monitor-v1.4'
           assert backtest['meta']['version']=='thi-public-backtest-v2.1'
           assert backtest['meta']['financial_claim'] is False
           assert all(sport['status']=='not_validated' for sport in backtest['sports'].values())

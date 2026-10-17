@@ -2,15 +2,15 @@
   "meta": {
     "season": 2026,
     "schema_version": "1.1",
-    "generated_at_utc": "2026-10-16T21:16:05.313025Z",
+    "generated_at_utc": "2026-10-16T04:30:00Z",
     "purpose": "Fresh, source-linked player availability context. Display only; never used by Model A.",
     "notes_policy": "Only ESPN records updated within seven days are retained. Empty or expired notes imply unknown status, not full availability.",
     "model_usage": "display_only_not_used_by_model_a",
     "adjustment_policy": "ESPN statuses are never assigned point values automatically. A point scenario is retained only from a fresh manual note with a public HTTPS source and is capped at +/-10 team-value points.",
-    "team_count_with_current_notes": 2,
-    "current_note_count": 2,
+    "team_count_with_current_notes": 16,
+    "current_note_count": 16,
     "espn_current_note_count": 0,
-    "retained_manual_note_count": 2
+    "retained_manual_note_count": 16
   },
   "conference_sources": {
     "ACC": {
@@ -58,6 +58,230 @@
         "valid_until_utc": "2026-10-18T04:12:58Z",
         "withhold_public_signal": true,
         "adjustment_status": "withheld_pending_validated_qb_value"
+      }
+    ],
+    "Mississippi State": [
+      {
+        "manual_id": "msst-qb-rb-2026-w7",
+        "player": "Kamario Taylor / Fluff Bothwell",
+        "position": "QB / RB",
+        "status": "Questionable",
+        "text": "Starting quarterback Kamario Taylor and leading rusher Fluff Bothwell are listed questionable for LSU. This materially overlaps the 5.5-point move toward LSU, so THI withholds the public Fade Steam label while preserving the trigger for research grading.",
+        "source_label": "SEC availability report coverage",
+        "source_url": "https://state1878.com/sec-availability-report-for-mississippi-state-lsu",
+        "verified_at_utc": "2026-10-16T04:30:00Z",
+        "valid_until_utc": "2026-10-18T08:00:00Z",
+        "withhold_public_signal": true,
+        "market_context_relevant": true,
+        "adjustment_status": "withheld_pending_validated_player_value"
+      }
+    ],
+    "Tennessee": [
+      {
+        "manual_id": "tenn-qb-2026-w7",
+        "player": "Faizon Brandon",
+        "position": "QB",
+        "status": "Questionable",
+        "text": "Starting quarterback Faizon Brandon remains questionable with a shoulder injury for Alabama. Model A does not contain a player-level replacement adjustment.",
+        "source_label": "SEC availability report coverage",
+        "source_url": "https://www.aol.com/articles/qb-faizon-brandon-remains-questionable-001216000.html",
+        "verified_at_utc": "2026-10-16T04:30:00Z",
+        "valid_until_utc": "2026-10-18T08:00:00Z",
+        "withhold_public_signal": true,
+        "market_context_relevant": true,
+        "adjustment_status": "withheld_pending_validated_player_value"
+      }
+    ],
+    "Pittsburgh": [
+      {
+        "manual_id": "pitt-qb-2026-w7",
+        "player": "Mason Heintschel",
+        "position": "QB",
+        "status": "Out",
+        "text": "Starting quarterback Mason Heintschel is out for the season with a torn ACL; Holden Geriner made his first career start last week. The published line remains the raw team-form baseline.",
+        "source_label": "ACC availability report coverage",
+        "source_url": "https://accsports.com/news/acc-injury-report-week-7/",
+        "verified_at_utc": "2026-10-16T04:30:00Z",
+        "valid_until_utc": "2026-10-18T08:00:00Z",
+        "withhold_public_signal": true,
+        "market_context_relevant": true,
+        "adjustment_status": "withheld_pending_validated_player_value"
+      }
+    ],
+    "Syracuse": [
+      {
+        "manual_id": "syracuse-qb-room-2026-w7",
+        "player": "Quarterback room",
+        "position": "QB",
+        "status": "Critical uncertainty",
+        "text": "Amari Odom is out while Steve Angeli and Malachi Nelson are questionable. Syracuse has not named a starter for Louisville.",
+        "source_label": "ACC availability report coverage",
+        "source_url": "https://accsports.com/news/acc-injury-report-week-7/",
+        "verified_at_utc": "2026-10-16T04:30:00Z",
+        "valid_until_utc": "2026-10-18T08:00:00Z",
+        "withhold_public_signal": true,
+        "market_context_relevant": true,
+        "adjustment_status": "withheld_pending_validated_player_value"
+      }
+    ],
+    "Michigan State": [
+      {
+        "manual_id": "msu-qb-2026-w7",
+        "player": "C. Fancher",
+        "position": "QB",
+        "status": "Questionable",
+        "text": "Quarterback C. Fancher is listed questionable after leaving the prior game with a knee injury.",
+        "source_label": "Covers injury report",
+        "source_url": "https://www.covers.com/sport/football/ncaaf/injuries",
+        "verified_at_utc": "2026-10-16T04:30:00Z",
+        "valid_until_utc": "2026-10-18T08:00:00Z",
+        "withhold_public_signal": true,
+        "market_context_relevant": true,
+        "adjustment_status": "withheld_pending_validated_player_value"
+      }
+    ],
+    "Army": [
+      {
+        "manual_id": "army-qb-2026-w7",
+        "player": "B. Luter",
+        "position": "QB",
+        "status": "Questionable",
+        "text": "Quarterback B. Luter is listed questionable for Florida Atlantic. No player-value adjustment is inserted without a verified starter and replacement valuation.",
+        "source_label": "Covers injury report",
+        "source_url": "https://www.covers.com/sport/football/ncaaf/injuries",
+        "verified_at_utc": "2026-10-16T04:30:00Z",
+        "valid_until_utc": "2026-10-18T08:00:00Z",
+        "withhold_public_signal": true,
+        "market_context_relevant": true,
+        "adjustment_status": "withheld_pending_validated_player_value"
+      }
+    ],
+    "Kansas State": [
+      {
+        "manual_id": "kstate-qb-room-2026-w7",
+        "player": "Quarterback room",
+        "position": "QB",
+        "status": "Critical uncertainty",
+        "text": "Multiple Kansas State quarterbacks are listed questionable for Kansas, creating unresolved depth-chart uncertainty.",
+        "source_label": "Covers injury report",
+        "source_url": "https://www.covers.com/sport/football/ncaaf/injuries",
+        "verified_at_utc": "2026-10-16T04:30:00Z",
+        "valid_until_utc": "2026-10-18T08:00:00Z",
+        "withhold_public_signal": true,
+        "market_context_relevant": true,
+        "adjustment_status": "withheld_pending_validated_player_value"
+      }
+    ],
+    "App State": [
+      {
+        "manual_id": "app-qb-2026-w7",
+        "player": "M. Singleton",
+        "position": "QB",
+        "status": "Out",
+        "text": "Quarterback M. Singleton is listed out with an ankle injury for the Coastal Carolina matchup.",
+        "source_label": "Covers injury report",
+        "source_url": "https://www.covers.com/sport/football/ncaaf/injuries",
+        "verified_at_utc": "2026-10-16T04:30:00Z",
+        "valid_until_utc": "2026-10-18T08:00:00Z",
+        "withhold_public_signal": true,
+        "market_context_relevant": true,
+        "adjustment_status": "withheld_pending_validated_player_value"
+      }
+    ],
+    "California": [
+      {
+        "manual_id": "cal-qb-2026-w7",
+        "player": "Jaron-Keawe Sagapolutele",
+        "position": "QB",
+        "status": "Questionable",
+        "text": "Quarterback Jaron-Keawe Sagapolutele remains questionable in concussion protocol; Jackson Brousseau started last week.",
+        "source_label": "ACC availability report coverage",
+        "source_url": "https://accsports.com/news/acc-injury-report-week-7/",
+        "verified_at_utc": "2026-10-16T04:30:00Z",
+        "valid_until_utc": "2026-10-18T08:00:00Z",
+        "withhold_public_signal": true,
+        "market_context_relevant": true,
+        "adjustment_status": "withheld_pending_validated_player_value"
+      }
+    ],
+    "Virginia": [
+      {
+        "manual_id": "uva-mass-availability-2026-w7",
+        "player": "22-player availability list",
+        "position": "Multiple",
+        "status": "Material attrition",
+        "text": "Virginia lists 22 players out for SMU, including starting contributors at running back, wide receiver, defensive back and offensive line.",
+        "source_label": "ACC availability report coverage",
+        "source_url": "https://accsports.com/news/acc-injury-report-week-7/",
+        "verified_at_utc": "2026-10-16T04:30:00Z",
+        "valid_until_utc": "2026-10-18T08:00:00Z",
+        "withhold_public_signal": true,
+        "market_context_relevant": true,
+        "adjustment_status": "withheld_pending_validated_player_value"
+      }
+    ],
+    "Georgia Tech": [
+      {
+        "manual_id": "gt-key-availability-2026-w7",
+        "player": "Kyle Efford / Justice Haynes / Malachi Hosley",
+        "position": "LB / RB",
+        "status": "Out / Doubtful",
+        "text": "Captain Kyle Efford and running back Malachi Hosley are out, while running back Justice Haynes is doubtful for Virginia Tech.",
+        "source_label": "ACC availability report coverage",
+        "source_url": "https://accsports.com/news/acc-injury-report-week-7/",
+        "verified_at_utc": "2026-10-16T04:30:00Z",
+        "valid_until_utc": "2026-10-18T08:00:00Z",
+        "withhold_public_signal": true,
+        "market_context_relevant": true,
+        "adjustment_status": "withheld_pending_validated_player_value"
+      }
+    ],
+    "Duke": [
+      {
+        "manual_id": "duke-rb-2026-w7",
+        "player": "Nate Sheppard",
+        "position": "RB",
+        "status": "Questionable",
+        "text": "Leading rusher Nate Sheppard is questionable for North Carolina after producing 743 rushing yards through five games.",
+        "source_label": "ACC availability report coverage",
+        "source_url": "https://accsports.com/news/acc-injury-report-week-7/",
+        "verified_at_utc": "2026-10-16T04:30:00Z",
+        "valid_until_utc": "2026-10-18T08:00:00Z",
+        "withhold_public_signal": true,
+        "market_context_relevant": true,
+        "adjustment_status": "withheld_pending_validated_player_value"
+      }
+    ],
+    "Missouri": [
+      {
+        "manual_id": "mizzou-rb-room-2026-w7",
+        "player": "Ahmad Hardy / Malai Fonoti",
+        "position": "RB",
+        "status": "Out",
+        "text": "Running backs Ahmad Hardy and Malai Fonoti are listed out for Ole Miss, materially changing Missouri backfield availability.",
+        "source_label": "SEC availability report coverage",
+        "source_url": "https://olemiss365.com/availability-list-for-saturdays-battle/",
+        "verified_at_utc": "2026-10-16T04:30:00Z",
+        "valid_until_utc": "2026-10-18T08:00:00Z",
+        "withhold_public_signal": true,
+        "market_context_relevant": true,
+        "adjustment_status": "withheld_pending_validated_player_value"
+      }
+    ],
+    "Vanderbilt": [
+      {
+        "manual_id": "vandy-qb-2026-w7",
+        "player": "Blaze Berlowitz",
+        "position": "QB",
+        "status": "Out",
+        "text": "Quarterback Blaze Berlowitz is listed out for Arkansas. THI has no validated player-level replacement adjustment in Model A.",
+        "source_label": "SEC availability report coverage",
+        "source_url": "https://sports.yahoo.com/articles/vanderbilt-football-injury-report-vs-004909259.html",
+        "verified_at_utc": "2026-10-16T04:30:00Z",
+        "valid_until_utc": "2026-10-18T08:00:00Z",
+        "withhold_public_signal": true,
+        "market_context_relevant": true,
+        "adjustment_status": "withheld_pending_validated_player_value"
       }
     ]
   }

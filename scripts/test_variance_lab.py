@@ -39,6 +39,13 @@ class VarianceLabTests(unittest.TestCase):
  def test_steam_reversal_excludes_cbb_and_sub_three_moves(self):
   moves=[{"sport":"cbb","opening_home_spread":-7,"current_home_spread":-10,"line_delta":-3},{"sport":"cfb","opening_home_spread":-7,"current_home_spread":-9.5,"line_delta":-2.5}]
   self.assertEqual(steam_reversal_alerts(moves),[])
+ def test_steam_reversal_holds_public_label_when_sourced_availability_overlaps(self):
+  moves=[{"sport":"cfb","event_id":"1","away_team":"Mississippi State Bulldogs","home_team":"LSU Tigers","opening_home_spread":-10.5,"current_home_spread":-16,"line_delta":-5.5,"sharp_book":"pinnacle"}]
+  availability={"teams":{"Mississippi State":[{"player":"Kamario Taylor","position":"QB","status":"Questionable","text":"Quarterback listed questionable.","verified_at_utc":"2026-10-15T20:00:00Z","valid_until_utc":"2026-10-18T20:00:00Z","source_url":"https://example.com/report","market_context_relevant":True,"withhold_public_signal":True}]}}
+  alert=steam_reversal_alerts(moves,availability=availability,now=datetime(2026,10,16,tzinfo=timezone.utc))[0]
+  self.assertEqual(alert["context_status"],"material_availability_overlap")
+  self.assertEqual(alert["action_status"],"context_hold")
+  self.assertEqual(alert["context_flags"][0]["position"],"QB")
  def test_owls_capture_joins_dk_splits_to_pinnacle(self):
   odds={"data":{"pinnacle":[{"event_id":"ncaaf:Away@Home-20261010","commence_time":"2026-10-10T23:00:00Z","away_team":"Away","home_team":"Home","bookmakers":[{"key":"pinnacle","last_update":"2026-10-08T12:00:00Z","markets":[{"key":"spreads","outcomes":[{"name":"Away","point":7.0,"price":-110},{"name":"Home","point":-7.0,"price":-110}]}]}]}]}}
   splits={"data":[{"event_id":"ncaaf:Away@Home-20261010","away_team":"Away","home_team":"Home","splits":[{"book":"dk","title":"DraftKings","as_of":"2026-10-08T12:03:00Z","spread":{"away_line":7.0,"home_line":-7.0,"away_bets_pct":72,"home_bets_pct":28,"away_handle_pct":64,"home_handle_pct":36}}]}]}
@@ -74,8 +81,14 @@ class VarianceLabTests(unittest.TestCase):
   frozen=build({"frozen":[]},{"games":[game]},{"games":[]},{"games":[]},now,monitor)
   row=next(row for row in frozen["frozen"] if row["system_id"]=="steam-reversal")
   self.assertEqual(row["tracked_team"],"Away");self.assertEqual(row["spread_at_freeze"],-10)
+  monitor["steam_reversal_alerts"][0].update({"current_home_spread":-12,"context_status":"material_availability_overlap","action_status":"context_hold","context_flags":[{"team":"Home","player":"Starting QB"}]})
+  refreshed=build(frozen,{"games":[game]},{"games":[]},{"games":[]},now,monitor)
+  row=next(row for row in refreshed["frozen"] if row["system_id"]=="steam-reversal")
+  self.assertEqual(row["spread_at_freeze"],-10)
+  self.assertEqual(row["public_action_status"],"context_hold")
+  self.assertEqual(row["latest_context_flags"][0]["player"],"Starting QB")
   results={"games":[{"game_id":2,"status":"completed","home_team":"Home","away_team":"Away","home_points":27,"away_points":20,"source":"test"}]}
-  settled=build(frozen,{"games":[game]},{"games":[]},results,datetime(2026,10,8,12,tzinfo=timezone.utc),monitor)
+  settled=build(refreshed,{"games":[game]},{"games":[]},results,datetime(2026,10,8,12,tzinfo=timezone.utc),monitor)
   row=next(row for row in settled["frozen"] if row["system_id"]=="steam-reversal")
   self.assertEqual(row["result"],"W")
 if __name__=="__main__":unittest.main()

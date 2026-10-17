@@ -1,13 +1,14 @@
 {
   "meta": {
-    "version": "thi-rlm-monitor-v1.3",
-    "generated_at_utc": "2026-10-16T22:49:18.259113Z",
+    "version": "thi-rlm-monitor-v1.4",
+    "generated_at_utc": "2026-10-17T00:01:29.658443Z",
     "status": "line_monitoring",
     "rlm_status": "public_splits_pending",
     "sharp_line_status": "monitoring",
     "alert_count": 0,
     "sharp_move_count": 37,
     "steam_reversal_alert_count": 3,
+    "steam_context_hold_count": 3,
     "sharp_tracked_event_count": 52,
     "qualified_event_count": 0,
     "sharp_book_policy": {
@@ -34,6 +35,7 @@
       "Opening and current spread from the same named sharp book",
       "Pinnacle is required when present; BetOnline is used only when Pinnacle is absent",
       "No sharp-money claim from line movement alone",
+      "Steam triggers remain research observations, but the public fade label is held when material sourced availability overlaps the move",
       "No alert when required inputs are absent"
     ]
   },
@@ -883,8 +885,22 @@
       "fade_team": "Mississippi State Bulldogs",
       "fade_spread": 16.0,
       "movement_points": 5.5,
-      "context_status": "unclassified",
-      "context_note": "Price movement alone does not establish sharp money, injury, weather or public causation."
+      "context_status": "material_availability_overlap",
+      "action_status": "context_hold",
+      "context_flags": [
+        {
+          "team": "Mississippi State",
+          "side": "away",
+          "player": "Kamario Taylor / Fluff Bothwell",
+          "position": "QB / RB",
+          "status": "Questionable",
+          "text": "Starting quarterback Kamario Taylor and leading rusher Fluff Bothwell are listed questionable for LSU. This materially overlaps the 5.5-point move toward LSU, so THI withholds the public Fade Steam label while preserving the trigger for research grading.",
+          "source_label": "SEC availability report coverage",
+          "source_url": "https://state1878.com/sec-availability-report-for-mississippi-state-lsu",
+          "withhold_public_signal": true
+        }
+      ],
+      "context_note": "Sourced player availability overlaps this move. THI does not claim it caused the move; the public fade label is held pending context review."
     },
     {
       "sport": "cfb",
@@ -915,8 +931,22 @@
       "fade_team": "Kansas State Wildcats",
       "fade_spread": -3.5,
       "movement_points": 3.0,
-      "context_status": "unclassified",
-      "context_note": "Price movement alone does not establish sharp money, injury, weather or public causation."
+      "context_status": "material_availability_overlap",
+      "action_status": "context_hold",
+      "context_flags": [
+        {
+          "team": "Kansas State",
+          "side": "home",
+          "player": "Quarterback room",
+          "position": "QB",
+          "status": "Critical uncertainty",
+          "text": "Multiple Kansas State quarterbacks are listed questionable for Kansas, creating unresolved depth-chart uncertainty.",
+          "source_label": "Covers injury report",
+          "source_url": "https://www.covers.com/sport/football/ncaaf/injuries",
+          "withhold_public_signal": true
+        }
+      ],
+      "context_note": "Sourced player availability overlaps this move. THI does not claim it caused the move; the public fade label is held pending context review."
     },
     {
       "sport": "cfb",
@@ -947,8 +977,22 @@
       "fade_team": "UMass Minutemen",
       "fade_spread": 7.5,
       "movement_points": 4.5,
-      "context_status": "unclassified",
-      "context_note": "Price movement alone does not establish sharp money, injury, weather or public causation."
+      "context_status": "material_availability_overlap",
+      "action_status": "context_hold",
+      "context_flags": [
+        {
+          "team": "Massachusetts",
+          "side": "away",
+          "player": "Quarterback room",
+          "position": "QB",
+          "status": "Critical uncertainty",
+          "text": "Starter Pop Watson III was unavailable on Oct. 10; first-time starter Aedan McCarthy then left with an injury, and Logan Inagawa finished the game. Week 7 starter status requires a fresh team update.",
+          "source_label": "UMass Athletics",
+          "source_url": "https://umassathletics.com/news/2026/10/10/football-minutemen-comeback-falls-one-point-short-to-miami-oh-20-19",
+          "withhold_public_signal": true
+        }
+      ],
+      "context_note": "Sourced player availability overlaps this move. THI does not claim it caused the move; the public fade label is held pending context review."
     }
   ],
   "alerts": []

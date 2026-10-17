@@ -1577,7 +1577,7 @@
             ${escapeHtml(gameDateText(game.start_date))}
           </div>
           ${varianceContextMarkup(game)}
-          ${availabilityHold ? `<div class="thi-availability-hold" title="${escapeHtml(availabilityHolds.map(note => `${note.team}: ${note.text}`).join(" · "))}">Critical QB availability · signal held</div>` : ""}
+          ${availabilityHold ? `<div class="thi-availability-hold" title="${escapeHtml(availabilityHolds.map(note => `${note.team}: ${note.text}`).join(" · "))}">Critical availability · signal held</div>` : ""}
         </td>
 
         <td>${window.THIIntelligence?.watchMarkup?.(game) ?? "—"}</td>
@@ -1588,7 +1588,7 @@
             ${spreadWeatherApplied ? `<span class="weather-adjusted-dot" title="Weather-adjusted spread"></span>` : ""}
           </div>
           <div class="line-secondary">
-            ${availabilityHold ? "Raw Model A · availability unresolved" : recommendedSide ? "THI preferred side at current market" : "THI projected spread"}
+            ${availabilityHold ? "Raw Model A · player availability excluded" : recommendedSide ? "THI preferred side at current market" : "THI projected spread"}
           </div>
         </td>
 
