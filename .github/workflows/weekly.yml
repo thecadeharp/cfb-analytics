@@ -3,7 +3,9 @@ name: Update CFB Analytics
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 10 * * 1"
+    # Sunday 8:00 AM ET during the season (7:00 AM after DST), leaving
+    # enough time for every downstream rating layer to publish by noon ET.
+    - cron: "0 12 * * 0"
 
 permissions:
   contents: write

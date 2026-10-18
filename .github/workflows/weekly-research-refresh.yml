@@ -9,7 +9,9 @@ on:
         default: "0"
         type: string
   schedule:
-    - cron: "15 17 * * 2"
+    # Sunday 11:00 AM ET during the season. Upstream team and observed
+    # ratings run earlier Sunday so the public THI Index lands before noon.
+    - cron: "0 15 * * 0"
 
 permissions:
   contents: write

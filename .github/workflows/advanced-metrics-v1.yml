@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
 
   schedule:
-    # Refresh every Monday after the main weekly analytics update.
-    - cron: "30 11 * * 1"
+    # Sunday 9:30 AM ET during the season, after the main weekly update.
+    - cron: "30 13 * * 0"
 
 permissions:
   contents: write

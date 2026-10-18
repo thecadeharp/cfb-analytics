@@ -30,6 +30,18 @@ class ScheduledWriterWorkflowSafetyTest(unittest.TestCase):
         source = (WORKFLOWS / "refresh-projections-no-cfbd.yml").read_text()
         self.assertIn('cron: "11 0,6,12,18 * 8-12 *"', source)
 
+    def test_cfb_ratings_pipeline_finishes_before_sunday_noon(self):
+        schedules = {
+            "weekly.yml": 'cron: "0 12 * * 0"',
+            "advanced-metrics-v1.yml": 'cron: "30 13 * * 0"',
+            "player-intelligence-v1.yml": 'cron: "15 14 * * 0"',
+            "weekly-research-refresh.yml": 'cron: "0 15 * * 0"',
+        }
+        for workflow, expected in schedules.items():
+            with self.subTest(workflow=workflow):
+                source = (WORKFLOWS / workflow).read_text()
+                self.assertIn(expected, source)
+
     def test_scheduled_writers_are_serialized_and_checkout_current_main(self):
         dedicated_groups = {
             "live-score-pulse.yml": "thi-live-score-pulse",

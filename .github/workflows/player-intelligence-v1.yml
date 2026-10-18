@@ -8,7 +8,8 @@ on:
         required: false
         default: "0"
   schedule:
-    - cron: "35 12 * * 1"
+    # Sunday 10:15 AM ET during the season, after weekly team metrics.
+    - cron: "15 14 * * 0"
 
 permissions:
   contents: write
