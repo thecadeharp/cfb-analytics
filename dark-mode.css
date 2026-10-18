@@ -278,26 +278,72 @@ html[data-theme="dark"] .thi-band-poor { background:#603c23 !important; color:#f
 html[data-theme="dark"] .thi-band-critical { background:#692f30 !important; color:#ffd9d6 !important; }
 html[data-theme="dark"] .thi-band-missing { background:#202832 !important; color:#8995a1 !important; }
 html[data-theme="dark"] .thi-band-regression { background:#30294a !important; color:#d6c9ff !important; }
-html[data-theme="dark"] #hammer-postgame-analytics .hammer-pg-band-elite { background:#0c6049 !important; color:#f2fffb !important; }
-html[data-theme="dark"] #hammer-postgame-analytics .hammer-pg-band-strong { background:#217353 !important; color:#f2fffb !important; }
-html[data-theme="dark"] #hammer-postgame-analytics .hammer-pg-band-above { background:#254d3e !important; color:#d7f4e8 !important; }
-html[data-theme="dark"] #hammer-postgame-analytics .hammer-pg-band-average { background:#29313a !important; color:#d4dbe2 !important; }
-html[data-theme="dark"] #hammer-postgame-analytics .hammer-pg-band-below { background:#4a3d1f !important; color:#f2d77d !important; }
-html[data-theme="dark"] #hammer-postgame-analytics .hammer-pg-band-poor { background:#603c23 !important; color:#ffd1a9 !important; }
-html[data-theme="dark"] #hammer-postgame-analytics .hammer-pg-band-critical { background:#692f30 !important; color:#ffd9d6 !important; }
+html[data-theme="dark"] #hammer-postgame-analysis .hammer-pg-band-elite { background:#0c6049 !important; color:#f2fffb !important; }
+html[data-theme="dark"] #hammer-postgame-analysis .hammer-pg-band-strong { background:#217353 !important; color:#f2fffb !important; }
+html[data-theme="dark"] #hammer-postgame-analysis .hammer-pg-band-above { background:#254d3e !important; color:#d7f4e8 !important; }
+html[data-theme="dark"] #hammer-postgame-analysis .hammer-pg-band-average { background:#29313a !important; color:#d4dbe2 !important; }
+html[data-theme="dark"] #hammer-postgame-analysis .hammer-pg-band-below { background:#4a3d1f !important; color:#f2d77d !important; }
+html[data-theme="dark"] #hammer-postgame-analysis .hammer-pg-band-poor { background:#603c23 !important; color:#ffd1a9 !important; }
+html[data-theme="dark"] #hammer-postgame-analysis .hammer-pg-band-critical { background:#692f30 !important; color:#ffd9d6 !important; }
+html[data-theme="dark"] #hammer-postgame-analysis .hammer-pg-band-missing { background:#202832 !important; color:#aebbc7 !important; }
 
 html[data-theme="dark"] #thi-market-story :is(.thi-market-head,.thi-market-grid,.thi-market-card,.thi-market-empty),
 html[data-theme="dark"] #thi-market-story .thi-market-panel,
 html[data-theme="dark"] #thi-performance-scorecard :is(.perf-stat,.perf-period),
-html[data-theme="dark"] #thi-postgame-panel :is(.pg-metric,.pg-note),
-html[data-theme="dark"] #hammer-postgame-analytics :is(.hammer-pg-card,.hammer-pg-row,.hammer-pg-pending) {
+html[data-theme="dark"] #hammer-postgame-analysis :is(.pg-card,.pg-metric,.pg-method,.pg-pending),
+html[data-theme="dark"] #hammer-postgame-analysis :is(.hammer-pg-card,.hammer-pg-panel,.hammer-pg-heat-card,.hammer-pg-pending) {
   background:var(--surface) !important; color:var(--text) !important;
 }
 html[data-theme="dark"] #thi-market-story :is(.thi-market-head,.thi-market-empty),
 html[data-theme="dark"] #thi-performance-scorecard th,
-html[data-theme="dark"] #thi-postgame-panel .pg-note {
+html[data-theme="dark"] #hammer-postgame-analysis :is(.pg-method,.pg-note) {
   background:var(--surface-soft) !important;
 }
+
+/* Postgame analytics render their own light-mode card CSS after page load. Keep
+   every postgame surface explicitly themed so late-injected rules cannot create
+   white cards with light text in dark mode. */
+html[data-theme="dark"] #hammer-postgame-analysis {
+  background:#111720 !important;
+  border-color:#3a4653 !important;
+  color:#e6edf3 !important;
+}
+html[data-theme="dark"] #hammer-postgame-analysis :is(.hammer-pg-card,.hammer-pg-panel,.hammer-pg-heat-card,.pg-card,.pg-metric) {
+  background:#1b2430 !important;
+  border-color:#3b4857 !important;
+  box-shadow:none !important;
+}
+html[data-theme="dark"] #hammer-postgame-analysis :is(.hammer-pg-card-value,.hammer-pg-panel-title,.hammer-pg-heat-title,.pg-title,.pg-value,.pg-metric-value) {
+  color:#f4f7fa !important;
+}
+html[data-theme="dark"] #hammer-postgame-analysis :is(.hammer-pg-subtitle,.hammer-pg-card-label,.hammer-pg-card-note,.hammer-pg-team-head,.hammer-pg-row-label,.hammer-pg-heat-subtitle,.hammer-pg-heat-coverage,.hammer-pg-footer,.pg-kicker,.pg-label,.pg-team,.pg-note,.pg-section-title,.pg-metric-name) {
+  color:#b4c0cb !important;
+}
+html[data-theme="dark"] #hammer-postgame-analysis .hammer-pg-row {
+  border-color:#34404c !important;
+}
+html[data-theme="dark"] #hammer-postgame-analysis .hammer-pg-beta {
+  background:#3f351d !important;
+  border-color:#806d31 !important;
+  color:#f3dc89 !important;
+}
+
+html[data-theme="dark"] .final-result-panel {
+  background:#111720 !important;
+  border-color:#3a4653 !important;
+  color:#e6edf3 !important;
+}
+html[data-theme="dark"] .final-result-panel .final-result-score { color:#f4f7fa !important; }
+html[data-theme="dark"] .final-result-panel .final-result-item {
+  background:#1b2430 !important;
+  border-color:#3b4857 !important;
+  color:#f4f7fa !important;
+}
+html[data-theme="dark"] .final-result-panel .final-result-item span:first-child { color:#aebbc7 !important; }
+html[data-theme="dark"] .final-result-panel .final-result-item span:last-child { color:#f4f7fa !important; }
+html[data-theme="dark"] .final-result-panel .result-win { background:#153b31 !important; border-color:#326a59 !important; color:#8de0c1 !important; }
+html[data-theme="dark"] .final-result-panel .result-loss { background:#3b2222 !important; border-color:#70403d !important; color:#ffaaa1 !important; }
+html[data-theme="dark"] .final-result-panel .result-push { background:#3f351d !important; border-color:#806d31 !important; color:#f3dc89 !important; }
 
 html[data-theme="dark"] :is(.status.agree,.status.inline,.result-pending,.grade-na,.tag-neutral) {
   background:#252d38 !important; color:var(--muted) !important; border-color:var(--border-dark) !important;
