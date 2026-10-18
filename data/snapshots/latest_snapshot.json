@@ -1,674 +1,16 @@
 {
-  "captured_at_utc": "2026-10-18T00:05:04.118592+00:00",
+  "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
   "model_version": "production-model-a-2026-week1-freeze-v1",
-  "snapshots_added": 11,
+  "snapshots_added": 40,
   "excluded_untracked_games": 127,
   "ledger_path": "data/snapshots/projection_market_snapshots.jsonl",
   "note": "Prospective timestamped Model A model/market snapshot. Closing lines are evaluation targets only. tracking_eligible=false and FCS fallback games are excluded.",
   "snapshots": [
     {
-      "snapshot_id": "aa192a29451f0b2eb96c72cd",
-      "captured_at_utc": "2026-10-18T00:05:04.118592+00:00",
+      "snapshot_id": "e10eccceafdfb9989fc75f6b",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-18T00:05:03.890517",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401864523,
-      "week": 7,
-      "start_date": "2026-10-18T01:00:00.000Z",
-      "home_team": "UTEP",
-      "away_team": "San Jose State",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 12.0,
-        "total": 48.5,
-        "home_win_probability": 22.7
-      },
-      "public_projection": {
-        "home_spread": 12.0,
-        "total": 48.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "60\u00b0F \u00b7 6 mph wind \u00b7 gusts 14 \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "ACTIVE"
-      },
-      "market_at_snapshot": {
-        "home_spread": 6.5,
-        "total": 45.5,
-        "bookmaker": "Consensus (9 books)",
-        "reference_spread": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "home_spread": 6.5,
-          "home_price": -105,
-          "away_spread": -6.5,
-          "away_price": -115,
-          "last_update": "2026-10-18T00:05:00Z",
-          "implied_probability": {
-            "home": 0.51219512,
-            "away": 0.53488372
-          },
-          "no_vig_probability": {
-            "home": 0.48916576,
-            "away": 0.51083424
-          },
-          "overround": 0.04707884,
-          "price_format": "american"
-        },
-        "reference_total": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "total": 45.5,
-          "under_total": 45.5,
-          "over_price": -110,
-          "under_price": -110,
-          "last_update": "2026-10-18T00:05:00Z",
-          "implied_probability": {
-            "over": 0.52380952,
-            "under": 0.52380952
-          },
-          "no_vig_probability": {
-            "over": 0.5,
-            "under": 0.5
-          },
-          "overround": 0.04761905,
-          "price_format": "american"
-        },
-        "price_policy": "single_book_two_sided_quote_only"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 5.5,
-        "preferred_side": "San Jose State",
-        "market_disagreement_status": "EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "502c445888cf219c39cc3e36",
-      "captured_at_utc": "2026-10-18T00:05:04.118592+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-18T00:05:03.890517",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401866445,
-      "week": 7,
-      "start_date": "2026-10-18T02:00:00.000Z",
-      "home_team": "Sacramento State",
-      "away_team": "Ohio",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 8.0,
-        "total": 49.0,
-        "home_win_probability": 30.9
-      },
-      "public_projection": {
-        "home_spread": 8.0,
-        "total": 49.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "76\u00b0F \u00b7 4 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "ACTIVE"
-      },
-      "market_at_snapshot": {
-        "home_spread": 16.5,
-        "total": 46.5,
-        "bookmaker": "Consensus (9 books)",
-        "reference_spread": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "home_spread": 17.0,
-          "home_price": -116,
-          "away_spread": -17.0,
-          "away_price": -104,
-          "last_update": "2026-10-18T00:05:00Z",
-          "implied_probability": {
-            "home": 0.53703704,
-            "away": 0.50980392
-          },
-          "no_vig_probability": {
-            "home": 0.51300728,
-            "away": 0.48699272
-          },
-          "overround": 0.04684096,
-          "price_format": "american"
-        },
-        "reference_total": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "total": 46.5,
-          "under_total": 46.5,
-          "over_price": -110,
-          "under_price": -110,
-          "last_update": "2026-10-18T00:05:00Z",
-          "implied_probability": {
-            "over": 0.52380952,
-            "under": 0.52380952
-          },
-          "no_vig_probability": {
-            "over": 0.5,
-            "under": 0.5
-          },
-          "overround": 0.04761905,
-          "price_format": "american"
-        },
-        "price_policy": "single_book_two_sided_quote_only"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 8.5,
-        "preferred_side": "Sacramento State",
-        "market_disagreement_status": "STRONG EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "9ff2dfcd329cdda2d323da10",
-      "captured_at_utc": "2026-10-18T00:05:04.118592+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-18T00:05:03.890517",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401856833,
-      "week": 7,
-      "start_date": "2026-10-18T02:15:00.000Z",
-      "home_team": "Colorado",
-      "away_team": "Utah",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 18.5,
-        "total": 54.5,
-        "home_win_probability": 12.4
-      },
-      "public_projection": {
-        "home_spread": 18.5,
-        "total": 54.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "61\u00b0F \u00b7 9 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "ACTIVE"
-      },
-      "market_at_snapshot": {
-        "home_spread": 15.5,
-        "total": 49.5,
-        "bookmaker": "Consensus (10 books)",
-        "reference_spread": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "home_spread": 16.0,
-          "home_price": -115,
-          "away_spread": -16.0,
-          "away_price": -105,
-          "last_update": "2026-10-18T00:05:00Z",
-          "implied_probability": {
-            "home": 0.53488372,
-            "away": 0.51219512
-          },
-          "no_vig_probability": {
-            "home": 0.51083424,
-            "away": 0.48916576
-          },
-          "overround": 0.04707884,
-          "price_format": "american"
-        },
-        "reference_total": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "total": 49.5,
-          "under_total": 49.5,
-          "over_price": -105,
-          "under_price": -115,
-          "last_update": "2026-10-18T00:05:00Z",
-          "implied_probability": {
-            "over": 0.51219512,
-            "under": 0.53488372
-          },
-          "no_vig_probability": {
-            "over": 0.48916576,
-            "under": 0.51083424
-          },
-          "overround": 0.04707884,
-          "price_format": "american"
-        },
-        "price_policy": "single_book_two_sided_quote_only"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 3.0,
-        "preferred_side": "Utah",
-        "market_disagreement_status": "SLIGHT EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "b3d07503ad9824efd00bed5d",
-      "captured_at_utc": "2026-10-18T00:05:04.118592+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-18T00:05:03.890517",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401860904,
-      "week": 7,
-      "start_date": "2026-10-18T02:30:00.000Z",
-      "home_team": "San Diego State",
-      "away_team": "Fresno State",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 6.5,
-        "total": 50.5,
-        "home_win_probability": 34.2
-      },
-      "public_projection": {
-        "home_spread": 6.5,
-        "total": 50.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "79\u00b0F \u00b7 3 mph wind \u00b7 gusts 8 \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "ACTIVE"
-      },
-      "market_at_snapshot": {
-        "home_spread": 7.0,
-        "total": 45.5,
-        "bookmaker": "Consensus (9 books)",
-        "reference_spread": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "home_spread": 7.0,
-          "home_price": -110,
-          "away_spread": -7.0,
-          "away_price": -110,
-          "last_update": "2026-10-18T00:05:00Z",
-          "implied_probability": {
-            "home": 0.52380952,
-            "away": 0.52380952
-          },
-          "no_vig_probability": {
-            "home": 0.5,
-            "away": 0.5
-          },
-          "overround": 0.04761905,
-          "price_format": "american"
-        },
-        "reference_total": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "total": 46.0,
-          "under_total": 46.0,
-          "over_price": -108,
-          "under_price": -112,
-          "last_update": "2026-10-18T00:05:00Z",
-          "implied_probability": {
-            "over": 0.51923077,
-            "under": 0.52830189
-          },
-          "no_vig_probability": {
-            "over": 0.49567025,
-            "under": 0.50432975
-          },
-          "overround": 0.04753266,
-          "price_format": "american"
-        },
-        "price_policy": "single_book_two_sided_quote_only"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 0.5,
-        "preferred_side": "San Diego State",
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "2a2225c6c8638d9986661561",
-      "captured_at_utc": "2026-10-18T00:05:04.118592+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-18T00:05:03.890517",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401864521,
-      "week": 7,
-      "start_date": "2026-10-18T02:30:00.000Z",
-      "home_team": "Hawai'i",
-      "away_team": "New Mexico",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 9.5,
-        "total": 52.5,
-        "home_win_probability": 27.6
-      },
-      "public_projection": {
-        "home_spread": 9.5,
-        "total": 52.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "80\u00b0F \u00b7 12 mph wind \u00b7 gusts 29 \u00b7 Dry",
-        "impact": "Moderate",
-        "total_adjustment": -0.5,
-        "spread_adjustment": 0.0,
-        "spread_status": "ACTIVE"
-      },
-      "market_at_snapshot": {
-        "home_spread": 14.5,
-        "total": 45.5,
-        "bookmaker": "Consensus (9 books)",
-        "reference_spread": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "home_spread": 15.5,
-          "home_price": -110,
-          "away_spread": -15.5,
-          "away_price": -110,
-          "last_update": "2026-10-18T00:05:00Z",
-          "implied_probability": {
-            "home": 0.52380952,
-            "away": 0.52380952
-          },
-          "no_vig_probability": {
-            "home": 0.5,
-            "away": 0.5
-          },
-          "overround": 0.04761905,
-          "price_format": "american"
-        },
-        "reference_total": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "total": 46.0,
-          "under_total": 46.0,
-          "over_price": -107,
-          "under_price": -113,
-          "last_update": "2026-10-18T00:05:00Z",
-          "implied_probability": {
-            "over": 0.51690821,
-            "under": 0.53051643
-          },
-          "no_vig_probability": {
-            "over": 0.49350396,
-            "under": 0.50649604
-          },
-          "overround": 0.04742464,
-          "price_format": "american"
-        },
-        "price_policy": "single_book_two_sided_quote_only"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 5.0,
-        "preferred_side": "Hawai'i",
-        "market_disagreement_status": "SLIGHT EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "7d2aa0e83951624fe5d66637",
-      "captured_at_utc": "2026-10-18T00:05:04.118592+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-18T00:05:03.890517",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401858269,
-      "week": 7,
-      "start_date": "2026-10-18T02:30:00.000Z",
-      "home_team": "California",
-      "away_team": "Wake Forest",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 6.0,
-        "total": 52.5,
-        "home_win_probability": 35.4
-      },
-      "public_projection": {
-        "home_spread": 6.0,
-        "total": 52.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "71\u00b0F \u00b7 5 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "ACTIVE"
-      },
-      "market_at_snapshot": {
-        "home_spread": 10.5,
-        "total": 54.5,
-        "bookmaker": "Consensus (10 books)",
-        "reference_spread": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "home_spread": 10.5,
-          "home_price": -110,
-          "away_spread": -10.5,
-          "away_price": -110,
-          "last_update": "2026-10-18T00:05:00Z",
-          "implied_probability": {
-            "home": 0.52380952,
-            "away": 0.52380952
-          },
-          "no_vig_probability": {
-            "home": 0.5,
-            "away": 0.5
-          },
-          "overround": 0.04761905,
-          "price_format": "american"
-        },
-        "reference_total": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "total": 55.0,
-          "under_total": 55.0,
-          "over_price": -110,
-          "under_price": -110,
-          "last_update": "2026-10-18T00:05:00Z",
-          "implied_probability": {
-            "over": 0.52380952,
-            "under": 0.52380952
-          },
-          "no_vig_probability": {
-            "over": 0.5,
-            "under": 0.5
-          },
-          "overround": 0.04761905,
-          "price_format": "american"
-        },
-        "price_policy": "single_book_two_sided_quote_only"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 4.5,
-        "preferred_side": "California",
-        "market_disagreement_status": "SLIGHT EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "748c5c17ea0458d9355c46d5",
-      "captured_at_utc": "2026-10-18T00:05:04.118592+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-18T00:05:03.890517",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401858492,
-      "week": 7,
-      "start_date": "2026-10-18T03:00:00.000Z",
-      "home_team": "Oregon",
-      "away_team": "Nebraska",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -4.0,
-        "total": 54.0,
-        "home_win_probability": 59.9
-      },
-      "public_projection": {
-        "home_spread": -4.0,
-        "total": 54.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "55\u00b0F \u00b7 5 mph wind \u00b7 gusts 16 \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "ACTIVE"
-      },
-      "market_at_snapshot": {
-        "home_spread": -6.5,
-        "total": 51.5,
-        "bookmaker": "Consensus (9 books)",
-        "reference_spread": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "home_spread": -7.0,
-          "home_price": -103,
-          "away_spread": 7.0,
-          "away_price": -117,
-          "last_update": "2026-10-18T00:05:00Z",
-          "implied_probability": {
-            "home": 0.50738916,
-            "away": 0.53917051
-          },
-          "no_vig_probability": {
-            "home": 0.48481628,
-            "away": 0.51518372
-          },
-          "overround": 0.04655967,
-          "price_format": "american"
-        },
-        "reference_total": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "total": 52.0,
-          "under_total": 52.0,
-          "over_price": -105,
-          "under_price": -115,
-          "last_update": "2026-10-18T00:05:00Z",
-          "implied_probability": {
-            "over": 0.51219512,
-            "under": 0.53488372
-          },
-          "no_vig_probability": {
-            "over": 0.48916576,
-            "under": 0.51083424
-          },
-          "overround": 0.04707884,
-          "price_format": "american"
-        },
-        "price_policy": "single_book_two_sided_quote_only"
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 2.5,
-        "preferred_side": "Nebraska",
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "262aceace56b9c617547bfda",
-      "captured_at_utc": "2026-10-18T00:05:04.118592+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-18T00:05:03.890517",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401871055,
@@ -688,43 +30,43 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "79\u00b0F \u00b7 20 mph wind \u00b7 Light rain",
+        "conditions_line": "80\u00b0F \u00b7 20 mph wind \u00b7 Light rain",
         "impact": "Moderate",
         "total_adjustment": -2.0,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
       "market_at_snapshot": {
-        "home_spread": -10.0,
+        "home_spread": -10.5,
         "total": 45.5,
-        "bookmaker": "Consensus (3 books)",
+        "bookmaker": "Consensus (8 books)",
         "reference_spread": {
-          "bookmaker": "DraftKings",
-          "bookmaker_key": "draftkings",
-          "home_spread": -10.0,
-          "home_price": -110,
-          "away_spread": 10.0,
-          "away_price": -110,
-          "last_update": "2026-10-18T00:04:24Z",
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "home_spread": -9.5,
+          "home_price": -120,
+          "away_spread": 9.5,
+          "away_price": 100,
+          "last_update": "2026-10-18T14:02:58Z",
           "implied_probability": {
-            "home": 0.52380952,
-            "away": 0.52380952
-          },
-          "no_vig_probability": {
-            "home": 0.5,
+            "home": 0.54545455,
             "away": 0.5
           },
-          "overround": 0.04761905,
+          "no_vig_probability": {
+            "home": 0.52173913,
+            "away": 0.47826087
+          },
+          "overround": 0.04545455,
           "price_format": "american"
         },
         "reference_total": {
-          "bookmaker": "DraftKings",
-          "bookmaker_key": "draftkings",
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
           "total": 45.5,
           "under_total": 45.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-10-18T00:04:24Z",
+          "last_update": "2026-10-18T14:02:58Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -739,8 +81,8 @@
         "price_policy": "single_book_two_sided_quote_only"
       },
       "comparison_at_snapshot": {
-        "disagreement": 0.5,
-        "preferred_side": "Florida International",
+        "disagreement": 0.0,
+        "preferred_side": null,
         "market_disagreement_status": "ALIGNED",
         "status_system": "v2_the_signal"
       },
@@ -759,10 +101,104 @@
       }
     },
     {
-      "snapshot_id": "67c8532a1d59dc46094d7942",
-      "captured_at_utc": "2026-10-18T00:05:04.118592+00:00",
+      "snapshot_id": "a5918613dccb0c9d7480cf1f",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-18T00:05:03.890517",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401871069,
+      "week": 8,
+      "start_date": "2026-10-20T23:00:00.000Z",
+      "home_team": "Delaware",
+      "away_team": "Missouri State",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -5.5,
+        "total": 49.5,
+        "home_win_probability": 63.4
+      },
+      "public_projection": {
+        "home_spread": -5.5,
+        "total": 49.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "59\u00b0F \u00b7 5 mph wind \u00b7 gusts 11 \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -3.0,
+        "total": 51.5,
+        "bookmaker": "Consensus (7 books)",
+        "reference_spread": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "home_spread": -3.5,
+          "home_price": -110,
+          "away_spread": 3.5,
+          "away_price": -110,
+          "last_update": "2026-10-18T14:02:58Z",
+          "implied_probability": {
+            "home": 0.52380952,
+            "away": 0.52380952
+          },
+          "no_vig_probability": {
+            "home": 0.5,
+            "away": 0.5
+          },
+          "overround": 0.04761905,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "total": 52.0,
+          "under_total": 52.0,
+          "over_price": -110,
+          "under_price": -110,
+          "last_update": "2026-10-18T14:02:58Z",
+          "implied_probability": {
+            "over": 0.52380952,
+            "under": 0.52380952
+          },
+          "no_vig_probability": {
+            "over": 0.5,
+            "under": 0.5
+          },
+          "overround": 0.04761905,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 2.5,
+        "preferred_side": "Delaware",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "1064b557895b4939acc95b0c",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401871092,
@@ -789,17 +225,17 @@
         "spread_status": "ACTIVE"
       },
       "market_at_snapshot": {
-        "home_spread": 3.5,
+        "home_spread": 3.0,
         "total": 62.5,
-        "bookmaker": "Consensus (3 books)",
+        "bookmaker": "Consensus (8 books)",
         "reference_spread": {
-          "bookmaker": "DraftKings",
-          "bookmaker_key": "draftkings",
-          "home_spread": 3.5,
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "home_spread": 3.0,
           "home_price": -110,
-          "away_spread": -3.5,
+          "away_spread": -3.0,
           "away_price": -110,
-          "last_update": "2026-10-18T00:04:24Z",
+          "last_update": "2026-10-18T14:02:58Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -812,13 +248,13 @@
           "price_format": "american"
         },
         "reference_total": {
-          "bookmaker": "DraftKings",
-          "bookmaker_key": "draftkings",
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
           "total": 62.5,
           "under_total": 62.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-10-18T00:04:24Z",
+          "last_update": "2026-10-18T14:02:58Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -833,7 +269,7 @@
         "price_policy": "single_book_two_sided_quote_only"
       },
       "comparison_at_snapshot": {
-        "disagreement": 5.0,
+        "disagreement": 4.5,
         "preferred_side": "Marshall",
         "market_disagreement_status": "SLIGHT EDGE",
         "status_system": "v2_the_signal"
@@ -853,10 +289,10 @@
       }
     },
     {
-      "snapshot_id": "6f9f002f094caae339dec451",
-      "captured_at_utc": "2026-10-18T00:05:04.118592+00:00",
+      "snapshot_id": "7a8c92fa0bd6ee0b6ee3bff2",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-18T00:05:03.890517",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401871070,
@@ -884,16 +320,16 @@
       },
       "market_at_snapshot": {
         "home_spread": 2.5,
-        "total": 47.5,
-        "bookmaker": "Consensus (3 books)",
+        "total": 46.5,
+        "bookmaker": "Consensus (8 books)",
         "reference_spread": {
-          "bookmaker": "DraftKings",
-          "bookmaker_key": "draftkings",
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
           "home_spread": 2.5,
           "home_price": -110,
           "away_spread": -2.5,
           "away_price": -110,
-          "last_update": "2026-10-18T00:04:24Z",
+          "last_update": "2026-10-18T14:02:58Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -906,13 +342,13 @@
           "price_format": "american"
         },
         "reference_total": {
-          "bookmaker": "DraftKings",
-          "bookmaker_key": "draftkings",
-          "total": 47.5,
-          "under_total": 47.5,
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "total": 46.0,
+          "under_total": 46.0,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-10-18T00:04:24Z",
+          "last_update": "2026-10-18T14:02:58Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -947,10 +383,104 @@
       }
     },
     {
-      "snapshot_id": "269727df7a25e117b1abea1a",
-      "captured_at_utc": "2026-10-18T00:05:04.118592+00:00",
+      "snapshot_id": "96c36459b9d62756849b055e",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-10-18T00:05:03.890517",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401869845,
+      "week": 8,
+      "start_date": "2026-10-22T23:00:00.000Z",
+      "home_team": "App State",
+      "away_team": "James Madison",
+      "neutral_site": false,
+      "model": {
+        "home_spread": 9.0,
+        "total": 52.5,
+        "home_win_probability": 28.7
+      },
+      "public_projection": {
+        "home_spread": 9.0,
+        "total": 52.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "49\u00b0F \u00b7 4 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": -0.5,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": 10.0,
+        "total": 57.5,
+        "bookmaker": "Consensus (8 books)",
+        "reference_spread": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "home_spread": 10.0,
+          "home_price": -115,
+          "away_spread": -10.0,
+          "away_price": -105,
+          "last_update": "2026-10-18T14:02:58Z",
+          "implied_probability": {
+            "home": 0.53488372,
+            "away": 0.51219512
+          },
+          "no_vig_probability": {
+            "home": 0.51083424,
+            "away": 0.48916576
+          },
+          "overround": 0.04707884,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "total": 57.5,
+          "under_total": 57.5,
+          "over_price": -110,
+          "under_price": -110,
+          "last_update": "2026-10-18T14:02:58Z",
+          "implied_probability": {
+            "over": 0.52380952,
+            "under": 0.52380952
+          },
+          "no_vig_probability": {
+            "over": 0.5,
+            "under": 0.5
+          },
+          "overround": 0.04761905,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 1.0,
+        "preferred_side": "App State",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "aad30bc4051834c417bc02c6",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401871056,
@@ -970,24 +500,1152 @@
         "weather_applied": true
       },
       "weather_at_snapshot": {
-        "conditions_line": "67\u00b0F \u00b7 6 mph wind \u00b7 gusts 15 \u00b7 Dry",
+        "conditions_line": "66\u00b0F \u00b7 6 mph wind \u00b7 gusts 15 \u00b7 Dry",
         "impact": "Minimal",
         "total_adjustment": 0.0,
         "spread_adjustment": 0.0,
         "spread_status": "ACTIVE"
       },
       "market_at_snapshot": {
-        "home_spread": 8.5,
+        "home_spread": 10.0,
+        "total": 48.0,
+        "bookmaker": "Consensus (8 books)",
+        "reference_spread": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "home_spread": 10.0,
+          "home_price": -110,
+          "away_spread": -10.0,
+          "away_price": -110,
+          "last_update": "2026-10-18T14:02:58Z",
+          "implied_probability": {
+            "home": 0.52380952,
+            "away": 0.52380952
+          },
+          "no_vig_probability": {
+            "home": 0.5,
+            "away": 0.5
+          },
+          "overround": 0.04761905,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "total": 48.0,
+          "under_total": 48.0,
+          "over_price": -110,
+          "under_price": -110,
+          "last_update": "2026-10-18T14:02:58Z",
+          "implied_probability": {
+            "over": 0.52380952,
+            "under": 0.52380952
+          },
+          "no_vig_probability": {
+            "over": 0.5,
+            "under": 0.5
+          },
+          "overround": 0.04761905,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 0.5,
+        "preferred_side": "Liberty",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "ea7910baa75a8cceeccf508d",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401862807,
+      "week": 8,
+      "start_date": "2026-10-22T23:30:00.000Z",
+      "home_team": "Memphis",
+      "away_team": "East Carolina",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -14.0,
+        "total": 54.0,
+        "home_win_probability": 80.9
+      },
+      "public_projection": {
+        "home_spread": -14.0,
+        "total": 54.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "78\u00b0F \u00b7 5 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -9.5,
+        "total": 53.5,
+        "bookmaker": "Consensus (8 books)",
+        "reference_spread": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "home_spread": -9.5,
+          "home_price": -110,
+          "away_spread": 9.5,
+          "away_price": -110,
+          "last_update": "2026-10-18T14:02:58Z",
+          "implied_probability": {
+            "home": 0.52380952,
+            "away": 0.52380952
+          },
+          "no_vig_probability": {
+            "home": 0.5,
+            "away": 0.5
+          },
+          "overround": 0.04761905,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "total": 53.5,
+          "under_total": 53.5,
+          "over_price": -110,
+          "under_price": -110,
+          "last_update": "2026-10-18T14:02:58Z",
+          "implied_probability": {
+            "over": 0.52380952,
+            "under": 0.52380952
+          },
+          "no_vig_probability": {
+            "over": 0.5,
+            "under": 0.5
+          },
+          "overround": 0.04761905,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 4.5,
+        "preferred_side": "Memphis",
+        "market_disagreement_status": "SLIGHT EDGE",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "0b9ea1e8084683522648da63",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401858271,
+      "week": 8,
+      "start_date": "2026-10-23T23:00:00.000Z",
+      "home_team": "Virginia",
+      "away_team": "Duke",
+      "neutral_site": false,
+      "model": {
+        "home_spread": 0.5,
+        "total": 53.5,
+        "home_win_probability": 48.8
+      },
+      "public_projection": {
+        "home_spread": 0.5,
+        "total": 53.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "54\u00b0F \u00b7 4 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -2.5,
         "total": 47.5,
+        "bookmaker": "Consensus (8 books)",
+        "reference_spread": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "home_spread": -1.5,
+          "home_price": -105,
+          "away_spread": 1.5,
+          "away_price": -115,
+          "last_update": "2026-10-18T14:02:58Z",
+          "implied_probability": {
+            "home": 0.51219512,
+            "away": 0.53488372
+          },
+          "no_vig_probability": {
+            "home": 0.48916576,
+            "away": 0.51083424
+          },
+          "overround": 0.04707884,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "total": 47.5,
+          "under_total": 47.5,
+          "over_price": -110,
+          "under_price": -110,
+          "last_update": "2026-10-18T14:02:58Z",
+          "implied_probability": {
+            "over": 0.52380952,
+            "under": 0.52380952
+          },
+          "no_vig_probability": {
+            "over": 0.5,
+            "under": 0.5
+          },
+          "overround": 0.04761905,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 3.0,
+        "preferred_side": "Duke",
+        "market_disagreement_status": "SLIGHT EDGE",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "d737727558d542af6f2037e3",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401861965,
+      "week": 8,
+      "start_date": "2026-10-23T23:00:00.000Z",
+      "home_team": "UConn",
+      "away_team": "Massachusetts",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -4.0,
+        "total": 52.5,
+        "home_win_probability": 59.9
+      },
+      "public_projection": {
+        "home_spread": -4.0,
+        "total": 52.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "51\u00b0F \u00b7 7 mph wind \u00b7 gusts 21 \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -16.5,
+        "total": 47.5,
+        "bookmaker": "Consensus (7 books)",
+        "reference_spread": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "home_spread": -16.5,
+          "home_price": -105,
+          "away_spread": 16.5,
+          "away_price": -115,
+          "last_update": "2026-10-18T14:02:58Z",
+          "implied_probability": {
+            "home": 0.51219512,
+            "away": 0.53488372
+          },
+          "no_vig_probability": {
+            "home": 0.48916576,
+            "away": 0.51083424
+          },
+          "overround": 0.04707884,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "total": 47.5,
+          "under_total": 47.5,
+          "over_price": -110,
+          "under_price": -110,
+          "last_update": "2026-10-18T14:02:58Z",
+          "implied_probability": {
+            "over": 0.52380952,
+            "under": 0.52380952
+          },
+          "no_vig_probability": {
+            "over": 0.5,
+            "under": 0.5
+          },
+          "overround": 0.04761905,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 12.5,
+        "preferred_side": "Massachusetts",
+        "market_disagreement_status": "OUTLIER",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "d235d0103406435b1403351f",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401862808,
+      "week": 8,
+      "start_date": "2026-10-24T00:30:00.000Z",
+      "home_team": "Tulsa",
+      "away_team": "Army",
+      "neutral_site": false,
+      "model": {
+        "home_spread": 3.0,
+        "total": 52.0,
+        "home_win_probability": 42.6
+      },
+      "public_projection": {
+        "home_spread": 3.0,
+        "total": 52.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "74\u00b0F \u00b7 6 mph wind \u00b7 gusts 13 \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -1.5,
+        "total": 52.5,
+        "bookmaker": "Consensus (8 books)",
+        "reference_spread": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "home_spread": 1.0,
+          "home_price": -105,
+          "away_spread": -1.0,
+          "away_price": -115,
+          "last_update": "2026-10-18T14:02:58Z",
+          "implied_probability": {
+            "home": 0.51219512,
+            "away": 0.53488372
+          },
+          "no_vig_probability": {
+            "home": 0.48916576,
+            "away": 0.51083424
+          },
+          "overround": 0.04707884,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "total": 53.5,
+          "under_total": 53.5,
+          "over_price": -110,
+          "under_price": -110,
+          "last_update": "2026-10-18T14:02:58Z",
+          "implied_probability": {
+            "over": 0.52380952,
+            "under": 0.52380952
+          },
+          "no_vig_probability": {
+            "over": 0.5,
+            "under": 0.5
+          },
+          "overround": 0.04761905,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 4.5,
+        "preferred_side": "Army",
+        "market_disagreement_status": "SLIGHT EDGE",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "cb8838bbb5c1302b6b1509f3",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401864525,
+      "week": 8,
+      "start_date": "2026-10-24T01:00:00.000Z",
+      "home_team": "Wyoming",
+      "away_team": "Air Force",
+      "neutral_site": false,
+      "model": {
+        "home_spread": 7.5,
+        "total": 52.5,
+        "home_win_probability": 32.0
+      },
+      "public_projection": {
+        "home_spread": 7.5,
+        "total": 49.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "49\u00b0F \u00b7 20 mph wind \u00b7 gusts 38 \u00b7 Dry",
+        "impact": "Moderate",
+        "total_adjustment": -3.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": 7.0,
+        "total": 44.5,
+        "bookmaker": "Consensus (7 books)",
+        "reference_spread": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "home_spread": 7.0,
+          "home_price": -112,
+          "away_spread": -7.0,
+          "away_price": -108,
+          "last_update": "2026-10-18T14:02:58Z",
+          "implied_probability": {
+            "home": 0.52830189,
+            "away": 0.51923077
+          },
+          "no_vig_probability": {
+            "home": 0.50432975,
+            "away": 0.49567025
+          },
+          "overround": 0.04753266,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "total": 44.5,
+          "under_total": 44.5,
+          "over_price": -110,
+          "under_price": -110,
+          "last_update": "2026-10-18T14:02:58Z",
+          "implied_probability": {
+            "over": 0.52380952,
+            "under": 0.52380952
+          },
+          "no_vig_probability": {
+            "over": 0.5,
+            "under": 0.5
+          },
+          "overround": 0.04761905,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 0.5,
+        "preferred_side": "Air Force",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "dd41c589fb8430da9c224d1b",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401858272,
+      "week": 8,
+      "start_date": "2026-10-24T02:30:00.000Z",
+      "home_team": "Stanford",
+      "away_team": "NC State",
+      "neutral_site": false,
+      "model": {
+        "home_spread": 1.0,
+        "total": 49.5,
+        "home_win_probability": 47.5
+      },
+      "public_projection": {
+        "home_spread": 1.0,
+        "total": 49.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "65\u00b0F \u00b7 4 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": 7.5,
+        "total": 56.0,
+        "bookmaker": "Consensus (7 books)",
+        "reference_spread": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "home_spread": 7.5,
+          "home_price": -115,
+          "away_spread": -7.5,
+          "away_price": -105,
+          "last_update": "2026-10-18T14:02:58Z",
+          "implied_probability": {
+            "home": 0.53488372,
+            "away": 0.51219512
+          },
+          "no_vig_probability": {
+            "home": 0.51083424,
+            "away": 0.48916576
+          },
+          "overround": 0.04707884,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "total": 56.5,
+          "under_total": 56.5,
+          "over_price": -110,
+          "under_price": -110,
+          "last_update": "2026-10-18T14:02:58Z",
+          "implied_probability": {
+            "over": 0.52380952,
+            "under": 0.52380952
+          },
+          "no_vig_probability": {
+            "over": 0.5,
+            "under": 0.5
+          },
+          "overround": 0.04761905,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 6.5,
+        "preferred_side": "Stanford",
+        "market_disagreement_status": "EDGE",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "0012af394026a469f443c2cc",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401856835,
+      "week": 8,
+      "start_date": "2026-10-24T04:00:00.000Z",
+      "home_team": "UCF",
+      "away_team": "BYU",
+      "neutral_site": false,
+      "model": {
+        "home_spread": 10.0,
+        "total": 54.0,
+        "home_win_probability": 26.6
+      },
+      "public_projection": {
+        "home_spread": 10.0,
+        "total": 53.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "73\u00b0F \u00b7 9 mph wind \u00b7 gusts 21 \u00b7 Light rain",
+        "impact": "Moderate",
+        "total_adjustment": -0.5,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": 7.5,
+        "total": 46.0,
+        "bookmaker": "Consensus (4 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": 7.0,
+          "home_price": -113,
+          "away_spread": -7.0,
+          "away_price": -110,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.53051643,
+            "away": 0.52380952
+          },
+          "no_vig_probability": {
+            "home": 0.50318066,
+            "away": 0.49681934
+          },
+          "overround": 0.05432596,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 45.5,
+          "under_total": 45.5,
+          "over_price": -108,
+          "under_price": -115,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.51923077,
+            "under": 0.53488372
+          },
+          "no_vig_probability": {
+            "over": 0.49257531,
+            "under": 0.50742469
+          },
+          "overround": 0.05411449,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 2.5,
+        "preferred_side": "BYU",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "e08a2aaad005d7f8899aec12",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401856834,
+      "week": 8,
+      "start_date": "2026-10-24T04:00:00.000Z",
+      "home_team": "Kansas",
+      "away_team": "Baylor",
+      "neutral_site": false,
+      "model": {
+        "home_spread": 3.0,
+        "total": 53.0,
+        "home_win_probability": 42.6
+      },
+      "public_projection": {
+        "home_spread": 3.0,
+        "total": 52.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "67\u00b0F \u00b7 13 mph wind \u00b7 gusts 32 \u00b7 Dry",
+        "impact": "Moderate",
+        "total_adjustment": -0.5,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": 2.5,
+        "total": 54.5,
+        "bookmaker": "Consensus (2 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": 2.5,
+          "home_price": -106,
+          "away_spread": -2.5,
+          "away_price": -118,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.51456311,
+            "away": 0.5412844
+          },
+          "no_vig_probability": {
+            "home": 0.48734604,
+            "away": 0.51265396
+          },
+          "overround": 0.05584751,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 54.5,
+          "under_total": 54.5,
+          "over_price": -107,
+          "under_price": -117,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.51690821,
+            "under": 0.53917051
+          },
+          "no_vig_probability": {
+            "over": 0.48945993,
+            "under": 0.51054007
+          },
+          "overround": 0.05607872,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 0.5,
+        "preferred_side": "Baylor",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "78f8858218da68aefa82a7a1",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401856836,
+      "week": 8,
+      "start_date": "2026-10-24T04:00:00.000Z",
+      "home_team": "Oklahoma State",
+      "away_team": "Colorado",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -10.0,
+        "total": 51.0,
+        "home_win_probability": 73.4
+      },
+      "public_projection": {
+        "home_spread": -10.0,
+        "total": 50.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "64\u00b0F \u00b7 10 mph wind \u00b7 gusts 28 \u00b7 Dry",
+        "impact": "Moderate",
+        "total_adjustment": -0.5,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -13.0,
+        "total": 55.5,
+        "bookmaker": "Consensus (2 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": -13.5,
+          "home_price": -117,
+          "away_spread": 13.5,
+          "away_price": -107,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.53917051,
+            "away": 0.51690821
+          },
+          "no_vig_probability": {
+            "home": 0.51054007,
+            "away": 0.48945993
+          },
+          "overround": 0.05607872,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 55.5,
+          "under_total": 55.5,
+          "over_price": -115,
+          "under_price": -108,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.53488372,
+            "under": 0.51923077
+          },
+          "no_vig_probability": {
+            "over": 0.50742469,
+            "under": 0.49257531
+          },
+          "overround": 0.05411449,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 3.0,
+        "preferred_side": "Colorado",
+        "market_disagreement_status": "SLIGHT EDGE",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "58159254cf9af58f43b200a6",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401856837,
+      "week": 8,
+      "start_date": "2026-10-24T04:00:00.000Z",
+      "home_team": "Utah",
+      "away_team": "Houston",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -11.5,
+        "total": 57.0,
+        "home_win_probability": 76.4
+      },
+      "public_projection": {
+        "home_spread": -11.5,
+        "total": 56.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "52\u00b0F \u00b7 5 mph wind \u00b7 gusts 10 \u00b7 Light rain",
+        "impact": "Moderate",
+        "total_adjustment": -0.5,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -5.5,
+        "total": 55.5,
         "bookmaker": "Consensus (3 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": -5.5,
+          "home_price": -112,
+          "away_spread": 5.5,
+          "away_price": -112,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.52830189,
+            "away": 0.52830189
+          },
+          "no_vig_probability": {
+            "home": 0.5,
+            "away": 0.5
+          },
+          "overround": 0.05660377,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 55.5,
+          "under_total": 55.5,
+          "over_price": -112,
+          "under_price": -112,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.52830189,
+            "under": 0.52830189
+          },
+          "no_vig_probability": {
+            "over": 0.5,
+            "under": 0.5
+          },
+          "overround": 0.05660377,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 6.0,
+        "preferred_side": "Utah",
+        "market_disagreement_status": "EDGE",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "2ca0118bdee4585bd78014f0",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401858497,
+      "week": 8,
+      "start_date": "2026-10-24T04:00:00.000Z",
+      "home_team": "Minnesota",
+      "away_team": "Iowa",
+      "neutral_site": false,
+      "model": {
+        "home_spread": 4.0,
+        "total": 52.0,
+        "home_win_probability": 40.1
+      },
+      "public_projection": {
+        "home_spread": 4.0,
+        "total": 51.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "64\u00b0F \u00b7 14 mph wind \u00b7 gusts 37 \u00b7 Light rain",
+        "impact": "Moderate",
+        "total_adjustment": -1.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": 5.5,
+        "total": 40.5,
+        "bookmaker": "Consensus (5 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": 5.5,
+          "home_price": -110,
+          "away_spread": -5.5,
+          "away_price": -113,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.52380952,
+            "away": 0.53051643
+          },
+          "no_vig_probability": {
+            "home": 0.49681934,
+            "away": 0.50318066
+          },
+          "overround": 0.05432596,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 40.5,
+          "under_total": 40.5,
+          "over_price": -112,
+          "under_price": -112,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.52830189,
+            "under": 0.52830189
+          },
+          "no_vig_probability": {
+            "over": 0.5,
+            "under": 0.5
+          },
+          "overround": 0.05660377,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 1.5,
+        "preferred_side": "Minnesota",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "98c933f3315b89fd5f76035d",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401856838,
+      "week": 8,
+      "start_date": "2026-10-24T04:00:00.000Z",
+      "home_team": "Arizona",
+      "away_team": "Iowa State",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -12.0,
+        "total": 53.5,
+        "home_win_probability": 77.3
+      },
+      "public_projection": {
+        "home_spread": -12.0,
+        "total": 53.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "72\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -10.0,
+        "total": 50.5,
+        "bookmaker": "Consensus (4 books)",
         "reference_spread": {
           "bookmaker": "DraftKings",
           "bookmaker_key": "draftkings",
-          "home_spread": 8.5,
+          "home_spread": -10.0,
           "home_price": -110,
-          "away_spread": -8.5,
+          "away_spread": 10.0,
           "away_price": -110,
-          "last_update": "2026-10-18T00:04:24Z",
+          "last_update": "2026-10-18T14:02:02Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -1002,11 +1660,11 @@
         "reference_total": {
           "bookmaker": "DraftKings",
           "bookmaker_key": "draftkings",
-          "total": 47.5,
-          "under_total": 47.5,
+          "total": 50.5,
+          "under_total": 50.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-10-18T00:04:24Z",
+          "last_update": "2026-10-18T14:02:02Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -1022,8 +1680,2076 @@
       },
       "comparison_at_snapshot": {
         "disagreement": 2.0,
-        "preferred_side": "Liberty",
+        "preferred_side": "Arizona",
         "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "5d68840daddab18a19ef8094",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401856839,
+      "week": 8,
+      "start_date": "2026-10-24T04:00:00.000Z",
+      "home_team": "Arizona State",
+      "away_team": "Kansas State",
+      "neutral_site": false,
+      "model": {
+        "home_spread": 1.5,
+        "total": 52.5,
+        "home_win_probability": 46.3
+      },
+      "public_projection": {
+        "home_spread": 1.5,
+        "total": 52.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "79\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": 3.5,
+        "total": 56.5,
+        "bookmaker": "Consensus (2 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": 3.5,
+          "home_price": -121,
+          "away_spread": -3.5,
+          "away_price": -103,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.54751131,
+            "away": 0.50738916
+          },
+          "no_vig_probability": {
+            "home": 0.51901703,
+            "away": 0.48098297
+          },
+          "overround": 0.05490047,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 56.5,
+          "under_total": 56.5,
+          "over_price": -109,
+          "under_price": -114,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.5215311,
+            "under": 0.53271028
+          },
+          "no_vig_probability": {
+            "over": 0.494698,
+            "under": 0.505302
+          },
+          "overround": 0.05424138,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 2.0,
+        "preferred_side": "Arizona State",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "4e545d81d40d34f6803dd34a",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401858499,
+      "week": 8,
+      "start_date": "2026-10-24T04:00:00.000Z",
+      "home_team": "UCLA",
+      "away_team": "Michigan State",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -12.5,
+        "total": 53.0,
+        "home_win_probability": 78.3
+      },
+      "public_projection": {
+        "home_spread": -12.5,
+        "total": 53.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "68\u00b0F \u00b7 3 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -13.0,
+        "total": 47.5,
+        "bookmaker": "Consensus (4 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": -13.5,
+          "home_price": -113,
+          "away_spread": 13.5,
+          "away_price": -109,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.53051643,
+            "away": 0.5215311
+          },
+          "no_vig_probability": {
+            "home": 0.5042704,
+            "away": 0.4957296
+          },
+          "overround": 0.05204753,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 47.5,
+          "under_total": 47.5,
+          "over_price": -108,
+          "under_price": -115,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.51923077,
+            "under": 0.53488372
+          },
+          "no_vig_probability": {
+            "over": 0.49257531,
+            "under": 0.50742469
+          },
+          "overround": 0.05411449,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 0.5,
+        "preferred_side": "Michigan State",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "0e8ce622538701e44235a4fd",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401858495,
+      "week": 8,
+      "start_date": "2026-10-24T04:00:00.000Z",
+      "home_team": "Illinois",
+      "away_team": "Oregon",
+      "neutral_site": false,
+      "model": {
+        "home_spread": 7.5,
+        "total": 53.0,
+        "home_win_probability": 32.0
+      },
+      "public_projection": {
+        "home_spread": 7.5,
+        "total": 53.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "58\u00b0F \u00b7 8 mph wind \u00b7 gusts 19 \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": 11.5,
+        "total": 51.5,
+        "bookmaker": "Consensus (3 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": 11.5,
+          "home_price": -110,
+          "away_spread": -11.5,
+          "away_price": -113,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.52380952,
+            "away": 0.53051643
+          },
+          "no_vig_probability": {
+            "home": 0.49681934,
+            "away": 0.50318066
+          },
+          "overround": 0.05432596,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 50.5,
+          "under_total": 50.5,
+          "over_price": -113,
+          "under_price": -110,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.53051643,
+            "under": 0.52380952
+          },
+          "no_vig_probability": {
+            "over": 0.50318066,
+            "under": 0.49681934
+          },
+          "overround": 0.05432596,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 4.0,
+        "preferred_side": "Illinois",
+        "market_disagreement_status": "SLIGHT EDGE",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "0907823110056bb246bb6d20",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401856840,
+      "week": 8,
+      "start_date": "2026-10-24T04:00:00.000Z",
+      "home_team": "Cincinnati",
+      "away_team": "Texas Tech",
+      "neutral_site": false,
+      "model": {
+        "home_spread": 6.0,
+        "total": 54.0,
+        "home_win_probability": 35.4
+      },
+      "public_projection": {
+        "home_spread": 6.0,
+        "total": 54.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "52\u00b0F \u00b7 4 mph wind \u00b7 gusts 14 \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": 11.5,
+        "total": 56.5,
+        "bookmaker": "Consensus (4 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": 11.5,
+          "home_price": -110,
+          "away_spread": -11.5,
+          "away_price": -112,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.52380952,
+            "away": 0.52830189
+          },
+          "no_vig_probability": {
+            "home": 0.49786507,
+            "away": 0.50213493
+          },
+          "overround": 0.05211141,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 56.5,
+          "under_total": 56.5,
+          "over_price": -113,
+          "under_price": -110,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.53051643,
+            "under": 0.52380952
+          },
+          "no_vig_probability": {
+            "over": 0.50318066,
+            "under": 0.49681934
+          },
+          "overround": 0.05432596,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 5.5,
+        "preferred_side": "Cincinnati",
+        "market_disagreement_status": "EDGE",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "640cb203b518664b4db7f3ee",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401858276,
+      "week": 8,
+      "start_date": "2026-10-24T04:00:00.000Z",
+      "home_team": "Clemson",
+      "away_team": "Virginia Tech",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -1.0,
+        "total": 52.0,
+        "home_win_probability": 52.5
+      },
+      "public_projection": {
+        "home_spread": -1.0,
+        "total": 52.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "53\u00b0F \u00b7 5 mph wind \u00b7 gusts 12 \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -2.0,
+        "total": 50.0,
+        "bookmaker": "Consensus (4 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": -2.0,
+          "home_price": -110,
+          "away_spread": 2.0,
+          "away_price": -113,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.52380952,
+            "away": 0.53051643
+          },
+          "no_vig_probability": {
+            "home": 0.49681934,
+            "away": 0.50318066
+          },
+          "overround": 0.05432596,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 50.5,
+          "under_total": 50.5,
+          "over_price": -112,
+          "under_price": -112,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.52830189,
+            "under": 0.52830189
+          },
+          "no_vig_probability": {
+            "over": 0.5,
+            "under": 0.5
+          },
+          "overround": 0.05660377,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 1.0,
+        "preferred_side": "Virginia Tech",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "a170c6b526de5874f7649281",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401858270,
+      "week": 8,
+      "start_date": "2026-10-24T16:00:00.000Z",
+      "home_team": "SMU",
+      "away_team": "California",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -11.5,
+        "total": 52.0,
+        "home_win_probability": 76.4
+      },
+      "public_projection": {
+        "home_spread": -11.5,
+        "total": 52.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "74\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -17.5,
+        "total": 54.5,
+        "bookmaker": "Consensus (4 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": -17.5,
+          "home_price": -109,
+          "away_spread": 17.5,
+          "away_price": -114,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.5215311,
+            "away": 0.53271028
+          },
+          "no_vig_probability": {
+            "home": 0.494698,
+            "away": 0.505302
+          },
+          "overround": 0.05424138,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 54.5,
+          "under_total": 54.5,
+          "over_price": -112,
+          "under_price": -112,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.52830189,
+            "under": 0.52830189
+          },
+          "no_vig_probability": {
+            "over": 0.5,
+            "under": 0.5
+          },
+          "overround": 0.05660377,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 6.0,
+        "preferred_side": "California",
+        "market_disagreement_status": "EDGE",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "ce7213d527e0cdb4e3b54133",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401858496,
+      "week": 8,
+      "start_date": "2026-10-24T16:00:00.000Z",
+      "home_team": "Michigan",
+      "away_team": "Indiana",
+      "neutral_site": false,
+      "model": {
+        "home_spread": 6.0,
+        "total": 56.0,
+        "home_win_probability": 35.4
+      },
+      "public_projection": {
+        "home_spread": 6.0,
+        "total": 55.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "62\u00b0F \u00b7 11 mph wind \u00b7 Dry",
+        "impact": "Moderate",
+        "total_adjustment": -0.5,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": 7.5,
+        "total": 42.0,
+        "bookmaker": "Consensus (7 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": 7.5,
+          "home_price": -114,
+          "away_spread": -7.5,
+          "away_price": -109,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.53271028,
+            "away": 0.5215311
+          },
+          "no_vig_probability": {
+            "home": 0.505302,
+            "away": 0.494698
+          },
+          "overround": 0.05424138,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 42.5,
+          "under_total": 42.5,
+          "over_price": -108,
+          "under_price": -115,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.51923077,
+            "under": 0.53488372
+          },
+          "no_vig_probability": {
+            "over": 0.49257531,
+            "under": 0.50742469
+          },
+          "overround": 0.05411449,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 1.5,
+        "preferred_side": "Michigan",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "ccaaeba57f03f6f9a4cc38da",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401856728,
+      "week": 8,
+      "start_date": "2026-10-24T16:00:00.000Z",
+      "home_team": "Auburn",
+      "away_team": "LSU",
+      "neutral_site": false,
+      "model": {
+        "home_spread": 7.5,
+        "total": 54.0,
+        "home_win_probability": 32.0
+      },
+      "public_projection": {
+        "home_spread": 7.5,
+        "total": 53.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "67\u00b0F \u00b7 11 mph wind \u00b7 gusts 18 \u00b7 Dry",
+        "impact": "Moderate",
+        "total_adjustment": -0.5,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": 5.5,
+        "total": 51.0,
+        "bookmaker": "Consensus (7 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": 6.0,
+          "home_price": -114,
+          "away_spread": -6.0,
+          "away_price": -109,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.53271028,
+            "away": 0.5215311
+          },
+          "no_vig_probability": {
+            "home": 0.505302,
+            "away": 0.494698
+          },
+          "overround": 0.05424138,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 50.5,
+          "under_total": 50.5,
+          "over_price": -118,
+          "under_price": -106,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.5412844,
+            "under": 0.51456311
+          },
+          "no_vig_probability": {
+            "over": 0.51265396,
+            "under": 0.48734604
+          },
+          "overround": 0.05584751,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 2.0,
+        "preferred_side": "LSU",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "a617ceef68208a306a46dd54",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401858274,
+      "week": 8,
+      "start_date": "2026-10-24T16:00:00.000Z",
+      "home_team": "Miami",
+      "away_team": "Pittsburgh",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -17.5,
+        "total": 55.0,
+        "home_win_probability": 86.3
+      },
+      "public_projection": {
+        "home_spread": -17.5,
+        "total": 53.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "82\u00b0F \u00b7 18 mph wind \u00b7 Light rain",
+        "impact": "Moderate",
+        "total_adjustment": -2.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -23.0,
+        "total": 51.0,
+        "bookmaker": "Consensus (6 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": -22.5,
+          "home_price": -112,
+          "away_spread": 22.5,
+          "away_price": -112,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.52830189,
+            "away": 0.52830189
+          },
+          "no_vig_probability": {
+            "home": 0.5,
+            "away": 0.5
+          },
+          "overround": 0.05660377,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 51.5,
+          "under_total": 51.5,
+          "over_price": -105,
+          "under_price": -120,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.51219512,
+            "under": 0.54545455
+          },
+          "no_vig_probability": {
+            "over": 0.48427673,
+            "under": 0.51572327
+          },
+          "overround": 0.05764967,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 5.5,
+        "preferred_side": "Pittsburgh",
+        "market_disagreement_status": "EDGE",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "43fe23a92ecbac6a25164e2d",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401858498,
+      "week": 8,
+      "start_date": "2026-10-24T16:00:00.000Z",
+      "home_team": "Northwestern",
+      "away_team": "Rutgers",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -19.5,
+        "total": 53.0,
+        "home_win_probability": 88.9
+      },
+      "public_projection": {
+        "home_spread": -19.5,
+        "total": 52.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "65\u00b0F \u00b7 12 mph wind \u00b7 gusts 25 \u00b7 Dry",
+        "impact": "Moderate",
+        "total_adjustment": -0.5,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -16.5,
+        "total": 58.5,
+        "bookmaker": "Consensus (5 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": -16.5,
+          "home_price": -110,
+          "away_spread": 16.5,
+          "away_price": -113,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.52380952,
+            "away": 0.53051643
+          },
+          "no_vig_probability": {
+            "home": 0.49681934,
+            "away": 0.50318066
+          },
+          "overround": 0.05432596,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 58.5,
+          "under_total": 58.5,
+          "over_price": -115,
+          "under_price": -107,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.53488372,
+            "under": 0.51690821
+          },
+          "no_vig_probability": {
+            "over": 0.50854518,
+            "under": 0.49145482
+          },
+          "overround": 0.05179193,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 3.0,
+        "preferred_side": "Northwestern",
+        "market_disagreement_status": "SLIGHT EDGE",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "bd8a14b84b2d1fffb2d5210d",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401856841,
+      "week": 8,
+      "start_date": "2026-10-24T16:00:00.000Z",
+      "home_team": "TCU",
+      "away_team": "West Virginia",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -8.5,
+        "total": 51.0,
+        "home_win_probability": 70.2
+      },
+      "public_projection": {
+        "home_spread": -8.5,
+        "total": 51.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "74\u00b0F \u00b7 8 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -6.5,
+        "total": 58.5,
+        "bookmaker": "Consensus (5 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": -6.0,
+          "home_price": -114,
+          "away_spread": 6.0,
+          "away_price": -109,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.53271028,
+            "away": 0.5215311
+          },
+          "no_vig_probability": {
+            "home": 0.505302,
+            "away": 0.494698
+          },
+          "overround": 0.05424138,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 57.5,
+          "under_total": 57.5,
+          "over_price": -134,
+          "under_price": 108,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.57264957,
+            "under": 0.48076923
+          },
+          "no_vig_probability": {
+            "over": 0.54361055,
+            "under": 0.45638945
+          },
+          "overround": 0.0534188,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 2.0,
+        "preferred_side": "TCU",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "6c8e3728f272b0cdeba1635c",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401858273,
+      "week": 8,
+      "start_date": "2026-10-24T19:30:00.000Z",
+      "home_team": "Georgia Tech",
+      "away_team": "Boston College",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -3.5,
+        "total": 52.5,
+        "home_win_probability": 58.7
+      },
+      "public_projection": {
+        "home_spread": -3.5,
+        "total": 52.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "71\u00b0F \u00b7 11 mph wind \u00b7 Dry",
+        "impact": "Moderate",
+        "total_adjustment": -0.5,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -5.0,
+        "total": 50.5,
+        "bookmaker": "Consensus (4 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": -5.0,
+          "home_price": -110,
+          "away_spread": 5.0,
+          "away_price": -112,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.52380952,
+            "away": 0.52830189
+          },
+          "no_vig_probability": {
+            "home": 0.49786507,
+            "away": 0.50213493
+          },
+          "overround": 0.05211141,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 50.5,
+          "under_total": 50.5,
+          "over_price": -108,
+          "under_price": -115,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.51923077,
+            "under": 0.53488372
+          },
+          "no_vig_probability": {
+            "over": 0.49257531,
+            "under": 0.50742469
+          },
+          "overround": 0.05411449,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 1.5,
+        "preferred_side": "Boston College",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "88437e2b6810d7db185d8c9c",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401856730,
+      "week": 8,
+      "start_date": "2026-10-24T19:30:00.000Z",
+      "home_team": "Mississippi State",
+      "away_team": "Oklahoma",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -4.0,
+        "total": 53.0,
+        "home_win_probability": 59.9
+      },
+      "public_projection": {
+        "home_spread": -4.0,
+        "total": 53.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "80\u00b0F \u00b7 9 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": 2.5,
+        "total": 45.5,
+        "bookmaker": "Consensus (5 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": 2.5,
+          "home_price": -113,
+          "away_spread": -2.5,
+          "away_price": -110,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.53051643,
+            "away": 0.52380952
+          },
+          "no_vig_probability": {
+            "home": 0.50318066,
+            "away": 0.49681934
+          },
+          "overround": 0.05432596,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 45.5,
+          "under_total": 45.5,
+          "over_price": -113,
+          "under_price": -110,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.53051643,
+            "under": 0.52380952
+          },
+          "no_vig_probability": {
+            "over": 0.50318066,
+            "under": 0.49681934
+          },
+          "overround": 0.05432596,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 6.5,
+        "preferred_side": "Mississippi State",
+        "market_disagreement_status": "EDGE",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "956b81551e425b1439e404d4",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401856731,
+      "week": 8,
+      "start_date": "2026-10-24T19:30:00.000Z",
+      "home_team": "South Carolina",
+      "away_team": "Tennessee",
+      "neutral_site": false,
+      "model": {
+        "home_spread": 3.5,
+        "total": 54.0,
+        "home_win_probability": 41.3
+      },
+      "public_projection": {
+        "home_spread": 3.5,
+        "total": 53.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "72\u00b0F \u00b7 12 mph wind \u00b7 Dry",
+        "impact": "Moderate",
+        "total_adjustment": -0.5,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": 3.0,
+        "total": 50.5,
+        "bookmaker": "Consensus (6 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": 3.0,
+          "home_price": -115,
+          "away_spread": -3.0,
+          "away_price": -108,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.53488372,
+            "away": 0.51923077
+          },
+          "no_vig_probability": {
+            "home": 0.50742469,
+            "away": 0.49257531
+          },
+          "overround": 0.05411449,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 50.5,
+          "under_total": 50.5,
+          "over_price": -117,
+          "under_price": -107,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.53917051,
+            "under": 0.51690821
+          },
+          "no_vig_probability": {
+            "over": 0.51054007,
+            "under": 0.48945993
+          },
+          "overround": 0.05607872,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 0.5,
+        "preferred_side": "Tennessee",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "e88b566a3c81b26e807fc95b",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401856727,
+      "week": 8,
+      "start_date": "2026-10-24T19:30:00.000Z",
+      "home_team": "Alabama",
+      "away_team": "Texas A&M",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -14.5,
+        "total": 54.5,
+        "home_win_probability": 81.8
+      },
+      "public_projection": {
+        "home_spread": -14.5,
+        "total": 54.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "77\u00b0F \u00b7 7 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -15.5,
+        "total": 52.0,
+        "bookmaker": "Consensus (7 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": -15.0,
+          "home_price": -113,
+          "away_spread": 15.0,
+          "away_price": -110,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.53051643,
+            "away": 0.52380952
+          },
+          "no_vig_probability": {
+            "home": 0.50318066,
+            "away": 0.49681934
+          },
+          "overround": 0.05432596,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 51.5,
+          "under_total": 51.5,
+          "over_price": -108,
+          "under_price": -115,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.51923077,
+            "under": 0.53488372
+          },
+          "no_vig_probability": {
+            "over": 0.49257531,
+            "under": 0.50742469
+          },
+          "overround": 0.05411449,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 1.0,
+        "preferred_side": "Texas A&M",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "75cd8048394e060060a36dc7",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401860907,
+      "week": 8,
+      "start_date": "2026-10-24T22:00:00.000Z",
+      "home_team": "Washington State",
+      "away_team": "Boise State",
+      "neutral_site": false,
+      "model": {
+        "home_spread": 15.5,
+        "total": 52.0,
+        "home_win_probability": 16.6
+      },
+      "public_projection": {
+        "home_spread": 15.5,
+        "total": 52.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "57\u00b0F \u00b7 5 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": 14.0,
+        "total": 50.5,
+        "bookmaker": "Consensus (4 books)",
+        "reference_spread": {
+          "bookmaker": "theScore Bet",
+          "bookmaker_key": "espnbet",
+          "home_spread": 13.5,
+          "home_price": -110,
+          "away_spread": -13.5,
+          "away_price": -110,
+          "last_update": "2026-10-18T14:02:57Z",
+          "implied_probability": {
+            "home": 0.52380952,
+            "away": 0.52380952
+          },
+          "no_vig_probability": {
+            "home": 0.5,
+            "away": 0.5
+          },
+          "overround": 0.04761905,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "theScore Bet",
+          "bookmaker_key": "espnbet",
+          "total": 50.5,
+          "under_total": 50.5,
+          "over_price": -110,
+          "under_price": -110,
+          "last_update": "2026-10-18T14:02:57Z",
+          "implied_probability": {
+            "over": 0.52380952,
+            "under": 0.52380952
+          },
+          "no_vig_probability": {
+            "over": 0.5,
+            "under": 0.5
+          },
+          "overround": 0.04761905,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 1.5,
+        "preferred_side": "Boise State",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "2c35aa388b35c44c06aa7cd6",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401860905,
+      "week": 8,
+      "start_date": "2026-10-24T22:30:00.000Z",
+      "home_team": "Colorado State",
+      "away_team": "San Diego State",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -2.5,
+        "total": 50.0,
+        "home_win_probability": 56.2
+      },
+      "public_projection": {
+        "home_spread": -2.5,
+        "total": 49.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "54\u00b0F \u00b7 11 mph wind \u00b7 Dry",
+        "impact": "Moderate",
+        "total_adjustment": -0.5,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": 3.5,
+        "total": 60.5,
+        "bookmaker": "Consensus (2 books)",
+        "reference_spread": {
+          "bookmaker": "theScore Bet",
+          "bookmaker_key": "espnbet",
+          "home_spread": 3.5,
+          "home_price": -120,
+          "away_spread": -3.5,
+          "away_price": 100,
+          "last_update": "2026-10-18T14:02:57Z",
+          "implied_probability": {
+            "home": 0.54545455,
+            "away": 0.5
+          },
+          "no_vig_probability": {
+            "home": 0.52173913,
+            "away": 0.47826087
+          },
+          "overround": 0.04545455,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "theScore Bet",
+          "bookmaker_key": "espnbet",
+          "total": 60.5,
+          "under_total": 60.5,
+          "over_price": -110,
+          "under_price": -110,
+          "last_update": "2026-10-18T14:02:57Z",
+          "implied_probability": {
+            "over": 0.52380952,
+            "under": 0.52380952
+          },
+          "no_vig_probability": {
+            "over": 0.5,
+            "under": 0.5
+          },
+          "overround": 0.04761905,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 6.0,
+        "preferred_side": "Colorado State",
+        "market_disagreement_status": "EDGE",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "238cfe489238f04018091326",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401856732,
+      "week": 8,
+      "start_date": "2026-10-24T23:30:00.000Z",
+      "home_team": "Texas",
+      "away_team": "Ole Miss",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -5.0,
+        "total": 55.0,
+        "home_win_probability": 62.3
+      },
+      "public_projection": {
+        "home_spread": -5.0,
+        "total": 55.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "83\u00b0F \u00b7 8 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -3.0,
+        "total": 55.0,
+        "bookmaker": "Consensus (6 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": -3.0,
+          "home_price": -118,
+          "away_spread": 3.0,
+          "away_price": -106,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.5412844,
+            "away": 0.51456311
+          },
+          "no_vig_probability": {
+            "home": 0.51265396,
+            "away": 0.48734604
+          },
+          "overround": 0.05584751,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 55.5,
+          "under_total": 55.5,
+          "over_price": -112,
+          "under_price": -112,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.52830189,
+            "under": 0.52830189
+          },
+          "no_vig_probability": {
+            "over": 0.5,
+            "under": 0.5
+          },
+          "overround": 0.05660377,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 2.0,
+        "preferred_side": "Texas",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "5de891e36fdb79b5c33a4267",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401858275,
+      "week": 8,
+      "start_date": "2026-10-24T23:30:00.000Z",
+      "home_team": "North Carolina",
+      "away_team": "Syracuse",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -3.5,
+        "total": 51.5,
+        "home_win_probability": 58.7
+      },
+      "public_projection": {
+        "home_spread": -3.5,
+        "total": 51.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "58\u00b0F \u00b7 6 mph wind \u00b7 gusts 18 \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -9.5,
+        "total": 44.5,
+        "bookmaker": "Consensus (5 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": -8.5,
+          "home_price": -110,
+          "away_spread": 8.5,
+          "away_price": -113,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.52380952,
+            "away": 0.53051643
+          },
+          "no_vig_probability": {
+            "home": 0.49681934,
+            "away": 0.50318066
+          },
+          "overround": 0.05432596,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 44.5,
+          "under_total": 44.5,
+          "over_price": -110,
+          "under_price": -112,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.52380952,
+            "under": 0.52830189
+          },
+          "no_vig_probability": {
+            "over": 0.49786507,
+            "under": 0.50213493
+          },
+          "overround": 0.05211141,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 6.0,
+        "preferred_side": "Syracuse",
+        "market_disagreement_status": "EDGE",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "0141e4b9eeca924bbe5a13d4",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401858500,
+      "week": 8,
+      "start_date": "2026-10-24T23:30:00.000Z",
+      "home_team": "Wisconsin",
+      "away_team": "USC",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -1.0,
+        "total": 54.5,
+        "home_win_probability": 52.5
+      },
+      "public_projection": {
+        "home_spread": -1.0,
+        "total": 54.0,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "68\u00b0F \u00b7 13 mph wind \u00b7 gusts 25 \u00b7 Dry",
+        "impact": "Moderate",
+        "total_adjustment": -0.5,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": 2.5,
+        "total": 50.0,
+        "bookmaker": "Consensus (7 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": 2.5,
+          "home_price": -110,
+          "away_spread": -2.5,
+          "away_price": -113,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.52380952,
+            "away": 0.53051643
+          },
+          "no_vig_probability": {
+            "home": 0.49681934,
+            "away": 0.50318066
+          },
+          "overround": 0.05432596,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 49.5,
+          "under_total": 49.5,
+          "over_price": -114,
+          "under_price": -109,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.53271028,
+            "under": 0.5215311
+          },
+          "no_vig_probability": {
+            "over": 0.505302,
+            "under": 0.494698
+          },
+          "overround": 0.05424138,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 3.5,
+        "preferred_side": "Wisconsin",
+        "market_disagreement_status": "SLIGHT EDGE",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "4217d180a23e766b510c2d24",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401860906,
+      "week": 8,
+      "start_date": "2026-10-24T23:30:00.000Z",
+      "home_team": "Texas State",
+      "away_team": "Utah State",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -9.0,
+        "total": 52.5,
+        "home_win_probability": 71.3
+      },
+      "public_projection": {
+        "home_spread": -9.0,
+        "total": 52.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "79\u00b0F \u00b7 10 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -8.5,
+        "total": 59.5,
+        "bookmaker": "Consensus (2 books)",
+        "reference_spread": {
+          "bookmaker": "theScore Bet",
+          "bookmaker_key": "espnbet",
+          "home_spread": -8.5,
+          "home_price": -110,
+          "away_spread": 8.5,
+          "away_price": -110,
+          "last_update": "2026-10-18T14:02:57Z",
+          "implied_probability": {
+            "home": 0.52380952,
+            "away": 0.52380952
+          },
+          "no_vig_probability": {
+            "home": 0.5,
+            "away": 0.5
+          },
+          "overround": 0.04761905,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "theScore Bet",
+          "bookmaker_key": "espnbet",
+          "total": 59.5,
+          "under_total": 59.5,
+          "over_price": -110,
+          "under_price": -110,
+          "last_update": "2026-10-18T14:02:57Z",
+          "implied_probability": {
+            "over": 0.52380952,
+            "under": 0.52380952
+          },
+          "no_vig_probability": {
+            "over": 0.5,
+            "under": 0.5
+          },
+          "overround": 0.04761905,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 0.5,
+        "preferred_side": "Texas State",
+        "market_disagreement_status": "ALIGNED",
+        "status_system": "v2_the_signal"
+      },
+      "clv": {
+        "closing_home_spread": null,
+        "clv_points_preferred_side": null,
+        "beat_close": null,
+        "settled": false
+      },
+      "result": {
+        "home_points": null,
+        "away_points": null,
+        "actual_home_margin": null,
+        "ats_result_at_snapshot": null,
+        "settled": false
+      }
+    },
+    {
+      "snapshot_id": "4ace5b966de7380d99cff8b9",
+      "captured_at_utc": "2026-10-18T14:03:18.025580+00:00",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-18T14:03:17.833860",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401856729,
+      "week": 8,
+      "start_date": "2026-10-24T23:30:00.000Z",
+      "home_team": "Kentucky",
+      "away_team": "Vanderbilt",
+      "neutral_site": false,
+      "model": {
+        "home_spread": -5.5,
+        "total": 53.5,
+        "home_win_probability": 63.4
+      },
+      "public_projection": {
+        "home_spread": -5.5,
+        "total": 53.5,
+        "weather_applied": true
+      },
+      "weather_at_snapshot": {
+        "conditions_line": "64\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+        "impact": "Minimal",
+        "total_adjustment": 0.0,
+        "spread_adjustment": 0.0,
+        "spread_status": "ACTIVE"
+      },
+      "market_at_snapshot": {
+        "home_spread": -11.5,
+        "total": 51.5,
+        "bookmaker": "Consensus (7 books)",
+        "reference_spread": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "home_spread": -11.5,
+          "home_price": -113,
+          "away_spread": 11.5,
+          "away_price": -109,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "home": 0.53051643,
+            "away": 0.5215311
+          },
+          "no_vig_probability": {
+            "home": 0.5042704,
+            "away": 0.4957296
+          },
+          "overround": 0.05204753,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "total": 51.5,
+          "under_total": 51.5,
+          "over_price": -112,
+          "under_price": -112,
+          "last_update": "2026-10-18T14:02:59Z",
+          "implied_probability": {
+            "over": 0.52830189,
+            "under": 0.52830189
+          },
+          "no_vig_probability": {
+            "over": 0.5,
+            "under": 0.5
+          },
+          "overround": 0.05660377,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "comparison_at_snapshot": {
+        "disagreement": 6.0,
+        "preferred_side": "Vanderbilt",
+        "market_disagreement_status": "EDGE",
         "status_system": "v2_the_signal"
       },
       "clv": {
