@@ -3,7 +3,12 @@
 import unittest
 from datetime import datetime, timedelta, timezone
 
-from scripts.audit_data_freshness import current_cfb_week, parse_time, within_age
+from scripts.audit_data_freshness import (
+    acceptable_completed_weeks,
+    current_cfb_week,
+    parse_time,
+    within_age,
+)
 
 
 class DataFreshnessAuditTests(unittest.TestCase):
@@ -27,6 +32,14 @@ class DataFreshnessAuditTests(unittest.TestCase):
             {"week": 8, "start_date": "2026-10-24T16:00:00Z", "status": "scheduled"},
         ]}
         self.assertEqual(current_cfb_week(projections, now), 7)
+
+    def test_weekly_delivery_grace_matches_sunday_through_monday_window(self):
+        sunday = datetime(2026, 10, 18, 12, 0, tzinfo=timezone.utc)
+        monday = datetime(2026, 10, 19, 12, 0, tzinfo=timezone.utc)
+        tuesday = datetime(2026, 10, 20, 12, 0, tzinfo=timezone.utc)
+        self.assertEqual(acceptable_completed_weeks(8, sunday), {6, 7, 8})
+        self.assertEqual(acceptable_completed_weeks(8, monday), {6, 7, 8})
+        self.assertEqual(acceptable_completed_weeks(8, tuesday), {7, 8})
 
 
 if __name__ == "__main__":

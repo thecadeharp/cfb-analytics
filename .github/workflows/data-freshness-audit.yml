@@ -63,7 +63,10 @@ jobs:
             printf '%s|%s\n' "$workflow" "$previous_run" >> /tmp/thi-recovery-workflows.txt
           }
 
-          if grep -Eq '^(cfb_scores|cfb_live_scores)$' /tmp/thi-critical-datasets.txt; then
+          if grep -Eq '^(cfb_postgame|cfb_signal_records)$' /tmp/thi-critical-datasets.txt; then
+            dispatch_recovery settle-results-no-cfbd.yml
+            echo "Dispatched settlement and downstream analytics recovery."
+          elif grep -Eq '^(cfb_scores|cfb_live_scores)$' /tmp/thi-critical-datasets.txt; then
             dispatch_recovery live-score-pulse.yml
             echo "Dispatched live-score recovery."
           fi

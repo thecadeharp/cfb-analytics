@@ -8,6 +8,10 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
+
+
+EASTERN = ZoneInfo("America/New_York")
 
 
 def parse_time(value: Any) -> datetime | None:
@@ -66,6 +70,19 @@ def current_cfb_week(projections: dict, now: datetime) -> int | None:
             except (TypeError, ValueError):
                 pass
     return min(upcoming, default=None)
+
+
+def acceptable_completed_weeks(active_week: int, now: datetime) -> set[int]:
+    """Return valid weekly-data cutoffs, including the published delivery window.
+
+    CFBD Tier 3 training inputs normally arrive Sunday evening and no later than
+    Monday. When the projection board rolls to the next week early Sunday, the
+    prior completed-week metrics are therefore still valid through Monday ET.
+    """
+    acceptable = {active_week - 1, active_week}
+    if now.astimezone(EASTERN).weekday() in {6, 0}:
+        acceptable.add(active_week - 2)
+    return {week for week in acceptable if week >= 0}
 
 
 def audit(root: Path, now: datetime) -> dict:
@@ -143,16 +160,21 @@ def audit(root: Path, now: datetime) -> dict:
     cbb_roster = check("cbb_roster_audit", "data/cbb/roster_audit.json", ["meta.generated_at_utc"], 15, {}, severity="warning")
 
     active_week = current_cfb_week(projections, now)
+    acceptable_metric_weeks = sorted(acceptable_completed_weeks(active_week, now)) if active_week is not None else []
     week_checks = {
         "active_week": active_week,
         "metrics_through_week": nested(metrics, "meta.through_week"),
         "advanced_through_week": nested(advanced, "meta.through_week"),
         "players_through_week": nested(players, "meta.through_week"),
+        "acceptable_metric_weeks": acceptable_metric_weeks,
+        "weekly_delivery_grace_active": bool(
+            active_week is not None and active_week - 2 in acceptable_metric_weeks
+        ),
     }
     if active_week is not None:
         for key in ("metrics_through_week", "advanced_through_week"):
             value = week_checks[key]
-            if not isinstance(value, int) or value not in {active_week - 1, active_week}:
+            if not isinstance(value, int) or value not in acceptable_metric_weeks:
                 findings.append({"severity": "critical", "dataset": key, "failed_checks": ["completed_week_alignment"]})
         player_week = week_checks["players_through_week"]
         if not isinstance(player_week, int) or player_week < active_week - 1 or player_week > active_week:

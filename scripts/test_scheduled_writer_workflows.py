@@ -17,6 +17,7 @@ class ScheduledWriterWorkflowSafetyTest(unittest.TestCase):
         self.assertIn("actions: write", audit)
         self.assertIn("Recover stale production inputs", audit)
         self.assertIn("dispatch_recovery live-score-pulse.yml", audit)
+        self.assertIn("dispatch_recovery settle-results-no-cfbd.yml", audit)
         self.assertIn("dispatch_recovery refresh-projections-no-cfbd.yml", audit)
         self.assertIn("dispatch_recovery refresh-availability-reports.yml", audit)
         self.assertIn('gh workflow run "$workflow" --ref main', audit)
