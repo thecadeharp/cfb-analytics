@@ -183,6 +183,7 @@ def evaluation(rows: list[dict[str, Any]]) -> dict[str, Any]:
 def current_rows(
     history: dict[int, dict[str, Any]], personnel: dict[int, dict[str, Any]],
     profiles: dict[str, Any], players: dict[str, Any], models: dict[str, dict[str, Any]],
+    roster_audit_passed: bool,
 ) -> list[dict[str, Any]]:
     season = int(profiles["meta"]["season"])
     prior_season = max(history)
@@ -275,7 +276,10 @@ def current_rows(
             "projected_offense": round(offense, 4),
             "projected_defense": round(defense, 4),
             "returning_minutes_pct": returning,
-            "roster_verified": players.get("meta", {}).get("roster_verification_status") == "provider_verified",
+            # Provider verification is necessary but insufficient. Public THI
+            # verification remains false until the independent national audit
+            # passes; otherwise the research artifact overstates input quality.
+            "roster_verified": roster_audit_passed,
             "personnel": people.get(team_id, {}),
         })
     rows.sort(key=lambda row: (-row["rating"], str(row["team"])))
@@ -285,11 +289,18 @@ def current_rows(
     return rows
 
 
-def build(history_dir: Path, personnel_dir: Path, profiles_path: Path, players_path: Path) -> dict[str, Any]:
+def build(
+    history_dir: Path, personnel_dir: Path, profiles_path: Path, players_path: Path,
+    roster_audit_path: Path,
+) -> dict[str, Any]:
     history = load_seasons(history_dir)
     personnel = load_seasons(personnel_dir)
     profiles = json.loads(profiles_path.read_text())
     players = json.loads(players_path.read_text())
+    roster_audit = json.loads(roster_audit_path.read_text())
+    roster_audit_status = roster_audit.get("meta", {}).get("status")
+    roster_audit_passed = roster_audit_status == "passed" and all((roster_audit.get("checks") or {}).values())
+    roster_verification_status = "provider_verified" if roster_audit_passed else "withheld_by_thi_audit"
     examples = historical_examples(history, personnel)
     training = [row for row in examples if row["season"] in TRAIN_SEASONS]
     models = {
@@ -303,7 +314,14 @@ def build(history_dir: Path, personnel_dir: Path, profiles_path: Path, players_p
     test_rows = [row for row in examples if row["season"] in TEST_SEASONS]
     validation = evaluation(validation_rows)
     test = evaluation(test_rows)
-    rows = current_rows(history, personnel, profiles, players, models)
+    rows = current_rows(history, personnel, profiles, players, models, roster_audit_passed)
+    promotion_blockers = [
+        "Historical personnel snapshots are not point-in-time certified.",
+        "The analyzed 2026 test season cannot be reused as a fresh holdout.",
+        "Current active-roster personnel features do not yet have a like-for-like frozen historical archive.",
+    ]
+    if not roster_audit_passed:
+        promotion_blockers.append("The current national roster audit has not passed.")
     return {
         "meta": {
             "version": VERSION,
@@ -319,7 +337,9 @@ def build(history_dir: Path, personnel_dir: Path, profiles_path: Path, players_p
             "training_seasons": sorted(TRAIN_SEASONS),
             "validation_seasons": sorted(VALIDATION_SEASONS),
             "out_of_time_test_seasons": sorted(TEST_SEASONS),
-            "roster_verification_status": players.get("meta", {}).get("roster_verification_status"),
+            "provider_roster_verification_status": players.get("meta", {}).get("roster_verification_status"),
+            "roster_verification_status": roster_verification_status,
+            "roster_audit_status": roster_audit_status,
             "team_count": len(rows),
         },
         "evaluation": {
@@ -328,15 +348,11 @@ def build(history_dir: Path, personnel_dir: Path, profiles_path: Path, players_p
             "beats_carry_forward_on_validation": validation["rating_mae"] < validation["carry_forward_mae"],
             "beats_carry_forward_on_test": test["rating_mae"] < test["carry_forward_mae"],
             "promotion_eligible": False,
-            "promotion_blockers": [
-                "Historical personnel snapshots are not point-in-time certified.",
-                "The analyzed 2026 test season cannot be reused as a fresh holdout.",
-                "Current active-roster personnel features do not yet have a like-for-like frozen historical archive.",
-            ],
+            "promotion_blockers": promotion_blockers,
         },
         "models": models,
         "prospective_protocol": {
-            "candidate_state": "research_awaiting_preseason_freeze",
+            "candidate_state": "research_awaiting_preseason_freeze" if roster_audit_passed else "research_blocked_roster_audit",
             "target": "game-level scoring margin for Division I versus Division I games",
             "primary_comparison": "paired absolute-error difference versus the frozen production baseline",
             "primary_interval": "95% game-level bootstrap interval",
@@ -363,9 +379,10 @@ def main() -> None:
     parser.add_argument("--personnel-dir", type=Path, default=ROOT / "data/cbb/personnel")
     parser.add_argument("--profiles", type=Path, default=ROOT / "data/cbb/team_profiles.json")
     parser.add_argument("--players", type=Path, default=ROOT / "data/cbb/player_ratings.json")
+    parser.add_argument("--roster-audit", type=Path, default=ROOT / "data/cbb/roster_audit.json")
     parser.add_argument("--output", type=Path, default=ROOT / "data/cbb/model/preseason_index_candidate.json")
     args = parser.parse_args()
-    payload = build(args.history_dir, args.personnel_dir, args.profiles, args.players)
+    payload = build(args.history_dir, args.personnel_dir, args.profiles, args.players, args.roster_audit)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(payload, separators=(",", ":"), allow_nan=False) + "\n")
     print(VERSION, payload["evaluation"], "top25", [row["team"] for row in payload["teams"][:25]])

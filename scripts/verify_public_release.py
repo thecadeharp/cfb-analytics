@@ -99,7 +99,7 @@ def verify(payloads: dict[str, dict], raw_assets: dict[str, bytes] | None = None
         (model.get("meta", {}).get("model_version") == cbb_board.get("meta", {}).get("model_version"), "CBB board and model-card versions match"),
         (tracking.get("meta", {}).get("projection_board_version") == cbb_board.get("meta", {}).get("version"), "Tracking ledger matches the projection board"),
         (candidate.get("evaluation", {}).get("promotion_eligible") is False, "Roster-aware challenger remains ineligible for promotion"),
-        (candidate.get("prospective_protocol", {}).get("candidate_state") == "research_awaiting_preseason_freeze", "Roster-aware challenger remains research-only"),
+        (candidate.get("prospective_protocol", {}).get("candidate_state") in {"research_awaiting_preseason_freeze", "research_blocked_roster_audit"}, "Roster-aware challenger remains research-only"),
         ("does not feed Model A" in str(candidate.get("meta", {}).get("model_usage", "")), "Challenger remains isolated from production"),
         (sos.get("meta", {}).get("version") == "thi-cbb-preseason-sos-snapshot-v1.0", "Projected SOS snapshot is current schema"),
         (sos.get("meta", {}).get("immutable") is True and sos.get("meta", {}).get("status") == "immutable_preseason_snapshot", "Projected SOS snapshot is immutable"),
@@ -115,6 +115,13 @@ def verify(payloads: dict[str, dict], raw_assets: dict[str, bytes] | None = None
     published = int((health.get("coverage") or {}).get("published_roster_players") or 0)
     checks.append((audit_status == "passed" or published == 0, "Failed roster audit cannot publish player data"))
     checks.append((audit_status == "passed" or len(players.get("players") or []) == 0, "Failed roster audit strips the public player payload"))
+    if audit_status != "passed":
+        checks.extend([
+            (candidate.get("meta", {}).get("roster_audit_status") == audit_status, "Challenger reports the independent roster-audit status"),
+            (candidate.get("meta", {}).get("roster_verification_status") == "withheld_by_thi_audit", "Challenger cannot claim verified rosters after a failed audit"),
+            (candidate.get("prospective_protocol", {}).get("candidate_state") == "research_blocked_roster_audit", "Failed roster audit blocks the challenger research clock"),
+            (not any(row.get("roster_verified") is True for row in candidate.get("teams") or []), "Failed roster audit clears challenger team verification flags"),
+        ])
 
     if raw_assets is not None:
         manifest_assets = manifest.get("assets") or {}

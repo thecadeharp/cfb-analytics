@@ -71,7 +71,7 @@ class ReleaseSafetyTests(unittest.TestCase):
             "cbb_power": {"meta": {"version": "thi-cbb-display-power-v2.0", "model_usage": "display_only", "team_count": 300}, "teams": power_teams},
             "cbb_priors": {"teams": prior_teams},
             "cbb_model": {"meta": {"model_version": "model-v1"}},
-            "cbb_candidate": {"meta": {"model_usage": "display_only; does not feed Model A"}, "evaluation": {"promotion_eligible": False}, "prospective_protocol": {"candidate_state": "research_awaiting_preseason_freeze"}},
+            "cbb_candidate": {"meta": {"model_usage": "display_only; does not feed Model A", "roster_audit_status": "withheld", "roster_verification_status": "withheld_by_thi_audit"}, "evaluation": {"promotion_eligible": False}, "prospective_protocol": {"candidate_state": "research_blocked_roster_audit"}, "teams": []},
             "cbb_sos": {"meta": {"version": "thi-cbb-preseason-sos-snapshot-v1.0", "immutable": True, "status": "immutable_preseason_snapshot", "game_count": 300, "team_count": 300, "power_version": "thi-cbb-display-power-v2.0"}, "teams": sos_teams},
             "cbb_tracking": {"meta": {"projection_board_version": "board-v1"}},
             "cbb_health": {"meta": {"status": "healthy"}, "coverage": {"published_roster_players": 10}},
@@ -81,6 +81,15 @@ class ReleaseSafetyTests(unittest.TestCase):
             "cfb_board": {"games": cfb_games},
             "operations": {"meta": {"version": "thi-operations-readiness-v1.0"}},
         }
+        with self.assertRaises(RuntimeError):
+            verify(payloads)
+
+        # Once the public payload is stripped, a stale candidate verification
+        # claim must still fail independently of the public-player guard.
+        payloads["cbb_health"]["coverage"]["published_roster_players"] = 0
+        payloads["cbb_players"]["players"] = []
+        payloads["cbb_candidate"]["meta"]["roster_verification_status"] = "provider_verified"
+        payloads["cbb_candidate"]["prospective_protocol"]["candidate_state"] = "research_awaiting_preseason_freeze"
         with self.assertRaises(RuntimeError):
             verify(payloads)
 
