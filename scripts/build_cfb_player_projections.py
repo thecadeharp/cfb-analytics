@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Build display-only CFB player stat projections for each team's next game.
+"""Build display-only CFB player performance forecasts for each team's next game.
 
 This is intentionally isolated from Model A. It converts verified season workload
-into matchup-aware research estimates; it does not ingest sportsbook prop lines or
-publish betting recommendations.
+into matchup-aware statistical expectations and does not ingest or retain player
+market data, prices, lines, picks, or wager records.
 """
 
 from __future__ import annotations
@@ -241,13 +241,14 @@ def build(players_payload: dict, board: dict, metrics: dict, notes: dict) -> dic
             "game_count": len({row["matchup"]["game_id"] for row in output}),
             "status": "research_only",
             "model_usage": "display_only_not_used_by_model_a",
-            "market_usage": "no_sportsbook_prop_lines_or_over_under_recommendations",
+            "intended_use": "player_performance_forecasting_for_matchup_analysis_fantasy_research_broadcast_preparation_and_player_evaluation",
+            "market_data_usage": "none_ingested_retained_or_displayed",
             "method": "Two-game empirical-Bayes shrinkage of observed per-game production, adjusted for projected pace, game script, opponent efficiency and implied team scoring.",
             "limitations": [
                 "Current build uses season aggregates rather than a complete frozen player-game variance ledger.",
-                "Point estimates are not yet certified as calibrated prop forecasts.",
+                "Point estimates remain research forecasts until prospective error calibration is complete.",
                 "Availability context is shown only when a current source-linked report exists.",
-                "No projection is a wagering recommendation.",
+                "The board contains no player market lines, odds, prices, picks, or wager tracking.",
             ],
         },
         "projections": output,
@@ -270,7 +271,7 @@ def main() -> None:
         temporary = Path(handle.name)
     temporary.replace(args.output)
     print(f"Built {payload['meta']['projection_count']} research player projections across {payload['meta']['game_count']} games")
-    print("Model A and sportsbook market files were not changed")
+    print("Model A was not changed; no player market data was read or written")
 
 
 if __name__ == "__main__":

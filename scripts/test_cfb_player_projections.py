@@ -39,6 +39,7 @@ class PlayerProjectionTests(unittest.TestCase):
         payload = build(self.players, self.board, self.metrics, {"teams": {}})
         self.assertEqual(payload["meta"]["status"], "research_only")
         self.assertEqual(payload["meta"]["model_usage"], "display_only_not_used_by_model_a")
+        self.assertEqual(payload["meta"]["market_data_usage"], "none_ingested_retained_or_displayed")
         names = {row["name"] for row in payload["projections"]}
         self.assertIn("Starter QB", names)
         self.assertIn("Primary RB", names)

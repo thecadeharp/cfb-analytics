@@ -66,6 +66,8 @@
 .thi-player-projection-notice strong { font:900 11px var(--mono); text-transform:uppercase; }
 .thi-player-projection-notice span { margin-top:5px; color:#ddcf96; font-size:11px; }
 .thi-player-projection-notice small { color:#cfbf80; font:700 9px var(--mono); text-align:right; }
+.thi-player-projection-policy { display:flex; gap:10px; align-items:flex-start; margin:8px 0 14px; padding:9px 12px; border-left:3px solid var(--accent); background:color-mix(in srgb,var(--surface) 94%,var(--accent) 6%); color:var(--muted); font-size:10px; line-height:1.45; }
+.thi-player-projection-policy strong { flex:0 0 auto; color:var(--text); font:800 9px var(--mono); letter-spacing:.05em; text-transform:uppercase; }
 .thi-player-projection-controls { display:grid; grid-template-columns:minmax(260px,1fr) repeat(2,minmax(160px,220px)); }
 .thi-player-projection-count { margin:-5px 0 10px; color:var(--muted); font:700 9px var(--mono); letter-spacing:.05em; text-transform:uppercase; }
 .thi-player-projection-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
@@ -95,6 +97,8 @@
   .thi-player-mode-heading p { margin-top:6px; }
   .thi-player-projection-notice { display:block; }
   .thi-player-projection-notice small { display:block; margin-top:9px; text-align:left; }
+  .thi-player-projection-policy { display:block; }
+  .thi-player-projection-policy strong { display:block; margin-bottom:5px; }
   .thi-player-projection-controls { grid-template-columns:1fr 1fr; }
   .thi-player-projection-grid { grid-template-columns:1fr; }
   .thi-player-projection-metrics { grid-template-columns:repeat(3,minmax(0,1fr)); }

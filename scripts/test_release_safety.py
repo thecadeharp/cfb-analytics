@@ -84,6 +84,7 @@ class ReleaseSafetyTests(unittest.TestCase):
                     "version": "thi-cfb-player-projections-v0.1-research",
                     "status": "research_only",
                     "model_usage": "display_only_not_used_by_model_a",
+                    "market_data_usage": "none_ingested_retained_or_displayed",
                     "projection_count": 500,
                 },
                 "projections": [{"athlete_id": str(index)} for index in range(500)],

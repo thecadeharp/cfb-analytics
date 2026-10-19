@@ -204,7 +204,8 @@
       : `${rows.length} projected players shown`;
     root.innerHTML = `${sectionTabs()}
       <div class="thi-player-mode-heading"><div><span>Next-game layer</span><strong>Player Stat Projections</strong></div><p>What workload and production does the current matchup imply?</p></div>
-      <div class="thi-player-projection-notice"><div><strong>Research projections · v0.1</strong><span>Projected means are matchup-aware estimates, not sportsbook prop lines or over/under recommendations.</span></div><small>Through Week ${escape(meta.through_week ?? "—")} · ${escape(meta.projection_count ?? 0)} players · Model A unchanged</small></div>
+      <div class="thi-player-projection-notice"><div><strong>Player performance forecasts · Research v0.1</strong><span>Matchup-aware statistical expectations for analysis, fantasy research, broadcast preparation and player evaluation.</span></div><small>Through Week ${escape(meta.through_week ?? "—")} · ${escape(meta.projection_count ?? 0)} players · Model A unchanged</small></div>
+      <div class="thi-player-projection-policy"><strong>Forecasting only</strong><span>This board does not ingest, retain or display player market lines, odds, prices, picks or wager records.</span></div>
       <div class="thi-player-controls thi-player-projection-controls">
         <div class="thi-player-control"><label for="thi-projection-search">Player, team or opponent</label><input id="thi-projection-search" type="search" value="${escape(projectionSearch)}" placeholder="Search the next-game board"></div>
         <div class="thi-player-control"><label for="thi-projection-position">Position</label><select id="thi-projection-position"><option value="ALL">All positions</option>${["QB","RB","WR","TE"].map(position => `<option value="${position}" ${projectionPosition === position ? "selected" : ""}>${position}</option>`).join("")}</select></div>
@@ -221,7 +222,7 @@
           <div class="thi-player-projection-metrics">${projectionMetrics(row)}</div>${context}
         </article>`;
       }).join("") || `<div class="empty-state">No projected players match these filters.</div>`}</div>
-      <div class="thi-player-beta">Method: ${escape(meta.method || "Observed workload with matchup adjustments.")} A complete frozen player-game ledger and prospective calibration are still required before THI certifies these as prop-grade forecasts.</div>`;
+      <div class="thi-player-beta">Method: ${escape(meta.method || "Observed workload with matchup adjustments.")} A frozen player-game performance ledger will be used only to measure forecast accuracy and calibration.</div>`;
     bindSectionTabs(root);
     root.querySelector("#thi-projection-search").addEventListener("input", event => { projectionSearch = event.target.value; renderProjections(); const input=document.getElementById("thi-projection-search"); input?.focus(); input?.setSelectionRange(input.value.length,input.value.length); });
     root.querySelector("#thi-projection-position").addEventListener("change", event => { projectionPosition = event.target.value; renderProjections(); });

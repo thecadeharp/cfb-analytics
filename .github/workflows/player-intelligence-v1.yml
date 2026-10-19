@@ -79,7 +79,8 @@ jobs:
           assert len(player['players']) >= 3000
           assert projections['meta']['status'] == 'research_only'
           assert projections['meta']['model_usage'] == 'display_only_not_used_by_model_a'
-          assert projections['meta']['market_usage'] == 'no_sportsbook_prop_lines_or_over_under_recommendations'
+          assert projections['meta']['market_data_usage'] == 'none_ingested_retained_or_displayed'
+          assert projections['meta']['intended_use'].startswith('player_performance_forecasting')
           assert len(projections['projections']) >= 100
           assert all(row['position_group'] in {'QB','RB','WR','TE'} for row in projections['projections'])
           assert player['meta']['heisman_status'] in {'NOT_RUN', 'BOARD_ONLY_CALIBRATION_GATE_FAILED', 'PASSED_FOR_BETA_PROBABILITIES'}

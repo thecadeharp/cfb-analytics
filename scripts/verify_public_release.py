@@ -100,6 +100,7 @@ def verify(payloads: dict[str, dict], raw_assets: dict[str, bytes] | None = None
         (cfb_player_projections.get("meta", {}).get("version") == "thi-cfb-player-projections-v0.1-research", "CFB player projections use the research schema"),
         (cfb_player_projections.get("meta", {}).get("status") == "research_only", "CFB player projections remain research-only"),
         (cfb_player_projections.get("meta", {}).get("model_usage") == "display_only_not_used_by_model_a", "CFB player projections remain isolated from Model A"),
+        (cfb_player_projections.get("meta", {}).get("market_data_usage") == "none_ingested_retained_or_displayed", "CFB player forecasts exclude player market data"),
         (len(projected_players) >= 500 and unique_non_null(projected_players, "athlete_id"), "CFB player projection board has unique national coverage"),
         (cfb_player_projections.get("meta", {}).get("projection_count") == len(projected_players), "CFB player projection count matches metadata"),
         (health.get("meta", {}).get("status") in {"healthy", "attention_required"}, "CBB health contract is readable"),

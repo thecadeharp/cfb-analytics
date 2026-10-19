@@ -1138,7 +1138,7 @@
         <h1 class="page-title">CBB Player Intelligence</h1>
         <p class="page-subtitle">Ratings and next-game statistical projections occupy separate research layers.</p>
         ${sectionTabs}
-        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Withheld</span><strong>CBB player projections follow roster verification</strong><p>The future board is reserved for minutes, points, rebounds, assists, threes, steals, blocks and turnovers. THI will not publish those estimates until current rosters, projected rotations and the player-game validation ledger clear their release gates.</p></div>`;
+        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Withheld</span><strong>CBB player projections follow roster verification</strong><p>The future board is reserved for minutes, points, rebounds, assists, threes, steals, blocks and turnovers. THI will not publish those estimates until current rosters, projected rotations and the player-game validation ledger clear their release gates. It will remain a performance-forecasting tool with no player market lines, odds, prices, picks or wager records.</p></div>`;
       bindSectionTabs();
       return;
     }
