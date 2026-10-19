@@ -257,6 +257,40 @@ class CbbPlayerResearchTests(unittest.TestCase):
         self.assertNotIn(departed["name"], {row["name"] for row in payload["players"]})
         self.assertEqual({row["name"] for row in payload["team_rosters"][0]["players"]}, {current["name"], "True Freshman"})
 
+    def test_same_name_on_two_official_rosters_does_not_share_historical_identity(self):
+        historical = player(1, 4, 1)
+        historical["name"] = "Jordan Smith"
+        providers = [roster([], 1, "Alpha"), roster([], 2, "Beta")]
+        official = {"teams": [
+            {
+                "team_id": 1,
+                "team": "Alpha",
+                "source_url": "https://alpha.example/roster",
+                "checked_at": "2026-10-19",
+                "official_roster_complete": True,
+                "official_players": [{"name": "Jordan Smith", "position": "G", "jersey": "1"}],
+            },
+            {
+                "team_id": 2,
+                "team": "Beta",
+                "source_url": "https://beta.example/roster",
+                "checked_at": "2026-10-19",
+                "official_roster_complete": True,
+                "official_players": [{"name": "Jordan Smith", "position": "F", "jersey": "2"}],
+            },
+        ]}
+
+        resolved, summary = apply_official_roster_overrides(providers, official, [historical])
+        alpha_player = resolved[0]["players"][0]
+        beta_player = resolved[1]["players"][0]
+        self.assertIsNone(alpha_player["id"])
+        self.assertIsNone(beta_player["id"])
+        self.assertEqual(alpha_player["sourceId"], "official:1:jordan-smith")
+        self.assertEqual(beta_player["sourceId"], "official:2:jordan-smith")
+        self.assertNotEqual(alpha_player["sourceId"], beta_player["sourceId"])
+        self.assertEqual(sum(row["exact_identity_matches"] for row in summary["teams"]), 0)
+        self.assertEqual(sum(row["roster_only_players"] for row in summary["teams"]), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

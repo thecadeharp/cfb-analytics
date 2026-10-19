@@ -154,6 +154,23 @@ def apply_official_roster_overrides(
         if name:
             identity_candidates[name].append((row.get("athleteId"), row.get("athleteSourceId") or row.get("sourceId")))
 
+    # A name-only join is safe only when that name appears on one complete
+    # official roster. Common names can otherwise cause one historical player
+    # identifier (and its statistics) to be assigned to two current athletes.
+    # Keep both official roster memberships, but leave their prior identities
+    # unresolved until a stronger identifier is available.
+    official_name_teams: defaultdict[str, set[str]] = defaultdict(set)
+    for official in (official_payload or {}).get("teams") or []:
+        if not isinstance(official, dict) or official.get("official_roster_complete") is not True:
+            continue
+        team_id = str(official.get("team_id") or "")
+        for row in official.get("official_players") or []:
+            if not isinstance(row, dict):
+                continue
+            name_key = normalized(row.get("name"))
+            if team_id and name_key:
+                official_name_teams[name_key].add(team_id)
+
     applied = []
     for official in (official_payload or {}).get("teams") or []:
         if not isinstance(official, dict) or official.get("official_roster_complete") is not True:
@@ -167,11 +184,13 @@ def apply_official_roster_overrides(
         exact_id_matches = 0
         for row in official_players:
             name_key = normalized(row.get("name"))
-            candidates = {
-                (athlete_id, source_id)
-                for athlete_id, source_id in identity_candidates.get(name_key, [])
-                if athlete_id is not None or source_id
-            }
+            candidates = set()
+            if len(official_name_teams.get(name_key, set())) == 1:
+                candidates = {
+                    (athlete_id, source_id)
+                    for athlete_id, source_id in identity_candidates.get(name_key, [])
+                    if athlete_id is not None or source_id
+                }
             athlete_id = source_id = None
             athlete_ids = {candidate[0] for candidate in candidates if candidate[0] is not None}
             source_ids = {candidate[1] for candidate in candidates if candidate[1]}
