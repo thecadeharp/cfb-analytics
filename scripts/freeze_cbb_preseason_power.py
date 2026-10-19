@@ -42,7 +42,7 @@ def freeze(source: Path, output: Path) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, default=ROOT / "data/cbb/model/display_power_ratings.json")
-    parser.add_argument("--output", type=Path, default=ROOT / "data/cbb/frozen/preseason_power_2027.json")
+    parser.add_argument("--output", type=Path, default=ROOT / "data/cbb/frozen/preseason_roster_power_2027.json")
     args = parser.parse_args()
     payload = freeze(args.source, args.output)
     print(f"Frozen CBB preseason power: {payload['meta']['canonical_sha256'][:16]}")
