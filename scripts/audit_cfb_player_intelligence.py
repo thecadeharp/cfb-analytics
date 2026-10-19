@@ -18,7 +18,7 @@ except ModuleNotFoundError:
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "thi-cfb-player-audit-v1.0"
+VERSION = "thi-cfb-player-audit-v2.0"
 
 
 def finite(value: Any) -> bool:
@@ -100,18 +100,22 @@ def audit(payload: dict[str, Any], roster: dict[str, Any]) -> dict[str, Any]:
             invalid_ratings.append({"athlete_id": athlete_id, "name": player.get("name"), "rating": player.get("rating")})
         components = player.get("rating_components")
         if rated:
-            required = ["workload_percentile", "raw_composite", "reliability_percent", "final_rating", "formula"]
+            required = ["raw_composite", "reliability_percent", "final_rating", "formula", "weights", "observed_metrics"]
             missing = [key for key in required if not isinstance(components, dict) or components.get(key) is None]
-            numeric_keys = ["workload_percentile", "raw_composite", "reliability_percent", "final_rating"]
+            numeric_keys = ["raw_composite", "reliability_percent", "final_rating"]
             invalid = [
                 key for key in numeric_keys
                 if not isinstance(components, dict) or not finite(components.get(key))
                 or not 0 <= float(components[key]) <= 100
             ]
-            if player.get("position_group") != "DEF":
-                for key in ("efficiency_percentile", "total_production_percentile", "success_percentile"):
-                    if not isinstance(components, dict) or not finite(components.get(key)) or not 0 <= float(components[key]) <= 100:
+            if isinstance(components, dict):
+                weights = components.get("weights") or {}
+                observed = components.get("observed_metrics") or {}
+                for key in weights:
+                    if key not in observed or not finite(components.get(key)) or not 0 <= float(components[key]) <= 100:
                         invalid.append(key)
+                if weights and abs(sum(float(value) for value in weights.values()) - 1) > 1e-9:
+                    invalid.append("weights")
             final_mismatch = (
                 isinstance(components, dict)
                 and finite(components.get("final_rating"))

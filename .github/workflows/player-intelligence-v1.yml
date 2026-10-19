@@ -50,7 +50,9 @@ jobs:
           python scripts/build_player_intelligence.py "${args[@]}"
 
       - name: Audit player ratings and roster joins
-        run: python scripts/audit_cfb_player_intelligence.py
+        run: |
+          python -m unittest scripts/test_cfb_player_intelligence.py
+          python scripts/audit_cfb_player_intelligence.py
 
       - name: Build next-game player projection research board
         run: |
@@ -71,7 +73,7 @@ jobs:
           projections = json.load(open('data/player_projections.json'))
           assert team['meta']['model_usage'] == 'display_only_not_used_by_model_a'
           assert player['meta']['model_usage'] == 'display_only_not_used_by_model_a'
-          assert player['meta']['rating_version'] == 'thi-cfb-player-production-v1.2'
+          assert player['meta']['rating_version'] == 'thi-cfb-player-production-v2.0'
           assert audit['meta']['status'] == 'passed'
           assert all(audit['checks'].values())
           assert len(team['teams']) >= 130
@@ -91,6 +93,10 @@ jobs:
           assert smith['primary_volume'] >= smith['traditional']['targets']
           assert smith['rating'] is not None
           assert smith['rating_components']['final_rating'] == smith['rating']
+          assert [player['players'][athlete_id]['name'] for athlete_id in player['leaderboards']['WR'][:3]] == [
+              'Jeremiah Smith', 'Jesse Legree', 'KJ Duff'
+          ]
+          assert all(row['name'] != 'Julian Sayin' for row in player['heisman_board'])
           print(f"Validated {len(team['teams'])} team summaries and {len(player['players'])} rostered players")
           PY
 

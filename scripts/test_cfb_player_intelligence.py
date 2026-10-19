@@ -2,7 +2,7 @@
 import unittest
 
 from scripts.audit_cfb_player_intelligence import audit
-from scripts.build_player_intelligence import empty_stats, position_group, usage_volume
+from scripts.build_player_intelligence import empty_stats, position_group, rating_metrics, usage_volume
 
 
 class CfbPlayerIntelligenceTests(unittest.TestCase):
@@ -51,6 +51,26 @@ class CfbPlayerIntelligenceTests(unittest.TestCase):
         }
         report = audit(payload, roster)
         self.assertFalse(report["checks"]["rating_decomposition_integrity"])
+
+    def test_qb_rating_metrics_penalize_interceptions(self):
+        base = {
+            "games": 5, "advanced": {"opponent_adjusted_epa_per_opportunity": .3, "success_rate": 55},
+            "traditional": {"pass_attempts": 100, "completions": 70, "pass_yards": 1000, "pass_tds": 10, "rush_attempts": 20, "rush_yards": 100, "rush_tds": 2},
+            "workload": {},
+        }
+        clean = rating_metrics("QB", base)
+        turnover_heavy = rating_metrics("QB", {**base, "traditional": {**base["traditional"], "interceptions": 5}})
+        self.assertGreater(clean["turnover_avoidance"], turnover_heavy["turnover_avoidance"])
+
+    def test_wr_rating_metrics_reward_yards_and_touchdowns(self):
+        row = {
+            "games": 7, "advanced": {"opponent_adjusted_epa_per_opportunity": .8, "success_rate": 60},
+            "traditional": {"targets": 70, "receptions": 50, "receiving_yards": 1000, "receiving_tds": 12},
+            "workload": {"target_share": 35},
+        }
+        metrics = rating_metrics("WR", row)
+        self.assertEqual(metrics["receiving_dominance"], 1360)
+        self.assertAlmostEqual(metrics["yards_per_target"], 100 / 7)
 
 
 if __name__ == "__main__":

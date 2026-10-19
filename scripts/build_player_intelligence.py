@@ -69,13 +69,101 @@ POSITION_GROUPS = {
     "LB": "DEF", "ILB": "DEF", "OLB": "DEF", "CB": "DEF", "DB": "DEF",
     "S": "DEF", "FS": "DEF", "SS": "DEF", "NB": "DEF",
 }
-RATING_MINIMUMS = {"QB": 35, "RB": 20, "WR": 15, "TE": 12, "DEF": 3}
-RATING_WEIGHTS = {
-    "efficiency_percentile": 0.45,
-    "total_production_percentile": 0.30,
-    "workload_percentile": 0.15,
-    "success_percentile": 0.10,
+RATING_MINIMUMS = {"QB": 35, "RB": 20, "WR": 15, "TE": 12, "DEF": 10}
+POSITION_RATING_WEIGHTS = {
+    "QB": {
+        "adjusted_epa": .18, "success_rate": .12, "yards_per_attempt": .12,
+        "completion_rate": .08, "touchdown_rate": .15, "turnover_avoidance": .15,
+        "yards_per_game": .10, "touchdowns_per_game": .10,
+    },
+    "RB": {
+        "adjusted_epa": .18, "success_rate": .10, "yards_per_opportunity": .15,
+        "yards_per_game": .20, "touchdowns_per_game": .22, "workload_share": .15,
+    },
+    "WR": {
+        "receiving_dominance": .70, "adjusted_epa": .15,
+        "yards_per_target": .10, "target_share": .05,
+    },
+    "TE": {
+        "receiving_yards": .20, "receiving_touchdowns": .20, "yards_per_game": .12,
+        "touchdowns_per_game": .12, "yards_per_target": .10, "adjusted_epa": .12,
+        "receptions": .06, "target_share": .08,
+    },
+    "DEF": {
+        "tackles": .14, "tackles_for_loss": .18, "sacks": .18,
+        "passes_defended": .16, "interceptions": .17, "forced_fumbles": .12,
+        "fumble_recoveries": .05,
+    },
 }
+
+
+def divide(numerator, denominator):
+    return number(numerator) / max(1.0, number(denominator))
+
+
+def rating_metrics(group, row):
+    """Return position-relevant observed metrics used by the ratings board."""
+    stats = row.get("traditional") or {}
+    advanced = row.get("advanced") or {}
+    workload = row.get("workload") or {}
+    games = max(1.0, number(row.get("games")))
+    if group == "QB":
+        attempts = number(stats.get("pass_attempts"))
+        total_plays = attempts + number(stats.get("rush_attempts"))
+        total_yards = number(stats.get("pass_yards")) + number(stats.get("rush_yards"))
+        total_touchdowns = number(stats.get("pass_tds")) + number(stats.get("rush_tds"))
+        return {
+            "adjusted_epa": number(advanced.get("opponent_adjusted_epa_per_opportunity")),
+            "success_rate": number(advanced.get("success_rate")),
+            "yards_per_attempt": divide(stats.get("pass_yards"), attempts),
+            "completion_rate": 100 * divide(stats.get("completions"), attempts),
+            "touchdown_rate": 100 * divide(total_touchdowns, total_plays),
+            "turnover_avoidance": -100 * divide(stats.get("interceptions"), attempts),
+            "yards_per_game": total_yards / games,
+            "touchdowns_per_game": total_touchdowns / games,
+        }
+    if group == "RB":
+        opportunities = number(stats.get("rush_attempts")) + number(stats.get("targets"))
+        total_yards = number(stats.get("rush_yards")) + number(stats.get("receiving_yards"))
+        total_touchdowns = number(stats.get("rush_tds")) + number(stats.get("receiving_tds"))
+        return {
+            "adjusted_epa": number(advanced.get("opponent_adjusted_epa_per_opportunity")),
+            "success_rate": number(advanced.get("success_rate")),
+            "yards_per_opportunity": divide(total_yards, opportunities),
+            "yards_per_game": total_yards / games,
+            "touchdowns_per_game": total_touchdowns / games,
+            "workload_share": number(workload.get("rush_attempt_share")),
+        }
+    if group in {"WR", "TE"}:
+        targets = number(stats.get("targets"))
+        receiving_yards = number(stats.get("receiving_yards"))
+        receiving_touchdowns = number(stats.get("receiving_tds"))
+        return {
+            "receiving_dominance": receiving_yards + 30 * receiving_touchdowns,
+            "yards_per_target": divide(receiving_yards, targets),
+            "adjusted_epa": number(advanced.get("opponent_adjusted_epa_per_opportunity")),
+            "target_share": number(workload.get("target_share")),
+        } if group == "WR" else {
+            "receiving_yards": receiving_yards,
+            "receiving_touchdowns": receiving_touchdowns,
+            "yards_per_game": receiving_yards / games,
+            "touchdowns_per_game": receiving_touchdowns / games,
+            "yards_per_target": divide(receiving_yards, targets),
+            "adjusted_epa": number(advanced.get("opponent_adjusted_epa_per_opportunity")),
+            "receptions": number(stats.get("receptions")),
+            "target_share": number(workload.get("target_share")),
+        }
+    if group == "DEF":
+        return {
+            "tackles": number(stats.get("total_tackles")),
+            "tackles_for_loss": number(stats.get("tackles_for_loss")),
+            "sacks": number(stats.get("sacks")),
+            "passes_defended": number(stats.get("passes_defended", stats.get("pass_breakups"))),
+            "interceptions": number(stats.get("interceptions_def")),
+            "forced_fumbles": number(stats.get("forced_fumbles")),
+            "fumble_recoveries": number(stats.get("fumble_recoveries")),
+        }
+    return {}
 
 
 def position_group(position, stats):
@@ -104,6 +192,8 @@ def usage_volume(group, stats):
     if group in {"WR", "TE"}:
         return number(stats.get("targets")) + number(stats.get("rush_attempts"))
     if group == "DEF":
+        if number(stats.get("total_tackles")):
+            return number(stats.get("total_tackles"))
         return number(stats.get("defensive_disruptions"))
     return 0.0
 
@@ -116,6 +206,7 @@ def empty_stats():
         "targets": 0, "receptions": 0, "receiving_yards": 0, "receiving_tds": 0,
         "sacks": 0, "interceptions_def": 0, "pass_breakups": 0, "forced_fumbles": 0, "fumble_recoveries": 0,
         "epa_total": 0.0, "successes": 0, "opportunities": 0, "opponent_baseline_total": 0.0,
+        "total_tackles": 0, "solo_tackles": 0, "tackles_for_loss": 0, "passes_defended": 0, "qb_hurries": 0,
         "defensive_disruptions": 0,
     })
 
@@ -249,6 +340,20 @@ def main():
     for pid in all_ids:
         meta = roster_players.get(pid, {})
         s = stats[pid]
+        usage = meta.get("usage") or {}
+        # CFBD game box scores carry the complete defensive counting-stat line.
+        # Prefer those season aggregates over the smaller subset of disruptive
+        # events identified in play-by-play descriptions.
+        for key in (
+            "total_tackles", "solo_tackles", "tackles_for_loss", "sacks", "passes_defended",
+            "interceptions_def", "forced_fumbles", "fumble_recoveries", "qb_hurries",
+        ):
+            if finite(usage.get(key)):
+                s[key] = number(usage[key])
+        if any(number(s.get(key)) for key in ("tackles_for_loss", "sacks", "passes_defended", "interceptions_def", "forced_fumbles")):
+            s["defensive_disruptions"] = sum(number(s.get(key)) for key in (
+                "tackles_for_loss", "passes_defended", "interceptions_def", "forced_fumbles", "fumble_recoveries"
+            ))
         games = len(s["games"])
         opportunities = int(s["opportunities"])
         group = position_group(meta.get("position"), s)
@@ -273,7 +378,8 @@ def main():
             "traditional": {key: int(value) if float(value).is_integer() else round(value, 1) for key, value in s.items() if key in {
                 "pass_attempts", "completions", "pass_yards", "pass_tds", "interceptions", "sacks_taken",
                 "rush_attempts", "rush_yards", "rush_tds", "targets", "receptions", "receiving_yards", "receiving_tds",
-                "sacks", "interceptions_def", "pass_breakups", "forced_fumbles", "fumble_recoveries", "defensive_disruptions"
+                "total_tackles", "solo_tackles", "tackles_for_loss", "sacks", "interceptions_def", "pass_breakups",
+                "passes_defended", "forced_fumbles", "fumble_recoveries", "qb_hurries", "defensive_disruptions"
             } and value},
             "advanced": {
                 "epa_total": round(s["epa_total"], 2) if opportunities else None,
@@ -303,30 +409,20 @@ def main():
     minimums = RATING_MINIMUMS
     for group in ("QB", "RB", "WR", "TE", "DEF"):
         pool = [row for row in players.values() if row["position_group"] == group and number(row["primary_volume"]) >= minimums[group]]
-        effs = [row["advanced"]["opponent_adjusted_epa_per_opportunity"] for row in pool if finite(row["advanced"]["opponent_adjusted_epa_per_opportunity"])]
-        totals = [row["advanced"]["epa_total"] for row in pool if finite(row["advanced"]["epa_total"])]
-        volumes = [row["primary_volume"] for row in pool]
-        successes = [row["advanced"]["success_rate"] for row in pool if finite(row["advanced"]["success_rate"])]
+        metrics_by_id = {row["athlete_id"]: rating_metrics(group, row) for row in pool}
+        metric_pools = {
+            key: [metrics[key] for metrics in metrics_by_id.values() if finite(metrics.get(key))]
+            for key in POSITION_RATING_WEIGHTS[group]
+        }
         for row in pool:
-            workload_percentile = percentile(volumes, row["primary_volume"])
-            if group == "DEF":
-                component_values = {
-                    "efficiency_percentile": None,
-                    "total_production_percentile": None,
-                    "workload_percentile": workload_percentile,
-                    "success_percentile": None,
-                }
-                rating = workload_percentile
-                formula = "defensive_disruption_volume"
-            else:
-                component_values = {
-                    "efficiency_percentile": percentile(effs, row["advanced"]["opponent_adjusted_epa_per_opportunity"]),
-                    "total_production_percentile": percentile(totals, row["advanced"]["epa_total"]),
-                    "workload_percentile": workload_percentile,
-                    "success_percentile": percentile(successes, row["advanced"]["success_rate"]),
-                }
-                rating = sum(RATING_WEIGHTS[key] * component_values[key] for key in RATING_WEIGHTS)
-                formula = "offensive_weighted_production"
+            observed = metrics_by_id[row["athlete_id"]]
+            component_values = {
+                key: percentile(metric_pools[key], observed[key])
+                for key in POSITION_RATING_WEIGHTS[group]
+            }
+            weights = POSITION_RATING_WEIGHTS[group]
+            rating = sum(weights[key] * component_values[key] for key in weights)
+            formula = f"{group.lower()}_position_specific_production_v2"
             reliability = min(1.0, number(row["primary_volume"]) / (minimums[group] * 2))
             row["rating"] = round(max(1.0, min(99.0, 50 + (rating - 50) * reliability)), 1)
             row["reliability"] = round(100 * reliability, 0)
@@ -336,6 +432,8 @@ def main():
                 "reliability_percent": round(100 * reliability, 0),
                 "final_rating": row["rating"],
                 "formula": formula,
+                "weights": weights,
+                "observed_metrics": {key: round(value, 3) for key, value in observed.items()},
             }
         ordered = sorted(pool, key=lambda row: (-(row["rating"] or -999), row["name"]))
         for rank, row in enumerate(ordered, 1):
@@ -353,29 +451,72 @@ def main():
     power = {row.get("team"): row for row in load(DATA / "thi_power_ratings.json").get("teams", [])}
     eligible = [row for row in players.values() if row["position_group"] in {"QB", "RB", "WR", "TE"} and finite(row.get("rating"))]
     ratings = [row["rating"] for row in eligible]
-    values = [row["advanced"]["epa_total"] for row in eligible]
+    position_rating_pools = defaultdict(list)
+    production_pools = defaultdict(list)
+    production_values = {}
+    for row in eligible:
+        group = row["position_group"]
+        stats_row = row.get("traditional") or {}
+        if group == "QB":
+            production = (
+                number(stats_row.get("pass_yards")) + number(stats_row.get("rush_yards"))
+                + 20 * (number(stats_row.get("pass_tds")) + number(stats_row.get("rush_tds")))
+                - 50 * number(stats_row.get("interceptions"))
+            )
+        elif group == "RB":
+            production = (
+                number(stats_row.get("rush_yards")) + number(stats_row.get("receiving_yards"))
+                + 25 * (number(stats_row.get("rush_tds")) + number(stats_row.get("receiving_tds")))
+            )
+        else:
+            production = number(stats_row.get("receiving_yards")) + 30 * number(stats_row.get("receiving_tds"))
+        production_values[row["athlete_id"]] = production
+        position_rating_pools[group].append(row["rating"])
+        production_pools[group].append(production)
+
+    availability_path = DATA / "research" / "cfb_player_availability_overrides_2026.json"
+    availability_payload = load(availability_path) if availability_path.exists() else {"players": []}
+    now = datetime.now(timezone.utc)
+    heisman_ineligible = {}
+    for status_row in availability_payload.get("players") or []:
+        try:
+            starts = datetime.fromisoformat(str(status_row.get("effective_from_utc")).replace("Z", "+00:00"))
+            expires = datetime.fromisoformat(str(status_row.get("expires_at_utc")).replace("Z", "+00:00"))
+        except (TypeError, ValueError):
+            continue
+        if starts <= now <= expires and status_row.get("heisman_eligible") is False:
+            heisman_ineligible[(status_row.get("team"), status_row.get("name"))] = status_row
+
     heisman = []
     for row in eligible:
         team = row.get("team")
+        status_row = heisman_ineligible.get((team, row.get("name")))
+        if status_row:
+            continue
         expected_wins = number((projections.get(team) or {}).get("expected_wins"), 6)
         team_rating = number((power.get(team) or {}).get("rating"), 0)
+        group = row["position_group"]
+        position_rating = percentile(position_rating_pools[group], row["rating"])
+        position_production = percentile(production_pools[group], production_values[row["athlete_id"]])
         score = (
-            0.52 * percentile(ratings, row["rating"])
-            + 0.23 * percentile(values, row["advanced"]["epa_total"])
-            + 0.15 * min(100, 100 * expected_wins / 12)
+            0.45 * position_rating
+            + 0.25 * position_production
+            + 0.10 * percentile(ratings, row["rating"])
+            + 0.10 * min(100, 100 * expected_wins / 12)
             + 0.10 * min(100, max(0, 50 + 3 * team_rating))
         )
         heisman.append({
             "athlete_id": row["athlete_id"], "name": row["name"], "team": team, "position": row.get("position"),
             "heisman_score": round(score, 1), "win_probability": None, "finalist_probability": None,
             "team_expected_wins": round(expected_wins, 1), "player_rating": row["rating"],
+            "position_production_percentile": round(position_production, 1),
         })
     heisman.sort(key=lambda row: (-row["heisman_score"], row["name"]))
     for rank, row in enumerate(heisman, 1): row["rank"] = rank
 
     published_players = {
         pid: row for pid, row in players.items()
-        if row["opportunities"] or number(row["traditional"].get("defensive_disruptions"))
+        if row["opportunities"] or number(row["traditional"].get("total_tackles")) or number(row["traditional"].get("defensive_disruptions"))
     }
     team_payload = {}
     for team, ids in sorted(roster_teams.items()):
@@ -391,11 +532,11 @@ def main():
             "source": "SportsDataverse/cfbfastR play-by-play joined to ESPN roster athlete IDs",
             "model_usage": "display_only_not_used_by_model_a",
             "rating_status": "research_beta",
-            "rating_version": "thi-cfb-player-production-v1.2",
+            "rating_version": "thi-cfb-player-production-v2.0",
             "rating_method": {
                 "label": "position-specific production rating",
-                "offensive_weights": RATING_WEIGHTS,
-                "defensive_formula": "defensive disruption-volume percentile",
+                "position_weights": POSITION_RATING_WEIGHTS,
+                "defensive_formula": "position-balanced box-score production using tackles, tackles for loss, sacks, passes defended, interceptions and takeaways",
                 "reliability_rule": "regress the raw composite toward 50 until twice the position minimum is reached",
                 "not_a_measure_of": ["scouting talent", "draft grade", "award probability"],
             },
@@ -409,7 +550,9 @@ def main():
             "notes": [
                 "Observed role is based on recorded workload and is not an official depth chart.",
                 "Official roster positions define rating cohorts; incidental trick-play usage does not reclassify players.",
-                "Primary volume is position-specific usage: QB dropbacks/carries, RB carries/targets, receiver targets/carries and defensive disruptions.",
+                "Primary volume is position-specific usage: QB dropbacks/carries, RB carries/targets, receiver targets/carries and defensive tackles.",
+                "Each offensive position uses its own production formula; quarterback turnover avoidance and receiver touchdown/yardage dominance are evaluated explicitly.",
+                "Defensive ratings require the complete CFBD box-score layer and are withheld when only partial play-by-play disruption data is available.",
                 "THI player ratings are position-specific and should not be compared across positions as equivalent scouting grades.",
                 "The rating describes observed current-season production within position; it is not a talent grade or Heisman probability.",
                 "Award probabilities are withheld unless the leave-one-season-out historical calibration clears every publication gate.",

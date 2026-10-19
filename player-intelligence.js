@@ -23,7 +23,7 @@
     return `${signed && n > 0 ? "+" : ""}${n.toFixed(digits)}`;
   };
   const teamConference = row => row?.conference || "FBS Independents";
-  const title = {QB:"Quarterbacks",RB:"Running Backs",WR:"Wide Receivers",TE:"Tight Ends",DEF:"Defensive Disruptors",HEISMAN:"THI Heisman Board"};
+  const title = {QB:"Quarterbacks",RB:"Running Backs",WR:"Wide Receivers",TE:"Tight Ends",DEF:"Defensive Production",HEISMAN:"THI Heisman Board"};
 
   function loadData() {
     if (data) return Promise.resolve(data);
@@ -98,7 +98,7 @@
     if (row.position_group === "QB") return `${s.completions || 0}/${s.pass_attempts || 0}, ${s.pass_yards || 0} yds`;
     if (row.position_group === "RB") return `${s.rush_attempts || 0} car, ${s.rush_yards || 0} yds`;
     if (["WR","TE"].includes(row.position_group)) return `${s.receptions || 0}/${s.targets || 0}, ${s.receiving_yards || 0} yds`;
-    return `${s.defensive_disruptions || 0} disruptions`;
+    return `${s.total_tackles || 0} tkl · ${s.tackles_for_loss || 0} TFL · ${s.passes_defended || s.pass_breakups || 0} PD`;
   }
 
   function sectionTabs() {
@@ -396,19 +396,15 @@
     const row = data?.players?.[String(id)]; if (!row) return;
     const stats = {...row.traditional, ...row.workload};
     const components = row.rating_components || {};
-    const componentCards = row.position_group === "DEF"
-      ? `<div class="thi-player-component"><span>Disruption workload</span><strong>${percent(components.workload_percentile,1)}</strong><small>Within DEF cohort</small></div>`
-      : `<div class="thi-player-component"><span>Efficiency</span><strong>${percent(components.efficiency_percentile,1)}</strong><small>45% weight</small></div>
-         <div class="thi-player-component"><span>Total production</span><strong>${percent(components.total_production_percentile,1)}</strong><small>30% weight</small></div>
-         <div class="thi-player-component"><span>Workload</span><strong>${percent(components.workload_percentile,1)}</strong><small>15% weight</small></div>
-         <div class="thi-player-component"><span>Success</span><strong>${percent(components.success_percentile,1)}</strong><small>10% weight</small></div>`;
-    const labels = {pass_attempts:"Pass attempts",completions:"Completions",pass_yards:"Passing yards",pass_tds:"Passing TD",interceptions:"Interceptions",rush_attempts:"Carries",rush_yards:"Rushing yards",rush_tds:"Rushing TD",targets:"Targets",receptions:"Receptions",receiving_yards:"Receiving yards",receiving_tds:"Receiving TD",sacks:"Sacks",interceptions_def:"Defensive INT",pass_breakups:"Pass breakups",forced_fumbles:"Forced fumbles",fumble_recoveries:"Fumble recoveries",defensive_disruptions:"Disruptions",pass_attempt_share:"Pass-attempt share",rush_attempt_share:"Carry share",target_share:"Target share"};
+    const componentLabel = key => ({adjusted_epa:"Adjusted EPA",success_rate:"Success rate",yards_per_attempt:"Yards / attempt",completion_rate:"Completion rate",touchdown_rate:"TD rate",turnover_avoidance:"Turnover avoidance",yards_per_game:"Yards / game",touchdowns_per_game:"TDs / game",yards_per_opportunity:"Yards / opportunity",workload_share:"Workload share",receiving_dominance:"Yards + TD production",yards_per_target:"Yards / target",target_share:"Target share",receiving_yards:"Receiving yards",receiving_touchdowns:"Receiving TDs",receptions:"Receptions",tackles:"Tackles",tackles_for_loss:"Tackles for loss",sacks:"Sacks",passes_defended:"Passes defended",interceptions:"Interceptions",forced_fumbles:"Forced fumbles",fumble_recoveries:"Fumble recoveries"}[key] || key.replaceAll("_", " "));
+    const componentCards = Object.entries(components.weights || {}).map(([key, weight]) => `<div class="thi-player-component"><span>${escape(componentLabel(key))}</span><strong>${percent(components[key],1)}</strong><small>${percent(Number(weight) * 100,0)} weight · within position</small></div>`).join("");
+    const labels = {pass_attempts:"Pass attempts",completions:"Completions",pass_yards:"Passing yards",pass_tds:"Passing TD",interceptions:"Interceptions",rush_attempts:"Carries",rush_yards:"Rushing yards",rush_tds:"Rushing TD",targets:"Targets",receptions:"Receptions",receiving_yards:"Receiving yards",receiving_tds:"Receiving TD",total_tackles:"Total tackles",solo_tackles:"Solo tackles",tackles_for_loss:"Tackles for loss",sacks:"Sacks",interceptions_def:"Defensive INT",pass_breakups:"Pass breakups",passes_defended:"Passes defended",qb_hurries:"QB hurries",forced_fumbles:"Forced fumbles",fumble_recoveries:"Fumble recoveries",defensive_disruptions:"Impact events",pass_attempt_share:"Pass-attempt share",rush_attempt_share:"Carry share",target_share:"Target share"};
     const drawer = document.getElementById("thi-player-drawer");
     document.getElementById("thi-player-drawer-content").innerHTML = `<div class="thi-player-identity">${row.headshot ? `<img class="thi-player-headshot" src="${escape(row.headshot)}" alt="">` : ""}<div><h2>${escape(row.name)}</h2><p>${escape(row.team)} · ${escape(row.position || "—")} · ${escape(row.class_name || row.class || "—")} · ${escape([row.height,row.weight].filter(Boolean).join(" · "))}</p></div></div>
       <div class="thi-player-card-grid"><div class="thi-player-card"><span>THI Production</span><strong>${num(row.rating,1)}</strong></div><div class="thi-player-card"><span>National position rank</span><strong>${row.national_position_rank ? `#${row.national_position_rank}` : "—"}</strong></div><div class="thi-player-card"><span>Adjusted EPA / opportunity</span><strong>${num(row.advanced?.opponent_adjusted_epa_per_opportunity,3,true)}</strong></div><div class="thi-player-card"><span>Success rate</span><strong>${num(row.advanced?.success_rate,1)}%</strong></div></div>
       <h3>Rating decomposition</h3><div class="thi-player-component-grid">${componentCards}<div class="thi-player-component reliability"><span>Sample reliability</span><strong>${percent(components.reliability_percent,0)}</strong><small>Regresses rating toward 50</small></div></div>
       <h3>Season production</h3><div class="thi-player-stat-list">${Object.entries(stats).map(([key,value]) => `<div class="thi-player-stat-line"><span>${escape(labels[key] || key)}</span><strong>${escape(value)}${key.endsWith("_share") ? "%" : ""}</strong></div>`).join("") || `<div class="thi-player-stat-line"><span>No qualifying production recorded</span></div>`}</div>
-      <h3>Method</h3><p class="thi-heisman-note">THI Production is a current-season, within-position measure. Offensive ratings combine opponent-adjusted efficiency (45%), total production (30%), workload (15%) and success (10%), then regress small samples toward 50. Defensive ratings currently measure verified disruption volume and sample reliability. It is not a scouting grade, draft projection or Heisman probability. Observed workload is not an official depth designation and does not affect Model A.</p>`;
+      <h3>Method</h3><p class="thi-heisman-note">THI Production is a current-season, within-position measure. Each position has its own transparent formula: quarterbacks include turnovers and passing efficiency; backs include scrimmage production; receivers emphasize yards, touchdowns and target efficiency; defenders use the complete box-score profile rather than disruption plays alone. Small samples regress toward 50. It is not a scouting grade, draft projection or Heisman probability and does not affect Model A.</p>`;
     drawer.hidden = false; document.body.style.overflow = "hidden";
   }
   function closePlayer() { const drawer = document.getElementById("thi-player-drawer"); if (drawer) drawer.hidden = true; document.body.style.overflow = ""; }

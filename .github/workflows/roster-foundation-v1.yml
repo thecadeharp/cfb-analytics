@@ -57,6 +57,7 @@ jobs:
           CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
           THROUGH_WEEK: ${{ inputs.through_week || '0' }}
         run: |
+          python -m unittest scripts/test_roster_assets.py
           python scripts/build_roster_assets.py
 
       - name: Verify Model A remained unchanged
@@ -88,6 +89,11 @@ jobs:
           assert assets["meta"]["official_depth_chart"] is False
           assert len(assets.get("teams", {})) >= 125
           assert assets["meta"]["player_count"] >= 5000
+          assert sum(
+              bool(player.get("usage", {}).get("total_tackles"))
+              for team in assets["teams"].values()
+              for player in team.get("players", [])
+          ) >= 1000
           print("Roster foundation validation passed")
           PY
 

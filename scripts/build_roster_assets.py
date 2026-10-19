@@ -19,6 +19,7 @@ import requests
 ROOT = Path(__file__).resolve().parents[1]
 EXTERNAL_PATH = ROOT / "data" / "external_ratings.json"
 OUTPUT_PATH = ROOT / "data" / "roster_assets.json"
+OVERRIDES_PATH = ROOT / "data" / "research" / "cfb_roster_overrides_2026.json"
 ESPN_ROSTER_URL = (
     "https://site.api.espn.com/apis/site/v2/sports/football/"
     "college-football/teams/{team_id}/roster"
@@ -177,6 +178,21 @@ def add_player_stats(accumulator, payload):
                             row["receptions"] += number(stat) or 0
                         elif category_name == "receiving" and stat_name in {"YDS", "YARDS"}:
                             row["receiving_yards"] += number(stat) or 0
+                        elif category_name in {"defensive", "defense"}:
+                            defensive_fields = {
+                                "TOT": "total_tackles", "TOTAL": "total_tackles", "TACKLES": "total_tackles",
+                                "SOLO": "solo_tackles", "SOLOTACKLES": "solo_tackles",
+                                "TFL": "tackles_for_loss", "TACKLESFORLOSS": "tackles_for_loss",
+                                "SACK": "sacks", "SACKS": "sacks",
+                                "PD": "passes_defended", "PBU": "passes_defended", "PASSESDEFENDED": "passes_defended",
+                                "INT": "interceptions_def", "INTERCEPTIONS": "interceptions_def",
+                                "FF": "forced_fumbles", "FORCEDFUMBLES": "forced_fumbles",
+                                "FR": "fumble_recoveries", "FUMBLERECOVERIES": "fumble_recoveries",
+                                "QBH": "qb_hurries", "QBHUR": "qb_hurries", "QBHURRIES": "qb_hurries",
+                            }
+                            output_field = defensive_fields.get(stat_name)
+                            if output_field:
+                                row[output_field] += number(stat) or 0
 
 
 def attach_usage(teams, stats):
@@ -192,7 +208,11 @@ def attach_usage(teams, stats):
             if not row:
                 continue
             usage = {}
-            for field in ("pass_attempts", "pass_yards", "rush_attempts", "rush_yards", "receptions", "receiving_yards"):
+            for field in (
+                "pass_attempts", "pass_yards", "rush_attempts", "rush_yards", "receptions", "receiving_yards",
+                "total_tackles", "solo_tackles", "tackles_for_loss", "sacks", "passes_defended",
+                "interceptions_def", "forced_fumbles", "fumble_recoveries", "qb_hurries",
+            ):
                 value = row[field]
                 if value:
                     usage[field] = int(value) if float(value).is_integer() else round(value, 1)
@@ -209,6 +229,38 @@ def attach_usage(teams, stats):
                 player["usage"] = usage
                 attached += 1
     return attached
+
+
+def apply_verified_overrides(teams, year):
+    """Patch documented provider omissions without fuzzy identity matching."""
+    if not OVERRIDES_PATH.exists():
+        return 0
+    payload = json.loads(OVERRIDES_PATH.read_text(encoding="utf-8"))
+    if int(payload.get("meta", {}).get("season", 0)) != int(year):
+        return 0
+    added = 0
+    for row in payload.get("players") or []:
+        team = row.get("team")
+        athlete_id = str(row.get("athlete_id") or "")
+        roster = teams.get(team)
+        if not roster or not athlete_id:
+            continue
+        existing = {str(player.get("athlete_id")) for player in roster.get("players") or []}
+        if athlete_id in existing:
+            continue
+        roster["players"].append({
+            "athlete_id": athlete_id,
+            "name": row.get("name"), "jersey": row.get("jersey"),
+            "position": row.get("position"), "position_name": row.get("position_name"),
+            "group": row.get("group"), "class": row.get("class"), "class_name": row.get("class_name"),
+            "height_inches": row.get("height_inches"), "height": row.get("height"),
+            "weight_lbs": row.get("weight_lbs"), "weight": row.get("weight"),
+            "status": "active", "headshot": row.get("headshot"), "profile_url": row.get("profile_url"),
+            "roster_override_source": row.get("source_url"),
+        })
+        roster["players"].sort(key=lambda player: (player.get("group") or "", player.get("position") or "", player.get("name") or ""))
+        added += 1
+    return added
 
 
 def parse_args():
@@ -248,6 +300,8 @@ def main():
     if len(teams) < 125:
         raise RuntimeError(f"ESPN roster safety check failed: only {len(teams)} teams loaded")
 
+    verified_overrides = apply_verified_overrides(teams, args.year)
+
     cfbd_key = clean_key(os.environ.get("CFBD_API_KEY"))
     through_week = args.through_week
     stats = defaultdict(lambda: defaultdict(float))
@@ -276,6 +330,7 @@ def main():
             "team_count": len(teams),
             "player_count": total_players,
             "players_with_statistical_usage": usage_players,
+            "verified_roster_overrides": verified_overrides,
             "official_depth_chart": False,
             "model_usage": "display_only_not_used_by_model_a",
             "usage_note": "Shares describe recorded box-score workload, not snap percentage or official depth order.",
