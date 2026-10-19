@@ -22,6 +22,7 @@ PATHS = {
     "cbb_players": "data/cbb/player_ratings.json",
     "cbb_board": "data/cbb/projection_board.json",
     "cfb_board": "data/projections.json",
+    "cfb_player_projections": "data/player_projections.json",
     "operations": "data/reports/operations_readiness.json",
 }
 
@@ -74,6 +75,7 @@ def verify(payloads: dict[str, dict], raw_assets: dict[str, bytes] | None = None
     players = payloads["cbb_players"]
     cbb_board = payloads["cbb_board"]
     cfb_board = payloads["cfb_board"]
+    cfb_player_projections = payloads["cfb_player_projections"]
     operations = payloads["operations"]
     power_teams = power.get("teams") or []
     prior_teams = priors.get("teams") or []
@@ -81,6 +83,7 @@ def verify(payloads: dict[str, dict], raw_assets: dict[str, bytes] | None = None
     sos_game_ids = {opponent.get("game_id") for row in sos_teams for opponent in (row.get("opponents") or []) if opponent.get("game_id") is not None}
     cbb_games = cbb_board.get("games") or []
     cfb_games = cfb_board.get("games") or []
+    projected_players = cfb_player_projections.get("projections") or []
 
     checks.extend([
         (manifest.get("meta", {}).get("version") == "thi-static-cache-manifest-v1.0", "Cache manifest is current schema"),
@@ -94,6 +97,11 @@ def verify(payloads: dict[str, dict], raw_assets: dict[str, bytes] | None = None
         (len(cbb_games) >= 300 and unique_non_null(cbb_games, "game_id"), "CBB projection board is populated with unique games"),
         (cbb_board.get("meta", {}).get("game_count") == len(cbb_games), "CBB game count matches metadata"),
         (len(cfb_games) >= 50 and unique_non_null(cfb_games, "game_id"), "CFB projection board is populated with unique games"),
+        (cfb_player_projections.get("meta", {}).get("version") == "thi-cfb-player-projections-v0.1-research", "CFB player projections use the research schema"),
+        (cfb_player_projections.get("meta", {}).get("status") == "research_only", "CFB player projections remain research-only"),
+        (cfb_player_projections.get("meta", {}).get("model_usage") == "display_only_not_used_by_model_a", "CFB player projections remain isolated from Model A"),
+        (len(projected_players) >= 500 and unique_non_null(projected_players, "athlete_id"), "CFB player projection board has unique national coverage"),
+        (cfb_player_projections.get("meta", {}).get("projection_count") == len(projected_players), "CFB player projection count matches metadata"),
         (health.get("meta", {}).get("status") in {"healthy", "attention_required"}, "CBB health contract is readable"),
         (operations.get("meta", {}).get("version") == "thi-operations-readiness-v1.0", "Operations report is current schema"),
         (model.get("meta", {}).get("model_version") == cbb_board.get("meta", {}).get("model_version"), "CBB board and model-card versions match"),

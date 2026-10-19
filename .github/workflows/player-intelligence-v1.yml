@@ -52,16 +52,23 @@ jobs:
       - name: Audit player ratings and roster joins
         run: python scripts/audit_cfb_player_intelligence.py
 
+      - name: Build next-game player projection research board
+        run: |
+          python -m unittest scripts/test_cfb_player_projections.py
+          python scripts/build_cfb_player_projections.py
+
       - name: Validate output contracts
         run: |
           python -m json.tool data/team_intelligence.json >/dev/null
           python -m json.tool data/player_intelligence.json >/dev/null
           python -m json.tool data/player_intelligence_audit.json >/dev/null
+          python -m json.tool data/player_projections.json >/dev/null
           python - <<'PY'
           import json
           team = json.load(open('data/team_intelligence.json'))
           player = json.load(open('data/player_intelligence.json'))
           audit = json.load(open('data/player_intelligence_audit.json'))
+          projections = json.load(open('data/player_projections.json'))
           assert team['meta']['model_usage'] == 'display_only_not_used_by_model_a'
           assert player['meta']['model_usage'] == 'display_only_not_used_by_model_a'
           assert player['meta']['rating_version'] == 'thi-cfb-player-production-v1.2'
@@ -70,6 +77,11 @@ jobs:
           assert len(team['teams']) >= 130
           assert len(player['teams']) >= 130
           assert len(player['players']) >= 3000
+          assert projections['meta']['status'] == 'research_only'
+          assert projections['meta']['model_usage'] == 'display_only_not_used_by_model_a'
+          assert projections['meta']['market_usage'] == 'no_sportsbook_prop_lines_or_over_under_recommendations'
+          assert len(projections['projections']) >= 100
+          assert all(row['position_group'] in {'QB','RB','WR','TE'} for row in projections['projections'])
           assert player['meta']['heisman_status'] in {'NOT_RUN', 'BOARD_ONLY_CALIBRATION_GATE_FAILED', 'PASSED_FOR_BETA_PROBABILITIES'}
           if player['meta']['heisman_status'] != 'PASSED_FOR_BETA_PROBABILITIES':
               assert all(row['win_probability'] is None and row['finalist_probability'] is None for row in player['heisman_board'])
@@ -86,13 +98,13 @@ jobs:
 
       - name: Commit display and research data only
         run: |
-          if git diff --quiet -- data/team_intelligence.json data/player_intelligence.json data/player_intelligence_audit.json; then
+          if git diff --quiet -- data/team_intelligence.json data/player_intelligence.json data/player_intelligence_audit.json data/player_projections.json; then
             echo "No player-intelligence changes"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/team_intelligence.json data/player_intelligence.json data/player_intelligence_audit.json
+          git add data/team_intelligence.json data/player_intelligence.json data/player_intelligence_audit.json data/player_projections.json
           git commit -m "Refresh THI player intelligence and team luck"
           for attempt in 1 2 3 4 5; do
             git fetch origin main

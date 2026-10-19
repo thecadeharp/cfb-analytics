@@ -141,6 +141,7 @@ def audit(root: Path, now: datetime) -> dict:
     check("cfb_roster_assets", "data/roster_assets.json", ["meta.generated_at"], 192, {"teams": ("teams", 130), "players": ("meta.player_count", 5000)})
     players = check("cfb_player_intelligence", "data/player_intelligence.json", ["meta.generated_at"], 192, {"teams": ("teams", 130), "players": ("players", 3000)})
     player_audit = check("cfb_player_audit", "data/player_intelligence_audit.json", ["meta.generated_at_utc"], 192, {}, severity="critical")
+    check("cfb_player_projections", "data/player_projections.json", ["meta.generated_at_utc"], 192, {"projections": ("projections", 500)}, severity="warning")
     check("cfb_schedule_context", "data/schedule_context.json", ["meta.generated_at"], 192, {"games": ("games", 700)})
     check("cfb_coach_ats", "data/coach_ats_trends.json", ["meta.generated_at_utc"], 192, {"coaches": ("coaches", 130)})
     check("cfb_team_market_records", "data/team_market_performance.json", ["meta.generated_at"], 192, {"teams": ("teams", 130)})

@@ -116,6 +116,10 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
   letter-spacing: .07em;
   text-transform: uppercase;
 }
+.cbb-player-section-tabs { display:inline-grid; grid-template-columns:repeat(2,minmax(160px,1fr)); gap:4px; margin:18px 0 14px; padding:4px; border:1px solid var(--border); border-radius:10px; background:var(--surface); }
+.cbb-player-section-tabs button { border:0; border-radius:7px; padding:10px 14px; background:transparent; color:var(--muted); cursor:pointer; font:800 10px var(--mono); }
+.cbb-player-section-tabs button span { margin-left:5px; color:#b77a23; font-size:8px; text-transform:uppercase; }
+.cbb-player-section-tabs button.is-active { background:var(--text); color:var(--surface); }
 
 .cbb-status-card strong { font-size: 18px; }
 .cbb-status-card p { margin: 4px 0 0; color: #744226; font-size: 12px; line-height: 1.5; }
@@ -820,6 +824,7 @@ html[data-theme="dark"] .cbb-error { background: #3a2020; border-color: #76443e;
 }
 
 @media (max-width: 640px) {
+  .cbb-player-section-tabs { display:grid; width:100%; grid-template-columns:1fr 1fr; }
   .cbb-health-strip { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .cbb-trends-grid { grid-template-columns:1fr; }
   .cbb-planned-trends > div { grid-template-columns:1fr; gap:4px; }

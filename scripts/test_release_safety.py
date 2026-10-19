@@ -79,6 +79,15 @@ class ReleaseSafetyTests(unittest.TestCase):
             "cbb_players": {"players": [{"name": "Wrong Player"}]},
             "cbb_board": {"meta": {"version": "board-v1", "model_version": "model-v1", "game_count": 300}, "games": cbb_games},
             "cfb_board": {"games": cfb_games},
+            "cfb_player_projections": {
+                "meta": {
+                    "version": "thi-cfb-player-projections-v0.1-research",
+                    "status": "research_only",
+                    "model_usage": "display_only_not_used_by_model_a",
+                    "projection_count": 500,
+                },
+                "projections": [{"athlete_id": str(index)} for index in range(500)],
+            },
             "operations": {"meta": {"version": "thi-operations-readiness-v1.0"}},
         }
         with self.assertRaises(RuntimeError):

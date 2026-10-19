@@ -60,7 +60,9 @@
     playerPageSize: 100,
     playerData: null,
     playerLoading: null,
+    playerError: "",
     playerBandCache: {},
+    cbbPlayerSection: "ratings",
     deferredLoads: {},
     cacheManifest: { meta: {}, assets: {} },
     projectionQuery: "",
@@ -1128,13 +1130,27 @@
 
   function renderPlayerRatings() {
     const view = document.getElementById("view-cbb-player-ratings");
+    const sectionTabs = `<div class="cbb-player-section-tabs" role="tablist" aria-label="CBB player intelligence view"><button type="button" role="tab" aria-selected="${state.cbbPlayerSection === "ratings"}" class="${state.cbbPlayerSection === "ratings" ? "is-active" : ""}" data-cbb-player-section="ratings">Player Ratings</button><button type="button" role="tab" aria-selected="${state.cbbPlayerSection === "projections"}" class="${state.cbbPlayerSection === "projections" ? "is-active" : ""}" data-cbb-player-section="projections">Player Projections <span>Future</span></button></div>`;
+    const bindSectionTabs = () => view.querySelectorAll("[data-cbb-player-section]").forEach(button => button.addEventListener("click", () => { state.cbbPlayerSection = button.dataset.cbbPlayerSection; renderPlayerRatings(); }));
+    if (state.cbbPlayerSection === "projections") {
+      view.innerHTML = `
+        <div class="cbb-kicker">Player-level basketball intelligence</div>
+        <h1 class="page-title">CBB Player Intelligence</h1>
+        <p class="page-subtitle">Ratings and next-game statistical projections occupy separate research layers.</p>
+        ${sectionTabs}
+        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Withheld</span><strong>CBB player projections follow roster verification</strong><p>The future board is reserved for minutes, points, rebounds, assists, threes, steals, blocks and turnovers. THI will not publish those estimates until current rosters, projected rotations and the player-game validation ledger clear their release gates.</p></div>`;
+      bindSectionTabs();
+      return;
+    }
     if (!state.playerData) {
       view.innerHTML = `
         <div class="cbb-kicker">Player-level basketball intelligence</div>
-        <h1 class="page-title">CBB Player Ratings</h1>
+        <h1 class="page-title">CBB Player Intelligence</h1>
         <p class="page-subtitle">THI's projected-impact layer translates prior production through competition, destination, role, pedigree and sample context without feeding these ratings into public game projections.</p>
-        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Roster audit</span><strong>${state.playerLoading ? "Checking current-roster verification" : "Player board pending verified rosters"}</strong><p>${state.playerLoading ? "Rejecting stale and incomplete roster feeds…" : "THI publishes player ratings only after the current roster source clears the national verification gate."}</p></div>
+        ${sectionTabs}
+        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Roster audit</span><strong>${state.playerLoading ? "Checking current-roster verification" : "Player board pending verified rosters"}</strong><p>${state.playerLoading ? "Rejecting stale and incomplete roster feeds…" : escapeHtml(state.playerError || "THI publishes player ratings only after the current roster source clears the national verification gate.")}</p></div>
       `;
+      bindSectionTabs();
       return;
     }
     const payload = state.playerData;
@@ -1143,8 +1159,9 @@
     const conferences = [...new Set(players.map(player => player.conference).filter(Boolean))].sort();
     view.innerHTML = `
       <div class="cbb-kicker">Player-level basketball intelligence</div>
-      <h1 class="page-title">CBB Player Ratings</h1>
+      <h1 class="page-title">CBB Player Intelligence</h1>
       <p class="page-subtitle">Active ${escapeHtml(meta.roster_season || meta.season)} roster players ranked by projected impact. THI adjusts qualified ${escapeHtml(meta.source_season || "prior-season")} production for competition, destination strength, role, recruiting or portal pedigree, and sample reliability.</p>
+      ${sectionTabs}
       <div class="cbb-stat-grid">
         ${statCard("Rated players", integer(meta.player_count), `${integer(meta.team_count)} Division I teams`)}
         ${statCard("Prior minimum", `${integer(meta.minimum_minutes)} min`, `${integer(meta.minimum_games)} games · newcomers use verified pedigree`)}
@@ -1165,6 +1182,7 @@
       <div class="cbb-player-pager"><button type="button" data-player-page="prev">Previous</button><span id="cbb-player-page-status"></span><button type="button" data-player-page="next">Next</button></div>
       <div class="cbb-stat-note">Only players verified on a ${escapeHtml(meta.roster_season || meta.season)} roster are shown. Projected Impact is the default rank; Prior Production preserves the unadjusted statistical grade. Green is stronger, red is weaker. Rank numbers remain neutral.</div>
     `;
+    bindSectionTabs();
     bindPlayerControls();
     paintPlayerRows();
   }
@@ -1179,15 +1197,16 @@
           throw new Error("Current rosters have not cleared THI's verification gate. Stale fallback players and their ratings are withheld.");
         }
         state.playerData = payload;
+        state.playerError = "";
         state.playerBandCache = {};
         renderPlayerRatings();
         return payload;
       })
       .catch(error => {
-        const view = document.getElementById("view-cbb-player-ratings");
-        if (view) view.innerHTML = `<div class="cbb-error"><strong>CBB player ratings are temporarily unavailable.</strong><div>${escapeHtml(error.message)}</div></div>`;
+        state.playerError = error.message;
+        renderPlayerRatings();
       })
-      .finally(() => { state.playerLoading = null; });
+      .finally(() => { state.playerLoading = null; renderPlayerRatings(); });
     renderPlayerRatings();
     return state.playerLoading;
   }

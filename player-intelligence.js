@@ -1,10 +1,17 @@
 (() => {
   const DATA_URL = "./data/player_intelligence.json";
+  const PROJECTION_URL = "./data/player_projections.json";
   let data = null;
   let dataPromise = null;
+  let projectionData = null;
+  let projectionPromise = null;
+  let section = "ratings";
   let active = "QB";
   let search = "";
   let conference = "ALL";
+  let projectionPosition = "ALL";
+  let projectionSearch = "";
+  let projectionConfidence = "ALL";
   let sortKey = "rank";
   let sortDirection = "asc";
   let decorateQueued = false;
@@ -56,8 +63,8 @@
     anchor.after(button);
     const view = document.createElement("section");
     view.id = "view-player-ratings"; view.className = "view";
-    view.innerHTML = `<div class="eyebrow">THI Player Intelligence</div><h1 class="page-title">Player Production Ratings</h1>
-      <p class="page-subtitle">Position-specific current-season production, opponent-adjusted efficiency and observed workload. This is not a scouting grade, talent ranking or award probability, and it does not affect Model A.</p>
+    view.innerHTML = `<div class="eyebrow">THI Player Intelligence</div><h1 class="page-title">Player Intelligence</h1>
+      <p class="page-subtitle">Position-specific production ratings and matchup-aware player stat projections in separate research layers. Neither layer affects Model A.</p>
       <div id="thi-player-root"><div class="empty-state">Open Player Ratings to load the current player dataset.</div></div>`;
     ratings.after(view);
     const drawer = document.createElement("div"); drawer.id = "thi-player-drawer"; drawer.className = "thi-player-drawer"; drawer.hidden = true;
@@ -94,14 +101,37 @@
     return `${s.defensive_disruptions || 0} disruptions`;
   }
 
+  function sectionTabs() {
+    return `<div class="thi-player-section-tabs" role="tablist" aria-label="Player intelligence view">
+      <button type="button" role="tab" aria-selected="${section === "ratings"}" class="${section === "ratings" ? "active" : ""}" data-player-section="ratings">Player Ratings</button>
+      <button type="button" role="tab" aria-selected="${section === "projections"}" class="${section === "projections" ? "active" : ""}" data-player-section="projections">Player Projections <span>Research</span></button>
+    </div>`;
+  }
+
+  function bindSectionTabs(root) {
+    root.querySelectorAll("[data-player-section]").forEach(button => button.addEventListener("click", () => {
+      section = button.dataset.playerSection;
+      if (section === "projections") loadProjectionData().catch(() => {});
+      else render();
+    }));
+  }
+
   function render() {
     const root = document.getElementById("thi-player-root"); if (!root || !data) return;
+    if (section === "projections") {
+      if (projectionData) renderProjections();
+      else root.innerHTML = `${sectionTabs()}<div class="loading-state"><div class="spinner"></div>Loading player projections…</div>`;
+      bindSectionTabs(root);
+      return;
+    }
     const conferences = [...new Set(Object.values(data.players).map(teamConference).filter(Boolean))].sort();
-    root.innerHTML = `<div class="thi-player-tabs">${["QB","RB","WR","TE","DEF","HEISMAN"].map(key => `<button class="thi-player-tab ${active === key ? "active" : ""}" data-player-tab="${key}">${escape(title[key])}</button>`).join("")}</div>
+    root.innerHTML = `${sectionTabs()}<div class="thi-player-mode-heading"><div><span>Current-season layer</span><strong>Player Production Ratings</strong></div><p>Who has produced efficiently within their position?</p></div>
+      <div class="thi-player-tabs">${["QB","RB","WR","TE","DEF","HEISMAN"].map(key => `<button class="thi-player-tab ${active === key ? "active" : ""}" data-player-tab="${key}">${escape(title[key])}</button>`).join("")}</div>
       <div class="thi-player-controls"><div class="thi-player-control"><label for="thi-player-search">Player or team</label><input id="thi-player-search" type="search" value="${escape(search)}" placeholder="Search players"></div>
       <div class="thi-player-control"><label for="thi-player-conference">Conference</label><select id="thi-player-conference"><option value="ALL">All conferences</option>${conferences.map(name => `<option ${conference === name ? "selected" : ""}>${escape(name)}</option>`).join("")}</select></div></div>
       <div class="thi-player-beta">Through Week ${escape(data.meta?.through_week ?? "—")} · all percentiles compare players within position · observed roles are derived from recorded workload, not an official depth chart · production ratings are research beta, not scouting or award grades · Model A is unchanged.</div>
       <div id="thi-player-table"></div>`;
+    bindSectionTabs(root);
     root.querySelectorAll("[data-player-tab]").forEach(button => button.addEventListener("click", () => {
       active = button.dataset.playerTab;
       sortKey = "rank";
@@ -111,6 +141,91 @@
     root.querySelector("#thi-player-search").addEventListener("input", event => { search = event.target.value; renderTable(); });
     root.querySelector("#thi-player-conference").addEventListener("change", event => { conference = event.target.value; renderTable(); });
     renderTable();
+  }
+
+  function loadProjectionData() {
+    if (projectionData) { renderProjections(); return Promise.resolve(projectionData); }
+    if (projectionPromise) return projectionPromise;
+    const root = document.getElementById("thi-player-root");
+    if (root) {
+      root.innerHTML = `${sectionTabs()}<div class="loading-state"><div class="spinner"></div>Loading player projections…</div>`;
+      bindSectionTabs(root);
+    }
+    projectionPromise = fetch(PROJECTION_URL)
+      .then(response => { if (!response.ok) throw new Error(response.status); return response.json(); })
+      .then(payload => {
+        if (!Array.isArray(payload.projections)) throw new Error("Projection payload is incomplete.");
+        projectionData = payload;
+        renderProjections();
+        return payload;
+      })
+      .catch(error => {
+        projectionPromise = null;
+        if (root) {
+          root.innerHTML = `${sectionTabs()}<div class="empty-state">Player projections could not load. Ratings remain available.</div>`;
+          bindSectionTabs(root);
+        }
+        throw error;
+      });
+    return projectionPromise;
+  }
+
+  const projectionMetricLabels = {
+    pass_attempts:"Pass Att", completions:"Completions", pass_yards:"Pass Yds", pass_tds:"Pass TD", interceptions:"INT",
+    rush_attempts:"Carries", rush_yards:"Rush Yds", targets:"Targets", receptions:"Receptions", receiving_yards:"Rec Yds"
+  };
+
+  function projectionMetrics(row) {
+    const order = row.position_group === "QB"
+      ? ["completions","pass_attempts","pass_yards","pass_tds","interceptions","rush_attempts","rush_yards"]
+      : row.position_group === "RB"
+        ? ["rush_attempts","rush_yards","targets","receptions","receiving_yards"]
+        : ["targets","receptions","receiving_yards"];
+    return order.filter(key => Number.isFinite(Number(row.projection?.[key]))).map(key => `<div class="thi-player-projection-metric"><span>${escape(projectionMetricLabels[key] || key)}</span><strong>${num(row.projection[key], ["pass_tds","interceptions"].includes(key) ? 2 : 1)}</strong></div>`).join("");
+  }
+
+  function projectionRows() {
+    const query = projectionSearch.trim().toLocaleLowerCase();
+    return (projectionData?.projections || []).filter(row => {
+      const matchesQuery = !query || `${row.name} ${row.team} ${row.matchup?.opponent}`.toLocaleLowerCase().includes(query);
+      const matchesPosition = projectionPosition === "ALL" || row.position_group === projectionPosition;
+      const matchesConfidence = projectionConfidence === "ALL" || row.confidence === projectionConfidence;
+      return matchesQuery && matchesPosition && matchesConfidence;
+    });
+  }
+
+  function renderProjections() {
+    const root = document.getElementById("thi-player-root"); if (!root || !projectionData) return;
+    const meta = projectionData.meta || {};
+    const rows = projectionRows();
+    const visibleRows = rows.slice(0, 300);
+    const countLabel = rows.length > visibleRows.length
+      ? `Showing ${visibleRows.length} of ${rows.length} projected players · refine the filters to narrow the board`
+      : `${rows.length} projected players shown`;
+    root.innerHTML = `${sectionTabs()}
+      <div class="thi-player-mode-heading"><div><span>Next-game layer</span><strong>Player Stat Projections</strong></div><p>What workload and production does the current matchup imply?</p></div>
+      <div class="thi-player-projection-notice"><div><strong>Research projections · v0.1</strong><span>Projected means are matchup-aware estimates, not sportsbook prop lines or over/under recommendations.</span></div><small>Through Week ${escape(meta.through_week ?? "—")} · ${escape(meta.projection_count ?? 0)} players · Model A unchanged</small></div>
+      <div class="thi-player-controls thi-player-projection-controls">
+        <div class="thi-player-control"><label for="thi-projection-search">Player, team or opponent</label><input id="thi-projection-search" type="search" value="${escape(projectionSearch)}" placeholder="Search the next-game board"></div>
+        <div class="thi-player-control"><label for="thi-projection-position">Position</label><select id="thi-projection-position"><option value="ALL">All positions</option>${["QB","RB","WR","TE"].map(position => `<option value="${position}" ${projectionPosition === position ? "selected" : ""}>${position}</option>`).join("")}</select></div>
+        <div class="thi-player-control"><label for="thi-projection-confidence">Evidence state</label><select id="thi-projection-confidence"><option value="ALL">All evidence states</option><option value="established" ${projectionConfidence === "established" ? "selected" : ""}>Established role</option><option value="developing" ${projectionConfidence === "developing" ? "selected" : ""}>Developing role</option><option value="availability_watch" ${projectionConfidence === "availability_watch" ? "selected" : ""}>Availability watch</option></select></div>
+      </div>
+      <div class="thi-player-projection-count">${escape(countLabel)}</div>
+      <div class="thi-player-projection-grid">${visibleRows.map(row => {
+        const matchup = row.matchup || {};
+        const start = matchup.start_date ? new Date(matchup.start_date).toLocaleString("en-US", {timeZone:"America/New_York",weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZoneName:"short"}) : "Time TBD";
+        const context = row.availability ? `<div class="thi-player-availability"><strong>${escape(row.availability.status || "Availability watch")}</strong><span>${escape(row.availability.note || "Current source-linked player status requires review.")}</span>${/^https:\/\//i.test(row.availability.source_url || "") ? `<a href="${escape(row.availability.source_url)}" target="_blank" rel="noopener noreferrer">Source ↗</a>` : ""}</div>` : "";
+        return `<article class="thi-player-projection-card">
+          <header><div><button type="button" class="thi-player-name" data-thi-player-id="${escape(row.athlete_id)}">${escape(row.name)}</button><p>${escape(row.team)} ${escape(matchup.home_away === "home" ? "vs" : "at")} ${escape(matchup.opponent)} · ${escape(start)}</p></div><span>${escape(row.position_group)}</span></header>
+          <div class="thi-player-projection-context"><span>THI ${row.national_position_rank ? `#${escape(row.national_position_rank)} ${escape(row.position_group)}` : "N/R"}</span><span>${escape(row.confidence === "established" ? "Established role" : row.confidence === "availability_watch" ? "Availability watch" : "Developing role")}</span><span>${matchup.implied_team_points != null ? `${num(matchup.implied_team_points,1)} implied pts` : "No team total"}</span></div>
+          <div class="thi-player-projection-metrics">${projectionMetrics(row)}</div>${context}
+        </article>`;
+      }).join("") || `<div class="empty-state">No projected players match these filters.</div>`}</div>
+      <div class="thi-player-beta">Method: ${escape(meta.method || "Observed workload with matchup adjustments.")} A complete frozen player-game ledger and prospective calibration are still required before THI certifies these as prop-grade forecasts.</div>`;
+    bindSectionTabs(root);
+    root.querySelector("#thi-projection-search").addEventListener("input", event => { projectionSearch = event.target.value; renderProjections(); const input=document.getElementById("thi-projection-search"); input?.focus(); input?.setSelectionRange(input.value.length,input.value.length); });
+    root.querySelector("#thi-projection-position").addEventListener("change", event => { projectionPosition = event.target.value; renderProjections(); });
+    root.querySelector("#thi-projection-confidence").addEventListener("change", event => { projectionConfidence = event.target.value; renderProjections(); });
   }
 
   function renderTable() {
