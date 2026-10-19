@@ -39,6 +39,7 @@
     .thi-hub-control-group { display:flex; align-items:center; gap:10px; }
     .thi-hub-search { min-width:210px; }
     .thi-hub-note { font-size:12px; line-height:1.55; color:var(--muted); margin:0 0 18px; }
+    .thi-hub-mobile-sort { display:none; }
     .thi-hub-table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
     .thi-hub-table { width:100%; min-width:1180px; border-collapse:collapse; }
     .thi-hub-table th, .thi-hub-table td { text-align:left; padding:14px 16px; border-bottom:1px solid var(--border); }
@@ -85,6 +86,7 @@
     .thi-hub-badge { display:inline-block; border:1px solid var(--border); border-radius:40px; padding:4px 8px; font:600 10px var(--mono); }
     .thi-hub-badge.strong { color:#12694d; background:#e8f7ef; }
     .thi-hub-badge.limited { color:#815b08; background:#fff4d6; }
+    .thi-hub-mobile-list { display:none; }
     .thi-hub-provisional { margin-top:18px; }
     .thi-hub-provisional summary { cursor:pointer; font-size:14px; font-weight:700; margin-bottom:10px; }
     .thi-hub-provisional p { color:var(--muted); font-size:12px; line-height:1.55; margin:0 0 12px; }
@@ -102,12 +104,37 @@
     .thi-situational-sample { color:var(--muted); font-size:11px; line-height:1.5; margin-top:4px; }
     .thi-situational-explainer { margin:12px 0 0; color:var(--muted); font-size:12px; line-height:1.55; }
     @media (max-width:700px) {
-      .thi-hub-table { min-width:0; }
-      .thi-hub-table thead { display:none; }
-      .thi-hub-table tbody tr { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); padding:14px; gap:10px 16px; border-bottom:1px solid var(--border); }
-      .thi-hub-table td { padding:0; border:0; min-width:0; }
-      .thi-hub-table td:first-child { grid-column:1/-1; }
-      .thi-hub-table td[data-label]::before { content:attr(data-label); display:block; color:var(--muted); font:600 10px var(--mono); margin-bottom:3px; }
+      .thi-hub-table-wrap { display:none; }
+      .thi-hub-mobile-list { display:grid; gap:10px; }
+      .thi-hub-mobile-card {
+        overflow:hidden; border:1px solid var(--border); border-radius:13px; background:var(--surface);
+        box-shadow:0 1px 0 rgba(15,23,42,.03);
+      }
+      .thi-hub-mobile-head {
+        display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:12px;
+        padding:14px; border-bottom:1px solid var(--border); background:var(--surface-soft);
+      }
+      .thi-hub-mobile-team { display:flex; align-items:center; gap:10px; min-width:0; }
+      .thi-hub-mobile-team-copy { min-width:0; }
+      .thi-hub-mobile-team .thi-hub-team { display:block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:15px; }
+      .thi-hub-mobile-meta { margin-top:3px; color:var(--muted); font:600 10px/1.3 var(--mono); }
+      .thi-hub-mobile-power { min-width:74px; text-align:right; }
+      .thi-hub-mobile-power span, .thi-hub-mobile-stat span, .thi-hub-mobile-context span {
+        display:block; color:var(--muted); font:700 9px/1.3 var(--mono); letter-spacing:.55px; text-transform:uppercase;
+      }
+      .thi-hub-mobile-power strong { display:block; margin-top:2px; font:800 22px/1 var(--mono); color:var(--text); }
+      .thi-hub-mobile-power small { display:block; margin-top:4px; color:var(--muted); font:700 10px/1.2 var(--mono); }
+      .thi-hub-mobile-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); }
+      .thi-hub-mobile-stat { min-width:0; padding:12px 8px; text-align:center; border-right:1px solid var(--border); }
+      .thi-hub-mobile-stat:last-child { border-right:0; }
+      .thi-hub-mobile-stat strong { display:block; margin-top:5px; font:800 15px/1 var(--mono); color:var(--text); }
+      .thi-hub-mobile-context-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border-top:1px solid var(--border); }
+      .thi-hub-mobile-context { min-width:0; padding:10px 8px; text-align:center; border-right:1px solid var(--border); }
+      .thi-hub-mobile-context:last-child { border-right:0; }
+      .thi-hub-mobile-context strong { display:block; margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text); font:700 11px/1.2 var(--mono); }
+      .thi-hub-mobile-sort { display:flex; width:100%; align-items:center; gap:10px; }
+      .thi-hub-mobile-sort .conference-filter-label { flex:0 0 auto; }
+      .thi-hub-mobile-sort .conference-filter-select { flex:1 1 auto; min-width:0; }
       .thi-hub-controls { align-items:stretch; }
       .thi-hub-control-group { width:100%; }
       .thi-hub-control-group .conference-filter-select { flex:1 1 auto; min-width:0; }
@@ -117,6 +144,12 @@
       .thi-decomposition-head { display:block; }
       .thi-decomposition-stamp { margin-top:7px; text-align:left; }
       .thi-decomposition-lenses { grid-template-columns:1fr; }
+    }
+    @media (max-width:380px) {
+      .thi-hub-mobile-head { padding:12px; }
+      .thi-hub-mobile-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .thi-hub-mobile-stat:nth-child(2) { border-right:0; }
+      .thi-hub-mobile-stat:nth-child(-n+2) { border-bottom:1px solid var(--border); }
     }
     @media (min-width:701px) and (max-width:1050px) { .thi-decomposition-lenses { grid-template-columns:repeat(2,minmax(0,1fr)); } }
   `;
@@ -398,25 +431,51 @@
     });
     const priorRanks = priorRankMap();
 
+    const tableRows = data.map(row => `<tr>
+        <td data-label="Power"><span class="thi-hub-number">${row.indexRank?.power_rank ? `#${formatNumber(row.indexRank.power_rank, 0)}` : "—"}</span></td>
+        <td data-label="Résumé"><span class="thi-hub-number">${row.indexRank?.resume_rank ? `#${formatNumber(row.indexRank.resume_rank, 0)}` : "—"}</span></td>
+        <td data-label="Team"><span class="thi-hub-team-wrap">${teamLogoMarkup(row.team, "projection")}
+            <button type="button" class="thi-hub-team" data-thi-team="${escapeHtml(row.team)}">${escapeHtml(row.team)}</button></span></td>
+        <td data-label="Power Rating"><span class="thi-hub-number">${formatAxisNumber(row.indexRank?.power_score, 1)}</span></td>
+        <td data-label="Current Form"><span class="thi-hub-rank">${row.indexRank?.components?.observed_efficiency?.rank ? `#${row.indexRank.components.observed_efficiency.rank}` : "—"}</span></td>
+        <td data-label="SOS"><span class="thi-hub-rank">${row.indexRank?.components?.schedule_strength?.rank ? `#${row.indexRank.components.schedule_strength.rank}` : "—"}</span></td>
+        <td data-label="Game Control"><span class="thi-hub-rank">${row.indexRank?.components?.game_control?.rank ? `#${row.indexRank.components.game_control.rank}` : "—"}</span></td>
+        <td data-label="FBS Sample"><span class="thi-hub-number">${Number.isFinite(Number(row.indexRank?.sample?.fbs_games)) ? `${row.indexRank.sample.fbs_games} G` : "—"}</span></td>
+        <td data-label="vs Power Top 25"><span class="thi-hub-number">${escapeHtml(row.qualityRecord)}</span></td>
+        ${metricCell("Home Edge", formatAxisNumber(row.hfa, 1), row.hfa, allValues("hfa"), "context")}
+      </tr>`).join("");
+    const mobileCards = data.map(row => {
+      const sample = Number.isFinite(Number(row.indexRank?.sample?.fbs_games)) ? `${row.indexRank.sample.fbs_games} games` : "—";
+      const record = row.indexRank?.record || "Record unavailable";
+      const mobileStat = (label, value) => `<div class="thi-hub-mobile-stat"><span>${label}</span><strong>${value}</strong></div>`;
+      const contextStat = (label, value) => `<div class="thi-hub-mobile-context"><span>${label}</span><strong>${value}</strong></div>`;
+      return `<article class="thi-hub-mobile-card">
+        <header class="thi-hub-mobile-head">
+          <div class="thi-hub-mobile-team">${teamLogoMarkup(row.team, "projection")}
+            <div class="thi-hub-mobile-team-copy">
+              <button type="button" class="thi-hub-team" data-thi-team="${escapeHtml(row.team)}">${escapeHtml(row.team)}</button>
+              <div class="thi-hub-mobile-meta">${escapeHtml(row.conference)} · ${escapeHtml(record)}</div>
+            </div>
+          </div>
+          <div class="thi-hub-mobile-power"><span>Power</span><strong>${row.indexRank?.power_rank ? `#${formatNumber(row.indexRank.power_rank, 0)}` : "—"}</strong><small>${formatAxisNumber(row.indexRank?.power_score, 1)} rating</small></div>
+        </header>
+        <div class="thi-hub-mobile-grid">
+          ${mobileStat("Résumé", row.indexRank?.resume_rank ? `#${formatNumber(row.indexRank.resume_rank, 0)}` : "—")}
+          ${mobileStat("Form", row.indexRank?.components?.observed_efficiency?.rank ? `#${row.indexRank.components.observed_efficiency.rank}` : "—")}
+          ${mobileStat("SOS", row.indexRank?.components?.schedule_strength?.rank ? `#${row.indexRank.components.schedule_strength.rank}` : "—")}
+          ${mobileStat("Control", row.indexRank?.components?.game_control?.rank ? `#${row.indexRank.components.game_control.rank}` : "—")}
+        </div>
+        <div class="thi-hub-mobile-context-grid">
+          ${contextStat("FBS Sample", sample)}
+          ${contextStat("vs Power 25", escapeHtml(row.qualityRecord))}
+          ${contextStat("Home Edge", formatAxisNumber(row.hfa, 1))}
+        </div>
+      </article>`;
+    }).join("");
+
     target.innerHTML = data.length ? `<div class="thi-hub-table-wrap"><table class="thi-hub-table">
       <thead><tr>${sortHeader("index_rank", "Power", "asc")}${sortHeader("resume_rank", "Résumé", "asc")}${sortHeader("team", "Team", "asc")}${sortHeader("power_score", "Power Rating")}${sortHeader("observed_rank", "Current Form", "asc")}${sortHeader("schedule_strength_rank", "SOS", "asc")}${sortHeader("game_control_rank", "Game Control", "asc")}<th>FBS Sample</th><th>vs Power Top 25</th>${sortHeader("hfa", "Home Edge")}</tr></thead>
-      <tbody>${data.map(row => {
-        const { power, profile } = row;
-        const rating = profile.ratings ?? {};
-        return `<tr>
-          <td data-label="Power"><span class="thi-hub-number">${row.indexRank?.power_rank ? `#${formatNumber(row.indexRank.power_rank, 0)}` : "—"}</span></td>
-          <td data-label="Résumé"><span class="thi-hub-number">${row.indexRank?.resume_rank ? `#${formatNumber(row.indexRank.resume_rank, 0)}` : "—"}</span></td>
-          <td data-label="Team"><span class="thi-hub-team-wrap">${teamLogoMarkup(row.team, "projection")}
-              <button type="button" class="thi-hub-team" data-thi-team="${escapeHtml(row.team)}">${escapeHtml(row.team)}</button></span></td>
-          <td data-label="Power Rating"><span class="thi-hub-number">${formatAxisNumber(row.indexRank?.power_score, 1)}</span></td>
-          <td data-label="Current Form"><span class="thi-hub-rank">${row.indexRank?.components?.observed_efficiency?.rank ? `#${row.indexRank.components.observed_efficiency.rank}` : "—"}</span></td>
-          <td data-label="SOS"><span class="thi-hub-rank">${row.indexRank?.components?.schedule_strength?.rank ? `#${row.indexRank.components.schedule_strength.rank}` : "—"}</span></td>
-          <td data-label="Game Control"><span class="thi-hub-rank">${row.indexRank?.components?.game_control?.rank ? `#${row.indexRank.components.game_control.rank}` : "—"}</span></td>
-          <td data-label="FBS Sample"><span class="thi-hub-number">${Number.isFinite(Number(row.indexRank?.sample?.fbs_games)) ? `${row.indexRank.sample.fbs_games} G` : "—"}</span></td>
-          <td data-label="vs Power Top 25"><span class="thi-hub-number">${escapeHtml(row.qualityRecord)}</span></td>
-          ${metricCell("Home Edge", formatAxisNumber(row.hfa, 1), row.hfa, allValues("hfa"), "context")}
-        </tr>`;
-      }).join("")}</tbody></table></div>` :
+      <tbody>${tableRows}</tbody></table></div><div class="thi-hub-mobile-list">${mobileCards}</div>` :
       `<div class="empty-state">No matching teams in the ranked sample.</div>`;
   }
 
@@ -480,6 +539,17 @@
               `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("")}
           </select>
         </div>
+        <div class="thi-hub-mobile-sort">
+          <label class="conference-filter-label" for="thi-ratings-mobile-sort">Rank by</label>
+          <select class="conference-filter-select" id="thi-ratings-mobile-sort" aria-label="Sort THI ratings">
+            <option value="index_rank:asc">Power</option>
+            <option value="resume_rank:asc">Résumé</option>
+            <option value="observed_rank:asc">Current Form</option>
+            <option value="schedule_strength_rank:asc">Schedule Strength</option>
+            <option value="game_control_rank:asc">Game Control</option>
+            <option value="team:asc">Team A–Z</option>
+          </select>
+        </div>
         <span class="conference-filter-count">${escapeHtml(thiPowerRatingsData.teams.length)} teams</span>
       </div>
       <p class="thi-hub-note">Power ranks predictive neutral-field strength; Current Form isolates opponent-adjusted in-season performance; Résumé ranks accomplishment through Week ${escapeHtml(cfbThiIndexData?.meta?.through_week ?? "—")}. Polls and betting markets are excluded. Power remains an independent beta, and Model A remains separate and unchanged.</p>
@@ -498,6 +568,13 @@
     conferenceSelect.value = conferenceFilter;
     conferenceSelect.addEventListener("change", () => {
       conferenceFilter = conferenceSelect.value;
+      renderRows();
+    });
+    const mobileSort = document.getElementById("thi-ratings-mobile-sort");
+    const supportedMobileSort = ["index_rank", "resume_rank", "observed_rank", "schedule_strength_rank", "game_control_rank", "team"].includes(sort);
+    mobileSort.value = supportedMobileSort ? `${sort}:${sortDirection}` : "index_rank:asc";
+    mobileSort.addEventListener("change", () => {
+      [sort, sortDirection] = mobileSort.value.split(":");
       renderRows();
     });
     renderRows();
