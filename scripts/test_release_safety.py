@@ -68,7 +68,7 @@ class ReleaseSafetyTests(unittest.TestCase):
         sos_teams = [{"team_id": index, "opponents": [{"game_id": index}]} for index in range(300)]
         payloads = {
             "manifest": {"meta": {"version": "thi-static-cache-manifest-v1.0", "asset_count": 0}, "assets": {}},
-            "cbb_power": {"meta": {"version": "thi-cbb-display-power-v2.0", "model_usage": "display_only", "team_count": 300}, "teams": power_teams},
+            "cbb_power": {"meta": {"version": "thi-cbb-roster-power-v3.0", "model_usage": "display_only", "team_count": 300}, "teams": power_teams},
             "cbb_priors": {"teams": prior_teams},
             "cbb_model": {"meta": {"model_version": "model-v1"}},
             "cbb_candidate": {"meta": {"model_usage": "display_only; does not feed Model A", "roster_audit_status": "withheld", "roster_verification_status": "withheld_by_thi_audit"}, "evaluation": {"promotion_eligible": False}, "prospective_protocol": {"candidate_state": "research_blocked_roster_audit"}, "teams": []},

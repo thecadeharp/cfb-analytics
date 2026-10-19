@@ -133,8 +133,8 @@ jobs:
           python scripts/build_cbb_player_research.py
           python scripts/audit_cbb_roster_integrity.py
           python scripts/build_cbb_walk_forward_model.py
-          python scripts/build_cbb_display_power_ratings.py
           python scripts/build_cbb_preseason_index.py
+          python scripts/build_cbb_display_power_ratings.py
           python scripts/build_cbb_home_court.py
           python scripts/build_cbb_venue_audit.py
           python scripts/build_cbb_projection_board.py
@@ -215,10 +215,10 @@ jobs:
           assert all(model["meta"]["leakage_audit"].values())
           assert len(model["evaluation"]["by_season"]) >= 8
           assert priors["meta"]["model_version"] == model["meta"]["model_version"]
-          assert display_power["meta"]["version"] == "thi-cbb-display-power-v2.0"
+          assert display_power["meta"]["version"] == "thi-cbb-roster-power-v3.0"
           assert display_power["meta"]["model_usage"].startswith("display_only")
           assert len(display_power["teams"]) >= 300
-          assert display_power["meta"]["validation"][-1]["structural_spearman"] > display_power["meta"]["validation"][-1]["legacy_spearman"]
+          assert display_power["meta"]["validation"]["display_blend"]["rank_correlation"] > preseason_candidate["evaluation"]["validation"]["rank_correlation"]
           assert preseason_candidate["meta"]["version"] == "thi-cbb-preseason-index-v2.0-research"
           assert preseason_candidate["evaluation"]["promotion_eligible"] is False
           assert preseason_candidate["evaluation"]["beats_carry_forward_on_validation"] is True

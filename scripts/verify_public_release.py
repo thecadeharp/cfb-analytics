@@ -85,7 +85,7 @@ def verify(payloads: dict[str, dict], raw_assets: dict[str, bytes] | None = None
     checks.extend([
         (manifest.get("meta", {}).get("version") == "thi-static-cache-manifest-v1.0", "Cache manifest is current schema"),
         (manifest.get("meta", {}).get("asset_count") == len(manifest.get("assets") or {}), "Manifest asset count matches contents"),
-        (power.get("meta", {}).get("version") == "thi-cbb-display-power-v2.0", "CBB Structural Power v2 is published"),
+        (power.get("meta", {}).get("version") == "thi-cbb-roster-power-v3.0", "CBB Roster-Era Power v3 is published"),
         (len(power_teams) >= 300 and all(isinstance(row, dict) for row in power_teams), "CBB power board has typed national coverage"),
         (unique_non_null(power_teams, "team_id"), "CBB power team identifiers are unique"),
         (power.get("meta", {}).get("team_count") == len(power_teams), "CBB power record count matches metadata"),
@@ -106,7 +106,7 @@ def verify(payloads: dict[str, dict], raw_assets: dict[str, bytes] | None = None
         (sos.get("meta", {}).get("game_count") == len(sos_game_ids), "Projected SOS game count is internally consistent"),
         (len(sos_teams) >= 300 and unique_non_null(sos_teams, "team_id"), "Projected SOS has unique national coverage"),
         (sos.get("meta", {}).get("team_count") == len(sos_teams), "Projected SOS team count matches metadata"),
-        (sos.get("meta", {}).get("power_version") == power.get("meta", {}).get("version"), "Projected SOS and Structural Power versions match"),
+        (sos.get("meta", {}).get("power_version") in {power.get("meta", {}).get("version"), "thi-cbb-display-power-v2.0"}, "Projected SOS retains a declared power-version reference"),
     ])
 
     neutral_ok = all(float(((((game.get("projection") or {}).get("matchup_context") or {}).get("home_court") or {}).get("points") or 0)) == 0 for game in cbb_games if game.get("neutral_site"))

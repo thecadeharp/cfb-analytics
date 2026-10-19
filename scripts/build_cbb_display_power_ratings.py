@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Build the display-only THI CBB structural power board.
+"""Build the display-only THI CBB roster-era preseason power board.
 
-This artifact is deliberately isolated from current_priors.json and Model A.  It
-uses only completed-season, opponent-adjusted team efficiencies; current roster
-data, polls, market prices, and third-party ratings are excluded.
+The displayed order combines the validated roster-aware candidate with a
+continuity-scaled carry from the latest completed season. It remains isolated
+from current_priors.json and Model A; polls, markets and third-party ratings are
+diagnostic comparisons only and never enter this calculation.
 """
 
 from __future__ import annotations
@@ -19,7 +20,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "thi-cbb-display-power-v2.0"
+VERSION = "thi-cbb-roster-power-v3.0"
 WEIGHTS = (0.70, 0.20, 0.10)
 PRESEASON_SHRINKAGE = 0.88
 
@@ -157,9 +158,14 @@ def validate_order(history: dict[int, list[dict[str, Any]]], target: int) -> dic
     }
 
 
-def build(history_dir: Path, profiles_path: Path, frozen_path: Path | None = None) -> dict[str, Any]:
+def build(
+    history_dir: Path, profiles_path: Path, candidate_path: Path,
+    roster_audit_path: Path, frozen_path: Path | None = None,
+) -> dict[str, Any]:
     history = load_history(history_dir)
     profiles = json.loads(profiles_path.read_text(encoding="utf-8"))
+    candidate = json.loads(candidate_path.read_text(encoding="utf-8"))
+    roster_audit = json.loads(roster_audit_path.read_text(encoding="utf-8"))
     latest = max(history)
     source_seasons = [latest - offset for offset in range(3)]
     if any(season not in history for season in source_seasons):
@@ -167,17 +173,38 @@ def build(history_dir: Path, profiles_path: Path, frozen_path: Path | None = Non
     centers = {season: season_center(history[season]) for season in source_seasons}
     maps = {season: {str(row.get("team_id")): row for row in history[season]} for season in source_seasons}
     current_center = centers[latest]
+    candidate_by_team = {str(row.get("team_id")): row for row in candidate.get("teams") or []}
+    audit_by_team = {str(row.get("team_id")): row for row in roster_audit.get("team_audit") or []}
     frozen = json.loads(frozen_path.read_text(encoding="utf-8")) if frozen_path and frozen_path.exists() else {}
     frozen_by_team = {str(row.get("team_id")): row for row in frozen.get("teams") or []}
     teams = []
     for profile in profiles.get("teams", []):
         team_id = profile.get("team_id")
-        rating = weighted_team_rating(team_id, [
+        structural = weighted_team_rating(team_id, [
             (season, weight, centers[season], maps[season].get(str(team_id)))
             for season, weight in zip(source_seasons, WEIGHTS)
         ], current_center)
-        if not rating:
+        roster = candidate_by_team.get(str(team_id))
+        if not structural or not roster:
             continue
+        roster_power = finite(roster.get("roster_power_rating"))
+        if roster_power is None:
+            carry_weight = finite(candidate.get("meta", {}).get("display_carry_weight")) or 0.55
+            carry = finite(roster.get("carry_forward_rating")) or 0.0
+            roster_power = (1.0 - carry_weight) * (finite(roster.get("rating")) or 0.0) + carry_weight * carry
+        midpoint = ((finite(roster.get("projected_offense")) or current_center) + (finite(roster.get("projected_defense")) or current_center)) / 2.0
+        rating = {
+            "team_id": team_id,
+            "prior_offense": round(midpoint + roster_power / 2.0, 4),
+            "prior_defense": round(midpoint - roster_power / 2.0, 4),
+            "prior_net": round(roster_power, 4),
+            "prior_tempo": structural.get("prior_tempo"),
+            "source_season": latest,
+            "returning_minutes_pct": roster.get("returning_minutes_pct"),
+            "roster_model_rating": roster.get("rating"),
+            "continuity_carry_rating": roster.get("carry_forward_rating"),
+            "structural_reference_rating": structural.get("prior_net"),
+        }
         preseason = dict(rating)
         current = ((profile.get("current_efficiency") or {}).get("adjusted") or {})
         games = int((profile.get("record") or {}).get("games") or 0)
@@ -193,7 +220,9 @@ def build(history_dir: Path, profiles_path: Path, frozen_path: Path | None = Non
             **rating,
             "team": profile.get("team"),
             "conference": profile.get("conference"),
-            "rating_type": "display_only_structural_power",
+            "rating_type": "display_only_roster_era_power",
+            "roster_verification_state": (audit_by_team.get(str(team_id)) or {}).get("verification_state", "unreviewed"),
+            "official_roster_source_url": (audit_by_team.get(str(team_id)) or {}).get("official_source_url"),
             "preseason_net": frozen_row.get("prior_net", preseason["prior_net"]),
             "preseason_rank": frozen_row.get("power_rank"),
             "current_games": games,
@@ -204,24 +233,31 @@ def build(history_dir: Path, profiles_path: Path, frozen_path: Path | None = Non
     for rank, row in enumerate(teams, 1):
         row["power_rank"] = rank
         row["rank_movement_from_preseason"] = (int(row["preseason_rank"]) - rank) if row.get("preseason_rank") else None
-    validations = [result for target in (latest - 1, latest) if (result := validate_order(history, target))]
+    validations = {
+        "roster_model": candidate.get("evaluation", {}).get("validation"),
+        "roster_model_out_of_time": candidate.get("evaluation", {}).get("out_of_time_test"),
+        "display_blend": candidate.get("evaluation", {}).get("roster_power_display_validation"),
+        "display_blend_out_of_time": candidate.get("evaluation", {}).get("roster_power_display_out_of_time_test"),
+    }
     return {
         "meta": {
             "version": VERSION,
             "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "season": profiles.get("meta", {}).get("season"),
             "latest_completed_season": latest,
-            "source_seasons": source_seasons,
-            "season_weights": {str(season): weight for season, weight in zip(source_seasons, WEIGHTS)},
-            "preseason_shrinkage": PRESEASON_SHRINKAGE,
+            "source_seasons": [latest],
+            "candidate_version": candidate.get("meta", {}).get("version"),
+            "display_carry_weight": candidate.get("meta", {}).get("display_carry_weight", 0.55),
             "team_count": len(teams),
-            "status": "provisional_structural_power",
+            "status": "provisional_roster_era_power",
             "model_usage": "display_only; does not feed Model A, game projections, signals, or bracketology",
-            "methodology": "Three-season blend of THI opponent-adjusted offensive and defensive efficiency, centered within each season's scoring environment and conservatively shrunk 12% toward the national mean.",
-            "excluded_inputs": ["polls", "market prices", "third-party ratings", "unverified current rosters", "returning-minutes multipliers"],
+            "methodology": "Current-roster personnel model blended with a continuity-scaled carry from only the latest completed season. Returning minutes, incoming transfer production and recruiting replace multi-season team-name carryover.",
+            "excluded_inputs": ["polls", "market prices", "third-party ratings"],
             "validation_target": "future-season rank ordering, not betting ROI",
             "current_season_update_policy": "Verified current-season adjusted efficiency blends from 0% to an 85% cap over the first 12 games. The immutable preseason board remains the movement reference.",
-            "frozen_baseline": "data/cbb/frozen/preseason_power_2027.json",
+            "legacy_structural_reference": "data/cbb/model/structural_power_reference.json",
+            "roster_audit_status": roster_audit.get("meta", {}).get("status"),
+            "official_roster_matches": (roster_audit.get("coverage") or {}).get("verification_state_counts", {}).get("official_match", 0),
             "validation": validations,
         },
         "teams": teams,
@@ -241,10 +277,12 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--history-dir", type=Path, default=ROOT / "data/cbb/history")
     parser.add_argument("--profiles", type=Path, default=ROOT / "data/cbb/team_profiles.json")
+    parser.add_argument("--candidate", type=Path, default=ROOT / "data/cbb/model/preseason_index_candidate.json")
+    parser.add_argument("--roster-audit", type=Path, default=ROOT / "data/cbb/roster_audit.json")
     parser.add_argument("--output", type=Path, default=ROOT / "data/cbb/model/display_power_ratings.json")
-    parser.add_argument("--frozen", type=Path, default=ROOT / "data/cbb/frozen/preseason_power_2027.json")
+    parser.add_argument("--frozen", type=Path, default=ROOT / "data/cbb/frozen/preseason_roster_power_2027.json")
     args = parser.parse_args()
-    payload = build(args.history_dir, args.profiles, args.frozen)
+    payload = build(args.history_dir, args.profiles, args.candidate, args.roster_audit, args.frozen)
     atomic_write(args.output, payload)
     leader = payload["teams"][0]
     print(f"{VERSION}: {len(payload['teams'])} teams · #1 {leader['team']} {leader['prior_net']:+.2f}")

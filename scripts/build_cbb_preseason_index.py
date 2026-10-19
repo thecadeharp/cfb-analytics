@@ -26,6 +26,7 @@ except ModuleNotFoundError:  # Direct workflow execution adds scripts/ to sys.pa
 
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = "thi-cbb-preseason-index-v2.0-research"
+DISPLAY_CARRY_WEIGHT = 0.55
 TRAIN_SEASONS = set(range(2019, 2025))
 VALIDATION_SEASONS = {2025}
 TEST_SEASONS = {2026}
@@ -151,10 +152,10 @@ def spearman(rows: list[dict[str, Any]], predicted_key: str, target_key: str) ->
     return 1.0 - (6.0 * squared) / (n * (n * n - 1.0))
 
 
-def evaluation(rows: list[dict[str, Any]]) -> dict[str, Any]:
+def evaluation(rows: list[dict[str, Any]], predicted_key: str = "predicted_net") -> dict[str, Any]:
     paired_improvements = [
         abs(row["carry_forward_net"] - row["target_net"])
-        - abs(row["predicted_net"] - row["target_net"])
+        - abs(row[predicted_key] - row["target_net"])
         for row in rows
     ]
     rng = random.Random(20271012)
@@ -166,14 +167,14 @@ def evaluation(rows: list[dict[str, Any]]) -> dict[str, Any]:
     upper = bootstrap[min(len(bootstrap) - 1, int(0.975 * len(bootstrap)))] if bootstrap else None
     return {
         "teams": len(rows),
-        "rating_mae": round(statistics.fmean(abs(row["predicted_net"] - row["target_net"]) for row in rows), 4),
+        "rating_mae": round(statistics.fmean(abs(row[predicted_key] - row["target_net"]) for row in rows), 4),
         "carry_forward_mae": round(statistics.fmean(abs(row["carry_forward_net"] - row["target_net"]) for row in rows), 4),
-        "rank_correlation": round(spearman(rows, "predicted_net", "target_net"), 4),
+        "rank_correlation": round(spearman(rows, predicted_key, "target_net"), 4),
         "descriptive_end_season_top_25_overlap": len(
-            {row["team_id"] for row in sorted(rows, key=lambda row: -row["predicted_net"])[:25]}
+            {row["team_id"] for row in sorted(rows, key=lambda row: -row[predicted_key])[:25]}
             & {row["team_id"] for row in sorted(rows, key=lambda row: -row["target_net"])[:25]}
         ),
-        "bias": round(statistics.fmean(row["predicted_net"] - row["target_net"] for row in rows), 4),
+        "bias": round(statistics.fmean(row[predicted_key] - row["target_net"] for row in rows), 4),
         "paired_team_season_mae_improvement": round(statistics.fmean(paired_improvements), 4),
         "paired_team_season_bootstrap_95_interval": [round(lower, 4), round(upper, 4)] if lower is not None else None,
         "overlap_interpretation": "Descriptive only. End-of-season top-25 membership is not the preseason power-rating target and is not a promotion criterion.",
@@ -268,11 +269,15 @@ def current_rows(
         midpoint = (raw_offense + raw_defense) / 2.0
         offense = midpoint + net / 2.0
         defense = midpoint - net / 2.0
+        carry_forward = features["prior_net"] * (0.25 + 0.50 * features["returning_minutes"])
+        roster_power = (1.0 - DISPLAY_CARRY_WEIGHT) * net + DISPLAY_CARRY_WEIGHT * carry_forward
         rows.append({
             "team_id": profile.get("team_id"),
             "team": profile.get("team"),
             "conference": profile.get("conference"),
             "rating": round(net, 4),
+            "carry_forward_rating": round(carry_forward, 4),
+            "roster_power_rating": round(roster_power, 4),
             "projected_offense": round(offense, 4),
             "projected_defense": round(defense, 4),
             "returning_minutes_pct": returning,
@@ -310,10 +315,16 @@ def build(
     }
     for row in examples:
         row["predicted_net"] = predict(row, models["net"])
+        row["roster_power_net"] = (
+            (1.0 - DISPLAY_CARRY_WEIGHT) * row["predicted_net"]
+            + DISPLAY_CARRY_WEIGHT * row["carry_forward_net"]
+        )
     validation_rows = [row for row in examples if row["season"] in VALIDATION_SEASONS]
     test_rows = [row for row in examples if row["season"] in TEST_SEASONS]
     validation = evaluation(validation_rows)
     test = evaluation(test_rows)
+    display_validation = evaluation(validation_rows, "roster_power_net")
+    display_test = evaluation(test_rows, "roster_power_net")
     rows = current_rows(history, personnel, profiles, players, models, roster_audit_passed)
     promotion_blockers = [
         "Historical personnel snapshots are not point-in-time certified.",
@@ -341,10 +352,13 @@ def build(
             "roster_verification_status": roster_verification_status,
             "roster_audit_status": roster_audit_status,
             "team_count": len(rows),
+            "display_carry_weight": DISPLAY_CARRY_WEIGHT,
         },
         "evaluation": {
             "validation": validation,
             "out_of_time_test": test,
+            "roster_power_display_validation": display_validation,
+            "roster_power_display_out_of_time_test": display_test,
             "beats_carry_forward_on_validation": validation["rating_mae"] < validation["carry_forward_mae"],
             "beats_carry_forward_on_test": test["rating_mae"] < test["carry_forward_mae"],
             "promotion_eligible": False,

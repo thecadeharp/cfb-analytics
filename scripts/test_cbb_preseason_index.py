@@ -2,7 +2,7 @@
 
 import unittest
 
-from scripts.build_cbb_preseason_index import FEATURES, evaluation, feature_row
+from scripts.build_cbb_preseason_index import DISPLAY_CARRY_WEIGHT, FEATURES, evaluation, feature_row
 
 
 class CbbPreseasonIndexTests(unittest.TestCase):
@@ -34,6 +34,9 @@ class CbbPreseasonIndexTests(unittest.TestCase):
         self.assertEqual(report["rank_correlation"], 1.0)
         self.assertEqual(report["descriptive_end_season_top_25_overlap"], 2)
         self.assertEqual(report["paired_team_season_bootstrap_95_interval"], [3.0, 3.0])
+
+    def test_display_blend_gives_continuity_carry_majority_weight(self):
+        self.assertEqual(DISPLAY_CARRY_WEIGHT, 0.55)
 
 
 if __name__ == "__main__":

@@ -1587,10 +1587,10 @@
     const conferences = [...new Set(priors.map(team => team.conference?.abbreviation || team.conference?.name).filter(Boolean))].sort();
     const view = document.getElementById("view-cbb-ratings");
     view.innerHTML = `
-      <div class="cbb-kicker">2026–27 Preseason Model v2 · provisional research</div>
+      <div class="cbb-kicker">2026–27 Roster-Era Power v3 · provisional research</div>
       <h1 class="page-title">CBB THI Ratings</h1>
-      <p class="page-subtitle">A three-season, opponent-adjusted view of program strength. No poll, market price, or outside rating determines this order.</p>
-      <div class="cbb-readiness-banner"><span class="cbb-status-pill">Structural Power v2</span><strong>Official THI Index 25 withheld</strong><p>This is THI's displayed, opponent-adjusted structural preseason baseline. A separate roster-aware challenger remains research-only and does not influence this board, Model A, projections, signals, or bracketology. It must pass THI's prospective promotion standard before any official Index 25 is published.</p></div>
+      <p class="page-subtitle">A current-roster preseason view of team strength. No poll, market price, or outside rating determines this order.</p>
+      <div class="cbb-readiness-banner"><span class="cbb-status-pill">Roster-Era Power v3</span><strong>Current rosters replace multi-season team-name carryover</strong><p>The order blends THI's roster-aware personnel model with a continuity-scaled carry from only the latest completed season. Incoming transfers, recruiting and returning minutes now determine how much prior strength survives. It remains display-only and does not alter Model A, projections, signals, or bracketology.</p></div>
       ${cbbEfficiencyLandscape(priors)}
       ${cbbRatingDecomposition(priors)}
       <div class="cbb-definition-banner"><strong>THI Ratings</strong><span>How strong the model believes a team is beneath its record.</span><strong>Team Data</strong><span>Observed results, box-score performance and roster facts.</span></div>
@@ -1606,7 +1606,7 @@
           <tbody id="cbb-rating-body"></tbody>
         </table>
       </div>
-      <div class="cbb-stat-note" style="margin-top:9px">Overall and Predictive currently share the provisional structural baseline until 2027 results create separate lenses. Projected SOS is the average Structural Power v2 rating of opponents in the currently confirmed published schedule; it is frozen separately as a preseason snapshot. Played SOS and Remaining SOS replace it once results begin. Source seasons: ${(powerMeta.source_seasons || []).join(", ") || "2024–2026"}. Recent form and quality records activate only after games are played. Lower defensive efficiency is better.</div>
+      <div class="cbb-stat-note" style="margin-top:9px">Overall and Predictive share the provisional roster-era baseline until 2027 results create separate lenses. Projected SOS remains the frozen Structural Power v2 schedule snapshot for preseason reconstruction; Played SOS and Remaining SOS replace it once results begin. Current strength carries only from ${(powerMeta.source_seasons || []).join(", ") || "2026"}, scaled by verified returning minutes and current personnel. Lower defensive efficiency is better.</div>
     `;
 
     view.querySelector("#cbb-rating-search").addEventListener("input", event => { state.query = event.target.value; paintRatingRows(); });
@@ -1706,10 +1706,10 @@
     return `<section class="cbb-rating-decomposition" aria-label="THI rating decomposition">
       <div class="cbb-rating-decomposition-head"><div><div class="cbb-label">THI Rating Decomposition</div><h2>What each rating means now</h2></div><span>Rated ${escapeHtml(stamp)}</span></div>
       <div class="cbb-rating-lenses">
-        ${methodCard("Overall", "Three-season structural power", "THI blends completed-season opponent-adjusted efficiency at 70% / 20% / 10%, centers each season to its scoring environment, then shrinks the preseason scale 12% toward average.")}
-        ${methodCard("Predictive", "Display-only baseline", "The order excludes polls, market prices, outside ratings and unverified current rosters. It does not independently alter Model A.")}
+        ${methodCard("Overall", "Roster-era preseason power", "THI blends the roster-aware personnel estimate with a continuity-scaled carry from the latest completed season. Teams do not inherit strength from players or staffs who are gone.")}
+        ${methodCard("Predictive", "Display-only baseline", "Returning minutes, incoming transfer production and recruiting drive the preseason order. Polls, market prices and outside ratings remain excluded.")}
         ${methodCard("Recent form", "Awaiting 2027 games", "No recent-form rating is published before a qualified current-season sample exists.")}
-        ${methodCard("Projected SOS", "Confirmed published matchups", "Preseason difficulty is the average Structural Power v2 rating of opponents in THI's confirmed schedule window. The snapshot is frozen for reconstruction; Played SOS and Remaining SOS activate after games begin.")}
+        ${methodCard("Projected SOS", "Frozen structural schedule snapshot", "The original preseason schedule-strength snapshot remains frozen for reconstruction. Played SOS and Remaining SOS activate after games begin using current results.")}
         ${methodCard("Dynamic home advantage", Number.isFinite(home) ? `${number(home,2)}-point national mean` : "Awaiting estimate", "Every program receives its own five-season regularized value; neutral courts receive zero.")}
       </div>
       <div class="cbb-conference-strip"><strong>Conference strength · neutral-floor team benchmark</strong>${conferences.map(row => `<span>${escapeHtml(row.name)} <b>${number(row.average,1,true)}</b> avg · ${number(row.median,1,true)} median</span>`).join("")}</div>
@@ -1813,7 +1813,7 @@
       <section class="cbb-detail-section" id="cbb-dossier-ratings"><h3>Rating provenance</h3>
         ${detailRow("Source seasons", escapeHtml((power.seasons_used || [2026,2025,2024]).join(" · ")))}
         ${detailRow("Season weights", "70% · 20% · 10%")}
-        ${detailRow("Current rating state", "Provisional structural power")}
+        ${detailRow("Current rating state", "Provisional roster-era power")}
         ${detailRow("Returning-minutes signal", "Displayed in personnel research; excluded from this power order")}
       </section>
       <section class="cbb-detail-section"><h3>Projection context</h3>
@@ -1952,13 +1952,13 @@
       <p class="page-subtitle">Every frozen THI projection graded after the final: winner accuracy, ATS results, tracked totals, closing-line value and projection error.</p>
       <section class="cbb-panel cbb-tracking-shell" aria-labelledby="cbb-research-validation-title">
         <header class="cbb-tracking-head"><div><div class="cbb-label">Research &amp; Validation</div><h2 id="cbb-research-validation-title">Model status and promotion record</h2></div><p>Software releases and model promotion are separate decisions. A passing deployment verifies delivery and data contracts; it never promotes an experimental model.</p></header>
-        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Official Index 25 withheld</span><strong>Structural Power v2 is provisional; the roster-aware challenger remains research-only</strong><p>${candidateProtocol.candidate_state === "research_blocked_roster_audit" ? "The challenger is currently blocked because the independent national roster audit has not passed. " : ""}The two models stay visibly separate after games begin. Neither a successful build nor an interesting retrospective result can change the challenger's production status.</p></div>
+        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Roster-Era Power v3</span><strong>The displayed board now uses the roster-aware research layer</strong><p>${candidateProtocol.candidate_state === "research_blocked_roster_audit" ? "National player-level publication remains blocked until the independent roster audit passes. " : ""}The rating board remains display-only: neither a successful build nor an interesting retrospective result can promote it into Model A or production projections.</p></div>
         <div class="cbb-tracking-grid">
-          ${modelCard("Displayed board", "Structural Power v2", humanize(structural.meta?.status || "provisional_structural_power"), `${integer(structural.meta?.team_count)} teams · display-only`)}
+          ${modelCard("Displayed board", "Roster-Era Power v3", humanize(structural.meta?.status || "provisional_roster_era_power"), `${integer(structural.meta?.team_count)} teams · display-only`)}
           ${modelCard("Research challenger", "Roster-aware candidate", candidateEvaluation.promotion_eligible === false ? "WITHHELD" : "UNRESOLVED", humanize(candidateProtocol.candidate_state || "research_only"))}
           ${modelCard("Validation result", "2025 paired MAE change", candidateEvaluation.validation?.paired_team_season_mae_improvement == null ? "—" : `${number(candidateEvaluation.validation.paired_team_season_mae_improvement,2,true)} pts`, "Retrospective evidence; not promotion authority")}
           ${modelCard("Out-of-time result", "2026 paired MAE change", candidateEvaluation.out_of_time_test?.paired_team_season_mae_improvement == null ? "—" : `${number(candidateEvaluation.out_of_time_test.paired_team_season_mae_improvement,2,true)} pts`, "Analyzed test; no longer untouched")}
-          ${modelCard("Frozen power", structural.meta?.version || "Awaiting version", structural.meta?.frozen_baseline ? "IMMUTABLE" : "CHECK", formatTimestamp(structural.meta?.generated_at_utc))}
+          ${modelCard("Roster-era board", structural.meta?.version || "Awaiting version", `${integer(structural.meta?.official_roster_matches)} official matches`, formatTimestamp(structural.meta?.generated_at_utc))}
           ${modelCard("Frozen Projected SOS", sosSnapshot.meta?.version || "Awaiting snapshot", sosSnapshot.meta?.immutable ? "IMMUTABLE" : "CHECK", `${integer(sosSnapshot.meta?.game_count)} confirmed games · ${formatTimestamp(sosSnapshot.meta?.frozen_at_utc)}`)}
         </div>
         <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Predetermined promotion standard</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Requirement</th><th>Evidence required</th><th>Current state</th></tr></thead><tbody>
