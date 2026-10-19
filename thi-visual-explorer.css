@@ -53,6 +53,23 @@
 .thi-explorer-point:hover circle,
 .thi-explorer-point:focus-visible circle,
 .thi-explorer-point.selected circle { stroke: var(--green); stroke-width: 3; fill: var(--green-soft); }
+.thi-chart-tooltip {
+  position: absolute; z-index: 8; width: min(290px, calc(100% - 20px)); padding: 12px 13px;
+  transform: translate(-50%, calc(-100% - 14px)); pointer-events: none;
+  border: 1px solid var(--border-strong, var(--border)); border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 96%, transparent); color: var(--text);
+  box-shadow: 0 14px 34px rgba(0,0,0,.24); backdrop-filter: blur(8px);
+}
+.thi-chart-tooltip[hidden] { display: none; }
+.thi-chart-tooltip.is-below { transform: translate(-50%, 14px); }
+.thi-chart-tooltip-title { display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+.thi-chart-tooltip-title strong { font-size:13px; }
+.thi-chart-tooltip-title span { color:var(--green); font:800 10px var(--mono); white-space:nowrap; }
+.thi-chart-tooltip small { display:block; margin-top:4px; color:var(--muted); font:600 9px/1.4 var(--mono); }
+.thi-chart-tooltip dl { display:grid; gap:6px; margin:9px 0 7px; }
+.thi-chart-tooltip dl div { display:flex; justify-content:space-between; gap:14px; }
+.thi-chart-tooltip dt { color:var(--muted); font:700 9px/1.3 var(--mono); }
+.thi-chart-tooltip dd { margin:0; text-align:right; font:800 10px/1.3 var(--mono); }
 .thi-explorer-detail {
   display: grid; grid-template-columns: minmax(180px, 1fr) repeat(3, minmax(110px, .6fr));
   border-top: 1px solid var(--border); background: var(--surface);

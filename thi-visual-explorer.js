@@ -152,7 +152,8 @@
     const points = rows.map(row => {
       const href = logo(row.team);
       const selectedClass = row.team === selected.team ? " selected" : "";
-      return `<g class="thi-explorer-point${selectedClass}" data-explorer-team="${esc(row.team)}" tabindex="0" role="button" aria-label="${esc(`${row.team}: ${config.x.label} ${fmt(row.x, config.x.unit)}, ${config.y.label} ${fmt(row.y, config.y.unit)}`)}" transform="translate(${sx(row.x)} ${sy(row.y)})">
+      const power = indexRow(row.team);
+      return `<g class="thi-explorer-point${selectedClass}" data-explorer-team="${esc(row.team)}" data-explorer-conference="${esc(row.conference)}" data-explorer-power-rank="${esc(power?.power_rank || power?.rank || "—")}" data-explorer-x-label="${esc(config.x.label)}" data-explorer-x-value="${esc(fmt(row.x, config.x.unit))}" data-explorer-x-rank="${esc(rankFor(rows, "x", config.x.better, row.team))}" data-explorer-y-label="${esc(config.y.label)}" data-explorer-y-value="${esc(fmt(row.y, config.y.unit))}" data-explorer-y-rank="${esc(rankFor(rows, "y", config.y.better, row.team))}" data-explorer-sample="${esc(row.plays || "—")}" tabindex="0" role="button" aria-label="${esc(`${row.team}: ${config.x.label} ${fmt(row.x, config.x.unit)}, ${config.y.label} ${fmt(row.y, config.y.unit)}`)}" transform="translate(${sx(row.x)} ${sy(row.y)})">
         <circle r="11"></circle>${href ? `<image href="${esc(href)}" x="-8" y="-8" width="16" height="16" preserveAspectRatio="xMidYMid meet"></image>` : `<text text-anchor="middle" y="3">${esc(initials(row.team))}</text>`}
         <title>${esc(row.team)} · ${esc(fmt(row.x, config.x.unit))} / ${esc(fmt(row.y, config.y.unit))}</title></g>`;
     }).join("");
@@ -166,6 +167,7 @@
         <text x="${(plot.left + plot.right) / 2}" y="566" text-anchor="middle" class="thi-explorer-axis-title">${esc(config.x.label.toUpperCase())}</text>
         <text x="20" y="${(plot.top + plot.bottom) / 2}" text-anchor="middle" transform="rotate(-90 20 ${(plot.top + plot.bottom) / 2})" class="thi-explorer-axis-title">${esc(config.y.label.toUpperCase())}</text>
       </svg>
+      <div class="thi-chart-tooltip" role="status" aria-live="polite" hidden></div>
       <div class="thi-explorer-detail" aria-live="polite">
         <div><span>Selected team</span><strong>${esc(selected.team)} · ${esc(selected.conference)}</strong></div>
         <div><span>${esc(config.x.label)}</span><strong>${esc(fmt(selected.x, config.x.unit))} · ${esc(rankFor(rows, "x", config.x.better, selected.team))}</strong></div>
@@ -173,6 +175,39 @@
         <div><span>Sample reliability</span><strong>${esc(selected.reliability)} · ${selected.plays || "—"} plays</strong></div>
       </div></div>
       <p class="thi-explorer-method">${esc(config.description)} Median lines are calculated from the visible sample. This is a descriptive THI research view and does not alter Model A.</p>`;
+  }
+
+  function explorerTooltip(point) {
+    if (!point) return "";
+    const rank = point.dataset.explorerPowerRank;
+    return `<div class="thi-chart-tooltip-title"><strong>${esc(point.dataset.explorerTeam)}</strong><span>${rank && rank !== "—" ? `THI #${esc(rank)}` : "THI rank —"}</span></div>
+      <small>${esc(point.dataset.explorerConference)}</small>
+      <dl><div><dt>${esc(point.dataset.explorerXLabel)}</dt><dd>${esc(point.dataset.explorerXValue)} · ${esc(point.dataset.explorerXRank)}</dd></div><div><dt>${esc(point.dataset.explorerYLabel)}</dt><dd>${esc(point.dataset.explorerYValue)} · ${esc(point.dataset.explorerYRank)}</dd></div></dl>
+      <small>${esc(point.dataset.explorerSample)} charted plays · Click for persistent detail</small>`;
+  }
+
+  function placeExplorerTooltip(section, point, clientX, clientY) {
+    const frame = point?.closest(".thi-explorer-frame");
+    const tooltip = frame?.querySelector(".thi-chart-tooltip");
+    if (!tooltip || !point) return;
+    tooltip.innerHTML = explorerTooltip(point);
+    tooltip.hidden = false;
+    const bounds = frame.getBoundingClientRect();
+    const pointBounds = point.getBoundingClientRect();
+    const x = Number.isFinite(clientX) ? clientX - bounds.left : pointBounds.left + pointBounds.width / 2 - bounds.left;
+    const y = Number.isFinite(clientY) ? clientY - bounds.top : pointBounds.top - bounds.top;
+    const halfWidth = tooltip.offsetWidth / 2;
+    const showBelow = y < tooltip.offsetHeight + 24;
+    tooltip.classList.toggle("is-below", showBelow);
+    tooltip.style.left = `${Math.max(halfWidth + 8, Math.min(bounds.width - halfWidth - 8, x))}px`;
+    tooltip.style.top = `${showBelow ? y + 4 : y}px`;
+    section.dataset.tooltipTeam = point.dataset.explorerTeam;
+  }
+
+  function hideExplorerTooltip(section, point) {
+    const tooltip = point?.closest(".thi-explorer-frame")?.querySelector(".thi-chart-tooltip");
+    if (tooltip) tooltip.hidden = true;
+    delete section.dataset.tooltipTeam;
   }
 
   function historyEntries(team) {
@@ -269,6 +304,26 @@
     section.addEventListener("keydown", event => {
       const point = event.target.closest("[data-explorer-team]");
       if (point && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); state.selectedTeam = point.dataset.explorerTeam; renderMetric(); }
+    });
+    section.addEventListener("pointerover", event => {
+      const point = event.target.closest("[data-explorer-team]");
+      if (point) placeExplorerTooltip(section, point, event.clientX, event.clientY);
+    });
+    section.addEventListener("pointermove", event => {
+      const point = event.target.closest("[data-explorer-team]");
+      if (point && section.dataset.tooltipTeam === point.dataset.explorerTeam) placeExplorerTooltip(section, point, event.clientX, event.clientY);
+    });
+    section.addEventListener("pointerout", event => {
+      const point = event.target.closest("[data-explorer-team]");
+      if (point && !point.contains(event.relatedTarget)) hideExplorerTooltip(section, point);
+    });
+    section.addEventListener("focusin", event => {
+      const point = event.target.closest("[data-explorer-team]");
+      if (point) placeExplorerTooltip(section, point);
+    });
+    section.addEventListener("focusout", event => {
+      const point = event.target.closest("[data-explorer-team]");
+      if (point) hideExplorerTooltip(section, point);
     });
     section.querySelector("#thi-explorer-metric").addEventListener("change", event => { state.metric = event.target.value; renderMetric(); });
     section.querySelector("#thi-explorer-conference").addEventListener("change", event => { state.conference = event.target.value; renderMetric(); });

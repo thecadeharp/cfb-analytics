@@ -50,6 +50,7 @@
     loading: null,
     data: null,
     ratingSort: { key: "prior_net", direction: "desc" },
+    ratingChart: "efficiency",
     playerSort: { key: "thi_player_rating", direction: "desc" },
     playerQuery: "",
     playerConference: "all",
@@ -1611,6 +1612,7 @@
 
     view.querySelector("#cbb-rating-search").addEventListener("input", event => { state.query = event.target.value; paintRatingRows(); });
     view.querySelector("#cbb-conference-filter").addEventListener("change", event => { state.conference = event.target.value; paintRatingRows(); });
+    view.querySelector("#cbb-rating-chart")?.addEventListener("change", event => { state.ratingChart = event.target.value; renderRatings(); });
     view.querySelector("thead").addEventListener("click", event => {
       const header = event.target.closest("[data-sort]");
       if (!header) return;
@@ -1638,53 +1640,126 @@
       event.preventDefault();
       openLandscapeTeam(point);
     });
+    const landscape = view.querySelector("#cbb-efficiency-landscape");
+    const placeLandscapeTooltip = (point, clientX, clientY) => {
+      const frame = point?.closest(".cbb-landscape-frame");
+      const tooltip = frame?.querySelector(".cbb-chart-tooltip");
+      if (!frame || !tooltip || !point) return;
+      tooltip.innerHTML = `<div class="cbb-chart-tooltip-title"><strong>${escapeHtml(point.dataset.chartTeam)}</strong><span>THI #${escapeHtml(point.dataset.chartRank)}</span></div><small>${escapeHtml(point.dataset.chartConference)}</small><dl><div><dt>${escapeHtml(point.dataset.chartXLabel)}</dt><dd>${escapeHtml(point.dataset.chartXValue)}</dd></div><div><dt>${escapeHtml(point.dataset.chartYLabel)}</dt><dd>${escapeHtml(point.dataset.chartYValue)}</dd></div><div><dt>Roster-era rating</dt><dd>${escapeHtml(point.dataset.chartRating)}</dd></div></dl><small>Click to open the team dossier</small>`;
+      tooltip.hidden = false;
+      const bounds = frame.getBoundingClientRect();
+      const pointBounds = point.getBoundingClientRect();
+      const x = Number.isFinite(clientX) ? clientX - bounds.left : pointBounds.left + pointBounds.width / 2 - bounds.left;
+      const y = Number.isFinite(clientY) ? clientY - bounds.top : pointBounds.top - bounds.top;
+      const halfWidth = tooltip.offsetWidth / 2;
+      const showBelow = y < tooltip.offsetHeight + 24;
+      tooltip.classList.toggle("is-below", showBelow);
+      tooltip.style.left = `${Math.max(halfWidth + 8, Math.min(bounds.width - halfWidth - 8, x))}px`;
+      tooltip.style.top = `${showBelow ? y + 4 : y}px`;
+      landscape.dataset.tooltipTeam = point.dataset.chartTeam;
+    };
+    const hideLandscapeTooltip = point => {
+      const tooltip = point?.closest(".cbb-landscape-frame")?.querySelector(".cbb-chart-tooltip");
+      if (tooltip) tooltip.hidden = true;
+      if (landscape) delete landscape.dataset.tooltipTeam;
+    };
+    landscape?.addEventListener("pointerover", event => {
+      const point = event.target.closest("[data-landscape-team-id]");
+      if (point) placeLandscapeTooltip(point,event.clientX,event.clientY);
+    });
+    landscape?.addEventListener("pointermove", event => {
+      const point = event.target.closest("[data-landscape-team-id]");
+      if (point && landscape.dataset.tooltipTeam === point.dataset.chartTeam) placeLandscapeTooltip(point,event.clientX,event.clientY);
+    });
+    landscape?.addEventListener("pointerout", event => {
+      const point = event.target.closest("[data-landscape-team-id]");
+      if (point && !point.contains(event.relatedTarget)) hideLandscapeTooltip(point);
+    });
+    landscape?.addEventListener("focusin", event => {
+      const point = event.target.closest("[data-landscape-team-id]");
+      if (point) placeLandscapeTooltip(point);
+    });
+    landscape?.addEventListener("focusout", event => {
+      const point = event.target.closest("[data-landscape-team-id]");
+      if (point) hideLandscapeTooltip(point);
+    });
     paintRatingRows();
   }
 
   function cbbEfficiencyLandscape(teams) {
-    const eligible = teams.filter(team => Number.isFinite(Number(team.prior_offense)) && Number.isFinite(Number(team.prior_defense)));
+    const charts = {
+      efficiency: {
+        title: "Where every team wins its possessions",
+        description: "THI's projected offensive and defensive efficiency estimates show two-way team quality.",
+        xLabel: "Projected offense", yLabel: "Projected defense", xRead: team => team.prior_offense, yRead: team => team.prior_defense,
+        xAxis: "PROJECTED OFFENSIVE EFFICIENCY", yAxis: "PROJECTED DEFENSIVE EFFICIENCY · LOWER IS BETTER", yBetter: "lower",
+      },
+      roster: {
+        title: "Current roster strength vs retained foundation",
+        description: "Compare THI's current personnel estimate with the continuity-scaled value retained from last season.",
+        xLabel: "Roster model", yLabel: "Continuity carry", xRead: team => team.roster_model_rating, yRead: team => team.continuity_carry_rating,
+        xAxis: "CURRENT ROSTER MODEL RATING", yAxis: "CONTINUITY-SCALED 2026 CARRY", yBetter: "higher",
+      },
+      continuity: {
+        title: "How continuity relates to preseason strength",
+        description: "Returning minutes provide context for the roster-era rating without deciding the order by themselves.",
+        xLabel: "Returning minutes", yLabel: "Roster-era rating", xRead: team => team.returning_minutes_pct, yRead: team => team.prior_net,
+        xAxis: "RETURNING MINUTES %", yAxis: "ROSTER-ERA POWER RATING", yBetter: "higher", xSuffix: "%",
+      },
+    };
+    const chart = charts[state.ratingChart] || charts.efficiency;
+    const eligible = teams.map(team => ({ team, x:Number(chart.xRead(team)), y:Number(chart.yRead(team)) })).filter(row => Number.isFinite(row.x) && Number.isFinite(row.y));
     if (!eligible.length) return "";
     const width = 1000, height = 590;
     const plot = { left:72, top:28, right:978, bottom:520 };
-    const offenses = eligible.map(team => Number(team.prior_offense));
-    const defenses = eligible.map(team => Number(team.prior_defense));
-    const xMin = Math.floor(Math.min(...offenses) - 2), xMax = Math.ceil(Math.max(...offenses) + 2);
-    const yMin = Math.floor(Math.min(...defenses) - 2), yMax = Math.ceil(Math.max(...defenses) + 2);
+    const extent = values => {
+      let min=Math.min(...values), max=Math.max(...values);
+      const padding=Math.max((max-min)*.08,.5);
+      if (min===max) return [min-1,max+1];
+      return [min-padding,max+padding];
+    };
+    const [xMin,xMax]=extent(eligible.map(row=>row.x));
+    const [yMin,yMax]=extent(eligible.map(row=>row.y));
     const sx = value => plot.left + (Number(value) - xMin) / Math.max(1, xMax - xMin) * (plot.right - plot.left);
-    const sy = value => plot.top + (Number(value) - yMin) / Math.max(1, yMax - yMin) * (plot.bottom - plot.top);
-    const rankedTeams = [...eligible].sort((a,b) => Number(b.prior_net) - Number(a.prior_net));
-    const ranks = new Map(rankedTeams.map((team,index) => [String(team.team_id), index + 1]));
+    const sy = value => chart.yBetter === "lower"
+      ? plot.top + (Number(value) - yMin) / Math.max(1, yMax - yMin) * (plot.bottom - plot.top)
+      : plot.bottom - (Number(value) - yMin) / Math.max(1, yMax - yMin) * (plot.bottom - plot.top);
+    const rankedTeams = [...teams].filter(team=>Number.isFinite(Number(team.prior_net))).sort((a,b) => Number(b.prior_net) - Number(a.prior_net));
+    const ranks = new Map(rankedTeams.map((team,index) => [String(team.team_id), Number(team.power_rank) || index + 1]));
     const xTicks = Array.from({length:6}, (_,index) => xMin + (xMax-xMin) * index / 5);
     const yTicks = Array.from({length:6}, (_,index) => yMin + (yMax-yMin) * index / 5);
+    const tick = (value,suffix="") => `${number(value,chart===charts.efficiency?0:1)}${suffix}`;
     const grid = [
-      ...xTicks.map(value => `<line x1="${sx(value)}" y1="${plot.top}" x2="${sx(value)}" y2="${plot.bottom}"/><text x="${sx(value)}" y="${plot.bottom+23}" text-anchor="middle">${number(value,0)}</text>`),
-      ...yTicks.map(value => `<line x1="${plot.left}" y1="${sy(value)}" x2="${plot.right}" y2="${sy(value)}"/><text x="${plot.left-12}" y="${sy(value)+4}" text-anchor="end">${number(value,0)}</text>`),
+      ...xTicks.map(value => `<line x1="${sx(value)}" y1="${plot.top}" x2="${sx(value)}" y2="${plot.bottom}"/><text x="${sx(value)}" y="${plot.bottom+23}" text-anchor="middle">${tick(value,chart.xSuffix||"")}</text>`),
+      ...yTicks.map(value => `<line x1="${plot.left}" y1="${sy(value)}" x2="${plot.right}" y2="${sy(value)}"/><text x="${plot.left-12}" y="${sy(value)+4}" text-anchor="end">${tick(value)}</text>`),
     ].join("");
-    const points = eligible.map(team => {
+    const points = eligible.map(({team,x:rawX,y:rawY}) => {
       const profile = teamProfile(team.team_id);
       const rank = ranks.get(String(team.team_id));
       const net = Number(team.prior_net);
       const tier = net >= 15 ? "elite" : net >= 10 ? "strong" : net >= 5 ? "competitive" : "developing";
       const label = profile?.abbreviation || team.team;
       const logo = profile?.logo_url;
-      const x = sx(team.prior_offense), y = sy(team.prior_defense);
+      const x = sx(rawX), y = sy(rawY);
       const visual = rank <= 40 && logo
         ? `<circle r="15" class="cbb-landscape-logo-backdrop"/><image href="${escapeHtml(logo)}" x="-12" y="-12" width="24" height="24" preserveAspectRatio="xMidYMid meet"/>`
         : `<circle r="5"/><text x="8" y="4" class="cbb-landscape-point-label">${rank <= 75 ? escapeHtml(label) : ""}</text>`;
-      return `<g class="cbb-landscape-point cbb-landscape-${tier}" transform="translate(${x.toFixed(1)} ${y.toFixed(1)})" data-landscape-team-id="${escapeHtml(team.team_id)}" role="button" tabindex="0"><title>#${rank} ${escapeHtml(team.team)} · Off ${number(team.prior_offense,1)} · Def ${number(team.prior_defense,1)} · Net ${number(net,1,true)}</title>${visual}</g>`;
+      const xValue=`${number(rawX,1)}${chart.xSuffix||""}`;
+      const yValue=number(rawY,1);
+      return `<g class="cbb-landscape-point cbb-landscape-${tier}" transform="translate(${x.toFixed(1)} ${y.toFixed(1)})" data-landscape-team-id="${escapeHtml(team.team_id)}" data-chart-team="${escapeHtml(team.team)}" data-chart-conference="${escapeHtml(team.conference?.abbreviation||team.conference?.name||"Independent")}" data-chart-rank="${escapeHtml(rank||"—")}" data-chart-x-label="${escapeHtml(chart.xLabel)}" data-chart-x-value="${escapeHtml(xValue)}" data-chart-y-label="${escapeHtml(chart.yLabel)}" data-chart-y-value="${escapeHtml(yValue)}" data-chart-rating="${escapeHtml(number(net,1,true))}" role="button" tabindex="0" aria-label="#${rank} ${escapeHtml(team.team)}, ${escapeHtml(chart.xLabel)} ${escapeHtml(xValue)}, ${escapeHtml(chart.yLabel)} ${escapeHtml(yValue)}"><title>#${rank} ${escapeHtml(team.team)} · ${escapeHtml(chart.xLabel)} ${escapeHtml(xValue)} · ${escapeHtml(chart.yLabel)} ${escapeHtml(yValue)} · THI ${number(net,1,true)}</title>${visual}</g>`;
     }).join("");
-    return `<section class="cbb-efficiency-landscape" aria-labelledby="cbb-landscape-title">
-      <div class="cbb-rating-decomposition-head"><div><div class="cbb-label">THI Efficiency Landscape</div><h2 id="cbb-landscape-title">Where every team wins its possessions</h2></div><span>Better offense → · Better defense ↑</span></div>
-      <p class="cbb-model-sub">THI's own preseason offensive and defensive efficiency estimates. Logos identify the current top 40 by THI net rating; every point opens that team's dossier.</p>
-      <div class="cbb-landscape-frame"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="College basketball projected offensive and defensive efficiency landscape">
+    return `<section class="cbb-efficiency-landscape" id="cbb-efficiency-landscape" aria-labelledby="cbb-landscape-title">
+      <div class="cbb-rating-decomposition-head"><div><div class="cbb-label">THI Visual Research</div><h2 id="cbb-landscape-title">${escapeHtml(chart.title)}</h2></div><div class="cbb-landscape-toolbar"><label for="cbb-rating-chart">Chart</label><select id="cbb-rating-chart"><option value="efficiency" ${state.ratingChart==="efficiency"?"selected":""}>Offense vs defense</option><option value="roster" ${state.ratingChart==="roster"?"selected":""}>Roster vs continuity</option><option value="continuity" ${state.ratingChart==="continuity"?"selected":""}>Continuity vs power</option></select></div></div>
+      <p class="cbb-model-sub">${escapeHtml(chart.description)} Hover or focus any point for its team, THI rank and exact values; click only when you want the full dossier.</p>
+      <div class="cbb-landscape-frame"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(chart.title)} college basketball comparison">
         <rect x="${plot.left}" y="${plot.top}" width="${plot.right-plot.left}" height="${plot.bottom-plot.top}" rx="12" class="cbb-landscape-plot"/>
         <g class="cbb-landscape-grid">${grid}</g>
         <g class="cbb-landscape-points">${points}</g>
-        <text x="${(plot.left+plot.right)/2}" y="574" text-anchor="middle" class="cbb-landscape-axis-title">PROJECTED OFFENSIVE EFFICIENCY</text>
-        <text x="18" y="${(plot.top+plot.bottom)/2}" text-anchor="middle" transform="rotate(-90 18 ${(plot.top+plot.bottom)/2})" class="cbb-landscape-axis-title">PROJECTED DEFENSIVE EFFICIENCY · LOWER IS BETTER</text>
-      </svg></div>
+        <text x="${(plot.left+plot.right)/2}" y="574" text-anchor="middle" class="cbb-landscape-axis-title">${escapeHtml(chart.xAxis)}</text>
+        <text x="18" y="${(plot.top+plot.bottom)/2}" text-anchor="middle" transform="rotate(-90 18 ${(plot.top+plot.bottom)/2})" class="cbb-landscape-axis-title">${escapeHtml(chart.yAxis)}</text>
+      </svg><div class="cbb-chart-tooltip" role="status" aria-live="polite" hidden></div></div>
       <div class="cbb-landscape-legend"><span class="is-elite"><b>Elite two-way</b> +15 net or better</span><span class="is-strong"><b>Strong profile</b> +10 to +14.9</span><span class="is-competitive"><b>Competitive profile</b> +5 to +9.9</span><span class="is-developing"><b>Development range</b> below +5</span></div>
-      <div class="cbb-simulator-footnote">Profile bands describe THI rating ranges; they are not tournament probabilities and do not change Model A.</div>
+      <div class="cbb-simulator-footnote">Profile colors always represent the roster-era THI rating. These views are descriptive and do not alter Model A.</div>
     </section>`;
   }
 
