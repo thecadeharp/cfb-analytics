@@ -2,6 +2,8 @@
 
 Date: 2026-10-19
 
+Implementation status: the first THI-native release is complete in `thi-visual-explorer.js` and `thi-visual-explorer.css`. It publishes the CFB Metric Explorer and Rating History inside THI Ratings. Schedule Stress, Projection Accuracy Explorer, deeper position-room views, drive/control charts, and Regression Watch remain sequenced below.
+
 This audit reviews public Punt & Rally pages for product and presentation ideas. It is an inspiration and gap analysis, not a data-ingestion plan. THI should calculate every public metric from its own permitted sources and document its own methodology. Punt & Rally ratings, tables, formulas, and page content should not be copied into THI.
 
 ## What Punt & Rally does well
