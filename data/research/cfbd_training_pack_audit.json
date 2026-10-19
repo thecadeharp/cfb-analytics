@@ -1,11 +1,11 @@
 {
   "meta": {
-    "generated_at": "2026-10-11T20:13:46.708421+00:00",
-    "status": "PASS",
+    "generated_at": "2026-10-19T15:19:16.574029+00:00",
+    "status": "PASS_WITH_WARNINGS",
     "source": "licensed CFBD Model Training Pack weekly drop",
     "raw_data_committed": false,
     "raw_data_policy": "Keep purchased rows in gitignored local storage; publish aggregate diagnostics and independently derived outputs only.",
-    "input_sha256": "6f8f00e0b16742a8c71d7e65ec070b015d8baff15c4bff38536fb57e56118f72",
+    "input_sha256": "9289b946101b4d3ca47b3afb1d308ba1adf6aaa8f47228946121f2010a3ec937",
     "model_usage": "CHALLENGER_AND_DATA_QUALITY_ONLY",
     "production_model_a_changed": false,
     "market_feature_rule": "The opening spread is retained only for evaluation and line-movement comparison; it is excluded from predictive features."
@@ -15,13 +15,13 @@
       2026
     ],
     "weeks": [
-      7
+      8
     ],
-    "rows": 59,
+    "rows": 56,
     "columns": 83,
     "numeric_feature_columns_including_identifiers": 75,
-    "matched_games": 59,
-    "projection_metrics_through_week": 6
+    "matched_games": 56,
+    "projection_metrics_through_week": 7
   },
   "checks": {
     "required_columns_present": true,
@@ -37,7 +37,7 @@
     "opening_spread_is_evaluation_only": true
   },
   "advisories": {
-    "start_times_match_current_board": true
+    "start_times_match_current_board": false
   },
   "diagnostics": {
     "missing_required_columns": [],
@@ -48,10 +48,66 @@
     "matchup_mismatches": [],
     "conference_mismatches": [],
     "neutral_site_mismatch_game_ids": [],
-    "start_time_mismatches": [],
+    "start_time_mismatches": [
+      {
+        "game_id": "401858495",
+        "pack": "2026-10-24 04:00:00",
+        "board": "2026-10-24T19:00:00.000Z"
+      },
+      {
+        "game_id": "401858499",
+        "pack": "2026-10-24 04:00:00",
+        "board": "2026-10-24T19:30:00.000Z"
+      },
+      {
+        "game_id": "401858276",
+        "pack": "2026-10-24 04:00:00",
+        "board": "2026-10-24T23:00:00.000Z"
+      },
+      {
+        "game_id": "401858497",
+        "pack": "2026-10-24 04:00:00",
+        "board": "2026-10-24T19:30:00.000Z"
+      },
+      {
+        "game_id": "401856836",
+        "pack": "2026-10-24 04:00:00",
+        "board": "2026-10-24T23:00:00.000Z"
+      },
+      {
+        "game_id": "401856834",
+        "pack": "2026-10-24 04:00:00",
+        "board": "2026-10-24T17:00:00.000Z"
+      },
+      {
+        "game_id": "401856835",
+        "pack": "2026-10-24 04:00:00",
+        "board": "2026-10-24T19:30:00.000Z"
+      },
+      {
+        "game_id": "401856837",
+        "pack": "2026-10-24 04:00:00",
+        "board": "2026-10-25T02:15:00.000Z"
+      },
+      {
+        "game_id": "401856839",
+        "pack": "2026-10-24 04:00:00",
+        "board": "2026-10-24T19:45:00.000Z"
+      },
+      {
+        "game_id": "401856840",
+        "pack": "2026-10-24 04:00:00",
+        "board": "2026-10-24T16:00:00.000Z"
+      },
+      {
+        "game_id": "401856838",
+        "pack": "2026-10-24 04:00:00",
+        "board": "2026-10-24T23:30:00.000Z"
+      }
+    ],
     "safe_name_normalizations": [
       {
-        "game_id": "401864523",
+        "game_id": "401864528",
         "side": "away",
         "pack": "San Jos\u00e9 State",
         "board": "San Jose State"
@@ -59,11 +115,11 @@
     ]
   },
   "opening_to_current_market": {
-    "paired_games": 48,
-    "unpaired_games": 11,
+    "paired_games": 56,
+    "unpaired_games": 0,
     "median_signed_move_points": 0.0,
-    "median_absolute_move_points": 0.5,
+    "median_absolute_move_points": 0.0,
     "p90_absolute_move_points": 1.0,
-    "maximum_absolute_move_points": 1.5
+    "maximum_absolute_move_points": 3.5
   }
 }
