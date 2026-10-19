@@ -14,7 +14,8 @@ assert(ui.includes("pass_yards") && ui.includes("interceptions") && ui.includes(
 assert(ui.includes("data-thi-player-id"), "Projection cards must retain player-detail access");
 assert(cbb.includes('data-cbb-player-section="projections"'), "CBB future projection slot is missing");
 assert(cbb.includes("CBB player projections follow roster verification"), "CBB verification gate is missing");
-assert(html.includes("player-intelligence.js?v=2026-player-projections-v02"), "CFB asset cache key is stale");
+assert(html.includes("player-intelligence.js?v=2026-player-ratings-v03"), "CFB asset cache key is stale");
+assert(ui.includes("thi-player-rating-grid") && ui.includes("thi-player-board-sort"), "Player ratings board redesign is missing");
 assert(html.includes("cbb-site.js?v=2027-player-projections-v02"), "CBB asset cache key is stale");
 assert.strictEqual(payload.meta.status, "research_only");
 assert.strictEqual(payload.meta.model_usage, "display_only_not_used_by_model_a");

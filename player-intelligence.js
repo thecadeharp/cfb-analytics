@@ -241,13 +241,22 @@
         ? `This is a score-based watch list. A ${validation.seasons.length}-season leave-one-season-out backtest did not clear THI's publication gates, so finalist and winner probabilities are withheld.`
         : "This is a score-based watch list. Probabilities remain withheld until historical validation clears every THI publication gate.";
       rows = sortRows(rows.map(row => ({...data.players[row.athlete_id], ...row, rating:row.player_rating})), true);
-      target.innerHTML = `<p class="thi-heisman-note">${escape(note)} The board is display-only and does not affect Model A.</p>${table(rows, true)}`;
-      installSortListeners();
+      target.innerHTML = `<p class="thi-heisman-note">${escape(note)} The board is display-only and does not affect Model A.</p>${ratingBoard(rows, true)}`;
+      installBoardSort();
       return;
     }
     rows = sortRows(rows, false);
-    target.innerHTML = table(rows.slice(0, 250), false);
-    installSortListeners();
+    target.innerHTML = ratingBoard(rows, false);
+    installBoardSort();
+  }
+
+  function installBoardSort() {
+    const control = document.getElementById("thi-player-board-sort");
+    if (!control) return;
+    control.addEventListener("change", event => {
+      [sortKey, sortDirection] = event.target.value.split("|");
+      renderTable();
+    });
   }
 
   function sortValue(row, key, heisman) {
@@ -323,6 +332,46 @@
 
   function percent(value, digits = 1) {
     return Number.isFinite(Number(value)) ? `${num(value, digits)}%` : "—";
+  }
+
+  function ratingBoard(rows, heisman) {
+    const visible = rows.slice(0, 250);
+    const bands = Object.fromEntries(
+      ["rating", "production", "adj_epa", "total_epa", "success", "reliability"]
+        .map(key => [key, metricValues(rows, key, heisman)])
+    );
+    const currentSort = `${sortKey}|${sortDirection}`;
+    const sortOptions = [
+      ["rank|asc", heisman ? "Board order" : "Position rank"],
+      ["rating|desc", heisman ? "Heisman score" : "THI Production"],
+      ["adj_epa|desc", "Adjusted EPA / opportunity"],
+      ["total_epa|desc", "Total EPA"],
+      ["success|desc", "Success rate"],
+      ["production|desc", "Workload"],
+      ["reliability|desc", "Sample reliability"],
+      ["player|asc", "Player name"],
+      ["team|asc", "Team"],
+    ];
+    const metric = (label, display, rawValue, values) => {
+      const band = metricBand(values, rawValue);
+      return `<div class="thi-player-rating-metric thi-player-band-${band.name}"><span>${escape(label)}</span><strong>${escape(display)}</strong><small>${escape(band.label)}</small></div>`;
+    };
+    return `<div class="thi-player-board-toolbar"><div><strong>${escape(title[active])}</strong><span>${escape(visible.length)} of ${escape(rows.length)} qualifying players</span></div><label for="thi-player-board-sort">Sort board<select id="thi-player-board-sort">${sortOptions.map(([value,label]) => `<option value="${value}" ${currentSort === value ? "selected" : ""}>${escape(label)}</option>`).join("")}</select></label></div>
+      <div class="thi-player-rating-grid">${visible.map((row,index) => {
+        const rank = heisman ? row.rank : row.national_position_rank || index + 1;
+        const score = heisman ? row.heisman_score : row.rating;
+        const scoreBand = metricBand(bands.rating, score);
+        return `<article class="thi-player-rating-card ${index < 3 && sortKey === "rank" ? "is-podium" : ""}">
+          <div class="thi-player-rating-head"><div class="thi-player-rating-rank"><span>${heisman ? "Board" : `${escape(row.position_group || row.position || "POS")} rank`}</span><strong>#${escape(rank)}</strong></div><div class="thi-player-rating-identity"><button class="thi-player-name" data-thi-player-id="${escape(row.athlete_id)}">${escape(row.name)}</button><span>${escape(row.team || "—")} · ${escape(row.position || row.position_group || "—")} · ${escape(row.class_name || row.class || "—")}</span></div><div class="thi-player-rating-score thi-player-band-${scoreBand.name}"><span>${heisman ? "THI Heisman" : "THI Production"}</span><strong>${num(score,1)}</strong><small>${escape(scoreBand.label)}</small></div></div>
+          <div class="thi-player-rating-metrics">
+            ${metric("Season production", volume(row), sortValue(row,"production",heisman), bands.production)}
+            ${metric("Adj EPA / opp", num(row.advanced?.opponent_adjusted_epa_per_opportunity,3,true), sortValue(row,"adj_epa",heisman), bands.adj_epa)}
+            ${metric("Total EPA", num(row.advanced?.epa_total,1,true), sortValue(row,"total_epa",heisman), bands.total_epa)}
+            ${metric("Success rate", percent(row.advanced?.success_rate,1), sortValue(row,"success",heisman), bands.success)}
+            ${metric("Sample", percent(row.reliability,0), sortValue(row,"reliability",heisman), bands.reliability)}
+          </div>
+        </article>`;
+      }).join("") || `<div class="empty-state">No players match the current filters.</div>`}</div>`;
   }
 
   function table(rows, heisman) {
