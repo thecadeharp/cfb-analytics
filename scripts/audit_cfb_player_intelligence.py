@@ -18,7 +18,7 @@ except ModuleNotFoundError:
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "thi-cfb-player-audit-v2.0"
+VERSION = "thi-cfb-player-audit-v2.1"
 
 
 def finite(value: Any) -> bool:
@@ -151,11 +151,17 @@ def audit(payload: dict[str, Any], roster: dict[str, Any]) -> dict[str, Any]:
 
     leaderboard_mismatches = []
     for group in RATING_MINIMUMS:
+        def leaderboard_sort_key(row):
+            components = row.get("rating_components") or {}
+            observed = components.get("observed_metrics") or {}
+            receiving_dominance = float(observed.get("receiving_dominance") or 0) if group == "WR" else 0.0
+            return (-float(row["rating"]), -receiving_dominance, str(row.get("name") or ""))
+
         expected = [
             row["athlete_id"]
             for row in sorted(
                 [row for row in players.values() if row.get("position_group") == group and finite(row.get("rating"))],
-                key=lambda row: (-float(row["rating"]), str(row.get("name") or "")),
+                key=leaderboard_sort_key,
             )
         ]
         published = [str(value) for value in leaderboards.get(group) or []]

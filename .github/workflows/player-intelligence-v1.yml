@@ -94,9 +94,12 @@ jobs:
           assert smith['rating'] is not None
           assert smith['rating_components']['final_rating'] == smith['rating']
           assert [player['players'][athlete_id]['name'] for athlete_id in player['leaderboards']['WR'][:3]] == [
-              'Jeremiah Smith', 'Jesse Legree', 'KJ Duff'
+              'Jesse Legree', 'Jeremiah Smith', 'KJ Duff'
           ]
           assert all(row['name'] != 'Julian Sayin' for row in player['heisman_board'])
+          assert [row['name'] for row in player['heisman_board'][:5]] == [
+              'Darian Mensah', 'Jeremiah Smith', 'Malachi Toney', 'Trinidad Chambliss', 'Jesse Legree'
+          ]
           print(f"Validated {len(team['teams'])} team summaries and {len(player['players'])} rostered players")
           PY
 

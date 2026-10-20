@@ -59,6 +59,24 @@ def percentile(values, target):
     return 100.0 * (less + 0.5 * equal) / len(values)
 
 
+def distance_rating(values, target, points_per_standard_deviation=12.0):
+    """Map observed distance from the position mean onto a 1-99 scale.
+
+    Percentile ranks describe order but hide how far the leaders are ahead.
+    This scale is used for WR production so an exceptional top tier does not
+    appear tied to the rest of the board merely because all are high-percentile.
+    """
+    values = [float(value) for value in values if finite(value)]
+    if len(values) < 2:
+        return 50.0
+    mean = sum(values) / len(values)
+    variance = sum((value - mean) ** 2 for value in values) / len(values)
+    standard_deviation = math.sqrt(variance)
+    if standard_deviation <= 0:
+        return 50.0
+    return max(1.0, min(99.0, 50.0 + points_per_standard_deviation * ((float(target) - mean) / standard_deviation)))
+
+
 POSITION_GROUPS = {
     "QB": "QB",
     "RB": "RB", "HB": "RB", "FB": "RB",
@@ -95,6 +113,20 @@ POSITION_RATING_WEIGHTS = {
         "fumble_recoveries": .05,
     },
 }
+DEFENSIVE_POSITION_WEIGHTS = {
+    "DB": {"tackles": .10, "tackles_for_loss": .05, "sacks": .03, "passes_defended": .30, "interceptions": .30, "forced_fumbles": .12, "fumble_recoveries": .10},
+    "LB": {"tackles": .25, "tackles_for_loss": .25, "sacks": .15, "passes_defended": .10, "interceptions": .10, "forced_fumbles": .10, "fumble_recoveries": .05},
+    "DL": {"tackles": .15, "tackles_for_loss": .30, "sacks": .30, "passes_defended": .05, "interceptions": .02, "forced_fumbles": .13, "fumble_recoveries": .05},
+}
+
+
+def defensive_position_group(position):
+    position = str(position or "").upper()
+    if position in {"CB", "DB", "S", "FS", "SS", "NB"}:
+        return "DB"
+    if position in {"LB", "ILB", "OLB"}:
+        return "LB"
+    return "DL"
 
 
 def divide(numerator, denominator):
@@ -410,19 +442,31 @@ def main():
     for group in ("QB", "RB", "WR", "TE", "DEF"):
         pool = [row for row in players.values() if row["position_group"] == group and number(row["primary_volume"]) >= minimums[group]]
         metrics_by_id = {row["athlete_id"]: rating_metrics(group, row) for row in pool}
-        metric_pools = {
-            key: [metrics[key] for metrics in metrics_by_id.values() if finite(metrics.get(key))]
-            for key in POSITION_RATING_WEIGHTS[group]
-        }
+        defensive_cohorts = {row["athlete_id"]: defensive_position_group(row.get("position")) for row in pool}
         for row in pool:
             observed = metrics_by_id[row["athlete_id"]]
+            cohort = defensive_cohorts[row["athlete_id"]] if group == "DEF" else group
+            weights = DEFENSIVE_POSITION_WEIGHTS[cohort] if group == "DEF" else POSITION_RATING_WEIGHTS[group]
+            comparison_ids = [
+                candidate["athlete_id"] for candidate in pool
+                if group != "DEF" or defensive_cohorts[candidate["athlete_id"]] == cohort
+            ]
+            metric_pools = {
+                key: [metrics_by_id[athlete_id][key] for athlete_id in comparison_ids if finite(metrics_by_id[athlete_id].get(key))]
+                for key in weights
+            }
             component_values = {
                 key: percentile(metric_pools[key], observed[key])
-                for key in POSITION_RATING_WEIGHTS[group]
+                for key in weights
             }
-            weights = POSITION_RATING_WEIGHTS[group]
             rating = sum(weights[key] * component_values[key] for key in weights)
-            formula = f"{group.lower()}_position_specific_production_v2"
+            formula = f"{cohort.lower()}_position_specific_production_v2"
+            if group == "WR":
+                # Preserve real production separation at the top of the WR
+                # board. A percentile-only composite compressed the historic
+                # output of the leaders into the same one-point band.
+                rating = distance_rating(metric_pools["receiving_dominance"], observed["receiving_dominance"])
+                formula = "wr_distance_scaled_receiving_production_v2_1"
             reliability = min(1.0, number(row["primary_volume"]) / (minimums[group] * 2))
             row["rating"] = round(max(1.0, min(99.0, 50 + (rating - 50) * reliability)), 1)
             row["reliability"] = round(100 * reliability, 0)
@@ -435,7 +479,11 @@ def main():
                 "weights": weights,
                 "observed_metrics": {key: round(value, 3) for key, value in observed.items()},
             }
-        ordered = sorted(pool, key=lambda row: (-(row["rating"] or -999), row["name"]))
+        ordered = sorted(pool, key=lambda row: (
+            -(row["rating"] or -999),
+            -number(metrics_by_id[row["athlete_id"]].get("receiving_dominance")) if group == "WR" else 0,
+            row["name"],
+        ))
         for rank, row in enumerate(ordered, 1):
             row["national_position_rank"] = rank
         for conference in sorted({row.get("team") for row in []}):
@@ -511,7 +559,21 @@ def main():
             "team_expected_wins": round(expected_wins, 1), "player_rating": row["rating"],
             "position_production_percentile": round(position_production, 1),
         })
-    heisman.sort(key=lambda row: (-row["heisman_score"], row["name"]))
+    watch_path = DATA / "research" / "cfb_heisman_watch_2026.json"
+    watch_payload = load(watch_path) if watch_path.exists() else {"top_tier": []}
+    editorial_order = {
+        (row.get("team"), row.get("name")): index
+        for index, row in enumerate(watch_payload.get("top_tier") or [], 1)
+    }
+    for row in heisman:
+        editorial_rank = editorial_order.get((row.get("team"), row.get("name")))
+        row["editorial_watch_rank"] = editorial_rank
+        row["board_basis"] = "editorial_top_tier" if editorial_rank else "production_score"
+    heisman.sort(key=lambda row: (
+        0 if row.get("editorial_watch_rank") else 1,
+        row.get("editorial_watch_rank") or 999,
+        -row["heisman_score"], row["name"],
+    ))
     for rank, row in enumerate(heisman, 1): row["rank"] = rank
 
     published_players = {
@@ -526,16 +588,23 @@ def main():
         ))
         team_payload[team] = ordered
 
+    def published_leaderboard_sort_key(row, group):
+        components = row.get("rating_components") or {}
+        observed = components.get("observed_metrics") or {}
+        receiving_dominance = number(observed.get("receiving_dominance")) if group == "WR" else 0.0
+        return (-(row.get("rating") or -1), -receiving_dominance, row["name"])
+
     output = {
         "meta": {
             "season": args.year, "through_week": through_week, "generated_at": datetime.now(timezone.utc).isoformat(),
             "source": "SportsDataverse/cfbfastR play-by-play joined to ESPN roster athlete IDs",
             "model_usage": "display_only_not_used_by_model_a",
             "rating_status": "research_beta",
-            "rating_version": "thi-cfb-player-production-v2.0",
+            "rating_version": "thi-cfb-player-production-v2.1",
             "rating_method": {
                 "label": "position-specific production rating",
                 "position_weights": POSITION_RATING_WEIGHTS,
+                "defensive_position_weights": DEFENSIVE_POSITION_WEIGHTS,
                 "defensive_formula": "position-balanced box-score production using tackles, tackles for loss, sacks, passes defended, interceptions and takeaways",
                 "reliability_rule": "regress the raw composite toward 50 until twice the position minimum is reached",
                 "not_a_measure_of": ["scouting talent", "draft grade", "award probability"],
@@ -547,6 +616,7 @@ def main():
                 "winner_top5_rate": calibration_validation.get("winner_top5_rate"),
                 "seasons": ((calibration or {}).get("meta") or {}).get("seasons", []),
             },
+            "heisman_board_method": "Source-linked availability gate, editorial top tier, then position-adjusted production score. No award probabilities.",
             "notes": [
                 "Observed role is based on recorded workload and is not an official depth chart.",
                 "Official roster positions define rating cohorts; incidental trick-play usage does not reclassify players.",
@@ -562,7 +632,7 @@ def main():
         "leaderboards": {
             group: [row["athlete_id"] for row in sorted(
                 [p for p in published_players.values() if p["position_group"] == group and finite(p.get("rating"))],
-                key=lambda p: (-(p["rating"] or -1), p["name"]),
+                key=lambda p: published_leaderboard_sort_key(p, group),
             )]
             for group in ("QB", "RB", "WR", "TE", "DEF")
         },

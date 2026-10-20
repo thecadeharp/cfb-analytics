@@ -1,5 +1,5 @@
 (() => {
-  const DATA_URL = "./data/player_intelligence.json";
+  const DATA_URL = "./data/player_intelligence.json?v=20261020-player-production-v21";
   const PROJECTION_URL = "./data/player_projections.json";
   let data = null;
   let dataPromise = null;
@@ -241,7 +241,7 @@
         ? `This is a score-based watch list. A ${validation.seasons.length}-season leave-one-season-out backtest did not clear THI's publication gates, so finalist and winner probabilities are withheld.`
         : "This is a score-based watch list. Probabilities remain withheld until historical validation clears every THI publication gate.";
       rows = sortRows(rows.map(row => ({...data.players[row.athlete_id], ...row, rating:row.player_rating})), true);
-      target.innerHTML = `<p class="thi-heisman-note">${escape(note)} The board is display-only and does not affect Model A.</p>${ratingBoard(rows, true)}`;
+      target.innerHTML = `<p class="thi-heisman-note">${escape(note)} The first five positions are THI's editorial watch tier, informed by production, team context and verified availability; the remaining order is score-based. The board is display-only and does not affect Model A.</p>${ratingBoard(rows, true)}`;
       installBoardSort();
       return;
     }
@@ -343,7 +343,7 @@
     const currentSort = `${sortKey}|${sortDirection}`;
     const sortOptions = [
       ["rank|asc", heisman ? "Board order" : "Position rank"],
-      ["rating|desc", heisman ? "Heisman score" : "THI Production"],
+      ["rating|desc", heisman ? "Production context" : "THI Production"],
       ["adj_epa|desc", "Adjusted EPA / opportunity"],
       ["total_epa|desc", "Total EPA"],
       ["success|desc", "Success rate"],
@@ -362,7 +362,7 @@
         const score = heisman ? row.heisman_score : row.rating;
         const scoreBand = metricBand(bands.rating, score);
         return `<article class="thi-player-rating-card ${index < 3 && sortKey === "rank" ? "is-podium" : ""}">
-          <div class="thi-player-rating-head"><div class="thi-player-rating-rank"><span>${heisman ? "Board" : `${escape(row.position_group || row.position || "POS")} rank`}</span><strong>#${escape(rank)}</strong></div><div class="thi-player-rating-identity"><button class="thi-player-name" data-thi-player-id="${escape(row.athlete_id)}">${escape(row.name)}</button><span>${escape(row.team || "—")} · ${escape(row.position || row.position_group || "—")} · ${escape(row.class_name || row.class || "—")}</span></div><div class="thi-player-rating-score thi-player-band-${scoreBand.name}"><span>${heisman ? "THI Heisman" : "THI Production"}</span><strong>${num(score,1)}</strong><small>${escape(scoreBand.label)}</small></div></div>
+          <div class="thi-player-rating-head"><div class="thi-player-rating-rank"><span>${heisman ? "Board" : `${escape(row.position_group || row.position || "POS")} rank`}</span><strong>#${escape(rank)}</strong></div><div class="thi-player-rating-identity"><button class="thi-player-name" data-thi-player-id="${escape(row.athlete_id)}">${escape(row.name)}</button><span>${escape(row.team || "—")} · ${escape(row.position || row.position_group || "—")} · ${escape(row.class_name || row.class || "—")}</span></div><div class="thi-player-rating-score thi-player-band-${scoreBand.name}"><span>${heisman ? "Production context" : "THI Production"}</span><strong>${num(score,1)}</strong><small>${heisman && row.board_basis === "editorial_top_tier" ? "Editorial watch tier" : escape(scoreBand.label)}</small></div></div>
           <div class="thi-player-rating-metrics">
             ${metric("Season production", volume(row), sortValue(row,"production",heisman), bands.production)}
             ${metric("Adj EPA / opp", num(row.advanced?.opponent_adjusted_epa_per_opportunity,3,true), sortValue(row,"adj_epa",heisman), bands.adj_epa)}
@@ -379,7 +379,7 @@
       ["rating", "production", "adj_epa", "total_epa", "success", "reliability"]
         .map(key => [key, metricValues(rows, key, heisman)])
     );
-    return `<div class="thi-player-table-wrap"><table class="thi-player-table"><thead><tr>${sortHeader("rank", heisman ? "Board" : "Pos Rank")}${sortHeader("player", "Player")}${sortHeader("team", "Team")}${sortHeader("class", "Class")}${sortHeader("rating", heisman ? "Heisman Score" : "THI Production")}${sortHeader("production", "Production")}${sortHeader("adj_epa", "Adj EPA/Opp")}${sortHeader("total_epa", "Total EPA")}${sortHeader("success", "Success")}${sortHeader("reliability", "Reliability")}</tr></thead><tbody>${rows.map((row,index) => `<tr>
+    return `<div class="thi-player-table-wrap"><table class="thi-player-table"><thead><tr>${sortHeader("rank", heisman ? "Board" : "Pos Rank")}${sortHeader("player", "Player")}${sortHeader("team", "Team")}${sortHeader("class", "Class")}${sortHeader("rating", heisman ? "Production Context" : "THI Production")}${sortHeader("production", "Production")}${sortHeader("adj_epa", "Adj EPA/Opp")}${sortHeader("total_epa", "Total EPA")}${sortHeader("success", "Success")}${sortHeader("reliability", "Reliability")}</tr></thead><tbody>${rows.map((row,index) => `<tr>
       <td class="thi-player-mono">#${escape(heisman ? row.rank : row.national_position_rank || index + 1)}</td>
       <td><button class="thi-player-name" data-thi-player-id="${escape(row.athlete_id)}">${escape(row.name)}</button><div class="thi-hub-muted">${escape(row.position || row.position_group || "—")}</div></td>
       <td>${escape(row.team || "—")}</td><td>${escape(row.class || "—")}</td>
@@ -404,7 +404,7 @@
       <div class="thi-player-card-grid"><div class="thi-player-card"><span>THI Production</span><strong>${num(row.rating,1)}</strong></div><div class="thi-player-card"><span>National position rank</span><strong>${row.national_position_rank ? `#${row.national_position_rank}` : "—"}</strong></div><div class="thi-player-card"><span>Adjusted EPA / opportunity</span><strong>${num(row.advanced?.opponent_adjusted_epa_per_opportunity,3,true)}</strong></div><div class="thi-player-card"><span>Success rate</span><strong>${num(row.advanced?.success_rate,1)}%</strong></div></div>
       <h3>Rating decomposition</h3><div class="thi-player-component-grid">${componentCards}<div class="thi-player-component reliability"><span>Sample reliability</span><strong>${percent(components.reliability_percent,0)}</strong><small>Regresses rating toward 50</small></div></div>
       <h3>Season production</h3><div class="thi-player-stat-list">${Object.entries(stats).map(([key,value]) => `<div class="thi-player-stat-line"><span>${escape(labels[key] || key)}</span><strong>${escape(value)}${key.endsWith("_share") ? "%" : ""}</strong></div>`).join("") || `<div class="thi-player-stat-line"><span>No qualifying production recorded</span></div>`}</div>
-      <h3>Method</h3><p class="thi-heisman-note">THI Production is a current-season, within-position measure. Each position has its own transparent formula: quarterbacks include turnovers and passing efficiency; backs include scrimmage production; receivers emphasize yards, touchdowns and target efficiency; defenders use the complete box-score profile rather than disruption plays alone. Small samples regress toward 50. It is not a scouting grade, draft projection or Heisman probability and does not affect Model A.</p>`;
+      <h3>Method</h3><p class="thi-heisman-note">THI Production is a current-season, within-position measure. Each position has its own transparent formula: quarterbacks include turnovers and passing efficiency; backs include scrimmage production; receivers emphasize yards and touchdowns with a distance scale that preserves separation between exceptional seasons; defenders use the complete box-score profile rather than disruption plays alone. Small samples regress toward 50. It is not a scouting grade, draft projection or Heisman probability and does not affect Model A.</p>`;
     drawer.hidden = false; document.body.style.overflow = "hidden";
   }
   function closePlayer() { const drawer = document.getElementById("thi-player-drawer"); if (drawer) drawer.hidden = true; document.body.style.overflow = ""; }
