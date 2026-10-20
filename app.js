@@ -79,6 +79,14 @@ function hasValue(value) {
   return value !== null && value !== undefined && !Number.isNaN(Number(value));
 }
 
+function parseDataTimestamp(value) {
+  if (!value) return null;
+  const text = String(value);
+  const normalized = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(text) ? text : `${text}Z`;
+  const parsed = new Date(normalized);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -276,8 +284,8 @@ function updateProjectionDataAnchor() {
   const node = document.getElementById("projection-data-anchor");
   if (!node) return;
   const generated = projectionsData?.meta?.generated || oddsData?.meta?.generated;
-  const parsed = generated ? new Date(generated) : null;
-  const snapshot = parsed && !Number.isNaN(parsed.getTime())
+  const parsed = parseDataTimestamp(generated);
+  const snapshot = parsed
     ? parsed.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/New_York", timeZoneName: "short" })
     : "awaiting refresh";
   node.textContent = `${currentWeek === null ? "Active week" : `Week ${currentWeek}`} · all times Eastern · market snapshot ${snapshot}`;
@@ -2453,9 +2461,9 @@ function updateHeader() {
     return;
   }
 
-  const date = new Date(generated);
+  const date = parseDataTimestamp(generated);
 
-  if (Number.isNaN(date.getTime())) {
+  if (!date) {
     header.textContent = "2026 model";
     return;
   }
@@ -2957,7 +2965,8 @@ function marketChangeSummaryMarkup(game) {
     }
   }
   const latest = snapshots.at(-1)?.captured_at;
-  const freshness = latest ? new Date(latest).toLocaleString("en-US", {month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZone:"America/New_York",timeZoneName:"short"}) : "Awaiting first synchronized market observation";
+  const latestDate = parseDataTimestamp(latest);
+  const freshness = latestDate ? latestDate.toLocaleString("en-US", {month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZone:"America/New_York",timeZoneName:"short"}) : "Awaiting first synchronized market observation";
   return `<section class="analysis-panel wide thi-change-summary" aria-label="What changed since first capture">
     <div class="analysis-panel-header"><div><div class="analysis-panel-title">What Changed?</div><div class="team-meta">Since THI's first market capture · ${snapshots.length} observations</div></div></div>
     <div class="analysis-panel-body"><strong>${escapeHtml(headline)}</strong><p>${escapeHtml(explanation)}</p><span>${escapeHtml(freshness)}</span></div>

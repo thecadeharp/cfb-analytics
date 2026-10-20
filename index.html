@@ -432,6 +432,60 @@
       white-space: nowrap;
     }
 
+    .data-health-shell {
+      max-width: 1480px;
+      margin: 14px auto 0;
+      padding: 0 24px;
+    }
+
+    .data-health-panel {
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .data-health-panel > summary {
+      min-height: 42px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .data-health-panel > summary::-webkit-details-marker { display: none; }
+    .data-health-summary,
+    .data-health-meta { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .data-health-summary { color: var(--text); font-size: 11px; font-weight: 800; }
+    .data-health-meta { color: var(--muted); font: 9px var(--mono); text-align: right; }
+    .data-health-dot { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: var(--muted-light); }
+    .data-health-panel[data-state="current"] .data-health-dot { background: var(--green); box-shadow: 0 0 0 3px var(--green-light); }
+    .data-health-panel[data-state="delayed"] .data-health-dot { background: var(--amber); box-shadow: 0 0 0 3px var(--amber-light); }
+    .data-health-panel[data-state="unavailable"] .data-health-dot { background: var(--red); box-shadow: 0 0 0 3px var(--red-light); }
+    .data-health-chevron { font-size: 12px; transition: transform .15s ease; }
+    .data-health-panel[open] .data-health-chevron { transform: rotate(180deg); }
+
+    .data-health-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid var(--border);
+    }
+
+    .data-health-item { min-width: 0; padding: 13px 14px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .data-health-item:nth-child(3n) { border-right: 0; }
+    .data-health-item:nth-last-child(-n+3) { border-bottom: 0; }
+    .data-health-item-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .data-health-label { overflow: hidden; color: var(--text); font-size: 11px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+    .data-health-state { flex: 0 0 auto; padding: 3px 6px; border-radius: 999px; font: 700 8px var(--mono); letter-spacing: .04em; text-transform: uppercase; }
+    .data-health-state.current { color: var(--green); background: var(--green-light); }
+    .data-health-state.delayed { color: var(--amber); background: var(--amber-light); }
+    .data-health-state.unavailable { color: var(--red); background: var(--red-light); }
+    .data-health-time { margin-top: 6px; color: var(--muted); font: 9px/1.45 var(--mono); }
+    .data-health-note { padding: 10px 14px; color: var(--muted); background: var(--surface-soft); font: 9px/1.5 var(--mono); }
+
     /* =========================
        MAIN
     ========================== */
@@ -1097,6 +1151,12 @@
         display: none;
       }
 
+      .data-health-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .data-health-item:nth-child(3n) { border-right: 1px solid var(--border); }
+      .data-health-item:nth-child(2n) { border-right: 0; }
+      .data-health-item:nth-last-child(-n+3) { border-bottom: 1px solid var(--border); }
+      .data-health-item:nth-last-child(-n+2) { border-bottom: 0; }
+
       .dossier-stat-grid {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -1135,6 +1195,16 @@
     }
 
     @media (max-width: 600px) {
+      .data-health-shell { margin-top: 10px; padding: 0 14px; }
+      .data-health-panel > summary { align-items: flex-start; flex-direction: column; }
+      .data-health-meta { width: 100%; justify-content: space-between; text-align: left; }
+      .data-health-grid { grid-template-columns: 1fr; }
+      .data-health-item,
+      .data-health-item:nth-child(2n),
+      .data-health-item:nth-child(3n),
+      .data-health-item:nth-last-child(-n+2) { border-right: 0; border-bottom: 1px solid var(--border); }
+      .data-health-item:last-child { border-bottom: 0; }
+
       .page {
         padding: 22px 14px 50px;
       }
@@ -1482,6 +1552,25 @@
     </div>
   </header>
 
+  <div class="data-health-shell">
+    <details class="data-health-panel" id="data-health-panel" data-state="loading">
+      <summary>
+        <span class="data-health-summary">
+          <span class="data-health-dot" aria-hidden="true"></span>
+          <span id="data-health-headline">Checking published data</span>
+        </span>
+        <span class="data-health-meta">
+          <span id="data-health-count">6 feeds</span>
+          <span class="data-health-chevron" aria-hidden="true">⌄</span>
+        </span>
+      </summary>
+      <div class="data-health-grid" id="data-health-grid" aria-live="polite"></div>
+      <div class="data-health-note">
+        Status reflects published feed freshness and availability. It does not certify model performance or promote research models into production.
+      </div>
+    </details>
+  </div>
+
 
   <main class="page">
 
@@ -1755,14 +1844,15 @@
   </main>
 
   <script src="cfb-game-script.js?v=2026-drive-script-v01"></script>
-  <script src="app.js?v=2026-daily-game-intel-v01"></script>
+  <script src="app.js?v=2026-public-status-v02"></script>
   <script src="thi-ratings-hub.js?v=2026-mobile-cards-v02"></script>
   <link rel="stylesheet" href="thi-visual-explorer.css?v=2026-chart-tooltips-v02">
   <script src="thi-visual-explorer.js?v=2026-chart-tooltips-v02"></script>
   <script src="portfolio-config.js"></script>
   <script src="account-access.js?v=2026-track-play-v01"></script>
   <script src="market-research.js?v=2026-matchup-odds-v01"></script>
-  <script src="last-updated-timestamp.js"></script>
+  <script src="last-updated-timestamp.js?v=2026-utc-fix-v01"></script>
+  <script src="data-status.js?v=2026-public-status-v01"></script>
   <script src="dossier-ranks.js"></script>
   <script src="ux-v2.js?v=2026-mobile-projections-v05"></script>
   <script src="portal-variance.js?v=2026-steam-reversal-v01"></script>

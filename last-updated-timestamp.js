@@ -6,7 +6,9 @@
 
   function formatUpdatedTimestamp(value) {
     if (!value) return null;
-    const date = new Date(value);
+    const text = String(value);
+    const normalized = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(text) ? text : `${text}Z`;
+    const date = new Date(normalized);
     if (Number.isNaN(date.getTime())) return null;
 
     const parts = new Intl.DateTimeFormat("en-US", {

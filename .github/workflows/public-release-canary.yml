@@ -26,5 +26,7 @@ jobs:
       - name: Wait briefly for CDN publication
         if: ${{ github.event_name == 'workflow_run' }}
         run: sleep 20
+      - name: Verify responsive public status contracts
+        run: python -m unittest scripts.test_public_data_status -v
       - name: Verify public data contracts
         run: python scripts/verify_public_release.py --base-url https://thehammerindex.com
