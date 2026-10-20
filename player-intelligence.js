@@ -10,6 +10,8 @@
   let search = "";
   let conference = "ALL";
   let projectionPosition = "ALL";
+  let projectionTeam = "ALL";
+  let projectionPlayer = "ALL";
   let projectionSearch = "";
   let projectionConfidence = "ALL";
   let sortKey = "rank";
@@ -188,15 +190,24 @@
     const query = projectionSearch.trim().toLocaleLowerCase();
     return (projectionData?.projections || []).filter(row => {
       const matchesQuery = !query || `${row.name} ${row.team} ${row.matchup?.opponent}`.toLocaleLowerCase().includes(query);
+      const matchesTeam = projectionTeam === "ALL" || row.team === projectionTeam;
+      const matchesPlayer = projectionPlayer === "ALL" || String(row.athlete_id) === projectionPlayer;
       const matchesPosition = projectionPosition === "ALL" || row.position_group === projectionPosition;
       const matchesConfidence = projectionConfidence === "ALL" || row.confidence === projectionConfidence;
-      return matchesQuery && matchesPosition && matchesConfidence;
+      return matchesQuery && matchesTeam && matchesPlayer && matchesPosition && matchesConfidence;
     });
   }
 
   function renderProjections() {
     const root = document.getElementById("thi-player-root"); if (!root || !projectionData) return;
     const meta = projectionData.meta || {};
+    const allProjectionRows = projectionData.projections || [];
+    const teams = [...new Set(allProjectionRows.map(row => row.team).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+    const selectablePlayers = allProjectionRows
+      .filter(row => projectionTeam === "ALL" || row.team === projectionTeam)
+      .filter(row => projectionPosition === "ALL" || row.position_group === projectionPosition)
+      .sort((a,b) => a.name.localeCompare(b.name) || a.team.localeCompare(b.team));
+    if (projectionPlayer !== "ALL" && !selectablePlayers.some(row => String(row.athlete_id) === projectionPlayer)) projectionPlayer = "ALL";
     const rows = projectionRows();
     const visibleRows = rows.slice(0, 300);
     const countLabel = rows.length > visibleRows.length
@@ -206,10 +217,15 @@
       <div class="thi-player-mode-heading"><div><span>Next-game layer</span><strong>Player Stat Projections</strong></div><p>What workload and production does the current matchup imply?</p></div>
       <div class="thi-player-projection-notice"><div><strong>Player performance forecasts · Research v0.1</strong><span>Matchup-aware statistical expectations for analysis, fantasy research, broadcast preparation and player evaluation.</span></div><small>Through Week ${escape(meta.through_week ?? "—")} · ${escape(meta.projection_count ?? 0)} players · Model A unchanged</small></div>
       <div class="thi-player-projection-policy"><strong>Forecasting only</strong><span>This board does not ingest, retain or display player market lines, odds, prices, picks or wager records.</span></div>
-      <div class="thi-player-controls thi-player-projection-controls">
-        <div class="thi-player-control"><label for="thi-projection-search">Player, team or opponent</label><input id="thi-projection-search" type="search" value="${escape(projectionSearch)}" placeholder="Search the next-game board"></div>
-        <div class="thi-player-control"><label for="thi-projection-position">Position</label><select id="thi-projection-position"><option value="ALL">All positions</option>${["QB","RB","WR","TE"].map(position => `<option value="${position}" ${projectionPosition === position ? "selected" : ""}>${position}</option>`).join("")}</select></div>
-        <div class="thi-player-control"><label for="thi-projection-confidence">Evidence state</label><select id="thi-projection-confidence"><option value="ALL">All evidence states</option><option value="established" ${projectionConfidence === "established" ? "selected" : ""}>Established role</option><option value="developing" ${projectionConfidence === "developing" ? "selected" : ""}>Developing role</option><option value="availability_watch" ${projectionConfidence === "availability_watch" ? "selected" : ""}>Availability watch</option></select></div>
+      <div class="thi-player-projection-finder">
+        <div class="thi-player-projection-finder-heading"><div><span>Guided lookup</span><strong>Find a projected player</strong></div><button id="thi-projection-clear" type="button">Clear</button></div>
+        <div class="thi-player-controls thi-player-projection-controls">
+          <div class="thi-player-control thi-player-team-control"><label for="thi-projection-team">1 · Team</label><select id="thi-projection-team"><option value="ALL">All teams</option>${teams.map(team => `<option value="${escape(team)}" ${projectionTeam === team ? "selected" : ""}>${escape(team)}</option>`).join("")}</select></div>
+          <div class="thi-player-control thi-player-select-control"><label for="thi-projection-player">2 · Player</label><select id="thi-projection-player"><option value="ALL">${projectionTeam === "ALL" ? "All projected players" : `All ${escape(projectionTeam)} players`}</option>${selectablePlayers.map(row => `<option value="${escape(row.athlete_id)}" ${projectionPlayer === String(row.athlete_id) ? "selected" : ""}>${escape(row.name)} · ${escape(row.position_group)}${projectionTeam === "ALL" ? ` · ${escape(row.team)}` : ""}</option>`).join("")}</select></div>
+          <div class="thi-player-control"><label for="thi-projection-position">Position</label><select id="thi-projection-position"><option value="ALL">All positions</option>${["QB","RB","WR","TE"].map(position => `<option value="${position}" ${projectionPosition === position ? "selected" : ""}>${position}</option>`).join("")}</select></div>
+          <div class="thi-player-control"><label for="thi-projection-confidence">Evidence state</label><select id="thi-projection-confidence"><option value="ALL">All evidence states</option><option value="established" ${projectionConfidence === "established" ? "selected" : ""}>Established role</option><option value="developing" ${projectionConfidence === "developing" ? "selected" : ""}>Developing role</option><option value="availability_watch" ${projectionConfidence === "availability_watch" ? "selected" : ""}>Availability watch</option></select></div>
+          <div class="thi-player-control thi-player-keyword-control"><label for="thi-projection-search">Optional keyword</label><input id="thi-projection-search" type="search" value="${escape(projectionSearch)}" placeholder="Opponent or name"></div>
+        </div>
       </div>
       <div class="thi-player-projection-count">${escape(countLabel)}</div>
       <div class="thi-player-projection-grid">${visibleRows.map(row => {
@@ -225,8 +241,11 @@
       <div class="thi-player-beta">Method: ${escape(meta.method || "Observed workload with matchup adjustments.")} A frozen player-game performance ledger will be used only to measure forecast accuracy and calibration.</div>`;
     bindSectionTabs(root);
     root.querySelector("#thi-projection-search").addEventListener("input", event => { projectionSearch = event.target.value; renderProjections(); const input=document.getElementById("thi-projection-search"); input?.focus(); input?.setSelectionRange(input.value.length,input.value.length); });
-    root.querySelector("#thi-projection-position").addEventListener("change", event => { projectionPosition = event.target.value; renderProjections(); });
+    root.querySelector("#thi-projection-team").addEventListener("change", event => { projectionTeam = event.target.value; projectionPlayer = "ALL"; projectionSearch = ""; renderProjections(); });
+    root.querySelector("#thi-projection-player").addEventListener("change", event => { projectionPlayer = event.target.value; projectionSearch = ""; renderProjections(); });
+    root.querySelector("#thi-projection-position").addEventListener("change", event => { projectionPosition = event.target.value; projectionPlayer = "ALL"; renderProjections(); });
     root.querySelector("#thi-projection-confidence").addEventListener("change", event => { projectionConfidence = event.target.value; renderProjections(); });
+    root.querySelector("#thi-projection-clear").addEventListener("click", () => { projectionTeam = "ALL"; projectionPlayer = "ALL"; projectionPosition = "ALL"; projectionConfidence = "ALL"; projectionSearch = ""; renderProjections(); });
   }
 
   function renderTable() {
