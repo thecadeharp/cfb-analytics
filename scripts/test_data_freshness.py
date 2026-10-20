@@ -7,6 +7,7 @@ from scripts.audit_data_freshness import (
     acceptable_completed_weeks,
     current_cfb_week,
     parse_time,
+    postgame_covers_results,
     within_age,
 )
 
@@ -40,6 +41,13 @@ class DataFreshnessAuditTests(unittest.TestCase):
         self.assertEqual(acceptable_completed_weeks(8, sunday), {6, 7, 8})
         self.assertEqual(acceptable_completed_weeks(8, monday), {6, 7, 8})
         self.assertEqual(acceptable_completed_weeks(8, tuesday), {7, 8})
+
+    def test_postgame_coverage_requires_every_published_final(self):
+        results = {"games": [{"game_id": "101"}, {"game_id": 202}]}
+        complete = {"games": {"101": {}, "202": {}}}
+        missing = {"games": {"101": {}}}
+        self.assertTrue(postgame_covers_results(results, complete))
+        self.assertFalse(postgame_covers_results(results, missing))
 
 
 if __name__ == "__main__":

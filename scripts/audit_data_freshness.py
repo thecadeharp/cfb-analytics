@@ -50,6 +50,31 @@ def within_age(stamp: datetime | None, now: datetime, max_age_hours: float) -> b
     return -0.25 <= age <= max_age_hours
 
 
+def postgame_covers_results(results: dict, postgame: dict) -> bool:
+    """Confirm every published final has a corresponding postgame record.
+
+    Postgame analytics are immutable once built and the builder intentionally
+    leaves the file untouched when no new final or retry is due. Coverage is
+    therefore the meaningful live-readiness check; a recently rewritten
+    timestamp alone is not.
+    """
+    result_ids = {
+        str(game.get("game_id"))
+        for game in (results.get("games") or [])
+        if isinstance(game, dict) and game.get("game_id") is not None
+    }
+    postgame_rows = postgame.get("games") or {}
+    if isinstance(postgame_rows, dict):
+        postgame_ids = {str(game_id) for game_id in postgame_rows}
+    else:
+        postgame_ids = {
+            str(game.get("game_id"))
+            for game in postgame_rows
+            if isinstance(game, dict) and game.get("game_id") is not None
+        }
+    return result_ids.issubset(postgame_ids)
+
+
 def load(root: Path, relative: str) -> dict:
     path = root / relative
     if not path.exists():
@@ -147,10 +172,16 @@ def audit(root: Path, now: datetime) -> dict:
     check("cfb_team_market_records", "data/team_market_performance.json", ["meta.generated_at"], 192, {"teams": ("teams", 130)})
     check("cfb_portal", "data/portal_2026.json", ["player_source.generated_at", "generated_at"], 192, {"teams": ("teams", 40), "players": ("players", 1000)})
     score_slo = 0.5 if live_window else 6
-    settlement_slo = 2 if live_window else 8
-    check("cfb_scores", "data/results.json", ["meta.generated_at"], score_slo, {"completed_games": ("meta.completed_games", 300)})
-    check("cfb_live_scores", "data/live_scores.json", ["meta.generated_at"], score_slo, {}, severity="critical")
-    check("cfb_postgame", "data/postgame_analytics.json", ["meta.generated_at"], settlement_slo, {"games": ("games", 300)})
+    results = check("cfb_scores", "data/results.json", ["meta.generated_at"], score_slo, {"completed_games": ("meta.completed_games", 300)})
+    live_scores = check("cfb_live_scores", "data/live_scores.json", ["meta.generated_at"], score_slo, {}, severity="critical")
+    actual_live_games = len(live_scores.get("games") or [])
+    settlement_slo = 2 if actual_live_games else 8
+    postgame = check("cfb_postgame", "data/postgame_analytics.json", ["meta.generated_at"], settlement_slo, {"games": ("games", 300)})
+    postgame_aligned = postgame_covers_results(results, postgame)
+    assets["cfb_postgame"]["checks"]["finals_aligned"] = postgame_aligned
+    if not postgame_aligned:
+        assets["cfb_postgame"]["status"] = "fail"
+        findings.append({"severity": "critical", "dataset": "cfb_postgame", "failed_checks": ["finals_aligned"]})
     check("cfb_signal_records", "data/reports/signal_report.json", ["generated_at_utc"], settlement_slo, {"signals": ("signals", 1)})
     check("cfb_availability", "data/roster_notes.json", ["meta.generated_at_utc"], 2.5 if weekend else 14, {"source_health": ("meta.source_health", 6)})
     check("cbb_projection_board", "data/cbb/projection_board.json", ["meta.generated_at_utc"], 15, {"games": ("games", 300)})
@@ -207,6 +238,7 @@ def audit(root: Path, now: datetime) -> dict:
         },
         "week_alignment": week_checks,
         "live_game_window": live_window,
+        "actual_live_games": actual_live_games,
         "datasets": assets,
         "findings": findings,
     }
