@@ -1118,6 +1118,145 @@
     }
 
     /* =========================
+       SITE INFORMATION
+    ========================== */
+
+    .site-footer {
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .site-footer-inner {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 18px 24px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .site-footer-brand {
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .site-footer-note {
+      margin-top: 4px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      line-height: 1.5;
+    }
+
+    .site-footer-nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 5px 16px;
+    }
+
+    .site-footer-link {
+      padding: 4px 0;
+      color: var(--muted);
+      background: transparent;
+      border: 0;
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .site-footer-link:hover,
+    .site-footer-link:focus-visible {
+      color: var(--text);
+    }
+
+    .site-info-dialog {
+      width: min(620px, calc(100vw - 28px));
+      max-height: min(720px, calc(100vh - 36px));
+      padding: 0;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border-dark);
+      border-radius: 16px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, .28);
+      overflow: hidden;
+    }
+
+    .site-info-dialog::backdrop {
+      background: rgba(11, 17, 24, .64);
+      backdrop-filter: blur(4px);
+    }
+
+    .site-info-dialog-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .site-info-dialog-kicker {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .site-info-dialog-title {
+      margin: 5px 0 0;
+      font-size: 22px;
+      line-height: 1.15;
+    }
+
+    .site-info-close {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 36px;
+      color: var(--muted);
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .site-info-dialog-body {
+      padding: 20px;
+      overflow-y: auto;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .site-info-dialog-body p {
+      margin: 0 0 14px;
+    }
+
+    .site-info-dialog-body p:last-child {
+      margin-bottom: 0;
+    }
+
+    .site-info-dialog-body strong {
+      color: var(--text);
+    }
+
+    .site-info-dialog-body a {
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    /* =========================
        RESPONSIVE
     ========================== */
 
@@ -1207,6 +1346,22 @@
 
       .page {
         padding: 22px 14px 50px;
+      }
+
+      .site-footer-inner {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 16px 14px 18px;
+      }
+
+      .site-footer-nav {
+        justify-content: flex-start;
+        gap: 4px 14px;
+      }
+
+      .site-info-dialog-head,
+      .site-info-dialog-body {
+        padding: 16px;
       }
 
       .header-inner {
@@ -1843,6 +1998,34 @@
 
   </main>
 
+  <footer class="site-footer" aria-label="Site information">
+    <div class="site-footer-inner">
+      <div>
+        <div class="site-footer-brand">The Hammer Index</div>
+        <div class="site-footer-note">Independent college football and college basketball analytics by Cade Harper.</div>
+      </div>
+      <nav class="site-footer-nav" aria-label="Information links">
+        <button class="site-footer-link" type="button" data-site-info="about">About</button>
+        <button class="site-footer-link" type="button" data-site-info="contact">Contact</button>
+        <button class="site-footer-link" type="button" data-site-info="disclosure">Disclosure</button>
+        <button class="site-footer-link" type="button" data-site-info="privacy">Privacy</button>
+        <button class="site-footer-link" type="button" data-site-info="terms">Terms</button>
+        <button class="site-footer-link" type="button" data-site-info="responsible">Responsible Use</button>
+      </nav>
+    </div>
+  </footer>
+
+  <dialog class="site-info-dialog" id="site-info-dialog" aria-labelledby="site-info-title">
+    <div class="site-info-dialog-head">
+      <div>
+        <div class="site-info-dialog-kicker">The Hammer Index</div>
+        <h2 class="site-info-dialog-title" id="site-info-title">About</h2>
+      </div>
+      <button class="site-info-close" id="site-info-close" type="button" aria-label="Close site information">×</button>
+    </div>
+    <div class="site-info-dialog-body" id="site-info-body"></div>
+  </dialog>
+
   <script src="cfb-game-script.js?v=2026-drive-script-v01"></script>
   <script src="app.js?v=2026-public-status-v02"></script>
   <script src="thi-ratings-hub.js?v=2026-mobile-cards-v02"></script>
@@ -1876,6 +2059,7 @@
   <link rel="stylesheet" href="dark-mode.css?v=2026-dark-player-ratings-v07">
   <script src="dark-mode.js?v=2026-dark-v01"></script>
   <script src="cbb-site.js?v=2027-player-projections-v02"></script>
+  <script src="site-info.js?v=2026-site-info-v01"></script>
 
   <!-- Cloudflare Web Analytics -->
   <script
