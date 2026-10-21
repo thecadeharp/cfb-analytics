@@ -1256,6 +1256,59 @@
       font-weight: 700;
     }
 
+    .site-info-section {
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+
+    .site-info-section h3 {
+      margin: 0 0 10px;
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    .site-social-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .site-info-dialog-body .site-social-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+      padding: 11px 12px;
+      color: var(--text);
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      text-decoration: none;
+    }
+
+    .site-social-link:hover,
+    .site-social-link:focus-visible {
+      border-color: var(--border-dark);
+    }
+
+    .site-social-label {
+      overflow: hidden;
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .site-social-platform {
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
     /* =========================
        RESPONSIVE
     ========================== */
@@ -1362,6 +1415,10 @@
       .site-info-dialog-head,
       .site-info-dialog-body {
         padding: 16px;
+      }
+
+      .site-social-grid {
+        grid-template-columns: 1fr;
       }
 
       .header-inner {
@@ -2007,6 +2064,7 @@
       <nav class="site-footer-nav" aria-label="Information links">
         <button class="site-footer-link" type="button" data-site-info="about">About</button>
         <button class="site-footer-link" type="button" data-site-info="contact">Contact</button>
+        <button class="site-footer-link" type="button" data-site-info="socials">Socials</button>
         <button class="site-footer-link" type="button" data-site-info="disclosure">Disclosure</button>
         <button class="site-footer-link" type="button" data-site-info="privacy">Privacy</button>
         <button class="site-footer-link" type="button" data-site-info="terms">Terms</button>

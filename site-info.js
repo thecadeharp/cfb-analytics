@@ -5,17 +5,37 @@
     about: {
       title: "About THI",
       html: `
-        <p><strong>The Hammer Index is an independent college football and college basketball analytics platform built by Cade Harper.</strong></p>
-        <p>THI publishes ratings, projections, player research, market context, and public model tracking. The standard is simple. Every number should be explainable, current, and accountable.</p>
+        <p><strong>The Hammer Index is my independent college football and college basketball analytics platform.</strong></p>
+        <p>I built THI to create an original view of teams, players, matchups, and market movement. The site publishes ratings, projections, player research, schedule context, and public model tracking. Every number should be explainable, current, and accountable.</p>
+        <p>The goal is not to copy a poll or dress an opinion up as math. I want THI to show its work, explain where the model disagrees, track the results, and be direct when the evidence is still developing.</p>
         <p>Production models and research candidates remain separate. Model status, data freshness, and known limitations are displayed wherever they materially affect interpretation.</p>
+        <div class="site-info-section">
+          <h3>Meet the Creator</h3>
+          <p><strong>I am Cade Harper, the creator of The Hammer Index.</strong> Before building THI, I spent three years covering Notre Dame athletics for The Irish Tribune. That experience shaped how I approach this platform. Start with the full context, verify the details, and be willing to challenge the obvious answer.</p>
+          <p>I also host the Hammer Time Podcast and write The Hammer Index on Substack. THI brings that work together in one place, with deeper data, clearer standards, and a public record of what the models actually produce.</p>
+        </div>
       `
     },
     contact: {
       title: "Contact",
       html: `
-        <p>For partnerships, media, data corrections, or general questions, contact Cade Harper.</p>
+        <p>For partnerships, media, data corrections, questions about the models, or anything else related to THI, contact me below.</p>
         <p><a href="mailto:cadeharper513@gmail.com">cadeharper513@gmail.com</a></p>
-        <p>Please include the relevant sport, page, team, or data point when reporting an issue. Specific details make corrections faster and easier to verify.</p>
+        <p>If you are reporting an issue, please include the relevant sport, page, team, or data point. Specific details make corrections faster and easier for me to verify.</p>
+      `
+    },
+    socials: {
+      title: "Follow My Work",
+      html: `
+        <p>Follow THI, read my weekly work, and find the Hammer Time Podcast across the platforms below.</p>
+        <div class="site-social-grid">
+          <a class="site-social-link" href="https://x.com/cad_loxx" target="_blank" rel="noopener noreferrer"><span class="site-social-label">@cad_loxx</span><span class="site-social-platform">X</span></a>
+          <a class="site-social-link" href="https://cadloxx.substack.com" target="_blank" rel="noopener noreferrer"><span class="site-social-label">The Hammer Index</span><span class="site-social-platform">Substack</span></a>
+          <a class="site-social-link" href="https://www.buzzsprout.com/2397955/about" target="_blank" rel="noopener noreferrer"><span class="site-social-label">Hammer Time Podcast</span><span class="site-social-platform">Podcast</span></a>
+          <a class="site-social-link" href="https://www.youtube.com/channel/UCadEUqcxAcKJ65AAJfNCPgw" target="_blank" rel="noopener noreferrer"><span class="site-social-label">Hammer Time Podcast</span><span class="site-social-platform">YouTube</span></a>
+          <a class="site-social-link" href="https://x.com/HammerTime_Pod" target="_blank" rel="noopener noreferrer"><span class="site-social-label">@HammerTime_Pod</span><span class="site-social-platform">X</span></a>
+          <a class="site-social-link" href="https://www.twitch.tv/cad_loxx" target="_blank" rel="noopener noreferrer"><span class="site-social-label">@cad_loxx</span><span class="site-social-platform">Twitch</span></a>
+        </div>
       `
     },
     disclosure: {
