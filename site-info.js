@@ -31,7 +31,7 @@
         <div class="site-social-grid">
           <a class="site-social-link" href="https://x.com/cad_loxx" target="_blank" rel="noopener noreferrer"><span class="site-social-label">@cad_loxx</span><span class="site-social-platform">X</span></a>
           <a class="site-social-link" href="https://cadloxx.substack.com" target="_blank" rel="noopener noreferrer"><span class="site-social-label">The Hammer Index</span><span class="site-social-platform">Substack</span></a>
-          <a class="site-social-link" href="https://www.buzzsprout.com/2397955/about" target="_blank" rel="noopener noreferrer"><span class="site-social-label">Hammer Time Podcast</span><span class="site-social-platform">Podcast</span></a>
+          <a class="site-social-link" href="https://open.spotify.com/show/6fGji3nVj2icc18sF1dsKk" target="_blank" rel="noopener noreferrer"><span class="site-social-label">Hammer Time Podcast</span><span class="site-social-platform">Spotify</span></a>
           <a class="site-social-link" href="https://www.youtube.com/channel/UCadEUqcxAcKJ65AAJfNCPgw" target="_blank" rel="noopener noreferrer"><span class="site-social-label">Hammer Time Podcast</span><span class="site-social-platform">YouTube</span></a>
           <a class="site-social-link" href="https://x.com/HammerTime_Pod" target="_blank" rel="noopener noreferrer"><span class="site-social-label">@HammerTime_Pod</span><span class="site-social-platform">X</span></a>
           <a class="site-social-link" href="https://www.twitch.tv/cad_loxx" target="_blank" rel="noopener noreferrer"><span class="site-social-label">@cad_loxx</span><span class="site-social-platform">Twitch</span></a>
