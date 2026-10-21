@@ -1309,6 +1309,229 @@
       text-transform: uppercase;
     }
 
+    .site-menu-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex: 0 0 auto;
+      min-height: 34px;
+      padding: 8px 11px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font: 700 9px var(--mono);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .site-menu-button:hover,
+    .site-menu-button:focus-visible {
+      border-color: var(--border-dark);
+    }
+
+    .site-menu-button-icon {
+      display: grid;
+      gap: 3px;
+      width: 13px;
+    }
+
+    .site-menu-button-icon::before,
+    .site-menu-button-icon::after,
+    .site-menu-button-icon span {
+      content: "";
+      display: block;
+      width: 100%;
+      height: 1px;
+      background: currentColor;
+    }
+
+    .site-menu-dialog {
+      width: min(410px, calc(100vw - 18px));
+      height: 100dvh;
+      max-width: none;
+      max-height: none;
+      margin: 0 0 0 auto;
+      padding: 0;
+      color: var(--text);
+      background: var(--surface);
+      border: 0;
+      border-left: 1px solid var(--border-dark);
+      overflow: hidden;
+      box-shadow: -24px 0 70px rgba(0, 0, 0, .24);
+    }
+
+    .site-menu-dialog::backdrop {
+      background: rgba(11, 17, 24, .64);
+      backdrop-filter: blur(4px);
+    }
+
+    .site-menu-shell {
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .site-menu-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .site-menu-kicker,
+    .site-menu-section-label,
+    .site-menu-sport-note {
+      color: var(--muted);
+      font: 700 8px/1.5 var(--mono);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .site-menu-title {
+      margin-top: 4px;
+      font-size: 19px;
+      font-weight: 850;
+      letter-spacing: -.02em;
+    }
+
+    .site-menu-close {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 36px;
+      color: var(--muted);
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .site-menu-body {
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .site-menu-section + .site-menu-section {
+      margin-top: 24px;
+      padding-top: 22px;
+      border-top: 1px solid var(--border);
+    }
+
+    .site-menu-sports {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .site-menu-sport-button {
+      min-width: 0;
+      padding: 12px 10px;
+      color: var(--muted);
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font: 750 9px var(--mono);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .site-menu-sport-button.is-active {
+      color: var(--text);
+      background: var(--surface);
+      border-color: var(--green);
+      box-shadow: inset 0 0 0 1px var(--green);
+    }
+
+    .site-menu-sport-note {
+      margin-top: 10px;
+      color: var(--green);
+    }
+
+    .site-menu-intro {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .site-menu-links {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .site-menu-link {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      padding: 13px 14px;
+      color: var(--text);
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .site-menu-link:hover,
+    .site-menu-link:focus-visible {
+      border-color: var(--border-dark);
+    }
+
+    .site-menu-link strong {
+      display: block;
+      font-size: 12px;
+    }
+
+    .site-menu-link small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font: 500 9px/1.45 var(--mono);
+    }
+
+    .site-menu-link-arrow {
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .site-menu-meta {
+      margin: 22px 0 4px;
+      color: var(--muted);
+      font: 600 8px/1.6 var(--mono);
+      letter-spacing: .04em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .site-info-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 4px;
+      padding: 10px 12px;
+      color: var(--text);
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font: 700 9px var(--mono);
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
     /* =========================
        RESPONSIVE
     ========================== */
@@ -1419,6 +1642,15 @@
 
       .site-social-grid {
         grid-template-columns: 1fr;
+      }
+
+      .site-menu-dialog {
+        width: min(390px, calc(100vw - 10px));
+      }
+
+      .site-menu-head,
+      .site-menu-body {
+        padding: 16px;
       }
 
       .header-inner {
@@ -1761,6 +1993,11 @@
         Loading data
       </div>
 
+      <button class="site-menu-button" id="site-menu-open" type="button" aria-haspopup="dialog" aria-controls="site-menu-dialog">
+        <span class="site-menu-button-icon" aria-hidden="true"><span></span></span>
+        <span>Menu</span>
+      </button>
+
     </div>
   </header>
 
@@ -2062,9 +2299,8 @@
         <div class="site-footer-note">Independent college football and college basketball analytics by Cade Harper.</div>
       </div>
       <nav class="site-footer-nav" aria-label="Information links">
-        <button class="site-footer-link" type="button" data-site-info="about">About</button>
         <button class="site-footer-link" type="button" data-site-info="contact">Contact</button>
-        <button class="site-footer-link" type="button" data-site-info="socials">Socials</button>
+        <button class="site-footer-link" type="button" data-site-info="methodology">Methodology</button>
         <button class="site-footer-link" type="button" data-site-info="disclosure">Disclosure</button>
         <button class="site-footer-link" type="button" data-site-info="privacy">Privacy</button>
         <button class="site-footer-link" type="button" data-site-info="terms">Terms</button>
@@ -2072,6 +2308,56 @@
       </nav>
     </div>
   </footer>
+
+  <dialog class="site-menu-dialog" id="site-menu-dialog" aria-labelledby="site-menu-title">
+    <div class="site-menu-shell">
+      <div class="site-menu-head">
+        <div>
+          <div class="site-menu-kicker">The Hammer Index</div>
+          <div class="site-menu-title" id="site-menu-title">Explore THI</div>
+        </div>
+        <button class="site-menu-close" id="site-menu-close" type="button" aria-label="Close menu">×</button>
+      </div>
+      <div class="site-menu-body">
+        <section class="site-menu-section" aria-labelledby="site-menu-sports-label">
+          <div class="site-menu-section-label" id="site-menu-sports-label">Choose a sport</div>
+          <div class="site-menu-sports" role="group" aria-label="Choose sport">
+            <button class="site-menu-sport-button is-active" type="button" data-sport="cfb" aria-pressed="true">College Football</button>
+            <button class="site-menu-sport-button" type="button" data-sport="cbb" aria-pressed="false">College Basketball</button>
+          </div>
+          <div class="site-menu-sport-note">More sports coming soon</div>
+        </section>
+
+        <section class="site-menu-section" aria-labelledby="site-menu-about-label">
+          <div class="site-menu-section-label" id="site-menu-about-label">Inside THI</div>
+          <p class="site-menu-intro">Independent ratings, projections, player research, and public model accountability built by Cade Harper.</p>
+          <div class="site-menu-links">
+            <button class="site-menu-link" type="button" data-site-info="about"><span><strong>About THI and Cade</strong><small>The platform, the creator, and where this is going</small></span><span class="site-menu-link-arrow" aria-hidden="true">›</span></button>
+            <button class="site-menu-link" type="button" data-site-info="methodology"><span><strong>How THI Works</strong><small>Ratings, projections, market signals, and research standards</small></span><span class="site-menu-link-arrow" aria-hidden="true">›</span></button>
+            <button class="site-menu-link" type="button" data-site-info="validation"><span><strong>Model Tracking and Validation</strong><small>Frozen outputs, grading, evidence, and promotion standards</small></span><span class="site-menu-link-arrow" aria-hidden="true">›</span></button>
+          </div>
+        </section>
+
+        <section class="site-menu-section" aria-labelledby="site-menu-connect-label">
+          <div class="site-menu-section-label" id="site-menu-connect-label">Connect</div>
+          <div class="site-menu-links">
+            <button class="site-menu-link" type="button" data-site-info="socials"><span><strong>Follow My Work</strong><small>Substack, podcast, YouTube, Twitch, and social accounts</small></span><span class="site-menu-link-arrow" aria-hidden="true">›</span></button>
+            <button class="site-menu-link" type="button" data-site-info="contact"><span><strong>Contact and Corrections</strong><small>Partnerships, media, questions, and data corrections</small></span><span class="site-menu-link-arrow" aria-hidden="true">›</span></button>
+          </div>
+        </section>
+
+        <section class="site-menu-section" aria-labelledby="site-menu-standards-label">
+          <div class="site-menu-section-label" id="site-menu-standards-label">Standards</div>
+          <div class="site-menu-links">
+            <button class="site-menu-link" type="button" data-site-info="disclosure"><span><strong>Affiliate Disclosure</strong><small>How commercial relationships are handled</small></span><span class="site-menu-link-arrow" aria-hidden="true">›</span></button>
+            <button class="site-menu-link" type="button" data-site-info="responsible"><span><strong>Responsible Use</strong><small>Research context, limits, and support resources</small></span><span class="site-menu-link-arrow" aria-hidden="true">›</span></button>
+          </div>
+        </section>
+
+        <p class="site-menu-meta">© 2026 Cade Harper · The Hammer Index</p>
+      </div>
+    </div>
+  </dialog>
 
   <dialog class="site-info-dialog" id="site-info-dialog" aria-labelledby="site-info-title">
     <div class="site-info-dialog-head">
@@ -2113,11 +2399,11 @@
   <script src="thi-intelligence.js?v=2026-intelligence-v01"></script>
   <link rel="stylesheet" href="player-intelligence.css?v=2026-player-ratings-v04">
   <script src="player-intelligence.js?v=2026-player-ratings-v06"></script>
-  <link rel="stylesheet" href="cbb-site.css?v=2027-player-projections-v02">
+  <link rel="stylesheet" href="cbb-site.css?v=2027-site-menu-v01">
   <link rel="stylesheet" href="dark-mode.css?v=2026-dark-player-ratings-v07">
   <script src="dark-mode.js?v=2026-dark-v01"></script>
-  <script src="cbb-site.js?v=2027-player-projections-v02"></script>
-  <script src="site-info.js?v=2026-site-info-v01"></script>
+  <script src="cbb-site.js?v=2027-site-menu-v01"></script>
+  <script src="site-info.js?v=2026-site-info-v02"></script>
 
   <!-- Cloudflare Web Analytics -->
   <script

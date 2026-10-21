@@ -287,7 +287,7 @@
     const logo = document.querySelector(".brand-sport-logo");
     state.sport = sport;
 
-    document.querySelectorAll(".thi-sport-button").forEach(button => {
+    document.querySelectorAll("[data-sport]").forEach(button => {
       const selected = button.dataset.sport === sport;
       button.classList.toggle("is-active", selected);
       button.setAttribute("aria-pressed", String(selected));

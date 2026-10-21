@@ -13,7 +13,39 @@
           <h3>Meet the Creator</h3>
           <p><strong>I am Cade Harper, the creator of The Hammer Index.</strong> Before building THI, I spent three years covering Notre Dame athletics for The Irish Tribune. That experience shaped how I approach this platform. Start with the full context, verify the details, and be willing to challenge the obvious answer.</p>
           <p>I also host the Hammer Time Podcast and write The Hammer Index on Substack. THI brings that work together in one place, with deeper data, clearer standards, and a public record of what the models actually produce.</p>
+          <p>I have always loved finding the details inside a game that a final score, ranking, or headline can miss. Building THI gives me a place to turn that curiosity into useful research and make the process visible instead of asking readers to trust a number without context.</p>
+          <p>My goal is to grow THI into a trusted independent home for college sports analysis. I want it to be useful to serious fans, bettors, writers, and anyone who wants a clearer explanation of why teams and players perform the way they do.</p>
         </div>
+      `
+    },
+    methodology: {
+      title: "How THI Works",
+      html: `
+        <p><strong>THI separates team strength, season accomplishment, game projection, player evaluation, and market comparison because they answer different questions.</strong></p>
+        <div class="site-info-section">
+          <h3>Team Ratings</h3>
+          <p><strong>Power</strong> estimates current team strength on a neutral field. <strong>Current Form</strong> emphasizes recent opponent adjusted performance. <strong>Résumé</strong> measures what a team has earned through results. <strong>Schedule Strength</strong> describes the difficulty of the opponents a team has faced or is expected to face.</p>
+        </div>
+        <div class="site-info-section">
+          <h3>Game Projections</h3>
+          <p>Game projections combine team ratings with location, personnel availability, matchup context, and other sport specific inputs. Eligible projections are frozen before the game so the published output can be graded without rewriting history.</p>
+        </div>
+        <div class="site-info-section">
+          <h3>Signals and Evidence</h3>
+          <p>A model signal describes the distance between a THI projection and the available market. It is not a recommendation. Signal confidence reports the quality and quantity of prospective evidence supporting that category.</p>
+          <p>Historical research, live production models, and experimental candidates remain separate. A promising backtest does not become a production model until it clears the published validation standard.</p>
+        </div>
+        <button class="site-info-action" type="button" data-site-action="model-tracking">Open Model Tracking</button>
+      `
+    },
+    validation: {
+      title: "Model Tracking and Validation",
+      html: `
+        <p><strong>THI treats model credibility as something that must be earned through recorded evidence.</strong></p>
+        <p>Production projections are frozen before eligible games and graded after the result. Model Tracking reports accuracy, record, closing line information when captured, and other measures that help show where the model performs well and where it needs work.</p>
+        <p>Research candidates remain isolated from production. Promotion requires verified inputs, reproducible versions, prospective evaluation, calibration checks, and a written decision. Routine code deployment does not promote an experimental model.</p>
+        <p>Labels such as provisional, developing, validated, and production describe the level of evidence behind an output. They do not describe how interesting or confident a prediction may appear.</p>
+        <button class="site-info-action" type="button" data-site-action="model-tracking">Open Model Tracking</button>
       `
     },
     contact: {
@@ -76,15 +108,19 @@
   const title = document.getElementById("site-info-title");
   const body = document.getElementById("site-info-body");
   const close = document.getElementById("site-info-close");
+  const menu = document.getElementById("site-menu-dialog");
+  const menuOpen = document.getElementById("site-menu-open");
+  const menuClose = document.getElementById("site-menu-close");
 
   if (!dialog || !title || !body || !close) return;
 
   function openInfo(key) {
     const entry = content[key];
     if (!entry) return;
+    if (menu?.open) menu.close();
     title.textContent = entry.title;
     body.innerHTML = entry.html;
-    if (typeof dialog.showModal === "function") dialog.showModal();
+    if (typeof dialog.showModal === "function" && !dialog.open) dialog.showModal();
     else dialog.setAttribute("open", "");
   }
 
@@ -95,5 +131,32 @@
   close.addEventListener("click", () => dialog.close());
   dialog.addEventListener("click", (event) => {
     if (event.target === dialog) dialog.close();
+  });
+
+  body.addEventListener("click", event => {
+    const action = event.target.closest("[data-site-action]");
+    if (!action) return;
+    if (dialog.open) dialog.close();
+    if (action.dataset.siteAction === "model-tracking") {
+      window.requestAnimationFrame(() => {
+        const selector = document.body.classList.contains("thi-sport-cbb")
+          ? '[data-cbb-view="cbb-tracking"]'
+          : '[data-view="model-tracking"]';
+        document.querySelector(selector)?.click();
+      });
+    }
+  });
+
+  menuOpen?.addEventListener("click", () => {
+    if (typeof menu?.showModal === "function" && !menu.open) menu.showModal();
+    else menu?.setAttribute("open", "");
+  });
+  menuClose?.addEventListener("click", () => menu?.close());
+  menu?.addEventListener("click", event => {
+    if (event.target === menu) menu.close();
+    const sport = event.target.closest("[data-sport]")?.dataset.sport;
+    if (!sport) return;
+    window.thiSetSport?.(sport);
+    menu.close();
   });
 })();
