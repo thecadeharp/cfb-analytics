@@ -121,6 +121,7 @@
     if (menu?.open) menu.close();
     title.textContent = entry.title;
     body.innerHTML = entry.html;
+    body.scrollTop = 0;
     if (typeof dialog.showModal === "function" && !dialog.open) dialog.showModal();
     else dialog.setAttribute("open", "");
   }

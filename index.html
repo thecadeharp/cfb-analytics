@@ -1178,6 +1178,7 @@
     .site-info-dialog {
       width: min(620px, calc(100vw - 28px));
       max-height: min(720px, calc(100vh - 36px));
+      max-height: min(720px, calc(100dvh - 36px));
       padding: 0;
       color: var(--text);
       background: var(--surface);
@@ -1185,6 +1186,11 @@
       border-radius: 16px;
       box-shadow: 0 24px 80px rgba(0, 0, 0, .28);
       overflow: hidden;
+    }
+
+    .site-info-dialog[open] {
+      display: flex;
+      flex-direction: column;
     }
 
     .site-info-dialog::backdrop {
@@ -1197,6 +1203,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 16px;
+      flex: 0 0 auto;
       padding: 18px 20px;
       border-bottom: 1px solid var(--border);
     }
@@ -1232,8 +1239,13 @@
     }
 
     .site-info-dialog-body {
+      min-height: 0;
+      flex: 1 1 auto;
       padding: 20px;
       overflow-y: auto;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
+      -webkit-overflow-scrolling: touch;
       color: var(--muted);
       font-size: 13px;
       line-height: 1.7;
@@ -1350,6 +1362,7 @@
 
     .site-menu-dialog {
       width: min(410px, calc(100vw - 18px));
+      height: 100vh;
       height: 100dvh;
       max-width: none;
       max-height: none;
@@ -1370,8 +1383,9 @@
 
     .site-menu-shell {
       height: 100%;
+      min-height: 0;
       display: grid;
-      grid-template-rows: auto 1fr;
+      grid-template-rows: auto minmax(0, 1fr);
     }
 
     .site-menu-head {
@@ -1415,8 +1429,12 @@
     }
 
     .site-menu-body {
+      min-height: 0;
       padding: 20px;
       overflow-y: auto;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
+      -webkit-overflow-scrolling: touch;
     }
 
     .site-menu-section + .site-menu-section {
@@ -1638,6 +1656,12 @@
       .site-info-dialog-head,
       .site-info-dialog-body {
         padding: 16px;
+      }
+
+      .site-info-dialog {
+        width: calc(100vw - 10px);
+        max-height: calc(100vh - 10px);
+        max-height: calc(100dvh - 10px);
       }
 
       .site-social-grid {
@@ -2403,7 +2427,7 @@
   <link rel="stylesheet" href="dark-mode.css?v=2026-dark-player-ratings-v07">
   <script src="dark-mode.js?v=2026-dark-v01"></script>
   <script src="cbb-site.js?v=2027-site-menu-v01"></script>
-  <script src="site-info.js?v=2026-site-info-v03"></script>
+  <script src="site-info.js?v=2026-site-info-v04"></script>
 
   <!-- Cloudflare Web Analytics -->
   <script
