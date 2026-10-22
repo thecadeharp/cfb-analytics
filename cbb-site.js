@@ -458,7 +458,8 @@
 
   function statusButton(value, label, games) {
     const count = value === "all" ? games.length : games.filter(game => gameStatus(game) === value).length;
-    return `<button type="button" class="cbb-status-button ${state.projectionStatus === value ? "is-active" : ""}" data-cbb-status="${value}">${escapeHtml(label)} <b>${integer(count)}</b></button>`;
+    const selected = state.projectionStatus === value;
+    return `<button type="button" class="cbb-status-button ${selected ? "is-active" : ""}" data-cbb-status="${value}" aria-pressed="${selected}"><span>${escapeHtml(label)}</span><b>${integer(count)}</b></button>`;
   }
 
   function signalTier(game) {
