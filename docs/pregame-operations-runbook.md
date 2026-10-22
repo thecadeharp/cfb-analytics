@@ -53,8 +53,11 @@ The public CFB board has two independent refresh paths. `live-score-pulse.yml`
 publishes the static scoreboard on an offset five-minute schedule, while the
 browser refreshes active scores once per minute. `data-freshness-audit.yml`
 runs twice per hour and dispatches a recovery pulse when the static live files
-breach their game-window SLO. An external scheduler can call the workflow's
-`live-score-pulse` repository-dispatch event without changing the workflow.
+breach their game-window SLO. Once a pulse observes an active game, that run
+also retains a five-minute fallback polling loop until every observed game is
+final. A changed completed result automatically dispatches the full settlement
+workflow. An external scheduler can call the workflow's `live-score-pulse`
+repository-dispatch event without changing the workflow.
 
 GitHub scheduled workflows are best-effort and can be delayed. Before a paid
 launch, move the authoritative live-score cache to a server scheduler such as a

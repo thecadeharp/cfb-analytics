@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: thi-live-score-pulse
@@ -19,7 +20,7 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,6 +38,18 @@ jobs:
           cp data/results.json /tmp/results-before.json
           cp data/live_scores.json /tmp/live-before.json
           python scripts/fetch_results_no_cfbd.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          before=json.load(open("/tmp/results-before.json", encoding="utf-8"))
+          after=json.load(open("data/results.json", encoding="utf-8"))
+          before_rows=before.get("games") or before.get("results") or []
+          after_rows=after.get("games") or after.get("results") or []
+          Path("/tmp/thi-results-changed").write_text(
+              "1\n" if before_rows != after_rows else "",
+              encoding="utf-8",
+          )
+          PY
       - name: Suppress timestamp-only idle refreshes
         run: |
           python - <<'PY'
@@ -84,3 +97,80 @@ jobs:
             sleep 2
           done
           exit 1
+      - name: Dispatch settlement when a completed result changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [[ -s /tmp/thi-results-changed ]]; then
+            gh workflow run settle-results-no-cfbd.yml --ref main
+            echo "Completed result changed; dispatched settlement."
+          fi
+      - name: Continue polling while a game remains active
+        env:
+          CFB_SEASON: "2026"
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          live_count=$(python - <<'PY'
+          import json
+          print(len(json.load(open("data/live_scores.json", encoding="utf-8")).get("games") or []))
+          PY
+          )
+          if [[ "$live_count" -eq 0 ]]; then
+            echo "No active games; continuous pulse not needed."
+            exit 0
+          fi
+
+          echo "$live_count active game(s); retaining a five-minute fallback pulse."
+          for pulse in $(seq 1 56); do
+            sleep 300
+            cp data/results.json /tmp/results-before-loop.json
+            python scripts/fetch_results_no_cfbd.py
+
+            python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+          before=json.load(open("/tmp/results-before-loop.json", encoding="utf-8"))
+          after=json.load(open("data/results.json", encoding="utf-8"))
+          before_rows=before.get("games") or before.get("results") or []
+          after_rows=after.get("games") or after.get("results") or []
+          Path("/tmp/thi-loop-results-changed").write_text(
+              "1\n" if before_rows != after_rows else "",
+              encoding="utf-8",
+          )
+          for path in ("data/results.json", "data/live_scores.json"):
+              payload=json.load(open(path, encoding="utf-8"))
+              stamp=datetime.fromisoformat(payload["meta"]["generated_at"].replace("Z", "+00:00"))
+              assert payload["meta"]["season"] == 2026
+              assert (datetime.now(timezone.utc)-stamp).total_seconds() < 600
+          PY
+
+            git add data/results.json data/live_scores.json
+            if ! git diff --cached --quiet; then
+              git commit -m "Refresh CFB live score pulse"
+              for attempt in 1 2 3 4 5; do
+                git fetch origin main
+                git rebase origin/main
+                if git push origin HEAD:main; then break; fi
+                [[ "$attempt" -eq 5 ]] && exit 1
+                sleep 2
+              done
+            fi
+
+            if [[ -s /tmp/thi-loop-results-changed ]]; then
+              gh workflow run settle-results-no-cfbd.yml --ref main
+              echo "Completed result changed during fallback pulse; dispatched settlement."
+            fi
+
+            live_count=$(python - <<'PY'
+          import json
+          print(len(json.load(open("data/live_scores.json", encoding="utf-8")).get("games") or []))
+          PY
+          )
+            echo "Fallback pulse $pulse complete; $live_count active game(s)."
+            if [[ "$live_count" -eq 0 ]]; then
+              exit 0
+            fi
+          done
+
+          echo "Active-game fallback reached its polling limit."
