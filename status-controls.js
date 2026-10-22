@@ -478,10 +478,9 @@
       }
 
       if (button) {
-        button.classList.toggle(
-          "is-active",
-          activeStatus === status
-        );
+        const selected = activeStatus === status;
+        button.classList.toggle("is-active", selected);
+        button.setAttribute("aria-pressed", String(selected));
       }
     });
   }

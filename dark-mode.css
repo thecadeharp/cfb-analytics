@@ -175,10 +175,13 @@ html[data-theme="dark"] .hammer-status-filter-button:hover {
   border-color:#556779 !important;
   color:#f1f5f8 !important;
 }
-html[data-theme="dark"] .hammer-status-filter-button.is-active {
-  background:#3a5368 !important;
-  border-color:#678197 !important;
+html[data-theme="dark"] body .hammer-status-filter-wrap .hammer-status-filter-button.is-active {
+  background:#36566f !important;
+  border-color:#82a9c5 !important;
   color:#fff !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 0 0 2px rgba(130,169,197,.16) !important;
 }
 html[data-theme="dark"] body .hammer-status-filter-wrap .hammer-status-filter-button[data-status="live"] {
   background:#2b1d21 !important;
@@ -189,6 +192,9 @@ html[data-theme="dark"] body .hammer-status-filter-wrap .hammer-status-filter-bu
   background:#8f302f !important;
   border-color:#d15f5c !important;
   color:#fff !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.1),
+    0 0 0 2px rgba(209,95,92,.16) !important;
 }
 html[data-theme="dark"] body .hammer-status-filter-wrap .hammer-status-filter-button[data-status="live"] .hammer-status-live-dot {
   background:#ef5b55 !important;
