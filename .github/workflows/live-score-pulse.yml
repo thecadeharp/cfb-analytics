@@ -2,6 +2,12 @@ name: CFB Live Score Pulse
 
 on:
   workflow_dispatch:
+    inputs:
+      one_shot:
+        description: "Refresh once without retaining the active-game polling loop"
+        required: false
+        default: false
+        type: boolean
   repository_dispatch:
     types: [live-score-pulse]
   schedule:
@@ -106,6 +112,7 @@ jobs:
             echo "Completed result changed; dispatched settlement."
           fi
       - name: Continue polling while a game remains active
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.one_shot != true }}
         env:
           CFB_SEASON: "2026"
           GH_TOKEN: ${{ github.token }}

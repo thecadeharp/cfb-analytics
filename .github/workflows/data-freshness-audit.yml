@@ -52,6 +52,7 @@ jobs:
           : > /tmp/thi-recovery-workflows.txt
           dispatch_recovery() {
             local workflow="$1"
+            shift
             local previous_run
             previous_run=$(gh run list \
               --workflow "$workflow" \
@@ -59,7 +60,7 @@ jobs:
               --limit 1 \
               --json databaseId \
               --jq '.[0].databaseId // empty')
-            gh workflow run "$workflow" --ref main
+            gh workflow run "$workflow" --ref main "$@"
             printf '%s|%s\n' "$workflow" "$previous_run" >> /tmp/thi-recovery-workflows.txt
           }
 
@@ -67,7 +68,7 @@ jobs:
             dispatch_recovery settle-results-no-cfbd.yml
             echo "Dispatched settlement and downstream analytics recovery."
           elif grep -Eq '^(cfb_scores|cfb_live_scores)$' /tmp/thi-critical-datasets.txt; then
-            dispatch_recovery live-score-pulse.yml
+            dispatch_recovery live-score-pulse.yml -f one_shot=true
             echo "Dispatched live-score recovery."
           fi
 
