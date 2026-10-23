@@ -93,16 +93,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/results.json data/live_scores.json
-          git diff --cached --quiet && exit 0
-          git commit -m "Refresh CFB live score pulse"
-          for attempt in 1 2 3 4 5; do
-            git fetch origin main
-            git rebase origin/main
-            if git push origin HEAD:main; then exit 0; fi
-            sleep 2
-          done
-          exit 1
+          bash scripts/publish_live_score_update.sh
       - name: Dispatch settlement when a completed result changes
         env:
           GH_TOKEN: ${{ github.token }}
@@ -154,14 +145,7 @@ jobs:
 
             git add data/results.json data/live_scores.json
             if ! git diff --cached --quiet; then
-              git commit -m "Refresh CFB live score pulse"
-              for attempt in 1 2 3 4 5; do
-                git fetch origin main
-                git rebase origin/main
-                if git push origin HEAD:main; then break; fi
-                [[ "$attempt" -eq 5 ]] && exit 1
-                sleep 2
-              done
+              bash scripts/publish_live_score_update.sh
             fi
 
             if [[ -s /tmp/thi-loop-results-changed ]]; then

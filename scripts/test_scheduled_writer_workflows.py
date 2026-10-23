@@ -10,6 +10,7 @@ WORKFLOWS = ROOT / ".github" / "workflows"
 class ScheduledWriterWorkflowSafetyTest(unittest.TestCase):
     def test_live_score_schedule_avoids_busy_boundary_and_has_watchdog(self):
         pulse = (WORKFLOWS / "live-score-pulse.yml").read_text()
+        publisher = (ROOT / "scripts" / "publish_live_score_update.sh").read_text()
         audit = (WORKFLOWS / "data-freshness-audit.yml").read_text()
         self.assertIn('cron: "2-57/5 * * * *"', pulse)
         self.assertIn("repository_dispatch:", pulse)
@@ -19,6 +20,10 @@ class ScheduledWriterWorkflowSafetyTest(unittest.TestCase):
         self.assertIn("inputs.one_shot != true", pulse)
         self.assertIn("Continue polling while a game remains active", pulse)
         self.assertIn("sleep 300", pulse)
+        self.assertEqual(pulse.count("bash scripts/publish_live_score_update.sh"), 2)
+        self.assertIn("git rebase --abort", publisher)
+        self.assertIn("git reset --hard origin/main", publisher)
+        self.assertIn("python scripts/fetch_results_no_cfbd.py", publisher)
         self.assertIn("gh workflow run settle-results-no-cfbd.yml --ref main", pulse)
         self.assertIn("actions: write", audit)
         self.assertIn("Recover stale production inputs", audit)
