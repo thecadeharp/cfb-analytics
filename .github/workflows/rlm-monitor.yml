@@ -24,6 +24,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Import authoritative read-only Circa Sheet
+        run: |
+          if python scripts/import_circa_line_sheet.py; then
+            echo "CIRCA_SHEET_ENABLED=1" >> "$GITHUB_ENV"
+          else
+            echo "::warning::Circa Sheet refresh failed; preserving the last verified state."
+            if [ -s data/market/circa_sheet_state.json ]; then
+              echo "CIRCA_SHEET_ENABLED=1" >> "$GITHUB_ENV"
+            else
+              echo "CIRCA_SHEET_ENABLED=0" >> "$GITHUB_ENV"
+            fi
+          fi
       - name: Poll free Pinnacle line feed
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
@@ -61,8 +73,8 @@ jobs:
           fi
       - name: Test and publish qualified monitor state
         run: |
-          python -m unittest scripts/test_validation_framework.py scripts/test_variance_lab.py scripts/test_market_provider_contract.py
-          if [ "$FREE_SHARP_ENABLED" != "1" ] && [ "$LICENSED_RLM_ENABLED" != "1" ]; then
+          python -m unittest scripts/test_validation_framework.py scripts/test_variance_lab.py scripts/test_market_provider_contract.py scripts/test_circa_sheet_import.py
+          if [ "$FREE_SHARP_ENABLED" != "1" ] && [ "$LICENSED_RLM_ENABLED" != "1" ] && [ "$CIRCA_SHEET_ENABLED" != "1" ]; then
             echo "No market feed is configured; skipping an empty timestamp-only commit."
             exit 0
           fi

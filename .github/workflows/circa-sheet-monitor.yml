@@ -1,0 +1,54 @@
+name: Circa Sheet Steam Reversal Monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thi-data-writer
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Read authoritative Circa Sheet
+        id: sheet
+        continue-on-error: true
+        run: |
+          python scripts/import_circa_line_sheet.py
+          if git diff --quiet -- data/market/circa_sheet_state.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Preserve last verified state when Google is unavailable
+        if: steps.sheet.outcome == 'failure'
+        run: echo "::warning::Circa Sheet refresh failed; the last verified public state remains unchanged."
+      - name: Verify, rebuild, and publish
+        if: steps.sheet.outcome == 'success' && steps.sheet.outputs.changed == 'true'
+        run: |
+          python -m unittest scripts.test_circa_sheet_import scripts.test_variance_lab
+          python scripts/build_rlm_monitor.py
+          python scripts/build_variance_prospective_tracker.py
+          python scripts/build_trends_lab.py
+          python scripts/build_static_cache_manifest.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/market/circa_sheet_state.json data/market/rlm_monitor.json data/variance/prospective_tracker.json data/trends_lab.json data/cbb/cache_manifest.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Refresh authoritative Circa Sheet monitor"
+          git pull --rebase origin main
+          git push origin HEAD:main

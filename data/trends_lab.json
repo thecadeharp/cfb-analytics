@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "thi-variance-systems-lab-v2.1",
-    "generated_at_utc": "2026-10-22T15:18:13.291726Z",
+    "generated_at_utc": "2026-10-23T00:36:29.346770Z",
     "policy": "Rules are frozen before evaluation. Validated requires a recorded per-play no-vig baseline, an exact binomial or Poisson-binomial test, Holm multiple-comparison control, and a passed bomb-dependency check. Rolling monthly results are retained for stability review."
   },
   "sports": {
@@ -11,7 +11,7 @@
         {
           "id": "steam-reversal",
           "name": "Steam Reversal",
-          "description": "CFB only: after the same sharp-book spread moves 3.0 points or more toward one team, track the opposite side at the first qualifying current number.",
+          "description": "CFB only: after the Circa spread moves 3.0 points or more toward one team, track the opposite side at the first qualifying current number.",
           "family": "market movement",
           "market": "ATS",
           "wins": 69,
@@ -26,15 +26,14 @@
             2026
           ],
           "state": "independent_verified",
-          "source_note": "Independently tracked historical ledger supplied by the system owner; aggregate arithmetic verified by THI. Game-level audit remains separate from THI's four-gate Validated label.",
+          "source_note": "Independently tracked historical ledger supplied by the system owner; aggregate arithmetic verified by THI. Current qualifiers use the owner's authoritative read-only Circa Sheet. Game-level historical audit remains separate from THI's four-gate Validated label.",
           "rule": {
             "sport": "cfb",
             "minimum_move_points": 3.0,
             "reference_books": [
-              "Pinnacle",
-              "BetOnline fallback"
+              "Circa"
             ],
-            "entry": "First captured price at or beyond the 3.0-point threshold",
+            "entry": "First Sheet-recorded price at or beyond the 3.0-point threshold",
             "side": "Opposite the direction of the move"
           },
           "variance_analysis": {
@@ -2651,7 +2650,7 @@
           {
             "id": "steam-reversal",
             "name": "Steam Reversal",
-            "description": "CFB only: after the same sharp-book spread moves 3.0 points or more toward one team, track the opposite side at the first qualifying current number.",
+            "description": "CFB only: after the Circa spread moves 3.0 points or more toward one team, track the opposite side at the first qualifying current number.",
             "family": "market movement",
             "market": "ATS",
             "wins": 69,
@@ -2666,15 +2665,14 @@
               2026
             ],
             "state": "independent_verified",
-            "source_note": "Independently tracked historical ledger supplied by the system owner; aggregate arithmetic verified by THI. Game-level audit remains separate from THI's four-gate Validated label.",
+            "source_note": "Independently tracked historical ledger supplied by the system owner; aggregate arithmetic verified by THI. Current qualifiers use the owner's authoritative read-only Circa Sheet. Game-level historical audit remains separate from THI's four-gate Validated label.",
             "rule": {
               "sport": "cfb",
               "minimum_move_points": 3.0,
               "reference_books": [
-                "Pinnacle",
-                "BetOnline fallback"
+                "Circa"
               ],
-              "entry": "First captured price at or beyond the 3.0-point threshold",
+              "entry": "First Sheet-recorded price at or beyond the 3.0-point threshold",
               "side": "Opposite the direction of the move"
             },
             "variance_analysis": {

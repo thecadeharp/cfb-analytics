@@ -1,6 +1,6 @@
 import unittest
 from datetime import datetime, timezone
-from scripts.build_rlm_monitor import analyze,select_authoritative_rows,sharp_line_moves,steam_reversal_alerts
+from scripts.build_rlm_monitor import analyze,select_authoritative_rows,sharp_line_moves,steam_reversal_alerts,upcoming_circa_moves
 from scripts.poll_free_sharp_lines import merge_events
 from scripts.poll_owls_rlm import build_capture
 from scripts.build_trends_lab import evidence_state
@@ -39,6 +39,14 @@ class VarianceLabTests(unittest.TestCase):
  def test_steam_reversal_excludes_cbb_and_sub_three_moves(self):
   moves=[{"sport":"cbb","opening_home_spread":-7,"current_home_spread":-10,"line_delta":-3},{"sport":"cfb","opening_home_spread":-7,"current_home_spread":-9.5,"line_delta":-2.5}]
   self.assertEqual(steam_reversal_alerts(moves),[])
+ def test_only_verified_future_circa_rows_reach_official_monitor(self):
+  now=datetime(2026,10,22,tzinfo=timezone.utc)
+  state={"qualifiers":[
+   {"sport":"cfb","sharp_book":"circa","source_verified":True,"start_date":"2026-10-24T00:30:00Z","event_id":"circa"},
+   {"sport":"cfb","sharp_book":"pinnacle","source_verified":True,"start_date":"2026-10-24T00:30:00Z","event_id":"pin"},
+   {"sport":"cfb","sharp_book":"circa","source_verified":True,"start_date":"2026-10-20T00:30:00Z","event_id":"past"},
+  ]}
+  self.assertEqual([row["event_id"] for row in upcoming_circa_moves(state,now)], ["circa"])
  def test_steam_reversal_holds_public_label_when_sourced_availability_overlaps(self):
   moves=[{"sport":"cfb","event_id":"1","away_team":"Mississippi State Bulldogs","home_team":"LSU Tigers","opening_home_spread":-10.5,"current_home_spread":-16,"line_delta":-5.5,"sharp_book":"pinnacle"}]
   availability={"teams":{"Mississippi State":[{"player":"Kamario Taylor","position":"QB","status":"Questionable","text":"Quarterback listed questionable.","verified_at_utc":"2026-10-15T20:00:00Z","valid_until_utc":"2026-10-18T20:00:00Z","source_url":"https://example.com/report","market_context_relevant":True,"withhold_public_signal":True}]}}
@@ -77,7 +85,7 @@ class VarianceLabTests(unittest.TestCase):
  def test_steam_reversal_freezes_fade_side_and_grades_it(self):
   now=datetime(2026,10,6,12,tzinfo=timezone.utc)
   game={"game_id":2,"week":6,"start_date":"2026-10-07T23:00:00Z","status":"scheduled","home":{"team":"Home","conference":"SEC"},"away":{"team":"Away","conference":"ACC"},"market":{"home_spread":-10,"total":50}}
-  monitor={"steam_reversal_alerts":[{"sport":"cfb","event_id":"market-2","away_team":"Away","home_team":"Home","opening_home_spread":-7,"current_home_spread":-10,"movement_points":3,"fade_side":"away","fade_team":"Away","sharp_book":"pinnacle"}]}
+  monitor={"steam_reversal_alerts":[{"sport":"cfb","event_id":"market-2","away_team":"Away","home_team":"Home","opening_home_spread":-7,"current_home_spread":-10,"movement_points":3,"fade_side":"away","fade_team":"Away","sharp_book":"circa"}]}
   frozen=build({"frozen":[]},{"games":[game]},{"games":[]},{"games":[]},now,monitor)
   row=next(row for row in frozen["frozen"] if row["system_id"]=="steam-reversal")
   self.assertEqual(row["tracked_team"],"Away");self.assertEqual(row["spread_at_freeze"],-10)
@@ -91,4 +99,8 @@ class VarianceLabTests(unittest.TestCase):
   settled=build(refreshed,{"games":[game]},{"games":[]},results,datetime(2026,10,8,12,tzinfo=timezone.utc),monitor)
   row=next(row for row in settled["frozen"] if row["system_id"]=="steam-reversal")
   self.assertEqual(row["result"],"W")
+ def test_retired_pinnacle_steam_rows_are_removed_from_official_ledger(self):
+  old={"frozen":[{"freeze_id":"cfb:2:steam-reversal","sport":"cfb","game_id":"2","system_id":"steam-reversal","sharp_book":"pinnacle","result":"pending"}]}
+  rebuilt=build(old,{"games":[]},{"games":[]},{"games":[]},datetime(2026,10,8,12,tzinfo=timezone.utc),{"steam_reversal_alerts":[]})
+  self.assertEqual(rebuilt["frozen"],[])
 if __name__=="__main__":unittest.main()

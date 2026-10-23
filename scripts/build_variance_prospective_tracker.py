@@ -172,7 +172,11 @@ def summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def build(old: dict[str, Any], cfb_board: dict[str, Any], cbb_board: dict[str, Any], cfb_results: dict[str, Any], now: datetime, market_monitor: dict[str, Any] | None = None) -> dict[str, Any]:
-    by_freeze = {row["freeze_id"]: dict(row) for row in old.get("frozen") or []}
+    # The owner's Circa Sheet is the permanent Steam Reversal authority.
+    # Remove the former Pinnacle approximation instead of presenting it as if
+    # it had qualified under the official system definition.
+    retained = [row for row in old.get("frozen") or [] if row.get("system_id") != "steam-reversal" or str(row.get("sharp_book") or "").lower() == "circa"]
+    by_freeze = {row["freeze_id"]: dict(row) for row in retained}
     steam_alerts = [row for row in (market_monitor or {}).get("steam_reversal_alerts") or [] if str(row.get("sport") or "").lower() == "cfb"]
     for sport, board in (("cfb", cfb_board), ("cbb", cbb_board)):
         for game in board.get("games") or []:
