@@ -1,12 +1,85 @@
 {
-  "captured_at_utc": "2026-10-23T18:23:48.174162+00:00",
+  "captured_at_utc": "2026-10-24T00:44:36.360448+00:00",
   "window": {
     "pre_kickoff_minutes": 90,
     "post_kickoff_grace_minutes": 10
   },
-  "closing_lines_added": 0,
+  "closing_lines_added": 1,
   "excluded_untracked_games": 127,
   "ledger_path": "data/snapshots/closing_lines.jsonl",
   "note": "Official Model A closing-line capture. tracking_eligible=false and FCS fallback games are excluded.",
-  "captures": []
+  "captures": [
+    {
+      "closing_id": "53cb96100ce60688d4637f5c",
+      "game_key": "401864525",
+      "captured_at_utc": "2026-10-24T00:44:36.360448+00:00",
+      "scheduled_kickoff_utc": "2026-10-24T01:00:00+00:00",
+      "minutes_to_kickoff": 15.4,
+      "capture_type": "near_kickoff_closing_proxy",
+      "model_version": "production-model-a-2026-week1-freeze-v1",
+      "projection_source_generated": "2026-10-24T00:44:35.843987",
+      "model_type": "fbs_full_model",
+      "tracking_eligible": true,
+      "game_id": 401864525,
+      "week": 8,
+      "home_team": "Wyoming",
+      "away_team": "Air Force",
+      "neutral_site": false,
+      "model_reference": {
+        "home_spread": 6.0,
+        "total": 53.5
+      },
+      "closing_market": {
+        "home_spread": 6.5,
+        "total": 46.5,
+        "bookmaker": "Consensus (10 books)",
+        "reference_spread": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "home_spread": 7.0,
+          "home_price": -118,
+          "away_spread": -7.0,
+          "away_price": -102,
+          "last_update": "2026-10-24T00:43:58Z",
+          "implied_probability": {
+            "home": 0.5412844,
+            "away": 0.5049505
+          },
+          "no_vig_probability": {
+            "home": 0.51736413,
+            "away": 0.48263587
+          },
+          "overround": 0.0462349,
+          "price_format": "american"
+        },
+        "reference_total": {
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "total": 46.5,
+          "under_total": 46.5,
+          "over_price": -115,
+          "under_price": -105,
+          "last_update": "2026-10-24T00:43:58Z",
+          "implied_probability": {
+            "over": 0.53488372,
+            "under": 0.51219512
+          },
+          "no_vig_probability": {
+            "over": 0.51083424,
+            "under": 0.48916576
+          },
+          "overround": 0.04707884,
+          "price_format": "american"
+        },
+        "price_policy": "single_book_two_sided_quote_only"
+      },
+      "signal_at_close": {
+        "disagreement": 0.5,
+        "preferred_side": "Wyoming",
+        "signal": "ALIGNED",
+        "bet_status": "TRACKING",
+        "status_system": "v2_the_signal"
+      }
+    }
+  ]
 }
