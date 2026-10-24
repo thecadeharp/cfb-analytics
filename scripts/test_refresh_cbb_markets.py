@@ -1,10 +1,23 @@
 import unittest
 from datetime import datetime, timezone
 
-from scripts.refresh_cbb_markets import active_window, refresh
+from scripts.refresh_cbb_markets import active_window, capture_window, refresh
 
 
 class RefreshCbbMarketsTests(unittest.TestCase):
+    def test_force_targets_first_upcoming_slate_before_opening_week(self):
+        now = datetime(2026, 10, 24, tzinfo=timezone.utc)
+        board = {
+            "games": [
+                {"game_id": 1, "status": "scheduled", "start_date": "2026-11-02T23:00:00Z"},
+                {"game_id": 2, "status": "scheduled", "start_date": "2026-11-04T00:00:00Z"},
+                {"game_id": 3, "status": "scheduled", "start_date": "2026-11-07T00:00:00Z"},
+            ]
+        }
+        self.assertEqual(active_window(board, now, 72), [])
+        selected = capture_window(board, now, 72, force=True)
+        self.assertEqual([game["game_id"] for game in selected], [1, 2])
+
     def test_freezes_first_open_and_preserves_neutral_site(self):
         now = datetime(2026, 11, 2, tzinfo=timezone.utc)
         board = {"meta": {}, "games": [{"game_id": 9, "status": "scheduled", "start_date": "2026-11-03T00:00:00Z", "neutral_site": True, "away": {"team": "Ohio State"}, "home": {"team": "BYU"}, "market": None}]}

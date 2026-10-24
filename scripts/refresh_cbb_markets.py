@@ -49,6 +49,38 @@ def active_window(board: dict[str, Any], now: datetime, hours: int) -> list[dict
     ]
 
 
+def capture_window(
+    board: dict[str, Any],
+    now: datetime,
+    hours: int,
+    force: bool = False,
+) -> list[dict[str, Any]]:
+    """Select the live window, or the first upcoming slate for a forced capture.
+
+    Before opening week, posted markets can appear more than 72 hours before the
+    first game. A forced run must therefore move the capture window forward to
+    the earliest scheduled game instead of merely bypassing the empty-window
+    guard.
+    """
+    active = active_window(board, now, hours)
+    if active or not force:
+        return active
+
+    scheduled: list[tuple[datetime, dict[str, Any]]] = []
+    for game in board.get("games") or []:
+        if str(game.get("status") or "").lower() != "scheduled":
+            continue
+        start = parse_time(game.get("start_date"))
+        if start is not None and start >= now - timedelta(hours=2):
+            scheduled.append((start, game))
+    if not scheduled:
+        return []
+
+    first_start = min(start for start, _game in scheduled)
+    forced_end = first_start + timedelta(hours=hours)
+    return [game for start, game in scheduled if first_start <= start <= forced_end]
+
+
 def merge_market(previous: dict[str, Any] | None, current: dict[str, Any], captured_at: str) -> dict[str, Any]:
     previous = previous or {}
     opening_spread = previous.get("opening_home_spread")
@@ -137,7 +169,7 @@ def main() -> None:
     args = parser.parse_args()
     board = json.loads(args.board.read_text())
     now = datetime.now(timezone.utc)
-    active = active_window(board, now, args.hours)
+    active = capture_window(board, now, args.hours, force=args.force)
     if not active and not args.force:
         print(f"{VERSION}: no scheduled games inside {args.hours} hours; provider request skipped")
         return
