@@ -43,6 +43,7 @@ jobs:
         id: market
         env:
           CBBD_API_KEY: ${{ secrets.CBBD_API_KEY }}
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
         run: |
           extra=""
           if [ "${{ inputs.force || false }}" = "true" ]; then extra="--force"; fi
