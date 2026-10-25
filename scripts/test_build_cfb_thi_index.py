@@ -1,6 +1,12 @@
 import unittest
 
-from build_cfb_thi_index import adjusted_home_margin, percentile_map, resume_result_values, schedule_strength_map
+from build_cfb_thi_index import (
+    adjusted_home_margin,
+    apply_verified_score_updates,
+    percentile_map,
+    resume_result_values,
+    schedule_strength_map,
+)
 
 
 class ThiIndexTests(unittest.TestCase):
@@ -39,6 +45,16 @@ class ThiIndexTests(unittest.TestCase):
         close, _ = resume_result_values(.5, .5, winner_is_away=False, neutral_site=False, margin=21)
         blowout, _ = resume_result_values(.5, .5, winner_is_away=False, neutral_site=False, margin=70)
         self.assertEqual(close, blowout)
+
+    def test_verified_score_update_advances_only_new_week(self):
+        ratings = {"A": 5.0, "B": -5.0}
+        games = [
+            {"id": 1, "week": 7, "home_team": "A", "away_team": "B", "home_points": 21, "away_points": 20, "neutral_site": True},
+            {"id": 2, "week": 8, "home_team": "A", "away_team": "B", "home_points": 10, "away_points": 30, "neutral_site": True},
+        ]
+        updated = apply_verified_score_updates(ratings, games, 7, 8)
+        self.assertAlmostEqual(updated["A"], 2.0)
+        self.assertAlmostEqual(updated["B"], -2.0)
 
 
 if __name__ == "__main__":

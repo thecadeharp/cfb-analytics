@@ -17,6 +17,7 @@ from pathlib import Path
 MARGIN_CAP = 28.0
 HOME_EDGE = 2.5
 SHRINKAGE_GAMES = 2.5
+SCORE_UPDATE_K = 0.10
 
 
 def percentile_map(values: dict[str, float]) -> dict[str, float]:
@@ -99,7 +100,41 @@ def schedule_strength_map(
     }
 
 
-def build(metrics: dict, observed: dict, schedule: dict, predictive: dict) -> dict:
+def apply_verified_score_updates(
+    ratings: dict[str, float], games: list[dict], after_week: int, through_week: int
+) -> dict[str, float]:
+    """Advance a lagged power file using only newly verified final scores."""
+    updated = dict(ratings)
+    eligible = sorted(
+        (
+            game for game in games
+            if after_week < int(game.get("week") or 0) <= through_week
+        ),
+        key=lambda game: (int(game.get("week") or 0), str(game.get("start_date") or ""), str(game.get("id") or "")),
+    )
+    for game in eligible:
+        home, away = game["home_team"], game["away_team"]
+        expected_margin = updated[home] - updated[away]
+        if not game.get("neutral_site"):
+            expected_margin += HOME_EDGE
+        actual_margin = max(
+            -MARGIN_CAP,
+            min(MARGIN_CAP, float(game["home_points"]) - float(game["away_points"])),
+        )
+        adjustment = SCORE_UPDATE_K * (actual_margin - expected_margin)
+        updated[home] += adjustment
+        updated[away] -= adjustment
+    return updated
+
+
+def build(
+    metrics: dict,
+    observed: dict,
+    schedule: dict,
+    predictive: dict,
+    *,
+    allow_score_only_fallback: bool = False,
+) -> dict:
     metric_teams = metrics.get("teams", {})
     observed_teams = observed.get("teams", {})
     predictive_teams = {
@@ -112,11 +147,16 @@ def build(metrics: dict, observed: dict, schedule: dict, predictive: dict) -> di
     metrics_week = int(metrics.get("meta", {}).get("through_week") or 0)
     observed_week = int(observed.get("meta", {}).get("through_week") or 0)
     predictive_week = int(predictive.get("meta", {}).get("through_week") or 0)
-    if len({metrics_week, observed_week, predictive_week}) != 1:
+    input_weeks = {metrics_week, observed_week, predictive_week}
+    if len(input_weeks) != 1 and not allow_score_only_fallback:
         raise ValueError(
             "Input weeks do not match: "
             f"metrics={metrics_week}, observed={observed_week}, predictive={predictive_week}"
         )
+    if observed_week > metrics_week or predictive_week > metrics_week:
+        raise ValueError("Observed and predictive inputs cannot be newer than the verified results week")
+    if metrics_week - min(observed_week, predictive_week) > 1:
+        raise ValueError("Score-only fallback permits no more than one week of input lag")
     through_week = metrics_week
     games = completed_games(schedule, set(team_names), through_week)
     srs, fbs_games = solve_srs(team_names, games)
@@ -129,6 +169,12 @@ def build(metrics: dict, observed: dict, schedule: dict, predictive: dict) -> di
         team: float(predictive_teams[team].get("rating") or 0.0)
         for team in team_names
     }
+    release_mode = "FULL_INPUTS"
+    if len(input_weeks) != 1:
+        predictive_rating = apply_verified_score_updates(
+            predictive_rating, games, predictive_week, through_week
+        )
+        release_mode = "VERIFIED_SCORE_FALLBACK"
     srs_pct = percentile_map(srs)
     observed_pct = percentile_map(observed_net)
     power_pct = percentile_map(predictive_rating)
@@ -213,6 +259,12 @@ def build(metrics: dict, observed: dict, schedule: dict, predictive: dict) -> di
             "season": int(metrics.get("meta", {}).get("year") or schedule.get("meta", {}).get("year")),
             "through_week": through_week,
             "generated_at": datetime.now(timezone.utc).isoformat(),
+            "release_mode": release_mode,
+            "component_weeks": {
+                "verified_results": metrics_week,
+                "observed_efficiency": observed_week,
+                "predictive_power": predictive_week,
+            },
             "poll_inputs": False,
             "market_inputs": False,
             "roster_inputs": True,
@@ -227,7 +279,7 @@ def build(metrics: dict, observed: dict, schedule: dict, predictive: dict) -> di
             "power_source_version": predictive.get("meta", {}).get("version"),
             "power_source_status": predictive.get("meta", {}).get("status"),
             "power_validation_status": "Independent beta; historical input-timing limitations prevent validated or established labeling.",
-            "power_method": "Fitted neutral-field margin rating using current-season result Elo, talent and returning-production priors with weekly decay, plus opponent-adjusted on-field performance.",
+            "power_method": "Fitted neutral-field margin rating using current-season result Elo, talent and returning-production priors with weekly decay, plus opponent-adjusted on-field performance. When detailed weekly play-by-play is delayed, verified final scores advance the prior power file until the full inputs arrive.",
             "schedule_strength_usage": "Displayed for context only; the predictive engine already opponent-adjusts performance, so SOS is not added a second time.",
             "resume_method": "Opponent quality from THI Power, result, capped margin and location. FCS wins receive limited credit; FCS losses receive a major penalty.",
             "methodology": "THI Power is the poll-free fitted neutral-field margin rating. Current Form shows opponent-adjusted in-season efficiency, Game Control shows capped location-adjusted SRS, and THI Resume separately ranks accomplishment. Internal SOS is displayed but not added again because the Power, Current Form and Game Control engines already adjust for opponent quality.",
@@ -243,12 +295,14 @@ def main() -> None:
     parser.add_argument("--schedule", type=Path, default=Path("data/schedule.json"))
     parser.add_argument("--predictive", type=Path, default=Path("data/thi_power_ratings.json"))
     parser.add_argument("--output", type=Path, default=Path("data/cfb_thi_index.json"))
+    parser.add_argument("--allow-score-only-fallback", action="store_true")
     args = parser.parse_args()
     output = build(
         json.loads(args.metrics.read_text()),
         json.loads(args.observed.read_text()),
         json.loads(args.schedule.read_text()),
         json.loads(args.predictive.read_text()),
+        allow_score_only_fallback=args.allow_score_only_fallback,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(output, separators=(",", ":")) + "\n")
