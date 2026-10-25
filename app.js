@@ -371,7 +371,7 @@ function metricRank(team, section, rankField, value) {
 }
 
 function powerRank(team) {
-  const rank = team?.power_rating_rank;
+  const rank = cfbThiRank(team?.team);
   return rank ? `#${rank}` : "—";
 }
 
@@ -3350,9 +3350,9 @@ function teamSummaryCard(teamName) {
       ${teamSummaryMetric("Offensive Success", offenseSuccess, "success_rate")}
       ${teamSummaryMetric("Defensive Success", defenseSuccess, "success_rate")}
       <div class="thi-profile-stat">
-        <span class="thi-profile-label">Power Rank</span>
-        <span class="thi-profile-value">${escapeHtml(profile?.power_rank ? `#${profile.power_rank}` : "—")}</span>
-        <span class="thi-metric-rank thi-band-average" title="Frozen Model A power rank">MODEL</span>
+        <span class="thi-profile-label">THI Power Rank</span>
+        <span class="thi-profile-value">${escapeHtml(cfbThiRank(teamName) ? `#${cfbThiRank(teamName)}` : "—")}</span>
+        <span class="thi-metric-rank thi-band-average" title="Current THI Power rank">THI</span>
       </div>
     </div>
   `;
@@ -4514,7 +4514,9 @@ function renderRatings() {
   const container = document.getElementById("ratings-container");
   if (!container) return;
 
-  const data = filteredTeamsByConference();
+  const data = filteredTeamsByConference()
+    .slice()
+    .sort((a, b) => String(a.team || "").localeCompare(String(b.team || "")));
   const isConferenceView = currentTeamConference !== "ALL";
   const throughWeek = Number(metricsData?.meta?.through_week);
   const liveWeight = Number(metricsData?.meta?.blend_weight);
@@ -4563,7 +4565,6 @@ function renderRatings() {
       <table class="projection-table">
         <thead>
           <tr>
-            <th>${isConferenceView ? "Filtered Rank" : "Power Rank"}</th>
             <th>Team</th>
             <th>Conference</th>
             <th>Record</th>
@@ -4574,18 +4575,12 @@ function renderRatings() {
         </thead>
 
         <tbody>
-          ${data.map((team, index) => {
-            const external = externalRatingsData?.teams?.[team.team] ?? {};
-
+          ${data.map(team => {
             return `
               <tr
                 style="cursor:pointer"
                 onclick="openDossier('${escapeJsString(team.team)}')"
               >
-                <td class="team-meta">
-                  ${isConferenceView ? `#${index + 1}` : powerRank(team)}
-                </td>
-
                 <td>
                   <span class="team-with-logo">
                     ${teamLogoMarkup(team.team)}
@@ -4598,7 +4593,7 @@ function renderRatings() {
                 <td class="line-primary">${formatSigned(team.power_rating, 3)}</td>
                 <td class="team-meta">
                   ${hasValue(openWeeklyRating(team.team))
-                    ? `${formatSigned(openWeeklyRating(team.team), 3)} (${openWeeklyRank(team.team)})`
+                    ? formatSigned(openWeeklyRating(team.team), 3)
                     : "—"}
                 </td>
                 <td class="team-meta">${formatSigned(team?.sp_plus?.overall, 1)}</td>
@@ -4887,58 +4882,15 @@ function renderRatings() {
 
   container.innerHTML = `
     <div class="ratings-note">
-      <strong>How to read these ratings:</strong>
-      Model Rating is the production Model A rating and is not changed by the
-      fallback feed. Open Rating blends the frozen preseason foundation with
-      the complete public play-by-play sample and is display-only.
+      <strong>Team Profiles:</strong>
+      This sortable directory compares records and rating inputs without creating
+      a second THI ranking. Model Rating is the production Model A rating. Open
+      Rating blends the frozen preseason foundation with the complete public
+      play-by-play sample and remains display-only.
       ${openLabel} Production status: ${weightLabel} ${weekLabel} ${externalLabel}
-      Strength of Record, schedule strength, remaining schedule strength and
-      Game Control remain available in each Team Dossier.
+      THI Ratings is the sole source for official THI ranks.
     </div>
-
-    <div class="ratings-toggle" role="group" aria-label="Ratings view">
-      <button
-        class="ratings-toggle-button ${currentRatingsMode === "overview" ? "active" : ""}"
-        type="button"
-        onclick="setRatingsMode('overview')"
-      >Overview</button>
-
-      <button
-        class="ratings-toggle-button ${currentRatingsMode === "advanced" ? "active" : ""}"
-        type="button"
-        onclick="setRatingsMode('advanced')"
-      >Advanced Ratings</button>
-
-      <button
-        class="ratings-toggle-button ${currentRatingsMode === "conferences" ? "active" : ""}"
-        type="button"
-        onclick="setRatingsMode('conferences')"
-      >Conference Standings</button>
-
-      <button
-        class="ratings-toggle-button ${currentRatingsMode === "strength" ? "active" : ""}"
-        type="button"
-        onclick="setRatingsMode('strength')"
-      >Conference Landscape</button>
-
-      <button
-        class="ratings-toggle-button ${currentRatingsMode === "market" ? "active" : ""}"
-        type="button"
-        onclick="setRatingsMode('market')"
-      >Market Performance</button>
-    </div>
-
-    ${
-      currentRatingsMode === "conferences"
-        ? conferenceTable
-        : currentRatingsMode === "strength"
-          ? conferenceStrength
-        : currentRatingsMode === "market"
-          ? marketTable
-        : currentRatingsMode === "advanced"
-          ? `${conferenceFilterMarkup("ratings")}${teamTable}`
-          : overviewTable
-    }
+    ${overviewTable}
   `;
 }
 
@@ -7354,7 +7306,7 @@ function renderDossier(team) {
 
       <div class="sim-wins">
         <div class="sim-wins-label">
-          Power rank
+          THI Power rank
         </div>
 
         <div class="sim-wins-number">
@@ -7375,10 +7327,6 @@ function renderDossier(team) {
             team.power_rating,
             3
           )}
-
-          <span class="dossier-rank-inline">
-            (${powerRank(team)} Overall)
-          </span>
         </div>
       </div>
 
@@ -7392,10 +7340,6 @@ function renderDossier(team) {
             openWeeklyRating(team.team),
             3
           )}
-
-          <span class="dossier-rank-inline">
-            (${openWeeklyRank(team.team)} Overall)
-          </span>
         </div>
       </div>
 
@@ -7409,13 +7353,6 @@ function renderDossier(team) {
             team?.sp_plus?.overall,
             1
           )}
-
-          <span class="dossier-rank-inline">
-            (${spPlusRank(
-              team,
-              "overall"
-            )})
-          </span>
         </div>
       </div>
 
@@ -7687,7 +7624,7 @@ function renderDossier(team) {
 
         <div class="panel-body">
           ${renderMetricRow(
-            "Power Rank",
+            "THI Power Rank",
             powerRank(team)
           )}
 

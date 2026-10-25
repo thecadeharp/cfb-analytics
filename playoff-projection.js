@@ -237,7 +237,7 @@
     const anchor = nav.querySelector('[data-view="thi-ratings"]') || nav.querySelector('[data-view="ratings"]');
     anchor?.after(button);
 
-    const ratings = document.getElementById('view-ratings');
+    const ratings = document.getElementById('view-thi-ratings');
     if (!ratings) return;
     const view = document.createElement('section');
     view.id = 'view-playoff';

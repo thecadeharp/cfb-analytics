@@ -1428,8 +1428,8 @@
         }
 
         if (currentProjectionSort === "top25") {
-          const aRank = Math.min(Number(a?.home?.power_rating_rank || 999), Number(a?.away?.power_rating_rank || 999));
-          const bRank = Math.min(Number(b?.home?.power_rating_rank || 999), Number(b?.away?.power_rating_rank || 999));
+          const aRank = Math.min(cfbThiRank(a?.home?.team) || 999, cfbThiRank(a?.away?.team) || 999);
+          const bRank = Math.min(cfbThiRank(b?.home?.team) || 999, cfbThiRank(b?.away?.team) || 999);
           const aTop25 = aRank <= 25 ? 1 : 0;
           const bTop25 = bRank <= 25 ? 1 : 0;
           if (bTop25 !== aTop25) return bTop25 - aTop25;
@@ -1518,8 +1518,8 @@
     const homeName = game?.home?.team ?? "Unknown";
     const awayName = game?.away?.team ?? "Unknown";
 
-    const homeRank = game?.home?.power_rating_rank;
-    const awayRank = game?.away?.power_rating_rank;
+    const homeRank = cfbThiRank(homeName);
+    const awayRank = cfbThiRank(awayName);
 
     const modelSpread = effectiveModelSpread(game);
     const modelTotal = effectiveModelTotal(game);

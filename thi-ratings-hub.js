@@ -160,7 +160,7 @@
   const section = document.getElementById("view-ratings");
   if (!nav || !section || !ratingsButton) return;
 
-  ratingsButton.textContent = "Team Data";
+  ratingsButton.textContent = "Team Profiles";
   const button = document.createElement("button");
   button.type = "button";
   button.className = "nav-item";
@@ -176,8 +176,8 @@
     <div class="eyebrow">Calculated by The Hammer Index</div>
     <h1 class="page-title">THI Ratings</h1>
     <p class="page-subtitle thi-hub-intro">Three distinct lenses: predictive neutral-field strength, opponent-adjusted current form, and season accomplishment.</p>
-    <div class="thi-ratings-difference" aria-label="Difference between Team Data and THI Ratings">
-      <div><strong>Team Data</strong><span>Observed efficiency, schedule and resume context, market performance, and team dossiers.</span></div>
+    <div class="thi-ratings-difference" aria-label="Difference between Team Profiles and THI Ratings">
+      <div><strong>Team Profiles</strong><span>Sortable records and rating comparisons without a separate ranking system.</span></div>
       <div><strong>THI Power</strong><span>Predictive neutral-field strength from a fitted, poll-free scoring-margin model.</span></div>
       <div><strong>THI Résumé</strong><span>Season accomplishment from opponent quality, results, game location and capped scoring margin.</span></div>
       <p>THI Power supplies projection-page ranking badges. Neither ranking changes Model A projections.</p>
@@ -326,9 +326,6 @@
   function applyTeamDataExperience() {
     const container = document.getElementById("ratings-container");
     if (!container || !thiPowerRatingsData?.teams?.length) return;
-    if (!container.querySelector(".thi-weekly-pulse")) {
-      container.insertAdjacentHTML("afterbegin", weeklyPulseMarkup());
-    }
     container.querySelectorAll("table").forEach(table => {
       const headers = Array.from(table.querySelectorAll("thead th")).map(cell => cell.textContent.trim());
       const rows = Array.from(table.querySelectorAll("tbody tr"));
