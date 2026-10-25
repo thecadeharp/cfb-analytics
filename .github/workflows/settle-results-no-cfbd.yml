@@ -41,6 +41,7 @@ jobs:
         env:
           CFB_SEASON: "2026"
         run: |
+          python -m unittest scripts/test_fetch_results_no_cfbd.py
           python scripts/fetch_results_no_cfbd.py
 
       - name: Publish scoreboard state immediately

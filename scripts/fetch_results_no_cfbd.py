@@ -256,7 +256,17 @@ def align_to_projection_names(
     exact = known_matchups.get(key)
 
     if not exact:
-        return game
+        away_key, home_key = key.split("@", 1) if "@" in key else ("", "")
+        candidates = []
+        for known_key, names in known_matchups.items():
+            known_away, known_home = known_key.split("@", 1)
+            away_matches = away_key == known_away or away_key.startswith(known_away) or known_away.startswith(away_key)
+            home_matches = home_key == known_home or home_key.startswith(known_home) or known_home.startswith(home_key)
+            if away_matches and home_matches:
+                candidates.append(names)
+        if len(candidates) != 1:
+            return game
+        exact = candidates[0]
 
     away, home = exact
     return {
@@ -787,10 +797,10 @@ def espn_team_name(competitor: Any) -> str | None:
 
     return clean_team_name(
         first_nonempty(
+            team.get("location"),
             team.get("displayName"),
             team.get("shortDisplayName"),
             team.get("name"),
-            team.get("location"),
             competitor.get("name"),
         )
     )
@@ -1163,6 +1173,11 @@ def main() -> None:
         existing_payload
     )
     known_projection_matchups = projection_matchups()
+    existing_games = [
+        align_to_projection_names(game, known_projection_matchups)
+        for game in existing_games
+        if isinstance(game, dict)
+    ]
     active_week = infer_active_week(
         existing_payload
     )
