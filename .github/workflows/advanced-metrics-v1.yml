@@ -4,8 +4,10 @@ on:
   workflow_dispatch:
 
   schedule:
-    # Sunday 9:30 AM ET during the season, after the main weekly update.
+    # Retry Sunday through Tuesday because the public weekly play-by-play file
+    # does not publish at a consistent time after Saturday's games.
     - cron: "30 13 * * 0"
+    - cron: "30 13 * * 1,2"
 
 permissions:
   contents: write
