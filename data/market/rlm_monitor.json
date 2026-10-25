@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "thi-rlm-monitor-v1.5",
-    "generated_at_utc": "2026-10-25T14:23:40.186803Z",
+    "generated_at_utc": "2026-10-25T19:00:41.929143Z",
     "status": "line_monitoring",
     "rlm_status": "public_splits_pending",
     "sharp_line_status": "monitoring",
@@ -17,10 +17,10 @@
       "review_notes": 10
     },
     "alert_count": 0,
-    "sharp_move_count": 2,
+    "sharp_move_count": 0,
     "steam_reversal_alert_count": 0,
     "steam_context_hold_count": 0,
-    "sharp_tracked_event_count": 2,
+    "sharp_tracked_event_count": 20,
     "qualified_event_count": 0,
     "sharp_book_policy": {
       "primary": "Pinnacle",
@@ -51,52 +51,7 @@
       "No alert when required inputs are absent or ambiguous"
     ]
   },
-  "sharp_line_moves": [
-    {
-      "sport": "cfb",
-      "event_id": "ebe9883d9cb488e233e6c45cfa009008",
-      "start_date": "2026-10-25T02:24:54Z",
-      "away_team": "North Dakota State Bison",
-      "home_team": "New Mexico Lobos",
-      "sharp_book": "pinnacle",
-      "source": "the_odds_api_free",
-      "first_seen_at_utc": "2026-10-18T22:24:40.076168Z",
-      "last_seen_at_utc": "2026-10-25T04:36:10.004009Z",
-      "book_last_update_utc": "2026-10-25T04:35:58Z",
-      "opening_home_spread": -4.0,
-      "current_home_spread": -5.5,
-      "last_change_at_utc": "2026-10-25T04:36:10.004009Z",
-      "observations": 25,
-      "line_delta": -1.5,
-      "movement_toward": "home",
-      "movement_toward_team": "New Mexico Lobos",
-      "key_number_crossed": null,
-      "severity": "move",
-      "definition": "Observed Pinnacle spread movement from THI's first captured number. Public betting splits are unavailable, so this is not an RLM or sharp-money claim."
-    },
-    {
-      "sport": "cfb",
-      "event_id": "47595bd2a188e4dab8a27dce97c5b45d",
-      "start_date": "2026-10-25T02:30:28Z",
-      "away_team": "Houston Cougars",
-      "home_team": "Utah Utes",
-      "sharp_book": "pinnacle",
-      "source": "the_odds_api_free",
-      "first_seen_at_utc": "2026-10-18T22:24:40.076168Z",
-      "last_seen_at_utc": "2026-10-25T04:36:10.004009Z",
-      "book_last_update_utc": "2026-10-25T04:35:58Z",
-      "opening_home_spread": -6.5,
-      "current_home_spread": 3.5,
-      "last_change_at_utc": "2026-10-25T04:36:10.004009Z",
-      "observations": 25,
-      "line_delta": 10.0,
-      "movement_toward": "away",
-      "movement_toward_team": "Houston Cougars",
-      "key_number_crossed": null,
-      "severity": "major",
-      "definition": "Observed Pinnacle spread movement from THI's first captured number. Public betting splits are unavailable, so this is not an RLM or sharp-money claim."
-    }
-  ],
+  "sharp_line_moves": [],
   "steam_reversal_alerts": [],
   "alerts": []
 }
