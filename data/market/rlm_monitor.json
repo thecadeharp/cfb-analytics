@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "thi-rlm-monitor-v1.5",
-    "generated_at_utc": "2026-10-24T22:28:05.499049Z",
+    "generated_at_utc": "2026-10-25T00:22:04.901512Z",
     "status": "line_monitoring",
     "rlm_status": "public_splits_pending",
     "sharp_line_status": "monitoring",
@@ -18,7 +18,7 @@
     },
     "alert_count": 0,
     "sharp_move_count": 35,
-    "steam_reversal_alert_count": 1,
+    "steam_reversal_alert_count": 0,
     "steam_context_hold_count": 0,
     "sharp_tracked_event_count": 44,
     "qualified_event_count": 0,
@@ -823,41 +823,6 @@
       "definition": "Observed Pinnacle spread movement from THI's first captured number. Public betting splits are unavailable, so this is not an RLM or sharp-money claim."
     }
   ],
-  "steam_reversal_alerts": [
-    {
-      "sport": "cfb",
-      "event_id": "401860906",
-      "game_id": "401860906",
-      "week": 8,
-      "start_date": "2026-10-24T23:30:00.000Z",
-      "away_team": "Utah State",
-      "home_team": "Texas State",
-      "opening_home_spread": -9.5,
-      "current_home_spread": -13.0,
-      "line_delta": -3.5,
-      "movement_points": 3.5,
-      "sharp_book": "circa",
-      "source_verified": true,
-      "source_id": "week-8:row-53:401860906",
-      "source_sheet": "WEEK 8",
-      "source_row": 53,
-      "source_opening_text": "UTAH STATE V TEX ST -9.5 (59.5)",
-      "source_movement_text": "TEX ST -13 (3.5 PTS)",
-      "source_observed_at_utc": "2026-10-23T01:20:11.627505Z",
-      "definition": "Circa opening-to-later spread movement recorded in the system owner's authoritative read-only Google Sheet.",
-      "first_seen_at_utc": "2026-10-23T01:20:11.627505Z",
-      "system_id": "steam-reversal",
-      "trigger_threshold_points": 3.0,
-      "steam_side": "home",
-      "steam_team": "Texas State",
-      "fade_side": "away",
-      "fade_team": "Utah State",
-      "fade_spread": 13.0,
-      "context_status": "unclassified",
-      "action_status": "monitor_only",
-      "context_flags": [],
-      "context_note": "Price movement alone does not establish sharp money, injury, weather or public causation."
-    }
-  ],
+  "steam_reversal_alerts": [],
   "alerts": []
 }
