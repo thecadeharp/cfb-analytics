@@ -102,12 +102,17 @@ jobs:
 
           observed = json.loads(Path("data/thi_observed_ratings.json").read_text())
           predictive = json.loads(Path("data/thi_power_ratings.json").read_text())
-          ready = observed["meta"]["through_week"] == predictive["meta"]["through_week"]
+          metrics = json.loads(Path("data/cfb_metrics.json").read_text())
+          observed_week = observed["meta"]["through_week"]
+          predictive_week = predictive["meta"]["through_week"]
+          metrics_week = metrics["meta"]["through_week"]
+          ready = observed_week == predictive_week == metrics_week
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
               handle.write(f"ready={'true' if ready else 'false'}\n")
           print(
               "THI Index inputs aligned." if ready else
-              "THI Index deferred until the predictive refresh reaches the observed week."
+              f"THI Index deferred: metrics Week {metrics_week}, "
+              f"observed Week {observed_week}, predictive Week {predictive_week}."
           )
           PY
 

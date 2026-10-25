@@ -128,10 +128,16 @@ jobs:
           print(json.loads(Path('data/thi_observed_ratings.json').read_text())['meta']['through_week'])
           PY
           )
-          if [ "$OBSERVED_WEEK" = "$RESOLVED_WEEK" ]; then
+          METRICS_WEEK=$(python - <<'PY'
+          import json
+          from pathlib import Path
+          print(json.loads(Path('data/cfb_metrics.json').read_text())['meta']['through_week'])
+          PY
+          )
+          if [ "$OBSERVED_WEEK" = "$RESOLVED_WEEK" ] && [ "$METRICS_WEEK" = "$RESOLVED_WEEK" ]; then
             python scripts/build_cfb_thi_index.py
           else
-            echo "THI Index deferred: observed Week $OBSERVED_WEEK, predictive Week $RESOLVED_WEEK."
+            echo "THI Index deferred: metrics Week $METRICS_WEEK, observed Week $OBSERVED_WEEK, predictive Week $RESOLVED_WEEK."
           fi
 
       - name: Verify output and isolation contracts

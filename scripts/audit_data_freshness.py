@@ -209,7 +209,11 @@ def audit(root: Path, now: datetime) -> dict:
             if not isinstance(value, int) or value not in acceptable_metric_weeks:
                 findings.append({"severity": "critical", "dataset": key, "failed_checks": ["completed_week_alignment"]})
         player_week = week_checks["players_through_week"]
-        if not isinstance(player_week, int) or player_week < active_week - 1 or player_week > active_week:
+        # Player intelligence is built from the same public weekly play-by-play
+        # delivery as the advanced team metrics. Apply the documented Sunday-
+        # Monday delivery grace to both layers so the audit does not page on a
+        # healthy prior-week snapshot while the new public file is pending.
+        if not isinstance(player_week, int) or player_week not in acceptable_metric_weeks:
             findings.append({"severity": "critical", "dataset": "players_through_week", "failed_checks": ["active_week_alignment"]})
 
     if nested(player_audit, "meta.status") != "passed" or not all((player_audit.get("checks") or {}).values()):

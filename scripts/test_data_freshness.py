@@ -42,6 +42,12 @@ class DataFreshnessAuditTests(unittest.TestCase):
         self.assertEqual(acceptable_completed_weeks(8, monday), {6, 7, 8})
         self.assertEqual(acceptable_completed_weeks(8, tuesday), {7, 8})
 
+    def test_prior_public_player_week_is_accepted_during_delivery_grace(self):
+        sunday = datetime(2026, 10, 25, 16, 0, tzinfo=timezone.utc)
+        acceptable = acceptable_completed_weeks(9, sunday)
+        self.assertIn(7, acceptable)
+        self.assertNotIn(6, acceptable)
+
     def test_postgame_coverage_requires_every_published_final(self):
         results = {"games": [{"game_id": "101"}, {"game_id": 202}]}
         complete = {"games": {"101": {}, "202": {}}}
