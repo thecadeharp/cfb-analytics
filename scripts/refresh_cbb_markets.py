@@ -52,16 +52,29 @@ def odds_api_lines(board: dict[str, Any], events: list[dict[str, Any]], active_i
     active_games = [game for game in board.get("games") or [] if str(game.get("game_id")) in active_ids]
     transformed: list[dict[str, Any]] = []
     for event in events:
-        matches = [
-            game for game in active_games
-            if school_matches(event.get("home_team"), (game.get("home") or {}).get("team"))
-            and school_matches(event.get("away_team"), (game.get("away") or {}).get("team"))
-        ]
+        event_home = event.get("home_team")
+        event_away = event.get("away_team")
+        matches = []
+        for game in active_games:
+            board_home = (game.get("home") or {}).get("team")
+            board_away = (game.get("away") or {}).get("team")
+            same_orientation = school_matches(event_home, board_home) and school_matches(event_away, board_away)
+            reversed_orientation = school_matches(event_home, board_away) and school_matches(event_away, board_home)
+            if same_orientation or reversed_orientation:
+                matches.append(game)
         if len(matches) != 1:
             continue
         game = matches[0]
-        home_name = str(event.get("home_team") or "")
-        away_name = str(event.get("away_team") or "")
+        board_home = (game.get("home") or {}).get("team")
+        board_away = (game.get("away") or {}).get("team")
+        if school_matches(event_home, board_home):
+            home_name = str(event_home or "")
+            away_name = str(event_away or "")
+        else:
+            # Neutral-site providers may reverse home/away. Every stored spread
+            # and moneyline must still be expressed from THI's board-home side.
+            home_name = str(event_away or "")
+            away_name = str(event_home or "")
         rows: list[dict[str, Any]] = []
         for book in event.get("bookmakers") or []:
             row: dict[str, Any] = {"provider": book.get("title") or book.get("key")}

@@ -45,6 +45,34 @@ class RefreshCbbMarketsTests(unittest.TestCase):
         self.assertEqual(rows[0]["lines"][0]["spread"], -24.5)
         self.assertEqual(rows[0]["lines"][0]["overUnder"], 146.5)
 
+    def test_neutral_site_event_can_reverse_provider_home_and_away(self):
+        board = {
+            "games": [{
+                "game_id": 45,
+                "neutral_site": True,
+                "home": {"team": "Villanova"},
+                "away": {"team": "Notre Dame"},
+            }]
+        }
+        events = [{
+            "home_team": "Notre Dame Fighting Irish",
+            "away_team": "Villanova Wildcats",
+            "bookmakers": [{
+                "key": "williamhill_us",
+                "title": "Caesars",
+                "markets": [
+                    {"key": "spreads", "outcomes": [{"name": "Notre Dame Fighting Irish", "point": -2.5}, {"name": "Villanova Wildcats", "point": 2.5}]},
+                    {"key": "totals", "outcomes": [{"name": "Over", "point": 144.5}, {"name": "Under", "point": 144.5}]},
+                    {"key": "h2h", "outcomes": [{"name": "Notre Dame Fighting Irish", "price": -145}, {"name": "Villanova Wildcats", "price": 125}]},
+                ],
+            }],
+        }]
+        rows = odds_api_lines(board, events, {"45"})
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["lines"][0]["spread"], 2.5)
+        self.assertEqual(rows[0]["lines"][0]["homeMoneyline"], 125)
+        self.assertEqual(rows[0]["lines"][0]["awayMoneyline"], -145)
+
     def test_freezes_first_open_and_preserves_neutral_site(self):
         now = datetime(2026, 11, 2, tzinfo=timezone.utc)
         board = {"meta": {}, "games": [{"game_id": 9, "status": "scheduled", "start_date": "2026-11-03T00:00:00Z", "neutral_site": True, "away": {"team": "Ohio State"}, "home": {"team": "BYU"}, "market": None}]}
