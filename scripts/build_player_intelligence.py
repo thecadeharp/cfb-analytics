@@ -40,6 +40,22 @@ def number(value, default=0.0):
     return float(value) if finite(value) else default
 
 
+def leaderboard_sort_key(row, group, editorial_order=None):
+    """Order a published position board with explicit, reviewable overrides."""
+    editorial_order = editorial_order or {}
+    editorial_rank = editorial_order.get((row.get("team"), row.get("name")))
+    components = row.get("rating_components") or {}
+    observed = components.get("observed_metrics") or {}
+    receiving_dominance = number(observed.get("receiving_dominance")) if group == "WR" else 0.0
+    return (
+        0 if editorial_rank else 1,
+        editorial_rank or 999,
+        -(row.get("rating") or -1),
+        -receiving_dominance,
+        row["name"],
+    )
+
+
 def truthy(value):
     return value is True or value == 1 or str(value).lower() == "true"
 
@@ -305,6 +321,15 @@ def main():
         urllib.request.urlretrieve(PBP_URL.format(year=args.year), path)
 
     roster, roster_players, team_by_id, roster_teams = roster_contract()
+    board_path = DATA / "research" / "cfb_player_leaderboard_2026.json"
+    board_payload = load(board_path) if board_path.exists() else {"position_overrides": {}}
+    position_overrides = {
+        group: {
+            (row.get("team"), row.get("name")): index
+            for index, row in enumerate(entries or [], 1)
+        }
+        for group, entries in (board_payload.get("position_overrides") or {}).items()
+    }
     calibration_path = DATA / "research" / "heisman_calibration.json"
     calibration = load(calibration_path) if calibration_path.exists() else None
     calibration_status = ((calibration or {}).get("meta") or {}).get("status", "NOT_RUN")
@@ -479,11 +504,10 @@ def main():
                 "weights": weights,
                 "observed_metrics": {key: round(value, 3) for key, value in observed.items()},
             }
-        ordered = sorted(pool, key=lambda row: (
-            -(row["rating"] or -999),
-            -number(metrics_by_id[row["athlete_id"]].get("receiving_dominance")) if group == "WR" else 0,
-            row["name"],
-        ))
+        ordered = sorted(
+            pool,
+            key=lambda row: leaderboard_sort_key(row, group, position_overrides.get(group)),
+        )
         for rank, row in enumerate(ordered, 1):
             row["national_position_rank"] = rank
         for conference in sorted({row.get("team") for row in []}):
@@ -588,12 +612,6 @@ def main():
         ))
         team_payload[team] = ordered
 
-    def published_leaderboard_sort_key(row, group):
-        components = row.get("rating_components") or {}
-        observed = components.get("observed_metrics") or {}
-        receiving_dominance = number(observed.get("receiving_dominance")) if group == "WR" else 0.0
-        return (-(row.get("rating") or -1), -receiving_dominance, row["name"])
-
     output = {
         "meta": {
             "season": args.year, "through_week": through_week, "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -617,6 +635,10 @@ def main():
                 "seasons": ((calibration or {}).get("meta") or {}).get("seasons", []),
             },
             "heisman_board_method": "Source-linked availability gate, editorial top tier, then position-adjusted production score. No award probabilities.",
+            "leaderboard_policy": {
+                "source": str(board_path.relative_to(ROOT)),
+                "method": "Explicit editorial ordering is applied first when listed; all remaining players follow the position-specific production rating.",
+            },
             "notes": [
                 "Observed role is based on recorded workload and is not an official depth chart.",
                 "Official roster positions define rating cohorts; incidental trick-play usage does not reclassify players.",
@@ -632,7 +654,7 @@ def main():
         "leaderboards": {
             group: [row["athlete_id"] for row in sorted(
                 [p for p in published_players.values() if p["position_group"] == group and finite(p.get("rating"))],
-                key=lambda p: published_leaderboard_sort_key(p, group),
+                key=lambda p: leaderboard_sort_key(p, group, position_overrides.get(group)),
             )]
             for group in ("QB", "RB", "WR", "TE", "DEF")
         },

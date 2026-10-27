@@ -2,7 +2,13 @@
 import unittest
 
 from scripts.audit_cfb_player_intelligence import audit
-from scripts.build_player_intelligence import empty_stats, position_group, rating_metrics, usage_volume
+from scripts.build_player_intelligence import (
+    empty_stats,
+    leaderboard_sort_key,
+    position_group,
+    rating_metrics,
+    usage_volume,
+)
 
 
 class CfbPlayerIntelligenceTests(unittest.TestCase):
@@ -71,6 +77,21 @@ class CfbPlayerIntelligenceTests(unittest.TestCase):
         metrics = rating_metrics("WR", row)
         self.assertEqual(metrics["receiving_dominance"], 1360)
         self.assertAlmostEqual(metrics["yards_per_target"], 100 / 7)
+
+    def test_reviewed_leaderboard_order_precedes_computed_rating(self):
+        players = [
+            {"name": "Computed Leader", "team": "A", "rating": 99.0},
+            {"name": "Jesse Legree", "team": "Oregon State", "rating": 91.0},
+            {"name": "Jeremiah Smith", "team": "Ohio State", "rating": 98.0},
+            {"name": "KJ Duff", "team": "Rutgers", "rating": 93.5},
+        ]
+        reviewed = {
+            ("Oregon State", "Jesse Legree"): 1,
+            ("Ohio State", "Jeremiah Smith"): 2,
+            ("Rutgers", "KJ Duff"): 3,
+        }
+        ordered = sorted(players, key=lambda row: leaderboard_sort_key(row, "WR", reviewed))
+        self.assertEqual([row["name"] for row in ordered[:3]], ["Jesse Legree", "Jeremiah Smith", "KJ Duff"])
 
 
 if __name__ == "__main__":
