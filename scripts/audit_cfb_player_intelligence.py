@@ -12,9 +12,9 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from scripts.build_player_intelligence import POSITION_GROUPS, RATING_MINIMUMS, usage_volume
+    from scripts.build_player_intelligence import POSITION_GROUPS, RATING_MINIMUMS, leaderboard_sort_key, usage_volume
 except ModuleNotFoundError:
-    from build_player_intelligence import POSITION_GROUPS, RATING_MINIMUMS, usage_volume
+    from build_player_intelligence import POSITION_GROUPS, RATING_MINIMUMS, leaderboard_sort_key, usage_volume
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -149,19 +149,22 @@ def audit(payload: dict[str, Any], roster: dict[str, Any]) -> dict[str, Any]:
         athlete_id: team_names for athlete_id, team_names in team_memberships.items() if len(team_names) != 1
     }
 
+    board_path = ROOT / "data" / "research" / "cfb_player_leaderboard_2026.json"
+    board_payload = json.loads(board_path.read_text(encoding="utf-8")) if board_path.exists() else {"position_overrides": {}}
+    position_overrides = {
+        group: {
+            (row.get("team"), row.get("name")): index
+            for index, row in enumerate(entries or [], 1)
+        }
+        for group, entries in (board_payload.get("position_overrides") or {}).items()
+    }
     leaderboard_mismatches = []
     for group in RATING_MINIMUMS:
-        def leaderboard_sort_key(row):
-            components = row.get("rating_components") or {}
-            observed = components.get("observed_metrics") or {}
-            receiving_dominance = float(observed.get("receiving_dominance") or 0) if group == "WR" else 0.0
-            return (-float(row["rating"]), -receiving_dominance, str(row.get("name") or ""))
-
         expected = [
             row["athlete_id"]
             for row in sorted(
                 [row for row in players.values() if row.get("position_group") == group and finite(row.get("rating"))],
-                key=leaderboard_sort_key,
+                key=lambda row: leaderboard_sort_key(row, group, position_overrides.get(group)),
             )
         ]
         published = [str(value) for value in leaderboards.get(group) or []]
