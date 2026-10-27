@@ -82,6 +82,11 @@ jobs:
             echo "Dispatched availability recovery."
           fi
 
+          if grep -Eq '^players_through_week$' /tmp/thi-critical-datasets.txt; then
+            dispatch_recovery player-intelligence-v1.yml
+            echo "Dispatched player-intelligence recovery."
+          fi
+
           if [[ ! -s /tmp/thi-recovery-workflows.txt ]]; then
             echo "No automatic recovery exists for the critical findings:"
             cat /tmp/thi-critical-datasets.txt

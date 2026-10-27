@@ -8,8 +8,9 @@ on:
         required: false
         default: "0"
   schedule:
-    # Sunday 10:15 AM ET during the season, after weekly team metrics.
-    - cron: "15 14 * * 0"
+    # Sunday and Monday 10:15 AM ET during the season. Monday retries cover
+    # upstream play-by-play releases that arrive after the Sunday build.
+    - cron: "15 14 * * 0,1"
 
 permissions:
   contents: write
