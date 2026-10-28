@@ -21,7 +21,25 @@ class CbbMarketContractTests(unittest.TestCase):
         self.assertEqual(game["market"]["opening"]["home_spread"], 2.5)
         self.assertEqual(game["market"]["movement"]["home_spread_points"], 1.0)
         self.assertTrue(game["market"]["movement"]["toward_thi"])
+        self.assertEqual(game["market"]["book_count"], 4)
         self.assertTrue(game["neutral_site"])
+
+    def test_contract_recovers_book_count_from_durable_snapshot(self):
+        board = {"meta": {"version": "board-v1"}, "games": [{
+            "game_id": 9, "status": "scheduled", "start_date": "2026-11-03T00:00:00Z", "neutral_site": True,
+            "away": {"team": "Ohio State"}, "home": {"team": "BYU"},
+            "projection": {"home_margin": -6.2, "total": 154},
+            "market": None,
+        }]}
+        history = {"games": {"9": [{
+            "captured_at_utc": "2026-11-02T00:00:00Z",
+            "consensus_home_spread": 3.5,
+            "consensus_total": 153,
+            "book_count": 2,
+        }]}}
+        game = build_contract(board, history)["games"]["9"]
+        self.assertEqual(game["market"]["current"]["home_spread"], 3.5)
+        self.assertEqual(game["market"]["book_count"], 2)
 
     def test_manifest_versions_change_with_content(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -40,6 +58,7 @@ class CbbMarketContractTests(unittest.TestCase):
         source = (ROOT / "cbb-site.js").read_text()
         self.assertIn("CACHE_MANIFEST_PATH", source)
         self.assertIn("state.data?.marketContract?.games", source)
+        self.assertIn("applyMarketContractFallback(state.data)", source)
         self.assertIn("data-cbb-possession-simulator", source)
         self.assertIn("normalCdf(margin / residualSd)", source)
         self.assertIn("does not change Model A, signals, tracked plays or the official projection", source)

@@ -75,6 +75,8 @@ def build_contract(board: dict[str, Any], history: dict[str, Any] | None = None)
         if snapshots:
             current_spread = snapshots[-1]["home_spread"] if snapshots[-1]["home_spread"] is not None else current_spread
             current_total = snapshots[-1]["total"] if snapshots[-1]["total"] is not None else current_total
+        snapshot_book_count = int(snapshots[-1]["book_count"] or 0) if snapshots else 0
+        market_book_count = int(market.get("book_count") or 0)
         if market or snapshots:
             market_count += 1
         home = str((game.get("home") or {}).get("team") or "home")
@@ -115,7 +117,7 @@ def build_contract(board: dict[str, Any], history: dict[str, Any] | None = None)
                         if current_spread is not None and opening_spread is not None and finite(projection.get("home_margin")) is not None else None
                     ),
                 },
-                "book_count": int(market.get("book_count") or 0),
+                "book_count": max(market_book_count, snapshot_book_count),
                 "book_lines": market.get("book_lines") if isinstance(market.get("book_lines"), list) else [],
                 "reference_moneyline": market.get("reference_moneyline") if isinstance(market.get("reference_moneyline"), dict) else {},
                 "spread_price_status": market.get("spread_price_status") or "unavailable",

@@ -265,7 +265,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--board", type=Path, default=ROOT / "data/cbb/game_board.json")
     parser.add_argument("--history", type=Path, default=ROOT / "data/cbb/market_snapshots.json")
-    parser.add_argument("--hours", type=int, default=72)
+    parser.add_argument("--hours", type=int, default=168)
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
     board = json.loads(args.board.read_text())

@@ -226,6 +226,45 @@
     return value;
   }
 
+  function applyMarketContractFallback(data) {
+    const contractGames = data?.marketContract?.games || {};
+    for (const game of data?.projectionBoard?.games || []) {
+      const contract = contractGames[String(game.game_id)] || {};
+      const contractMarket = contract.market || {};
+      const current = contractMarket.current || {};
+      const opening = contractMarket.opening || {};
+      const history = Array.isArray(contract.history) ? contract.history : [];
+      const latest = history.at(-1) || {};
+      const direct = game.market || {};
+      const spread = direct.consensus_home_spread ?? current.home_spread;
+      const total = direct.consensus_total ?? current.total;
+      if (spread == null && total == null) continue;
+      const directBooks = Number(direct.book_count || 0);
+      const contractBooks = Number(contractMarket.book_count || 0);
+      const capturedBooks = Number(latest.book_count || 0);
+      const bookCount = Math.max(directBooks, contractBooks, capturedBooks);
+      game.market = {
+        ...direct,
+        consensus_home_spread: spread,
+        consensus_total: total,
+        opening_home_spread: direct.opening_home_spread ?? opening.home_spread,
+        opening_total: direct.opening_total ?? opening.total,
+        book_count: bookCount,
+        book_lines: Array.isArray(direct.book_lines) && direct.book_lines.length
+          ? direct.book_lines
+          : Array.isArray(contractMarket.book_lines) ? contractMarket.book_lines : [],
+        reference_moneyline: direct.reference_moneyline || contractMarket.reference_moneyline || {},
+        source: direct.source || "THI captured market contract",
+      };
+      const margin = Number(game.projection?.home_margin);
+      const marketSpread = Number(spread);
+      if (game.projection && game.projection.spread_edge == null && Number.isFinite(margin) && Number.isFinite(marketSpread)) {
+        game.projection.spread_edge = Math.round((margin + marketSpread) * 10) / 10;
+        game.projection.market_coverage_state = bookCount >= 3 ? "consensus" : "isolated";
+      }
+    }
+  }
+
   async function loadData() {
     if (state.loaded) return state.data;
     if (state.loading) return state.loading;
@@ -250,6 +289,7 @@
     })))
       .then(entries => {
         state.data = { ...Object.fromEntries(Object.keys(PATHS).map(key => [key, {}])), ...Object.fromEntries(entries) };
+        applyMarketContractFallback(state.data);
         state.loaded = true;
         renderAll();
         loadDeferredForView(state.cbbView);
