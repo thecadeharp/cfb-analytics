@@ -9,6 +9,7 @@ from scripts.audit_data_freshness import (
     in_scoreboard_live_window,
     parse_time,
     postgame_covers_results,
+    required_checks_pass,
     within_age,
 )
 
@@ -67,6 +68,14 @@ class DataFreshnessAuditTests(unittest.TestCase):
         missing = {"games": {"101": {}}}
         self.assertTrue(postgame_covers_results(results, complete))
         self.assertFalse(postgame_covers_results(results, missing))
+
+    def test_immutable_derived_asset_can_pass_with_stale_informational_age(self):
+        checks = {"timestamp_present": True, "fresh": False, "games": True}
+        self.assertFalse(required_checks_pass(checks))
+        self.assertTrue(required_checks_pass(checks, freshness_required=False))
+        self.assertFalse(required_checks_pass(
+            {**checks, "games": False}, freshness_required=False
+        ))
 
 
 if __name__ == "__main__":

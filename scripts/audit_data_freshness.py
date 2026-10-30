@@ -50,6 +50,21 @@ def within_age(stamp: datetime | None, now: datetime, max_age_hours: float) -> b
     return -0.25 <= age <= max_age_hours
 
 
+def required_checks_pass(checks: dict[str, bool], freshness_required: bool = True) -> bool:
+    """Evaluate a dataset contract while allowing immutable derived assets.
+
+    Some derived files, including canonical postgame analytics, intentionally
+    remain unchanged when their source coverage has not changed. Their recorded
+    age stays visible in audit evidence, while structural and coverage checks
+    determine whether the asset is production ready.
+    """
+    return all(
+        passed
+        for key, passed in checks.items()
+        if freshness_required or key != "fresh"
+    )
+
+
 def postgame_covers_results(results: dict, postgame: dict) -> bool:
     """Confirm every published final has a corresponding postgame record.
 
@@ -129,6 +144,7 @@ def audit(root: Path, now: datetime) -> dict:
         max_age_hours: float,
         coverage: dict[str, tuple[str, int]],
         severity: str = "critical",
+        freshness_required: bool = True,
     ) -> dict:
         payload = load(root, relative)
         stamp = first_time(payload, timestamp_paths)
@@ -140,7 +156,7 @@ def audit(root: Path, now: datetime) -> dict:
             value = nested(payload, path)
             count = len(value) if isinstance(value, (list, dict)) else int(value or 0)
             checks[label] = count >= minimum
-        status = "pass" if all(checks.values()) else "fail"
+        status = "pass" if required_checks_pass(checks, freshness_required) else "fail"
         row = {
             "status": status,
             "severity": severity,
@@ -148,11 +164,20 @@ def audit(root: Path, now: datetime) -> dict:
             "generated_at_utc": stamp.isoformat().replace("+00:00", "Z") if stamp else None,
             "age_hours": round(age, 2) if age is not None else None,
             "max_age_hours": max_age_hours,
+            "freshness_required": freshness_required,
             "checks": checks,
         }
         assets[name] = row
         if status == "fail":
-            findings.append({"severity": severity, "dataset": name, "failed_checks": [key for key, passed in checks.items() if not passed]})
+            findings.append({
+                "severity": severity,
+                "dataset": name,
+                "failed_checks": [
+                    key
+                    for key, passed in checks.items()
+                    if not passed and (freshness_required or key != "fresh")
+                ],
+            })
         return payload
 
     weekend = now.weekday() in {3, 4, 5, 6}
@@ -181,7 +206,14 @@ def audit(root: Path, now: datetime) -> dict:
     live_scores = check("cfb_live_scores", "data/live_scores.json", ["meta.generated_at"], score_slo, {}, severity="critical")
     actual_live_games = len(live_scores.get("games") or [])
     settlement_slo = 2 if actual_live_games else 8
-    postgame = check("cfb_postgame", "data/postgame_analytics.json", ["meta.generated_at"], settlement_slo, {"games": ("games", 300)})
+    postgame = check(
+        "cfb_postgame",
+        "data/postgame_analytics.json",
+        ["meta.generated_at"],
+        settlement_slo,
+        {"games": ("games", 300)},
+        freshness_required=False,
+    )
     postgame_aligned = postgame_covers_results(results, postgame)
     assets["cfb_postgame"]["checks"]["finals_aligned"] = postgame_aligned
     if not postgame_aligned:
