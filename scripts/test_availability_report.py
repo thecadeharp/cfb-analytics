@@ -38,6 +38,31 @@ class AvailabilityReportTests(unittest.TestCase):
         self.assertFalse(is_material_status("QB", "Probable"))
         self.assertTrue(is_material_status("QB", "Game Time Decision"))
 
+    def test_reserve_qb_does_not_hold_when_primary_usage_is_known(self):
+        usage = {
+            "alpha": {
+                "players": {"starter": 76.9, "reserve": 23.1},
+                "max_pass_attempt_share_pct": 76.9,
+            }
+        }
+        self.assertTrue(is_material_status(
+            "QB", "Out", team="Alpha", player="Starter", qb_usage=usage
+        ))
+        self.assertFalse(is_material_status(
+            "QB", "Questionable", team="Alpha", player="Reserve", qb_usage=usage
+        ))
+
+    def test_unmatched_qb_remains_conservative(self):
+        usage = {
+            "alpha": {
+                "players": {"starter": 80.0},
+                "max_pass_attempt_share_pct": 80.0,
+            }
+        }
+        self.assertTrue(is_material_status(
+            "QB", "Questionable", team="Alpha", player="Name Mismatch", qb_usage=usage
+        ))
+
     def test_pac12_payload_is_normalized(self):
         payload = {"games": [{
             "gameId": "a-b", "dateISO": "2026-10-17", "updatedAtUTC": "2026-10-16T22:00:00Z",

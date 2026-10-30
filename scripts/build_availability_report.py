@@ -19,6 +19,7 @@ except ModuleNotFoundError:  # Unit tests exercise pure payload normalization.
 
 ROOT = Path(__file__).resolve().parents[1]
 EXTERNAL_PATH = ROOT / "data" / "external_ratings.json"
+ROSTER_ASSETS_PATH = ROOT / "data" / "roster_assets.json"
 OUTPUT_PATH = ROOT / "data" / "roster_notes.json"
 ESPN_URL = "https://site.api.espn.com/apis/site/v2/sports/football/college-football/injuries"
 HDI_URL = "https://app.hdintelligence.com/api/get-publish-public"
@@ -78,11 +79,63 @@ def valid_until(verified, game_date=None):
     return expiry
 
 
-def is_material_status(position, status):
-    """Withhold public signals for uncertain or unavailable quarterbacks only."""
+def normalize_identity(value):
+    return re.sub(r"[^a-z0-9]+", "", str(value or "").casefold())
+
+
+def quarterback_usage_index(path=ROSTER_ASSETS_PATH):
+    """Return current-season QB workload evidence by team and player."""
+    try:
+        payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError, TypeError):
+        return {}
+
+    result = {}
+    for team_name, team in (payload.get("teams") or {}).items():
+        quarterbacks = {}
+        for player in team.get("players") or []:
+            positions = str(player.get("position") or "").upper().split("/")
+            if "QB" not in positions:
+                continue
+            usage = player.get("usage") or {}
+            try:
+                share = float(usage.get("pass_attempt_share_pct") or 0.0)
+            except (TypeError, ValueError):
+                share = 0.0
+            name = normalize_identity(player.get("name"))
+            if name:
+                quarterbacks[name] = max(0.0, share)
+        if quarterbacks:
+            result[normalize_identity(team_name)] = {
+                "players": quarterbacks,
+                "max_pass_attempt_share_pct": max(quarterbacks.values()),
+            }
+    return result
+
+
+def is_material_status(position, status, *, team=None, player=None, qb_usage=None):
+    """Hold only for a primary or materially used QB with a material status."""
     positions = str(position or "").upper().split("/")
     normalized_status = str(status or "").lower()
-    return "QB" in positions and any(token in normalized_status for token in ("out", "doubtful", "questionable", "game time decision"))
+    if "QB" not in positions or not any(
+        token in normalized_status
+        for token in ("out", "doubtful", "questionable", "game time decision")
+    ):
+        return False
+
+    # Without workload evidence, preserve the conservative hold. Once current
+    # usage exists, do not suppress the public signal for a reserve QB merely
+    # because the official report lists the position as QB.
+    if qb_usage is None or not team or not player:
+        return True
+    team_usage = qb_usage.get(normalize_identity(team))
+    if not team_usage or float(team_usage.get("max_pass_attempt_share_pct") or 0.0) <= 0:
+        return True
+    player_share = (team_usage.get("players") or {}).get(normalize_identity(player))
+    if player_share is None:
+        return True
+    max_share = float(team_usage.get("max_pass_attempt_share_pct") or 0.0)
+    return player_share >= 35.0 or player_share >= max_share - 0.1
 
 
 def parse_player_label(value):
@@ -110,8 +163,8 @@ def report_game_date(report):
         return None
 
 
-def official_note(*, conference, source_url, opponent, player, position, number, status, verified, game_date, report_type, report_id):
-    hold = is_material_status(position, status)
+def official_note(*, conference, source_url, team, opponent, player, position, number, status, verified, game_date, report_type, report_id, qb_usage=None):
+    hold = is_material_status(position, status, team=team, player=player, qb_usage=qb_usage)
     return {
         "player": player,
         "position": position or None,
@@ -129,10 +182,11 @@ def official_note(*, conference, source_url, opponent, player, position, number,
         "official_report_id": str(report_id) if report_id is not None else None,
         "withhold_public_signal": hold,
         "market_context_relevant": hold,
+        "signal_hold_basis": "primary_qb_workload" if hold else None,
     }
 
 
-def parse_hdi_payload(payload, conference, source, now):
+def parse_hdi_payload(payload, conference, source, now, qb_usage=None):
     notes, reports = {}, []
     for report_id, report in (payload or {}).items():
         if not isinstance(report, dict):
@@ -160,9 +214,10 @@ def parse_hdi_payload(payload, conference, source, now):
                 if not player:
                     continue
                 notes.setdefault(team_name, []).append(official_note(
-                    conference=conference, source_url=source["url"], opponent=opponent,
+                    conference=conference, source_url=source["url"], team=team_name, opponent=opponent,
                     player=player, position=position, number=number, status=status,
                     verified=verified, game_date=game_date, report_type=report.get("ReportType"), report_id=report_id,
+                    qb_usage=qb_usage,
                 ))
                 report_note_count += 1
         reports.append({
@@ -174,7 +229,7 @@ def parse_hdi_payload(payload, conference, source, now):
     return notes, reports
 
 
-def parse_pac12_payload(payload, conference, source, now):
+def parse_pac12_payload(payload, conference, source, now, qb_usage=None):
     notes, reports = {}, []
     for game in (payload or {}).get("games") or []:
         verified = parse_utc(game.get("updatedAtUTC"))
@@ -201,9 +256,10 @@ def parse_pac12_payload(payload, conference, source, now):
                 if not player or not status or status.lower() in {"available", "exempt"}:
                     continue
                 notes.setdefault(team_name, []).append(official_note(
-                    conference=conference, source_url=source["url"], opponent=opponent,
+                    conference=conference, source_url=source["url"], team=team_name, opponent=opponent,
                     player=player, position=position, number=None, status=status,
                     verified=verified, game_date=game_date, report_type=game.get("notes"), report_id=game.get("gameId"),
+                    qb_usage=qb_usage,
                 ))
                 report_note_count += 1
         reports.append({
@@ -215,14 +271,14 @@ def parse_pac12_payload(payload, conference, source, now):
     return notes, reports
 
 
-def fetch_official_source(session, conference, source, now):
+def fetch_official_source(session, conference, source, now, qb_usage=None):
     if source["kind"] == "hdi":
         response = session.post(HDI_URL, json={"sport": "Football", "organization": source["organization"], "conference": source["conference"]}, timeout=60)
         response.raise_for_status()
-        return parse_hdi_payload(response.json(), conference, source, now)
+        return parse_hdi_payload(response.json(), conference, source, now, qb_usage=qb_usage)
     response = session.get(PAC12_URL, timeout=60)
     response.raise_for_status()
-    return parse_pac12_payload(response.json(), conference, source, now)
+    return parse_pac12_payload(response.json(), conference, source, now, qb_usage=qb_usage)
 
 
 def retain_existing_notes(existing, now):
@@ -257,7 +313,7 @@ def retain_existing_notes(existing, now):
     return manual, official, retained_manual
 
 
-def collect_espn(session, now):
+def collect_espn(session, now, qb_usage=None):
     response = session.get(ESPN_URL, timeout=60)
     response.raise_for_status()
     payload, id_to_team, teams = response.json(), team_map(), {}
@@ -276,13 +332,14 @@ def collect_espn(session, now):
             if not player or not source_url:
                 continue
             position = str((athlete.get("position") or {}).get("abbreviation") or "").strip()
-            hold = is_material_status(position, status)
+            hold = is_material_status(position, status, team=team_name, player=player, qb_usage=qb_usage)
             teams.setdefault(team_name, []).append({
                 "player": player, "position": position or None, "status": status,
                 "text": f"{player} is listed {status.lower()} in ESPN's college football availability feed.",
                 "source_type": "espn", "source_label": "ESPN", "source_url": source_url,
                 "verified_at_utc": iso_utc(updated), "valid_until_utc": iso_utc(valid_until(updated)),
                 "withhold_public_signal": hold, "market_context_relevant": hold,
+                "signal_hold_basis": "primary_qb_workload" if hold else None,
             })
     return teams
 
@@ -318,12 +375,13 @@ def main():
     now = utc_now()
     existing = json.loads(OUTPUT_PATH.read_text(encoding="utf-8")) if OUTPUT_PATH.exists() else {}
     teams, previous_official, retained_manual = retain_existing_notes(existing, now)
+    qb_usage = quarterback_usage_index()
     session = requests.Session()
     session.headers.update({"User-Agent": "THI-Availability-Report/2.0"})
     source_health, official_report_count, official_note_count = {}, 0, 0
     for conference, source in OFFICIAL_SOURCES.items():
         try:
-            conference_notes, reports = fetch_official_source(session, conference, source, now)
+            conference_notes, reports = fetch_official_source(session, conference, source, now, qb_usage=qb_usage)
             merge_notes(teams, conference_notes)
             count = sum(len(rows) for rows in conference_notes.values())
             official_note_count += count
@@ -344,7 +402,7 @@ def main():
                 "error": f"{type(error).__name__}: {error}"[:300],
             }
     try:
-        espn_teams = collect_espn(session, now)
+        espn_teams = collect_espn(session, now, qb_usage=qb_usage)
         merge_notes(teams, espn_teams)
         espn_note_count = sum(len(rows) for rows in espn_teams.values())
         source_health["ESPN"] = {"status": "ok", "checked_at_utc": iso_utc(now), "listed_player_count": espn_note_count}
@@ -360,7 +418,7 @@ def main():
             "purpose": "Fresh, source-linked player availability context. Official statuses can hold public signals; they never alter Model A automatically.",
             "notes_policy": "Official ACC, Big Ten, Big 12, SEC and Pac-12 reports are ingested when published. A failed source retains its last still-valid official snapshot. Empty status remains unknown, not healthy.",
             "model_usage": "display_and_signal_hold_not_used_by_model_a",
-            "adjustment_policy": "No automated source is assigned a point value. Current official or ESPN QB Out, Doubtful, Questionable, or Game Time Decision statuses withhold the public signal pending resolution.",
+            "adjustment_policy": "No automated source is assigned a point value. Current official or ESPN Out, Doubtful, Questionable, or Game Time Decision statuses hold the public signal only for a primary or materially used quarterback. Current roster workload is context, not a point adjustment.",
             "team_count_with_current_notes": len(teams), "current_note_count": sum(len(notes) for notes in teams.values()),
             "official_report_count": official_report_count, "official_current_note_count": official_note_count,
             "espn_current_note_count": espn_note_count, "retained_manual_note_count": retained_manual,

@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 from scripts.audit_data_freshness import (
     acceptable_completed_weeks,
     current_cfb_week,
+    in_scoreboard_live_window,
     parse_time,
     postgame_covers_results,
     within_age,
@@ -33,6 +34,18 @@ class DataFreshnessAuditTests(unittest.TestCase):
             {"week": 8, "start_date": "2026-10-24T16:00:00Z", "status": "scheduled"},
         ]}
         self.assertEqual(current_cfb_week(projections, now), 7)
+
+    def test_live_score_slo_starts_at_kickoff_not_before(self):
+        projections = {"games": [{
+            "start_date": "2026-10-30T23:30:00Z",
+            "status": "scheduled",
+        }]}
+        self.assertFalse(in_scoreboard_live_window(
+            projections, datetime(2026, 10, 30, 22, 30, tzinfo=timezone.utc)
+        ))
+        self.assertTrue(in_scoreboard_live_window(
+            projections, datetime(2026, 10, 30, 23, 30, tzinfo=timezone.utc)
+        ))
 
     def test_weekly_delivery_grace_matches_sunday_through_monday_window(self):
         sunday = datetime(2026, 10, 18, 12, 0, tzinfo=timezone.utc)

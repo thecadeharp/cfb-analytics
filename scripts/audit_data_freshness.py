@@ -110,6 +110,14 @@ def acceptable_completed_weeks(active_week: int, now: datetime) -> set[int]:
     return {week for week in acceptable if week >= 0}
 
 
+def in_scoreboard_live_window(projections: dict, now: datetime) -> bool:
+    """Require the live-score SLO only after a scheduled game has kicked off."""
+    return any(
+        kickoff is not None and 0 <= (now - kickoff).total_seconds() <= 5 * 3600
+        for kickoff in (parse_time(game.get("start_date")) for game in projections.get("games") or [])
+    )
+
+
 def audit(root: Path, now: datetime) -> dict:
     assets: dict[str, dict] = {}
     findings: list[dict] = []
@@ -149,10 +157,7 @@ def audit(root: Path, now: datetime) -> dict:
 
     weekend = now.weekday() in {3, 4, 5, 6}
     projections = check("cfb_projections", "data/projections.json", ["meta.generated"], 10 if weekend else 30, {"games": ("games", 800)})
-    live_window = any(
-        kickoff is not None and -3600 <= (now - kickoff).total_seconds() <= 5 * 3600
-        for kickoff in (parse_time(game.get("start_date")) for game in projections.get("games") or [])
-    )
+    live_window = in_scoreboard_live_window(projections, now)
     metrics = check("cfb_team_metrics", "data/cfb_metrics.json", ["meta.generated"], 192, {"teams": ("teams", 130)})
     advanced = check("cfb_advanced_metrics", "data/advanced_metrics.json", ["meta.generated"], 192, {"teams": ("teams", 130)})
     check("cfb_external_ratings", "data/external_ratings.json", ["meta.last_updated", "meta.generated_at_utc"], 192, {"teams": ("teams", 130)})
