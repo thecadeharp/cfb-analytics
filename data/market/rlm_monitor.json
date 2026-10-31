@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "thi-rlm-monitor-v1.5",
-    "generated_at_utc": "2026-10-30T20:45:12.894041Z",
+    "generated_at_utc": "2026-10-31T00:54:31.919420Z",
     "status": "line_monitoring",
     "rlm_status": "public_splits_pending",
     "sharp_line_status": "monitoring",
@@ -12,13 +12,13 @@
       "authoritative": true,
       "read_only": true,
       "spreadsheet_url": "https://docs.google.com/spreadsheets/d/1Kp565JoyCyQq1ddSs_Ri5daSC85Ss9KgldyTDdbHceg/edit",
-      "verified_at_utc": "2026-10-27T23:52:40.707126Z",
-      "parsed_qualifiers": 37,
-      "review_notes": 10
+      "verified_at_utc": "2026-10-31T00:54:31.582742Z",
+      "parsed_qualifiers": 38,
+      "review_notes": 13
     },
     "alert_count": 0,
     "sharp_move_count": 38,
-    "steam_reversal_alert_count": 0,
+    "steam_reversal_alert_count": 1,
     "steam_context_hold_count": 0,
     "sharp_tracked_event_count": 50,
     "qualified_event_count": 0,
@@ -889,6 +889,41 @@
       "definition": "Observed Pinnacle spread movement from THI's first captured number. Public betting splits are unavailable, so this is not an RLM or sharp-money claim."
     }
   ],
-  "steam_reversal_alerts": [],
+  "steam_reversal_alerts": [
+    {
+      "sport": "cfb",
+      "event_id": "401858506",
+      "game_id": "401858506",
+      "week": 9,
+      "start_date": "2026-10-31T20:15:00.000Z",
+      "away_team": "Purdue",
+      "home_team": "Penn State",
+      "opening_home_spread": -7.0,
+      "current_home_spread": -10.0,
+      "line_delta": -3.0,
+      "movement_points": 3.0,
+      "sharp_book": "circa",
+      "source_verified": true,
+      "source_id": "week-9:row-29:401858506",
+      "source_sheet": "WEEK 9",
+      "source_row": 29,
+      "source_opening_text": "PURDUE V PSU -7  (52)",
+      "source_movement_text": "-10",
+      "source_observed_at_utc": "2026-10-31T00:54:31.582742Z",
+      "definition": "Circa opening-to-later spread movement recorded in the system owner's authoritative read-only Google Sheet.",
+      "first_seen_at_utc": "2026-10-31T00:54:31.582742Z",
+      "system_id": "steam-reversal",
+      "trigger_threshold_points": 3.0,
+      "steam_side": "home",
+      "steam_team": "Penn State",
+      "fade_side": "away",
+      "fade_team": "Purdue",
+      "fade_spread": 10.0,
+      "context_status": "unclassified",
+      "action_status": "monitor_only",
+      "context_flags": [],
+      "context_note": "Price movement alone does not establish sharp money, injury, weather or public causation."
+    }
+  ],
   "alerts": []
 }

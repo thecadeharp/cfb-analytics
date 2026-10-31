@@ -2,15 +2,15 @@
   "meta": {
     "version": "thi-circa-sheet-v1.0",
     "status": "verified_read_only",
-    "generated_at_utc": "2026-10-27T23:52:40.707126Z",
+    "generated_at_utc": "2026-10-31T00:54:31.582742Z",
     "source": "Google Sheets",
     "book": "Circa",
     "spreadsheet_id": "1Kp565JoyCyQq1ddSs_Ri5daSC85Ss9KgldyTDdbHceg",
     "spreadsheet_url": "https://docs.google.com/spreadsheets/d/1Kp565JoyCyQq1ddSs_Ri5daSC85Ss9KgldyTDdbHceg/edit",
     "write_access_used": false,
     "tabs_read": 13,
-    "qualifier_count": 37,
-    "issue_count": 10,
+    "qualifier_count": 38,
+    "issue_count": 13,
     "policy": "Only unambiguous CFB moves of at least 3.0 points are published. The Sheet is never modified."
   },
   "tabs": [
@@ -82,7 +82,7 @@
       "title": "WEEK 9",
       "gid": 257008375,
       "row_count": 56,
-      "qualifier_count": 0
+      "qualifier_count": 1
     },
     {
       "week": 10,
@@ -957,6 +957,29 @@
       "source_observed_at_utc": "2026-10-23T01:20:11.627505Z",
       "definition": "Circa opening-to-later spread movement recorded in the system owner's authoritative read-only Google Sheet.",
       "first_seen_at_utc": "2026-10-23T01:20:11.627505Z"
+    },
+    {
+      "sport": "cfb",
+      "event_id": "401858506",
+      "game_id": "401858506",
+      "week": 9,
+      "start_date": "2026-10-31T20:15:00.000Z",
+      "away_team": "Purdue",
+      "home_team": "Penn State",
+      "opening_home_spread": -7.0,
+      "current_home_spread": -10.0,
+      "line_delta": -3.0,
+      "movement_points": 3.0,
+      "sharp_book": "circa",
+      "source_verified": true,
+      "source_id": "week-9:row-29:401858506",
+      "source_sheet": "WEEK 9",
+      "source_row": 29,
+      "source_opening_text": "PURDUE V PSU -7  (52)",
+      "source_movement_text": "-10",
+      "source_observed_at_utc": "2026-10-31T00:54:31.582742Z",
+      "definition": "Circa opening-to-later spread movement recorded in the system owner's authoritative read-only Google Sheet.",
+      "first_seen_at_utc": "2026-10-31T00:54:31.582742Z"
     }
   ],
   "issues": [
@@ -1039,6 +1062,30 @@
       "status": "no_verified_spread_change",
       "reason": "The populated movement cells did not contain an unambiguous spread",
       "source": "RICE V FAU -10.5  (58)"
+    },
+    {
+      "week": 9,
+      "tab": "WEEK 9",
+      "row": 10,
+      "status": "unmatched_game",
+      "reason": "The teams did not resolve to exactly one THI game in this week",
+      "source": "KENT ST -11  v SAC ST  (47)"
+    },
+    {
+      "week": 9,
+      "tab": "WEEK 9",
+      "row": 34,
+      "status": "unmatched_game",
+      "reason": "The teams did not resolve to exactly one THI game in this week",
+      "source": "COAST CAR  V GEORGIA ST -7 (58)"
+    },
+    {
+      "week": 9,
+      "tab": "WEEK 9",
+      "row": 57,
+      "status": "unmatched_game",
+      "reason": "The teams did not resolve to exactly one THI game in this week",
+      "source": "N ILL v UNLV -24.5  (52.5"
     }
   ]
 }
