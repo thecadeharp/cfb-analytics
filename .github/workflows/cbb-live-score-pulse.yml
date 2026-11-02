@@ -1,0 +1,79 @@
+name: CBB Live Score Pulse
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [cbb-live-score-pulse]
+  schedule:
+    # Five-minute cadence, offset from the top of the hour to reduce scheduler congestion.
+    - cron: "4-59/5 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thi-data-writer
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate the score pulse
+        run: |
+          python -m py_compile scripts/refresh_cbb_scores.py scripts/build_cbb_postgame.py
+          python -m unittest scripts/test_refresh_cbb_scores.py scripts/test_cbb_postgame.py
+      - name: Refresh live scores and completed games
+        env:
+          CBBD_API_KEY: ${{ secrets.CBBD_API_KEY }}
+        run: |
+          cp data/cbb/postgame.json /tmp/thi-cbb-postgame-before.json
+          python scripts/refresh_cbb_scores.py \
+            --changed-flag /tmp/thi-cbb-score-changed \
+            --recent-final-flag /tmp/thi-cbb-recent-final
+          if [[ -s /tmp/thi-cbb-recent-final ]]; then
+            python scripts/build_cbb_postgame.py
+            python - <<'PY'
+          import json, shutil
+          before_path = "/tmp/thi-cbb-postgame-before.json"
+          after_path = "data/cbb/postgame.json"
+          before = json.load(open(before_path, encoding="utf-8"))
+          after = json.load(open(after_path, encoding="utf-8"))
+          before.get("meta", {}).pop("generated_at_utc", None)
+          after.get("meta", {}).pop("generated_at_utc", None)
+          if before == after:
+              shutil.copyfile(before_path, after_path)
+              print("Postgame content is unchanged; suppressed timestamp-only update.")
+          PY
+          fi
+          python scripts/build_static_cache_manifest.py
+      - name: Validate published score contracts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          board = json.loads(Path("data/cbb/projection_board.json").read_text())
+          postgame = json.loads(Path("data/cbb/postgame.json").read_text())
+          counts = board["meta"]["status_counts"]
+          games = board["games"]
+          normalize = lambda value: str(value or "").lower().replace("_", "")
+          assert counts["upcoming"] == sum(normalize(g.get("status")) == "scheduled" for g in games)
+          assert counts["live"] == sum(normalize(g.get("status")) in {"live", "inprogress", "halftime"} for g in games)
+          assert counts["final"] == sum(normalize(g.get("status")) in {"final", "completed", "complete"} for g in games)
+          assert postgame["meta"]["final_game_count"] <= counts["final"]
+          PY
+      - name: Publish CBB score pulse
+        env:
+          CBBD_API_KEY: ${{ secrets.CBBD_API_KEY }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          bash scripts/publish_cbb_score_update.sh

@@ -34,6 +34,7 @@
   const PLAYER_PATH = "data/cbb/player_ratings.json";
   const CORE_DATA_KEYS = new Set(["profiles", "foundation", "model", "priors", "powerRatings", "homeCourt", "history", "projectionBoard", "tracking", "bracketology", "readiness", "health", "trends", "varianceTracker", "publicBacktest", "marketSnapshots", "marketContract"]);
   const memoryCache = new Map();
+  let scorePollTimer = null;
   const DEFERRED_VIEW_KEYS = {
     "cbb-projections": ["intelligence", "matchups", "operations", "postgame"],
     "cbb-tracking": ["preseasonCandidate", "preseasonSos"],
@@ -302,6 +303,28 @@
       })
       .finally(() => { state.loading = null; });
     return state.loading;
+  }
+
+  function startScorePolling() {
+    if (scorePollTimer) return;
+    scorePollTimer = window.setInterval(async () => {
+      if (state.sport !== "cbb" || !state.loaded || document.hidden) return;
+      const oldBoardVersion = state.cacheManifest?.assets?.[PATHS.projectionBoard]?.version;
+      try {
+        await loadCacheManifest();
+        const nextBoardVersion = state.cacheManifest?.assets?.[PATHS.projectionBoard]?.version;
+        if (!nextBoardVersion || nextBoardVersion === oldBoardVersion) return;
+        const [projectionBoard, postgame] = await Promise.all([
+          fetchJson(PATHS.projectionBoard),
+          fetchJson(PATHS.postgame).catch(() => state.data.postgame || { meta: {}, games: {} }),
+        ]);
+        state.data.projectionBoard = projectionBoard;
+        state.data.postgame = postgame;
+        renderProjections();
+      } catch (_error) {
+        // Keep the last valid board visible and retry on the next pulse.
+      }
+    }, 60_000);
   }
 
   function loadDeferred(keys = []) {
@@ -741,7 +764,7 @@
     const awayRank = cbbThiRank(game.away?.team_id);
     const homeRank = cbbThiRank(game.home?.team_id);
     return `<tr class="cbb-projection-row" data-cbb-game-id="${escapeHtml(game.game_id)}">
-      <td><div class="cbb-matchup-team">${teamLogo(game.away,"small")}<div class="cbb-matchup-name"><strong>${escapeHtml(game.away?.team || "—")}</strong>${awayRank ? `<small>#${awayRank}</small>` : ""}</div><span>${gameStatus(game) === "final" ? integer(game.away?.score) : ""}</span></div><div class="cbb-matchup-team">${teamLogo(game.home,"small")}<div class="cbb-matchup-name"><strong>${escapeHtml(game.home?.team || "—")}</strong>${homeRank ? `<small>#${homeRank}</small>` : ""}</div><span>${gameStatus(game) === "final" ? integer(game.home?.score) : ""}</span></div><div class="cbb-team-meta">${escapeHtml(time)} · ${escapeHtml(network)} · ${gameType}</div>${varianceMarkup}</td>
+      <td><div class="cbb-matchup-team">${teamLogo(game.away,"small")}<div class="cbb-matchup-name"><strong>${escapeHtml(game.away?.team || "—")}</strong>${awayRank ? `<small>#${awayRank}</small>` : ""}</div><span>${gameStatus(game) !== "upcoming" ? integer(game.away?.score) : ""}</span></div><div class="cbb-matchup-team">${teamLogo(game.home,"small")}<div class="cbb-matchup-name"><strong>${escapeHtml(game.home?.team || "—")}</strong>${homeRank ? `<small>#${homeRank}</small>` : ""}</div><span>${gameStatus(game) !== "upcoming" ? integer(game.home?.score) : ""}</span></div><div class="cbb-team-meta">${gameStatus(game) === "live" ? `<b class="cbb-live-label">LIVE${game.live?.clock ? ` · ${escapeHtml(game.live.clock)}` : ""}</b> · ` : ""}${escapeHtml(time)} · ${escapeHtml(network)} · ${gameType}</div>${varianceMarkup}</td>
       <td><span class="cbb-watch-score">${integer(watch)}</span><div class="cbb-team-meta">${watchLabel}</div></td>
       <td class="cbb-line-cell"><strong class="cbb-number cbb-line-value" title="${escapeHtml(edgeMarketTextFull || projectedLineFull)}">${escapeHtml(edgeMarketText || projectedLine)}</strong><div class="cbb-team-meta">${edgeMarketText ? "THI preferred side at current market" : "THI projected spread"}</div></td>
       <td class="cbb-line-cell"><strong class="cbb-number cbb-line-value" title="${escapeHtml(marketTextFull)}">${escapeHtml(marketText)}</strong><div class="cbb-team-meta">${game.market?.book_count ? `${integer(game.market.book_count)} books` : "No consensus line"}${isolatedMarket ? " · ISOLATED PRICE" : ""}</div></td>
@@ -2295,6 +2318,7 @@
 
   function mountWithSharedMatchup() {
     mount();
+    startScorePolling();
     const params = new URLSearchParams(window.location.search);
     const gameId = params.get("sport") === "cbb" ? params.get("game") : null;
     if (!gameId) return;
