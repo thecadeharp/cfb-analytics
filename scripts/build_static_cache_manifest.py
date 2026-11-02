@@ -20,12 +20,12 @@ CANDIDATES = [
     "data/cbb/history/manifest.json", "data/cbb/projection_board.json", "data/cbb/play_style.json",
     "data/cbb/matchup_engine.json", "data/cbb/intelligence_suite.json", "data/cbb/model_tracking.json",
     "data/cbb/bracketology.json", "data/cbb/research/model_v02_challenger.json", "data/cbb/game_day_readiness.json",
-    "data/cbb/operations_context.json", "data/cbb/platform_health.json", "data/cbb/market_snapshots.json",
+    "data/cbb/operations_context.json", "data/cbb/platform_health.json", "data/cbb/market_snapshots.json", "data/cbb/postgame.json",
     "data/cbb/market_contract.json", "data/cbb/player_ratings.json", "data/trends_lab.json",
     "data/variance/prospective_tracker.json", "data/market/rlm_monitor.json", "data/reports/public_backtest_scorecard.json",
 ]
 
-HOT_NAMES = {"game_board.json", "projection_board.json", "market_snapshots.json", "market_contract.json", "rlm_monitor.json", "prospective_tracker.json"}
+HOT_NAMES = {"game_board.json", "projection_board.json", "market_snapshots.json", "market_contract.json", "postgame.json", "rlm_monitor.json", "prospective_tracker.json"}
 
 
 def build_manifest(root: Path = ROOT) -> dict[str, Any]:

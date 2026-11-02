@@ -74,6 +74,7 @@ jobs:
             scripts/build_cbb_matchup_engine.py \
             scripts/build_cbb_intelligence_suite.py \
             scripts/build_cbb_model_tracking.py \
+            scripts/build_cbb_postgame.py \
             scripts/build_cbb_bracketology.py \
             scripts/research_cbb_model_v02.py \
             scripts/build_cbb_game_day_readiness.py \
@@ -107,6 +108,7 @@ jobs:
             scripts/test_cbb_matchup_engine.py \
             scripts/test_cbb_intelligence_suite.py \
             scripts/test_cbb_model_tracking.py \
+            scripts/test_cbb_postgame.py \
             scripts/test_cbb_bracketology.py \
             scripts/test_cbb_model_v02.py \
             scripts/test_cbb_game_day_readiness.py \
@@ -142,6 +144,7 @@ jobs:
           python scripts/build_cbb_play_style.py --max-games 40
           python scripts/build_cbb_matchup_engine.py
           python scripts/build_cbb_model_tracking.py
+          python scripts/build_cbb_postgame.py
           python scripts/build_cbb_bracketology.py
           python scripts/build_cbb_intelligence_suite.py
           python scripts/research_cbb_model_v02.py
@@ -174,6 +177,7 @@ jobs:
           display_power = json.loads((root / "model/display_power_ratings.json").read_text())
           preseason_candidate = json.loads((root / "model/preseason_index_candidate.json").read_text())
           projections = json.loads((root / "projection_board.json").read_text())
+          postgame = json.loads((root / "postgame.json").read_text())
           home_court = json.loads((root / "home_court_advantage.json").read_text())
           play_style = json.loads((root / "play_style.json").read_text())
           matchups = json.loads((root / "matchup_engine.json").read_text())
@@ -233,6 +237,9 @@ jobs:
               assert not any(row["roster_verified"] for row in preseason_candidate["teams"])
           assert preseason_candidate["prospective_protocol"]["checkpoints"][-1]["name"] == "end_of_season"
           assert projections["meta"]["version"] == "thi-cbb-projection-board-v0.5"
+          assert postgame["meta"]["version"] == "thi-cbb-postgame-v1.0"
+          assert postgame["meta"]["final_game_count"] == sum(str(game.get("status", "")).lower() == "final" for game in projections["games"])
+          assert postgame["meta"]["model_usage"].startswith("display_only_postgame")
           assert home_court["meta"]["version"] == "thi-cbb-home-court-v1.0"
           assert len(home_court["teams"]) >= 300
           assert all(0.5 <= row["home_court_points"] <= 5.5 for row in home_court["teams"])
@@ -340,6 +347,7 @@ jobs:
             data/cbb/play_style.json \
             data/cbb/matchup_engine.json \
             data/cbb/model_tracking.json \
+            data/cbb/postgame.json \
             data/cbb/bracketology.json \
             data/cbb/intelligence_suite.json \
             data/cbb/research/model_v02_challenger.json \
