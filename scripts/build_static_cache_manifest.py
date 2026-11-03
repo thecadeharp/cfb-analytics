@@ -25,7 +25,7 @@ CANDIDATES = [
     "data/variance/prospective_tracker.json", "data/market/rlm_monitor.json", "data/reports/public_backtest_scorecard.json",
 ]
 
-HOT_NAMES = {"game_board.json", "projection_board.json", "market_snapshots.json", "market_contract.json", "postgame.json", "rlm_monitor.json", "prospective_tracker.json"}
+HOT_NAMES = {"game_board.json", "projection_board.json", "model_tracking.json", "market_snapshots.json", "market_contract.json", "postgame.json", "rlm_monitor.json", "prospective_tracker.json"}
 
 
 def build_manifest(root: Path = ROOT) -> dict[str, Any]:

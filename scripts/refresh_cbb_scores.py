@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import math
 import os
@@ -150,6 +151,9 @@ def apply_scores(
             old_status = canonical_status(target.get("status"))
             next_status = target_status if status_rank(target_status) >= status_rank(old_status) else old_status
             changed = next_status != old_status
+            if next_status == "final" and old_status != "final" and target is projection_by_id.get(game_id) and not target.get("closing_market"):
+                target["closing_market"] = copy.deepcopy(target.get("market") or {})
+                changed = True
             if next_status in {"live", "final"}:
                 if home_score is not None and target.get("home", {}).get("score") != home_score:
                     target.setdefault("home", {})["score"] = home_score
@@ -260,6 +264,7 @@ def main() -> None:
     parser.add_argument("--projection-board", type=Path, default=ROOT / "data/cbb/projection_board.json")
     parser.add_argument("--changed-flag", type=Path)
     parser.add_argument("--recent-final-flag", type=Path)
+    parser.add_argument("--newly-final-flag", type=Path)
     args = parser.parse_args()
     key = clean_key(os.environ.get("CBBD_API_KEY"))
     if not key:
@@ -275,6 +280,8 @@ def main() -> None:
             args.changed_flag.write_text("\n".join(result["updated_ids"]) + "\n", encoding="utf-8")
     if result["recent_final"] and args.recent_final_flag:
         args.recent_final_flag.write_text("1\n", encoding="utf-8")
+    if result["newly_final_ids"] and args.newly_final_flag:
+        args.newly_final_flag.write_text("\n".join(result["newly_final_ids"]) + "\n", encoding="utf-8")
     print(
         f"CBB score pulse: active_window={result['active_window']} "
         f"updated={len(result['updated_ids'])} newly_final={len(result['newly_final_ids'])}"

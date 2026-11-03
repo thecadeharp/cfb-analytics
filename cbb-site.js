@@ -37,7 +37,7 @@
   let scorePollTimer = null;
   const DEFERRED_VIEW_KEYS = {
     "cbb-projections": ["intelligence", "matchups", "operations", "postgame"],
-    "cbb-tracking": ["preseasonCandidate", "preseasonSos"],
+    "cbb-tracking": [],
     "cbb-team-data": ["intelligence"],
     "cbb-ratings": ["intelligence"],
     "cbb-market": ["intelligence", "rlmMonitor"],
@@ -53,6 +53,7 @@
     data: null,
     ratingSort: { key: "prior_net", direction: "desc" },
     ratingChart: "efficiency",
+    trackingPeriod: "SEASON",
     playerSort: { key: "thi_player_rating", direction: "desc" },
     playerQuery: "",
     playerConference: "all",
@@ -310,17 +311,22 @@
     scorePollTimer = window.setInterval(async () => {
       if (state.sport !== "cbb" || !state.loaded || document.hidden) return;
       const oldBoardVersion = state.cacheManifest?.assets?.[PATHS.projectionBoard]?.version;
+      const oldTrackingVersion = state.cacheManifest?.assets?.[PATHS.tracking]?.version;
       try {
         await loadCacheManifest();
         const nextBoardVersion = state.cacheManifest?.assets?.[PATHS.projectionBoard]?.version;
-        if (!nextBoardVersion || nextBoardVersion === oldBoardVersion) return;
-        const [projectionBoard, postgame] = await Promise.all([
+        const nextTrackingVersion = state.cacheManifest?.assets?.[PATHS.tracking]?.version;
+        if ((!nextBoardVersion || nextBoardVersion === oldBoardVersion) && (!nextTrackingVersion || nextTrackingVersion === oldTrackingVersion)) return;
+        const [projectionBoard, postgame, tracking] = await Promise.all([
           fetchJson(PATHS.projectionBoard),
           fetchJson(PATHS.postgame).catch(() => state.data.postgame || { meta: {}, games: {} }),
+          fetchJson(PATHS.tracking).catch(() => state.data.tracking || { meta: {}, summary: {} }),
         ]);
         state.data.projectionBoard = projectionBoard;
         state.data.postgame = postgame;
+        state.data.tracking = tracking;
         renderProjections();
+        renderTracking();
       } catch (_error) {
         // Keep the last valid board visible and retry on the next pulse.
       }
@@ -2185,88 +2191,61 @@
   }
 
   function renderTracking() {
-    const prospective = state.data.tracking || {};
-    const structural = state.data.powerRatings || {};
-    const candidate = state.data.preseasonCandidate || {};
-    const sosSnapshot = state.data.preseasonSos || {};
-    const candidateEvaluation = candidate.evaluation || {};
-    const candidateProtocol = candidate.prospective_protocol || {};
-    const prospectiveSummary = prospective.summary || {};
-    const spreadYtd = prospectiveSummary.spread || {};
-    const totalsYtd = prospectiveSummary.totals || {};
-    const accuracyYtd = prospectiveSummary.projection_accuracy || {};
-    const spreadSignals = prospective.spread_by_signal || {};
-    const spreadMonths = prospective.spread_by_month || {};
+    const tracking = state.data.tracking || {};
+    const summary = tracking.summary || {};
+    const weeks = tracking.by_week || [];
+    const selectedWeek = state.trackingPeriod === "SEASON" ? null : weeks.find(row => `W${row.week}` === state.trackingPeriod);
+    const performance = selectedWeek || summary;
+    const spread = performance.spread || {};
+    const totals = performance.totals || {};
+    const straightUp = performance.straight_up || {};
+    const accuracy = performance.projection_accuracy || {};
+    const notable = selectedWeek ? {} : (summary.notable_spread || {});
     const record = row => Number(row?.games) ? `${integer(row.wins)}-${integer(row.losses)}-${integer(row.pushes)}` : "—";
-    const confidence = row => {
-      if (row?.validation?.passed !== true) return "DEVELOPING";
-      const games = Number(row?.games || 0);
-      const hit = Number(row?.hit_rate);
-      const clv = Number(row?.average_clv);
-      const beat = Number(row?.beat_close_pct);
-      if (games >= 100 && hit >= 53 && clv > 0 && beat >= 55) return "ESTABLISHED";
-      if (games >= 50 && hit >= 52.5 && clv > 0 && beat >= 52.5) return "VALIDATED";
-      return "DEVELOPING";
-    };
-    const monthLabel = value => {
-      const [year, month] = String(value).split("-").map(Number);
-      if (!year || !month) return humanize(value);
-      return new Intl.DateTimeFormat("en-US", { month:"long", year:"numeric", timeZone:"UTC" }).format(new Date(Date.UTC(year, month - 1, 1)));
-    };
-    const monthlyRows = Object.entries(spreadMonths).sort(([a],[b]) => a.localeCompare(b)).map(([month,row]) => `<tr>
-      <td>${escapeHtml(monthLabel(month))}</td><td class="cbb-number">${integer(row.games)}</td><td class="cbb-number">${record(row)}</td>
-      <td class="cbb-number">${row.hit_rate == null ? "—" : pct(row.hit_rate)}</td><td class="cbb-number">${row.average_clv == null ? "—" : number(row.average_clv,2,true)}</td>
-      <td class="cbb-number">${row.beat_close_pct == null ? "—" : pct(row.beat_close_pct)}</td></tr>`).join("");
-    const signalRows = Object.entries(spreadSignals).sort(([a],[b]) => a.localeCompare(b)).map(([signal,row]) => `<tr>
-      <td>${escapeHtml(publicSignalLabel(signal))}</td><td class="cbb-number">${integer(row.games)}</td><td class="cbb-number">${record(row)}</td>
-      <td class="cbb-number">${row.hit_rate == null ? "—" : pct(row.hit_rate)}</td><td class="cbb-number">${row.average_clv == null ? "—" : number(row.average_clv,2,true)}</td>
-      <td class="cbb-number">${row.beat_close_pct == null ? "—" : pct(row.beat_close_pct)}</td><td><span class="cbb-tracking-confidence">${confidence(row)}</span></td></tr>`).join("");
-    const play = spreadSignals.play || spreadSignals.PLAY || {};
-    const decisions = (prospective.spread_decisions || []).slice().sort((a,b) => String(b.start_date || "").localeCompare(String(a.start_date || ""))).slice(0, 25);
+    const performanceCard = (label, value, note) => `<article class="cbb-panel cbb-model-card"><div class="cbb-label">${escapeHtml(label)}</div><div class="cbb-model-value">${escapeHtml(value)}</div><div class="cbb-model-sub">${escapeHtml(note)}</div></article>`;
+    const periodButtons = [`<button type="button" data-cbb-tracking-week="SEASON" class="${state.trackingPeriod === "SEASON" ? "is-active" : ""}">Season</button>`, ...weeks.map(row => `<button type="button" data-cbb-tracking-week="W${row.week}" class="${state.trackingPeriod === `W${row.week}` ? "is-active" : ""}">Week ${row.week}</button>`)].join("");
+    const weeklyRows = weeks.map(row => `<tr><td><strong>Week ${integer(row.week)}</strong></td><td class="cbb-number">${integer(row.finals)}</td><td class="cbb-number">${record(row.straight_up)}</td><td class="cbb-number">${record(row.spread)}</td><td class="cbb-number">${record(row.totals)}</td><td class="cbb-number">${row.totals?.average_clv == null ? "—" : number(row.totals.average_clv,2,true)}</td><td class="cbb-number">${row.totals?.beat_close_pct == null ? "—" : pct(row.totals.beat_close_pct)}</td><td class="cbb-number">${row.projection_accuracy?.margin_mae == null ? "—" : `${number(row.projection_accuracy.margin_mae,1)} pts`}</td><td class="cbb-number">${row.spread?.average_clv == null ? "—" : number(row.spread.average_clv,2,true)}</td></tr>`).join("");
+    const signalEntries = [
+      ...Object.entries(tracking.spread_by_signal || {}).map(([key,row]) => [publicSignalLabel(key),row]),
+      ...Object.entries(tracking.totals_by_signal || {}).map(([key,row]) => [key === "total_watch" ? "Total Watch" : "Total Lean",row]),
+    ];
+    const signalRows = signalEntries.map(([label,row]) => `<tr><td><strong>${escapeHtml(label)}</strong></td><td class="cbb-number">${integer(row.games)}</td><td class="cbb-number">${record(row)}</td><td class="cbb-number">${row.hit_rate == null ? "—" : pct(row.hit_rate)}</td><td class="cbb-number">${row.average_clv == null ? "—" : number(row.average_clv,2,true)}</td><td class="cbb-number">${row.beat_close_pct == null ? "—" : pct(row.beat_close_pct)}</td><td><span class="cbb-tracking-confidence">DEVELOPING</span></td></tr>`).join("");
+    const decisions = (tracking.spread_decisions || []).filter(row => !selectedWeek || Number(row.week) === Number(selectedWeek.week)).slice(0,50);
     const decisionRows = decisions.map(trackingDecisionRow).join("");
     const view = document.getElementById("view-cbb-tracking");
     view.innerHTML = `
       <div class="cbb-kicker">Prospective accountability</div>
       <h1 class="page-title">Model Tracking</h1>
-      <p class="page-subtitle">Every frozen THI projection graded after the final: winner accuracy, ATS results, tracked totals, closing-line value and projection error.</p>
-      <section class="cbb-panel cbb-tracking-shell" aria-labelledby="cbb-research-validation-title">
-        <header class="cbb-tracking-head"><div><div class="cbb-label">Research &amp; Validation</div><h2 id="cbb-research-validation-title">Model status and promotion record</h2></div><p>Software releases and model promotion are separate decisions. A passing deployment verifies delivery and data contracts; it never promotes an experimental model.</p></header>
-        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Roster-Era Power v3</span><strong>The displayed board now uses the roster-aware research layer</strong><p>${candidateProtocol.candidate_state === "research_blocked_roster_audit" ? "National player-level publication remains blocked until the independent roster audit passes. " : ""}The rating board remains display-only: neither a successful build nor an interesting retrospective result can promote it into Model A or production projections.</p></div>
-        <div class="cbb-tracking-grid">
-          ${modelCard("Displayed board", "Roster-Era Power v3", humanize(structural.meta?.status || "provisional_roster_era_power"), `${integer(structural.meta?.team_count)} teams · display-only`)}
-          ${modelCard("Research challenger", "Roster-aware candidate", candidateEvaluation.promotion_eligible === false ? "WITHHELD" : "UNRESOLVED", humanize(candidateProtocol.candidate_state || "research_only"))}
-          ${modelCard("Validation result", "2025 paired MAE change", candidateEvaluation.validation?.paired_team_season_mae_improvement == null ? "—" : `${number(candidateEvaluation.validation.paired_team_season_mae_improvement,2,true)} pts`, "Retrospective evidence; not promotion authority")}
-          ${modelCard("Out-of-time result", "2026 paired MAE change", candidateEvaluation.out_of_time_test?.paired_team_season_mae_improvement == null ? "—" : `${number(candidateEvaluation.out_of_time_test.paired_team_season_mae_improvement,2,true)} pts`, "Analyzed test; no longer untouched")}
-          ${modelCard("Roster-era board", structural.meta?.version || "Awaiting version", `${integer(structural.meta?.official_roster_matches)} official matches`, formatTimestamp(structural.meta?.generated_at_utc))}
-          ${modelCard("Frozen Projected SOS", sosSnapshot.meta?.version || "Awaiting snapshot", sosSnapshot.meta?.immutable ? "IMMUTABLE" : "CHECK", `${integer(sosSnapshot.meta?.game_count)} confirmed games · ${formatTimestamp(sosSnapshot.meta?.frozen_at_utc)}`)}
-        </div>
-        <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Predetermined promotion standard</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Requirement</th><th>Evidence required</th><th>Current state</th></tr></thead><tbody>
-          <tr><td>Point-in-time data</td><td>Timestamped roster, transfer and recruiting inputs frozen before games</td><td>2027 freeze required</td></tr>
-          <tr><td>Reproducibility</td><td>Immutable inputs, code version, parameters and output checksums</td><td>Infrastructure active</td></tr>
-          <tr><td>Predictive accuracy</td><td>Prospective paired MAE improvement versus frozen production baseline</td><td>Awaiting games</td></tr>
-          <tr><td>Statistical evidence</td><td>Paired error interval, calibration and no major conference or strength-tier bias</td><td>Awaiting games</td></tr>
-          <tr><td>Decision point</td><td>Preseason, 100-game and midseason reviews are descriptive; promotion is allowed only after the end-of-season gate</td><td>Locked</td></tr>
-        </tbody></table></div></div>
-      </section>
+      <p class="page-subtitle">The same accountability framework used for college football: straight-up accuracy, every ATS decision, tracked total keys, closing-line value and projection error.</p>
       <section class="cbb-panel cbb-tracking-shell">
-        <header class="cbb-tracking-head"><div><div class="cbb-label">Transparent Model Tracking</div><h2>Season-to-Date Performance</h2></div><p>${escapeHtml(prospective.meta?.grading_policy || "The first coordinated refresh will initialize the frozen tracking ledger.")}</p></header>
-        <div class="cbb-tracking-periods"><span>Season ${escapeHtml(prospective.meta?.season || "2027")}</span></div>
-        <div class="cbb-tracking-section-label">Season to Date</div>
+        <header class="cbb-tracking-head"><div><div class="cbb-label">Transparent Model Tracking</div><h2>${selectedWeek ? `Week ${integer(selectedWeek.week)} Performance` : "Season-to-Date Performance"}</h2></div><p>${escapeHtml(tracking.meta?.grading_policy || "Every frozen projection is graded after the final.")}</p></header>
+        <div class="cbb-tracking-periods">${periodButtons}</div>
+        <div class="cbb-tracking-section-label">${selectedWeek ? `Week ${integer(selectedWeek.week)}` : "Selected period"}</div>
         <div class="cbb-tracking-grid">
-          ${modelCard("Games final", "Frozen projections", integer(accuracyYtd.games), `${integer(prospectiveSummary.final_games_with_frozen_projection)} finals reconciled`)}
-          ${modelCard("Straight up", "Winner accuracy", accuracyYtd.winner_accuracy == null ? "—" : pct(accuracyYtd.winner_accuracy), accuracyYtd.games ? `${integer(accuracyYtd.games)} graded games` : "No decisions")}
-          ${modelCard("Overall ATS", "Spread record", record(spreadYtd), spreadYtd.games ? `${pct(spreadYtd.hit_rate)} ATS` : "No decisions")}
-          ${modelCard("Tracked totals", "Totals record", record(totalsYtd), totalsYtd.games ? `${pct(totalsYtd.hit_rate)}` : "No decisions")}
-          ${modelCard("Average margin error", "Projection accuracy", accuracyYtd.margin_mae == null ? "—" : `${number(accuracyYtd.margin_mae,1)} pts`, "Absolute THI projection error")}
-          ${modelCard("Average CLV", "Preferred side", spreadYtd.average_clv == null ? "—" : number(spreadYtd.average_clv,1,true), `${integer(spreadYtd.closing_line_games)} decisions with a close`)}
-          ${modelCard("Beat close", "Spread CLV", spreadYtd.beat_close_pct == null ? "—" : pct(spreadYtd.beat_close_pct), "Directional closing-line decisions")}
-          ${modelCard("Notable tier ATS", "Qualified disagreements", record(play), play.games ? `${pct(play.hit_rate)} ATS` : "No decisions")}
+          ${performanceCard("Games final", integer(selectedWeek ? selectedWeek.finals : summary.final_games_with_frozen_projection), "Frozen projections reconciled")}
+          ${performanceCard("Straight up", record(straightUp), straightUp.hit_rate == null ? "No decisions" : `${pct(straightUp.hit_rate)} winner accuracy`)}
+          ${performanceCard("Overall ATS", record(spread), spread.hit_rate == null ? "No decisions" : `${pct(spread.hit_rate)} ATS`)}
+          ${performanceCard("Tracked totals", record(totals), totals.hit_rate == null ? "No testing keys" : `${pct(totals.hit_rate)} on 4+ point keys`)}
+          ${performanceCard("Totals average CLV", totals.average_clv == null ? "—" : number(totals.average_clv,2,true), `${integer(totals.closing_line_games)} decisions with a close`)}
+          ${performanceCard("Totals beat close", totals.beat_close_pct == null ? "—" : pct(totals.beat_close_pct), "Directional closing-line decisions")}
+          ${performanceCard("Notable tier ATS", selectedWeek ? "See ledger" : record(notable), selectedWeek || notable.hit_rate == null ? "Play, Material and Outlier" : `${pct(notable.hit_rate)} ATS`)}
+          ${performanceCard("Average margin error", accuracy.margin_mae == null ? "—" : `${number(accuracy.margin_mae,1)} pts`, "Absolute THI projection error")}
+          ${performanceCard("Average CLV", spread.average_clv == null ? "—" : number(spread.average_clv,2,true), `${integer(spread.closing_line_games)} spread decisions with a close`)}
         </div>
-        <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Monthly Ledger</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Month</th><th>Games</th><th>ATS</th><th>Win %</th><th>Average CLV</th><th>Beat Close</th></tr></thead><tbody>${monthlyRows || `<tr><td colspan="6" class="cbb-empty">The ledger will populate after the first qualified CBB decision reaches final status.</td></tr>`}</tbody></table></div></div>
-        <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Season-to-Date · Every Signal and Testing Key</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Signal / Key</th><th>Games</th><th>Record</th><th>Win %</th><th>Average CLV</th><th>Beat Close</th><th>Confidence</th></tr></thead><tbody>${signalRows || `<tr><td colspan="7" class="cbb-empty">Signal records will populate prospectively as qualified games are graded.</td></tr>`}</tbody></table></div></div>
-        <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Game-Level Accountability Ledger</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Date</th><th>Matchup</th><th>THI side</th><th>Frozen line</th><th>Closing line</th><th>CLV</th><th>Edge</th><th>Result</th><th>Final</th></tr></thead><tbody>${decisionRows || `<tr><td colspan="9" class="cbb-empty">Qualified decisions will appear here only after a pregame projection is frozen.</td></tr>`}</tbody></table></div></div>
-      </section>
-    `;
+        <div class="cbb-tracking-section-label">Season to date</div>
+        <div class="cbb-tracking-grid cbb-tracking-ytd-grid">
+          ${performanceCard("SU YTD", record(summary.straight_up), summary.straight_up?.hit_rate == null ? "No decisions" : pct(summary.straight_up.hit_rate))}
+          ${performanceCard("ATS YTD", record(summary.spread), summary.spread?.hit_rate == null ? "No decisions" : pct(summary.spread.hit_rate))}
+          ${performanceCard("Totals YTD", record(summary.totals), summary.totals?.hit_rate == null ? "No keys" : pct(summary.totals.hit_rate))}
+          ${performanceCard("Totals CLV YTD", summary.totals?.average_clv == null ? "—" : number(summary.totals.average_clv,2,true), "Average closing-line value")}
+          ${performanceCard("Totals beat close YTD", summary.totals?.beat_close_pct == null ? "—" : pct(summary.totals.beat_close_pct), "Closing-line decisions")}
+          ${performanceCard("Play tier YTD", record(tracking.spread_by_signal?.play), tracking.spread_by_signal?.play?.hit_rate == null ? "No decisions" : pct(tracking.spread_by_signal.play.hit_rate))}
+        </div>
+        <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Weekly Ledger</div><div class="cbb-table-wrap"><table class="cbb-table cbb-tracking-table"><thead><tr><th>Week</th><th>Finals</th><th>SU</th><th>ATS</th><th>Totals</th><th>Total CLV</th><th>Total Beat Close</th><th>Margin Error</th><th>Spread CLV</th></tr></thead><tbody>${weeklyRows || `<tr><td colspan="9" class="cbb-empty">Weekly records will populate as games become final.</td></tr>`}</tbody></table></div></div>
+        <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Season-to-Date · Every Signal and Testing Key</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Signal / Key</th><th>Games</th><th>Record</th><th>Win %</th><th>Average CLV</th><th>Beat Close</th><th>Confidence</th></tr></thead><tbody>${signalRows || `<tr><td colspan="7" class="cbb-empty">Signal records will populate as games are graded.</td></tr>`}</tbody></table></div></div>
+        <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Game-Level Accountability Ledger</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Date</th><th>Matchup</th><th>THI side</th><th>Frozen line</th><th>Closing line</th><th>CLV</th><th>Edge</th><th>Result</th><th>Final</th></tr></thead><tbody>${decisionRows || `<tr><td colspan="9" class="cbb-empty">Decisions will appear after a frozen projection reaches final status.</td></tr>`}</tbody></table></div></div>
+      </section>`;
+    view.querySelectorAll("[data-cbb-tracking-week]").forEach(button => button.addEventListener("click", () => { state.trackingPeriod = button.dataset.cbbTrackingWeek; renderTracking(); }));
   }
 
   function trendCard(card, sport) {

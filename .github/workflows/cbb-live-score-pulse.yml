@@ -29,8 +29,8 @@ jobs:
           python-version: "3.12"
       - name: Validate the score pulse
         run: |
-          python -m py_compile scripts/refresh_cbb_scores.py scripts/build_cbb_postgame.py
-          python -m unittest scripts/test_refresh_cbb_scores.py scripts/test_cbb_postgame.py
+          python -m py_compile scripts/refresh_cbb_scores.py scripts/build_cbb_postgame.py scripts/build_cbb_model_tracking.py
+          python -m unittest scripts/test_refresh_cbb_scores.py scripts/test_cbb_postgame.py scripts/test_cbb_model_tracking.py
       - name: Refresh live scores and completed games
         env:
           CBBD_API_KEY: ${{ secrets.CBBD_API_KEY }}
@@ -38,9 +38,15 @@ jobs:
           cp data/cbb/postgame.json /tmp/thi-cbb-postgame-before.json
           python scripts/refresh_cbb_scores.py \
             --changed-flag /tmp/thi-cbb-score-changed \
-            --recent-final-flag /tmp/thi-cbb-recent-final
+            --recent-final-flag /tmp/thi-cbb-recent-final \
+            --newly-final-flag /tmp/thi-cbb-newly-final
           if [[ -s /tmp/thi-cbb-recent-final ]]; then
             python scripts/build_cbb_postgame.py
+          fi
+          if [[ -s /tmp/thi-cbb-newly-final ]]; then
+            python scripts/build_cbb_model_tracking.py
+          fi
+          if [[ -s /tmp/thi-cbb-recent-final ]]; then
             python - <<'PY'
           import json, shutil
           before_path = "/tmp/thi-cbb-postgame-before.json"
@@ -62,6 +68,7 @@ jobs:
           from pathlib import Path
           board = json.loads(Path("data/cbb/projection_board.json").read_text())
           postgame = json.loads(Path("data/cbb/postgame.json").read_text())
+          tracking = json.loads(Path("data/cbb/model_tracking.json").read_text())
           counts = board["meta"]["status_counts"]
           games = board["games"]
           normalize = lambda value: str(value or "").lower().replace("_", "")
@@ -69,6 +76,8 @@ jobs:
           assert counts["live"] == sum(normalize(g.get("status")) in {"live", "inprogress", "halftime"} for g in games)
           assert counts["final"] == sum(normalize(g.get("status")) in {"final", "completed", "complete"} for g in games)
           assert postgame["meta"]["final_game_count"] <= counts["final"]
+          assert tracking["meta"]["version"] == "thi-cbb-model-tracking-v0.2"
+          assert tracking["summary"]["final_games_with_frozen_projection"] <= counts["final"]
           PY
       - name: Publish CBB score pulse
         env:

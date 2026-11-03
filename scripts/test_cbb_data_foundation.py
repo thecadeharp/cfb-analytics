@@ -2,10 +2,18 @@
 
 import unittest
 
-from scripts.build_cbb_data_foundation import build_outputs
+from scripts.build_cbb_data_foundation import build_outputs, market_summary
 
 
 class CbbDataFoundationTests(unittest.TestCase):
+    def test_normalizes_provider_spreads_to_home_team(self):
+        summary = market_summary([
+            {"provider": "DK", "spread": 8.5, "spreadOpen": 7.5, "homeMoneyline": -350, "awayMoneyline": 280},
+            {"provider": "Bovada", "spread": -8.5, "spreadOpen": -7.5, "homeMoneyline": -340, "awayMoneyline": 270},
+        ])
+        self.assertEqual(summary["consensus_home_spread"], -8.5)
+        self.assertEqual(summary["opening_home_spread"], -7.5)
+
     def test_builds_current_edges_prior_continuity_and_consensus_market(self):
         directory = [{"id": 1, "sourceId": "1234", "school": "Alpha", "conferenceId": 10}]
         directory += [{"id": i, "school": f"Team {i}", "conferenceId": 10} for i in range(2, 301)]

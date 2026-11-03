@@ -51,7 +51,7 @@ jobs:
           from pathlib import Path
 
           payload = json.loads(Path("data/cbb/model_tracking.json").read_text())
-          assert payload["meta"]["version"] == "thi-cbb-model-tracking-v0.1"
+          assert payload["meta"]["version"] == "thi-cbb-model-tracking-v0.2"
           assert payload["meta"]["projection_board_version"] == "thi-cbb-projection-board-v0.5"
           assert payload["meta"]["model_version"] == "thi-cbb-walk-forward-v0.6-research"
           spread = payload["summary"]["spread"]

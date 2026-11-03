@@ -39,12 +39,28 @@ class CbbModelTrackingTests(unittest.TestCase):
         }
         payload = build_tracking(board)
         summary = payload["summary"]["spread"]
-        self.assertEqual((summary["wins"], summary["losses"], summary["pushes"]), (2, 0, 0))
-        self.assertEqual(summary["hit_rate"], 100.0)
-        self.assertEqual(summary["average_clv"], 2.0)
-        self.assertEqual(summary["beat_close_pct"], 100.0)
-        self.assertEqual(payload["summary"]["totals"]["games"], 0)
+        self.assertEqual((summary["wins"], summary["losses"], summary["pushes"]), (2, 1, 0))
+        self.assertEqual(summary["hit_rate"], 66.67)
+        self.assertEqual(summary["average_clv"], 0.667)
+        self.assertEqual(summary["beat_close_pct"], 66.67)
+        self.assertEqual(payload["summary"]["straight_up"]["games"], 3)
+        self.assertEqual(payload["summary"]["totals"]["games"], 3)
+        self.assertEqual(payload["summary"]["totals"]["average_clv"], 1.0)
+        self.assertEqual(payload["totals_by_signal"]["total_lean"]["wins"], 3)
         self.assertEqual(payload["summary"]["projection_accuracy"]["games"], 3)
+        self.assertEqual(payload["by_week"][0]["finals"], 3)
+
+    def test_uses_first_capture_and_separates_signal_eligibility(self):
+        board = {
+            "meta": {"version": "thi-cbb-projection-board-v0.5", "season": 2027},
+            "games": [game(1, 3, False, 75, 70, pregame=-9, close=-5)],
+        }
+        history = {"games": {"1": [{"consensus_home_spread": -3, "consensus_total": 140}]}}
+        payload = build_tracking(board, history)
+        decision = payload["spread_decisions"][0]
+        self.assertEqual(decision["pregame_line"], -3)
+        self.assertFalse(decision["qualified_signal"])
+        self.assertEqual(payload["summary"]["spread"]["games"], 1)
 
     def test_rejects_unfrozen_board_version(self):
         with self.assertRaisesRegex(RuntimeError, "v0.5"):

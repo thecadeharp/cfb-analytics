@@ -62,6 +62,23 @@ def median(rows: list[dict[str, Any]], field: str) -> float | None:
 def market_summary(lines: list[dict[str, Any]]) -> dict[str, Any] | None:
     if not lines:
         return None
+    # CBBD providers do not all express the spread from the same team perspective.
+    # Normalize each book to the home team when its moneyline identifies the favorite.
+    normalized: list[dict[str, Any]] = []
+    for source in lines:
+        row = dict(source)
+        home_price = finite(row.get("homeMoneyline"))
+        away_price = finite(row.get("awayMoneyline"))
+        home_favored = home_price is not None and away_price is not None and home_price < 0 < away_price
+        away_favored = home_price is not None and away_price is not None and away_price < 0 < home_price
+        for field in ("spread", "spreadOpen"):
+            value = finite(row.get(field))
+            if value is None:
+                continue
+            if home_favored and value > 0 or away_favored and value < 0:
+                row[field] = -value
+        normalized.append(row)
+    lines = normalized
     spread = median(lines, "spread")
     total = median(lines, "overUnder")
     open_spread = median(lines, "spreadOpen")

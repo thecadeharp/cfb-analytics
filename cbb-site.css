@@ -447,10 +447,12 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
 .cbb-tracking-head { display:flex; align-items:flex-start; justify-content:space-between; gap:22px; padding:18px 20px; border-bottom:1px solid var(--border); }
 .cbb-tracking-head h2 { margin:5px 0 0; font-size:22px; letter-spacing:-.02em; }
 .cbb-tracking-head p { max-width:620px; margin:0; color:var(--muted); font-size:11px; line-height:1.55; text-align:right; }
-.cbb-tracking-periods { display:flex; padding:13px 14px 0; }
-.cbb-tracking-periods span { display:inline-flex; padding:7px 12px; border:1px solid var(--cbb-accent); border-radius:999px; background:var(--cbb-accent-soft); color:var(--cbb-accent); font:800 9px var(--mono); letter-spacing:.04em; text-transform:uppercase; }
+.cbb-tracking-periods { display:flex; flex-wrap:wrap; gap:8px; padding:13px 14px 0; }
+.cbb-tracking-periods button { appearance:none; padding:8px 13px; border:1px solid var(--border); border-radius:999px; background:var(--surface-soft); color:var(--muted); font:800 9px var(--mono); letter-spacing:.04em; text-transform:uppercase; cursor:pointer; }
+.cbb-tracking-periods button:hover, .cbb-tracking-periods button.is-active { border-color:var(--cbb-accent); background:var(--cbb-accent-soft); color:var(--cbb-accent); }
 .cbb-tracking-section-label { padding:16px 15px 0; color:var(--muted); font:800 10px var(--mono); letter-spacing:.09em; text-transform:uppercase; }
-.cbb-tracking-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; padding:12px 14px 4px; }
+.cbb-tracking-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; padding:12px 14px 4px; }
+.cbb-tracking-ytd-grid { grid-template-columns:repeat(6,minmax(0,1fr)); }
 .cbb-tracking-grid .cbb-model-card { min-width:0; background:var(--surface-soft); }
 .cbb-tracking-grid .cbb-model-value { font-size:20px; }
 .cbb-tracking-table-section { padding:8px 14px 14px; }
@@ -467,7 +469,7 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
 @media (max-width: 820px) {
   .cbb-tracking-head { display:block; }
   .cbb-tracking-head p { margin-top:8px; text-align:left; }
-  .cbb-tracking-grid { grid-template-columns:repeat(2,minmax(0,1fr)); padding-left:10px; padding-right:10px; }
+  .cbb-tracking-grid, .cbb-tracking-ytd-grid { grid-template-columns:repeat(2,minmax(0,1fr)); padding-left:10px; padding-right:10px; }
   .cbb-tracking-table-section { padding-left:10px; padding-right:10px; }
 }
 .cbb-bracket-grid {

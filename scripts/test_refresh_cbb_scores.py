@@ -25,7 +25,7 @@ class CbbScorePulseTests(unittest.TestCase):
             "meta": {"season": 2027, "status_counts": {"upcoming": 2, "live": 0, "final": 0}},
             "games": [
                 {**games["games"][0], "projection": {"home_margin": -2.7}},
-                {**games["games"][1], "projection": {"home_margin": -0.9}},
+                {**games["games"][1], "market": {"consensus_home_spread": 2.5}, "projection": {"home_margin": -0.9}},
             ],
         }
         responses = {
@@ -43,6 +43,7 @@ class CbbScorePulseTests(unittest.TestCase):
         self.assertEqual((final["status"], final["home"]["score"], final["away"]["score"]), ("final", 72, 78))
         self.assertEqual(live["projection"]["home_margin"], -2.7)
         self.assertEqual(final["projection"]["home_margin"], -0.9)
+        self.assertEqual(final["closing_market"], {"consensus_home_spread": 2.5})
         self.assertEqual(board["meta"]["status_counts"], {"upcoming": 0, "live": 1, "final": 1})
         self.assertEqual(result["newly_final_ids"], ["2"])
 
