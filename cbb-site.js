@@ -151,7 +151,8 @@
       <button class="nav-item" type="button" data-cbb-view="cbb-tracking">Model Tracking</button>
       <button class="nav-item" type="button" data-cbb-view="cbb-team-data">Team Data</button>
       <button class="nav-item" type="button" data-cbb-view="cbb-ratings">THI Ratings</button>
-      <button class="nav-item" type="button" data-cbb-view="cbb-player-ratings">Player Ratings</button>
+      <button class="nav-item" type="button" data-cbb-view="cbb-player-ratings" data-cbb-player-section-target="ratings">Player Ratings</button>
+      <button class="nav-item" type="button" data-cbb-view="cbb-player-ratings" data-cbb-player-section-target="projections">Player Projections</button>
       <button class="nav-item" type="button" data-cbb-view="cbb-bracketology">THI Bracketology</button>
       <button class="nav-item" type="button" data-cbb-view="cbb-portal">Transfer Portal</button>
       <button class="nav-item" type="button" data-cbb-view="cbb-market">Market Research</button>
@@ -182,7 +183,10 @@
     });
     cbbNav.addEventListener("click", event => {
       const button = event.target.closest("[data-cbb-view]");
-      if (button) showCbbView(button.dataset.cbbView);
+      if (button) {
+        if (button.dataset.cbbPlayerSectionTarget) state.cbbPlayerSection = button.dataset.cbbPlayerSectionTarget;
+        showCbbView(button.dataset.cbbView);
+      }
     });
     detail.addEventListener("click", event => {
       if (event.target === detail || event.target.closest("[data-cbb-close]")) closeTeamDetail();
@@ -392,10 +396,18 @@
   function showCbbView(view, scroll = true) {
     state.cbbView = view;
     document.querySelectorAll(".cbb-view").forEach(section => section.classList.toggle("active", section.id === `view-${view}`));
-    document.querySelectorAll("[data-cbb-view]").forEach(button => button.classList.toggle("active", button.dataset.cbbView === view));
+    syncCbbNav();
     if (view === "cbb-player-ratings") loadPlayerRatings();
     if (state.loaded) loadDeferredForView(view);
     if (scroll) window.scrollTo({ top: 0, behavior: "auto" });
+  }
+
+  function syncCbbNav() {
+    document.querySelectorAll("[data-cbb-view]").forEach(button => {
+      const playerTarget = button.dataset.cbbPlayerSectionTarget;
+      const selected = button.dataset.cbbView === state.cbbView && (!playerTarget || playerTarget === state.cbbPlayerSection);
+      button.classList.toggle("active", selected);
+    });
   }
 
   function renderAll() {
@@ -1327,7 +1339,7 @@
   function renderPlayerRatings() {
     const view = document.getElementById("view-cbb-player-ratings");
     const sectionTabs = `<div class="cbb-player-section-tabs" role="tablist" aria-label="CBB player intelligence view"><button type="button" role="tab" aria-selected="${state.cbbPlayerSection === "ratings"}" class="${state.cbbPlayerSection === "ratings" ? "is-active" : ""}" data-cbb-player-section="ratings">Player Ratings</button><button type="button" role="tab" aria-selected="${state.cbbPlayerSection === "projections"}" class="${state.cbbPlayerSection === "projections" ? "is-active" : ""}" data-cbb-player-section="projections">Player Projections <span>Research</span></button></div>`;
-    const bindSectionTabs = () => view.querySelectorAll("[data-cbb-player-section]").forEach(button => button.addEventListener("click", () => { state.cbbPlayerSection = button.dataset.cbbPlayerSection; renderPlayerRatings(); }));
+    const bindSectionTabs = () => view.querySelectorAll("[data-cbb-player-section]").forEach(button => button.addEventListener("click", () => { state.cbbPlayerSection = button.dataset.cbbPlayerSection; syncCbbNav(); renderPlayerRatings(); }));
     if (state.cbbPlayerSection === "projections") {
       const projections = (state.data?.intelligence?.player_projections || []).filter(row => row.matchup?.game_id && row.projection_state !== "role_only");
       const dates = [...new Set(projections.map(row => cbbTrackingDateKey(row.matchup?.start_date)).filter(Boolean))].sort();
