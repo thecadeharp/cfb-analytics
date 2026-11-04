@@ -29,4 +29,18 @@ jobs:
       - name: Verify responsive public status contracts
         run: python -m unittest scripts.test_public_data_status -v
       - name: Verify public data contracts
-        run: python scripts/verify_public_release.py --base-url https://thehammerindex.com
+        run: |
+          attempts=6
+          for attempt in $(seq 1 "$attempts"); do
+            if python scripts/verify_public_release.py --base-url https://thehammerindex.com; then
+              exit 0
+            fi
+
+            if [ "$attempt" -eq "$attempts" ]; then
+              echo "Public data contracts remained inconsistent after $attempts attempts."
+              exit 1
+            fi
+
+            echo "Public data is still publishing; retrying in 20 seconds ($attempt/$attempts)."
+            sleep 20
+          done
