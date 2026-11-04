@@ -60,7 +60,18 @@ jobs:
               --limit 1 \
               --json databaseId \
               --jq '.[0].databaseId // empty')
-            gh workflow run "$workflow" --ref main "$@"
+            local attempt
+            for attempt in 1 2 3 4; do
+              if gh workflow run "$workflow" --ref main "$@"; then
+                break
+              fi
+              if [[ "$attempt" -eq 4 ]]; then
+                echo "Could not dispatch $workflow after $attempt attempts."
+                return 1
+              fi
+              echo "GitHub did not accept the $workflow dispatch; retrying in $((attempt * 10)) seconds."
+              sleep $((attempt * 10))
+            done
             printf '%s|%s\n' "$workflow" "$previous_run" >> /tmp/thi-recovery-workflows.txt
           }
 

@@ -119,4 +119,14 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m "Capture CBB game-day market"
           git pull --rebase origin main
-          git push origin HEAD:main
+          for attempt in 1 2 3 4; do
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            if [[ "$attempt" -eq 4 ]]; then
+              echo "GitHub rejected the market snapshot push after $attempt attempts."
+              exit 1
+            fi
+            echo "GitHub did not accept the market snapshot push; retrying in $((attempt * 10)) seconds."
+            sleep $((attempt * 10))
+          done
