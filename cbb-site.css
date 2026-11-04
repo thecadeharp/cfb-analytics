@@ -450,6 +450,10 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
 .cbb-tracking-periods { display:flex; flex-wrap:wrap; gap:8px; padding:13px 14px 0; }
 .cbb-tracking-periods button { appearance:none; padding:8px 13px; border:1px solid var(--border); border-radius:999px; background:var(--surface-soft); color:var(--muted); font:800 9px var(--mono); letter-spacing:.04em; text-transform:uppercase; cursor:pointer; }
 .cbb-tracking-periods button:hover, .cbb-tracking-periods button.is-active { border-color:var(--cbb-accent); background:var(--cbb-accent-soft); color:var(--cbb-accent); }
+.cbb-tracking-custom { display:flex; flex-wrap:wrap; gap:10px; padding:13px 14px 0; }
+.cbb-tracking-custom label { display:grid; gap:5px; color:var(--muted); font:800 8px var(--mono); letter-spacing:.08em; text-transform:uppercase; }
+.cbb-tracking-custom input { min-width:150px; border:1px solid var(--border); border-radius:8px; padding:9px 11px; background:var(--surface); color:var(--text); color-scheme:light dark; font:700 10px var(--mono); }
+.cbb-tracking-custom input:focus { border-color:var(--cbb-accent); outline:2px solid var(--cbb-accent-soft); outline-offset:1px; }
 .cbb-tracking-section-label { padding:16px 15px 0; color:var(--muted); font:800 10px var(--mono); letter-spacing:.09em; text-transform:uppercase; }
 .cbb-tracking-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; padding:12px 14px 4px; }
 .cbb-tracking-ytd-grid { grid-template-columns:repeat(6,minmax(0,1fr)); }
@@ -469,6 +473,10 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
 @media (max-width: 820px) {
   .cbb-tracking-head { display:block; }
   .cbb-tracking-head p { margin-top:8px; text-align:left; }
+  .cbb-tracking-periods { flex-wrap:nowrap; overflow-x:auto; padding-bottom:3px; }
+  .cbb-tracking-periods button { flex:0 0 auto; }
+  .cbb-tracking-custom { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .cbb-tracking-custom input { width:100%; min-width:0; }
   .cbb-tracking-grid, .cbb-tracking-ytd-grid { grid-template-columns:repeat(2,minmax(0,1fr)); padding-left:10px; padding-right:10px; }
   .cbb-tracking-table-section { padding-left:10px; padding-right:10px; }
 }

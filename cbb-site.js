@@ -54,6 +54,8 @@
     ratingSort: { key: "prior_net", direction: "desc" },
     ratingChart: "efficiency",
     trackingPeriod: "SEASON",
+    trackingCustomStart: "",
+    trackingCustomEnd: "",
     playerSort: { key: "thi_player_rating", direction: "desc" },
     playerQuery: "",
     playerConference: "all",
@@ -2190,27 +2192,112 @@
     return `<article class="cbb-roster-player"><div><strong>${player.jersey ? `#${escapeHtml(player.jersey)} ` : ""}${escapeHtml(player.name || "Unknown player")}</strong><div class="cbb-team-meta">${escapeHtml(identity)}</div></div><div class="cbb-roster-player-state">${transfer}${prior}</div></article>`;
   }
 
+  function cbbTrackingDateKey(value = new Date()) {
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    const parts = new Intl.DateTimeFormat("en-US", { timeZone:"America/New_York", year:"numeric", month:"2-digit", day:"2-digit" }).formatToParts(date);
+    const get = type => parts.find(part => part.type === type)?.value || "";
+    return `${get("year")}-${get("month")}-${get("day")}`;
+  }
+
+  function cbbShiftDateKey(key, days) {
+    const date = new Date(`${key}T12:00:00Z`);
+    date.setUTCDate(date.getUTCDate() + days);
+    return date.toISOString().slice(0,10);
+  }
+
+  function cbbWeekStartKey(key) {
+    const date = new Date(`${key}T12:00:00Z`);
+    const day = date.getUTCDay();
+    return cbbShiftDateKey(key, -(day === 0 ? 6 : day - 1));
+  }
+
+  function cbbTrackingBounds(period) {
+    const today = cbbTrackingDateKey();
+    const thisWeek = cbbWeekStartKey(today);
+    if (period === "TODAY") return { start:today, end:today, label:"Today" };
+    if (period === "YESTERDAY") { const day=cbbShiftDateKey(today,-1); return { start:day, end:day, label:"Yesterday" }; }
+    if (period === "LAST_7") return { start:cbbShiftDateKey(today,-6), end:today, label:"Last 7 Days" };
+    if (period === "THIS_WEEK") return { start:thisWeek, end:cbbShiftDateKey(thisWeek,6), label:"This Week" };
+    if (period === "LAST_WEEK") { const start=cbbShiftDateKey(thisWeek,-7); return { start, end:cbbShiftDateKey(start,6), label:"Last Week" }; }
+    if (period === "THIS_MONTH") return { start:`${today.slice(0,7)}-01`, end:`${today.slice(0,7)}-31`, label:"This Month" };
+    if (period === "CUSTOM") return { start:state.trackingCustomStart, end:state.trackingCustomEnd, label:"Custom Range" };
+    return { start:"", end:"", label:"Season to Date" };
+  }
+
+  function cbbTrackingRowDate(row) { return row?.game_date_et || cbbTrackingDateKey(row?.start_date); }
+
+  function cbbFilterTrackingRows(rows, bounds) {
+    if (!bounds.start && !bounds.end) return rows;
+    return rows.filter(row => {
+      const key = cbbTrackingRowDate(row);
+      return key && (!bounds.start || key >= bounds.start) && (!bounds.end || key <= bounds.end);
+    });
+  }
+
+  function cbbFiniteTrackingValues(rows, key) {
+    return rows
+      .map(row => row?.[key])
+      .filter(value => value !== null && value !== undefined && value !== "")
+      .map(Number)
+      .filter(Number.isFinite);
+  }
+
+  function cbbSummarizeTrackingRows(rows) {
+    const wins=rows.filter(row => row.result === "win").length, losses=rows.filter(row => row.result === "loss").length, pushes=rows.filter(row => row.result === "push").length;
+    const clv=cbbFiniteTrackingValues(rows,"clv"), decisions=wins+losses;
+    return { games:rows.length, wins, losses, pushes, hit_rate:decisions ? 100*wins/decisions : null, average_clv:clv.length ? clv.reduce((sum,value) => sum+value,0)/clv.length : null, beat_close_pct:clv.length ? 100*clv.filter(value => value>0).length/clv.length : null, closing_line_games:clv.length };
+  }
+
+  function cbbTrackingAccuracy(rows) {
+    const margins=cbbFiniteTrackingValues(rows,"margin_error"), totals=cbbFiniteTrackingValues(rows,"total_error");
+    return { games:margins.length, margin_mae:margins.length ? margins.reduce((sum,value) => sum+value,0)/margins.length : null, total_mae:totals.length ? totals.reduce((sum,value) => sum+value,0)/totals.length : null };
+  }
+
   function renderTracking() {
     const tracking = state.data.tracking || {};
     const summary = tracking.summary || {};
-    const weeks = tracking.by_week || [];
-    const selectedWeek = state.trackingPeriod === "SEASON" ? null : weeks.find(row => `W${row.week}` === state.trackingPeriod);
-    const performance = selectedWeek || summary;
+    const allResults = tracking.game_results || [];
+    const allSpreads = tracking.spread_decisions || [];
+    const allTotals = tracking.total_decisions || [];
+    const availableDates = allResults.map(cbbTrackingRowDate).filter(Boolean).sort();
+    if (state.trackingPeriod === "CUSTOM") {
+      state.trackingCustomStart ||= availableDates[0] || "";
+      state.trackingCustomEnd ||= availableDates.at(-1) || cbbTrackingDateKey();
+    }
+    const bounds = cbbTrackingBounds(state.trackingPeriod);
+    const results = cbbFilterTrackingRows(allResults,bounds);
+    const spreadRows = cbbFilterTrackingRows(allSpreads,bounds);
+    const totalRows = cbbFilterTrackingRows(allTotals,bounds);
+    const performance = {
+      finals:results.length,
+      straight_up:cbbSummarizeTrackingRows(results),
+      spread:cbbSummarizeTrackingRows(spreadRows),
+      totals:cbbSummarizeTrackingRows(totalRows),
+      projection_accuracy:cbbTrackingAccuracy(results),
+      notable_spread:cbbSummarizeTrackingRows(spreadRows.filter(row => ["play","material","outlier"].includes(row.signal_tier)))
+    };
     const spread = performance.spread || {};
     const totals = performance.totals || {};
     const straightUp = performance.straight_up || {};
     const accuracy = performance.projection_accuracy || {};
-    const notable = selectedWeek ? {} : (summary.notable_spread || {});
+    const notable = performance.notable_spread || {};
     const record = row => Number(row?.games) ? `${integer(row.wins)}-${integer(row.losses)}-${integer(row.pushes)}` : "—";
     const performanceCard = (label, value, note) => `<article class="cbb-panel cbb-model-card"><div class="cbb-label">${escapeHtml(label)}</div><div class="cbb-model-value">${escapeHtml(value)}</div><div class="cbb-model-sub">${escapeHtml(note)}</div></article>`;
-    const periodButtons = [`<button type="button" data-cbb-tracking-week="SEASON" class="${state.trackingPeriod === "SEASON" ? "is-active" : ""}">Season</button>`, ...weeks.map(row => `<button type="button" data-cbb-tracking-week="W${row.week}" class="${state.trackingPeriod === `W${row.week}` ? "is-active" : ""}">Week ${row.week}</button>`)].join("");
-    const weeklyRows = weeks.map(row => `<tr><td><strong>Week ${integer(row.week)}</strong></td><td class="cbb-number">${integer(row.finals)}</td><td class="cbb-number">${record(row.straight_up)}</td><td class="cbb-number">${record(row.spread)}</td><td class="cbb-number">${record(row.totals)}</td><td class="cbb-number">${row.totals?.average_clv == null ? "—" : number(row.totals.average_clv,2,true)}</td><td class="cbb-number">${row.totals?.beat_close_pct == null ? "—" : pct(row.totals.beat_close_pct)}</td><td class="cbb-number">${row.projection_accuracy?.margin_mae == null ? "—" : `${number(row.projection_accuracy.margin_mae,1)} pts`}</td><td class="cbb-number">${row.spread?.average_clv == null ? "—" : number(row.spread.average_clv,2,true)}</td></tr>`).join("");
+    const periods = [["SEASON","Season"],["THIS_MONTH","This Month"],["THIS_WEEK","This Week"],["LAST_WEEK","Last Week"],["LAST_7","Last 7 Days"],["TODAY","Today"],["YESTERDAY","Yesterday"],["CUSTOM","Custom"]];
+    const periodButtons = periods.map(([key,label]) => `<button type="button" data-cbb-tracking-period="${key}" class="${state.trackingPeriod === key ? "is-active" : ""}">${label}</button>`).join("");
+    const dailyRows = [...new Set(results.map(cbbTrackingRowDate).filter(Boolean))].sort().reverse().slice(0,31).map(key => {
+      const dayResults=results.filter(row => cbbTrackingRowDate(row)===key), daySpread=spreadRows.filter(row => cbbTrackingRowDate(row)===key), dayTotals=totalRows.filter(row => cbbTrackingRowDate(row)===key);
+      const su=cbbSummarizeTrackingRows(dayResults), ats=cbbSummarizeTrackingRows(daySpread), total=cbbSummarizeTrackingRows(dayTotals), acc=cbbTrackingAccuracy(dayResults);
+      const label=new Intl.DateTimeFormat("en-US",{weekday:"short",month:"short",day:"numeric",timeZone:"UTC"}).format(new Date(`${key}T12:00:00Z`));
+      return `<tr><td><strong>${escapeHtml(label)}</strong></td><td class="cbb-number">${integer(dayResults.length)}</td><td class="cbb-number">${record(su)}</td><td class="cbb-number">${record(ats)}</td><td class="cbb-number">${record(total)}</td><td class="cbb-number">${total.average_clv == null ? "—" : number(total.average_clv,2,true)}</td><td class="cbb-number">${total.beat_close_pct == null ? "—" : pct(total.beat_close_pct)}</td><td class="cbb-number">${acc.margin_mae == null ? "—" : `${number(acc.margin_mae,1)} pts`}</td><td class="cbb-number">${ats.average_clv == null ? "—" : number(ats.average_clv,2,true)}</td></tr>`;
+    }).join("");
     const signalEntries = [
       ...Object.entries(tracking.spread_by_signal || {}).map(([key,row]) => [publicSignalLabel(key),row]),
       ...Object.entries(tracking.totals_by_signal || {}).map(([key,row]) => [key === "total_watch" ? "Total Watch" : "Total Lean",row]),
     ];
     const signalRows = signalEntries.map(([label,row]) => `<tr><td><strong>${escapeHtml(label)}</strong></td><td class="cbb-number">${integer(row.games)}</td><td class="cbb-number">${record(row)}</td><td class="cbb-number">${row.hit_rate == null ? "—" : pct(row.hit_rate)}</td><td class="cbb-number">${row.average_clv == null ? "—" : number(row.average_clv,2,true)}</td><td class="cbb-number">${row.beat_close_pct == null ? "—" : pct(row.beat_close_pct)}</td><td><span class="cbb-tracking-confidence">DEVELOPING</span></td></tr>`).join("");
-    const decisions = (tracking.spread_decisions || []).filter(row => !selectedWeek || Number(row.week) === Number(selectedWeek.week)).slice(0,50);
+    const decisions = spreadRows.slice(0,50);
     const decisionRows = decisions.map(trackingDecisionRow).join("");
     const view = document.getElementById("view-cbb-tracking");
     view.innerHTML = `
@@ -2218,17 +2305,18 @@
       <h1 class="page-title">Model Tracking</h1>
       <p class="page-subtitle">The same accountability framework used for college football: straight-up accuracy, every ATS decision, tracked total keys, closing-line value and projection error.</p>
       <section class="cbb-panel cbb-tracking-shell">
-        <header class="cbb-tracking-head"><div><div class="cbb-label">Transparent Model Tracking</div><h2>${selectedWeek ? `Week ${integer(selectedWeek.week)} Performance` : "Season-to-Date Performance"}</h2></div><p>${escapeHtml(tracking.meta?.grading_policy || "Every frozen projection is graded after the final.")}</p></header>
+        <header class="cbb-tracking-head"><div><div class="cbb-label">Transparent Model Tracking</div><h2>${escapeHtml(bounds.label)} Performance</h2></div><p>${escapeHtml(tracking.meta?.calendar_week_definition || "Monday through Sunday by scheduled game date in Eastern Time.")}</p></header>
         <div class="cbb-tracking-periods">${periodButtons}</div>
-        <div class="cbb-tracking-section-label">${selectedWeek ? `Week ${integer(selectedWeek.week)}` : "Selected period"}</div>
+        ${state.trackingPeriod === "CUSTOM" ? `<div class="cbb-tracking-custom"><label>From<input type="date" data-cbb-tracking-start value="${escapeHtml(state.trackingCustomStart)}"></label><label>Through<input type="date" data-cbb-tracking-end value="${escapeHtml(state.trackingCustomEnd)}"></label></div>` : ""}
+        <div class="cbb-tracking-section-label">Selected period · Eastern Time</div>
         <div class="cbb-tracking-grid">
-          ${performanceCard("Games final", integer(selectedWeek ? selectedWeek.finals : summary.final_games_with_frozen_projection), "Frozen projections reconciled")}
+          ${performanceCard("Games final", integer(performance.finals), "Frozen projections reconciled")}
           ${performanceCard("Straight up", record(straightUp), straightUp.hit_rate == null ? "No decisions" : `${pct(straightUp.hit_rate)} winner accuracy`)}
           ${performanceCard("Overall ATS", record(spread), spread.hit_rate == null ? "No decisions" : `${pct(spread.hit_rate)} ATS`)}
           ${performanceCard("Tracked totals", record(totals), totals.hit_rate == null ? "No testing keys" : `${pct(totals.hit_rate)} on 4+ point keys`)}
           ${performanceCard("Totals average CLV", totals.average_clv == null ? "—" : number(totals.average_clv,2,true), `${integer(totals.closing_line_games)} decisions with a close`)}
           ${performanceCard("Totals beat close", totals.beat_close_pct == null ? "—" : pct(totals.beat_close_pct), "Directional closing-line decisions")}
-          ${performanceCard("Notable tier ATS", selectedWeek ? "See ledger" : record(notable), selectedWeek || notable.hit_rate == null ? "Play, Material and Outlier" : `${pct(notable.hit_rate)} ATS`)}
+          ${performanceCard("Notable tier ATS", record(notable), notable.hit_rate == null ? "Play, Material and Outlier" : `${pct(notable.hit_rate)} ATS`)}
           ${performanceCard("Average margin error", accuracy.margin_mae == null ? "—" : `${number(accuracy.margin_mae,1)} pts`, "Absolute THI projection error")}
           ${performanceCard("Average CLV", spread.average_clv == null ? "—" : number(spread.average_clv,2,true), `${integer(spread.closing_line_games)} spread decisions with a close`)}
         </div>
@@ -2241,11 +2329,13 @@
           ${performanceCard("Totals beat close YTD", summary.totals?.beat_close_pct == null ? "—" : pct(summary.totals.beat_close_pct), "Closing-line decisions")}
           ${performanceCard("Play tier YTD", record(tracking.spread_by_signal?.play), tracking.spread_by_signal?.play?.hit_rate == null ? "No decisions" : pct(tracking.spread_by_signal.play.hit_rate))}
         </div>
-        <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Weekly Ledger</div><div class="cbb-table-wrap"><table class="cbb-table cbb-tracking-table"><thead><tr><th>Week</th><th>Finals</th><th>SU</th><th>ATS</th><th>Totals</th><th>Total CLV</th><th>Total Beat Close</th><th>Margin Error</th><th>Spread CLV</th></tr></thead><tbody>${weeklyRows || `<tr><td colspan="9" class="cbb-empty">Weekly records will populate as games become final.</td></tr>`}</tbody></table></div></div>
+        <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Daily Breakdown · Selected Period</div><div class="cbb-table-wrap"><table class="cbb-table cbb-tracking-table"><thead><tr><th>Date</th><th>Finals</th><th>SU</th><th>ATS</th><th>Totals</th><th>Total CLV</th><th>Total Beat Close</th><th>Margin Error</th><th>Spread CLV</th></tr></thead><tbody>${dailyRows || `<tr><td colspan="9" class="cbb-empty">No completed games fall inside this calendar window.</td></tr>`}</tbody></table></div></div>
         <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Season-to-Date · Every Signal and Testing Key</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Signal / Key</th><th>Games</th><th>Record</th><th>Win %</th><th>Average CLV</th><th>Beat Close</th><th>Confidence</th></tr></thead><tbody>${signalRows || `<tr><td colspan="7" class="cbb-empty">Signal records will populate as games are graded.</td></tr>`}</tbody></table></div></div>
         <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Game-Level Accountability Ledger</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Date</th><th>Matchup</th><th>THI side</th><th>Frozen line</th><th>Closing line</th><th>CLV</th><th>Edge</th><th>Result</th><th>Final</th></tr></thead><tbody>${decisionRows || `<tr><td colspan="9" class="cbb-empty">Decisions will appear after a frozen projection reaches final status.</td></tr>`}</tbody></table></div></div>
       </section>`;
-    view.querySelectorAll("[data-cbb-tracking-week]").forEach(button => button.addEventListener("click", () => { state.trackingPeriod = button.dataset.cbbTrackingWeek; renderTracking(); }));
+    view.querySelectorAll("[data-cbb-tracking-period]").forEach(button => button.addEventListener("click", () => { state.trackingPeriod = button.dataset.cbbTrackingPeriod; renderTracking(); }));
+    view.querySelector("[data-cbb-tracking-start]")?.addEventListener("change", event => { state.trackingCustomStart=event.target.value; renderTracking(); });
+    view.querySelector("[data-cbb-tracking-end]")?.addEventListener("change", event => { state.trackingCustomEnd=event.target.value; renderTracking(); });
   }
 
   function trendCard(card, sport) {

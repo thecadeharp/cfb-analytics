@@ -76,7 +76,7 @@ jobs:
           assert counts["live"] == sum(normalize(g.get("status")) in {"live", "inprogress", "halftime"} for g in games)
           assert counts["final"] == sum(normalize(g.get("status")) in {"final", "completed", "complete"} for g in games)
           assert postgame["meta"]["final_game_count"] <= counts["final"]
-          assert tracking["meta"]["version"] == "thi-cbb-model-tracking-v0.2"
+          assert tracking["meta"]["version"] == "thi-cbb-model-tracking-v0.3"
           assert tracking["summary"]["final_games_with_frozen_projection"] <= counts["final"]
           PY
       - name: Publish CBB score pulse

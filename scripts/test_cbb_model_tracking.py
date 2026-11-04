@@ -49,6 +49,9 @@ class CbbModelTrackingTests(unittest.TestCase):
         self.assertEqual(payload["totals_by_signal"]["total_lean"]["wins"], 3)
         self.assertEqual(payload["summary"]["projection_accuracy"]["games"], 3)
         self.assertEqual(payload["by_week"][0]["finals"], 3)
+        self.assertEqual(payload["meta"]["reporting_timezone"], "America/New_York")
+        self.assertEqual(payload["game_results"][0]["game_date_et"], "2027-01-09")
+        self.assertEqual(payload["game_results"][0]["calendar_week_start_et"], "2027-01-04")
 
     def test_uses_first_capture_and_separates_signal_eligibility(self):
         board = {

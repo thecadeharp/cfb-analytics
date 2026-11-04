@@ -3,12 +3,14 @@
 from __future__ import annotations
 import argparse, json, math, tempfile
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 ROOT=Path(__file__).resolve().parents[1]
-VERSION="thi-cbb-model-tracking-v0.2"
+VERSION="thi-cbb-model-tracking-v0.3"
 REQUIRED_BOARD_VERSION="thi-cbb-projection-board-v0.5"
+EASTERN=ZoneInfo("America/New_York")
 
 def finite(value:Any)->float|None:
     try:
@@ -18,6 +20,12 @@ def finite(value:Any)->float|None:
 def parse_time(value:Any)->datetime|None:
     try: return datetime.fromisoformat(str(value or "").replace("Z","+00:00"))
     except ValueError: return None
+
+def calendar_fields(value:Any)->dict[str,str|None]:
+    started=parse_time(value)
+    if not started: return {"game_date_et":None,"calendar_week_start_et":None,"calendar_month_et":None}
+    local=started.astimezone(EASTERN); game_date=local.date(); week_start=game_date-timedelta(days=game_date.weekday())
+    return {"game_date_et":game_date.isoformat(),"calendar_week_start_et":week_start.isoformat(),"calendar_month_et":game_date.strftime("%Y-%m")}
 
 def is_final(game): return str(game.get("status") or "").lower().replace("_","") in {"final","completed","complete"}
 def result_label(value): return "win" if value>.01 else "loss" if value<-.01 else "push"
@@ -63,8 +71,8 @@ def build_tracking(board,market_history=None):
         hs=finite((game.get("home") or {}).get("score")); aw=finite((game.get("away") or {}).get("score"))
         if hs is None or aw is None: continue
         p=game.get("projection") or {}; pm=finite(p.get("home_margin")); pt=finite(p.get("total")); actual=hs-aw; actual_total=hs+aw; started=parse_time(game.get("start_date")); week=1+max(0,(started.date()-season_start.date()).days//7) if started and season_start else 1
-        common={"game_id":game.get("game_id"),"start_date":game.get("start_date"),"week":week,"away_team":(game.get("away") or {}).get("team"),"home_team":(game.get("home") or {}).get("team"),"neutral_site":bool(game.get("neutral_site")),"final_score":f"{int(aw)}-{int(hs)}"}
-        if pm is not None: su.append({**common,"result":"win" if ((pm>=0)==(actual>=0)) else "loss"})
+        common={"game_id":game.get("game_id"),"start_date":game.get("start_date"),**calendar_fields(game.get("start_date")),"week":week,"away_team":(game.get("away") or {}).get("team"),"home_team":(game.get("home") or {}).get("team"),"neutral_site":bool(game.get("neutral_site")),"final_score":f"{int(aw)}-{int(hs)}"}
+        if pm is not None: su.append({**common,"result":"win" if ((pm>=0)==(actual>=0)) else "loss","margin_error":round(abs(actual-pm),3),"total_error":round(abs(actual_total-pt),3) if pt is not None else None})
         first,close=market_points(game,market_history); opening=finite(first.get("consensus_home_spread")); closing=finite(close.get("consensus_home_spread"))
         if opening is not None and pm is not None:
             edge=pm+opening; pick_home=edge>=0; line=opening if pick_home else -opening; close_line=(closing if pick_home else -closing) if closing is not None else None; grade=(actual if pick_home else -actual)+line
@@ -87,7 +95,7 @@ def build_tracking(board,market_history=None):
     for row in spreads: spread_groups[row["signal_tier"]].append(row)
     for row in totals: total_groups[row["signal_tier"]].append(row)
     notable=[r for r in spreads if r["signal_tier"] in {"play","material","outlier"}]
-    return {"meta":{"version":VERSION,"projection_board_version":version,"model_version":board.get("meta",{}).get("model_version"),"season":board.get("meta",{}).get("season"),"generated_at_utc":datetime.now(timezone.utc).isoformat().replace("+00:00","Z"),"grading_policy":"Every frozen projection with a valid pregame market is graded for accountability. Promoted signals remain separately identified.","totals_policy":"Total disagreements of 4+ points are tracked as testing keys; promotion eligibility remains separate."},"summary":{"final_games_with_frozen_projection":len(finals),"projection_accuracy":projection_accuracy(finals),"straight_up":summarize(su),"spread":summarize(spreads),"totals":summarize(totals),"notable_spread":summarize(notable)},"by_week":weekly,"spread_by_signal":{k:summarize(v) for k,v in sorted(spread_groups.items())},"totals_by_signal":{k:summarize(v) for k,v in sorted(total_groups.items())},"spread_decisions":spreads,"total_decisions":totals}
+    return {"meta":{"version":VERSION,"projection_board_version":version,"model_version":board.get("meta",{}).get("model_version"),"season":board.get("meta",{}).get("season"),"generated_at_utc":datetime.now(timezone.utc).isoformat().replace("+00:00","Z"),"reporting_timezone":"America/New_York","calendar_week_definition":"Monday through Sunday by scheduled game date in Eastern Time","grading_policy":"Every frozen projection with a valid pregame market is graded for accountability. Promoted signals remain separately identified.","totals_policy":"Total disagreements of 4+ points are tracked as testing keys; promotion eligibility remains separate."},"summary":{"final_games_with_frozen_projection":len(finals),"projection_accuracy":projection_accuracy(finals),"straight_up":summarize(su),"spread":summarize(spreads),"totals":summarize(totals),"notable_spread":summarize(notable)},"by_week":weekly,"spread_by_signal":{k:summarize(v) for k,v in sorted(spread_groups.items())},"totals_by_signal":{k:summarize(v) for k,v in sorted(total_groups.items())},"game_results":su,"spread_decisions":spreads,"total_decisions":totals}
 
 def atomic_write(path,payload):
     path.parent.mkdir(parents=True,exist_ok=True)
