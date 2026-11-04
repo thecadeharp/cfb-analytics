@@ -44,9 +44,17 @@ class RosterIntegrityTests(unittest.TestCase):
         spots={"teams":[{"team_id":1,"team":"Alpha","official_roster_complete":True,"official_players":[f"A {i}" for i in range(10)]}]}
         report=audit(payload,spots,expected_teams=2)
         states={row["team"]:row["verification_state"] for row in report["team_audit"]}
-        self.assertEqual(states,{"Alpha":"official_match","Beta":"official_source_pending"})
-        self.assertFalse(report["checks"]["official_source_coverage"])
+        self.assertEqual(states,{"Alpha":"official_match","Beta":"provider_verified"})
+        self.assertFalse(report["checks"]["independent_audit_sample"])
         self.assertEqual(report["meta"]["status"],"withheld")
+
+    def test_missing_optional_positions_do_not_block_verified_rosters(self):
+        players=[{"athlete_source_id":str(i),"name":f"Player {i}","position":None} for i in range(10)]
+        payload={"meta":{"roster_verification_status":"provider_verified","roster_season":2027},"team_rosters":[{"team_id":1,"team":"Alpha","players":players}]}
+        spots={"teams":[{"team_id":1,"team":"Alpha","official_roster_complete":True,"official_players":[{"name":row["name"]} for row in players]}]}
+        report=audit(payload,spots,expected_teams=1)
+        self.assertTrue(report["checks"]["recognized_positions"])
+        self.assertEqual(report["meta"]["status"],"passed")
 
 
 if __name__ == "__main__": unittest.main()

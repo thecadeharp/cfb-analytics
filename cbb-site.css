@@ -355,6 +355,10 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
   gap: 9px;
   margin: 16px 0 10px;
 }
+.cbb-player-projection-controls { display:grid; grid-template-columns:minmax(260px,1fr) minmax(180px,.35fr); gap:10px; margin:14px 0; }
+.cbb-player-projection-table { min-width:1180px; }
+.cbb-player-projection-table tbody tr { cursor:pointer; }
+.cbb-player-projection-table tbody tr:hover { background:var(--surface-soft); }
 .cbb-player-table { min-width: 1280px; }
 .cbb-player-pager {
   display: flex;
@@ -479,6 +483,7 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
   .cbb-tracking-custom input { width:100%; min-width:0; }
   .cbb-tracking-grid, .cbb-tracking-ytd-grid { grid-template-columns:repeat(2,minmax(0,1fr)); padding-left:10px; padding-right:10px; }
   .cbb-tracking-table-section { padding-left:10px; padding-right:10px; }
+  .cbb-player-projection-controls { grid-template-columns:1fr; }
 }
 .cbb-bracket-grid {
   display: grid;

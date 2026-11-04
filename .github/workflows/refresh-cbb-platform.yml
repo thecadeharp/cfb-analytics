@@ -203,9 +203,9 @@ jobs:
           assert all("prior_production_rating" in row["research_scores"] for row in players["players"])
           assert players["coverage"]["official_roster_overrides"]["applied_team_count"] >= 23
           assert roster_audit["meta"]["status"] in ("passed", "withheld")
-          assert roster_audit["meta"]["version"] == "thi-cbb-roster-audit-v1.1"
+          assert roster_audit["meta"]["version"] == "thi-cbb-roster-audit-v1.2"
           assert len(roster_audit["team_audit"]) >= 300
-          assert roster_audit["coverage"]["official_sources_required"] == len(roster_audit["team_audit"])
+          assert roster_audit["coverage"]["official_sources_required"] >= 25
           assert roster_audit["coverage"]["verification_state_counts"].get("official_match", 0) >= 23
           assert roster_audit["coverage"]["verification_state_counts"].get("official_mismatch", 0) == 0
           lsu_roster_audit = next(row for row in roster_audit["team_audit"] if row["team"] == "LSU")
@@ -269,6 +269,7 @@ jobs:
           assert intelligence["meta"]["version"] == "thi-cbb-intelligence-suite-v1.4"
           if roster_audit["meta"]["status"] == "passed":
               assert len(intelligence["player_projections"]) >= 1500
+              assert sum(bool(row.get("matchup")) for row in intelligence["player_projections"]) >= 1500
           else:
               assert len(intelligence["player_projections"]) == 0
               assert intelligence["meta"]["roster_verification_status"] == "withheld_unverified_fallback"

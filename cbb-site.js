@@ -39,6 +39,7 @@
     "cbb-projections": ["intelligence", "matchups", "operations", "postgame"],
     "cbb-tracking": [],
     "cbb-team-data": ["intelligence"],
+    "cbb-player-ratings": ["intelligence"],
     "cbb-ratings": ["intelligence"],
     "cbb-market": ["intelligence", "rlmMonitor"],
     "cbb-variance": ["trends", "varianceTracker", "rlmMonitor"],
@@ -68,6 +69,8 @@
     playerError: "",
     playerBandCache: {},
     cbbPlayerSection: "ratings",
+    playerProjectionQuery: "",
+    playerProjectionDate: "",
     deferredLoads: {},
     cacheManifest: { meta: {}, assets: {} },
     projectionQuery: "",
@@ -1323,16 +1326,30 @@
 
   function renderPlayerRatings() {
     const view = document.getElementById("view-cbb-player-ratings");
-    const sectionTabs = `<div class="cbb-player-section-tabs" role="tablist" aria-label="CBB player intelligence view"><button type="button" role="tab" aria-selected="${state.cbbPlayerSection === "ratings"}" class="${state.cbbPlayerSection === "ratings" ? "is-active" : ""}" data-cbb-player-section="ratings">Player Ratings</button><button type="button" role="tab" aria-selected="${state.cbbPlayerSection === "projections"}" class="${state.cbbPlayerSection === "projections" ? "is-active" : ""}" data-cbb-player-section="projections">Player Projections <span>Future</span></button></div>`;
+    const sectionTabs = `<div class="cbb-player-section-tabs" role="tablist" aria-label="CBB player intelligence view"><button type="button" role="tab" aria-selected="${state.cbbPlayerSection === "ratings"}" class="${state.cbbPlayerSection === "ratings" ? "is-active" : ""}" data-cbb-player-section="ratings">Player Ratings</button><button type="button" role="tab" aria-selected="${state.cbbPlayerSection === "projections"}" class="${state.cbbPlayerSection === "projections" ? "is-active" : ""}" data-cbb-player-section="projections">Player Projections <span>Research</span></button></div>`;
     const bindSectionTabs = () => view.querySelectorAll("[data-cbb-player-section]").forEach(button => button.addEventListener("click", () => { state.cbbPlayerSection = button.dataset.cbbPlayerSection; renderPlayerRatings(); }));
     if (state.cbbPlayerSection === "projections") {
+      const projections = (state.data?.intelligence?.player_projections || []).filter(row => row.matchup?.game_id && row.projection_state !== "role_only");
+      const dates = [...new Set(projections.map(row => cbbTrackingDateKey(row.matchup?.start_date)).filter(Boolean))].sort();
+      if (!dates.includes(state.playerProjectionDate)) state.playerProjectionDate = dates[0] || "";
+      const query = normalizeSearch(state.playerProjectionQuery);
+      const visible = projections.filter(row => {
+        if (state.playerProjectionDate && cbbTrackingDateKey(row.matchup?.start_date) !== state.playerProjectionDate) return false;
+        return !query || normalizeSearch(`${row.name} ${row.team} ${row.matchup?.opponent} ${row.position}`).includes(query);
+      }).sort((a,b) => String(a.matchup?.start_date || "").localeCompare(String(b.matchup?.start_date || "")) || String(a.team || "").localeCompare(String(b.team || "")) || Number(b.thi_impact || 0)-Number(a.thi_impact || 0));
+      const games = new Set(visible.map(row => row.matchup?.game_id)).size;
+      const dateOptions = dates.map(key => `<option value="${key}" ${state.playerProjectionDate === key ? "selected" : ""}>${new Intl.DateTimeFormat("en-US",{weekday:"short",month:"short",day:"numeric",timeZone:"UTC"}).format(new Date(`${key}T12:00:00Z`))}</option>`).join("");
+      const rows = visible.slice(0,400).map(row => `<tr data-player-id="${escapeHtml(row.player_season_id)}"><td><div class="cbb-team-name">${escapeHtml(row.name)}</div><div class="cbb-team-meta">${escapeHtml(row.position || "—")} · ${escapeHtml(row.confidence || "developing")} · Open profile →</div></td><td><strong>${escapeHtml(row.team)}</strong><div class="cbb-team-meta">${escapeHtml(row.matchup?.site === "home" ? "vs." : row.matchup?.site === "away" ? "at" : "vs.")} ${escapeHtml(row.matchup?.opponent || "TBD")}</div></td><td>${escapeHtml(formatTimestamp(row.matchup?.start_date))}</td><td class="cbb-number">${number(row.projected_minutes,1)}</td><td class="cbb-number">${number(row.projected_points,1)}</td><td class="cbb-number">${number(row.projected_rebounds,1)}</td><td class="cbb-number">${number(row.projected_assists,1)}</td><td class="cbb-number">${number(row.projected_steals,1)}</td><td class="cbb-number">${number(row.projected_blocks,1)}</td><td class="cbb-number">${number(row.projected_turnovers,1)}</td><td class="cbb-number">${number(row.thi_impact,1)}</td></tr>`).join("");
       view.innerHTML = `
         <div class="cbb-kicker">Player-level basketball intelligence</div>
-        <h1 class="page-title">CBB Player Intelligence</h1>
-        <p class="page-subtitle">Ratings and next-game statistical projections occupy separate research layers.</p>
+        <h1 class="page-title">CBB Player Projections</h1>
+        <p class="page-subtitle">Next-game minutes and counting-stat forecasts built from verified rotations, prior per-40 production, THI projected possessions and team scoring context.</p>
         ${sectionTabs}
-        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Withheld</span><strong>CBB player projections follow roster verification</strong><p>The future board is reserved for minutes, points, rebounds, assists, threes, steals, blocks and turnovers. THI will not publish those estimates until current rosters, projected rotations and the player-game validation ledger clear their release gates. It will remain a performance-forecasting tool with no player market lines, odds, prices, picks or wager records.</p></div>`;
+        ${projections.length ? `<div class="cbb-stat-grid"><article class="cbb-panel cbb-stat-card"><span>Projected players</span><strong>${integer(visible.length)}</strong><small>Qualified prior production</small></article><article class="cbb-panel cbb-stat-card"><span>Games</span><strong>${integer(games)}</strong><small>Selected Eastern Time slate</small></article><article class="cbb-panel cbb-stat-card"><span>Forecast state</span><strong>Research</strong><small>Game-linked performance estimates</small></article><article class="cbb-panel cbb-stat-card"><span>Model use</span><strong>Display only</strong><small>Does not change the team projection</small></article></div><div class="cbb-player-projection-controls"><input id="cbb-player-projection-search" class="cbb-input" type="search" placeholder="Search player, team or opponent" value="${escapeHtml(state.playerProjectionQuery)}"><select id="cbb-player-projection-date" class="cbb-select">${dateOptions}</select></div><div class="cbb-panel cbb-table-wrap"><table class="cbb-table cbb-player-projection-table"><thead><tr><th>Player</th><th>Matchup</th><th>Tip</th><th>MIN</th><th>PTS</th><th>REB</th><th>AST</th><th>STL</th><th>BLK</th><th>TO</th><th>Impact</th></tr></thead><tbody>${rows || `<tr><td colspan="11" class="cbb-empty">No qualified player projections match this slate and search.</td></tr>`}</tbody></table></div><div class="cbb-stat-note">These are performance forecasts, not player props. THI does not ingest or display player market lines. Three-point projections remain withheld until a verified player shooting-volume field is available rather than being inferred from points alone.</div>` : `<div class="cbb-readiness-banner"><span class="cbb-status-pill">Roster audit</span><strong>${state.playerLoading ? "Loading verified player data" : "CBB player projections follow roster verification"}</strong><p>${escapeHtml(state.playerError || "The board publishes automatically after the provider roster, structural checks and independent official-roster sample clear the release gate.")}</p></div>`}`;
       bindSectionTabs();
+      view.querySelector("#cbb-player-projection-search")?.addEventListener("input", event => { state.playerProjectionQuery=event.target.value; renderPlayerRatings(); const input=document.getElementById("cbb-player-projection-search"); input?.focus(); input?.setSelectionRange(input.value.length,input.value.length); });
+      view.querySelector("#cbb-player-projection-date")?.addEventListener("change", event => { state.playerProjectionDate=event.target.value; renderPlayerRatings(); });
+      view.querySelector(".cbb-player-projection-table tbody")?.addEventListener("click", event => { const row=event.target.closest("[data-player-id]"); if(row) openPlayerDetail(row.dataset.playerId); });
       return;
     }
     if (!state.playerData) {

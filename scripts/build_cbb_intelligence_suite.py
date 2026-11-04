@@ -18,6 +18,9 @@ def num(value: Any) -> float | None:
         return value if math.isfinite(value) else None
     except (TypeError, ValueError): return None
 
+def clamp(value: float, low: float, high: float) -> float:
+    return max(low, min(high, value))
+
 def national_hca(model: dict[str, Any]) -> float | None:
     margin = (model.get("models") or {}).get("margin") or {}
     names, coefs = margin.get("feature_names") or [], margin.get("coefficients") or []
@@ -100,8 +103,32 @@ def resume_profile(
         "policy": "THI-calculated résumé context using frozen projections and THI opponent ranks; quadrant-style records are not NCAA NET quadrants.",
     }
 
-def project_players(players: dict[str, Any], priors: dict[str, Any]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def upcoming_player_games(board: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    games = sorted(
+        [game for game in board.get("games") or [] if game_status(game) not in {"final", "completed", "complete"}],
+        key=lambda game: (str(game.get("start_date") or ""), str(game.get("game_id") or "")),
+    )
+    upcoming: dict[str, dict[str, Any]] = {}
+    for game in games:
+        projection = game.get("projection") or {}
+        for side, opponent_side in (("home", "away"), ("away", "home")):
+            team = game.get(side) or {}; opponent = game.get(opponent_side) or {}; team_id = str(team.get("team_id"))
+            if not team_id or team_id in upcoming:
+                continue
+            upcoming[team_id] = {
+                "game_id": game.get("game_id"), "start_date": game.get("start_date"),
+                "opponent": opponent.get("team"), "opponent_id": opponent.get("team_id"),
+                "site": "neutral" if game.get("neutral_site") else side,
+                "projected_team_points": num(projection.get(f"{side}_points")),
+                "projected_possessions": num(projection.get("projected_possessions")),
+                "sample_state": projection.get("sample_state"),
+            }
+    return upcoming
+
+def project_players(players: dict[str, Any], priors: dict[str, Any], board: dict[str, Any] | None = None) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     team_tempo = {str(row.get("team_id")): num(row.get("prior_tempo")) or 68.0 for row in priors.get("teams") or []}
+    team_offense = {str(row.get("team_id")): num(row.get("prior_offense")) or 105.0 for row in priors.get("teams") or []}
+    next_games = upcoming_player_games(board or {})
     grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for player in players.get("players") or []: grouped[str(player.get("team_id"))].append(player)
     projections, rotations = [], []
@@ -120,16 +147,28 @@ def project_players(players: dict[str, Any], priors: dict[str, Any]) -> tuple[li
             metrics = row.get("metrics") or {}
             reliability = num((row.get("data_quality") or {}).get("reliability")) or 0
             qualified = num(metrics.get("points_per_40")) is not None and minutes > 0
-            stat = lambda key: round((num(metrics.get(key)) or 0) * minutes / 40.0, 1) if qualified and num(metrics.get(key)) is not None else None
+            matchup = next_games.get(team_id)
+            tempo = team_tempo.get(team_id, 68.0)
+            projected_possessions = num((matchup or {}).get("projected_possessions")) or tempo
+            possession_factor = clamp(projected_possessions / max(tempo, 1.0), .88, 1.12)
+            baseline_points = team_offense.get(team_id, 105.0) * tempo / 100.0
+            projected_team_points = num((matchup or {}).get("projected_team_points"))
+            scoring_factor = clamp(projected_team_points / max(baseline_points, 1.0), .85, 1.15) if projected_team_points is not None else 1.0
+            scoring_volume = possession_factor * math.sqrt(scoring_factor)
+            def stat(key: str, factor: float = possession_factor) -> float | None:
+                value = num(metrics.get(key))
+                return round(value * minutes / 40.0 * factor, 1) if qualified and value is not None else None
             projected = {
                 "player_season_id": row.get("player_season_id"), "team_id": row.get("team_id"), "team": row.get("team"),
                 "name": row.get("name"), "position": row.get("position"), "role": row.get("role"),
-                "projected_minutes": minutes, "projected_points": stat("points_per_40"),
+                "projected_minutes": minutes, "projected_points": stat("points_per_40", scoring_volume),
                 "projected_rebounds": stat("rebounds_per_40"), "projected_assists": stat("assists_per_40"),
                 "projected_steals": stat("steals_per_40"), "projected_blocks": stat("blocks_per_40"),
                 "projected_turnovers": stat("turnovers_per_40"), "thi_impact": (row.get("research_scores") or {}).get("thi_player_rating"),
-                "tempo_context": round(team_tempo.get(team_id, 68.0), 1), "projection_state": "statistical_prior" if qualified else "role_only",
-                "reliability": reliability,
+                "tempo_context": round(tempo, 1), "projection_state": "next_game_statistical_prior" if qualified and matchup else "statistical_prior" if qualified else "role_only",
+                "reliability": reliability, "confidence": "established" if reliability >= 80 else "developing" if reliability >= 50 else "limited",
+                "matchup": matchup,
+                "adjustments": {"possession_factor": round(possession_factor,3), "team_scoring_factor": round(scoring_factor,3)},
             }
             projections.append(projected); team_rows.append(projected)
         rotations.append({"team_id": rows[0].get("team_id"), "team": rows[0].get("team"), "players": team_rows[:12], "projected_rotation_minutes": round(sum(row["projected_minutes"] for row in team_rows[:10]), 1)})
@@ -150,7 +189,7 @@ def build_suite(
     provider_verified = players.get("meta", {}).get("roster_verification_status") in (None, "provider_verified")
     audit_status = (roster_audit or {}).get("meta", {}).get("status")
     rosters_verified = provider_verified and audit_status in (None, "passed")
-    player_rows, rotations = project_players(players if rosters_verified else {"players": []}, priors)
+    player_rows, rotations = project_players(players if rosters_verified else {"players": []}, priors, board)
     prior_rows = priors.get("teams") or []
     prior_map = {str(row.get("team_id")): row for row in prior_rows}
     profile_map = {str(row.get("team_id")): row for row in profiles.get("teams") or []}
@@ -348,7 +387,7 @@ def build_suite(
             "version": VERSION, "season": priors.get("meta", {}).get("season"), "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "methodology": "THI uses regressed preseason priors, verified roster continuity when available, possession-based opponent-adjusted efficiency, chronological Four Factors, pace, regularized program-specific home-court effects and walk-forward updates. Market prices remain evaluation fields. Situational flags are displayed as research context until each feature clears out-of-sample validation.",
             "inspiration_note": "Away-from-home performance, record quality, quadrant-style records, rating movement and recent form are THI calculations inspired by useful public dossier concepts; no external proprietary rating is copied or used as a model input.",
-            "player_projection_policy": "Qualified prior production receives per-game counting-stat projections only after the current roster source clears THI's verification gate. The active fallback is withheld.",
+            "player_projection_policy": "Qualified prior production receives next-game counting-stat projections after the current roster source clears THI's verification gate. Minutes come from the projected rotation; counting stats adjust prior per-40 production for the matchup's THI possessions and team scoring forecast.",
             "roster_verification_status": "provider_verified" if rosters_verified else "withheld_unverified_fallback",
             "roster_audit_status": audit_status or "legacy_contract",
             "home_court_policy": "Program effects use five seasons of conference games, recency weighting and shrinkage toward the national mean; neutral-site games receive zero.",
