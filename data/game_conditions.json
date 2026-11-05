@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "weather-engine-v1",
-    "generated": "2026-11-05T01:27:44.686105+00:00",
+    "generated": "2026-11-05T10:51:49.883366+00:00",
     "forecast_source": "Open-Meteo",
     "venue_source": "ESPN event venue metadata",
     "broadcast_source": "ESPN event broadcast metadata",
@@ -38,186 +38,6 @@
     }
   },
   "games": {
-    "401866455": {
-      "game_id": "401866455",
-      "kickoff_utc": "2026-11-05T00:00:00+00:00",
-      "venue": "Warren McGuirk Alumni Stadium",
-      "network": null,
-      "indoor": false,
-      "indoor_source": null,
-      "forecast": {
-        "forecast_time_utc": "2026-11-05T00:00Z",
-        "temperature_f": 63.6,
-        "precip_probability_pct": 0.0,
-        "precipitation_in": 0.0,
-        "rain_in": 0.0,
-        "snowfall_in": 0.0,
-        "wind_mph": 6.9,
-        "wind_gust_mph": 17.4,
-        "weather_code": 0,
-        "summary": "Clear",
-        "precipitation_label": "Dry",
-        "location": {
-          "latitude": 42.36723,
-          "longitude": -72.51852,
-          "resolved_name": "Amherst",
-          "resolved_admin1": "Massachusetts",
-          "resolved_country": "United States",
-          "query": "Amherst, MA, USA"
-        }
-      },
-      "conditions_line": "64\u00b0F \u00b7 7 mph wind \u00b7 gusts 17 \u00b7 Dry",
-      "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
-      "baseline": {
-        "home_spread": -14.5,
-        "total": 51.0
-      },
-      "adjustments": {
-        "breakdown": {
-          "wind": 0.0,
-          "precipitation": 0.0,
-          "temperature": 0.0
-        },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
-        "home_spread_points": 0.0
-      },
-      "adjusted": {
-        "home_spread": -14.5,
-        "total": 51.0
-      },
-      "spread_logic": {
-        "status": "ACTIVE",
-        "home_spread_points": 0.0,
-        "favored_style_team": null,
-        "pass_lean_gap": -0.1,
-        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
-        "home_tendency": {
-          "team": "Massachusetts",
-          "plays": 331,
-          "epa_pass": 0.186,
-          "epa_rush": 0.13,
-          "pass_lean_score": 0.056,
-          "eligible": true
-        },
-        "away_tendency": {
-          "team": "Ball State",
-          "plays": 373,
-          "epa_pass": 0.207,
-          "epa_rush": 0.045,
-          "pass_lean_score": 0.162,
-          "eligible": true
-        }
-      }
-    },
-    "401866457": {
-      "game_id": "401866457",
-      "kickoff_utc": "2026-11-05T00:00:00+00:00",
-      "venue": "Hornet Stadium",
-      "network": null,
-      "indoor": false,
-      "indoor_source": null,
-      "forecast": {
-        "forecast_time_utc": "2026-11-05T00:00Z",
-        "temperature_f": 67.8,
-        "precip_probability_pct": 0.0,
-        "precipitation_in": 0.0,
-        "rain_in": 0.0,
-        "snowfall_in": 0.0,
-        "wind_mph": 4.9,
-        "wind_gust_mph": 7.6,
-        "weather_code": 3,
-        "summary": "Cloudy",
-        "precipitation_label": "Dry",
-        "location": {
-          "latitude": 38.58157,
-          "longitude": -121.4944,
-          "resolved_name": "Sacramento",
-          "resolved_admin1": "California",
-          "resolved_country": "United States",
-          "query": "Sacramento, CA, USA"
-        }
-      },
-      "conditions_line": "68\u00b0F \u00b7 5 mph wind \u00b7 Dry",
-      "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
-      "baseline": {
-        "home_spread": 20.0,
-        "total": 51.5
-      },
-      "adjustments": {
-        "breakdown": {
-          "wind": 0.0,
-          "precipitation": 0.0,
-          "temperature": 0.0
-        },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
-        "home_spread_points": 0.0
-      },
-      "adjusted": {
-        "home_spread": 20.0,
-        "total": 51.5
-      },
-      "spread_logic": {
-        "status": "ACTIVE",
-        "home_spread_points": 0.0,
-        "favored_style_team": null,
-        "pass_lean_gap": -0.4,
-        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
-        "home_tendency": {
-          "team": "Sacramento State",
-          "plays": 395,
-          "epa_pass": -0.097,
-          "epa_rush": -0.052,
-          "pass_lean_score": -0.045,
-          "eligible": true
-        },
-        "away_tendency": {
-          "team": "Toledo",
-          "plays": 459,
-          "epa_pass": 0.428,
-          "epa_rush": 0.095,
-          "pass_lean_score": 0.333,
-          "eligible": true
-        }
-      }
-    },
-    "401866456": {
-      "game_id": "401866456",
-      "kickoff_utc": "2026-11-05T00:30:00+00:00",
-      "venue": "Ford Field",
-      "network": null,
-      "indoor": true,
-      "indoor_source": "venue_registry",
-      "forecast": null,
-      "conditions_line": "Indoor \u00b7 Climate controlled \u00b7 Weather Neutral",
-      "impact": "Minimal",
-      "note": "Indoor venue; weather adjustment is automatically zero.",
-      "baseline": {
-        "home_spread": -3.5,
-        "total": 50.5
-      },
-      "adjustments": {
-        "breakdown": {
-          "wind": 0.0,
-          "precipitation": 0.0,
-          "temperature": 0.0
-        },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
-        "home_spread_points": 0.0
-      },
-      "adjusted": {
-        "home_spread": -3.5,
-        "total": 50.5
-      },
-      "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
-      }
-    },
     "401862817": {
       "game_id": "401862817",
       "kickoff_utc": "2026-11-06T00:30:00+00:00",
@@ -227,13 +47,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-06T00:00Z",
-        "temperature_f": 75.0,
-        "precip_probability_pct": 2.0,
+        "temperature_f": 74.9,
+        "precip_probability_pct": 1.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 7.1,
-        "wind_gust_mph": 12.5,
+        "wind_mph": 5.7,
+        "wind_gust_mph": 10.3,
         "weather_code": 0,
         "summary": "Clear",
         "precipitation_label": "Dry",
@@ -246,7 +66,7 @@
           "query": "Boca Raton, FL, USA"
         }
       },
-      "conditions_line": "75\u00b0F \u00b7 7 mph wind \u00b7 gusts 12 \u00b7 Dry",
+      "conditions_line": "75\u00b0F \u00b7 6 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -300,15 +120,15 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-06T01:00Z",
-        "temperature_f": 68.2,
+        "temperature_f": 65.7,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 5.0,
-        "wind_gust_mph": 5.6,
-        "weather_code": 3,
-        "summary": "Cloudy",
+        "wind_mph": 1.6,
+        "wind_gust_mph": 1.6,
+        "weather_code": 0,
+        "summary": "Clear",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 31.32712,
@@ -319,7 +139,7 @@
           "query": "Hattiesburg, MS, USA"
         }
       },
-      "conditions_line": "68\u00b0F \u00b7 5 mph wind \u00b7 Dry",
+      "conditions_line": "66\u00b0F \u00b7 2 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -373,13 +193,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T00:00Z",
-        "temperature_f": 72.5,
+        "temperature_f": 60.9,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 7.1,
-        "wind_gust_mph": 10.7,
+        "wind_mph": 7.8,
+        "wind_gust_mph": 18.1,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -392,7 +212,7 @@
           "query": "Dallas, TX, USA"
         }
       },
-      "conditions_line": "72\u00b0F \u00b7 7 mph wind \u00b7 Dry",
+      "conditions_line": "61\u00b0F \u00b7 8 mph wind \u00b7 gusts 18 \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -446,15 +266,15 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T00:00Z",
-        "temperature_f": 66.3,
-        "precip_probability_pct": 97.0,
-        "precipitation_in": 0.004,
+        "temperature_f": 65.1,
+        "precip_probability_pct": 99.0,
+        "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 4.7,
-        "wind_gust_mph": 14.5,
-        "weather_code": 51,
-        "summary": "Drizzle",
+        "wind_mph": 3.7,
+        "wind_gust_mph": 12.8,
+        "weather_code": 3,
+        "summary": "Cloudy",
         "precipitation_label": "Light rain",
         "location": {
           "latitude": 35.61266,
@@ -465,7 +285,7 @@
           "query": "Greenville, NC, USA"
         }
       },
-      "conditions_line": "66\u00b0F \u00b7 5 mph wind \u00b7 gusts 14 \u00b7 Light rain",
+      "conditions_line": "65\u00b0F \u00b7 4 mph wind \u00b7 gusts 13 \u00b7 Light rain",
       "impact": "Moderate",
       "note": "Rain may slightly suppress scoring efficiency.",
       "baseline": {
@@ -519,13 +339,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T01:00Z",
-        "temperature_f": 41.3,
+        "temperature_f": 40.8,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 5.2,
-        "wind_gust_mph": 8.3,
+        "wind_mph": 9.5,
+        "wind_gust_mph": 16.6,
         "weather_code": 0,
         "summary": "Clear",
         "precipitation_label": "Dry",
@@ -538,7 +358,7 @@
           "query": "Champaign, IL, USA"
         }
       },
-      "conditions_line": "41\u00b0F \u00b7 5 mph wind \u00b7 Dry",
+      "conditions_line": "41\u00b0F \u00b7 10 mph wind \u00b7 gusts 17 \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -592,15 +412,15 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T02:00Z",
-        "temperature_f": 56.1,
+        "temperature_f": 51.3,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 2.5,
-        "wind_gust_mph": 2.5,
-        "weather_code": 1,
-        "summary": "Partly cloudy",
+        "wind_mph": 6.1,
+        "wind_gust_mph": 6.0,
+        "weather_code": 0,
+        "summary": "Clear",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 39.52963,
@@ -611,7 +431,7 @@
           "query": "Reno, NV, USA"
         }
       },
-      "conditions_line": "56\u00b0F \u00b7 2 mph wind \u00b7 Dry",
+      "conditions_line": "51\u00b0F \u00b7 6 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -665,15 +485,15 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T03:00Z",
-        "temperature_f": 70.4,
-        "precip_probability_pct": 5.0,
+        "temperature_f": 64.0,
+        "precip_probability_pct": 9.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 7.5,
-        "wind_gust_mph": 9.8,
-        "weather_code": 2,
-        "summary": "Partly cloudy",
+        "wind_mph": 7.1,
+        "wind_gust_mph": 14.5,
+        "weather_code": 0,
+        "summary": "Clear",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 32.22174,
@@ -684,7 +504,7 @@
           "query": "Tucson, AZ, USA"
         }
       },
-      "conditions_line": "70\u00b0F \u00b7 8 mph wind \u00b7 Dry",
+      "conditions_line": "64\u00b0F \u00b7 7 mph wind \u00b7 gusts 14 \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -738,13 +558,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T17:00Z",
-        "temperature_f": 50.7,
+        "temperature_f": 50.4,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 3.6,
-        "wind_gust_mph": 4.7,
+        "wind_mph": 2.5,
+        "wind_gust_mph": 3.4,
         "weather_code": 0,
         "summary": "Clear",
         "precipitation_label": "Dry",
@@ -757,7 +577,7 @@
           "query": "Salt Lake City, UT, USA"
         }
       },
-      "conditions_line": "51\u00b0F \u00b7 4 mph wind \u00b7 Dry",
+      "conditions_line": "50\u00b0F \u00b7 2 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -845,13 +665,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T17:00Z",
-        "temperature_f": 53.3,
-        "precip_probability_pct": 37.0,
+        "temperature_f": 51.3,
+        "precip_probability_pct": 35.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 7.8,
-        "wind_gust_mph": 14.1,
+        "wind_mph": 9.8,
+        "wind_gust_mph": 20.8,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -864,7 +684,7 @@
           "query": "Chestnut Hill, MA, USA"
         }
       },
-      "conditions_line": "53\u00b0F \u00b7 8 mph wind \u00b7 gusts 14 \u00b7 Dry",
+      "conditions_line": "51\u00b0F \u00b7 10 mph wind \u00b7 gusts 21 \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -918,13 +738,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T17:00Z",
-        "temperature_f": 71.2,
-        "precip_probability_pct": 0.0,
+        "temperature_f": 69.9,
+        "precip_probability_pct": 8.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 5.5,
-        "wind_gust_mph": 5.8,
+        "wind_mph": 8.5,
+        "wind_gust_mph": 8.9,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -937,7 +757,7 @@
           "query": "Waco, TX, USA"
         }
       },
-      "conditions_line": "71\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+      "conditions_line": "70\u00b0F \u00b7 8 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -991,16 +811,16 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T17:00Z",
-        "temperature_f": 61.7,
-        "precip_probability_pct": 7.0,
-        "precipitation_in": 0.008,
+        "temperature_f": 57.8,
+        "precip_probability_pct": 14.0,
+        "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 5.8,
-        "wind_gust_mph": 1.3,
-        "weather_code": 51,
-        "summary": "Drizzle",
-        "precipitation_label": "Light rain",
+        "wind_mph": 6.3,
+        "wind_gust_mph": 15.7,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
         "location": {
           "latitude": 41.78232,
           "longitude": -72.61203,
@@ -1010,9 +830,9 @@
           "query": "East Hartford, CT, USA"
         }
       },
-      "conditions_line": "62\u00b0F \u00b7 6 mph wind \u00b7 Light rain",
-      "impact": "Moderate",
-      "note": "Rain may slightly suppress scoring efficiency.",
+      "conditions_line": "58\u00b0F \u00b7 6 mph wind \u00b7 gusts 16 \u00b7 Dry",
+      "impact": "Minimal",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -1.0,
         "total": 53.5
@@ -1020,16 +840,16 @@
       "adjustments": {
         "breakdown": {
           "wind": 0.0,
-          "precipitation": -0.5,
+          "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": -0.5,
-        "total_points": -0.5,
+        "raw_total_points": 0.0,
+        "total_points": 0.0,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -1.0,
-        "total": 53.0
+        "total": 53.5
       },
       "spread_logic": {
         "status": "ACTIVE",
@@ -1064,13 +884,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T17:00Z",
-        "temperature_f": 48.2,
+        "temperature_f": 49.3,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 2.9,
-        "wind_gust_mph": 3.8,
+        "wind_mph": 1.8,
+        "wind_gust_mph": 2.5,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -1083,7 +903,7 @@
           "query": "Columbia, MO, USA"
         }
       },
-      "conditions_line": "48\u00b0F \u00b7 3 mph wind \u00b7 Dry",
+      "conditions_line": "49\u00b0F \u00b7 2 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -1137,13 +957,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T17:00Z",
-        "temperature_f": 70.9,
+        "temperature_f": 69.3,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 7.2,
-        "wind_gust_mph": 7.8,
+        "wind_mph": 8.5,
+        "wind_gust_mph": 8.7,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -1156,7 +976,7 @@
           "query": "New Orleans, LA, USA"
         }
       },
-      "conditions_line": "71\u00b0F \u00b7 7 mph wind \u00b7 Dry",
+      "conditions_line": "69\u00b0F \u00b7 8 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -1210,15 +1030,15 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T17:00Z",
-        "temperature_f": 44.4,
+        "temperature_f": 47.1,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 5.3,
-        "wind_gust_mph": 8.1,
-        "weather_code": 3,
-        "summary": "Cloudy",
+        "wind_mph": 6.6,
+        "wind_gust_mph": 11.0,
+        "weather_code": 0,
+        "summary": "Clear",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 44.97997,
@@ -1229,7 +1049,7 @@
           "query": "Minneapolis, MN, USA"
         }
       },
-      "conditions_line": "44\u00b0F \u00b7 5 mph wind \u00b7 Dry",
+      "conditions_line": "47\u00b0F \u00b7 7 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -1283,13 +1103,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T17:00Z",
-        "temperature_f": 61.5,
+        "temperature_f": 62.7,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 11.3,
-        "wind_gust_mph": 14.3,
+        "wind_mph": 11.1,
+        "wind_gust_mph": 13.9,
         "weather_code": 0,
         "summary": "Clear",
         "precipitation_label": "Dry",
@@ -1302,7 +1122,7 @@
           "query": "Raleigh, NC, USA"
         }
       },
-      "conditions_line": "62\u00b0F \u00b7 11 mph wind \u00b7 Dry",
+      "conditions_line": "63\u00b0F \u00b7 11 mph wind \u00b7 Dry",
       "impact": "Moderate",
       "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
@@ -1356,13 +1176,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T17:00Z",
-        "temperature_f": 49.4,
+        "temperature_f": 48.6,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 5.9,
-        "wind_gust_mph": 7.2,
+        "wind_mph": 5.4,
+        "wind_gust_mph": 6.3,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -1375,7 +1195,7 @@
           "query": "West Lafayette, IN, USA"
         }
       },
-      "conditions_line": "49\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+      "conditions_line": "49\u00b0F \u00b7 5 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -1429,13 +1249,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T18:00Z",
-        "temperature_f": 65.5,
+        "temperature_f": 65.4,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 7.7,
-        "wind_gust_mph": 9.2,
+        "wind_mph": 8.0,
+        "wind_gust_mph": 9.8,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -1448,7 +1268,7 @@
           "query": "Auburn, AL, USA"
         }
       },
-      "conditions_line": "66\u00b0F \u00b7 8 mph wind \u00b7 Dry",
+      "conditions_line": "65\u00b0F \u00b7 8 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -1502,13 +1322,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T18:00Z",
-        "temperature_f": 56.3,
+        "temperature_f": 58.1,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 7.4,
-        "wind_gust_mph": 5.6,
+        "wind_mph": 7.3,
+        "wind_gust_mph": 8.9,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -1521,7 +1341,7 @@
           "query": "Manhattan, KS, USA"
         }
       },
-      "conditions_line": "56\u00b0F \u00b7 7 mph wind \u00b7 Dry",
+      "conditions_line": "58\u00b0F \u00b7 7 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -1575,13 +1395,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T18:00Z",
-        "temperature_f": 68.7,
+        "temperature_f": 69.3,
         "precip_probability_pct": 1.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 10.6,
-        "wind_gust_mph": 10.5,
+        "wind_mph": 10.8,
+        "wind_gust_mph": 10.7,
         "weather_code": 0,
         "summary": "Clear",
         "precipitation_label": "Dry",
@@ -1648,15 +1468,15 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T19:00Z",
-        "temperature_f": 50.9,
+        "temperature_f": 50.5,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 7.8,
-        "wind_gust_mph": 12.8,
-        "weather_code": 0,
-        "summary": "Clear",
+        "wind_mph": 10.9,
+        "wind_gust_mph": 13.2,
+        "weather_code": 2,
+        "summary": "Partly cloudy",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 36.21679,
@@ -1667,26 +1487,26 @@
           "query": "Boone, NC, USA"
         }
       },
-      "conditions_line": "51\u00b0F \u00b7 8 mph wind \u00b7 gusts 13 \u00b7 Dry",
-      "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
+      "conditions_line": "50\u00b0F \u00b7 11 mph wind \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": 3.0,
         "total": 52.0
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 3.0,
-        "total": 52.0
+        "total": 51.5
       },
       "spread_logic": {
         "status": "ACTIVE",
@@ -1721,13 +1541,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T20:00Z",
-        "temperature_f": 63.8,
+        "temperature_f": 63.6,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 8.1,
-        "wind_gust_mph": 10.3,
+        "wind_mph": 9.5,
+        "wind_gust_mph": 10.7,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -1740,7 +1560,7 @@
           "query": "Kennesaw, GA, USA"
         }
       },
-      "conditions_line": "64\u00b0F \u00b7 8 mph wind \u00b7 Dry",
+      "conditions_line": "64\u00b0F \u00b7 10 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -1794,15 +1614,15 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T20:00Z",
-        "temperature_f": 71.1,
+        "temperature_f": 71.6,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 4.8,
-        "wind_gust_mph": 5.4,
-        "weather_code": 0,
-        "summary": "Clear",
+        "wind_mph": 5.1,
+        "wind_gust_mph": 5.1,
+        "weather_code": 1,
+        "summary": "Partly cloudy",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 34.00071,
@@ -1813,7 +1633,7 @@
           "query": "Columbia, SC, USA"
         }
       },
-      "conditions_line": "71\u00b0F \u00b7 5 mph wind \u00b7 Dry",
+      "conditions_line": "72\u00b0F \u00b7 5 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -1867,13 +1687,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T20:00Z",
-        "temperature_f": 57.3,
+        "temperature_f": 56.5,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 6.0,
-        "wind_gust_mph": 7.8,
+        "wind_mph": 6.5,
+        "wind_gust_mph": 7.4,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -1886,7 +1706,7 @@
           "query": "Jonesboro, AR, USA"
         }
       },
-      "conditions_line": "57\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+      "conditions_line": "56\u00b0F \u00b7 6 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -1940,13 +1760,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T20:00Z",
-        "temperature_f": 76.0,
+        "temperature_f": 74.3,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 5.5,
-        "wind_gust_mph": 8.7,
+        "wind_mph": 7.4,
+        "wind_gust_mph": 10.1,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -1959,7 +1779,7 @@
           "query": "Baton Rouge, LA, USA"
         }
       },
-      "conditions_line": "76\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+      "conditions_line": "74\u00b0F \u00b7 7 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -2013,13 +1833,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T20:00Z",
-        "temperature_f": 62.0,
+        "temperature_f": 61.7,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 8.2,
-        "wind_gust_mph": 10.3,
+        "wind_mph": 8.9,
+        "wind_gust_mph": 11.9,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -2032,7 +1852,7 @@
           "query": "Birmingham, AL, USA"
         }
       },
-      "conditions_line": "62\u00b0F \u00b7 8 mph wind \u00b7 Dry",
+      "conditions_line": "62\u00b0F \u00b7 9 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -2086,13 +1906,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T20:00Z",
-        "temperature_f": 78.3,
+        "temperature_f": 75.0,
         "precip_probability_pct": 2.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 9.0,
-        "wind_gust_mph": 11.2,
+        "wind_mph": 8.4,
+        "wind_gust_mph": 11.0,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -2105,7 +1925,7 @@
           "query": "Houston, TX, USA"
         }
       },
-      "conditions_line": "78\u00b0F \u00b7 9 mph wind \u00b7 Dry",
+      "conditions_line": "75\u00b0F \u00b7 8 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -2159,13 +1979,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T20:00Z",
-        "temperature_f": 72.7,
+        "temperature_f": 73.8,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 5.1,
-        "wind_gust_mph": 5.6,
+        "wind_mph": 6.3,
+        "wind_gust_mph": 6.3,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -2178,7 +1998,7 @@
           "query": "Statesboro, GA, USA"
         }
       },
-      "conditions_line": "73\u00b0F \u00b7 5 mph wind \u00b7 Dry",
+      "conditions_line": "74\u00b0F \u00b7 6 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -2232,13 +2052,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T20:00Z",
-        "temperature_f": 50.6,
+        "temperature_f": 52.7,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 8.2,
-        "wind_gust_mph": 13.6,
+        "wind_mph": 9.3,
+        "wind_gust_mph": 14.1,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -2251,7 +2071,7 @@
           "query": "Columbus, OH, USA"
         }
       },
-      "conditions_line": "51\u00b0F \u00b7 8 mph wind \u00b7 gusts 14 \u00b7 Dry",
+      "conditions_line": "53\u00b0F \u00b7 9 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -2305,13 +2125,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T20:00Z",
-        "temperature_f": 58.2,
-        "precip_probability_pct": 8.0,
+        "temperature_f": 58.0,
+        "precip_probability_pct": 5.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 5.0,
-        "wind_gust_mph": 5.8,
+        "wind_mph": 5.4,
+        "wind_gust_mph": 6.7,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -2378,13 +2198,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T20:00Z",
-        "temperature_f": 56.8,
-        "precip_probability_pct": 3.0,
+        "temperature_f": 57.1,
+        "precip_probability_pct": 2.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 13.8,
-        "wind_gust_mph": 23.0,
+        "wind_mph": 15.1,
+        "wind_gust_mph": 18.6,
         "weather_code": 0,
         "summary": "Clear",
         "precipitation_label": "Dry",
@@ -2397,7 +2217,7 @@
           "query": "Annapolis"
         }
       },
-      "conditions_line": "57\u00b0F \u00b7 14 mph wind \u00b7 gusts 23 \u00b7 Dry",
+      "conditions_line": "57\u00b0F \u00b7 15 mph wind \u00b7 Dry",
       "impact": "Moderate",
       "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
@@ -2406,17 +2226,17 @@
       },
       "adjustments": {
         "breakdown": {
-          "wind": -0.5,
+          "wind": -1.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": -0.5,
-        "total_points": -0.5,
+        "raw_total_points": -1.5,
+        "total_points": -1.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -8.0,
-        "total": 53.0
+        "total": 52.0
       },
       "spread_logic": {
         "status": "ACTIVE",
@@ -2451,13 +2271,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T20:00Z",
-        "temperature_f": 56.7,
+        "temperature_f": 56.5,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 8.6,
-        "wind_gust_mph": 12.3,
+        "wind_mph": 9.6,
+        "wind_gust_mph": 12.1,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -2470,7 +2290,7 @@
           "query": "Murfreesboro, TN, USA"
         }
       },
-      "conditions_line": "57\u00b0F \u00b7 9 mph wind \u00b7 Dry",
+      "conditions_line": "56\u00b0F \u00b7 10 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -2524,7 +2344,7 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T21:00Z",
-        "temperature_f": 55.2,
+        "temperature_f": 57.2,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
@@ -2543,7 +2363,7 @@
           "query": "Lawrence, KS, USA"
         }
       },
-      "conditions_line": "55\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+      "conditions_line": "57\u00b0F \u00b7 6 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -2597,13 +2417,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T21:00Z",
-        "temperature_f": 64.5,
+        "temperature_f": 64.3,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 6.9,
-        "wind_gust_mph": 12.1,
+        "wind_mph": 8.2,
+        "wind_gust_mph": 14.1,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -2616,7 +2436,7 @@
           "query": "Troy, AL, USA"
         }
       },
-      "conditions_line": "64\u00b0F \u00b7 7 mph wind \u00b7 gusts 12 \u00b7 Dry",
+      "conditions_line": "64\u00b0F \u00b7 8 mph wind \u00b7 gusts 14 \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -2670,15 +2490,15 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T21:00Z",
-        "temperature_f": 80.9,
-        "precip_probability_pct": 13.0,
+        "temperature_f": 81.6,
+        "precip_probability_pct": 3.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 7.8,
-        "wind_gust_mph": 6.0,
-        "weather_code": 3,
-        "summary": "Cloudy",
+        "wind_mph": 11.2,
+        "wind_gust_mph": 7.8,
+        "weather_code": 0,
+        "summary": "Clear",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 25.77427,
@@ -2689,26 +2509,26 @@
           "query": "Miami, FL, USA"
         }
       },
-      "conditions_line": "81\u00b0F \u00b7 8 mph wind \u00b7 Dry",
-      "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
+      "conditions_line": "82\u00b0F \u00b7 11 mph wind \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": -3.5,
         "total": 50.0
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -3.5,
-        "total": 50.0
+        "total": 49.5
       },
       "spread_logic": {
         "status": "ACTIVE",
@@ -2743,13 +2563,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T21:00Z",
-        "temperature_f": 76.0,
+        "temperature_f": 76.3,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 7.0,
-        "wind_gust_mph": 3.4,
+        "wind_mph": 6.1,
+        "wind_gust_mph": 4.0,
         "weather_code": 0,
         "summary": "Clear",
         "precipitation_label": "Dry",
@@ -2762,7 +2582,7 @@
           "query": "San Jose, CA, USA"
         }
       },
-      "conditions_line": "76\u00b0F \u00b7 7 mph wind \u00b7 Dry",
+      "conditions_line": "76\u00b0F \u00b7 6 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -2816,16 +2636,16 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T21:00Z",
-        "temperature_f": 58.9,
-        "precip_probability_pct": 2.0,
-        "precipitation_in": 0.016,
-        "rain_in": 0.016,
+        "temperature_f": 69.1,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 2.3,
-        "wind_gust_mph": 2.2,
-        "weather_code": 51,
-        "summary": "Drizzle",
-        "precipitation_label": "Light rain",
+        "wind_mph": 6.2,
+        "wind_gust_mph": 6.3,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
         "location": {
           "latitude": 33.21484,
           "longitude": -97.13307,
@@ -2835,9 +2655,9 @@
           "query": "Denton, TX, USA"
         }
       },
-      "conditions_line": "59\u00b0F \u00b7 2 mph wind \u00b7 Light rain",
-      "impact": "Moderate",
-      "note": "Rain may slightly suppress scoring efficiency.",
+      "conditions_line": "69\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+      "impact": "Minimal",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -10.0,
         "total": 53.0
@@ -2845,16 +2665,16 @@
       "adjustments": {
         "breakdown": {
           "wind": 0.0,
-          "precipitation": -0.5,
+          "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": -0.5,
-        "total_points": -0.5,
+        "raw_total_points": 0.0,
+        "total_points": 0.0,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -10.0,
-        "total": 52.5
+        "total": 53.0
       },
       "spread_logic": {
         "status": "ACTIVE",
@@ -2889,13 +2709,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T21:00Z",
-        "temperature_f": 46.0,
+        "temperature_f": 46.9,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 4.5,
-        "wind_gust_mph": 6.9,
+        "wind_mph": 3.4,
+        "wind_gust_mph": 4.5,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -2908,7 +2728,7 @@
           "query": "Madison, WI, USA"
         }
       },
-      "conditions_line": "46\u00b0F \u00b7 4 mph wind \u00b7 Dry",
+      "conditions_line": "47\u00b0F \u00b7 3 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -2967,8 +2787,8 @@
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 8.5,
-        "wind_gust_mph": 11.2,
+        "wind_mph": 10.1,
+        "wind_gust_mph": 11.9,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -2981,26 +2801,26 @@
           "query": "Starkville, MS, USA"
         }
       },
-      "conditions_line": "63\u00b0F \u00b7 8 mph wind \u00b7 Dry",
-      "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
+      "conditions_line": "63\u00b0F \u00b7 10 mph wind \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": -9.0,
         "total": 52.0
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -9.0,
-        "total": 52.0
+        "total": 51.5
       },
       "spread_logic": {
         "status": "ACTIVE",
@@ -3035,13 +2855,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T22:00Z",
-        "temperature_f": 72.9,
+        "temperature_f": 69.7,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 6.1,
-        "wind_gust_mph": 10.3,
+        "wind_mph": 10.5,
+        "wind_gust_mph": 14.3,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -3054,26 +2874,26 @@
           "query": "Lafayette, LA, USA"
         }
       },
-      "conditions_line": "73\u00b0F \u00b7 6 mph wind \u00b7 Dry",
-      "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
+      "conditions_line": "70\u00b0F \u00b7 10 mph wind \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": -7.5,
         "total": 52.5
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -7.5,
-        "total": 52.5
+        "total": 52.0
       },
       "spread_logic": {
         "status": "ACTIVE",
@@ -3108,15 +2928,15 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T23:00Z",
-        "temperature_f": 60.8,
+        "temperature_f": 61.8,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 3.1,
-        "wind_gust_mph": 3.6,
-        "weather_code": 3,
-        "summary": "Cloudy",
+        "wind_mph": 3.4,
+        "wind_gust_mph": 4.7,
+        "weather_code": 0,
+        "summary": "Clear",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 40.58526,
@@ -3127,7 +2947,7 @@
           "query": "Fort Collins, CO, USA"
         }
       },
-      "conditions_line": "61\u00b0F \u00b7 3 mph wind \u00b7 Dry",
+      "conditions_line": "62\u00b0F \u00b7 3 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -3181,15 +3001,15 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-07T23:00Z",
-        "temperature_f": 51.0,
+        "temperature_f": 50.5,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 6.3,
-        "wind_gust_mph": 13.9,
-        "weather_code": 3,
-        "summary": "Cloudy",
+        "wind_mph": 6.0,
+        "wind_gust_mph": 13.4,
+        "weather_code": 0,
+        "summary": "Clear",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 35.96064,
@@ -3200,7 +3020,7 @@
           "query": "Knoxville, TN, USA"
         }
       },
-      "conditions_line": "51\u00b0F \u00b7 6 mph wind \u00b7 gusts 14 \u00b7 Dry",
+      "conditions_line": "50\u00b0F \u00b7 6 mph wind \u00b7 gusts 13 \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -3254,15 +3074,15 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-08T00:00Z",
-        "temperature_f": 49.7,
+        "temperature_f": 49.3,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 4.1,
-        "wind_gust_mph": 3.6,
-        "weather_code": 3,
-        "summary": "Cloudy",
+        "wind_mph": 4.4,
+        "wind_gust_mph": 4.5,
+        "weather_code": 2,
+        "summary": "Partly cloudy",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 33.81382,
@@ -3273,7 +3093,7 @@
           "query": "Jacksonville, AL, USA"
         }
       },
-      "conditions_line": "50\u00b0F \u00b7 4 mph wind \u00b7 Dry",
+      "conditions_line": "49\u00b0F \u00b7 4 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -3327,16 +3147,16 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-08T00:00Z",
-        "temperature_f": 49.0,
-        "precip_probability_pct": 25.0,
-        "precipitation_in": 0.0,
-        "rain_in": 0.0,
+        "temperature_f": 53.8,
+        "precip_probability_pct": 48.0,
+        "precipitation_in": 0.161,
+        "rain_in": 0.157,
         "snowfall_in": 0.0,
-        "wind_mph": 7.6,
-        "wind_gust_mph": 8.1,
-        "weather_code": 0,
-        "summary": "Clear",
-        "precipitation_label": "Dry",
+        "wind_mph": 3.2,
+        "wind_gust_mph": 12.1,
+        "weather_code": 81,
+        "summary": "Rain",
+        "precipitation_label": "Heavy rain",
         "location": {
           "latitude": 41.39148,
           "longitude": -73.95597,
@@ -3346,9 +3166,9 @@
           "query": "West Point, NY, USA"
         }
       },
-      "conditions_line": "49\u00b0F \u00b7 8 mph wind \u00b7 Dry",
-      "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
+      "conditions_line": "54\u00b0F \u00b7 3 mph wind \u00b7 gusts 12 \u00b7 Heavy rain",
+      "impact": "Moderate",
+      "note": "Heavy rain may reduce offensive efficiency and ball security.",
       "baseline": {
         "home_spread": 4.5,
         "total": 54.5
@@ -3356,23 +3176,23 @@
       "adjustments": {
         "breakdown": {
           "wind": 0.0,
-          "precipitation": 0.0,
-          "temperature": -0.5
+          "precipitation": -1.5,
+          "temperature": 0.0
         },
-        "raw_total_points": -0.5,
-        "total_points": -0.5,
-        "home_spread_points": 0.0
+        "raw_total_points": -1.5,
+        "total_points": -1.5,
+        "home_spread_points": 0.3
       },
       "adjusted": {
-        "home_spread": 4.5,
-        "total": 54.0
+        "home_spread": 4.8,
+        "total": 53.0
       },
       "spread_logic": {
         "status": "ACTIVE",
-        "home_spread_points": 0.0,
-        "favored_style_team": null,
-        "pass_lean_gap": 0.2,
-        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_spread_points": 0.3,
+        "favored_style_team": "Air Force",
+        "pass_lean_gap": 0.203,
+        "reason": "weather favors the less pass-reliant offense; directional magnitude is 0.3 before the +/-1.5 cap",
         "home_tendency": {
           "team": "Army",
           "plays": 420,
@@ -3405,8 +3225,8 @@
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 2.3,
-        "wind_gust_mph": 3.8,
+        "wind_mph": 3.2,
+        "wind_gust_mph": 5.6,
         "weather_code": 0,
         "summary": "Clear",
         "precipitation_label": "Dry",
@@ -3419,7 +3239,7 @@
           "query": "Tempe, AZ, USA"
         }
       },
-      "conditions_line": "81\u00b0F \u00b7 2 mph wind \u00b7 Dry",
+      "conditions_line": "81\u00b0F \u00b7 3 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -3473,15 +3293,15 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-08T00:00Z",
-        "temperature_f": 47.2,
+        "temperature_f": 46.5,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
         "wind_mph": 5.4,
-        "wind_gust_mph": 16.8,
-        "weather_code": 3,
-        "summary": "Cloudy",
+        "wind_gust_mph": 14.5,
+        "weather_code": 0,
+        "summary": "Clear",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 34.3665,
@@ -3492,7 +3312,7 @@
           "query": "Oxford, MS, USA"
         }
       },
-      "conditions_line": "47\u00b0F \u00b7 5 mph wind \u00b7 gusts 17 \u00b7 Dry",
+      "conditions_line": "46\u00b0F \u00b7 5 mph wind \u00b7 gusts 14 \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -3546,13 +3366,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-08T00:00Z",
-        "temperature_f": 45.1,
+        "temperature_f": 49.4,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 6.2,
-        "wind_gust_mph": 6.5,
+        "wind_mph": 1.7,
+        "wind_gust_mph": 4.7,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -3565,7 +3385,7 @@
           "query": "Evanston, IL, USA"
         }
       },
-      "conditions_line": "45\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+      "conditions_line": "49\u00b0F \u00b7 2 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -3619,13 +3439,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-08T00:00Z",
-        "temperature_f": 59.0,
+        "temperature_f": 59.4,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 7.8,
-        "wind_gust_mph": 18.1,
+        "wind_mph": 8.5,
+        "wind_gust_mph": 18.6,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -3638,7 +3458,7 @@
           "query": "Atlanta, GA, USA"
         }
       },
-      "conditions_line": "59\u00b0F \u00b7 8 mph wind \u00b7 gusts 18 \u00b7 Dry",
+      "conditions_line": "59\u00b0F \u00b7 8 mph wind \u00b7 gusts 19 \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -3692,13 +3512,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-08T00:00Z",
-        "temperature_f": 43.6,
-        "precip_probability_pct": 1.0,
+        "temperature_f": 45.4,
+        "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 5.5,
-        "wind_gust_mph": 16.6,
+        "wind_mph": 4.4,
+        "wind_gust_mph": 8.3,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -3711,7 +3531,7 @@
           "query": "Notre Dame, IN, USA"
         }
       },
-      "conditions_line": "44\u00b0F \u00b7 6 mph wind \u00b7 gusts 17 \u00b7 Dry",
+      "conditions_line": "45\u00b0F \u00b7 4 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -3765,13 +3585,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-08T00:00Z",
-        "temperature_f": 44.1,
+        "temperature_f": 45.0,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 5.4,
-        "wind_gust_mph": 12.5,
+        "wind_mph": 7.1,
+        "wind_gust_mph": 15.4,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -3784,7 +3604,7 @@
           "query": "Ann Arbor, MI, USA"
         }
       },
-      "conditions_line": "44\u00b0F \u00b7 5 mph wind \u00b7 gusts 12 \u00b7 Dry",
+      "conditions_line": "45\u00b0F \u00b7 7 mph wind \u00b7 gusts 15 \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -3838,15 +3658,15 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-08T01:00Z",
-        "temperature_f": 67.3,
+        "temperature_f": 67.1,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 5.1,
-        "wind_gust_mph": 15.9,
-        "weather_code": 2,
-        "summary": "Partly cloudy",
+        "wind_mph": 5.9,
+        "wind_gust_mph": 12.5,
+        "weather_code": 0,
+        "summary": "Clear",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 29.65163,
@@ -3857,7 +3677,7 @@
           "query": "Gainesville, FL, USA"
         }
       },
-      "conditions_line": "67\u00b0F \u00b7 5 mph wind \u00b7 gusts 16 \u00b7 Dry",
+      "conditions_line": "67\u00b0F \u00b7 6 mph wind \u00b7 gusts 12 \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -3911,15 +3731,15 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-08T01:00Z",
-        "temperature_f": 65.3,
-        "precip_probability_pct": 7.0,
+        "temperature_f": 57.1,
+        "precip_probability_pct": 5.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 5.0,
-        "wind_gust_mph": 9.2,
-        "weather_code": 0,
-        "summary": "Clear",
+        "wind_mph": 13.3,
+        "wind_gust_mph": 17.2,
+        "weather_code": 3,
+        "summary": "Cloudy",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 32.31232,
@@ -3930,26 +3750,26 @@
           "query": "Las Cruces, NM, USA"
         }
       },
-      "conditions_line": "65\u00b0F \u00b7 5 mph wind \u00b7 Dry",
-      "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
+      "conditions_line": "57\u00b0F \u00b7 13 mph wind \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": 22.0,
         "total": 53.5
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 22.0,
-        "total": 53.5
+        "total": 53.0
       },
       "spread_logic": {
         "status": "ACTIVE",
@@ -3984,13 +3804,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-08T02:00Z",
-        "temperature_f": 45.1,
+        "temperature_f": 45.7,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 4.1,
-        "wind_gust_mph": 3.6,
+        "wind_mph": 5.0,
+        "wind_gust_mph": 4.0,
         "weather_code": 0,
         "summary": "Clear",
         "precipitation_label": "Dry",
@@ -4003,7 +3823,7 @@
           "query": "Logan, UT, USA"
         }
       },
-      "conditions_line": "45\u00b0F \u00b7 4 mph wind \u00b7 Dry",
+      "conditions_line": "46\u00b0F \u00b7 5 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -4057,15 +3877,15 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-08T02:00Z",
-        "temperature_f": 66.5,
-        "precip_probability_pct": 15.0,
+        "temperature_f": 56.6,
+        "precip_probability_pct": 10.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 6.4,
-        "wind_gust_mph": 13.6,
-        "weather_code": 0,
-        "summary": "Clear",
+        "wind_mph": 14.8,
+        "wind_gust_mph": 28.2,
+        "weather_code": 3,
+        "summary": "Cloudy",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 31.75872,
@@ -4076,26 +3896,26 @@
           "query": "El Paso, TX, USA"
         }
       },
-      "conditions_line": "66\u00b0F \u00b7 6 mph wind \u00b7 gusts 14 \u00b7 Dry",
-      "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
+      "conditions_line": "57\u00b0F \u00b7 15 mph wind \u00b7 gusts 28 \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": 13.0,
         "total": 49.0
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 13.0,
-        "total": 49.0
+        "total": 48.5
       },
       "spread_logic": {
         "status": "ACTIVE",
@@ -4130,13 +3950,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-08T02:00Z",
-        "temperature_f": 60.4,
-        "precip_probability_pct": 10.0,
+        "temperature_f": 54.6,
+        "precip_probability_pct": 4.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 6.5,
-        "wind_gust_mph": 10.1,
+        "wind_mph": 6.0,
+        "wind_gust_mph": 7.4,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -4149,7 +3969,7 @@
           "query": "Lubbock, TX, USA"
         }
       },
-      "conditions_line": "60\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+      "conditions_line": "55\u00b0F \u00b7 6 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -4203,15 +4023,15 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-08T03:00Z",
-        "temperature_f": 54.3,
-        "precip_probability_pct": 21.0,
+        "temperature_f": 54.7,
+        "precip_probability_pct": 44.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 4.0,
-        "wind_gust_mph": 6.9,
-        "weather_code": 0,
-        "summary": "Clear",
+        "wind_mph": 5.1,
+        "wind_gust_mph": 7.6,
+        "weather_code": 3,
+        "summary": "Cloudy",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 44.56457,
@@ -4222,7 +4042,7 @@
           "query": "Corvallis, OR, USA"
         }
       },
-      "conditions_line": "54\u00b0F \u00b7 4 mph wind \u00b7 Dry",
+      "conditions_line": "55\u00b0F \u00b7 5 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -4310,15 +4130,15 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-11T00:00Z",
-        "temperature_f": 51.4,
+        "temperature_f": 55.0,
         "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 8.4,
-        "wind_gust_mph": 20.4,
-        "weather_code": 0,
-        "summary": "Clear",
+        "wind_mph": 8.2,
+        "wind_gust_mph": 19.0,
+        "weather_code": 3,
+        "summary": "Cloudy",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 41.37477,
@@ -4329,7 +4149,7 @@
           "query": "Bowling Green, OH, USA"
         }
       },
-      "conditions_line": "51\u00b0F \u00b7 8 mph wind \u00b7 gusts 20 \u00b7 Dry",
+      "conditions_line": "55\u00b0F \u00b7 8 mph wind \u00b7 gusts 19 \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -4383,15 +4203,15 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-11T00:00Z",
-        "temperature_f": 50.2,
-        "precip_probability_pct": 1.0,
+        "temperature_f": 53.7,
+        "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 6.3,
-        "wind_gust_mph": 15.4,
-        "weather_code": 0,
-        "summary": "Clear",
+        "wind_mph": 4.3,
+        "wind_gust_mph": 6.9,
+        "weather_code": 1,
+        "summary": "Partly cloudy",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 41.08144,
@@ -4402,7 +4222,7 @@
           "query": "Akron, OH, USA"
         }
       },
-      "conditions_line": "50\u00b0F \u00b7 6 mph wind \u00b7 gusts 15 \u00b7 Dry",
+      "conditions_line": "54\u00b0F \u00b7 4 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -4456,13 +4276,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-11T01:00Z",
-        "temperature_f": 47.4,
-        "precip_probability_pct": 1.0,
+        "temperature_f": 53.3,
+        "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 6.3,
-        "wind_gust_mph": 7.2,
+        "wind_mph": 6.1,
+        "wind_gust_mph": 7.4,
         "weather_code": 0,
         "summary": "Clear",
         "precipitation_label": "Dry",
@@ -4475,7 +4295,7 @@
           "query": "Oxford, OH, USA"
         }
       },
-      "conditions_line": "47\u00b0F \u00b7 6 mph wind \u00b7 Dry",
+      "conditions_line": "53\u00b0F \u00b7 6 mph wind \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -4486,15 +4306,15 @@
         "breakdown": {
           "wind": 0.0,
           "precipitation": 0.0,
-          "temperature": -0.5
+          "temperature": 0.0
         },
-        "raw_total_points": -0.5,
-        "total_points": -0.5,
+        "raw_total_points": 0.0,
+        "total_points": 0.0,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -2.0,
-        "total": 51.5
+        "total": 52.0
       },
       "spread_logic": {
         "status": "ACTIVE",
@@ -4520,79 +4340,6 @@
         }
       }
     },
-    "401866461": {
-      "game_id": "401866461",
-      "kickoff_utc": "2026-11-12T00:30:00+00:00",
-      "venue": "Scheumann Stadium",
-      "network": null,
-      "indoor": false,
-      "indoor_source": null,
-      "forecast": {
-        "forecast_time_utc": "2026-11-12T00:00Z",
-        "temperature_f": 43.7,
-        "precip_probability_pct": 2.0,
-        "precipitation_in": 0.0,
-        "rain_in": 0.0,
-        "snowfall_in": 0.0,
-        "wind_mph": 9.2,
-        "wind_gust_mph": 21.9,
-        "weather_code": 0,
-        "summary": "Clear",
-        "precipitation_label": "Dry",
-        "location": {
-          "latitude": 40.19338,
-          "longitude": -85.38636,
-          "resolved_name": "Muncie",
-          "resolved_admin1": "Indiana",
-          "resolved_country": "United States",
-          "query": "Muncie, IN, USA"
-        }
-      },
-      "conditions_line": "44\u00b0F \u00b7 9 mph wind \u00b7 gusts 22 \u00b7 Dry",
-      "impact": "Minimal",
-      "note": "No material weather-driven scoring effect is projected.",
-      "baseline": {
-        "home_spread": 2.5,
-        "total": 49.5
-      },
-      "adjustments": {
-        "breakdown": {
-          "wind": 0.0,
-          "precipitation": 0.0,
-          "temperature": -0.5
-        },
-        "raw_total_points": -0.5,
-        "total_points": -0.5,
-        "home_spread_points": 0.0
-      },
-      "adjusted": {
-        "home_spread": 2.5,
-        "total": 49.0
-      },
-      "spread_logic": {
-        "status": "ACTIVE",
-        "home_spread_points": 0.0,
-        "favored_style_team": null,
-        "pass_lean_gap": 0.3,
-        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
-        "home_tendency": {
-          "team": "Ball State",
-          "plays": 373,
-          "epa_pass": 0.207,
-          "epa_rush": 0.045,
-          "pass_lean_score": 0.162,
-          "eligible": true
-        },
-        "away_tendency": {
-          "team": "Buffalo",
-          "plays": 372,
-          "epa_pass": 0.007,
-          "epa_rush": 0.117,
-          "pass_lean_score": -0.11,
-          "eligible": true
-        }
-      }
-    },
     "401866463": {
       "game_id": "401866463",
       "kickoff_utc": "2026-11-11T05:00:00+00:00",
@@ -4607,10 +4354,10 @@
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 7.6,
-        "wind_gust_mph": 22.8,
-        "weather_code": 0,
-        "summary": "Clear",
+        "wind_mph": 6.7,
+        "wind_gust_mph": 17.4,
+        "weather_code": 3,
+        "summary": "Cloudy",
         "precipitation_label": "Dry",
         "location": {
           "latitude": 41.66394,
@@ -4621,7 +4368,7 @@
           "query": "Toledo, OH, USA"
         }
       },
-      "conditions_line": "48\u00b0F \u00b7 8 mph wind \u00b7 gusts 23 \u00b7 Dry",
+      "conditions_line": "48\u00b0F \u00b7 7 mph wind \u00b7 gusts 17 \u00b7 Dry",
       "impact": "Minimal",
       "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
@@ -4666,6 +4413,79 @@
         }
       }
     },
+    "401866461": {
+      "game_id": "401866461",
+      "kickoff_utc": "2026-11-12T00:30:00+00:00",
+      "venue": "Scheumann Stadium",
+      "network": null,
+      "indoor": false,
+      "indoor_source": null,
+      "forecast": {
+        "forecast_time_utc": "2026-11-12T00:00Z",
+        "temperature_f": 45.3,
+        "precip_probability_pct": 1.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 14.9,
+        "wind_gust_mph": 25.9,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 40.19338,
+          "longitude": -85.38636,
+          "resolved_name": "Muncie",
+          "resolved_admin1": "Indiana",
+          "resolved_country": "United States",
+          "query": "Muncie, IN, USA"
+        }
+      },
+      "conditions_line": "45\u00b0F \u00b7 15 mph wind \u00b7 gusts 26 \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
+      "baseline": {
+        "home_spread": 2.5,
+        "total": 49.5
+      },
+      "adjustments": {
+        "breakdown": {
+          "wind": -0.5,
+          "precipitation": 0.0,
+          "temperature": -0.5
+        },
+        "raw_total_points": -1.0,
+        "total_points": -1.0,
+        "home_spread_points": 0.0
+      },
+      "adjusted": {
+        "home_spread": 2.5,
+        "total": 48.5
+      },
+      "spread_logic": {
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.3,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Ball State",
+          "plays": 373,
+          "epa_pass": 0.207,
+          "epa_rush": 0.045,
+          "pass_lean_score": 0.162,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Buffalo",
+          "plays": 372,
+          "epa_pass": 0.007,
+          "epa_rush": 0.117,
+          "pass_lean_score": -0.11,
+          "eligible": true
+        }
+      }
+    },
     "401866462": {
       "game_id": "401866462",
       "kickoff_utc": "2026-11-12T00:30:00+00:00",
@@ -4675,13 +4495,13 @@
       "indoor_source": null,
       "forecast": {
         "forecast_time_utc": "2026-11-12T00:00Z",
-        "temperature_f": 41.1,
-        "precip_probability_pct": 5.0,
+        "temperature_f": 39.2,
+        "precip_probability_pct": 0.0,
         "precipitation_in": 0.0,
         "rain_in": 0.0,
         "snowfall_in": 0.0,
-        "wind_mph": 12.5,
-        "wind_gust_mph": 22.1,
+        "wind_mph": 12.6,
+        "wind_gust_mph": 21.9,
         "weather_code": 3,
         "summary": "Cloudy",
         "precipitation_label": "Dry",
@@ -4694,7 +4514,7 @@
           "query": "Mount Pleasant, MI, USA"
         }
       },
-      "conditions_line": "41\u00b0F \u00b7 12 mph wind \u00b7 gusts 22 \u00b7 Dry",
+      "conditions_line": "39\u00b0F \u00b7 13 mph wind \u00b7 gusts 22 \u00b7 Dry",
       "impact": "Moderate",
       "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
@@ -4735,6 +4555,132 @@
           "epa_pass": -0.097,
           "epa_rush": -0.052,
           "pass_lean_score": -0.045,
+          "eligible": true
+        }
+      }
+    },
+    "401862824": {
+      "game_id": "401862824",
+      "kickoff_utc": "2026-11-13T01:00:00+00:00",
+      "venue": "Raymond James Stadium",
+      "network": null,
+      "indoor": false,
+      "indoor_source": null,
+      "forecast": {
+        "forecast_time_utc": "2026-11-12T23:00Z",
+        "temperature_f": 69.0,
+        "precip_probability_pct": 15.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 13.2,
+        "wind_gust_mph": 20.8,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 27.94752,
+          "longitude": -82.45843,
+          "resolved_name": "Tampa",
+          "resolved_admin1": "Florida",
+          "resolved_country": "United States",
+          "query": "Tampa, FL, USA"
+        }
+      },
+      "conditions_line": "69\u00b0F \u00b7 13 mph wind \u00b7 gusts 21 \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
+      "baseline": {
+        "home_spread": 3.0,
+        "total": 55.0
+      },
+      "adjustments": {
+        "breakdown": {
+          "wind": -0.5,
+          "precipitation": 0.0,
+          "temperature": 0.0
+        },
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
+        "home_spread_points": 0.0
+      },
+      "adjusted": {
+        "home_spread": 3.0,
+        "total": 54.5
+      },
+      "spread_logic": {
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.4,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "South Florida",
+          "plays": 382,
+          "epa_pass": -0.02,
+          "epa_rush": 0.126,
+          "pass_lean_score": -0.146,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Memphis",
+          "plays": 509,
+          "epa_pass": 0.441,
+          "epa_rush": 0.213,
+          "pass_lean_score": 0.228,
+          "eligible": true
+        }
+      }
+    },
+    "401869969": {
+      "game_id": "401869969",
+      "kickoff_utc": "2026-11-13T02:00:00+00:00",
+      "venue": "Malone Stadium",
+      "network": null,
+      "indoor": false,
+      "indoor_source": null,
+      "forecast": null,
+      "conditions_line": "Forecast unavailable",
+      "impact": "Minimal",
+      "note": "Forecast unavailable; Model A baseline remains unchanged.",
+      "baseline": {
+        "home_spread": 12.0,
+        "total": 51.5
+      },
+      "adjustments": {
+        "breakdown": {
+          "wind": 0.0,
+          "precipitation": 0.0,
+          "temperature": 0.0
+        },
+        "raw_total_points": 0.0,
+        "total_points": 0.0,
+        "home_spread_points": 0.0
+      },
+      "adjusted": {
+        "home_spread": 12.0,
+        "total": 51.5
+      },
+      "spread_logic": {
+        "status": "LOCKED",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.1,
+        "reason": "forecast unavailable; directional weather adjustment cannot be evaluated",
+        "home_tendency": {
+          "team": "UL Monroe",
+          "plays": 375,
+          "epa_pass": 0.111,
+          "epa_rush": -0.045,
+          "pass_lean_score": 0.156,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Louisiana",
+          "plays": 447,
+          "epa_pass": 0.166,
+          "epa_rush": 0.157,
+          "pass_lean_score": 0.009,
           "eligible": true
         }
       }
