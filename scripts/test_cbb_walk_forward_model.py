@@ -116,6 +116,30 @@ class CbbWalkForwardModelTests(unittest.TestCase):
             self.assertEqual(payload["meta"]["verified_roster_continuity_count"], 1)
             self.assertGreater(row["prior_net"], 15)
 
+    def test_current_priors_match_walk_forward_tempo_shrinkage(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            profiles = {
+                "meta": {"season": 2027},
+                "teams": [{
+                    "team_id": 1,
+                    "team": "Slow Prior",
+                    "conference": {"name": "Test Conf"},
+                    "preseason_prior": {"returning_minutes_pct": 50, "adjusted": {"offense": 110, "defense": 100}},
+                }],
+            }
+            profile_path = root / "profiles.json"
+            profile_path.write_text(json.dumps(profiles))
+            payload = current_priors(
+                profile_path,
+                [
+                    {"team_id": 1, "adjusted_offense": 110, "adjusted_defense": 100, "pace": 60},
+                    {"team_id": 2, "adjusted_offense": 100, "adjusted_defense": 110, "pace": 76},
+                ],
+                {2027: {}},
+            )
+            self.assertEqual(payload["teams"][0]["prior_tempo"], 63.0)
+
     def test_evaluation_reports_context_and_probability_calibration(self):
         rows = []
         for index, probability in enumerate((0.2, 0.7, 0.8, 0.4)):

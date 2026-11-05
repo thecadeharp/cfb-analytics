@@ -2,7 +2,7 @@
 
 import unittest
 
-from scripts.build_cbb_projection_board import build_board, predict
+from scripts.build_cbb_projection_board import build_board, predict, team_state
 
 
 def profile(team_id: int, games: int) -> dict:
@@ -35,6 +35,13 @@ def prior(team_id: int) -> dict:
 
 
 class CbbProjectionBoardTests(unittest.TestCase):
+    def test_thin_sample_tempo_updates_without_promoting_efficiency(self):
+        thin_profile = profile(1, 1)
+        thin_profile["current_efficiency"]["pace_per_40"] = 75
+        state = team_state(thin_profile, {**prior(1), "prior_tempo": 63, "returning_minutes_pct": 50}, 68)
+        self.assertEqual(state["rating_source"], "preseason_prior")
+        self.assertAlmostEqual(state["tempo"], 65.0)
+
     def test_clips_out_of_distribution_standardized_features(self):
         model = {"feature_names": ["x"], "means": {"x": 0}, "scales": {"x": 1}, "coefficients": [0, 2]}
         self.assertEqual(predict({"x": 100}, model), 6)

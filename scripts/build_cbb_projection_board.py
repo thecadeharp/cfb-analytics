@@ -108,6 +108,15 @@ def team_state(profile: dict[str, Any], prior: dict[str, Any], league_tempo: flo
     current_factors = profile.get("four_factors") or {}
     prior_factors = prior.get("prior_four_factors") or {}
     factor_weight = games / (games + 5.0) if current_ready else 0.0
+    prior_tempo = finite(prior.get("prior_tempo")) or league_tempo
+    observed_tempo = finite(current.get("pace_per_40"))
+    returning = clip((finite(prior.get("returning_minutes_pct")) or 0.0) / 100.0, 0.0, 1.0)
+    tempo_prior_weight = 3.0 + 4.0 * returning
+    tempo = (
+        (tempo_prior_weight * prior_tempo + games * observed_tempo) / (tempo_prior_weight + games)
+        if games > 0 and observed_tempo is not None
+        else prior_tempo
+    )
     baselines = {"effective_fg_pct": 50.0, "turnover_pct": 20.0, "offensive_rebound_pct": 30.0, "free_throw_rate": 30.0}
 
     def blended_factor(side: str, key: str) -> float:
@@ -125,7 +134,7 @@ def team_state(profile: dict[str, Any], prior: dict[str, Any], league_tempo: flo
         "games": games,
         "offense": finite(adjusted.get("offense")) if current_ready else finite(prior.get("prior_offense")),
         "defense": finite(adjusted.get("defense")) if current_ready else finite(prior.get("prior_defense")),
-        "tempo": finite(current.get("pace_per_40")) if current_ready else finite(prior.get("prior_tempo")) or league_tempo,
+        "tempo": tempo,
         "rating_source": "current_adjusted" if current_ready else "preseason_prior",
         "factors": {
             side: {key: blended_factor(side, key) for key in baselines}
