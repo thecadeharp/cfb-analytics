@@ -1604,6 +1604,11 @@
     return `<div class="cbb-detail-row"><span>${escapeHtml(label)}</span><strong class="cbb-player-grade cbb-band-${band}">${escapeHtml(value)}</strong></div>`;
   }
 
+  async function openBracketTeam(teamId) {
+    await loadDeferred(["intelligence"]);
+    await openTeamDetail(Number(teamId));
+  }
+
   function renderBracketology() {
     const view = document.getElementById("view-cbb-bracketology");
     const bracket = state.data.bracketology || {};
@@ -1651,7 +1656,7 @@
         </section>
 
         <div class="cbb-methodology"><strong>When the bracket unlocks</strong><p>THI publishes regions, seed lines, First Four matchups and the live bubble after at least 300 teams have eight current-season games. That is when schedule strength, road performance and opponent-quality records can meaningfully separate résumés.</p><p>${escapeHtml(meta.methodology)}</p></div>`;
-      view.querySelectorAll("[data-bracket-team-id]").forEach(button => button.addEventListener("click", () => openTeamDossier(button.dataset.bracketTeamId)));
+      view.querySelectorAll("[data-bracket-team-id]").forEach(button => button.addEventListener("click", () => openBracketTeam(button.dataset.bracketTeamId)));
       return;
     }
     view.innerHTML = `
@@ -1686,7 +1691,7 @@
         <div class="cbb-panel cbb-table-wrap"><table class="cbb-table cbb-bid-table"><thead><tr><th>Conference</th><th>Total bids</th><th>Auto</th><th>At-large</th></tr></thead><tbody>${(bracket.conference_bids || []).map(row => `<tr><td class="cbb-team-name">${escapeHtml(row.conference)}</td><td class="cbb-number">${integer(row.bids)}</td><td class="cbb-number">${integer(row.automatic)}</td><td class="cbb-number">${integer(row.at_large)}</td></tr>`).join("")}</tbody></table></div>
       </section>
     `;
-    view.querySelectorAll("[data-bracket-team-id]").forEach(button => button.addEventListener("click", () => openTeamDetail(button.dataset.bracketTeamId)));
+    view.querySelectorAll("[data-bracket-team-id]").forEach(button => button.addEventListener("click", () => openBracketTeam(button.dataset.bracketTeamId)));
   }
 
   function bracketRegion(region, rows) {
