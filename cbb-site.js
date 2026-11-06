@@ -377,7 +377,7 @@
       document.body.classList.add("thi-sport-cbb");
       document.querySelectorAll(".view:not(.cbb-view)").forEach(view => view.classList.remove("active"));
       if (logo) logo.src = "assets/branding/thi-cbb-mark.png?v=2027-cbb-ui-v01";
-      if (status) status.textContent = "CBB · 2027 PRESEASON";
+      if (status) status.textContent = "CBB · 2027 EARLY SEASON";
       document.title = "THI College Basketball";
       showCbbView(state.cbbView, false);
       loadData().catch(() => {});
@@ -1619,39 +1619,39 @@
         <div class="cbb-kicker">NCAA tournament projection</div>
         <h1 class="page-title">THI Bracketology</h1>
         <p class="page-subtitle">A projected 68-team field built from THI team strength, résumé quality, conference races and selection-committee style inputs.</p>
-        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Awaiting first build</span><strong>The forecast is ready to generate</strong><p>Run the CBB Bracketology workflow to publish the initial 68-team preseason field.</p></div>`;
+        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Awaiting first build</span><strong>The forecast is ready to generate</strong><p>Run the CBB Bracketology workflow to publish the initial 68-team field outlook.</p></div>`;
       return;
     }
     const bubble = bracket.bubble || {};
     const regions = bracket.regions || {};
     const firstFour = bracket.first_four || [];
-    const isPreseasonOutlook = meta.forecast_type === "preseason_strength_scenario";
+    const isLimitedSampleOutlook = ["preseason_strength_scenario", "early_season_strength_scenario"].includes(meta.forecast_type);
     const atLargeCut = (bubble.last_four_in || []).reduce((minimum, team) => Math.min(minimum, Number(team.selection_score ?? team.prior_net)), Infinity);
-    if (isPreseasonOutlook) {
+    if (isLimitedSampleOutlook) {
       const nationalBoard = [...field].sort((a,b) => Number(a.overall_rank || 999) - Number(b.overall_rank || 999));
       const atLargePool = nationalBoard.filter(team => team.bid_type === "at_large");
       const conferenceFavorites = nationalBoard.filter(team => team.bid_type === "automatic").sort((a,b) => String(a.conference?.abbreviation || "").localeCompare(String(b.conference?.abbreviation || "")));
       view.innerHTML = `
         <div class="cbb-kicker">NCAA tournament outlook</div>
-        <h1 class="page-title">THI Preseason Field Outlook</h1>
-        <p class="page-subtitle">An opening strength board for the 2027 season. It identifies the teams THI rates most highly before results exist without pretending a committee-quality seed list or bubble can already be known.</p>
-        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Preseason scenario</span><strong>No seed lines or regions yet</strong><p>${escapeHtml(meta.limitations)}</p></div>
+        <h1 class="page-title">THI Early-Season Field Outlook</h1>
+        <p class="page-subtitle">A current strength and résumé board for the 2027 season. Results now influence the order, while seed lines and the bubble remain withheld until the national sample is broad enough.</p>
+        <div class="cbb-readiness-banner"><span class="cbb-status-pill">Early-season scenario</span><strong>No seed lines or regions yet</strong><p>${escapeHtml(meta.limitations)}</p></div>
         <div class="cbb-stat-grid">
           ${statCard("Strength pool", integer(meta.field_size), `${integer(meta.automatic_bid_count)} conference favorites · ${integer(meta.at_large_count)} at-large candidates`)}
-          ${statCard("No. 1 opening rating", escapeHtml(nationalBoard[0]?.team || "—"), `${number(nationalBoard[0]?.selection_score ?? nationalBoard[0]?.prior_net,1,true)} THI selection`)}
-          ${statCard("2027 games included", integer(meta.current_game_count), "Résumé evidence has not begun")}
-          ${statCard("Public forecast state", "Opening outlook", `2027 · ${escapeHtml(meta.version || "v0.3")}`)}
+          ${statCard("No. 1 selection score", escapeHtml(nationalBoard[0]?.team || "—"), `${number(nationalBoard[0]?.selection_score ?? nationalBoard[0]?.prior_net,1,true)} THI selection`)}
+          ${statCard("2027 games included", integer(meta.current_game_count), "Current results are phasing in")}
+          ${statCard("Public forecast state", "Early-season outlook", `2027 · ${escapeHtml(meta.version || "v0.3")}`)}
         </div>
 
-        <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Opening national board</div><h2 class="cbb-section-title">Top 16 by THI strength</h2></div><div class="cbb-section-note">These are rating positions, not NCAA tournament seeds. Region placement begins only after the résumé gate clears.</div></div>
+        <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Current national board</div><h2 class="cbb-section-title">Top 16 by THI selection score</h2></div><div class="cbb-section-note">These are outlook positions, not NCAA tournament seeds. Region placement begins only after the résumé gate clears.</div></div>
           <div class="cbb-bubble-grid">${[0,4,8,12].map(start => outlookColumn(`${start + 1}–${start + 4}`, nationalBoard.slice(start,start + 4), start)).join("")}</div>
         </section>
 
-        <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Unseeded selection pool</div><h2 class="cbb-section-title">Preseason at-large candidates</h2></div><div class="cbb-section-note">The pool reflects predictive strength and qualified roster information. It is deliberately unseeded and has no “last four in” label.</div></div>
+        <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Unseeded selection pool</div><h2 class="cbb-section-title">Early-season at-large candidates</h2></div><div class="cbb-section-note">The pool reflects predictive strength, qualified roster information and the available 2027 results. It is deliberately unseeded and has no “last four in” label.</div></div>
           <div class="cbb-bubble-grid">${[0,9,18,27].map(start => outlookColumn(`${start + 1}–${Math.min(start + 9, atLargePool.length)}`, atLargePool.slice(start,start + 9), start)).join("")}</div>
         </section>
 
-        <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Automatic-bid baseline</div><h2 class="cbb-section-title">Preseason conference favorites</h2></div><div class="cbb-section-note">Each entry is the highest-rated current team in its league. These are conference forecasts, not awarded bids.</div></div>
+        <section class="cbb-section"><div class="cbb-section-head"><div><div class="cbb-label">Automatic-bid baseline</div><h2 class="cbb-section-title">Current conference favorites</h2></div><div class="cbb-section-note">Each entry is the highest-rated current team in its league. These are conference forecasts, not awarded bids.</div></div>
           <div class="cbb-bubble-grid">${[0,8,16,24].map(start => outlookColumn(`${start + 1}–${Math.min(start + 8, conferenceFavorites.length)}`, conferenceFavorites.slice(start,start + 8), start, true)).join("")}</div>
         </section>
 
@@ -1849,7 +1849,7 @@
     view.innerHTML = `
       <div class="cbb-kicker">2026–27 Roster-Era Power v3 · provisional research</div>
       <h1 class="page-title">CBB THI Ratings</h1>
-      <p class="page-subtitle">A current-roster preseason view of team strength. No poll, market price, or outside rating determines this order.</p>
+      <p class="page-subtitle">An early-season view of team strength that blends verified current results with the roster-era baseline. No poll, market price, or outside rating determines this order.</p>
       <div class="cbb-readiness-banner"><span class="cbb-status-pill">Roster-Era Power v3</span><strong>Current rosters replace multi-season team-name carryover</strong><p>The order blends THI's roster-aware personnel model with a continuity-scaled carry from only the latest completed season. Incoming transfers, recruiting and returning minutes now determine how much prior strength survives. It remains display-only and does not alter Model A, projections, signals, or bracketology.</p></div>
       ${cbbEfficiencyLandscape(priors)}
       ${cbbRatingDecomposition(priors)}
@@ -1859,14 +1859,14 @@
         <select id="cbb-conference-filter" class="cbb-select"><option value="all">All conferences</option>${conferences.map(conf => `<option value="${escapeHtml(conf)}" ${state.conference === conf ? "selected" : ""}>${escapeHtml(conf)}</option>`).join("")}</select>
       </div>
       <div class="cbb-panel cbb-table-wrap">
-        <table class="cbb-table" aria-label="2027 THI college basketball preseason ratings">
+        <table class="cbb-table" aria-label="2027 THI college basketball ratings">
           <thead><tr>
             <th>Rank</th>${ratingHeader("team", "Team")}${ratingHeader("conference", "Conf")}${ratingHeader("prior_net", "Overall")}<th>Predictive</th><th>Recent form</th><th>Projected SOS</th><th>vs THI Top 25</th>${ratingHeader("prior_offense", "Adj off")}${ratingHeader("prior_defense", "Adj def")}<th>Home edge</th>
           </tr></thead>
           <tbody id="cbb-rating-body"></tbody>
         </table>
       </div>
-      <div class="cbb-stat-note" style="margin-top:9px">Overall and Predictive share the provisional roster-era baseline until 2027 results create separate lenses. Projected SOS remains the frozen Structural Power v2 schedule snapshot for preseason reconstruction; Played SOS and Remaining SOS replace it once results begin. Current strength carries only from ${(powerMeta.source_seasons || []).join(", ") || "2026"}, scaled by verified returning minutes and current personnel. Lower defensive efficiency is better.</div>
+      <div class="cbb-stat-note" style="margin-top:9px">Overall and Predictive remain partially anchored to the roster-era baseline while the 2027 sample matures. Projected SOS preserves the frozen opening schedule snapshot for reconstruction; Played SOS and Remaining SOS take over as current results accumulate. Current strength carries only from ${(powerMeta.source_seasons || []).join(", ") || "2026"}, scaled by verified returning minutes and current personnel. Lower defensive efficiency is better.</div>
     `;
 
     view.querySelector("#cbb-rating-search").addEventListener("input", event => { state.query = event.target.value; paintRatingRows(); });
@@ -2040,10 +2040,10 @@
     return `<section class="cbb-rating-decomposition" aria-label="THI rating decomposition">
       <div class="cbb-rating-decomposition-head"><div><div class="cbb-label">THI Rating Decomposition</div><h2>What each rating means now</h2></div><span>Rated ${escapeHtml(stamp)}</span></div>
       <div class="cbb-rating-lenses">
-        ${methodCard("Overall", "Roster-era preseason power", "THI blends the roster-aware personnel estimate with a continuity-scaled carry from the latest completed season. Teams do not inherit strength from players or staffs who are gone.")}
-        ${methodCard("Predictive", "Display-only baseline", "Returning minutes, incoming transfer production and recruiting drive the preseason order. Polls, market prices and outside ratings remain excluded.")}
-        ${methodCard("Recent form", "Awaiting 2027 games", "No recent-form rating is published before a qualified current-season sample exists.")}
-        ${methodCard("Projected SOS", "Frozen structural schedule snapshot", "The original preseason schedule-strength snapshot remains frozen for reconstruction. Played SOS and Remaining SOS activate after games begin using current results.")}
+        ${methodCard("Overall", "Roster-era power baseline", "THI blends verified current-season efficiency with the roster-aware personnel estimate and a continuity-scaled carry from the latest completed season. Teams do not inherit strength from players or staffs who are gone.")}
+        ${methodCard("Predictive", "Early-season baseline", "Returning minutes, incoming transfer production and recruiting establish the opening order; verified current-season efficiency receives more weight as each team plays. Polls, market prices and outside ratings remain excluded.")}
+        ${methodCard("Recent form", "Current sample developing", "Recent form publishes after a team reaches the qualified current-season sample rather than overreacting to one or two games.")}
+        ${methodCard("Projected SOS", "Frozen structural schedule snapshot", "The opening schedule-strength snapshot remains frozen for reconstruction. Played SOS and Remaining SOS take over as each team's current schedule sample grows.")}
         ${methodCard("Dynamic home advantage", Number.isFinite(home) ? `${number(home,2)}-point national mean` : "Awaiting estimate", "Every program receives its own five-season regularized value; neutral courts receive zero.")}
       </div>
       <div class="cbb-conference-strip"><strong>Conference strength · neutral-floor team benchmark</strong>${conferences.map(row => `<span>${escapeHtml(row.name)} <b>${number(row.average,1,true)}</b> avg · ${number(row.median,1,true)} median</span>`).join("")}</div>
@@ -2166,7 +2166,7 @@
         ${detailRow("Nonconference opponent THI net", number(dossier?.schedule_strength?.nonconference_average_opponent_thi_net,2,true))}
         ${detailRow("Games in projection window", integer(dossier?.schedule_strength?.scheduled_games))}
         ${detailRow("Expected wins in window", number(dossier?.forecast?.expected_wins_in_window,2))}
-        <div class="cbb-model-sub">Schedule strength uses THI opponent ratings from the published schedule window. Résumé outcomes and quadrant-style detail will phase in with current-season results. The preseason rank remains provisional until the personnel calibration clears a fresh holdout.</div>
+        <div class="cbb-model-sub">Schedule strength uses THI opponent ratings from the published schedule window. Résumé outcomes and quadrant-style detail phase in as the current-season sample grows. The early-season rank remains provisional until the personnel calibration clears a fresh holdout.</div>
       </section>
       <section class="cbb-detail-section"><h3>Performance and résumé profile</h3>
         ${detailRow("Overall record", recordText(resume.overall_record))}
@@ -2176,7 +2176,7 @@
         ${detailRow("THI record quality", resume.record_quality == null ? "Awaiting finals" : number(resume.record_quality,3,true))}
         ${detailRow("Away-from-home performance", resume.away_from_home_performance == null ? "Awaiting road/neutral sample" : `${number(resume.away_from_home_performance,2,true)} pts vs projection`)}
         ${detailRow("Recent form", resume.recent_form_vs_projection == null ? "Awaiting finals" : `${number(resume.recent_form_vs_projection,2,true)} pts vs projection`)}
-        ${detailRow("Rating movement", dossier?.ratings?.movement_since_preseason == null ? "Preseason baseline" : `${number(dossier.ratings.movement_since_preseason,2,true)} net · ${number(dossier.ratings.rank_movement_since_preseason,0,true)} ranks`)}
+        ${detailRow("Rating movement", dossier?.ratings?.movement_since_preseason == null ? "Opening baseline" : `${number(dossier.ratings.movement_since_preseason,2,true)} net · ${number(dossier.ratings.rank_movement_since_preseason,0,true)} ranks`)}
         <div class="cbb-model-sub">These are THI-calculated dossier fields. Quadrant-style records use THI opponent ranks and are separated from official NCAA NET quadrants.</div>
       </section>
       <section class="cbb-detail-section" id="cbb-dossier-lineups"><h3>Projected core lineup</h3>

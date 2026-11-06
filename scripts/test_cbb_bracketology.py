@@ -89,6 +89,17 @@ class CbbBracketologyTests(unittest.TestCase):
         self.assertEqual(result["meta"]["forecast_type"], "live_resume_projection")
         self.assertEqual(result["meta"]["teams_with_resume_sample"], 320)
 
+    def test_early_season_results_replace_preseason_forecast_label(self):
+        payload = priors()
+        profiles = {"teams": [
+            {"team_id": team["team_id"], "record": {"games": 1, "wins": 1}}
+            for team in payload["teams"][:12]
+        ]}
+        result = build_bracketology(payload, profiles_payload=profiles)
+        self.assertEqual(result["meta"]["forecast_type"], "early_season_strength_scenario")
+        self.assertEqual(result["meta"]["current_game_count"], 12)
+        self.assertIn("early-season", result["meta"]["limitations"])
+
 
 if __name__ == "__main__":
     unittest.main()

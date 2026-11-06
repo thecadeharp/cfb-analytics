@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build THI's preseason 68-team NCAA tournament strength forecast."""
+"""Build THI's season-long 68-team NCAA tournament strength forecast."""
 
 from __future__ import annotations
 
@@ -277,7 +277,13 @@ def build_bracketology(
             "model_version": model_version,
             "season": priors_payload.get("meta", {}).get("season"),
             "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-            "forecast_type": "live_resume_projection" if live_resume_ready else "preseason_strength_scenario",
+            "forecast_type": (
+                "live_resume_projection"
+                if live_resume_ready else
+                "early_season_strength_scenario"
+                if current_game_count else
+                "preseason_strength_scenario"
+            ),
             "current_game_count": current_game_count,
             "teams_with_resume_sample": teams_with_resume_sample,
             "resume_sample_minimum_games": 8,
@@ -286,9 +292,11 @@ def build_bracketology(
             "at_large_count": len(at_larges),
             "methodology": ("Selection score begins with THI predictive team strength, adds a bounded active-roster quality adjustment from the top eight qualified player projections, and gradually adds current win-loss resume evidence over the first 12 games." if roster_active else "Selection score currently uses THI predictive team strength without a roster adjustment because the active roster source is withheld; current win-loss résumé evidence is added gradually over the first 12 games.") + " Conference leaders receive projected automatic bids; the strongest remaining selection scores receive at-large bids.",
             "limitations": (
-                "This is a preseason strength scenario, not a current committee projection. No 2027 results, quadrant records, road wins or neutral-floor evidence are available yet, so THI does not publish seed lines, regions, First Four assignments or a true bubble board in the public preseason view."
-                if not live_resume_ready else
-                "Quadrant records and road/neutral resume detail remain labeled by sample strength while opponent tiers stabilize."
+                "Quadrant records and road/neutral résumé detail remain labeled by sample strength while opponent tiers stabilize."
+                if live_resume_ready else
+                "This is an early-season strength and résumé outlook, not yet a committee-style bracket. Current results are included, but fewer than 300 teams have reached the eight-game résumé threshold, so THI withholds seed lines, regions, First Four assignments and a true bubble board."
+                if current_game_count else
+                "This is an opening strength scenario, not a current committee projection. No current-season results are available yet, so THI withholds seed lines, regions, First Four assignments and a true bubble board."
             ),
         },
         "field": field,
