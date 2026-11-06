@@ -705,7 +705,7 @@
       if (!groups.has(label)) groups.set(label, []);
       groups.get(label).push(game);
     }
-    body.innerHTML = shown.length ? [...groups.entries()].map(([date, games]) => `<tr class="cbb-date-row"><td colspan="8">${escapeHtml(date)}</td></tr>${games.map(projectionRow).join("")}`).join("") : `<tr><td colspan="8" class="cbb-empty">No games match those filters.</td></tr>`;
+    body.innerHTML = shown.length ? [...groups.entries()].map(([date, games]) => `<tr class="cbb-date-row"><td colspan="8"><div class="cbb-day-divider-box hammer-day-divider-box">${escapeHtml(date)}</div></td></tr>${games.map(projectionRow).join("")}`).join("") : `<tr><td colspan="8" class="cbb-empty">No games match those filters.</td></tr>`;
     const summary = document.getElementById("cbb-projection-summary");
     if (summary) summary.textContent = `Showing ${integer(shown.length)} of ${integer(all.length)} matching games`;
     const more = document.getElementById("cbb-projection-more");

@@ -14,6 +14,7 @@ class MatchupBlueprintUiTests(unittest.TestCase):
         cls.cfb = (ROOT / "app.js").read_text(encoding="utf-8")
         cls.cbb = (ROOT / "cbb-site.js").read_text(encoding="utf-8")
         cls.cbb_css = (ROOT / "cbb-site.css").read_text(encoding="utf-8")
+        cls.cfb_status = (ROOT / "status-controls.js").read_text(encoding="utf-8")
         cls.dark = (ROOT / "dark-mode.css").read_text(encoding="utf-8")
         cls.index = (ROOT / "index.html").read_text(encoding="utf-8")
 
@@ -97,10 +98,36 @@ class MatchupBlueprintUiTests(unittest.TestCase):
         self.assertIn(".thi-standout-card.notable", self.dark)
         self.assertIn(".thi-standout-card.lean", self.dark)
 
+    def test_cbb_date_divider_matches_cfb_treatment(self):
+        self.assertIn('class="cbb-day-divider-box hammer-day-divider-box"', self.cbb)
+        for declaration in (
+            "min-height:46px",
+            "margin:12px 0 8px",
+            "padding:0 16px",
+            "background:#fff8dc",
+            "border:1px solid #e7c967",
+            "border-radius:9px",
+            "color:#5f4900",
+            "font-size:13px",
+            "font-weight:700",
+            "letter-spacing:.7px",
+        ):
+            with self.subTest(declaration=declaration):
+                self.assertIn(declaration, self.cfb_status)
+                self.assertIn(declaration, self.cbb_css)
+        for declaration in (
+            "background:#322b19 !important",
+            "border-color:#68582d !important",
+            "color:#e8cf83 !important",
+        ):
+            with self.subTest(declaration=declaration):
+                self.assertIn(declaration, self.dark)
+                self.assertIn(declaration, self.cbb_css)
+
     def test_asset_versions_are_bumped(self):
         self.assertIn("app.js?v=2026-blueprint-grades-v04", self.index)
-        self.assertIn("cbb-site.css?v=2027-cbb-blueprint-grades-v03", self.index)
-        self.assertIn("cbb-site.js?v=2027-cbb-blueprint-grades-v03", self.index)
+        self.assertIn("cbb-site.css?v=2027-cbb-date-parity-v04", self.index)
+        self.assertIn("cbb-site.js?v=2027-cbb-date-parity-v04", self.index)
         self.assertIn("dark-mode.css?v=2026-standout-contrast-v11", self.index)
 
 

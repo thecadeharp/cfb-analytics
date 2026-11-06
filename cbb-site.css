@@ -228,7 +228,23 @@ body.thi-sport-cbb .cbb-nav { display: flex; }
   overflow-wrap: normal;
   word-break: normal;
 }
-.cbb-date-row td { padding:9px 16px; border-bottom:1px solid var(--border); background:var(--surface-soft); color:var(--muted); font:700 9px var(--mono); letter-spacing:.08em; text-transform:uppercase; }
+.cbb-date-row td { padding:0 !important; border:0 !important; background:var(--bg) !important; }
+.cbb-day-divider-box {
+  display:flex;
+  align-items:center;
+  min-height:46px;
+  margin:12px 0 8px;
+  padding:0 16px;
+  background:#fff8dc;
+  border:1px solid #e7c967;
+  border-radius:9px;
+  color:#5f4900;
+  font-family:var(--mono);
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.7px;
+  text-transform:uppercase;
+}
 .cbb-matchup-team { display: grid; grid-template-columns: 24px minmax(0,1fr) auto; align-items: center; gap: 7px; min-height: 27px; }
 .cbb-matchup-name { display: flex; min-width: 0; align-items: baseline; gap: 6px; }
 .cbb-matchup-name strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -817,11 +833,10 @@ html[data-theme="dark"] body #view-cbb-projections .cbb-table.cbb-projection-tab
   border-color: #465465 !important;
   box-shadow: inset 0 -1px 0 #465465 !important;
 }
-html[data-theme="dark"] body #view-cbb-projections .cbb-projection-table .cbb-date-row td {
-  background: #e7c967 !important;
-  color: #2d2300 !important;
-  border-color: #e7c967 !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(45,35,0,.2);
+html[data-theme="dark"] body #view-cbb-projections .cbb-day-divider-box {
+  background:#322b19 !important;
+  border-color:#68582d !important;
+  color:#e8cf83 !important;
 }
 html[data-theme="dark"] .cbb-status-button { background: #1d2631; border-color: #465668; color: #d1dbe4; box-shadow: inset 0 1px 0 rgba(255,255,255,.035); }
 html[data-theme="dark"] .cbb-status-button:hover { background: #263241; border-color: #556779; color: #f1f5f8; }
@@ -953,7 +968,7 @@ html[data-theme="dark"] .cbb-error { background: #3a2020; border-color: #76443e;
   .cbb-projection-table thead { display:none; }
   .cbb-projection-table tbody { display:grid; gap:12px; }
   .cbb-projection-table .cbb-date-row { display:block; }
-  .cbb-projection-table .cbb-date-row td { display:block; width:100%; border-radius:8px; }
+  .cbb-projection-table .cbb-date-row td { display:block; width:100%; }
   .cbb-projection-row {
     display:grid;
     grid-template-columns:repeat(2,minmax(0,1fr));
