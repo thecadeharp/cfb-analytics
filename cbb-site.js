@@ -493,9 +493,9 @@
 
       <div class="cbb-date-navigator" aria-label="Choose game date">${projectionDateButtons()}</div>
 
-      <div class="cbb-panel cbb-table-wrap cbb-projection-table-wrap">
-        <table class="cbb-table cbb-projection-table" aria-label="THI college basketball game projections"><thead><tr>
-          <th>Matchup</th><th>Watchability</th><th>THI Spread</th><th>Market</th><th>Total</th><th>Model Edge</th><th>Model Signal</th><th>Signal Confidence</th>
+      <div class="table-card table-scroll cbb-projection-table-wrap">
+        <table class="projection-table cbb-table cbb-projection-table" aria-label="THI college basketball game projections"><thead><tr>
+          <th>Matchup</th><th>THI Watch</th><th>Fair Line</th><th>Market</th><th>Total</th><th class="align-right">Model Edge</th><th class="align-right">Model Signal</th><th class="align-right">Signal Confidence</th>
         </tr></thead><tbody id="cbb-projection-body"></tbody></table>
       </div>
       <div class="cbb-projection-footer"><span id="cbb-projection-summary"></span><button id="cbb-projection-more" type="button">Show more games</button></div>
@@ -563,6 +563,14 @@
 
   function signalLabel(tier) {
     return ({ no_line: "No line", aligned: "Aligned", small: "Small disagreement", play: "Notable disagreement", material: "Major disagreement", outlier: "Outlier" })[tier] || "Research";
+  }
+
+  function signalStatusClass(tier) {
+    return ({ no_line: "inline", aligned: "agree", small: "small-edge", play: "play", material: "material", outlier: "outlier" })[tier] || "inline";
+  }
+
+  function confidenceStatusClass(confidence) {
+    return ({ developing: "confidence-developing", validated: "confidence-validated", established: "confidence-established" })[String(confidence || "").toLowerCase()] || "agree";
   }
 
   function publicSignalLabel(value) {
@@ -737,9 +745,9 @@
     const projectedLineFull = `${favoredTeam?.team || "—"} ${projectedNumber}`;
     const marketLine = game.market?.consensus_home_spread == null ? NaN : Number(game.market.consensus_home_spread);
     const marketTeam = Number.isFinite(marketLine) ? (marketLine <= 0 ? game.home : game.away) : null;
-    const marketNumber = Number.isFinite(marketLine) ? `-${number(Math.abs(marketLine),1)}` : "";
-    const marketText = marketTeam ? `${spreadTeamLabel(marketTeam, marketNumber)} ${marketNumber}` : "Not posted";
-    const marketTextFull = marketTeam ? `${marketTeam.team} ${marketNumber}` : "Not posted";
+    const marketNumber = Number.isFinite(marketLine) ? number(marketLine,1,true) : "";
+    const marketText = marketTeam ? marketNumber : "Not posted";
+    const marketTextFull = marketTeam ? `${game.home?.team || "Home"} ${marketNumber}` : "Not posted";
     const edge = projection.spread_edge == null ? NaN : Number(projection.spread_edge);
     const edgeTeam = Number.isFinite(edge) ? (edge >= 0 ? game.home : game.away) : null;
     const tier = signalTier(game);
@@ -777,24 +785,29 @@
     const totalMarket = validMarketTotal(game.market?.consensus_total) ? Number(game.market.consensus_total) : null;
     const projectedTotal = Number(projection.total);
     const totalEdge = totalMarket !== null && Number.isFinite(projectedTotal) && projectedTotal > 0 ? projectedTotal - totalMarket : null;
-    const totalFlag = Number.isFinite(totalEdge) && Math.abs(totalEdge) >= 4 ? `<span class="cbb-total-flag">${totalEdge >= 0 ? "Over" : "Under"} ${number(totalMarket,1)} · ${Math.abs(totalEdge) >= 7 ? "Total Watch" : "Total Lean"}</span>` : "";
     const watch = watchability(game);
-    const watchLabel = watch >= 75 ? "Prime window" : watch >= 60 ? "On the radar" : "Standard";
+    const watchLabel = watch >= 75 ? "PRIME WINDOW" : watch >= 60 ? "ON THE RADAR" : "STANDARD";
     const varianceRows = (state.data?.varianceTracker?.frozen || []).filter(row => row.sport === "cbb" && String(row.game_id) === String(game.game_id));
     const varianceCards = new Map((state.data?.trends?.sports?.cbb?.cards || []).map(card => [card.id, card]));
     const verifiedVarianceRows = varianceRows.filter(row => String(varianceCards.get(row.system_id)?.state || "").toLowerCase() === "verified");
     const varianceMarkup = verifiedVarianceRows.length ? `<div class="cbb-variance-context">${verifiedVarianceRows.slice(0,2).map(row => { const card = varianceCards.get(row.system_id) || {}; return `<span title="Verified historical system; does not affect the THI projection">${escapeHtml(card.name || humanize(row.system_id))} · Verified</span>`; }).join("")}</div>` : "";
     const awayRank = cbbThiRank(game.away?.team_id);
     const homeRank = cbbThiRank(game.home?.team_id);
-    return `<tr class="cbb-projection-row" data-cbb-game-id="${escapeHtml(game.game_id)}">
-      <td><div class="cbb-matchup-team">${teamLogo(game.away,"small")}<div class="cbb-matchup-name"><strong>${escapeHtml(game.away?.team || "—")}</strong>${awayRank ? `<small>#${awayRank}</small>` : ""}</div><span>${gameStatus(game) !== "upcoming" ? integer(game.away?.score) : ""}</span></div><div class="cbb-matchup-team">${teamLogo(game.home,"small")}<div class="cbb-matchup-name"><strong>${escapeHtml(game.home?.team || "—")}</strong>${homeRank ? `<small>#${homeRank}</small>` : ""}</div><span>${gameStatus(game) !== "upcoming" ? integer(game.home?.score) : ""}</span></div><div class="cbb-team-meta">${gameStatus(game) === "live" ? `<b class="cbb-live-label">LIVE${game.live?.clock ? ` · ${escapeHtml(game.live.clock)}` : ""}</b> · ` : ""}${escapeHtml(time)} · ${escapeHtml(network)} · ${gameType}</div>${varianceMarkup}</td>
-      <td><span class="cbb-watch-score">${integer(watch)}</span><div class="cbb-team-meta">${watchLabel}</div></td>
-      <td class="cbb-line-cell"><strong class="cbb-number cbb-line-value" title="${escapeHtml(edgeMarketTextFull || projectedLineFull)}">${escapeHtml(edgeMarketText || projectedLine)}</strong><div class="cbb-team-meta">${edgeMarketText ? "THI preferred side at current market" : "THI projected spread"}</div></td>
-      <td class="cbb-line-cell"><strong class="cbb-number cbb-line-value" title="${escapeHtml(marketTextFull)}">${escapeHtml(marketText)}</strong><div class="cbb-team-meta">${game.market?.book_count ? `${integer(game.market.book_count)} books` : "No consensus line"}${isolatedMarket ? " · ISOLATED PRICE" : ""}</div></td>
-      <td><strong class="cbb-number">${Number.isFinite(projectedTotal) && projectedTotal > 0 ? number(projectedTotal,1) : "—"}</strong><div class="cbb-team-meta">Market ${totalMarket !== null ? number(totalMarket,1) : "—"}</div>${totalFlag}</td>
-      <td><strong class="cbb-edge-value">${Number.isFinite(edge) ? `${number(Math.abs(edge),1)} pts` : "—"}</strong><div class="cbb-team-meta">${edgeTeam ? `Model favors ${escapeHtml(edgeTeam.team)}` : "No market comparison"}</div></td>
-      <td><span class="cbb-signal cbb-signal-${tier}">${escapeHtml(signalLabel(tier))}</span>${outlierDriver ? `<div class="cbb-team-meta">${escapeHtml(outlierDriver)}</div>` : ""}</td>
-      <td><span class="cbb-confidence cbb-confidence-${isolatedMarket ? "research" : confidence}">${escapeHtml(isolatedMarket ? "Unverified" : confidence === "research" ? "Research only" : humanize(confidence))}</span><div class="cbb-team-meta">${projection.spread_signal_eligible ? "Qualified decision" : isolatedMarket ? "Fewer than 3 books" : "Not in prospective record"}</div></td>
+    const totalSignal = Number.isFinite(totalEdge) && Math.abs(totalEdge) >= 4
+      ? `<div class="total-signal ${Math.abs(totalEdge) >= 7 ? "total-watch" : "total-lean"}">${totalEdge >= 0 ? "OVER" : "UNDER"} ${number(totalMarket,1)} · ${Math.abs(totalEdge) >= 7 ? "TOTAL WATCH" : "TOTAL LEAN"} BY ${number(Math.abs(totalEdge),1)}</div>`
+      : "";
+    const signalCss = signalStatusClass(tier);
+    const publicConfidence = isolatedMarket ? "UNVERIFIED" : confidence === "research" ? "RESEARCH ONLY" : humanize(confidence).toUpperCase();
+    const confidenceCss = isolatedMarket ? "agree" : confidenceStatusClass(confidence);
+    return `<tr class="game-row cbb-projection-row" data-cbb-game-id="${escapeHtml(game.game_id)}">
+      <td class="matchup-cell"><div class="team-line cbb-matchup-team">${teamLogo(game.away,"small")}<strong class="team-name">${escapeHtml(game.away?.team || "—")}</strong>${awayRank ? `<span class="team-meta">THI #${awayRank}</span>` : ""}<span>${gameStatus(game) !== "upcoming" ? integer(game.away?.score) : ""}</span></div><div class="team-line cbb-matchup-team"><span class="at-symbol">@</span>${teamLogo(game.home,"small")}<strong class="team-name">${escapeHtml(game.home?.team || "—")}</strong>${homeRank ? `<span class="team-meta">THI #${homeRank}</span>` : ""}<span>${gameStatus(game) !== "upcoming" ? integer(game.home?.score) : ""}</span></div><div class="team-meta cbb-team-meta">${gameStatus(game) === "live" ? `<b class="cbb-live-label">LIVE${game.live?.clock ? ` · ${escapeHtml(game.live.clock)}` : ""}</b> · ` : ""}${escapeHtml(time)} · ${escapeHtml(network)} · ${gameType}</div>${varianceMarkup}</td>
+      <td><div class="thi-watch compact" title="THI Watch Index"><strong>${integer(watch)}</strong><span>${escapeHtml(watchLabel)}</span></div></td>
+      <td class="cbb-line-cell"><div class="line-primary cbb-line-value" title="${escapeHtml(edgeMarketTextFull || projectedLineFull)}">${escapeHtml(edgeMarketText || projectedLine)}</div><div class="line-secondary">${edgeMarketText ? "THI preferred side at current market" : "THI projected spread"}</div></td>
+      <td class="cbb-line-cell"><div class="line-primary cbb-line-value" title="${escapeHtml(marketTextFull)}">${escapeHtml(marketText)}</div><div class="line-secondary">${game.market?.book_count ? `${integer(game.market.book_count)} books` : "No consensus line"}${isolatedMarket ? " · ISOLATED PRICE" : ""}</div></td>
+      <td><div class="line-primary">${Number.isFinite(projectedTotal) && projectedTotal > 0 ? number(projectedTotal,1) : "—"}</div><div class="line-secondary">Market ${totalMarket !== null ? number(totalMarket,1) : "—"}</div>${totalSignal}</td>
+      <td class="disagreement"><div class="disagreement-number ${signalCss}">${Number.isFinite(edge) ? `${number(Math.abs(edge),1)} pts` : "—"}</div><div class="disagreement-note">${edgeTeam ? `Model favors ${escapeHtml(edgeTeam.team)}` : "No market comparison"}</div></td>
+      <td class="status-cell"><span class="status ${signalCss}">${escapeHtml(signalLabel(tier).toUpperCase())}</span>${outlierDriver ? `<div class="signal-record">${escapeHtml(outlierDriver)}</div>` : ""}</td>
+      <td class="status-cell"><span class="status ${confidenceCss}">${escapeHtml(publicConfidence)}</span><div class="signal-record">${projection.spread_signal_eligible ? "Qualified decision" : isolatedMarket ? "Fewer than 3 books" : "Not in prospective record"}</div></td>
     </tr>`;
   }
 
@@ -838,15 +851,16 @@
     const preferred = result.preferredSide === "home" ? game.home : result.preferredSide === "away" ? game.away : null;
     const preferredSpread = preferred && Number.isFinite(result.homeSpread) ? (result.preferredSide === "home" ? result.homeSpread : -result.homeSpread) : NaN;
     const marketLine = Number.isFinite(result.homeSpread) ? `${result.homeSpread <= 0 ? game.home.team : game.away.team} -${number(Math.abs(result.homeSpread),1)}` : "Not captured";
-    return `<tr class="cbb-projection-row cbb-completed-row" data-cbb-game-id="${escapeHtml(game.game_id)}">
-      <td><div class="cbb-matchup-team">${teamLogo(game.away,"small")}<div class="cbb-matchup-name"><strong>${escapeHtml(game.away?.team || "—")}</strong></div><span class="cbb-final-score">${integer(result.awayPoints)}</span></div><div class="cbb-matchup-team">${teamLogo(game.home,"small")}<div class="cbb-matchup-name"><strong>${escapeHtml(game.home?.team || "—")}</strong></div><span class="cbb-final-score">${integer(result.homePoints)}</span></div><span class="cbb-final-label">FINAL</span></td>
+    const tier = signalTier(game), confidence = confidenceTier(game);
+    return `<tr class="game-row cbb-projection-row cbb-completed-row" data-cbb-game-id="${escapeHtml(game.game_id)}">
+      <td class="matchup-cell"><div class="team-line cbb-matchup-team">${teamLogo(game.away,"small")}<strong class="team-name">${escapeHtml(game.away?.team || "—")}</strong><span class="cbb-final-score">${integer(result.awayPoints)}</span></div><div class="team-line cbb-matchup-team"><span class="at-symbol">@</span>${teamLogo(game.home,"small")}<strong class="team-name">${escapeHtml(game.home?.team || "—")}</strong><span class="cbb-final-score">${integer(result.homePoints)}</span></div><span class="cbb-final-label">FINAL</span></td>
       <td><div class="cbb-team-meta">Postgame viewing score</div></td>
       <td><strong class="cbb-number">${number(result.projectedAway,1)}–${number(result.projectedHome,1)}</strong><div class="cbb-team-meta">Frozen projected score</div></td>
       <td><strong class="cbb-number">${escapeHtml(marketLine)}</strong><div class="cbb-team-meta">Last captured line</div></td>
       <td><strong class="cbb-number">${Number.isFinite(Number(projection.total)) ? number(projection.total,1) : "—"}</strong><div class="cbb-team-meta">Market ${Number.isFinite(result.marketTotal) ? number(result.marketTotal,1) : "—"}</div>${cbbGradeBadge(result,"total")}</td>
       <td>${cbbGradeBadge(result,"ats")}<div class="cbb-team-meta">${preferred ? `${escapeHtml(preferred.team)} ${number(preferredSpread,1,true)}` : "No graded side"}</div></td>
-      <td><span class="cbb-signal cbb-signal-${signalTier(game)}">${escapeHtml(signalLabel(signalTier(game)))}</span></td>
-      <td><span class="cbb-confidence cbb-confidence-${confidenceTier(game)}">${escapeHtml(humanize(confidenceTier(game)))}</span><div class="cbb-team-meta">Winner ${result.winnerCorrect == null ? "—" : result.winnerCorrect ? "correct" : "incorrect"} · ${result.marginError == null ? "error pending" : `${number(result.marginError,1)} pt margin error`}</div></td>
+      <td class="status-cell"><span class="status ${signalStatusClass(tier)}">${escapeHtml(signalLabel(tier).toUpperCase())}</span></td>
+      <td class="status-cell"><span class="status ${confidenceStatusClass(confidence)}">${escapeHtml(humanize(confidence).toUpperCase())}</span><div class="signal-record">Winner ${result.winnerCorrect == null ? "—" : result.winnerCorrect ? "correct" : "incorrect"} · ${result.marginError == null ? "error pending" : `${number(result.marginError,1)} pt margin error`}</div></td>
     </tr>`;
   }
 
