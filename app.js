@@ -1884,8 +1884,8 @@ function ensureMatchupView() {
       max-width:520px;
       color:var(--muted);
       font-family:var(--mono);
-      font-size:9px;
-      line-height:1.5;
+      font-size:10px;
+      line-height:1.6;
       text-align:right;
       text-transform:uppercase;
     }
@@ -1898,16 +1898,33 @@ function ensureMatchupView() {
     }
 
     .thi-standout-card {
+      --standout-accent:#a86705;
+      --standout-bg:#fff5dc;
+      --standout-heading:#694000;
+      --standout-copy:#55452c;
+      --standout-badge:#825000;
       min-width:0;
-      padding:11px 12px;
-      border:1px solid var(--border);
-      border-left:5px solid #d5a000;
+      padding:12px 13px;
+      border:1px solid color-mix(in srgb,var(--standout-accent) 52%,var(--border));
+      border-left:5px solid var(--standout-accent);
       border-radius:8px;
-      background:#fff;
+      background:var(--standout-bg);
     }
 
-    .thi-standout-card.high { border-left-color:#087f5b; }
-    .thi-standout-card.notable { border-left-color:#49b783; }
+    .thi-standout-card.high {
+      --standout-accent:#16805f;
+      --standout-bg:#e9f6f1;
+      --standout-heading:#0b4f3b;
+      --standout-copy:#243f36;
+      --standout-badge:#0b6b4e;
+    }
+    .thi-standout-card.notable {
+      --standout-accent:#4e7faf;
+      --standout-bg:#edf4fb;
+      --standout-heading:#234f7b;
+      --standout-copy:#2f465c;
+      --standout-badge:#315f8f;
+    }
 
     .thi-standout-topline {
       display:flex;
@@ -1918,29 +1935,32 @@ function ensureMatchupView() {
     }
 
     .thi-standout-heading {
-      font-size:12px;
+      color:var(--standout-heading);
+      font-size:13px;
       font-weight:800;
     }
 
     .thi-standout-strength {
       flex:0 0 auto;
       padding:3px 6px;
-      border:1px solid var(--border);
+      border:1px solid var(--standout-badge);
       border-radius:999px;
-      color:#4c5965;
+      background:var(--standout-badge);
+      color:#fff;
       font-family:var(--mono);
-      font-size:8px;
+      font-size:9px;
       font-weight:800;
+      letter-spacing:.02em;
       text-transform:uppercase;
     }
 
     .thi-standout-copy {
-      color:#4c5965;
-      font-size:10px;
-      line-height:1.55;
+      color:var(--standout-copy);
+      font-size:11px;
+      line-height:1.65;
     }
 
-    .thi-standout-copy strong { color:var(--ink); }
+    .thi-standout-copy strong { color:var(--standout-heading); }
 
     .thi-matchup-blueprint {
       margin:0 10px 10px;

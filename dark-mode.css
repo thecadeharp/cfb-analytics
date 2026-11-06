@@ -118,8 +118,40 @@ html[data-theme="dark"] :is(.thi-context-fact,.thi-context-flags,.alt-table td,.
 html[data-theme="dark"] :is(.thi-context-flag,.schedule-context-chip) {
   background:#392f15 !important; border-color:#6d5a25 !important; color:#f1cd67 !important;
 }
-html[data-theme="dark"] :is(.thi-metric-guide-subtitle,.thi-standout-copy,.thi-standout-strength) { color:var(--muted) !important; }
-html[data-theme="dark"] .thi-standout-copy strong { color:var(--text) !important; }
+html[data-theme="dark"] .thi-metric-guide-subtitle { color:var(--muted) !important; }
+html[data-theme="dark"] .thi-standout-card.high {
+  --standout-accent:#3bb68b;
+  --standout-bg:#102c25;
+  --standout-heading:#9be6ca;
+  --standout-copy:#d7e9e2;
+  --standout-badge:#8adbbf;
+  background:var(--standout-bg) !important;
+}
+html[data-theme="dark"] .thi-standout-card.notable {
+  --standout-accent:#6aa5dc;
+  --standout-bg:#17283a;
+  --standout-heading:#afd5f5;
+  --standout-copy:#dbe8f5;
+  --standout-badge:#9ac5eb;
+  background:var(--standout-bg) !important;
+}
+html[data-theme="dark"] .thi-standout-card.lean {
+  --standout-accent:#d7a23d;
+  --standout-bg:#332814;
+  --standout-heading:#f0c96f;
+  --standout-copy:#eee0bf;
+  --standout-badge:#f0c15d;
+  background:var(--standout-bg) !important;
+}
+html[data-theme="dark"] .thi-standout-heading,
+html[data-theme="dark"] .thi-standout-copy,
+html[data-theme="dark"] .thi-standout-copy strong { color:var(--standout-heading) !important; }
+html[data-theme="dark"] .thi-standout-copy { color:var(--standout-copy) !important; }
+html[data-theme="dark"] .thi-standout-strength {
+  background:var(--standout-badge) !important;
+  border-color:var(--standout-badge) !important;
+  color:#102018 !important;
+}
 html[data-theme="dark"] .thi-metric-guide-note { background:#252039 !important; color:#cabcf2 !important; border-color:#514477 !important; }
 html[data-theme="dark"] .thi-conf-band { background:#29404a; }
 html[data-theme="dark"] .thi-conf-median { background:#9ccce0; }

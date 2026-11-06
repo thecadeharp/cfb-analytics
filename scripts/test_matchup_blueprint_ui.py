@@ -84,11 +84,20 @@ class MatchupBlueprintUiTests(unittest.TestCase):
         self.assertIn(".thi-style-matchup", self.dark)
         self.assertIn(".cbb-style-matchup", self.cbb_css)
 
+    def test_standout_cards_use_readable_strength_colors(self):
+        for token in ("--standout-bg", "--standout-heading", "--standout-copy", "--standout-badge"):
+            with self.subTest(token=token):
+                self.assertIn(token, self.cfb)
+                self.assertIn(token, self.dark)
+        self.assertIn(".thi-standout-card.high", self.dark)
+        self.assertIn(".thi-standout-card.notable", self.dark)
+        self.assertIn(".thi-standout-card.lean", self.dark)
+
     def test_asset_versions_are_bumped(self):
-        self.assertIn("app.js?v=2026-style-matchup-v02", self.index)
+        self.assertIn("app.js?v=2026-standout-contrast-v03", self.index)
         self.assertIn("cbb-site.css?v=2027-cbb-style-matchup-v02", self.index)
         self.assertIn("cbb-site.js?v=2027-cbb-style-matchup-v02", self.index)
-        self.assertIn("dark-mode.css?v=2026-style-matchup-v10", self.index)
+        self.assertIn("dark-mode.css?v=2026-standout-contrast-v11", self.index)
 
 
 if __name__ == "__main__":
