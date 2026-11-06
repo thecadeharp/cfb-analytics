@@ -2042,6 +2042,76 @@ function ensureMatchupView() {
       font-size:12px;
     }
 
+    .thi-style-matchup {
+      margin:0 10px 10px;
+      border:1px solid var(--border);
+      border-radius:11px;
+      background:#fff;
+      overflow:hidden;
+    }
+
+    .thi-style-header {
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      padding:12px 14px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .thi-style-header h3 { margin:2px 0 0; font-size:15px; }
+    .thi-style-header small {
+      max-width:590px;
+      color:var(--muted);
+      font-family:var(--mono);
+      font-size:9px;
+      line-height:1.5;
+      text-align:right;
+      text-transform:uppercase;
+    }
+
+    .thi-style-units {
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:8px;
+      padding:10px;
+      background:#fafaf8;
+    }
+
+    .thi-style-unit {
+      min-width:0;
+      border:1px solid var(--border);
+      border-radius:9px;
+      background:#fff;
+      overflow:hidden;
+    }
+
+    .thi-style-unit>header {
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .thi-style-groups { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .thi-style-group { min-width:0; padding:10px 12px; border-bottom:1px solid var(--border); }
+    .thi-style-group:nth-child(odd) { border-right:1px solid var(--border); }
+    .thi-style-group:nth-last-child(-n+2) { border-bottom:0; }
+    .thi-style-group>span {
+      display:block;
+      margin-bottom:7px;
+      color:var(--muted);
+      font-family:var(--mono);
+      font-size:8px;
+      font-weight:800;
+      letter-spacing:.07em;
+      text-transform:uppercase;
+    }
+    .thi-style-row { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:7px; align-items:baseline; margin-top:5px; font-size:9px; }
+    .thi-style-row b { font-family:var(--mono); font-size:10px; }
+    .thi-style-row em { color:var(--muted); font-family:var(--mono); font-size:8px; font-style:normal; }
+    .thi-style-source-note { padding:10px 14px; border-top:1px solid var(--border); color:var(--muted); font-size:10px; line-height:1.55; }
+
     .thi-metric-guide-note {
       padding:10px 12px;
       border:1px solid #d8cbed;
@@ -2331,6 +2401,7 @@ function ensureMatchupView() {
       .thi-tale-grid { grid-template-columns:1fr 1fr; }
       .thi-stands-out-grid { grid-template-columns:1fr; }
       .thi-blueprint-edges { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .thi-style-units { grid-template-columns:1fr; }
       .thi-metric-guide-grid { grid-template-columns:1fr; }
       .thi-context-facts { grid-template-columns:repeat(2,minmax(0,1fr)); }
       .cfb-script-results { grid-template-columns:repeat(3,minmax(0,1fr)); }
@@ -2367,6 +2438,12 @@ function ensureMatchupView() {
       .thi-blueprint-header { flex-direction:column; }
       .thi-blueprint-note { text-align:left; }
       .thi-blueprint-edges,.thi-blueprint-keys { grid-template-columns:1fr; }
+      .thi-style-header { flex-direction:column; }
+      .thi-style-header small { text-align:left; }
+      .thi-style-groups { grid-template-columns:1fr; }
+      .thi-style-group:nth-child(odd) { border-right:0; }
+      .thi-style-group:nth-last-child(-n+2) { border-bottom:1px solid var(--border); }
+      .thi-style-group:last-child { border-bottom:0; }
       .thi-metric-guide > summary {
         flex-direction:column;
         align-items:flex-start;
@@ -3763,6 +3840,82 @@ function matchupBlueprintMarkup(awayName, homeName, game) {
   `;
 }
 
+function styleMetricRow(teamName, side, field) {
+  const metric = profileMetric(teamName, side, field);
+  const label = profileMetricDefinition(field)?.label || field;
+  const rank = hasValue(metric?.rank) ? `#${Number(metric.rank)}` : "—";
+  const unit = side === "offense" ? "OFF" : "DEF";
+  return `<div class="thi-style-row"><span>${escapeHtml(`${unit} · ${label}`)}</span><b>${escapeHtml(profileMetricText(metric, field))}</b><em>${escapeHtml(rank)}</em></div>`;
+}
+
+function styleTendencyRow(teamName, side, label, numeratorField, denominatorField = "n_plays") {
+  const sample = advancedMetricsData?.teams?.[teamName]?.[currentAdvancedSample]
+    || advancedMetricsData?.teams?.[teamName]?.non_garbage
+    || {};
+  const unitData = sample?.[side] || {};
+  const numerator = Number(unitData[numeratorField]);
+  const denominator = Number(unitData[denominatorField]);
+  const value = Number.isFinite(numerator) && Number.isFinite(denominator) && denominator > 0
+    ? `${((numerator / denominator) * 100).toFixed(1)}%`
+    : "—";
+  const unit = side === "offense" ? "OFF" : "DEF";
+  return `<div class="thi-style-row"><span>${escapeHtml(`${unit} · ${label}`)}</span><b>${escapeHtml(value)}</b><em>share</em></div>`;
+}
+
+function styleUnitMarkup(offenseTeam, defenseTeam) {
+  const groups = [
+    ["Down structure", ["standard_down_epa", "standard_down_success_rate", "passing_down_epa", "passing_down_success_rate"]],
+    ["Rushing shape", ["yards_per_rush", "opportunity_rate", "line_yards_per_rush", "stuff_rate"]],
+    ["Passing + pressure", ["yards_per_pass_play", "adjusted_sack_rate", "havoc_rate"]],
+    ["Explosive profile", ["explosive_rate", "iso_ppp"]],
+  ];
+  return `
+    <article class="thi-style-unit">
+      <header>${escapeHtml(offenseTeam)} offense <span class="thi-unit-versus">vs</span> ${escapeHtml(defenseTeam)} defense</header>
+      <div class="thi-style-groups">
+        ${groups.map(([label, fields]) => `
+          <div class="thi-style-group">
+            <span>${escapeHtml(label)} · offense / defense rank</span>
+            ${label === "Down structure" ? `
+              ${styleTendencyRow(offenseTeam, "offense", "Standard-down rate", "standard_down_plays")}
+              ${styleTendencyRow(defenseTeam, "defense", "Standard-down rate faced", "standard_down_plays")}
+              ${styleTendencyRow(offenseTeam, "offense", "Passing-down rate", "passing_down_plays")}
+              ${styleTendencyRow(defenseTeam, "defense", "Passing-down rate faced", "passing_down_plays")}
+            ` : ""}
+            ${label === "Rushing shape" ? `
+              ${styleTendencyRow(offenseTeam, "offense", "Rush rate", "rush_attempts")}
+              ${styleTendencyRow(defenseTeam, "defense", "Rush rate faced", "rush_attempts")}
+            ` : ""}
+            ${label === "Passing + pressure" ? `
+              ${styleTendencyRow(offenseTeam, "offense", "Pass rate", "pass_plays")}
+              ${styleTendencyRow(defenseTeam, "defense", "Pass rate faced", "pass_plays")}
+            ` : ""}
+            ${fields.map(field => `
+              ${styleMetricRow(offenseTeam, "offense", field)}
+              ${styleMetricRow(defenseTeam, "defense", field)}
+            `).join("")}
+          </div>
+        `).join("")}
+      </div>
+    </article>`;
+}
+
+function styleMatchupMarkup(awayName, homeName) {
+  if (!teamMetricProfile(awayName) || !teamMetricProfile(homeName)) return "";
+  return `
+    <section class="thi-style-matchup" aria-labelledby="thi-style-title">
+      <div class="thi-style-header">
+        <div><div class="eyebrow">How each team plays</div><h3 id="thi-style-title">Style Matchup</h3></div>
+        <small>CFBD-derived production profile · current season · descriptive only</small>
+      </div>
+      <div class="thi-style-units">
+        ${styleUnitMarkup(awayName, homeName)}
+        ${styleUnitMarkup(homeName, awayName)}
+      </div>
+      <div class="thi-style-source-note">This layer measures results by down state, rushing opportunity, line production, pressure and explosiveness. THI does not label run direction, route location, inside/outside zone or play action until those concepts are supplied by a verified charting source.</div>
+    </section>`;
+}
+
 function taleOfTapeMarkup(awayName, homeName, game) {
   const throughWeek = teamMetricProfilesData?.meta?.through_week;
   const sample = teamMetricProfilesData?.meta?.sample === "non_garbage"
@@ -3792,6 +3945,7 @@ function taleOfTapeMarkup(awayName, homeName, game) {
       </div>
       ${matchupStandoutsMarkup(awayName, homeName)}
       ${matchupBlueprintMarkup(awayName, homeName, game)}
+      ${styleMatchupMarkup(awayName, homeName)}
       ${advancedMetricGuideMarkup()}
     </section>
   `;

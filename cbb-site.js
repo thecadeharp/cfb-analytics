@@ -1185,6 +1185,44 @@
       </section>`;
   }
 
+  function cbbStyleMatchup(game) {
+    const matchup = state.data?.matchups?.games?.find(row => String(row.game_id) === String(game.game_id));
+    const away = matchup?.shot_style?.away || {};
+    const home = matchup?.shot_style?.home || {};
+    const fields = [
+      ["At rim", "rim_rate"],
+      ["Midrange", "midrange_rate"],
+      ["Three-point", "three_rate"],
+      ["Assisted makes", "assisted_rate"],
+      ["Explicit transition", "explicit_transition_rate"],
+    ];
+    const hasCoverage = fields.some(([, key]) => away[key] != null || home[key] != null);
+    if (!hasCoverage) return "";
+    const teamCard = (team, style) => `
+      <article class="cbb-style-team">
+        <header><strong>${escapeHtml(team?.team)}</strong><span>${escapeHtml(humanize(style.sample_state || "sample developing"))}${style.tracked_shots == null ? "" : ` · ${integer(style.tracked_shots)} tracked shots`}</span></header>
+        <div>${fields.map(([label, key]) => `<p><span>${escapeHtml(label)}</span><b>${style[key] == null ? "—" : pct(style[key])}</b></p>`).join("")}</div>
+      </article>`;
+    const deltas = fields
+      .map(([label, key]) => ({ label, key, gap: Math.abs(Number(away[key]) - Number(home[key])) }))
+      .filter(item => Number.isFinite(item.gap))
+      .sort((a,b) => b.gap - a.gap);
+    const lead = deltas[0];
+    const leadTeam = lead && Number(away[lead.key]) !== Number(home[lead.key])
+      ? (Number(away[lead.key]) > Number(home[lead.key]) ? game.away?.team : game.home?.team)
+      : null;
+    const read = leadTeam
+      ? `${leadTeam} shows the stronger ${lead.label.toLowerCase()} tendency in the available play sample. That identifies shot selection and creation style; it does not by itself imply better efficiency.`
+      : "The available play sample does not show a meaningful separation in shot-location tendency yet.";
+    return `
+      <section class="cbb-style-matchup" aria-labelledby="cbb-style-title">
+        <div class="cbb-blueprint-head"><div><div class="cbb-kicker">HOW EACH TEAM PLAYS</div><h3 id="cbb-style-title">Style Matchup</h3></div><small>Observed play profile · descriptive only · separate from the published projection</small></div>
+        <div class="cbb-style-grid">${teamCard(game.away, away)}${teamCard(game.home, home)}</div>
+        <p class="cbb-style-read"><strong>Style read:</strong> ${escapeHtml(read)}</p>
+        <p class="cbb-style-note">Transition uses explicit provider play-type labels only. THI does not infer transition from period time when shot-clock context is absent.</p>
+      </section>`;
+  }
+
   function cbbParityHeader(game, date) {
     const projection = game.projection || {};
     const market = game.market || {};
@@ -1312,6 +1350,7 @@
       <button class="cbb-detail-close cbb-game-back" type="button" data-cbb-close>← Back to projections</button>
       ${cbbParityHeader(game, date)}
       ${cbbMatchupBlueprint(game)}
+      ${cbbStyleMatchup(game)}
       ${cbbFinalResultMarkup(game)}
       ${cbbPostgameBoxMarkup(game)}
       ${cbbChangeSummary(game)}

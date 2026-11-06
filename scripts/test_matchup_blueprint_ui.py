@@ -40,6 +40,26 @@ class MatchupBlueprintUiTests(unittest.TestCase):
                 self.assertIn(metric, self.cfb)
         self.assertIn("Model A remains the published line", self.cfb)
 
+    def test_cfb_style_matchup_uses_verified_production_metrics(self):
+        self.assertIn("function styleMatchupMarkup", self.cfb)
+        for metric in (
+            '"standard_down_epa"',
+            '"passing_down_epa"',
+            '"opportunity_rate"',
+            '"line_yards_per_rush"',
+            '"adjusted_sack_rate"',
+            '"havoc_rate"',
+            '"explosive_rate"',
+        ):
+            with self.subTest(metric=metric):
+                self.assertIn(metric, self.cfb)
+        self.assertIn("does not label run direction", self.cfb)
+        self.assertIn('"standard_down_plays"', self.cfb)
+        self.assertIn('"passing_down_plays"', self.cfb)
+        self.assertIn('"rush_attempts"', self.cfb)
+        self.assertIn('"pass_plays"', self.cfb)
+        self.assertIn("${styleMatchupMarkup(awayName, homeName)}", self.cfb)
+
     def test_cbb_blueprint_uses_adjusted_profiles_and_four_factors(self):
         self.assertIn("function cbbMatchupBlueprint", self.cbb)
         self.assertIn("current_efficiency?.adjusted", self.cbb)
@@ -48,17 +68,27 @@ class MatchupBlueprintUiTests(unittest.TestCase):
         self.assertIn("KEY TO WIN OR COVER", self.cbb)
         self.assertIn("${cbbParityHeader(game, date)}\n      ${cbbMatchupBlueprint(game)}", self.cbb)
 
+    def test_cbb_style_matchup_surfaces_observed_play_profile(self):
+        self.assertIn("function cbbStyleMatchup", self.cbb)
+        for metric in ("rim_rate", "midrange_rate", "three_rate", "assisted_rate", "explicit_transition_rate"):
+            with self.subTest(metric=metric):
+                self.assertIn(metric, self.cbb)
+        self.assertIn("${cbbStyleMatchup(game)}", self.cbb)
+        self.assertIn("does not by itself imply better efficiency", self.cbb)
+
     def test_blueprints_are_responsive_and_dark_mode_safe(self):
         self.assertIn(".cbb-matchup-blueprint", self.cbb_css)
         self.assertIn(".cbb-blueprint-grid,.cbb-blueprint-keys{grid-template-columns:1fr}", self.cbb_css)
         self.assertIn(".thi-matchup-blueprint", self.dark)
         self.assertIn(".thi-blueprint-edges", self.dark)
+        self.assertIn(".thi-style-matchup", self.dark)
+        self.assertIn(".cbb-style-matchup", self.cbb_css)
 
     def test_asset_versions_are_bumped(self):
-        self.assertIn("app.js?v=2026-matchup-blueprint-v01", self.index)
-        self.assertIn("cbb-site.css?v=2027-cbb-matchup-blueprint-v01", self.index)
-        self.assertIn("cbb-site.js?v=2027-cbb-matchup-blueprint-v01", self.index)
-        self.assertIn("dark-mode.css?v=2026-matchup-blueprint-v09", self.index)
+        self.assertIn("app.js?v=2026-style-matchup-v02", self.index)
+        self.assertIn("cbb-site.css?v=2027-cbb-style-matchup-v02", self.index)
+        self.assertIn("cbb-site.js?v=2027-cbb-style-matchup-v02", self.index)
+        self.assertIn("dark-mode.css?v=2026-style-matchup-v10", self.index)
 
 
 if __name__ == "__main__":

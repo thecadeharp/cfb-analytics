@@ -32,7 +32,7 @@ class DarkModePostgameTests(unittest.TestCase):
 
     def test_dark_mode_stylesheet_cache_key_was_bumped(self):
         self.assertIn(
-            'dark-mode.css?v=2026-matchup-blueprint-v09',
+            'dark-mode.css?v=2026-style-matchup-v10',
             self.index,
         )
 
