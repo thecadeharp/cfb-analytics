@@ -151,8 +151,7 @@
       <button class="nav-item" type="button" data-cbb-view="cbb-tracking">Model Tracking</button>
       <button class="nav-item" type="button" data-cbb-view="cbb-team-data">Team Data</button>
       <button class="nav-item" type="button" data-cbb-view="cbb-ratings">THI Ratings</button>
-      <button class="nav-item" type="button" data-cbb-view="cbb-player-ratings" data-cbb-player-section-target="ratings">Player Ratings</button>
-      <button class="nav-item" type="button" data-cbb-view="cbb-player-ratings" data-cbb-player-section-target="projections">Player Projections</button>
+      <button class="nav-item" type="button" data-cbb-view="cbb-player-ratings">Player Ratings</button>
       <button class="nav-item" type="button" data-cbb-view="cbb-bracketology">THI Bracketology</button>
       <button class="nav-item" type="button" data-cbb-view="cbb-portal">Transfer Portal</button>
       <button class="nav-item" type="button" data-cbb-view="cbb-market">Market Research</button>

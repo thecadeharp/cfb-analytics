@@ -16,10 +16,11 @@ assert(cbb.includes('data-cbb-player-section="projections"'), "CBB future projec
 assert(cbb.includes("CBB player projections follow roster verification"), "CBB verification gate is missing");
 assert(cbb.includes("cbb-player-projection-table"), "CBB projection board is missing");
 assert(cbb.includes("projected_points") && cbb.includes("projected_rebounds") && cbb.includes("projected_assists"), "CBB projected stat columns are incomplete");
-assert(html.includes("player-intelligence.js?v=2026-player-ratings-v03"), "CFB asset cache key is stale");
+assert(html.includes("player-intelligence.js?v=2026-player-ratings-v06"), "CFB asset cache key is stale");
 assert(ui.includes("thi-player-rating-grid") && ui.includes("thi-player-board-sort"), "Player ratings board redesign is missing");
-assert(html.includes("cbb-site.js?v=2027-cbb-cfb-parity-v01"), "CBB asset cache key is stale");
-assert(cbb.includes('data-cbb-player-section-target="projections">Player Projections'), "CBB player projections are not exposed in the primary navigation");
+assert(html.includes("cbb-site.js?v=2027-cbb-player-hub-v01"), "CBB asset cache key is stale");
+assert(cbb.includes('data-cbb-view="cbb-player-ratings">Player Ratings</button>'), "CBB player ratings hub is missing from the primary navigation");
+assert(!cbb.includes('data-cbb-player-section-target="projections"'), "CBB player projections must live inside Player Ratings instead of the primary navigation");
 assert.strictEqual(payload.meta.status, "research_only");
 assert.strictEqual(payload.meta.model_usage, "display_only_not_used_by_model_a");
 assert.strictEqual(payload.meta.market_data_usage, "none_ingested_retained_or_displayed");
