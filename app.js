@@ -1942,6 +1942,106 @@ function ensureMatchupView() {
 
     .thi-standout-copy strong { color:var(--ink); }
 
+    .thi-matchup-blueprint {
+      margin:0 10px 10px;
+      border:1px solid var(--border);
+      border-radius:11px;
+      background:#fff;
+      overflow:hidden;
+    }
+
+    .thi-blueprint-header {
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      padding:12px 14px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .thi-blueprint-title {
+      margin-top:2px;
+      font-size:15px;
+      font-weight:800;
+    }
+
+    .thi-blueprint-note {
+      max-width:540px;
+      color:var(--muted);
+      font-family:var(--mono);
+      font-size:9px;
+      line-height:1.5;
+      text-align:right;
+      text-transform:uppercase;
+    }
+
+    .thi-blueprint-edges {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:8px;
+      padding:10px;
+      background:#fafaf8;
+      border-bottom:1px solid var(--border);
+    }
+
+    .thi-blueprint-edge,
+    .thi-blueprint-key {
+      min-width:0;
+      padding:11px 12px;
+      border:1px solid var(--border);
+      border-radius:8px;
+      background:#fff;
+    }
+
+    .thi-blueprint-edge span,
+    .thi-blueprint-key span {
+      display:block;
+      color:var(--muted);
+      font-family:var(--mono);
+      font-size:8px;
+      font-weight:800;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+    }
+
+    .thi-blueprint-edge strong {
+      display:block;
+      margin:6px 0 4px;
+      font-size:13px;
+    }
+
+    .thi-blueprint-edge small,
+    .thi-blueprint-key small {
+      color:#4c5965;
+      font-size:10px;
+      line-height:1.45;
+    }
+
+    .thi-blueprint-script {
+      padding:14px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .thi-blueprint-script p {
+      margin:6px 0 0;
+      color:#4c5965;
+      font-size:11px;
+      line-height:1.65;
+    }
+
+    .thi-blueprint-keys {
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:8px;
+      padding:10px;
+    }
+
+    .thi-blueprint-key strong {
+      display:block;
+      margin:6px 0;
+      font-size:12px;
+    }
+
     .thi-metric-guide-note {
       padding:10px 12px;
       border:1px solid #d8cbed;
@@ -2230,6 +2330,7 @@ function ensureMatchupView() {
 
       .thi-tale-grid { grid-template-columns:1fr 1fr; }
       .thi-stands-out-grid { grid-template-columns:1fr; }
+      .thi-blueprint-edges { grid-template-columns:repeat(2,minmax(0,1fr)); }
       .thi-metric-guide-grid { grid-template-columns:1fr; }
       .thi-context-facts { grid-template-columns:repeat(2,minmax(0,1fr)); }
       .cfb-script-results { grid-template-columns:repeat(3,minmax(0,1fr)); }
@@ -2263,6 +2364,9 @@ function ensureMatchupView() {
       }
       .thi-stands-out-header { flex-direction:column; }
       .thi-stands-out-note { text-align:left; }
+      .thi-blueprint-header { flex-direction:column; }
+      .thi-blueprint-note { text-align:left; }
+      .thi-blueprint-edges,.thi-blueprint-keys { grid-template-columns:1fr; }
       .thi-metric-guide > summary {
         flex-direction:column;
         align-items:flex-start;
@@ -3520,7 +3624,9 @@ function matchupStandoutCandidates(awayName, homeName) {
       candidates.push({
         field: definition.field,
         offenseTeam,
+        defenseTeam,
         favoredTeam,
+        favoredUnit: offenseFavored ? "offense" : "defense",
         label: definition.label,
         strength,
         tone,
@@ -3578,7 +3684,86 @@ function matchupStandoutsMarkup(awayName, homeName) {
   `;
 }
 
-function taleOfTapeMarkup(awayName, homeName) {
+function matchupBlueprintMarkup(awayName, homeName, game) {
+  const candidates = matchupStandoutCandidates(awayName, homeName);
+  if (!candidates.length) return "";
+
+  const categoryFields = [
+    ["Efficiency", ["epa_play", "success_rate"]],
+    ["Explosiveness", ["iso_ppp", "passing_down_epa"]],
+    ["Line play", ["opportunity_rate", "havoc_rate"]],
+    ["Finishing drives", ["points_per_opportunity"]],
+  ];
+  const edges = categoryFields.map(([label, fields]) => {
+    const edge = candidates.find(item => fields.includes(item.field));
+    return edge ? { ...edge, categoryLabel: label } : null;
+  }).filter(Boolean);
+  if (!edges.length) return "";
+
+  const top = candidates[0];
+  const second = candidates.find(item => item.label !== top.label) || candidates[1];
+  const projectedTotal = Number(game?.projection?.total);
+  const totalText = Number.isFinite(projectedTotal)
+    ? `THI projects ${projectedTotal.toFixed(1)} total points, so efficiency on the highest-leverage possessions should matter more than raw play volume.`
+    : "The largest unit-on-unit gaps should shape the game before secondary matchup details do.";
+  const script = second
+    ? `${top.favoredTeam}'s clearest advantage is ${top.label.toLowerCase()}. ${second.favoredTeam}'s next strongest path is ${second.label.toLowerCase()}. ${totalText}`
+    : `${top.favoredTeam}'s clearest advantage is ${top.label.toLowerCase()}. ${totalText}`;
+
+  const keyForTeam = team => {
+    const strength = candidates.find(item => item.favoredTeam === team);
+    const threat = candidates.find(item => item.favoredTeam !== team);
+    if (!strength && !threat) return null;
+    const title = strength
+      ? strength.favoredUnit === "offense"
+        ? `Create offense through ${strength.label.toLowerCase()}`
+        : `Take away ${strength.label.toLowerCase()}`
+      : "Keep the game on schedule";
+    const detail = strength && threat
+      ? `Press the ${strength.strengthLabel.toLowerCase()} ${strength.label.toLowerCase()} edge and keep ${threat.favoredTeam}'s ${threat.label.toLowerCase()} advantage from deciding high-leverage downs.`
+      : strength
+        ? `Press the ${strength.strengthLabel.toLowerCase()} edge identified in the current-season matchup profile.`
+        : `Limit ${threat.favoredTeam}'s ${threat.label.toLowerCase()} advantage and force the matchup toward more neutral areas.`;
+    return { team, title, detail };
+  };
+  const keys = [keyForTeam(awayName), keyForTeam(homeName)].filter(Boolean);
+
+  return `
+    <section class="thi-matchup-blueprint" aria-labelledby="thi-blueprint-title">
+      <div class="thi-blueprint-header">
+        <div>
+          <div class="eyebrow">Who does what better</div>
+          <div class="thi-blueprint-title" id="thi-blueprint-title">Matchup Blueprint</div>
+        </div>
+        <div class="thi-blueprint-note">Grades describe current-season matchup separation · Model A remains the published line</div>
+      </div>
+      <div class="thi-blueprint-edges">
+        ${edges.map(edge => `
+          <article class="thi-blueprint-edge">
+            <span>${escapeHtml(edge.categoryLabel)} · ${escapeHtml(edge.strengthLabel)}</span>
+            <strong>${escapeHtml(edge.favoredTeam)}</strong>
+            <small>${escapeHtml(`${Math.round(edge.strength)}-point percentile gap`)}</small>
+          </article>
+        `).join("")}
+      </div>
+      <div class="thi-blueprint-script">
+        <div class="eyebrow">Expected game script</div>
+        <p>${escapeHtml(script)}</p>
+      </div>
+      <div class="thi-blueprint-keys">
+        ${keys.map(key => `
+          <article class="thi-blueprint-key">
+            <span>${escapeHtml(key.team)} · key to win or cover</span>
+            <strong>${escapeHtml(key.title)}</strong>
+            <small>${escapeHtml(key.detail)}</small>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function taleOfTapeMarkup(awayName, homeName, game) {
   const throughWeek = teamMetricProfilesData?.meta?.through_week;
   const sample = teamMetricProfilesData?.meta?.sample === "non_garbage"
     ? "garbage time removed"
@@ -3606,6 +3791,7 @@ function taleOfTapeMarkup(awayName, homeName) {
         ${teamSummaryCard(homeName)}
       </div>
       ${matchupStandoutsMarkup(awayName, homeName)}
+      ${matchupBlueprintMarkup(awayName, homeName, game)}
       ${advancedMetricGuideMarkup()}
     </section>
   `;
@@ -4206,7 +4392,7 @@ function renderMatchup(game) {
 
     ${availabilityReportMarkup(awayName, homeName, game)}
 
-    ${taleOfTapeMarkup(awayName, homeName)}
+    ${taleOfTapeMarkup(awayName, homeName, game)}
 
     ${cfbPersonnelMatchupMarkup(awayName, homeName)}
 

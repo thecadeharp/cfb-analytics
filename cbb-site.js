@@ -1111,6 +1111,80 @@
     return `<span class="cbb-result-badge ${css}">${escapeHtml(label)}</span>`;
   }
 
+  function cbbMatchupBlueprint(game) {
+    const projection = game.projection || {};
+    const matchup = state.data?.matchups?.games?.find(row => String(row.game_id) === String(game.game_id));
+    const profileFor = team => teamProfile(team?.team_id) || {};
+    const adjustedFor = team => {
+      const profile = profileFor(team);
+      const current = profile.current_efficiency?.adjusted || {};
+      const prior = profile.preseason_prior?.adjusted || {};
+      return current.net != null ? current : prior;
+    };
+    const awayAdjusted = adjustedFor(game.away);
+    const homeAdjusted = adjustedFor(game.home);
+    const grade = gap => gap >= 75 ? "Clear" : gap >= 35 ? "Strong" : gap >= 12 ? "Lean" : "Even";
+    const rankEdge = (label, key, lowerBetter = true) => {
+      const awayRank = Number(awayAdjusted[key]);
+      const homeRank = Number(homeAdjusted[key]);
+      if (!Number.isFinite(awayRank) || !Number.isFinite(homeRank)) return null;
+      const favored = awayRank === homeRank ? null : (lowerBetter ? (awayRank < homeRank ? game.away : game.home) : (awayRank > homeRank ? game.away : game.home));
+      const gap = Math.abs(awayRank - homeRank);
+      return {
+        label,
+        team: favored?.team || "Even",
+        grade: grade(gap),
+        detail: `${game.away?.team} #${integer(awayRank)} · ${game.home?.team} #${integer(homeRank)}`,
+      };
+    };
+    const factorEdges = (matchup?.factor_advantages || []).map(item => {
+      const labels = { shooting:"Shooting", ball_security:"Ball security", offensive_glass:"Offensive glass", foul_pressure:"Foul pressure" };
+      const edge = Math.abs(Number(item.edge) || 0);
+      return {
+        label: labels[item.dimension] || humanize(item.dimension),
+        team: item.advantage_team || "Even",
+        grade: edge >= 5 ? "Clear" : edge >= 2.5 ? "Strong" : edge >= 1 ? "Lean" : "Even",
+        edge,
+        detail: `${game.away?.team} ${number(item.away_value,1)} · ${game.home?.team} ${number(item.home_value,1)}`,
+      };
+    });
+    const cards = [rankEdge("Offensive efficiency", "offense_rank"), rankEdge("Defensive efficiency", "defense_rank"), ...factorEdges]
+      .filter(Boolean)
+      .slice(0, 4);
+    if (!cards.length) return "";
+
+    const meaningful = factorEdges.filter(item => item.team !== "Even" && item.edge >= 1).sort((a,b) => b.edge - a.edge);
+    const pace = Number(projection.projected_possessions);
+    const total = Number(projection.total);
+    const paceText = Number.isFinite(pace) ? `${pace.toFixed(1)} possessions` : "a still-developing pace estimate";
+    const totalText = Number.isFinite(total) ? `${total.toFixed(1)} projected points` : "a total still awaiting a qualified projection";
+    const script = meaningful.length
+      ? `${meaningful[0].team} owns the clearest expected edge in ${meaningful[0].label.toLowerCase()}. At ${paceText} and ${totalText}, the game should turn on whether that advantage survives possession volume and late-clock execution.`
+      : `The expected Four Factor matchups are not meaningfully separated yet. At ${paceText} and ${totalText}, shot making and turnover variance carry more weight than a single established stylistic edge.`;
+
+    const keyFor = team => {
+      const own = meaningful.find(item => item.team === team.team);
+      const threat = meaningful.find(item => item.team !== team.team);
+      const adjusted = team === game.away ? awayAdjusted : homeAdjusted;
+      const offenseRank = Number(adjusted.offense_rank);
+      const title = own ? `Own the ${own.label.toLowerCase()} margin` : "Win the efficiency possessions";
+      const detail = own && threat
+        ? `Convert the ${own.grade.toLowerCase()} ${own.label.toLowerCase()} edge while preventing ${threat.team} from controlling ${threat.label.toLowerCase()}.`
+        : own
+          ? `Turn the expected ${own.label.toLowerCase()} advantage into repeatable half-court points.`
+          : `${Number.isFinite(offenseRank) ? `The offense enters #${integer(offenseRank)} in the active adjusted profile. ` : ""}Limit empty possessions and force the game toward neutral Four Factor areas.`;
+      return { team: team.team, title, detail };
+    };
+
+    return `
+      <section class="cbb-matchup-blueprint" aria-labelledby="cbb-matchup-blueprint-title">
+        <div class="cbb-blueprint-head"><div><div class="cbb-kicker">WHO DOES WHAT BETTER</div><h3 id="cbb-matchup-blueprint-title">Matchup Blueprint</h3></div><small>Current adjusted profile when qualified · otherwise active prior · explanation layer</small></div>
+        <div class="cbb-blueprint-grid">${cards.map(card => `<article><span>${escapeHtml(card.label)} · ${escapeHtml(card.grade)}</span><strong>${escapeHtml(card.team)}</strong><small>${escapeHtml(card.detail)}</small></article>`).join("")}</div>
+        <div class="cbb-blueprint-script"><span>EXPECTED GAME SCRIPT</span><p>${escapeHtml(script)}</p></div>
+        <div class="cbb-blueprint-keys">${[keyFor(game.away), keyFor(game.home)].map(key => `<article><span>${escapeHtml(key.team)} · KEY TO WIN OR COVER</span><strong>${escapeHtml(key.title)}</strong><small>${escapeHtml(key.detail)}</small></article>`).join("")}</div>
+      </section>`;
+  }
+
   function cbbParityHeader(game, date) {
     const projection = game.projection || {};
     const market = game.market || {};
@@ -1237,6 +1311,7 @@
     panel.innerHTML = `
       <button class="cbb-detail-close cbb-game-back" type="button" data-cbb-close>← Back to projections</button>
       ${cbbParityHeader(game, date)}
+      ${cbbMatchupBlueprint(game)}
       ${cbbFinalResultMarkup(game)}
       ${cbbPostgameBoxMarkup(game)}
       ${cbbChangeSummary(game)}
