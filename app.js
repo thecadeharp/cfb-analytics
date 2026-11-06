@@ -2013,6 +2013,15 @@ function ensureMatchupView() {
       background:#fff;
     }
 
+    .thi-blueprint-edge {
+      --blueprint-accent:var(--muted);
+      padding-top:9px;
+      border-top:3px solid var(--blueprint-accent);
+    }
+    .thi-blueprint-edge.is-clear { --blueprint-accent:var(--green); }
+    .thi-blueprint-edge.is-strong { --blueprint-accent:var(--blue); }
+    .thi-blueprint-edge.is-lean { --blueprint-accent:color-mix(in srgb,var(--amber) 80%,#000); }
+    .thi-blueprint-edge.is-even { --blueprint-accent:color-mix(in srgb,var(--muted) 85%,#000); }
     .thi-blueprint-edge span,
     .thi-blueprint-key span {
       display:block;
@@ -2023,6 +2032,8 @@ function ensureMatchupView() {
       letter-spacing:.06em;
       text-transform:uppercase;
     }
+
+    .thi-blueprint-edge>span { color:var(--blueprint-accent); font-size:9px; }
 
     .thi-blueprint-edge strong {
       display:block;
@@ -3835,13 +3846,15 @@ function matchupBlueprintMarkup(awayName, homeName, game) {
         <div class="thi-blueprint-note">Grades describe current-season matchup separation · Model A remains the published line</div>
       </div>
       <div class="thi-blueprint-edges">
-        ${edges.map(edge => `
-          <article class="thi-blueprint-edge">
-            <span>${escapeHtml(edge.categoryLabel)} · ${escapeHtml(edge.strengthLabel)}</span>
+        ${edges.map(edge => {
+          const grade = edge.strength >= 50 ? "Clear" : edge.strength >= 32 ? "Strong" : edge.strength >= 18 ? "Lean" : "Even";
+          return `
+          <article class="thi-blueprint-edge is-${escapeHtml(grade.toLowerCase())}">
+            <span>${escapeHtml(edge.categoryLabel)} · ${escapeHtml(grade)}</span>
             <strong>${escapeHtml(edge.favoredTeam)}</strong>
             <small>${escapeHtml(`${Math.round(edge.strength)}-point percentile gap`)}</small>
-          </article>
-        `).join("")}
+          </article>`;
+        }).join("")}
       </div>
       <div class="thi-blueprint-script">
         <div class="eyebrow">Expected game script</div>

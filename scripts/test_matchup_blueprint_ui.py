@@ -39,6 +39,8 @@ class MatchupBlueprintUiTests(unittest.TestCase):
             with self.subTest(metric=metric):
                 self.assertIn(metric, self.cfb)
         self.assertIn("Model A remains the published line", self.cfb)
+        for grade in ("is-clear", "is-strong", "is-lean", "is-even"):
+            self.assertIn(grade, self.cfb)
 
     def test_cfb_style_matchup_uses_verified_production_metrics(self):
         self.assertIn("function styleMatchupMarkup", self.cfb)
@@ -67,6 +69,8 @@ class MatchupBlueprintUiTests(unittest.TestCase):
         self.assertIn("factor_advantages", self.cbb)
         self.assertIn("KEY TO WIN OR COVER", self.cbb)
         self.assertIn("${cbbParityHeader(game, date)}\n      ${cbbMatchupBlueprint(game)}", self.cbb)
+        self.assertIn('class="is-${escapeHtml(card.grade.toLowerCase())}"', self.cbb)
+        self.assertIn("--blueprint-accent", self.cbb_css)
 
     def test_cbb_style_matchup_surfaces_observed_play_profile(self):
         self.assertIn("function cbbStyleMatchup", self.cbb)
@@ -94,9 +98,9 @@ class MatchupBlueprintUiTests(unittest.TestCase):
         self.assertIn(".thi-standout-card.lean", self.dark)
 
     def test_asset_versions_are_bumped(self):
-        self.assertIn("app.js?v=2026-standout-contrast-v03", self.index)
-        self.assertIn("cbb-site.css?v=2027-cbb-style-matchup-v02", self.index)
-        self.assertIn("cbb-site.js?v=2027-cbb-style-matchup-v02", self.index)
+        self.assertIn("app.js?v=2026-blueprint-grades-v04", self.index)
+        self.assertIn("cbb-site.css?v=2027-cbb-blueprint-grades-v03", self.index)
+        self.assertIn("cbb-site.js?v=2027-cbb-blueprint-grades-v03", self.index)
         self.assertIn("dark-mode.css?v=2026-standout-contrast-v11", self.index)
 
 

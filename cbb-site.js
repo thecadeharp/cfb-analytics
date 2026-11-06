@@ -1179,7 +1179,7 @@
     return `
       <section class="cbb-matchup-blueprint" aria-labelledby="cbb-matchup-blueprint-title">
         <div class="cbb-blueprint-head"><div><div class="cbb-kicker">WHO DOES WHAT BETTER</div><h3 id="cbb-matchup-blueprint-title">Matchup Blueprint</h3></div><small>Current adjusted profile when qualified · otherwise active prior · explanation layer</small></div>
-        <div class="cbb-blueprint-grid">${cards.map(card => `<article><span>${escapeHtml(card.label)} · ${escapeHtml(card.grade)}</span><strong>${escapeHtml(card.team)}</strong><small>${escapeHtml(card.detail)}</small></article>`).join("")}</div>
+        <div class="cbb-blueprint-grid">${cards.map(card => `<article class="is-${escapeHtml(card.grade.toLowerCase())}"><span>${escapeHtml(card.label)} · ${escapeHtml(card.grade)}</span><strong>${escapeHtml(card.team)}</strong><small>${escapeHtml(card.detail)}</small></article>`).join("")}</div>
         <div class="cbb-blueprint-script"><span>EXPECTED GAME SCRIPT</span><p>${escapeHtml(script)}</p></div>
         <div class="cbb-blueprint-keys">${[keyFor(game.away), keyFor(game.home)].map(key => `<article><span>${escapeHtml(key.team)} · KEY TO WIN OR COVER</span><strong>${escapeHtml(key.title)}</strong><small>${escapeHtml(key.detail)}</small></article>`).join("")}</div>
       </section>`;
