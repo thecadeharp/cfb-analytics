@@ -16,7 +16,7 @@ concurrency:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
         with:
@@ -97,6 +97,40 @@ jobs:
             dispatch_recovery player-intelligence-v1.yml
             echo "Dispatched player-intelligence recovery."
           fi
+
+          if grep -Eq '^cbb_(projection_board|team_profiles|platform_health|market_contract)$' /tmp/thi-critical-datasets.txt; then
+            dispatch_recovery refresh-cbb-platform.yml
+            echo "Dispatched coordinated CBB platform recovery."
+          fi
+
+          python - <<'PY'
+          from pathlib import Path
+
+          supported = {
+              "cfb_postgame",
+              "cfb_signal_records",
+              "cfb_scores",
+              "cfb_live_scores",
+              "cfb_projections",
+              "cfb_availability",
+              "players_through_week",
+              "cbb_projection_board",
+              "cbb_team_profiles",
+              "cbb_platform_health",
+              "cbb_market_contract",
+          }
+          failed = {
+              line.strip()
+              for line in Path("/tmp/thi-critical-datasets.txt").read_text().splitlines()
+              if line.strip()
+          }
+          unsupported = sorted(failed - supported)
+          if unsupported:
+              raise SystemExit(
+                  "No automatic recovery exists for critical datasets: "
+                  + ", ".join(unsupported)
+              )
+          PY
 
           if [[ ! -s /tmp/thi-recovery-workflows.txt ]]; then
             echo "No automatic recovery exists for the critical findings:"

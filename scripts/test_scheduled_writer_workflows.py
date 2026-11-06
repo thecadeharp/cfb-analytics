@@ -31,11 +31,21 @@ class ScheduledWriterWorkflowSafetyTest(unittest.TestCase):
         self.assertIn("dispatch_recovery settle-results-no-cfbd.yml", audit)
         self.assertIn("dispatch_recovery refresh-projections-no-cfbd.yml", audit)
         self.assertIn("dispatch_recovery refresh-availability-reports.yml", audit)
+        self.assertIn("dispatch_recovery refresh-cbb-platform.yml", audit)
+        self.assertIn('"cbb_team_profiles"', audit)
+        self.assertIn("unsupported = sorted(failed - supported)", audit)
+        self.assertIn("timeout-minutes: 60", audit)
         self.assertIn('gh workflow run "$workflow" --ref main "$@"', audit)
         self.assertIn("Verify recovered production datasets", audit)
         self.assertIn("Upload recovery verification", audit)
         self.assertIn('gh run watch "$run_id" --exit-status', audit)
         self.assertNotIn("Preserve failing audit status", audit)
+
+    def test_cbb_coordinated_refresh_accepts_each_published_forecast_phase(self):
+        source = (WORKFLOWS / "refresh-cbb-platform.yml").read_text()
+        self.assertIn('"preseason_strength_scenario"', source)
+        self.assertIn('"early_season_strength_scenario"', source)
+        self.assertIn('"live_resume_projection"', source)
 
     def test_projection_board_has_in_season_freshness_schedule(self):
         source = (WORKFLOWS / "refresh-projections-no-cfbd.yml").read_text()

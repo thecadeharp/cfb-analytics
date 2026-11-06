@@ -258,7 +258,11 @@ jobs:
           assert tracking["meta"]["version"] == "thi-cbb-model-tracking-v0.3"
           assert tracking["meta"]["projection_board_version"] == projections["meta"]["version"]
           assert bracket["meta"]["version"] == "thi-cbb-bracketology-v0.3"
-          assert bracket["meta"]["forecast_type"] in {"preseason_strength_scenario", "live_resume_projection"}
+          assert bracket["meta"]["forecast_type"] in {
+              "preseason_strength_scenario",
+              "early_season_strength_scenario",
+              "live_resume_projection",
+          }
           assert len(bracket["field"]) == 68
           assert all("roster_adjustment" in row for row in bracket["field"])
           if roster_audit["meta"]["status"] == "passed":
