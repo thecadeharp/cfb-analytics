@@ -272,14 +272,15 @@ def signal_events(
     return events
 
 
-def earliest_settled_rows(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+def latest_settled_rows(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Use the final pregame tracked state, never an obsolete early snapshot."""
     selected: dict[str, dict[str, Any]] = {}
     for row in rows:
         if not row.get("result_settled") or number(row.get("snapshot_home_spread")) is None:
             continue
         key = game_key(row)
         current = selected.get(key)
-        if current is None or str(row.get("captured_at_utc") or "") < str(current.get("captured_at_utc") or ""):
+        if current is None or str(row.get("captured_at_utc") or "") > str(current.get("captured_at_utc") or ""):
             selected[key] = row
     return selected
 
@@ -289,7 +290,7 @@ def final_events(
 ) -> list[tuple[dict[str, Any], Callable[[], None]]]:
     events: list[tuple[dict[str, Any], Callable[[], None]]] = []
     final_state = state.setdefault("finals", {})
-    for key, row in earliest_settled_rows(rows).items():
+    for key, row in latest_settled_rows(rows).items():
         if key in final_state:
             continue
         away = str(row.get("away_team") or "Away")
@@ -372,7 +373,7 @@ def baseline(state: dict[str, Any], snapshots: list[dict[str, Any]], rows: list[
             "side": str(comparison.get("preferred_side") or ""),
         }
         totals[key] = {"rank": TOTAL_RANK[tier], "tier": tier, "direction": direction}
-    for key in earliest_settled_rows(rows):
+    for key in latest_settled_rows(rows):
         state.setdefault("finals", {})[key] = {"announced": True}
     values = list(postgames.values()) if isinstance(postgames, dict) else list(postgames)
     for game in values:

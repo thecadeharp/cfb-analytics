@@ -29,7 +29,8 @@ import statistics
 import sys
 import time
 import unicodedata
-from datetime import datetime
+from datetime import datetime, timezone
+from pathlib import Path
 
 import requests
 
@@ -52,6 +53,7 @@ ODDS_SCREEN_BOOKMAKERS = (
     "williamhill_us,espnbet,novig,prophetx"
 )
 PROJECTIONS_PATH = "data/projections.json"
+PROJECTION_SNAPSHOT_LEDGER_PATH = "data/snapshots/projection_market_snapshots.jsonl"
 
 MAX_MATCHUP_ADJUSTMENT = 3.0
 BASE_TOTAL = 52.5
@@ -133,6 +135,121 @@ def optional_number(value):
 
 def round_half(value):
     return round(value * 2) / 2
+
+
+def parse_utc(value):
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def consensus_book_count(label):
+    text = str(label or "")
+    marker = "Consensus ("
+    if marker not in text:
+        return 1 if text else 0
+    try:
+        return int(text.split(marker, 1)[1].split(" ", 1)[0])
+    except (ValueError, IndexError):
+        return 0
+
+
+def load_frozen_pregame_markets(path=PROJECTION_SNAPSHOT_LEDGER_PATH):
+    """Return the latest immutable pre-kick market snapshot for each matchup."""
+    ledger = Path(path)
+    if not ledger.exists():
+        return {}
+
+    latest = {}
+    with ledger.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if not line:
+                continue
+            row = json.loads(line)
+            home = row.get("home_team")
+            away = row.get("away_team")
+            captured = parse_utc(row.get("captured_at_utc"))
+            kickoff = parse_utc(row.get("start_date"))
+            market = row.get("market_at_snapshot") or {}
+            if not home or not away or captured is None or kickoff is None:
+                continue
+            if captured >= kickoff or market.get("home_spread") is None:
+                continue
+            key = (home, away)
+            previous = latest.get(key)
+            if previous is None or captured > previous[0]:
+                books = consensus_book_count(market.get("bookmaker"))
+                latest[key] = (
+                    captured,
+                    {
+                        "id": f"frozen:{row.get('game_id')}",
+                        "commence_time": row.get("start_date"),
+                        "home_team": home,
+                        "away_team": away,
+                        "home_level": "FBS",
+                        "away_level": "FBS",
+                        "spread_home": optional_number(market.get("home_spread")),
+                        "total": optional_number(market.get("total")),
+                        "bookmaker": market.get("bookmaker") or "Frozen pregame market",
+                        "spread_books": books,
+                        "total_books": books if market.get("total") is not None else 0,
+                        "spread_raw_books": books,
+                        "total_raw_books": books if market.get("total") is not None else 0,
+                        "spread_outliers_removed": [],
+                        "total_outliers_removed": [],
+                        "reference_spread": market.get("reference_spread"),
+                        "reference_total": market.get("reference_total"),
+                        "book_lines": [],
+                        "market_state": "frozen_pregame",
+                        "frozen_at": row.get("captured_at_utc"),
+                    },
+                )
+    return {key: value for key, (_, value) in latest.items()}
+
+
+def freeze_started_markets(odds, schedule, frozen_markets, now=None):
+    """Replace post-kick provider quotes with the last verified pregame snapshot."""
+    current = now or datetime.now(timezone.utc)
+    if current.tzinfo is None:
+        current = current.replace(tzinfo=timezone.utc)
+    current = current.astimezone(timezone.utc)
+
+    games = list(odds.get("games", []))
+    by_key = {
+        (game.get("home_team"), game.get("away_team")): game
+        for game in games
+        if game.get("home_team") and game.get("away_team")
+    }
+    scheduled = list(schedule.get("games", [])) + collect_fcs_games(schedule)
+    frozen_count = 0
+    withheld_count = 0
+    for game in scheduled:
+        kickoff = parse_utc(game.get("start_date"))
+        if kickoff is None or kickoff > current:
+            continue
+        key = (game.get("home_team"), game.get("away_team"))
+        if not all(key):
+            continue
+        frozen = frozen_markets.get(key)
+        if frozen:
+            by_key[key] = frozen
+            frozen_count += 1
+        elif key in by_key:
+            by_key.pop(key, None)
+            withheld_count += 1
+
+    result = dict(odds)
+    result["games"] = list(by_key.values())
+    result.setdefault("meta", {})["frozen_pregame_markets"] = frozen_count
+    result["meta"]["post_kick_markets_withheld"] = withheld_count
+    return result
 
 
 def first_value(data, *keys, default=None):
@@ -2880,6 +2997,14 @@ def main():
         valid_teams,
         fbs_lookup,
         fcs_lookup,
+    )
+
+    # The provider switches to in-game markets after kickoff. Those prices
+    # must never overwrite the public pregame comparison or tracked side.
+    odds = freeze_started_markets(
+        odds,
+        schedule,
+        load_frozen_pregame_markets(),
     )
 
     # Never replace a working public board with an empty provider response.
