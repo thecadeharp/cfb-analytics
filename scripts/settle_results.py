@@ -718,6 +718,8 @@ def main():
             "closing_home_spread": (
                 (closing.get("closing_market") or {}).get("home_spread") if closing else None
             ),
+            "closing_captured_at_utc": closing.get("captured_at_utc") if closing else None,
+            "closing_minutes_to_kickoff": closing.get("minutes_to_kickoff") if closing else None,
             "clv_points": round_or_none(clv),
             "home_points": result.get("home_points") if result else None,
             "away_points": result.get("away_points") if result else None,
@@ -831,7 +833,8 @@ def main():
         "snapshot_home_spread", "snapshot_total", "snapshot_bookmaker",
         "total_direction", "total_edge", "total_tier", "total_result",
         "actual_total", "total_projection_error",
-        "closing_home_spread", "clv_points", "home_points", "away_points",
+        "closing_home_spread", "closing_captured_at_utc",
+        "closing_minutes_to_kickoff", "clv_points", "home_points", "away_points",
         "actual_home_margin", "ats_result", "model_margin_error",
         "model_abs_error", "market_margin_error", "market_abs_error",
         "closing_margin_error", "closing_abs_error",

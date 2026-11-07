@@ -247,7 +247,8 @@ def freeze_started_markets(odds, schedule, frozen_markets, now=None):
 
     result = dict(odds)
     result["games"] = list(by_key.values())
-    result.setdefault("meta", {})["frozen_pregame_markets"] = frozen_count
+    result.setdefault("meta", {})["games"] = len(result["games"])
+    result["meta"]["frozen_pregame_markets"] = frozen_count
     result["meta"]["post_kick_markets_withheld"] = withheld_count
     return result
 

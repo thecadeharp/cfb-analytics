@@ -11,6 +11,7 @@
 
   let payload = { meta: {}, games: {} };
   let settledByGame = new Map();
+  let settledDisplayByGame = new Map();
   let signalReport = { signals: {} };
   let selectedGameId = null;
   let trackingWeek = "LATEST";
@@ -39,6 +40,45 @@
       .replace(/&/g, "and")
       .replace(/[^a-z0-9]+/g, "")
       .trim();
+  }
+
+  function resultTimestamp(value) {
+    const parsed = Date.parse(String(value || ""));
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  function finalDisplayResult(gameRows) {
+    const ordered = [...gameRows].sort((a, b) =>
+      String(a?.captured_at_utc || "").localeCompare(String(b?.captured_at_utc || ""))
+    );
+    const pregame = ordered.filter(row => {
+      const captured = resultTimestamp(row?.captured_at_utc);
+      const kickoff = resultTimestamp(row?.start_date);
+      return captured !== null && kickoff !== null && captured <= kickoff;
+    });
+    const lastPregame = pregame[pregame.length - 1] || null;
+    const official = { ...(lastPregame || ordered[0] || {}) };
+    if (!lastPregame) {
+      official.public_home_spread = null;
+      official.model_home_spread = null;
+      official.snapshot_home_spread = null;
+      official.closing_home_spread = null;
+      official.pregame_closing_source = "unavailable";
+      return official;
+    }
+    const capturedClose = [...ordered].reverse().find(row => {
+      if (!hasValue(row?.closing_home_spread)) return false;
+      const captured = resultTimestamp(row?.closing_captured_at_utc);
+      const kickoff = resultTimestamp(row?.start_date);
+      return captured !== null && kickoff !== null && captured <= kickoff;
+    });
+    official.closing_home_spread = capturedClose?.closing_home_spread ?? official.snapshot_home_spread ?? null;
+    official.pregame_closing_source = capturedClose
+      ? "near_kickoff_capture"
+      : hasValue(official.snapshot_home_spread)
+        ? "last_verified_pregame_snapshot"
+        : "unavailable";
+    return official;
   }
 
   function format(value, digits = 3, suffix = "") {
@@ -466,7 +506,7 @@
   }
 
   function settledData(gameId) {
-    return settledByGame.get(String(gameId)) || null;
+    return settledDisplayByGame.get(String(gameId)) || null;
   }
 
   function settledByRenderedTeams() {
@@ -474,7 +514,7 @@
       document.querySelectorAll("#matchup-container .projected-team-name")
     ).map(node => canonical(node.textContent));
     if (names.length < 2) return null;
-    return Array.from(settledByGame.values()).find(row =>
+    return Array.from(settledDisplayByGame.values()).find(row =>
       canonical(row.away_team) === names[0] && canonical(row.home_team) === names[1]
     ) || null;
   }
@@ -526,17 +566,11 @@
     if (title) title.textContent = "Pregame THI / Model Result · Frozen Before Kickoff";
     const grid = panel.querySelector(".final-result-grid");
     if (!grid) return;
-    const modelLine = favoredLine(game.home_team, game.away_team, game.public_home_spread ?? game.model_home_spread);
-    const marketLine = favoredLine(game.home_team, game.away_team, game.snapshot_home_spread);
-    const close = favoredLine(game.home_team, game.away_team, game.closing_home_spread);
     const total = hasValue(game.public_total) ? game.public_total : game.model_total;
     grid.insertAdjacentHTML("beforeend", [
-      auditItem("THI spread", modelLine),
-      auditItem("Market spread at snapshot", marketLine),
       auditItem("Preferred side", game.preferred_side || "—"),
       auditItem("ATS result", resultWord(game.ats_result, "ATS")),
       auditItem("Signal confidence", confidenceFor(game.signal)),
-      auditItem("Closing line", close),
       auditItem("CLV", hasValue(game.clv_points) ? formatSigned(game.clv_points, 1, " pts") : "—"),
       auditItem("Pregame projected score", projectedScore(game)),
       auditItem("Pregame THI total", hasValue(total) ? format(total, 1) : "—"),
@@ -778,9 +812,12 @@
         const clv = clvResponse.ok ? await clvResponse.json() : { rows: [] };
         const closingBySnapshot = new Map((clv?.rows || []).map(row => [String(row.snapshot_id || ""), row]));
         const earliest = new Map();
+        const grouped = new Map();
         rows.forEach(row => {
           const id = String(row.game_key || "");
           if (!id) return;
+          if (!grouped.has(id)) grouped.set(id, []);
+          grouped.get(id).push(row);
           const current = earliest.get(id);
           if (!current || String(row.captured_at_utc || "") < String(current.captured_at_utc || "")) {
             const closing = closingBySnapshot.get(String(row.snapshot_id || ""));
@@ -793,6 +830,13 @@
           }
         });
         settledByGame = earliest;
+        settledDisplayByGame = new Map();
+        grouped.forEach((gameRows, id) => {
+          const display = finalDisplayResult(gameRows);
+          [id, display.result_game_id]
+            .filter(value => value !== null && value !== undefined)
+            .forEach(value => settledDisplayByGame.set(String(value), display));
+        });
         if (trackingWeek === "LATEST") {
           const weeks = Array.from(earliest.values()).map(row => Number(row.week)).filter(Number.isFinite);
           trackingWeek = weeks.length ? String(Math.max(...weeks)) : "ALL";

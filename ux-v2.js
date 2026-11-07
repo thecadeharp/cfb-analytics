@@ -83,6 +83,50 @@
     return gameConditionsData?.games?.[String(game?.game_id ?? "")] ?? null;
   }
 
+  function resultTimestamp(value) {
+    const parsed = Date.parse(String(value || ""));
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  function latestPregameResult(gameRows) {
+    const pregame = gameRows.filter(row => {
+      const captured = resultTimestamp(row?.captured_at_utc);
+      const kickoff = resultTimestamp(row?.start_date);
+      return captured !== null && kickoff !== null && captured <= kickoff;
+    });
+    return pregame[pregame.length - 1] || null;
+  }
+
+  function finalDisplayResult(gameRows) {
+    const pregame = latestPregameResult(gameRows);
+    const official = { ...(pregame || gameRows[0] || {}) };
+    if (!pregame) {
+      official.public_home_spread = null;
+      official.model_home_spread = null;
+      official.snapshot_home_spread = null;
+      official.closing_home_spread = null;
+      official.pregame_closing_source = "unavailable";
+      return official;
+    }
+    const capturedClose = [...gameRows].reverse().find(row => {
+      if (!hasValue(row?.closing_home_spread)) return false;
+      const captured = resultTimestamp(row?.closing_captured_at_utc);
+      const kickoff = resultTimestamp(row?.start_date);
+      return captured !== null && kickoff !== null && captured <= kickoff;
+    });
+
+    // Postgame pages may use a verified near-kickoff capture. When that job did
+    // not catch the game, the last immutable pregame snapshot is the only safe
+    // fallback. A provider price observed after kickoff is never eligible.
+    official.closing_home_spread = capturedClose?.closing_home_spread ?? pregame.snapshot_home_spread ?? null;
+    official.pregame_closing_source = capturedClose
+      ? "near_kickoff_capture"
+      : hasValue(pregame.snapshot_home_spread)
+        ? "last_verified_pregame_snapshot"
+        : "unavailable";
+    return official;
+  }
+
   function indexSettledResults(payload) {
     const rows = Array.isArray(payload?.rows) ? payload.rows : [];
     const grouped = new Map();
@@ -99,16 +143,8 @@
       });
 
     grouped.forEach(gameRows => {
-      const official = { ...gameRows[0] };
-      const weather = [...gameRows].reverse().find(row => row?.weather_applied);
-      if (weather) {
-        [
-          "public_home_spread", "public_total", "weather_applied",
-          "weather_conditions_line", "weather_impact", "weather_total_adjustment",
-          "weather_spread_adjustment", "weather_spread_status", "public_margin_error",
-          "public_abs_error",
-        ].forEach(field => { official[field] = weather[field]; });
-      }
+      const official = finalDisplayResult(gameRows);
+      if (!official) return;
       [official.game_key, official.result_game_id]
         .filter(value => value !== null && value !== undefined)
         .forEach(key => indexed.set(String(key), official));
@@ -1121,8 +1157,8 @@
     const homePoints = Number(result.home_points);
     const frozenScore = frozenProjectedScore(result);
     const winnerCorrect = predictedWinnerCorrect(result);
-    const snapshotSide = result.preferred_side && hasValue(result.snapshot_home_spread)
-      ? marketSideForTeam(result.preferred_side, homeName, awayName, result.snapshot_home_spread)
+    const snapshotSide = result.preferred_side && hasValue(result.closing_home_spread)
+      ? marketSideForTeam(result.preferred_side, homeName, awayName, result.closing_home_spread)
       : "No graded side";
     const close = hasValue(result.closing_home_spread)
       ? favoredLine(homeName, awayName, result.closing_home_spread)
@@ -1141,15 +1177,15 @@
         </div>
         <div class="final-result-grid">
           <div class="final-result-item">
-            <span>Frozen public score</span>
+            <span>THI projected score</span>
             <span>${frozenScore ? `${escapeHtml(awayName)} ${frozenScore.away}–${frozenScore.home} ${escapeHtml(homeName)}` : "Not captured"}</span>
           </div>
           <div class="final-result-item">
-            <span>Model side</span>
-            <span>${escapeHtml(snapshotSide)}</span>
+            <span>THI projected spread</span>
+            <span>${escapeHtml(favoredLine(homeName, awayName, result.public_home_spread ?? result.model_home_spread))}</span>
           </div>
           <div class="final-result-item">
-            <span>Closing line</span>
+            <span>Pregame closing spread</span>
             <span>${escapeHtml(close)}</span>
           </div>
           <div class="final-result-item">
@@ -1165,8 +1201,8 @@
             <span>${escapeHtml(displayStatus(result.signal))}</span>
           </div>
           <div class="final-result-item">
-            <span>Snapshot line</span>
-            <span>${escapeHtml(favoredLine(homeName, awayName, result.snapshot_home_spread))}</span>
+            <span>Graded side</span>
+            <span>${escapeHtml(snapshotSide)}</span>
           </div>
           <div class="final-result-item">
             <span>Weather snapshot</span>
@@ -1459,11 +1495,11 @@
     const awayPoints = Number(result.away_points);
     const frozenScore = frozenProjectedScore(result);
     const confidence = signalConfidence(result.signal);
-    const preferredLine = result.preferred_side && hasValue(result.snapshot_home_spread)
-      ? marketSideForTeam(result.preferred_side, homeName, awayName, result.snapshot_home_spread)
+    const preferredLine = result.preferred_side && hasValue(result.closing_home_spread)
+      ? marketSideForTeam(result.preferred_side, homeName, awayName, result.closing_home_spread)
       : "No graded side";
     const close = hasValue(result.closing_home_spread)
-      ? shortSpread(result.closing_home_spread)
+      ? favoredLine(homeName, awayName, result.closing_home_spread)
       : "—";
     const winnerCorrect = predictedWinnerCorrect(result);
     const gameId = String(game.game_id ?? "");
@@ -1484,12 +1520,12 @@
         </td>
         <td><div class="line-secondary">Postgame viewing score follows the verified ledger.</div></td>
         <td>
-          <div class="line-primary">${escapeHtml(shortSpread(result.public_home_spread ?? result.model_home_spread))}</div>
-          <div class="line-secondary">Frozen public line</div>
+          <div class="line-primary">${escapeHtml(favoredLine(homeName, awayName, result.public_home_spread ?? result.model_home_spread))}</div>
+          <div class="line-secondary">THI projected spread</div>
         </td>
         <td>
           <div class="line-primary">${escapeHtml(close)}</div>
-          <div class="line-secondary">${hasValue(result.closing_home_spread) ? "Closing line" : `Snapshot ${escapeHtml(shortSpread(result.snapshot_home_spread))}`}</div>
+          <div class="line-secondary">Pregame closing spread</div>
         </td>
         <td>
           <div class="line-primary">${frozenScore ? `${frozenScore.away}–${frozenScore.home}` : "—"}</div>
