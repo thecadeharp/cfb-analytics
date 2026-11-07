@@ -1,6 +1,6 @@
 {
   "report_version": "signal-system-v1",
-  "generated_at_utc": "2026-11-07T20:33:50.817682+00:00",
+  "generated_at_utc": "2026-11-07T20:39:26.468510+00:00",
   "model_scope": "Prospective Model A accountability layer",
   "signal_system": {
     "order": [
@@ -171,15 +171,15 @@
         "max": 7.0
       },
       "sample": {
-        "settled_games": 75,
-        "ats_decisions": 73
+        "settled_games": 76,
+        "ats_decisions": 74
       },
       "record": {
-        "wins": 39,
+        "wins": 40,
         "losses": 34,
         "pushes": 2,
-        "record_text": "39-34-2",
-        "ats_win_pct_ex_pushes": 53.4
+        "record_text": "40-34-2",
+        "ats_win_pct_ex_pushes": 54.1
       },
       "clv": {
         "rows_with_clv": 43,
@@ -196,14 +196,14 @@
           "recorded_no_vig_baseline": false,
           "exact_test": false,
           "multiple_comparison_control": false,
-          "bomb_dependency": false
+          "bomb_dependency": true
         },
-        "adjusted_p_value": 0.959959,
+        "adjusted_p_value": 0.898411,
         "bomb_dependency": {
-          "passed": false,
+          "passed": true,
           "removed": 2,
-          "remaining_profit": -0.4,
-          "original_profit": 1.6
+          "remaining_profit": 0.6,
+          "original_profit": 2.6
         },
         "label_rule": "All four checks must pass before THI displays Validated.",
         "baseline_note": "Both sides' recorded prices are not present in the current prospective ledger; this tier cannot be promoted from a flat baseline."
