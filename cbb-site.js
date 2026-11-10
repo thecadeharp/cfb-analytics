@@ -372,6 +372,10 @@
     });
 
     if (sport === "cbb") {
+      window.THIAnalytics?.track("view_cbb", {
+        sport: "CBB",
+        section: state.cbbView
+      });
       state.cfbView = activeCfbView();
       state.statusText = status?.textContent || state.statusText;
       document.body.classList.add("thi-sport-cbb");
@@ -398,6 +402,10 @@
     syncCbbNav();
     if (view === "cbb-player-ratings") loadPlayerRatings();
     if (state.loaded) loadDeferredForView(view);
+    window.THIAnalytics?.navigate({
+      sport: "CBB",
+      section: view
+    });
     if (scroll) window.scrollTo({ top: 0, behavior: "auto" });
   }
 
@@ -1315,6 +1323,14 @@
   function openGameDetail(gameId) {
     const game = state.data?.projectionBoard?.games?.find(row => String(row.game_id) === String(gameId));
     if (!game?.projection) return;
+    window.THIAnalytics?.viewMatchup({
+      sport: "CBB",
+      matchup_id: String(gameId),
+      away_team: game.away?.team,
+      away_team_id: game.away?.team_id,
+      home_team: game.home?.team,
+      home_team_id: game.home?.team_id
+    });
     const projection = game.projection;
     const context = projection.matchup_context || {};
     const home = context.home || {};
@@ -2211,6 +2227,11 @@
     const power = state.data.powerRatings?.teams?.find(team => Number(team.team_id) === Number(teamId)) || prior;
     const profile = state.data.profiles.teams.find(team => Number(team.team_id) === Number(teamId));
     if (!prior) return;
+    window.THIAnalytics?.viewTeam({
+      sport: "CBB",
+      team_name: profile?.display_name || prior.team,
+      team_id: String(teamId)
+    });
     const detail = document.getElementById("cbb-team-detail");
     detail.classList.remove("is-game-page");
     detail.classList.add("is-team-page");
@@ -2339,6 +2360,10 @@
     detail.classList.remove("is-open", "is-game-page", "is-team-page");
     detail.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
+    window.THIAnalytics?.navigate({
+      sport: "CBB",
+      section: state.cbbView
+    });
   }
 
   function detailStat(label, value) { return `<div class="cbb-detail-stat"><div class="cbb-label">${escapeHtml(label)}</div><strong>${escapeHtml(value)}</strong></div>`; }

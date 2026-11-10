@@ -82,7 +82,8 @@
     privacy: {
       title: "Privacy",
       html: `
-        <p>THI uses Cloudflare Web Analytics to understand site traffic, product usage, and technical performance.</p>
+        <p>THI uses Cloudflare Web Analytics for aggregate traffic and technical performance, plus privacy-conscious event analytics to understand which site sections and research tools are useful.</p>
+        <p>THI event analytics records page sections, matchup or team identifiers, filter categories, referral sources and campaign labels. It does not record search text, email addresses, passwords, payment information, or session replays.</p>
         <p>If you contact THI, the information you provide is used to review and respond to your request. THI does not sell personal information.</p>
         <p>This notice will be updated before account, payment, or subscription features collect additional information.</p>
       `

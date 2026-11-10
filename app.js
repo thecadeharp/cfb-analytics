@@ -812,7 +812,17 @@ window.addEventListener("popstate", event => {
 
   if (state.view === "matchup" && state.detail?.gameId) {
     const game = findGame(state.detail.gameId);
-    if (game) renderMatchup(game);
+    if (game) {
+      window.THIAnalytics?.viewMatchup({
+        sport: "CFB",
+        matchup_id: String(state.detail.gameId),
+        away_team: game.away?.team,
+        away_team_id: game.away?.team_id,
+        home_team: game.home?.team,
+        home_team_id: game.home?.team_id
+      });
+      renderMatchup(game);
+    }
     detailReturnState = state.returnState || detailReturnState;
     updateDetailBackButton("matchup", detailReturnState?.view);
     switchView("matchup", { updateHistory: false, scrollY: state.scrollY || 0 });
@@ -822,6 +832,11 @@ window.addEventListener("popstate", event => {
   if (state.view === "dossier" && state.detail?.teamName) {
     const team = getTeam(state.detail.teamName);
     if (team) {
+      window.THIAnalytics?.viewTeam({
+        sport: "CFB",
+        team_name: state.detail.teamName,
+        team_id: team?.team_id
+      });
       currentDossierTeamName = state.detail.teamName;
       renderDossier(team);
       ensureRosterAssetsLoaded().then(() => {
@@ -843,6 +858,13 @@ function switchView(viewName, options = {}) {
 
   const requested = document.getElementById(`view-${viewName}`);
   if (requested) requested.classList.add("active");
+
+  if (requested && !["matchup", "dossier"].includes(viewName)) {
+    window.THIAnalytics?.navigate({
+      sport: "CFB",
+      section: viewName
+    });
+  }
 
   document.querySelectorAll(".nav-item").forEach(button => {
     button.classList.toggle("active", button.dataset.view === viewName);
@@ -3086,6 +3108,14 @@ function findGame(gameId) {
 function openMatchup(gameId, options = {}) {
   const game = findGame(gameId);
   if (!game) return;
+  window.THIAnalytics?.viewMatchup({
+    sport: "CFB",
+    matchup_id: String(gameId),
+    away_team: game.away?.team,
+    away_team_id: game.away?.team_id,
+    home_team: game.home?.team,
+    home_team_id: game.home?.team_id
+  });
   renderMatchup(game);
   if (options.updateHistory === false) {
     detailReturnState = {
@@ -6098,6 +6128,12 @@ function clearMatchupAnalysis() {
 function openDossier(teamName) {
   const team = getTeam(teamName);
   if (!team) return;
+
+  window.THIAnalytics?.viewTeam({
+    sport: "CFB",
+    team_name: teamName,
+    team_id: team?.team_id
+  });
 
   currentDossierTeamName = teamName;
 
