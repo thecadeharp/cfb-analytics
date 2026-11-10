@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "thi-commercial-readiness-v1.0",
-    "generated_at_utc": "2026-11-10T12:58:44.941869Z",
+    "generated_at_utc": "2026-11-10T18:14:21.194112Z",
     "scope": "Operational and evidence readiness for a paid THI research product; this is not a claim that a betting edge has validated."
   },
   "verdict": {
@@ -15,14 +15,14 @@
       "id": "prospective_validation",
       "label": "Prospective validation",
       "status": "in_progress",
-      "summary": "CFB has 8,918 immutable observations across 630 frozen games and 551 settled games. CBB automation is ready but has 363 settled 2027 spread decisions.",
+      "summary": "CFB has 8,985 immutable observations across 632 frozen games and 551 settled games. CBB automation is ready but has 363 settled 2027 spread decisions.",
       "pass_condition": "A full predeclared sample settles with complete price records, stability checks and corrected significance tests."
     },
     {
       "id": "real_prices",
       "label": "Exact market prices",
       "status": "collector_upgraded_history_incomplete",
-      "summary": "Existing CFB history has 2,792/8,918 opening snapshots and 93/266 near-kickoff captures with paired single-book prices. New CFB captures preserve them. CBBD exposes paired moneyline prices but not spread juice, so CBB ATS price validation still needs a two-sided sportsbook feed.",
+      "summary": "Existing CFB history has 2,859/8,985 opening snapshots and 93/266 near-kickoff captures with paired single-book prices. New CFB captures preserve them. CBBD exposes paired moneyline prices but not spread juice, so CBB ATS price validation still needs a two-sided sportsbook feed.",
       "pass_condition": "Every evaluated play stores one named book, exact line, both prices and timestamp at selection and close."
     },
     {
