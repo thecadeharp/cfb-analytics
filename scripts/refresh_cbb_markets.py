@@ -232,7 +232,7 @@ def refresh(
             previous["opening_total"] = first.get("opening_total")
             previous["first_seen_at_utc"] = first.get("captured_at_utc")
         merged = merge_market(previous, current, captured_at)
-        merged["source"] = source
+        merged["source"] = raw.get("source") or source
         before = game.get("market") or {}
         material = tuple(merged.get(key) for key in ("consensus_home_spread", "consensus_total", "book_count"))
         prior_material = tuple(before.get(key) for key in ("consensus_home_spread", "consensus_total", "book_count"))
@@ -292,14 +292,19 @@ def main() -> None:
         and market_summary([item for item in row.get("lines") or [] if isinstance(item, dict)])
     }
     odds_api_key = str(os.environ.get("ODDS_API_KEY") or "").strip()
-    market_source = "CollegeBasketballData.com transformed consensus"
-    if not matched_provider_ids and odds_api_key:
+    unmatched_ids = active_ids - matched_provider_ids
+    if unmatched_ids and odds_api_key:
         fallback_events = fetch_odds_api(odds_api_key)
-        lines = odds_api_lines(board, fallback_events, active_ids)
-        market_source = "The Odds API licensed multi-book feed"
-        print(f"{VERSION}: The Odds API fallback matched {len(lines)} games from {len(fallback_events)} listed events")
+        fallback_lines = odds_api_lines(board, fallback_events, unmatched_ids)
+        for row in fallback_lines:
+            row["source"] = "The Odds API licensed multi-book feed"
+        lines.extend(fallback_lines)
+        print(
+            f"{VERSION}: The Odds API fallback matched {len(fallback_lines)} of "
+            f"{len(unmatched_ids)} CBBD-unmatched games from {len(fallback_events)} listed events"
+        )
     history = json.loads(args.history.read_text()) if args.history.exists() else None
-    board, history, changed = refresh(board, history, lines, now, active_ids, source=market_source)
+    board, history, changed = refresh(board, history, lines, now, active_ids)
     atomic_write(args.board, board)
     atomic_write(args.history, history)
     print(f"{VERSION}: {len(active)} near-term games checked, {changed} changed market snapshots")

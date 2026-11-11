@@ -54,6 +54,40 @@ class CbbScorePulseTests(unittest.TestCase):
         self.assertFalse(result["active_window"])
         self.assertFalse(called)
 
+    def test_espn_fallback_updates_provider_omitted_game(self):
+        games = {"meta": {}, "games": [{
+            "game_id": 401911454,
+            "start_date": "2026-11-12T02:00:00Z",
+            "status": "scheduled",
+            "external_ids": {"espn": "401911454", "cbbd": None},
+            "home": {"score": 0},
+            "away": {"score": 0},
+        }]}
+        board = {
+            "meta": {"status_counts": {"upcoming": 1, "live": 0, "final": 0}},
+            "games": [{**games["games"][0], "projection": {"home_margin": 0.7}}],
+        }
+        responses = {"/games": [], "/scoreboard": []}
+        summary = {"header": {"competitions": [{
+            "status": {"period": 2, "displayClock": "12:18", "type": {"state": "in", "shortDetail": "2nd Half"}},
+            "competitors": [
+                {"homeAway": "home", "score": "51"},
+                {"homeAway": "away", "score": "48"},
+            ],
+        }]}}
+        result = refresh(
+            games,
+            board,
+            lambda path, _params: responses[path],
+            datetime(2026, 11, 12, 3, tzinfo=timezone.utc),
+            espn_fetcher=lambda event_id: summary if event_id == "401911454" else None,
+        )
+        game = board["games"][0]
+        self.assertEqual((game["status"], game["home"]["score"], game["away"]["score"]), ("live", 51, 48))
+        self.assertEqual(game["live"]["detail"], "2nd Half")
+        self.assertEqual(game["projection"]["home_margin"], 0.7)
+        self.assertEqual(result["updated_ids"], ["401911454"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -12,6 +12,8 @@ import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 try:
     from scripts.verify_cbb_api_foundation import clean_key, fetch_json
@@ -27,6 +29,10 @@ LIVE_STATES = {
     "live", "inprogress", "in_progress", "in progress", "halftime", "half time",
     "overtime", "ot", "1st half", "2nd half", "first half", "second half",
 }
+ESPN_SUMMARY_URL = (
+    "https://site.api.espn.com/apis/site/v2/sports/basketball/"
+    "mens-college-basketball/summary?event={event_id}"
+)
 
 
 def parse_time(value: Any) -> datetime | None:
@@ -108,6 +114,44 @@ def provider_rows_by_id(*collections: Any) -> dict[str, dict[str, Any]]:
             if current is None or status_rank(row.get("status")) >= status_rank(current.get("status")):
                 merged[game_id] = row
     return merged
+
+
+def fetch_espn_summary(event_id: str) -> dict[str, Any] | None:
+    request = Request(
+        ESPN_SUMMARY_URL.format(event_id=event_id),
+        headers={"User-Agent": "THI-CBB-Score-Reconciliation/1.0"},
+    )
+    try:
+        with urlopen(request, timeout=15) as response:
+            payload = json.load(response)
+        return payload if isinstance(payload, dict) else None
+    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError):
+        return None
+
+
+def espn_provider_row(payload: dict[str, Any], event_id: str) -> dict[str, Any] | None:
+    header = payload.get("header") or {}
+    competitions = header.get("competitions") or []
+    competition = competitions[0] if competitions else {}
+    competitors = competition.get("competitors") or []
+    home = next((row for row in competitors if row.get("homeAway") == "home"), None)
+    away = next((row for row in competitors if row.get("homeAway") == "away"), None)
+    if home is None or away is None:
+        return None
+    status = competition.get("status") or {}
+    status_type = status.get("type") or {}
+    state = str(status_type.get("state") or "pre").lower()
+    normalized = "final" if status_type.get("completed") or state == "post" else "live" if state == "in" else "scheduled"
+    return {
+        "id": event_id,
+        "status": normalized,
+        "homePoints": home.get("score"),
+        "awayPoints": away.get("score"),
+        "period": status.get("period"),
+        "clock": status.get("displayClock"),
+        "statusDetail": status_type.get("shortDetail") or status_type.get("detail"),
+        "source": "ESPN verified fallback",
+    }
 
 
 def candidate_window(board: dict[str, Any], now: datetime) -> tuple[datetime, datetime] | None:
@@ -228,6 +272,7 @@ def refresh(
     projection_board: dict[str, Any],
     fetcher: Callable[[str, dict[str, Any]], Any],
     now: datetime,
+    espn_fetcher: Callable[[str], dict[str, Any] | None] | None = None,
 ) -> dict[str, Any]:
     window = candidate_window(projection_board, now)
     if window is None:
@@ -241,11 +286,29 @@ def refresh(
     scoreboard = fetcher("/scoreboard", {})
     if not isinstance(games, list) or not isinstance(scoreboard, (list, dict)):
         raise RuntimeError("CBBD score pulse returned an invalid response")
+    provider_rows = provider_rows_by_id(games, scoreboard)
+    espn_fetcher = espn_fetcher or fetch_espn_summary
+    for game in projection_board.get("games") or []:
+        game_id = str(game.get("game_id") or "")
+        external = game.get("external_ids") or {}
+        espn_id = str(external.get("espn") or "")
+        start_time = parse_time(game.get("start_date"))
+        if (
+            not espn_id
+            or game_id in provider_rows
+            or start_time is None
+            or not (now - ACTIVE_LOOKBACK <= start_time <= now + ACTIVE_LOOKAHEAD)
+        ):
+            continue
+        payload = espn_fetcher(espn_id)
+        if payload and (row := espn_provider_row(payload, espn_id)):
+            provider_rows[game_id] = row
+
     snapshot_projection(projection_board)
     result = apply_scores(
         game_board,
         projection_board,
-        provider_rows_by_id(games, scoreboard),
+        provider_rows,
         now.isoformat().replace("+00:00", "Z"),
     )
     result["active_window"] = True

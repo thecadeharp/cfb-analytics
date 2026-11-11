@@ -90,6 +90,26 @@ class RefreshCbbMarketsTests(unittest.TestCase):
         self.assertEqual(board["games"][0]["market"]["spread_move"], -1.5)
         self.assertEqual(len(history["games"]["9"]), 2)
 
+    def test_per_game_fallback_source_is_preserved(self):
+        now = datetime(2026, 11, 11, 18, tzinfo=timezone.utc)
+        board = {"meta": {}, "games": [{
+            "game_id": 401911454,
+            "status": "scheduled",
+            "start_date": "2026-11-12T02:00:00Z",
+            "neutral_site": False,
+            "away": {"team": "Nevada"},
+            "home": {"team": "UC Santa Barbara"},
+            "market": None,
+        }]}
+        lines = [{
+            "gameId": 401911454,
+            "source": "The Odds API licensed multi-book feed",
+            "lines": [{"provider": "DraftKings", "spread": -1.5, "overUnder": 145.5}],
+        }]
+        board, _history, changed = refresh(board, None, lines, now, {"401911454"})
+        self.assertEqual(changed, 1)
+        self.assertEqual(board["games"][0]["market"]["source"], "The Odds API licensed multi-book feed")
+
 
 if __name__ == "__main__":
     unittest.main()
