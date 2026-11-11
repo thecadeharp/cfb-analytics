@@ -24,6 +24,7 @@ SETTLED_MIN_GAMES = 6
 SPREAD_SIGNAL_EDGE = 5.0
 MINIMUM_SIGNAL_BOOKS = 3
 STANDARDIZED_FEATURE_CLIP = 3.0
+EIGHTY_PERCENT_Z = 1.281551565545
 
 
 def finite(value: Any) -> float | None:
@@ -257,6 +258,9 @@ def build_board(
     margin_model = model_card["models"]["margin"]
     total_model = model_card["models"]["total"]
     residual_sd = float(model_card["models"]["margin_residual_sd"])
+    total_residual_sd = finite(model_card["models"].get("total_residual_sd"))
+    if total_residual_sd is None:
+        total_residual_sd = finite((model_card.get("evaluation") or {}).get("out_of_time_test", {}).get("total_rmse")) or 14.0
     learned_national_hca = model_home_court_points(margin_model)
     hca_rows = {str(row.get("team_id")): row for row in (home_court_payload or {}).get("teams") or []}
     hca_national = finite((home_court_payload or {}).get("meta", {}).get("national_points"))
@@ -302,6 +306,9 @@ def build_board(
         home_points = (total + margin) / 2.0
         away_points = (total - margin) / 2.0
         probability = clip(0.5 * (1.0 + math.erf((margin / max(residual_sd, 1.0)) / math.sqrt(2.0))), 0.001, 0.999)
+        margin_half_width = EIGHTY_PERCENT_Z * residual_sd
+        total_half_width = EIGHTY_PERCENT_Z * total_residual_sd
+        score_half_width = EIGHTY_PERCENT_Z * math.sqrt(residual_sd ** 2 + total_residual_sd ** 2) / 2.0
         minimum_games = min(home["games"], away["games"])
         state = sample_state(minimum_games)
         market = game.get("market") or {}
@@ -325,6 +332,17 @@ def build_board(
                 "total": round(total, 1),
                 "home_win_probability": round(100 * probability, 1),
                 "projected_possessions": round(features["projected_pace"], 1),
+                "prediction_interval_80": {
+                    "home_margin_low": round(margin - margin_half_width, 1),
+                    "home_margin_high": round(margin + margin_half_width, 1),
+                    "total_low": round(max(0.0, total - total_half_width), 1),
+                    "total_high": round(total + total_half_width, 1),
+                    "home_points_low": round(max(0.0, home_points - score_half_width), 1),
+                    "home_points_high": round(home_points + score_half_width, 1),
+                    "away_points_low": round(max(0.0, away_points - score_half_width), 1),
+                    "away_points_high": round(away_points + score_half_width, 1),
+                    "method": "empirical_training_residuals",
+                },
                 "sample_state": state,
                 "model_input_label": "prior_based" if state == "preseason" else state,
                 "minimum_team_games": minimum_games,
@@ -403,6 +421,7 @@ def build_board(
             "four_factor_method": "Neutral preseason Four Factor baselines blend toward chronological current-season offense and defense observations.",
             "home_court_method": "Program-specific five-season regularized conference-game estimates replace the model's national campus coefficient; neutral-site games receive zero.",
             "inference_standardized_feature_clip": STANDARDIZED_FEATURE_CLIP,
+            "prediction_interval_policy": "80% ranges use the fitted training residual distributions for margin and total. They communicate model uncertainty and are not betting thresholds.",
         },
         "games": output,
     }

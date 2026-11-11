@@ -71,6 +71,7 @@ jobs:
             scripts/resolve_cbb_venue_geocodes.py \
             scripts/build_cbb_projection_board.py \
             scripts/build_cbb_play_style.py \
+            scripts/build_cbb_live_center.py \
             scripts/build_cbb_matchup_engine.py \
             scripts/build_cbb_intelligence_suite.py \
             scripts/build_cbb_model_tracking.py \
@@ -78,6 +79,8 @@ jobs:
             scripts/refresh_cbb_scores.py \
             scripts/build_cbb_bracketology.py \
             scripts/research_cbb_model_v02.py \
+            scripts/build_cbb_model_lab.py \
+            scripts/build_cbb_situational_profiles.py \
             scripts/build_cbb_game_day_readiness.py \
             scripts/build_cbb_operations_context.py \
             scripts/build_cbb_platform_health.py \
@@ -113,6 +116,7 @@ jobs:
             scripts/test_refresh_cbb_scores.py \
             scripts/test_cbb_bracketology.py \
             scripts/test_cbb_model_v02.py \
+            scripts/test_cbb_research_surfaces.py \
             scripts/test_cbb_game_day_readiness.py \
             scripts/test_cbb_platform_health.py \
             scripts/test_cbb_roster_integrity.py \
@@ -144,12 +148,15 @@ jobs:
           python scripts/build_cbb_venue_audit.py
           python scripts/build_cbb_projection_board.py
           python scripts/build_cbb_play_style.py --max-games 40
+          python scripts/build_cbb_live_center.py
           python scripts/build_cbb_matchup_engine.py
           python scripts/build_cbb_model_tracking.py
           python scripts/build_cbb_postgame.py
           python scripts/build_cbb_bracketology.py
           python scripts/build_cbb_intelligence_suite.py
           python scripts/research_cbb_model_v02.py
+          python scripts/build_cbb_model_lab.py
+          python scripts/build_cbb_situational_profiles.py
           python scripts/build_cbb_game_day_readiness.py
           python scripts/validate_cbb_availability.py
           python scripts/build_cbb_operations_context.py

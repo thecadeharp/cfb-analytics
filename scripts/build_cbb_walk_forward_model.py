@@ -623,6 +623,7 @@ def build(history_dir: Path, personnel_dir: Path, profile_path: Path, output_dir
         row["projected_home_margin"] = round(predict(row, margin_model), 4)
         row["projected_total"] = round(predict(row, total_model), 4)
     residual_sd = statistics.pstdev(row["actual_home_margin"] - row["projected_home_margin"] for row in training)
+    total_residual_sd = statistics.pstdev(row["actual_total"] - row["projected_total"] for row in training)
     for row in rows:
         z = row["projected_home_margin"] / max(residual_sd, 1.0)
         row["home_win_probability"] = round(0.5 * (1.0 + math.erf(z / math.sqrt(2.0))), 6)
@@ -678,7 +679,12 @@ def build(history_dir: Path, personnel_dir: Path, profile_path: Path, output_dir
             },
             "description": "Pregame team states update only after each completed game. Current-season end ratings never initialize that same season. Market prices are evaluation fields only.",
         },
-        "models": {"margin": margin_model, "total": total_model, "margin_residual_sd": round(residual_sd, 6)},
+        "models": {
+            "margin": margin_model,
+            "total": total_model,
+            "margin_residual_sd": round(residual_sd, 6),
+            "total_residual_sd": round(total_residual_sd, 6),
+        },
         "evaluation": evaluation,
         "promotion_gate": {
             "eligible_for_public_projection_engine": all(gate_checks.values()),

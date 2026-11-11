@@ -4,7 +4,7 @@ set -euo pipefail
 commit_message="${1:-Refresh CBB live scores and finals}"
 
 stage_scoreboard() {
-  git add data/cbb/game_board.json data/cbb/projection_board.json data/cbb/model_tracking.json data/cbb/postgame.json data/cbb/cache_manifest.json
+  git add data/cbb/game_board.json data/cbb/projection_board.json data/cbb/model_tracking.json data/cbb/postgame.json data/cbb/live_game_center.json data/cbb/cache_manifest.json
 }
 
 commit_scoreboard_if_changed() {
@@ -34,6 +34,7 @@ for attempt in 1 2 3 4 5; do
     if [[ -s /tmp/thi-cbb-recent-final ]]; then
       python scripts/build_cbb_postgame.py
     fi
+    python scripts/build_cbb_live_center.py
     if [[ -s /tmp/thi-cbb-newly-final ]]; then
       python scripts/build_cbb_model_tracking.py
     fi

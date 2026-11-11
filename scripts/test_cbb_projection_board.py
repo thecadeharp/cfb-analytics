@@ -87,6 +87,11 @@ class CbbProjectionBoardTests(unittest.TestCase):
         self.assertIn(tracked["spread_signal_tier"], {"play", "material", "outlier"})
         self.assertFalse(tracked["totals_signal_eligible"])
         self.assertTrue(0 <= tracked["home_win_probability"] <= 100)
+        interval = tracked["prediction_interval_80"]
+        self.assertLess(interval["home_margin_low"], tracked["home_margin"])
+        self.assertGreater(interval["home_margin_high"], tracked["home_margin"])
+        self.assertLess(interval["total_low"], tracked["total"])
+        self.assertGreater(interval["total_high"], tracked["total"])
         neutral_drivers = tracked["matchup_context"]["margin_drivers"]
         self.assertTrue(neutral_drivers)
         self.assertFalse({"home_court", "early_home", "nonconference_home", "team_home_court_adjustment"} & {row["feature"] for row in neutral_drivers})
