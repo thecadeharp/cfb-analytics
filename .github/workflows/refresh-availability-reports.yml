@@ -44,7 +44,9 @@ jobs:
         run: python scripts/build_availability_report.py
 
       - name: Test official-report normalization
-        run: python -m unittest scripts.test_availability_report
+        run: |
+          python -m unittest scripts.test_availability_report
+          node scripts/test_availability_impact.cjs
 
       - name: Validate freshness and isolation
         run: |
