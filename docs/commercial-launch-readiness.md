@@ -1,12 +1,12 @@
 # THI commercial launch readiness
 
-Last reviewed: 2026-10-09
+Last reviewed: 2026-11-11
 
 This is the permanent pre-paywall checklist for The Hammer Index. It records product and data-rights work; it is not legal advice or a substitute for counsel reviewing the final product, customer terms, and launch jurisdictions.
 
 ## Current decision
 
-THI can be positioned as paid college-sports research, model transparency, team intelligence, and decision support after the blocking items below are resolved. Do not position it as a proven profitable picks product unless prospective, price-aware validation clears the published promotion gate.
+THI can be positioned as paid college-sports research, model transparency, team intelligence, and decision support after the blocking items below are resolved. The source policy is fail-closed: THI will not rely on a source that requires a bespoke written-permission request. It must have published or subscribed commercial terms that cover the intended use, or it must be replaced. Do not position THI as a proven profitable picks product unless prospective, price-aware validation clears the published promotion gate.
 
 Do not launch a paywall over the current static site unchanged. GitHub Pages serves public JSON assets directly, so hiding navigation or requiring a browser login would not protect licensed or subscriber-only data.
 
@@ -22,6 +22,7 @@ Do not launch a paywall over the current static site unchanged. GitHub Pages ser
 | Public ticket and handle splits | Provider pending | Do not display, cache, derive RLM alerts from, or place behind a paywall until the selected license expressly permits commercial subscriber display, historical retention, derived signals, and the intended polling frequency. |
 | SportsDataverse datasets | Source review required | Record the exact dataset and license, satisfy CC BY attribution where applicable, and separately review rights in upstream ESPN/NCAA-derived content. A package code license does not automatically clear every underlying dataset. |
 | ESPN endpoints and ESPN-hosted assets | Blocking | Replace or obtain a commercial license. Current Disney/ESPN terms restrict automated extraction and commercial use. [Terms](https://disneytermsofuse.com/english/) |
+| TeamRankings | Removed | Its terms require express written consent for commercial exploitation. THI's former coach ATS dependency was replaced with THI's immutable closing-line ledger. Do not restore this source. [Terms](https://www.teamrankings.com/terms-of-service/) |
 | School, conference, tournament, and broadcaster logos | Blocking unless licensed | Replace with THI-neutral text or monograms, or obtain documented permission. Provider access alone does not grant mark or artwork rights. |
 | Team and player factual references | Counsel review | Use descriptively, avoid endorsement or affiliation implications, and review publicity/trademark risk in the final paid presentation. |
 
@@ -57,3 +58,5 @@ Do not launch a paywall over the current static site unchanged. GitHub Pages ser
 ## Go-live gate
 
 Commercial launch is ready only when all blocking source rows are removed or licensed, subscriber data is protected server-side, the selected market/splits agreements are recorded, legal/customer pages are live, the payment processor has approved the business, and counsel has reviewed the final implementation.
+
+`python scripts/check_paywall_rights.py --paywall` is the mandatory paid-build gate. It must pass before enabling subscriptions. `THI_PAYWALL_ENABLED=true` activates the same fail-closed check in deployment automation.

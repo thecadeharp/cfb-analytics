@@ -81,8 +81,9 @@ class PriceContractTest(unittest.TestCase):
 class ReadinessTest(unittest.TestCase):
     def test_readiness_separates_research_from_betting_claim(self):
         report = build()
-        self.assertEqual(report["verdict"]["research_subscription"], "ready_with_guardrails")
+        self.assertEqual(report["verdict"]["research_subscription"], "blocked_until_source_rights_clear")
         self.assertEqual(report["verdict"]["betting_edge_product"], "not_ready")
+        self.assertTrue(report["paid_launch_blockers"])
         self.assertEqual(len(report["pillars"]), 5)
         self.assertEqual({row["id"] for row in report["pillars"]}, {"prospective_validation", "real_prices", "predeclared_rules", "operational_proof", "data_rights"})
 

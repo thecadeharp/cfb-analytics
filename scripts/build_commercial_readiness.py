@@ -46,6 +46,13 @@ def build() -> dict[str, Any]:
     settled_cfb = int(nested(cfb_scorecard, "season", "settled_games") or 0)
     cbb_decisions = int(nested(cbb_tracking, "summary", "spread", "games") or 0)
     signal_rules = nested(cfb_signals, "confidence_system", "meaning") or ""
+    source_register = load("config/commercial_sources.json", {}) or {}
+    source_rows = source_register.get("sources") or []
+    paid_blockers = [
+        row for row in source_rows
+        if row.get("active") is True
+        and row.get("paywall_status") not in {"allowed_with_conditions", "allowed_build_time_only"}
+    ]
 
     return {
         "meta": {
@@ -54,7 +61,7 @@ def build() -> dict[str, Any]:
             "scope": "Operational and evidence readiness for a paid THI research product; this is not a claim that a betting edge has validated.",
         },
         "verdict": {
-            "research_subscription": "ready_with_guardrails",
+            "research_subscription": "blocked_until_source_rights_clear" if paid_blockers else "ready_with_guardrails",
             "betting_edge_product": "not_ready",
             "recommended_positioning": "Paid college-sports research, model transparency, team intelligence and decision support.",
             "prohibited_positioning": "Do not market THI as a proven profitable picks service unless the prospective price-aware validation gate clears.",
@@ -91,37 +98,13 @@ def build() -> dict[str, Any]:
             {
                 "id": "data_rights",
                 "label": "Paid-data rights",
-                "status": "ready_with_open_items",
-                "summary": "CFBD/CBBD and The Odds API permit commercial analytical products under their current terms while restricting raw redistribution. SportsDataverse code is MIT licensed. Source-level rights for third-party underlying data, team marks and any ESPN/NCAA-derived fields remain open items before scaling paid access.",
+                "status": "blocked" if paid_blockers else "ready_with_conditions",
+                "summary": f"CFBD/CBBD and The Odds API permit paid analytical products under their current terms while restricting raw redistribution. {len(paid_blockers)} active source-rights blockers remain: " + ", ".join(row.get("name", row.get("id", "unknown")) for row in paid_blockers) + ".",
                 "pass_condition": "Maintain a source register, comply with attribution/redistribution limits and resolve every source-pending asset or field.",
             },
         ],
-        "rights_register": [
-            {
-                "source": "CollegeFootballData.com / CollegeBasketballData.com",
-                "status": "commercial_use_permitted_with_limits",
-                "url": "https://collegebasketballdata.com/terms",
-                "conditions": "Derived models, paid sites, dashboards and reasonable factual display are allowed; do not redistribute a raw bulk mirror or competing API.",
-            },
-            {
-                "source": "The Odds API",
-                "status": "commercial_use_permitted_with_limits",
-                "url": "https://the-odds-api.com/terms-and-conditions.html",
-                "conditions": "Integrated display, research and derived analytics are allowed; do not resell or repackage the feed as a standalone data product.",
-            },
-            {
-                "source": "cfbfastR / SportsDataverse code",
-                "status": "code_license_verified_source_data_pending",
-                "url": "https://cfbfastr.sportsdataverse.org/",
-                "conditions": "Package code is MIT licensed; that license does not itself grant rights to every upstream dataset loaded by the package.",
-            },
-            {
-                "source": "Team names, logos and third-party endpoint-derived fields",
-                "status": "source_pending",
-                "url": None,
-                "conditions": "Inventory marks and upstream fields, then document a license, permission, fair-use rationale or replacement for each paid-product dependency.",
-            },
-        ],
+        "rights_register": source_rows,
+        "paid_launch_blockers": paid_blockers,
     }
 
 

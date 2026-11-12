@@ -26,7 +26,8 @@ jobs:
           python-version: "3.12"
       - name: Test Variance Lab contracts
         run: |
-          python -m py_compile scripts/validation_framework.py scripts/build_variance_context.py scripts/build_trends_lab.py scripts/build_variance_prospective_tracker.py scripts/build_rlm_monitor.py scripts/poll_free_sharp_lines.py scripts/poll_rlm_feeds.py scripts/build_public_backtest_scorecard.py scripts/build_commercial_readiness.py
+          python -m py_compile scripts/validation_framework.py scripts/build_variance_context.py scripts/build_trends_lab.py scripts/build_variance_prospective_tracker.py scripts/build_rlm_monitor.py scripts/poll_free_sharp_lines.py scripts/poll_rlm_feeds.py scripts/build_public_backtest_scorecard.py scripts/build_commercial_readiness.py scripts/check_paywall_rights.py
+          python scripts/check_paywall_rights.py
           python -m unittest scripts/test_validation_framework.py scripts/test_variance_lab.py scripts/test_public_backtest_scorecard.py scripts/test_market_price_and_readiness.py
       - name: Refresh point-in-time context and systems
         env:

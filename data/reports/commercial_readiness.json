@@ -1,11 +1,11 @@
 {
   "meta": {
     "version": "thi-commercial-readiness-v1.0",
-    "generated_at_utc": "2026-11-11T22:06:07.456724Z",
+    "generated_at_utc": "2026-11-12T01:54:37.110968Z",
     "scope": "Operational and evidence readiness for a paid THI research product; this is not a claim that a betting edge has validated."
   },
   "verdict": {
-    "research_subscription": "ready_with_guardrails",
+    "research_subscription": "blocked_until_source_rights_clear",
     "betting_edge_product": "not_ready",
     "recommended_positioning": "Paid college-sports research, model transparency, team intelligence and decision support.",
     "prohibited_positioning": "Do not market THI as a proven profitable picks service unless the prospective price-aware validation gate clears."
@@ -42,35 +42,144 @@
     {
       "id": "data_rights",
       "label": "Paid-data rights",
-      "status": "ready_with_open_items",
-      "summary": "CFBD/CBBD and The Odds API permit commercial analytical products under their current terms while restricting raw redistribution. SportsDataverse code is MIT licensed. Source-level rights for third-party underlying data, team marks and any ESPN/NCAA-derived fields remain open items before scaling paid access.",
+      "status": "blocked",
+      "summary": "CFBD/CBBD and The Odds API permit paid analytical products under their current terms while restricting raw redistribution. 3 active source-rights blockers remain: ESPN/Disney endpoints and ESPN-hosted assets, SportsDataverse/cfbfastR ESPN-derived datasets, School, conference, tournament, bowl, and broadcaster logos.",
       "pass_condition": "Maintain a source register, comply with attribution/redistribution limits and resolve every source-pending asset or field."
     }
   ],
   "rights_register": [
     {
-      "source": "CollegeFootballData.com / CollegeBasketballData.com",
-      "status": "commercial_use_permitted_with_limits",
-      "url": "https://collegebasketballdata.com/terms",
-      "conditions": "Derived models, paid sites, dashboards and reasonable factual display are allowed; do not redistribute a raw bulk mirror or competing API."
+      "id": "cfbd_cbbd",
+      "name": "CollegeFootballData.com / CollegeBasketballData.com",
+      "active": true,
+      "paywall_status": "allowed_with_conditions",
+      "terms_url": "https://collegebasketballdata.com/terms",
+      "conditions": [
+        "Commercial paid sites and independently created derived outputs are permitted.",
+        "Display only reasonable factual portions inside the larger THI product.",
+        "Do not expose raw responses, keys, bulk downloads, substitute feeds, or database mirrors.",
+        "The agreement does not grant third-party logo, trademark, player-likeness, broadcast, photograph, video, or audio rights."
+      ]
     },
     {
-      "source": "The Odds API",
-      "status": "commercial_use_permitted_with_limits",
-      "url": "https://the-odds-api.com/terms-and-conditions.html",
-      "conditions": "Integrated display, research and derived analytics are allowed; do not resell or repackage the feed as a standalone data product."
+      "id": "the_odds_api",
+      "name": "The Odds API",
+      "active": true,
+      "paywall_status": "allowed_with_conditions",
+      "terms_url": "https://the-odds-api.com/terms-and-conditions.html",
+      "conditions": [
+        "Commercial UI display, storage, research, and derived analytics are permitted.",
+        "The odds feed cannot be the primary standalone product and cannot be resold as an API, feed, or download."
+      ]
     },
     {
-      "source": "cfbfastR / SportsDataverse code",
-      "status": "code_license_verified_source_data_pending",
-      "url": "https://cfbfastr.sportsdataverse.org/",
-      "conditions": "Package code is MIT licensed; that license does not itself grant rights to every upstream dataset loaded by the package."
+      "id": "openstreetmap",
+      "name": "OpenStreetMap data",
+      "active": true,
+      "paywall_status": "allowed_with_conditions",
+      "terms_url": "https://www.openstreetmap.org/copyright",
+      "conditions": [
+        "Commercial use is permitted with linked OpenStreetMap contributor attribution and ODbL notice.",
+        "Review share-alike obligations before distributing an OSM-derived database."
+      ]
     },
     {
-      "source": "Team names, logos and third-party endpoint-derived fields",
-      "status": "source_pending",
-      "url": null,
-      "conditions": "Inventory marks and upstream fields, then document a license, permission, fair-use rationale or replacement for each paid-product dependency."
+      "id": "nominatim_public",
+      "name": "OpenStreetMap Foundation public Nominatim service",
+      "active": true,
+      "paywall_status": "allowed_build_time_only",
+      "terms_url": "https://operations.osmfoundation.org/policies/nominatim/",
+      "conditions": [
+        "Use only for low-volume build-time venue resolution, never customer-facing live geocoding.",
+        "Cache results, identify THI, retain attribution, and remain below one request per second.",
+        "Move to a self-hosted or contracted provider before paid traffic makes this a runtime dependency."
+      ]
+    },
+    {
+      "id": "teamrankings",
+      "name": "TeamRankings",
+      "active": false,
+      "paywall_status": "prohibited_without_bespoke_permission",
+      "terms_url": "https://www.teamrankings.com/terms-of-service/",
+      "replacement": "THI immutable closing-line ledger",
+      "conditions": [
+        "Do not scrape, store, derive from, display, or commercialize TeamRankings content.",
+        "The former coach ATS dependency was removed on 2026-11-11."
+      ]
+    },
+    {
+      "id": "espn_disney",
+      "name": "ESPN/Disney endpoints and ESPN-hosted assets",
+      "active": true,
+      "paywall_status": "blocking_replace_before_paywall",
+      "terms_url": "https://disneytermsofuse.com/english/",
+      "replacement": "Licensed feed for factual fields and THI-neutral monograms for logos",
+      "conditions": [
+        "Current consumer terms restrict commercial use, automated extraction, copying, and Disney intellectual-property use.",
+        "Do not enable paid access while ESPN endpoints, ESPN-derived production fields, or ESPN-hosted logos remain dependencies."
+      ]
+    },
+    {
+      "id": "sportsdataverse_espn_derived",
+      "name": "SportsDataverse/cfbfastR ESPN-derived datasets",
+      "active": true,
+      "paywall_status": "blocking_underlying_rights_review",
+      "terms_url": "https://cfbfastr.sportsdataverse.org/",
+      "replacement": "CFBD/CBBD licensed data or another feed with explicit commercial dataset rights",
+      "conditions": [
+        "An open-source package license does not automatically grant commercial rights to the upstream ESPN-derived dataset.",
+        "Do not place affected play-by-play, postgame, roster, FPI, or derived fields behind the paywall until the underlying dataset rights are documented or the source is replaced."
+      ]
+    },
+    {
+      "id": "team_marks",
+      "name": "School, conference, tournament, bowl, and broadcaster logos",
+      "active": true,
+      "paywall_status": "blocking_replace_before_paywall",
+      "terms_url": null,
+      "replacement": "THI-neutral text and monograms unless a commercial mark license is recorded",
+      "conditions": [
+        "Descriptive team names and factual references are handled separately from logo artwork.",
+        "No third-party logo may ship in the paid presentation without a recorded commercial license."
+      ]
+    }
+  ],
+  "paid_launch_blockers": [
+    {
+      "id": "espn_disney",
+      "name": "ESPN/Disney endpoints and ESPN-hosted assets",
+      "active": true,
+      "paywall_status": "blocking_replace_before_paywall",
+      "terms_url": "https://disneytermsofuse.com/english/",
+      "replacement": "Licensed feed for factual fields and THI-neutral monograms for logos",
+      "conditions": [
+        "Current consumer terms restrict commercial use, automated extraction, copying, and Disney intellectual-property use.",
+        "Do not enable paid access while ESPN endpoints, ESPN-derived production fields, or ESPN-hosted logos remain dependencies."
+      ]
+    },
+    {
+      "id": "sportsdataverse_espn_derived",
+      "name": "SportsDataverse/cfbfastR ESPN-derived datasets",
+      "active": true,
+      "paywall_status": "blocking_underlying_rights_review",
+      "terms_url": "https://cfbfastr.sportsdataverse.org/",
+      "replacement": "CFBD/CBBD licensed data or another feed with explicit commercial dataset rights",
+      "conditions": [
+        "An open-source package license does not automatically grant commercial rights to the upstream ESPN-derived dataset.",
+        "Do not place affected play-by-play, postgame, roster, FPI, or derived fields behind the paywall until the underlying dataset rights are documented or the source is replaced."
+      ]
+    },
+    {
+      "id": "team_marks",
+      "name": "School, conference, tournament, bowl, and broadcaster logos",
+      "active": true,
+      "paywall_status": "blocking_replace_before_paywall",
+      "terms_url": null,
+      "replacement": "THI-neutral text and monograms unless a commercial mark license is recorded",
+      "conditions": [
+        "Descriptive team names and factual references are handled separately from logo artwork.",
+        "No third-party logo may ship in the paid presentation without a recorded commercial license."
+      ]
     }
   ]
 }
