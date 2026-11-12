@@ -77,6 +77,7 @@
     deferredLoads: {},
     cacheManifest: { meta: {}, assets: {} },
     projectionQuery: "",
+    projectionMatchup: "all",
     projectionConference: "all",
     projectionSignal: "all",
     projectionConfidence: "all",
@@ -489,6 +490,7 @@
 
       <div class="cbb-projection-controls">
         <input id="cbb-projection-search" class="cbb-input" type="search" placeholder="Search teams…" value="${escapeHtml(state.projectionQuery)}">
+        <select id="cbb-projection-matchup" class="cbb-select" aria-label="Filter by matchup type"><option value="all" ${state.projectionMatchup === "all" ? "selected" : ""}>All matchups</option><option value="thi25" ${state.projectionMatchup === "thi25" ? "selected" : ""}>THI 25</option><option value="midmajor" ${state.projectionMatchup === "midmajor" ? "selected" : ""}>Mid-Major vs Mid-Major</option><option value="p5p5" ${state.projectionMatchup === "p5p5" ? "selected" : ""}>P5 vs P5</option></select>
         <select id="cbb-projection-conference" class="cbb-select"><option value="all">All conferences</option>${conferences.map(conf => `<option value="${escapeHtml(conf)}" ${state.projectionConference === conf ? "selected" : ""}>${escapeHtml(conf)}</option>`).join("")}</select>
         <select id="cbb-projection-signal" class="cbb-select"><option value="all">All signals</option>${[['no_line','No line'],['aligned','Aligned'],['small','Small disagreement'],['play','Notable disagreement'],['material','Major disagreement'],['outlier','Outlier']].map(([value,label]) => `<option value="${value}" ${state.projectionSignal === value ? "selected" : ""}>${label}</option>`).join("")}</select>
         <select id="cbb-projection-confidence" class="cbb-select"><option value="all">All confidence</option>${[['research','Research only'],['developing','Developing'],['validated','Validated'],['established','Established']].map(([value,label]) => `<option value="${value}" ${state.projectionConfidence === value ? "selected" : ""}>${label}</option>`).join("")}</select>
@@ -612,9 +614,23 @@
   }
 
   function cbbThiRank(teamId) {
-    const teams = [...(state.data?.priors?.teams || [])].sort((a,b) => Number(b.prior_net || -Infinity) - Number(a.prior_net || -Infinity));
+    const current = state.data?.powerRatings?.teams?.find(team => String(team.team_id) === String(teamId));
+    if (Number.isFinite(Number(current?.power_rank))) return Number(current.power_rank);
+    const teams = [...(state.data?.powerRatings?.teams || state.data?.priors?.teams || [])]
+      .sort((a,b) => Number(b.prior_net || -Infinity) - Number(a.prior_net || -Infinity));
     const index = teams.findIndex(team => String(team.team_id) === String(teamId));
     return index >= 0 ? index + 1 : null;
+  }
+
+  function cbbMatchesMatchup(game) {
+    return window.THIMatchupFilters?.matchesGameFilter?.({
+      sport: "CBB",
+      filter: state.projectionMatchup,
+      homeConference: game?.home?.conference,
+      awayConference: game?.away?.conference,
+      homeRank: cbbThiRank(game?.home?.team_id),
+      awayRank: cbbThiRank(game?.away?.team_id),
+    }) ?? true;
   }
 
   function projectionValue(game, key) {
@@ -636,6 +652,7 @@
       const text = `${game.home?.team || ""} ${game.away?.team || ""} ${game.home?.conference || ""} ${game.away?.conference || ""}`.toLowerCase();
       const conference = state.projectionConference;
       return (!query || text.includes(query))
+        && cbbMatchesMatchup(game)
         && (conference === "all" || game.home?.conference === conference || game.away?.conference === conference)
         && (state.projectionSignal === "all" || signalTier(game) === state.projectionSignal)
         && (state.projectionConfidence === "all" || confidenceTier(game) === state.projectionConfidence)
@@ -673,12 +690,13 @@
     const view = document.getElementById("view-cbb-projections");
     const resetLimit = () => { state.projectionLimit = 150; paintProjectionBoard(); };
     view.querySelector("#cbb-projection-search").addEventListener("input", event => { state.projectionQuery = event.target.value; resetLimit(); });
+    view.querySelector("#cbb-projection-matchup").addEventListener("change", event => { state.projectionMatchup = event.target.value; resetLimit(); });
     view.querySelector("#cbb-projection-conference").addEventListener("change", event => { state.projectionConference = event.target.value; resetLimit(); });
     view.querySelector("#cbb-projection-signal").addEventListener("change", event => { state.projectionSignal = event.target.value; resetLimit(); });
     view.querySelector("#cbb-projection-confidence").addEventListener("change", event => { state.projectionConfidence = event.target.value; resetLimit(); });
     view.querySelector("#cbb-projection-sort").addEventListener("change", event => { state.projectionSort = event.target.value; resetLimit(); });
     view.querySelector("#cbb-projection-clear").addEventListener("click", () => {
-      state.projectionQuery = ""; state.projectionConference = "all"; state.projectionSignal = "all"; state.projectionConfidence = "all"; state.projectionSort = "time"; state.projectionStatus = "all"; state.projectionDate = "next"; state.projectionLimit = 150; renderProjections();
+      state.projectionQuery = ""; state.projectionMatchup = "all"; state.projectionConference = "all"; state.projectionSignal = "all"; state.projectionConfidence = "all"; state.projectionSort = "time"; state.projectionStatus = "all"; state.projectionDate = "next"; state.projectionLimit = 150; renderProjections();
     });
     view.querySelector(".cbb-status-filter").addEventListener("click", event => {
       const button = event.target.closest("[data-cbb-status]");

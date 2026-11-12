@@ -15,6 +15,7 @@
   let gameConditionsData = { games: {} };
   let settledResultsData = { rows: [] };
   let settledResultsByGame = new Map();
+  let currentMatchupFilter = "";
   let currentConferenceFilter = "";
   let currentSignalFilter = "";
   let currentConfidenceFilter = "";
@@ -37,6 +38,13 @@
     ["PAC-12", "Pac-12"],
     ["SEC", "SEC"],
     ["SUN BELT", "Sun Belt"],
+  ];
+
+  const MATCHUP_OPTIONS = [
+    ["", "All Matchups"],
+    ["thi25", "THI 25"],
+    ["g6g6", "G6 vs G6"],
+    ["p4p4", "P4 vs P4"],
   ];
 
   const SIGNAL_OPTIONS = [
@@ -310,6 +318,17 @@
       : home === currentConferenceFilter || away === currentConferenceFilter;
   }
 
+  function gameMatchesMatchup(game) {
+    return window.THIMatchupFilters?.matchesGameFilter?.({
+      sport: "CFB",
+      filter: currentMatchupFilter,
+      homeConference: game?.home?.conference,
+      awayConference: game?.away?.conference,
+      homeRank: cfbThiRank(game?.home?.team),
+      awayRank: cfbThiRank(game?.away?.team),
+    }) ?? true;
+  }
+
   function gameMatchesSignal(game) {
     if (!currentSignalFilter) return true;
     return canonicalSignal(effectiveComparison(game).signal) === currentSignalFilter;
@@ -342,6 +361,7 @@
     filterBar.id = "projection-filter-bar";
     filterBar.className = "projection-filter-bar";
     filterBar.innerHTML = `
+      ${selectMarkup("matchup-filter", "Matchup", MATCHUP_OPTIONS)}
       ${selectMarkup("conference-filter", "Conference", CONFERENCE_OPTIONS)}
       ${selectMarkup("signal-filter", "Model Signal", SIGNAL_OPTIONS)}
       ${selectMarkup("confidence-filter", "Confidence", CONFIDENCE_OPTIONS)}
@@ -350,10 +370,16 @@
 
     searchWrap.insertAdjacentElement("afterend", filterBar);
 
+    const matchup = document.getElementById("matchup-filter");
     const conference = document.getElementById("conference-filter");
     const signal = document.getElementById("signal-filter");
     const confidence = document.getElementById("confidence-filter");
     const clear = document.getElementById("clear-projection-filters");
+
+    matchup?.addEventListener("change", event => {
+      currentMatchupFilter = event.target.value;
+      renderProjections();
+    });
 
     conference?.addEventListener("change", event => {
       currentConferenceFilter = event.target.value;
@@ -371,10 +397,12 @@
     });
 
     clear?.addEventListener("click", () => {
+      currentMatchupFilter = "";
       currentConferenceFilter = "";
       currentSignalFilter = "";
       currentConfidenceFilter = "";
 
+      if (matchup) matchup.value = "";
       if (conference) conference.value = "";
       if (signal) signal.value = "";
       if (confidence) confidence.value = "";
@@ -388,16 +416,19 @@
     window.hammerProjectionFilters = {
       getState() {
         return {
+          matchup: currentMatchupFilter,
           conference: currentConferenceFilter,
           signal: currentSignalFilter,
           confidence: currentConfidenceFilter
         };
       },
       setState(state = {}, options = {}) {
+        currentMatchupFilter = state.matchup || "";
         currentConferenceFilter = state.conference || "";
         currentSignalFilter = state.signal || "";
         currentConfidenceFilter = state.confidence || "";
 
+        if (matchup) matchup.value = currentMatchupFilter;
         if (conference) conference.value = currentConferenceFilter;
         if (signal) signal.value = currentSignalFilter;
         if (confidence) confidence.value = currentConfidenceFilter;
@@ -1024,10 +1055,10 @@
           width:100%;
         }
 
-        .projection-filter:nth-child(3) { grid-column:1 / -1; }
-
         .projection-filter-select,
         .clear-filter-button { width:100%; }
+
+        .clear-filter-button { grid-column:1 / -1; }
 
         .signal-legend-grid {
           grid-template-columns:repeat(2,minmax(0,1fr));
@@ -1446,6 +1477,7 @@
           if (!home.includes(query) && !away.includes(query)) return false;
         }
 
+        if (!gameMatchesMatchup(game)) return false;
         if (!gameMatchesConference(game)) return false;
         if (!gameMatchesSignal(game)) return false;
         if (!gameMatchesConfidence(game)) return false;
