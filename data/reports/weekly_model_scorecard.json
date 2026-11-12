@@ -3,14 +3,16 @@
   "definition": "First captured prospective Model A snapshot per game. MAE is mean absolute error against the final margin or total. Incomplete and unmatched games are excluded from MAE and counted separately. Later model snapshots never replace the first one.",
   "season": {
     "frozen_snapshot_games": 632,
-    "settled_games": 554,
+    "qualified_snapshot_games": 631,
+    "excluded_material_availability_games": 1,
+    "settled_games": 553,
     "unsettled_or_unmatched": 78,
-    "model_margin_mae_points": 12.26,
-    "model_margin_sample": 554,
+    "model_margin_mae_points": 12.24,
+    "model_margin_sample": 553,
     "market_snapshot_margin_mae_points": 11.81,
-    "market_snapshot_margin_sample": 554,
-    "model_total_mae_points": 13.38,
-    "model_total_sample": 554,
+    "market_snapshot_margin_sample": 553,
+    "model_total_mae_points": 13.37,
+    "model_total_sample": 553,
     "market_comparison_definition": "Market MAE uses the market-implied margin captured in the same first prospective snapshot as the Model A forecast. It is a same-snapshot benchmark, not a closing-line comparison."
   },
   "weeks": [
@@ -106,13 +108,13 @@
     },
     {
       "week": 10,
-      "games_with_frozen_snapshots": 62,
-      "settled_games": 62,
+      "games_with_frozen_snapshots": 61,
+      "settled_games": 61,
       "unsettled_or_unmatched": 0,
-      "margin_mae_points": 13.48,
-      "margin_sample": 62,
-      "total_mae_points": 15.1,
-      "total_sample": 62
+      "margin_mae_points": 13.34,
+      "margin_sample": 61,
+      "total_mae_points": 15.02,
+      "total_sample": 61
     },
     {
       "week": 11,

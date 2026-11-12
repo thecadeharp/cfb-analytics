@@ -276,7 +276,11 @@ def latest_settled_rows(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]
     """Use the final pregame tracked state, never an obsolete early snapshot."""
     selected: dict[str, dict[str, Any]] = {}
     for row in rows:
-        if not row.get("result_settled") or number(row.get("snapshot_home_spread")) is None:
+        if (
+            not row.get("result_settled")
+            or row.get("tracking_eligible", True) is False
+            or number(row.get("snapshot_home_spread")) is None
+        ):
             continue
         key = game_key(row)
         current = selected.get(key)

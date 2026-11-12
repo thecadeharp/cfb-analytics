@@ -224,6 +224,8 @@ def main():
     grouped = {signal: [] for signal in SIGNAL_ORDER}
 
     for game_key, row in settled_first.items():
+        if row.get("tracking_eligible", True) is False:
+            continue
         signal = normalize_signal(row.get("signal"))
         if signal not in grouped:
             continue

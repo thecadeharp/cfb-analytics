@@ -50,6 +50,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SNAPSHOT_LEDGER = ROOT / "data" / "snapshots" / "projection_market_snapshots.jsonl"
 CLOSING_LEDGER = ROOT / "data" / "snapshots" / "closing_lines.jsonl"
 CLV_REPORT = ROOT / "data" / "reports" / "clv_report.json"
+TRACKING_EXCLUSIONS = ROOT / "data" / "tracking_exclusions.json"
 
 RESULT_SOURCES = [
     ROOT / "data" / "results.json",
@@ -544,7 +545,10 @@ def round_or_none(value, digits=3):
 
 
 def summarize(rows):
-    settled = [r for r in rows if r.get("result_settled")]
+    settled = [
+        r for r in rows
+        if r.get("result_settled") and r.get("tracking_eligible", True) is not False
+    ]
     model_errors = [r["model_margin_error"] for r in settled if r.get("model_margin_error") is not None]
     market_errors = [r["market_margin_error"] for r in settled if r.get("market_margin_error") is not None]
     closing_errors = [r["closing_margin_error"] for r in settled if r.get("closing_margin_error") is not None]
@@ -645,12 +649,20 @@ def main():
     results_source, results = load_completed_results()
     result_indexes = build_result_indexes(results)
     closing_index = build_closing_index(closings)
+    exclusion_payload = load_json(TRACKING_EXCLUSIONS) or {}
+    exclusions = exclusion_payload.get("exclusions") or []
+    exclusions_by_game = {
+        str(item.get("game_id")): item
+        for item in exclusions
+        if item.get("exclude_from_qualified_tracking") and item.get("game_id") is not None
+    }
 
     rows = []
     match_method_counts = defaultdict(int)
 
     for snapshot in snapshots:
         key = game_key(snapshot)
+        exclusion = exclusions_by_game.get(str(key))
         result, match_method = match_result(snapshot, result_indexes, results)
         closing = match_closing(snapshot, closing_index)
         comparison = snapshot.get("comparison_at_snapshot") or {}
@@ -738,6 +750,14 @@ def main():
             ),
             "result_settled": result is not None,
         })
+        if exclusion:
+            rows[-1].update({
+                "tracking_eligible": False,
+                "tracking_exclusion_code": exclusion.get("code"),
+                "tracking_exclusion_scope": exclusion.get("scope"),
+                "tracking_exclusion_reason": exclusion.get("reason"),
+                "diagnostic_only": True,
+            })
 
     # Earliest prospective snapshot per provider game key is the clean reference.
     first_by_game = {}
@@ -809,6 +829,9 @@ def main():
             "initial_snapshots_unmatched": sum(1 for r in initial_rows if not r["result_settled"]),
             "initial_snapshots_pending_future": len(pending_future),
             "initial_snapshots_past_due_unmatched": len(past_due_unmatched),
+            "qualified_tracking_games_excluded": sum(
+                1 for r in initial_rows if r.get("tracking_eligible") is False
+            ),
         },
         "result_match_methods_initial": dict(sorted(initial_match_counts.items())),
         "result_match_methods_all_snapshots": dict(sorted(match_method_counts.items())),
@@ -842,7 +865,7 @@ def main():
     ]
 
     with REPORT_CSV.open("w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fields)
+        writer = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(rows)
 

@@ -112,7 +112,7 @@ def main():
     games = {}
     for row in sorted(settled.get("rows") or [], key=lambda item: str(item.get("captured_at_utc") or "")):
         game_id = str(row.get("game_key") or "")
-        if not game_id or not row.get("result_settled"):
+        if not game_id or not row.get("result_settled") or row.get("tracking_eligible", True) is False:
             continue
         if finite(row.get("actual_home_margin")) is None or finite(row.get("closing_home_spread")) is None:
             continue

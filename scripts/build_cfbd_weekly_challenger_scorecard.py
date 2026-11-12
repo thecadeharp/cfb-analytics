@@ -23,7 +23,7 @@ def build(pack: Path, settled: dict, audit: dict) -> dict:
     evaluated = []
     for row in source:
         result = first.get(str(row.get("id") or ""))
-        if not result or not result.get("result_settled"): continue
+        if not result or not result.get("result_settled") or result.get("tracking_eligible", True) is False: continue
         actual = number(result.get("actual_home_margin")); opening = number(row.get("spread")); model = number(result.get("model_home_spread")); current = number(result.get("snapshot_home_spread"))
         if actual is None: continue
         evaluated.append({"actual": actual, "opening": opening, "model": model, "current": current})

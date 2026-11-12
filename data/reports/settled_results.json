@@ -23,8 +23,9 @@
     "completed_games_found": 739,
     "initial_snapshots_settled": 554,
     "initial_snapshots_unmatched": 78,
-    "initial_snapshots_pending_future": 76,
-    "initial_snapshots_past_due_unmatched": 2
+    "initial_snapshots_pending_future": 74,
+    "initial_snapshots_past_due_unmatched": 4,
+    "qualified_tracking_games_excluded": 1
   },
   "result_match_methods_initial": {
     "exact_game_id": 50,
@@ -38,24 +39,24 @@
   },
   "initial_snapshot_summary": {
     "rows": 632,
-    "settled_rows": 554,
-    "model_mae": 12.261,
-    "model_rmse": 15.54,
-    "market_snapshot_mae": 11.814,
-    "market_snapshot_rmse": 14.925,
+    "settled_rows": 553,
+    "model_mae": 12.242,
+    "model_rmse": 15.524,
+    "market_snapshot_mae": 11.806,
+    "market_snapshot_rmse": 14.922,
     "closing_proxy_mae": 10.826,
     "closing_proxy_rmse": 13.781,
     "model_beats_snapshot_market_count": 247,
-    "snapshot_market_beats_model_count": 281,
+    "snapshot_market_beats_model_count": 280,
     "prediction_error_ties": 26,
     "ats_wins": 274,
-    "ats_losses": 251,
+    "ats_losses": 250,
     "ats_pushes": 4,
-    "ats_win_pct_ex_pushes": 52.2,
+    "ats_win_pct_ex_pushes": 52.3,
     "total_wins": 98,
-    "total_losses": 100,
+    "total_losses": 99,
     "total_pushes": 1,
-    "total_win_pct_ex_pushes": 49.5
+    "total_win_pct_ex_pushes": 49.7
   },
   "initial_snapshot_by_signal": {
     "AGREE W/ MARKET": {
@@ -102,24 +103,24 @@
     },
     "EDGE": {
       "rows": 83,
-      "settled_rows": 72,
-      "model_mae": 11.979,
-      "model_rmse": 15.571,
-      "market_snapshot_mae": 10.944,
-      "market_snapshot_rmse": 14.288,
+      "settled_rows": 71,
+      "model_mae": 11.831,
+      "model_rmse": 15.451,
+      "market_snapshot_mae": 10.866,
+      "market_snapshot_rmse": 14.254,
       "closing_proxy_mae": 10.7,
       "closing_proxy_rmse": 13.327,
       "model_beats_snapshot_market_count": 30,
-      "snapshot_market_beats_model_count": 42,
+      "snapshot_market_beats_model_count": 41,
       "prediction_error_ties": 0,
       "ats_wins": 39,
-      "ats_losses": 31,
+      "ats_losses": 30,
       "ats_pushes": 2,
-      "ats_win_pct_ex_pushes": 55.7,
+      "ats_win_pct_ex_pushes": 56.5,
       "total_wins": 9,
-      "total_losses": 16,
+      "total_losses": 15,
       "total_pushes": 0,
-      "total_win_pct_ex_pushes": 36.0
+      "total_win_pct_ex_pushes": 37.5
     },
     "LEAN": {
       "rows": 28,
@@ -229,24 +230,24 @@
   },
   "all_snapshot_summary": {
     "rows": 9049,
-    "settled_rows": 8510,
-    "model_mae": 11.855,
-    "model_rmse": 15.081,
-    "market_snapshot_mae": 11.232,
-    "market_snapshot_rmse": 14.296,
+    "settled_rows": 8500,
+    "model_mae": 11.844,
+    "model_rmse": 15.073,
+    "market_snapshot_mae": 11.227,
+    "market_snapshot_rmse": 14.294,
     "closing_proxy_mae": 10.796,
     "closing_proxy_rmse": 13.768,
     "model_beats_snapshot_market_count": 3559,
-    "snapshot_market_beats_model_count": 4513,
+    "snapshot_market_beats_model_count": 4503,
     "prediction_error_ties": 438,
     "ats_wins": 4071,
-    "ats_losses": 3898,
+    "ats_losses": 3888,
     "ats_pushes": 182,
     "ats_win_pct_ex_pushes": 51.1,
     "total_wins": 1840,
-    "total_losses": 1783,
+    "total_losses": 1773,
     "total_pushes": 13,
-    "total_win_pct_ex_pushes": 50.8
+    "total_win_pct_ex_pushes": 50.9
   },
   "rows": [
     {
@@ -426231,7 +426232,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "483a929f3ca20ffe1560226a",
@@ -429715,7 +429721,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "9e07cc05a660763ecfee4aff",
@@ -432991,7 +433002,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "fe0fdcd58ab93e56df7fd6f7",
@@ -438139,7 +438155,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "159e2a50cd89232004c73ec3",
@@ -441363,7 +441384,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "0620dbbf11041f340aaddbc3",
@@ -444483,7 +444509,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "cae9e26b9826e4f39f35e1d2",
@@ -447499,7 +447530,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "c98f7d658cc5605d6cbf1219",
@@ -451035,7 +451071,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "f4cc8e5abd639300b0abb8d8",
@@ -454883,7 +454924,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "9f9bfbef7c7f418c11af8a5e",
@@ -458471,7 +458517,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "53b76e946d7c87251638f673",

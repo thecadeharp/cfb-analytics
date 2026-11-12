@@ -412,7 +412,7 @@
     return [...spreadRows, ...totalRows];
   }
 
-  function scorecardMarkup(period, selectedRows, ytdRows) {
+  function scorecardMarkup(period, selectedRows, ytdRows, excludedRows = []) {
     const selected = performanceStats(selectedRows);
     const ytd = performanceStats(ytdRows);
     const body = signalRows(ytdRows).map(item => `<tr>
@@ -430,7 +430,7 @@
     }).join("");
     return `<div class="perf-shell">
       <div class="perf-header"><div><div class="perf-kicker">🔨 Transparent Model Tracking</div><div class="perf-title">${weekLabel} Performance</div></div>
-      <div class="perf-note">Frozen pregame projections graded against final scores and closing markets. Pushes are excluded from win percentages.</div></div>
+      <div class="perf-note">Frozen pregame projections graded against final scores and closing markets. Pushes are excluded from win percentages.${excludedRows.length ? ` ${excludedRows.length} game${excludedRows.length === 1 ? "" : "s"} retained for diagnostics but excluded from qualified records after a material late availability change.` : ""}</div></div>
       <div class="perf-periods" aria-label="Model tracking period">${periodButtons}</div>
       <div class="perf-section-label">${weekLabel}</div>
       <div class="perf-grid">
@@ -462,14 +462,16 @@
   function applyPerformanceScorecard() {
     const target = document.getElementById("model-tracking-container");
     if (!target || !settledByGame.size) return;
-    const ytdRows = Array.from(settledByGame.values()).filter(row => row.result_settled);
+    const allSettledRows = Array.from(settledByGame.values()).filter(row => row.result_settled);
+    const excludedRows = allSettledRows.filter(row => row.tracking_eligible === false);
+    const ytdRows = allSettledRows.filter(row => row.tracking_eligible !== false);
     const selectedRows = ytdRows.filter(row => trackingWeek === "ALL" || Number(row.week) === Number(trackingWeek));
-    const signature = `${trackingWeek}|${selectedRows.length}|${ytdRows.length}|${payload?.meta?.generated_at_utc || ""}|${signalReport?.generated_at_utc || ""}`;
+    const signature = `${trackingWeek}|${selectedRows.length}|${ytdRows.length}|${excludedRows.length}|${payload?.meta?.generated_at_utc || ""}|${signalReport?.generated_at_utc || ""}`;
     let card = document.getElementById(SCORECARD_ID);
     if (!card) { target.innerHTML = ""; card = document.createElement("section"); card.id = SCORECARD_ID; target.appendChild(card); }
     if (card.dataset.signature === signature) return;
     card.dataset.signature = signature;
-    card.innerHTML = scorecardMarkup(trackingWeek,selectedRows,ytdRows);
+    card.innerHTML = scorecardMarkup(trackingWeek,selectedRows,ytdRows,excludedRows);
   }
 
   function mountTrackingView() {
