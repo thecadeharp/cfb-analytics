@@ -1771,6 +1771,38 @@ function ensureMatchupView() {
       display:flex; align-items:center; justify-content:space-between; gap:10px;
     }
     .thi-availability-team-head strong { font-size:12px; }
+    .thi-availability-impact-summary {
+      display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:12px;
+    }
+    .thi-availability-impact-label { color:var(--muted); font:800 8px var(--mono); letter-spacing:.4px; text-transform:uppercase; }
+    .thi-availability-impact-values { display:flex; align-items:center; gap:8px; }
+    .thi-availability-impact-score {
+      display:inline-flex; align-items:baseline; gap:4px; min-width:58px;
+      justify-content:center; padding:6px 8px; border:1px solid var(--border-dark);
+      border-radius:8px; background:var(--surface-soft); font:800 14px var(--mono);
+    }
+    .thi-availability-impact-score small { color:var(--muted); font-size:7px; text-transform:uppercase; }
+    .thi-availability-impact-tier {
+      display:inline-flex; padding:4px 7px; border-radius:999px; border:1px solid var(--border);
+      font:800 7px var(--mono); letter-spacing:.35px; text-transform:uppercase;
+    }
+    .thi-availability-impact-tier[data-tier="low"] { color:#17664f; border-color:#79b39f; background:rgba(83,196,157,.12); }
+    .thi-availability-impact-tier[data-tier="moderate"] { color:#806100; border-color:#c9a93a; background:rgba(224,190,64,.14); }
+    .thi-availability-impact-tier[data-tier="high"] { color:#a45300; border-color:#d58a3d; background:rgba(231,143,55,.15); }
+    .thi-availability-impact-tier[data-tier="severe"] { color:#a53b34; border-color:#d4756e; background:rgba(222,84,75,.15); }
+    .thi-availability-position-grid {
+      display:grid; grid-template-columns:repeat(9,minmax(0,1fr)); gap:4px;
+      margin-top:12px;
+    }
+    .thi-availability-position {
+      min-width:0; padding:7px 3px; border:1px solid var(--border); border-radius:6px;
+      background:var(--surface-soft); text-align:center;
+    }
+    .thi-availability-position span { display:block; color:var(--muted); font:700 7px var(--mono); }
+    .thi-availability-position strong { display:block; margin-top:4px; font:800 10px var(--mono); }
+    .thi-availability-position[data-impact="moderate"] { background:rgba(224,190,64,.12); border-color:rgba(201,169,58,.65); }
+    .thi-availability-position[data-impact="high"] { background:rgba(231,143,55,.14); border-color:rgba(213,138,61,.72); }
+    .thi-availability-position[data-impact="severe"] { background:rgba(222,84,75,.15); border-color:rgba(212,117,110,.76); }
     .thi-availability-source {
       color:var(--green); font-family:var(--mono); font-size:8px;
       font-weight:700; text-decoration:none; text-align:right;
@@ -1781,6 +1813,12 @@ function ensureMatchupView() {
     .thi-availability-item { padding:11px 0; border-top:1px solid var(--border); }
     .thi-availability-item-top { justify-content:flex-start; }
     .thi-availability-item-top strong { font-size:11px; }
+    .thi-availability-player-impact {
+      margin-left:auto; display:inline-flex; align-items:center; gap:4px; padding:4px 7px;
+      border:1px solid var(--border); border-radius:999px; background:var(--surface-soft);
+      color:var(--text); font:800 8px var(--mono); white-space:nowrap;
+    }
+    .thi-availability-player-impact small { color:var(--muted); font-size:6px; text-transform:uppercase; }
     .thi-availability-status {
       display:inline-flex; padding:4px 7px; border:1px solid var(--border);
       border-radius:999px; font-family:var(--mono); font-size:7px;
@@ -1804,6 +1842,16 @@ function ensureMatchupView() {
     }
     .thi-availability-foot {
       padding:10px 16px; border-top:1px solid var(--border); background:var(--surface-soft);
+    }
+    .thi-availability-method {
+      border-top:1px solid var(--border); background:var(--surface-soft);
+    }
+    .thi-availability-method summary {
+      cursor:pointer; padding:10px 16px; color:var(--muted); font:800 8px var(--mono);
+      letter-spacing:.4px; text-transform:uppercase;
+    }
+    .thi-availability-method p {
+      margin:0; padding:0 16px 12px; color:var(--muted); font-size:9px; line-height:1.6;
     }
     .thi-availability-scenario {
       display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px;
@@ -2494,6 +2542,7 @@ function ensureMatchupView() {
       .cfb-live-team-grid, .cfb-live-flow-grid { grid-template-columns:1fr; }
       .thi-availability-head { flex-direction:column; }
       .thi-availability-disclosure { text-align:left; }
+      .thi-availability-position-grid { grid-template-columns:repeat(5,minmax(0,1fr)); }
     }
 
     @media (max-width:520px) {
@@ -2505,6 +2554,7 @@ function ensureMatchupView() {
       .thi-matchup-section-note { text-align:left; }
       .thi-tale-grid { grid-template-columns:1fr; }
       .thi-availability-grid { grid-template-columns:1fr; }
+      .thi-availability-position-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
       .thi-availability-scenario { grid-template-columns:1fr; }
       .thi-availability-team + .thi-availability-team {
         border-top:1px solid var(--border); border-left:none;
@@ -7642,12 +7692,50 @@ function availabilityStatusClass(status) {
   return "unknown";
 }
 
+function availabilityImpactForTeam(teamName, notes = currentAvailabilityNotes(teamName)) {
+  if (!window.THIAvailabilityImpact?.rateTeam) return null;
+  return window.THIAvailabilityImpact.rateTeam(
+    notes,
+    teamName,
+    rosterAssetsData,
+    window.THIPlayerIntelligence
+  );
+}
+
+function availabilityImpactLevel(value) {
+  const amount = Number(value) || 0;
+  if (amount >= 25) return "severe";
+  if (amount >= 12) return "high";
+  if (amount >= 5) return "moderate";
+  return amount > 0 ? "low" : "none";
+}
+
+function availabilityImpactSummaryMarkup(impact) {
+  if (!impact) return "";
+  const positionOrder = window.THIAvailabilityImpact?.POSITION_ORDER ?? [];
+  return `
+    <div class="thi-availability-impact-summary">
+      <span class="thi-availability-impact-label">THI availability impact</span>
+      <span class="thi-availability-impact-values">
+        <span class="thi-availability-impact-tier" data-tier="${escapeHtml(impact.tier.key)}">${escapeHtml(impact.tier.label)}</span>
+        <span class="thi-availability-impact-score">${escapeHtml(impact.total)} <small>/ 100</small></span>
+      </span>
+    </div>
+    <div class="thi-availability-position-grid" aria-label="Availability impact by position group">
+      ${positionOrder.map(group => {
+        const value = Number(impact.byPosition?.[group]) || 0;
+        return `<div class="thi-availability-position" data-impact="${availabilityImpactLevel(value)}"><span>${escapeHtml(group)}</span><strong>${escapeHtml(value || "—")}</strong></div>`;
+      }).join("")}
+    </div>`;
+}
+
 function availabilityTeamMarkup(teamName) {
   const team = getTeam(teamName) ?? {};
   const conference = team?.conference ?? "Independent";
   const source = rosterNotesData?.conference_sources?.[conference];
   const officialUrl = String(source?.url ?? "");
   const notes = currentAvailabilityNotes(teamName);
+  const impact = availabilityImpactForTeam(teamName, notes);
   const sourceLink = /^https:\/\//i.test(officialUrl)
     ? `<a class="thi-availability-source" href="${escapeHtml(officialUrl)}" target="_blank" rel="noopener noreferrer">Official ${escapeHtml(conference)} reports ↗</a>`
     : `<span class="thi-availability-source muted">No official conference index listed</span>`;
@@ -7660,23 +7748,27 @@ function availabilityTeamMarkup(teamName) {
         </div>
         ${sourceLink}
       </div>
+      ${notes.length ? availabilityImpactSummaryMarkup(impact) : ""}
       ${notes.length ? `
         <div class="thi-availability-list">
-          ${notes.map(note => {
+          ${notes.map((note, noteIndex) => {
             const status = String(note?.status ?? "Update");
             const player = String(note?.player ?? "").trim();
             const position = String(note?.position ?? "").trim();
             const adjustment = Number(note?.availability_adjustment_points);
+            const playerImpact = impact?.players?.[noteIndex];
             return `
               <div class="thi-availability-item">
                 <div class="thi-availability-item-top">
                   <span class="thi-availability-status ${availabilityStatusClass(status)}">${escapeHtml(status)}</span>
                   ${player ? `<strong>${escapeHtml(player)}${position ? ` · ${escapeHtml(position)}` : ""}</strong>` : ""}
+                  ${playerImpact ? `<span class="thi-availability-player-impact">${escapeHtml(playerImpact.score.toFixed(1))} <small>/ 10 impact</small></span>` : ""}
                 </div>
                 <div class="thi-availability-copy">${escapeHtml(note.text)}</div>
                 <div class="thi-availability-meta">
                   Verified ${escapeHtml(new Date(note.verified_at_utc).toLocaleString())}
                   · <a href="${escapeHtml(note.source_url)}" target="_blank" rel="noopener noreferrer">Source ↗</a>
+                  ${playerImpact ? ` · Impact evidence ${escapeHtml(playerImpact.confidence)}` : ""}
                   ${Number.isFinite(adjustment) ? ` · Research scenario ${formatSigned(adjustment, 1)} pts` : ""}
                 </div>
               </div>`;
@@ -7726,6 +7818,10 @@ function availabilityReportMarkup(awayName, homeName, game) {
       <div class="thi-availability-foot">
         Reports expire after seven days. Negative team-value points represent a downgrade. The scenario is shown separately and is never inserted into the published Model A projection.
       </div>
+      <details class="thi-availability-method">
+        <summary>How THI Availability Impact is calculated</summary>
+        <p>Availability Impact is a 0–100 display-only concern score, not a projected point-spread adjustment. Each verified status is weighted by status severity, position leverage, recorded current-season workload within that position group and, when available, THI's position-specific production rating. Player scores are capped at 10 and rolled into the team and position totals. Missing roster or workload evidence lowers confidence rather than inventing a starter designation. The published Model A projection remains unchanged.</p>
+      </details>
     </section>`;
 }
 
