@@ -15,6 +15,8 @@ THI does not infer official starters, snap counts, injury severity, or a healthy
 
 Each player also receives a conservative full-absence point sensitivity. This estimates how much a newly absent player could matter versus a full-strength baseline; it is not automatically deducted from Model A. Position ceilings are 6.0 points for QB, 1.2 for RB, 1.3 for WR, 0.8 for TE and DL, 0.65 for OL and LB, 0.70 for DB, and 0.35 for special teams. Recorded role, production and position leverage determine the value beneath the ceiling.
 
+Quarterback uses a stricter replacement-aware curve. Production rating, observed role and the rating gap to the best observed backup determine the base value. Reaching 6.0 additionally requires a production rating of at least 94 and a replacement-gap score of at least 0.75. A clear but non-elite starter should generally remain in the 3–4 point range rather than inheriting the positional maximum.
+
 The current report exposure applies the status-severity weight, discounts additional absences through diminishing returns, caps non-QB accumulation at four points and caps the full team exposure at eight. THI still requires a separate, timestamped adjustment before changing the availability-adjusted scenario. This prevents double-counting a season-long absence already reflected in the team's observed performance.
 
 ## Calculation

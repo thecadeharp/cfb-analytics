@@ -121,6 +121,35 @@
     return clamp(rating / 100);
   }
 
+  function quarterbackPointValue(player, roster, playerIntelligence, roleScore, production) {
+    const athleteId = String(player?.athlete_id ?? "");
+    const rating = production === null ? 55 : production * 100;
+    const replacementRatings = roster
+      .filter(candidate => positionGroup(candidate?.position) === "QB"
+        && String(candidate?.athlete_id ?? "") !== athleteId)
+      .map(candidate => productionRating(candidate, playerIntelligence))
+      .filter(value => value !== null && value > 0)
+      .map(value => value * 100);
+    const replacementRating = replacementRatings.length
+      ? Math.max(...replacementRatings)
+      : 45;
+    const eliteScore = clamp((rating - 60) / 36);
+    const replacementGapScore = clamp((rating - replacementRating) / 45);
+    const sixPointBonus = rating >= 94 && replacementGapScore >= 0.75 ? 0.15 : 0;
+    const valueShare = clamp(
+      0.10
+      + 0.40 * eliteScore
+      + 0.25 * replacementGapScore
+      + 0.10 * roleScore
+      + sixPointBonus
+    );
+    return {
+      value: Math.round(POSITION_POINT_CAP.QB * valueShare * 10) / 10,
+      replacementRating: Math.round(replacementRating * 10) / 10,
+      sixPointEligible: sixPointBonus > 0,
+    };
+  }
+
   function impactTier(value) {
     if (value >= 50) return {key: "severe", label: "Severe"};
     if (value >= 30) return {key: "high", label: "High"};
@@ -164,7 +193,12 @@
       const severity = statusSeverity(note?.status);
       const score = Math.round(severity * 10 * clamp(roleValue) * 10) / 10;
       const pointCap = POSITION_POINT_CAP[group] ?? POSITION_POINT_CAP.OTHER;
-      const absenceValuePoints = Math.round(pointCap * (0.10 + 0.90 * clamp(roleValue)) * 10) / 10;
+      const quarterbackValue = group === "QB"
+        ? quarterbackPointValue(matchedPlayer, roster, playerIntelligence, roleScore, production)
+        : null;
+      const absenceValuePoints = quarterbackValue
+        ? quarterbackValue.value
+        : Math.round(pointCap * (0.10 + 0.90 * clamp(roleValue)) * 10) / 10;
       const currentExposurePoints = Math.round(absenceValuePoints * severity * 10) / 10;
       const confidence = matchedPlayer && workload > 0 && production !== null
         ? "high"
@@ -176,6 +210,8 @@
         severity,
         absenceValuePoints,
         currentExposurePoints,
+        replacementRating: quarterbackValue?.replacementRating ?? null,
+        sixPointEligible: quarterbackValue?.sixPointEligible ?? false,
         confidence,
         matchedPlayer: Boolean(matchedPlayer),
         workloadShare,
