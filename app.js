@@ -16,6 +16,7 @@ const DATA_URLS = {
   hfa: "./data/hfa_2026.json",
   results: "./data/results.json",
   liveScores: "./data/live_scores.json",
+  cfbLiveCenter: "./data/cfb_live_center.json",
   openWeeklyRatings: "./data/open_weekly_ratings.json",
   teamMetricProfiles: "./data/team_metric_profiles.json",
   teamMarketPerformance: "./data/team_market_performance.json",
@@ -42,6 +43,7 @@ let rosterAssetsPromise = null;
 let hfaData = null;
 let resultsData = null;
 let liveScoresData = null;
+let cfbLiveCenterData = null;
 let openWeeklyRatingsData = null;
 let teamMetricProfilesData = null;
 let teamMarketPerformanceData = null;
@@ -69,6 +71,8 @@ let tapeTeamA = null;
 let tapeTeamB = null;
 let tapeVenue = "neutral";
 let detailReturnState = null;
+let currentMatchupGameId = null;
+let cfbLivePollTimer = null;
 
 
 // ============================================================================
@@ -1075,6 +1079,23 @@ function ensureMatchupView() {
       border-radius:12px; padding:18px 20px; margin-bottom:18px;
       display:flex; justify-content:space-between; align-items:center; gap:20px;
     }
+
+    .cfb-live-center { border-color:#2d6b5a; }
+    .cfb-live-summary, .cfb-live-team-grid, .cfb-live-flow-grid {
+      display:grid; gap:10px; padding:10px;
+    }
+    .cfb-live-summary { grid-template-columns:repeat(4,minmax(0,1fr)); }
+    .cfb-live-team-grid { grid-template-columns:repeat(2,minmax(0,1fr)); padding-top:0; }
+    .cfb-live-flow-grid { grid-template-columns:1.15fr .85fr; padding-top:0; }
+    .cfb-live-card { padding:13px; border:1px solid var(--border); border-radius:10px; background:var(--surface-soft); }
+    .cfb-live-card span { display:block; color:var(--muted); font:700 8px var(--mono); letter-spacing:.7px; text-transform:uppercase; }
+    .cfb-live-card strong { display:block; margin-top:6px; font-size:17px; }
+    .cfb-live-metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:11px; }
+    .cfb-live-metrics div { padding-top:8px; border-top:1px solid var(--border); color:var(--muted); font:600 9px var(--mono); }
+    .cfb-live-metrics b { display:block; margin-top:4px; color:var(--text); font-size:12px; }
+    .cfb-live-drive { display:grid; grid-template-columns:1fr auto auto; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); font-size:10px; }
+    .cfb-live-drive:last-child { border-bottom:0; }
+    .cfb-live-policy { padding:0 12px 12px; color:var(--muted); font:600 8px/1.55 var(--mono); }
 
     .model-edge-title, .analysis-label, .analysis-panel-title,
     .season-summary-label {
@@ -2469,6 +2490,8 @@ function ensureMatchupView() {
       .matchup-header, .model-edge-banner {
         flex-direction:column; align-items:flex-start;
       }
+      .cfb-live-summary { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .cfb-live-team-grid, .cfb-live-flow-grid { grid-template-columns:1fr; }
       .thi-availability-head { flex-direction:column; }
       .thi-availability-disclosure { text-align:left; }
     }
@@ -2567,6 +2590,31 @@ async function loadJson(url) {
   return response.json();
 }
 
+async function pollCfbLiveData() {
+  if (document.hidden) return;
+  try {
+    const [scores, center] = await Promise.all([
+      loadJson(DATA_URLS.liveScores),
+      loadJson(DATA_URLS.cfbLiveCenter),
+    ]);
+    const previousStamp = cfbLiveCenterData?.meta?.generated_at_utc;
+    liveScoresData = scores;
+    cfbLiveCenterData = center;
+    if (currentMatchupGameId && previousStamp !== center?.meta?.generated_at_utc && document.getElementById("view-matchup")?.classList.contains("active")) {
+      const game = findGame(currentMatchupGameId);
+      if (game) renderMatchup(game);
+    }
+  } catch (_error) {
+    // Retain the last verified live payload and retry on the next pulse.
+  }
+}
+
+function startCfbLivePolling() {
+  if (cfbLivePollTimer) return;
+  cfbLivePollTimer = window.setInterval(pollCfbLiveData, 20_000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) pollCfbLiveData(); });
+}
+
 function ensureRosterAssetsLoaded() {
   if (rosterAssetsData) return Promise.resolve(rosterAssetsData);
   if (rosterAssetsPromise) return rosterAssetsPromise;
@@ -2601,6 +2649,7 @@ async function init() {
       hfaData,
       resultsData,
       liveScoresData,
+      cfbLiveCenterData,
       openWeeklyRatingsData,
       teamMetricProfilesData,
       teamMarketPerformanceData,
@@ -2624,6 +2673,7 @@ async function init() {
       loadJson(DATA_URLS.hfa),
       loadJson(DATA_URLS.results).catch(() => null),
       loadJson(DATA_URLS.liveScores).catch(() => null),
+      loadJson(DATA_URLS.cfbLiveCenter).catch(() => ({ meta: {}, games: [] })),
       loadJson(DATA_URLS.openWeeklyRatings).catch(() => null),
       loadJson(DATA_URLS.teamMetricProfiles).catch(() => null),
       loadJson(DATA_URLS.teamMarketPerformance).catch(() => null),
@@ -2653,6 +2703,7 @@ async function init() {
     renderRatings();
     initializeMatchupAnalysis();
     attachEvents();
+    startCfbLivePolling();
 
     const sharedMatchup = window.location.hash.match(/^#matchup=([^&]+)$/);
     if (sharedMatchup) {
@@ -3108,6 +3159,7 @@ function findGame(gameId) {
 function openMatchup(gameId, options = {}) {
   const game = findGame(gameId);
   if (!game) return;
+  currentMatchupGameId = String(gameId);
   window.THIAnalytics?.viewMatchup({
     sport: "CFB",
     matchup_id: String(gameId),
@@ -4444,6 +4496,55 @@ function cfbPersonnelMatchupMarkup(awayName, homeName) {
   </details>`;
 }
 
+function cfbLiveRate(value) {
+  if (!hasValue(value)) return "—";
+  const number = Number(value);
+  return `${(Math.abs(number) <= 1 ? number * 100 : number).toFixed(1)}%`;
+}
+
+function cfbLiveTeamMarkup(team = {}) {
+  return `<article class="cfb-live-card">
+    <span>${escapeHtml(team.homeAway || "team")} live profile</span>
+    <strong>${escapeHtml(team.team || "Team")} · ${formatNumber(team.points,0)} pts</strong>
+    <div class="cfb-live-metrics">
+      <div>EPA / play<b>${formatEPA(team.epaPerPlay)}</b></div>
+      <div>Success<b>${cfbLiveRate(team.successRate)}</b></div>
+      <div>Explosiveness<b>${formatNumber(team.explosiveness,2)}</b></div>
+      <div>Pass EPA<b>${formatEPA(team.epaPerPass)}</b></div>
+      <div>Rush EPA<b>${formatEPA(team.epaPerRush)}</b></div>
+      <div>PPO<b>${formatNumber(team.pointsPerOpportunity,2)}</b></div>
+      <div>Line yds / rush<b>${formatNumber(team.lineYardsPerRush,2)}</b></div>
+      <div>Scoring opps<b>${formatNumber(team.scoringOpportunities,0)}</b></div>
+      <div>Deserve-to-win<b>${cfbLiveRate(team.deserveToWin)}</b></div>
+    </div>
+  </article>`;
+}
+
+function cfbLiveCenterMarkup(game) {
+  const live = (cfbLiveCenterData?.games || []).find(row => String(row.game_id) === String(game?.game_id));
+  if (!live) return "";
+  const estimate = live.live_estimate || {};
+  const flow = live.game_flow || {};
+  const score = flow.current_score || {};
+  const final = estimate.projected_final || {};
+  const situation = live.down ? `${live.down}${live.down === 1 ? "st" : live.down === 2 ? "nd" : live.down === 3 ? "rd" : "th"} & ${live.distance ?? "—"}` : "Between plays";
+  return `<section class="thi-matchup-section cfb-live-center" aria-label="CFB live game center">
+    <div class="thi-matchup-section-header"><div><div class="eyebrow">Live game center · analysis only</div><div class="thi-matchup-section-title">${escapeHtml(game.away?.team)} ${formatNumber(score.away,0)} · ${escapeHtml(game.home?.team)} ${formatNumber(score.home,0)}</div></div><div class="thi-matchup-section-note">${escapeHtml(live.status || "LIVE")} · Q${escapeHtml(live.period ?? "—")} ${escapeHtml(live.clock || "")}</div></div>
+    <div class="cfb-live-summary">
+      <div class="cfb-live-card"><span>Current situation</span><strong>${escapeHtml(live.possession || "Possession pending")}</strong><div class="analysis-small">${escapeHtml(situation)} · ${hasValue(live.yards_to_goal) ? `${formatNumber(live.yards_to_goal,0)} yards to goal` : "field position pending"}</div></div>
+      <div class="cfb-live-card"><span>THI live estimate</span><strong>${formatNumber(final.away,1)}–${formatNumber(final.home,1)}</strong><div class="analysis-small">Observed pace blended with frozen pregame projection</div></div>
+      <div class="cfb-live-card"><span>Live total estimate</span><strong>${formatNumber(estimate.projected_total,1)}</strong><div class="analysis-small">Not a live betting line</div></div>
+      <div class="cfb-live-card"><span>${escapeHtml(game.home?.team)} win probability</span><strong>${formatPercent(estimate.home_win_probability,1)}</strong><div class="analysis-small">Display-only estimate</div></div>
+    </div>
+    <div class="cfb-live-team-grid">${(live.teams || []).map(cfbLiveTeamMarkup).join("")}</div>
+    <div class="cfb-live-flow-grid">
+      <article class="cfb-live-card"><span>Recent drives</span>${(live.recent_drives || []).length ? live.recent_drives.map(drive => `<div class="cfb-live-drive"><b>${escapeHtml(drive.offense || "Team")}</b><em>${escapeHtml(drive.result || "Drive")}</em><strong>${formatNumber(drive.pointsGained,0)} pts</strong></div>`).join("") : `<div class="analysis-small">Drive data is still developing.</div>`}</article>
+      <article class="cfb-live-card"><span>Game flow</span><div class="cfb-live-metrics"><div>Competitive plays<b>${formatNumber(flow.competitive_plays,0)}</b></div><div>Garbage-time plays<b>${formatNumber(flow.garbage_time_plays,0)}</b></div><div>Explosive plays<b>${formatNumber(flow.explosive_plays,0)}</b></div><div>${escapeHtml(game.away?.team)} max lead<b>${formatNumber(flow.largest_lead?.away,0)}</b></div><div>${escapeHtml(game.home?.team)} max lead<b>${formatNumber(flow.largest_lead?.home,0)}</b></div><div>Coverage<b>${escapeHtml(live.coverage_state || "developing")}</b></div></div></article>
+    </div>
+    <div class="cfb-live-policy">No live odds or live betting lines are collected or displayed here. The pregame THI projection remains frozen; this section describes what is happening in the game and refreshes when the verified live feed changes.</div>
+  </section>`;
+}
+
 function renderMatchup(game) {
   const container = document.getElementById("matchup-container");
   if (!container) return;
@@ -4540,6 +4641,8 @@ function renderMatchup(game) {
     </div>
 
     ${window.THIIntelligence?.matchupWatchMarkup?.(game) ?? ""}
+
+    ${cfbLiveCenterMarkup(game)}
 
     <div class="model-edge-banner">
       <div>

@@ -4,7 +4,7 @@ set -euo pipefail
 commit_message="${1:-Refresh CFB live score pulse}"
 
 stage_scoreboard() {
-  git add data/results.json data/live_scores.json
+  git add data/results.json data/live_scores.json data/cfb_live_center.json
 }
 
 commit_scoreboard_if_changed() {
@@ -27,6 +27,7 @@ for attempt in 1 2 3 4 5; do
     git rebase --abort || true
     git reset --hard origin/main
     python scripts/fetch_results_no_cfbd.py
+    python scripts/build_cfb_live_center.py
     if ! commit_scoreboard_if_changed; then
       echo "The upstream scoreboard already contains this refresh."
       exit 0

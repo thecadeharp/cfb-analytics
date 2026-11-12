@@ -83,6 +83,7 @@
     projectionConfidence: "all",
     projectionSort: "time",
     projectionStatus: "all",
+    openGameId: null,
     projectionDate: "next",
     projectionLimit: 150,
     teamDataQuery: "",
@@ -320,29 +321,39 @@
 
   function startScorePolling() {
     if (scorePollTimer) return;
-    scorePollTimer = window.setInterval(async () => {
+    const poll = async () => {
       if (state.sport !== "cbb" || !state.loaded || document.hidden) return;
       const oldBoardVersion = state.cacheManifest?.assets?.[PATHS.projectionBoard]?.version;
       const oldTrackingVersion = state.cacheManifest?.assets?.[PATHS.tracking]?.version;
+      const oldLiveVersion = state.cacheManifest?.assets?.[PATHS.liveCenter]?.version;
       try {
         await loadCacheManifest();
         const nextBoardVersion = state.cacheManifest?.assets?.[PATHS.projectionBoard]?.version;
         const nextTrackingVersion = state.cacheManifest?.assets?.[PATHS.tracking]?.version;
-        if ((!nextBoardVersion || nextBoardVersion === oldBoardVersion) && (!nextTrackingVersion || nextTrackingVersion === oldTrackingVersion)) return;
-        const [projectionBoard, postgame, tracking] = await Promise.all([
+        const nextLiveVersion = state.cacheManifest?.assets?.[PATHS.liveCenter]?.version;
+        const boardChanged = nextBoardVersion && nextBoardVersion !== oldBoardVersion;
+        const trackingChanged = nextTrackingVersion && nextTrackingVersion !== oldTrackingVersion;
+        const liveChanged = nextLiveVersion && nextLiveVersion !== oldLiveVersion;
+        if (!boardChanged && !trackingChanged && !liveChanged) return;
+        const [projectionBoard, postgame, tracking, liveCenter] = await Promise.all([
           fetchJson(PATHS.projectionBoard),
           fetchJson(PATHS.postgame).catch(() => state.data.postgame || { meta: {}, games: {} }),
           fetchJson(PATHS.tracking).catch(() => state.data.tracking || { meta: {}, summary: {} }),
+          fetchJson(PATHS.liveCenter).catch(() => state.data.liveCenter || { meta: {}, games: [] }),
         ]);
         state.data.projectionBoard = projectionBoard;
         state.data.postgame = postgame;
         state.data.tracking = tracking;
+        state.data.liveCenter = liveCenter;
         renderProjections();
         renderTracking();
+        if (state.openGameId != null) openGameDetail(state.openGameId, { track: false, preserveScroll: true });
       } catch (_error) {
         // Keep the last valid board visible and retry on the next pulse.
       }
-    }, 60_000);
+    };
+    scorePollTimer = window.setInterval(poll, 20_000);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) poll(); });
   }
 
   function loadDeferred(keys = []) {
@@ -1384,10 +1395,12 @@
     </section>`;
   }
 
-  function openGameDetail(gameId) {
+  function openGameDetail(gameId, options = {}) {
     const game = state.data?.projectionBoard?.games?.find(row => String(row.game_id) === String(gameId));
     if (!game?.projection) return;
-    window.THIAnalytics?.viewMatchup({
+    const priorScroll = options.preserveScroll ? document.getElementById("cbb-team-detail")?.querySelector(".cbb-detail-panel")?.scrollTop : 0;
+    state.openGameId = gameId;
+    if (options.track !== false) window.THIAnalytics?.viewMatchup({
       sport: "CBB",
       matchup_id: String(gameId),
       away_team: game.away?.team,
@@ -1502,7 +1515,7 @@
     detail.classList.add("is-open");
     detail.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
-    panel.scrollTop = 0;
+    panel.scrollTop = options.preserveScroll ? priorScroll : 0;
     wirePossessionSimulator(panel, game);
     panel.querySelector("[data-cbb-share]")?.addEventListener("click", event => copyCbbMatchupLink(game.game_id, event.currentTarget));
     panel.querySelector("[data-cbb-track-play]")?.addEventListener("click", () => {
@@ -2433,6 +2446,7 @@
     detail.classList.remove("is-open", "is-game-page", "is-team-page");
     detail.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
+    state.openGameId = null;
     window.THIAnalytics?.navigate({
       sport: "CBB",
       section: state.cbbView
