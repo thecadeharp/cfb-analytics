@@ -5,6 +5,8 @@ import unittest
 from scripts.build_cbb_live_center import build as build_live
 from scripts.build_cbb_model_lab import build as build_lab
 from scripts.build_cbb_situational_profiles import build as build_situational
+from scripts.build_cbb_coach_profiles import build as build_coaches
+from scripts.cbb_game_flow import game_flow
 
 
 class CbbResearchSurfaceTests(unittest.TestCase):
@@ -28,6 +30,27 @@ class CbbResearchSurfaceTests(unittest.TestCase):
         payload = build_live({"games":[{"game_id":1,"status":"scheduled"}]}, None)
         self.assertEqual(payload["games"],[])
         self.assertEqual(payload["meta"]["live_game_count"],0)
+
+    def test_game_flow_builds_pace_factors_and_foul_context(self):
+        game = {"away":{"team_id":1,"team":"Away","score":25},"home":{"team_id":2,"team":"Home","score":30},"projection":{"total":140,"projected_possessions":68,"home_margin":4}}
+        plays = [
+            {"period":1,"clock":"10:00","homeScore":10,"awayScore":8,"teamId":1,"playType":"Turnover"},
+            {"period":1,"clock":"09:30","homeScore":12,"awayScore":8,"teamId":2,"playType":"Made shot","shotInfo":{"made":True,"type":"rim"}},
+            {"period":1,"clock":"09:00","homeScore":12,"awayScore":8,"teamId":1,"playType":"Personal foul","playerName":"A Player"},
+            {"period":2,"clock":"05:00","homeScore":30,"awayScore":25,"teamId":1,"playType":"Made three point shot","shotInfo":{"made":True,"type":"three"}},
+        ]
+        flow = game_flow(game, plays)
+        self.assertIn("projected_40_minute_pace", flow)
+        self.assertEqual(len(flow["teams"]), 2)
+        self.assertIn("four_factors", flow["teams"][0])
+        self.assertIn("live_home_win_probability", flow)
+
+    def test_coach_profiles_require_verified_tenure(self):
+        games = {"games":[{"season":2026,"home_team_id":1,"home_team":"A","away_team_id":2,"away_team":"B","market_home_spread":-3,"actual_home_margin":5}]}
+        self.assertEqual(build_coaches(games,{"tenures":[]})["coaches"], [])
+        tenure = {"tenure_id":"a-coach","team_id":1,"team":"A","coach":"Coach A","start_season":2026,"source_url":"https://example.com","verified_at":"2026-11-11"}
+        payload = build_coaches(games,{"tenures":[tenure]})
+        self.assertEqual(payload["coaches"][0]["splits"]["overall"]["wins"],1)
 
 
 if __name__ == "__main__":

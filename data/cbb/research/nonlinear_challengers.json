@@ -1,0 +1,128 @@
+{
+  "meta": {
+    "version": "thi-cbb-nonlinear-challengers-v1.0",
+    "generated_at_utc": "2026-11-12T03:16:25.822285Z",
+    "policy": "Stumps are fit on the training split only. Ensemble weight is selected on validation only; the test split remains an out-of-time audit. Published model unchanged."
+  },
+  "gradient_boosting": {
+    "rounds": 12,
+    "learning_rate": 0.12,
+    "features": [
+      "raw_margin",
+      "raw_margin_curve",
+      "home_court",
+      "projected_pace",
+      "efg_edge",
+      "turnover_edge",
+      "rebound_edge",
+      "free_throw_edge",
+      "experience_diff",
+      "personnel_recruit_rating",
+      "personnel_transfer_minutes",
+      "personnel_transfer_rating"
+    ],
+    "validation": {
+      "games": 5638,
+      "mae": 9.0706,
+      "rmse": 11.5682,
+      "bias": -0.0279
+    },
+    "out_of_time_audit": {
+      "games": 5622,
+      "mae": 9.2132,
+      "rmse": 11.6851,
+      "bias": 0.3229
+    },
+    "stumps": [
+      {
+        "feature": "personnel_recruit_rating",
+        "threshold": 0.92958,
+        "left": -0.063233,
+        "right": 0.884007
+      },
+      {
+        "feature": "personnel_recruit_rating",
+        "threshold": 0.92958,
+        "left": -0.055645,
+        "right": 0.777926
+      },
+      {
+        "feature": "personnel_recruit_rating",
+        "threshold": 0.92958,
+        "left": -0.048968,
+        "right": 0.684575
+      },
+      {
+        "feature": "personnel_recruit_rating",
+        "threshold": 0.92958,
+        "left": -0.043092,
+        "right": 0.602426
+      },
+      {
+        "feature": "personnel_recruit_rating",
+        "threshold": 0.0,
+        "left": -0.093765,
+        "right": 0.382109
+      },
+      {
+        "feature": "personnel_recruit_rating",
+        "threshold": 0.92958,
+        "left": -0.037811,
+        "right": 0.484282
+      },
+      {
+        "feature": "projected_pace",
+        "threshold": 68.45734,
+        "left": -0.038122,
+        "right": 0.445562
+      },
+      {
+        "feature": "personnel_recruit_rating",
+        "threshold": 0.92958,
+        "left": -0.040537,
+        "right": 0.420052
+      },
+      {
+        "feature": "projected_pace",
+        "threshold": 68.45734,
+        "left": -0.039956,
+        "right": 0.386779
+      },
+      {
+        "feature": "personnel_recruit_rating",
+        "threshold": 0.0,
+        "left": -0.085371,
+        "right": 0.266547
+      },
+      {
+        "feature": "personnel_recruit_rating",
+        "threshold": -0.54714,
+        "left": 0.370884,
+        "right": -0.048782
+      },
+      {
+        "feature": "personnel_recruit_rating",
+        "threshold": 0.0,
+        "left": -0.084915,
+        "right": 0.240415
+      }
+    ]
+  },
+  "selected_ensemble": {
+    "boosted_weight": 1,
+    "incumbent_weight": 0,
+    "validation": {
+      "games": 5638,
+      "mae": 9.0706,
+      "rmse": 11.5682,
+      "bias": -0.0279
+    },
+    "out_of_time_audit": {
+      "games": 5622,
+      "mae": 9.2132,
+      "rmse": 11.6851,
+      "bias": 0.3229
+    },
+    "promotion_recommended": false
+  }
+}

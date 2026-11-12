@@ -71,6 +71,7 @@ jobs:
             scripts/resolve_cbb_venue_geocodes.py \
             scripts/build_cbb_projection_board.py \
             scripts/build_cbb_play_style.py \
+            scripts/cbb_game_flow.py \
             scripts/build_cbb_live_center.py \
             scripts/build_cbb_matchup_engine.py \
             scripts/build_cbb_intelligence_suite.py \
@@ -79,8 +80,10 @@ jobs:
             scripts/refresh_cbb_scores.py \
             scripts/build_cbb_bracketology.py \
             scripts/research_cbb_model_v02.py \
+            scripts/research_cbb_nonlinear_challengers.py \
             scripts/build_cbb_model_lab.py \
             scripts/build_cbb_situational_profiles.py \
+            scripts/build_cbb_coach_profiles.py \
             scripts/build_cbb_game_day_readiness.py \
             scripts/build_cbb_operations_context.py \
             scripts/build_cbb_platform_health.py \
@@ -155,8 +158,10 @@ jobs:
           python scripts/build_cbb_bracketology.py
           python scripts/build_cbb_intelligence_suite.py
           python scripts/research_cbb_model_v02.py
+          python scripts/research_cbb_nonlinear_challengers.py
           python scripts/build_cbb_model_lab.py
           python scripts/build_cbb_situational_profiles.py
+          python scripts/build_cbb_coach_profiles.py
           python scripts/build_cbb_game_day_readiness.py
           python scripts/validate_cbb_availability.py
           python scripts/build_cbb_operations_context.py

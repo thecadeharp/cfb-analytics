@@ -29,7 +29,7 @@ jobs:
           python-version: "3.12"
       - name: Validate the score pulse
         run: |
-          python -m py_compile scripts/refresh_cbb_scores.py scripts/build_cbb_postgame.py scripts/build_cbb_model_tracking.py scripts/build_cbb_live_center.py
+          python -m py_compile scripts/refresh_cbb_scores.py scripts/cbb_game_flow.py scripts/build_cbb_postgame.py scripts/build_cbb_model_tracking.py scripts/build_cbb_live_center.py
           python -m unittest scripts/test_refresh_cbb_scores.py scripts/test_cbb_postgame.py scripts/test_cbb_model_tracking.py
       - name: Refresh live scores and completed games
         env:

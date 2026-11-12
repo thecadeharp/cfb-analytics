@@ -13,13 +13,15 @@ from pathlib import Path
 from typing import Any
 
 try:
+    from scripts.cbb_game_flow import game_flow
     from scripts.verify_cbb_api_foundation import clean_key, fetch_json
 except ModuleNotFoundError:
+    from cbb_game_flow import game_flow
     from verify_cbb_api_foundation import clean_key, fetch_json
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "thi-cbb-postgame-v1.0"
+VERSION = "thi-cbb-postgame-v2.0"
 
 
 def finite(value: Any, digits: int = 2) -> float | None:
@@ -106,7 +108,20 @@ def player_stats(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def build_payload(board: dict[str, Any], team_rows: list[dict[str, Any]], player_rows: list[dict[str, Any]]) -> dict[str, Any]:
+def rotation_summary(side: dict[str, Any] | None) -> dict[str, Any]:
+    players = (side or {}).get("players") or []
+    starters = [row for row in players if row.get("starter")]
+    bench = [row for row in players if not row.get("starter")]
+    total = lambda rows, key: round(sum(float(row.get(key) or 0) for row in rows), 1)
+    return {
+        "starter_points": total(starters, "points"), "bench_points": total(bench, "points"),
+        "starter_minutes": total(starters, "minutes"), "bench_minutes": total(bench, "minutes"),
+        "heavy_minutes": [{"player": row["name"], "minutes": row["minutes"]} for row in players if float(row.get("minutes") or 0) >= 34],
+        "foul_outs": [{"player": row["name"], "fouls": row["fouls"]} for row in players if float(row.get("fouls") or 0) >= 5],
+    }
+
+
+def build_payload(board: dict[str, Any], team_rows: list[dict[str, Any]], player_rows: list[dict[str, Any]], flow_by_game: dict[str, Any] | None = None) -> dict[str, Any]:
     finals = {str(game.get("game_id")): game for game in board.get("games", []) if str(game.get("status", "")).lower() == "final"}
     teams: dict[str, dict[str, Any]] = {}
     players: dict[str, dict[str, Any]] = {}
@@ -131,6 +146,8 @@ def build_payload(board: dict[str, Any], team_rows: list[dict[str, Any]], player
             "away_team": game.get("away", {}).get("team"), "home_team": game.get("home", {}).get("team"),
             "pace": (teams.get(game_id, {}).get("home") or {}).get("pace"),
             "teams": teams.get(game_id, {}), "players": players.get(game_id, {}),
+            "rotation_summary": {side: rotation_summary(players.get(game_id, {}).get(side)) for side in ("away", "home")},
+            "game_flow": (flow_by_game or {}).get(game_id),
         }
     complete = sum(bool(row.get("teams", {}).get("home") and row.get("teams", {}).get("away") and row.get("players", {}).get("home") and row.get("players", {}).get("away")) for row in games.values())
     return {
@@ -178,7 +195,22 @@ def main() -> None:
     player_rows = fetch_json("/games/players", params, key)
     if not isinstance(team_rows, list) or not isinstance(player_rows, list):
         raise RuntimeError("CBBD postgame endpoints returned an invalid response")
-    payload = build_payload(board, team_rows, player_rows)
+    profiles_path = ROOT / "data/cbb/team_profiles.json"
+    profiles = json.loads(profiles_path.read_text()) if profiles_path.exists() else None
+    flows = {}
+    for game in finals:
+        game_id = str(game.get("game_id"))
+        try:
+            game_start = datetime.fromisoformat(str(game.get("start_date")).replace("Z", "+00:00"))
+        except (TypeError, ValueError):
+            game_start = now
+        if game_start < start:
+            continue
+        try:
+            flows[game_id] = game_flow(game, fetch_json(f"/plays/game/{game_id}", {}, key), profiles)
+        except RuntimeError:
+            continue
+    payload = build_payload(board, team_rows, player_rows, flows)
     atomic_write(args.output, payload)
     print(f"{VERSION}: {payload['meta']['complete_box_score_count']}/{payload['meta']['final_game_count']} completed box scores")
 

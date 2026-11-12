@@ -29,6 +29,7 @@
     postgame: "data/cbb/postgame.json",
     liveCenter: "data/cbb/live_game_center.json",
     situationalProfiles: "data/cbb/situational_profiles.json",
+    coachProfiles: "data/cbb/coach_profiles.json",
     modelLab: "data/cbb/model/model_lab.json",
     preseasonCandidate: "data/cbb/model/preseason_index_candidate.json",
     preseasonSos: "data/cbb/frozen/preseason_sos_2027.json"
@@ -39,7 +40,7 @@
   const memoryCache = new Map();
   let scorePollTimer = null;
   const DEFERRED_VIEW_KEYS = {
-    "cbb-projections": ["intelligence", "matchups", "playStyle", "operations", "postgame", "liveCenter", "situationalProfiles"],
+    "cbb-projections": ["intelligence", "matchups", "playStyle", "operations", "postgame", "liveCenter", "situationalProfiles", "coachProfiles"],
     "cbb-tracking": ["modelLab"],
     "cbb-team-data": ["intelligence", "situationalProfiles"],
     "cbb-player-ratings": ["intelligence"],
@@ -1238,26 +1239,34 @@
     if (gameStatus(game) !== "live") return "";
     const live = state.data?.liveCenter?.games?.find(row => String(row.game_id) === String(game.game_id));
     if (!live) return `<section class="cbb-live-center"><div class="cbb-blueprint-head"><div><div class="cbb-kicker">LIVE GAME CENTER</div><h3>Play intelligence is refreshing</h3></div><small>The frozen pregame projection will not change.</small></div><div class="cbb-coverage-note">Live score is current; compact play-by-play context is awaiting the next pulse.</div></section>`;
+    const flow = live.game_flow || {};
+    const flowTeam = team => (flow.teams || []).find(item => String(item.team_id) === String(team?.team_id)) || {};
     const teamCard = side => {
       const team = game[side];
       const row = (live.teams || []).find(item => String(item.team_id) === String(team?.team_id)) || {};
-      return `<article><header>${teamLogo(team,"small")}<strong>${escapeHtml(team?.team)}</strong><b>${integer(team?.score)}</b></header><div><p><span>Tracked shots</span><strong>${integer(row.tracked_shots)}</strong></p><p><span>Rim</span><strong>${pct(row.rim_rate)}</strong></p><p><span>Three</span><strong>${pct(row.three_rate)}</strong></p><p><span>Assisted makes</span><strong>${pct(row.assisted_rate)}</strong></p><p><span>Transition tagged</span><strong>${pct(row.explicit_transition_rate)}</strong></p></div></article>`;
+      const advanced = flowTeam(team), factors = advanced.four_factors || {}, shooting = advanced.shooting_vs_expected || {};
+      const trouble = (advanced.foul_trouble || []).map(player => `${player.player} (${integer(player.fouls)})`).join(", ");
+      return `<article><header>${teamLogo(team,"small")}<strong>${escapeHtml(team?.team)}</strong><b>${integer(team?.score)}</b></header><div class="cbb-live-factor-grid"><p><span>Possessions</span><strong>${number(advanced.estimated_possessions,1)}</strong></p><p><span>eFG%</span><strong>${number(factors.effective_fg_pct,1)}%</strong></p><p><span>TO%</span><strong>${number(factors.turnover_pct,1)}%</strong></p><p><span>ORB%</span><strong>${number(factors.offensive_rebound_pct,1)}%</strong></p><p><span>FT rate</span><strong>${number(factors.free_throw_rate,1)}%</strong></p><p><span>Team fouls</span><strong>${integer(advanced.team_fouls)}</strong><small>${escapeHtml(advanced.bonus_state || "—")}</small></p><p><span>Shooting vs expected</span><strong>${shooting.difference == null ? "—" : number(shooting.difference,1,true)}</strong></p><p><span>Rim / Three</span><strong>${pct(row.rim_rate)} / ${pct(row.three_rate)}</strong></p></div>${trouble ? `<div class="cbb-live-alert"><strong>FOUL TROUBLE</strong> ${escapeHtml(trouble)}</div>` : ""}</article>`;
     };
-    return `<section class="cbb-live-center"><div class="cbb-blueprint-head"><div><div class="cbb-kicker">LIVE GAME CENTER</div><h3>${escapeHtml(game.live?.clock || humanize(game.status || "Live"))}</h3></div><small>${integer(live.provider_play_count)} provider plays · ${escapeHtml(humanize(live.coverage_state || "developing"))} coverage</small></div><div class="cbb-live-center-grid">${teamCard("away")}${teamCard("home")}</div><p class="cbb-style-note">Observed live play context only. It never rewrites the frozen pregame projection or creates an in-game betting signal.</p></section>`;
+    const last4 = flow.last_four_minutes || {};
+    return `<section class="cbb-live-center"><div class="cbb-blueprint-head"><div><div class="cbb-kicker">LIVE GAME CENTER</div><h3>${escapeHtml(game.live?.clock || humanize(game.status || "Live"))}</h3></div><small>${integer(live.provider_play_count)} provider plays · ${escapeHtml(humanize(live.coverage_state || "developing"))} coverage</small></div><div class="cbb-live-summary"><p><span>40-minute pace</span><strong>${number(flow.projected_40_minute_pace,1)}</strong></p><p><span>THI live total</span><strong>${number(flow.thi_live_total_estimate,1)}</strong></p><p><span>Home win probability</span><strong>${pct(flow.live_home_win_probability)}</strong></p><p><span>Last four minutes</span><strong>${integer(last4.away_points)}–${integer(last4.home_points)}</strong><small>${integer(last4.away_turnovers)}–${integer(last4.home_turnovers)} turnovers</small></p></div><div class="cbb-live-center-grid">${teamCard("away")}${teamCard("home")}</div><p class="cbb-style-note">Observed live play context only. THI Live Total and win probability are estimates; neither rewrites the frozen pregame projection nor creates an in-game betting signal.</p></section>`;
   }
 
   function cbbProgramSituationalMarkup(game) {
     const profiles = state.data?.situationalProfiles?.teams || [];
+    const coaches = state.data?.coachProfiles?.coaches || [];
     const find = team => profiles.find(row => String(row.team_id) === String(team?.team_id));
+    const findCoach = team => coaches.find(row => String(row.team_id) === String(team?.team_id));
     const card = team => {
-      const profile = find(team);
+      const coach = findCoach(team), profile = coach || find(team);
       if (!profile) return "";
       const order = [["overall","Overall"],[game.neutral_site ? "neutral" : team === game.home ? "home" : "away",game.neutral_site ? "Neutral" : team === game.home ? "Home" : "Away"],["conference", "Conference"],["nonconference","Nonconference"],["favorite","As favorite"],["underdog","As underdog"]];
       const rows = order.map(([key,label]) => [label, profile.splits?.[key]]).filter(([,row]) => row?.games);
-      return `<article><h4>${escapeHtml(team?.team)}</h4>${rows.map(([label,row]) => `<p><span>${escapeHtml(label)}</span><strong>${integer(row.wins)}–${integer(row.losses)}–${integer(row.pushes)} · ${pct(row.cover_pct)}</strong><small>${integer(row.games)} games · ${escapeHtml(humanize(row.sample_state))}</small></p>`).join("")}</article>`;
+      return `<article><h4>${escapeHtml(team?.team)}${coach ? ` · ${escapeHtml(coach.coach)}` : ""}</h4>${rows.map(([label,row]) => `<p><span>${escapeHtml(label)}</span><strong>${integer(row.wins)}–${integer(row.losses)}–${integer(row.pushes)} · ${pct(row.cover_pct)}</strong><small>${integer(row.games)} games · ${escapeHtml(humanize(row.sample_state))}</small></p>`).join("")}</article>`;
     };
     if (!find(game.away) && !find(game.home)) return "";
-    return `<section class="cbb-situational-ats"><div class="cbb-blueprint-head"><div><div class="cbb-kicker">PROGRAM CONTEXT</div><h3>Historical ATS splits</h3></div><small>Descriptive only · not in the projection</small></div><div class="cbb-situational-ats-grid">${card(game.away)}${card(game.home)}</div><p class="cbb-style-note">Program-level results since 2022. These records are not attributed to the current coach and do not assume past covering performance will persist.</p></section>`;
+    const verifiedCoach = findCoach(game.away) || findCoach(game.home);
+    return `<section class="cbb-situational-ats"><div class="cbb-blueprint-head"><div><div class="cbb-kicker">${verifiedCoach ? "VERIFIED COACH CONTEXT" : "PROGRAM CONTEXT"}</div><h3>Historical ATS splits</h3></div><small>Descriptive only · not in the projection</small></div><div class="cbb-situational-ats-grid">${card(game.away)}${card(game.home)}</div><p class="cbb-style-note">${verifiedCoach ? "Coach-specific labels appear only for source-verified tenure windows. Unverified teams retain program-level context." : "Program-level results since 2022. These records are not attributed to the current coach and do not assume past covering performance will persist."}</p></section>`;
   }
 
   function cbbParityHeader(game, date) {
@@ -1318,6 +1327,7 @@
     const box = state.data?.postgame?.games?.[String(game.game_id)];
     if (!box?.teams?.away || !box?.teams?.home) return `<section class="cbb-detail-section cbb-postgame-box"><div class="cbb-kicker">POSTGAME ANALYTICS</div><h3>Box score and player statistics</h3><div class="cbb-coverage-note">The official box score is awaiting the next CBB data refresh.</div></section>`;
     const away = box.teams.away.stats || {}, home = box.teams.home.stats || {};
+    const flow = box.game_flow || {};
     const factor = (label, awayValue, homeValue, lowerBetter = false) => {
       const a = Number(awayValue), h = Number(homeValue);
       if (!Number.isFinite(a) || !Number.isFinite(h)) return null;
@@ -1347,7 +1357,9 @@
       const players = box.players?.[side]?.players || [];
       return `<div class="cbb-player-box"><h4>${escapeHtml(team?.team || "Team")}</h4><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Player</th><th>MIN</th><th>PTS</th><th>REB</th><th>AST</th><th>STL</th><th>BLK</th><th>TO</th><th>FG</th><th>3PT</th><th>FT</th><th>USG%</th><th>TS%</th><th>ORtg</th><th>DRtg</th><th>Game score</th></tr></thead><tbody>${players.map(player => `<tr><td class="cbb-team-name">${player.starter ? "★ " : ""}${escapeHtml(player.name)}</td><td>${number(player.minutes,1)}</td><td>${integer(player.points)}</td><td>${integer(player.rebounds)}</td><td>${integer(player.assists)}</td><td>${integer(player.steals)}</td><td>${integer(player.blocks)}</td><td>${integer(player.turnovers)}</td><td>${cbbShootingLine(player.field_goals)}</td><td>${cbbShootingLine(player.three_point_field_goals)}</td><td>${cbbShootingLine(player.free_throws)}</td><td>${player.usage_pct == null ? "—" : number(player.usage_pct,1)}</td><td>${player.true_shooting_pct == null ? "—" : number(player.true_shooting_pct,1)}</td><td>${number(player.offensive_rating,1)}</td><td>${number(player.defensive_rating,1)}</td><td>${number(player.game_score,1)}</td></tr>`).join("") || `<tr><td colspan="16">Player statistics pending.</td></tr>`}</tbody></table></div></div>`;
     };
-    return `<section class="cbb-detail-section cbb-postgame-box"><div class="cbb-kicker">POSTGAME ANALYTICS</div><h3>Official box score and advanced metrics</h3>${storyMarkup}<div class="cbb-team-box"><table class="cbb-table"><thead><tr><th>Team metric</th><th>${escapeHtml(game.away?.team)}</th><th>${escapeHtml(game.home?.team)}</th></tr></thead><tbody>${teamRows.map(row => `<tr><td>${escapeHtml(row[0])}</td><td>${escapeHtml(row[1])}</td><td>${escapeHtml(row[2])}</td></tr>`).join("")}</tbody></table></div><div class="cbb-player-box-grid">${playerTable("away")}${playerTable("home")}</div><p class="cbb-model-sub">Box score data provided by CollegeBasketballData.com. Postgame statistics are display only and are never fed back into the frozen pregame projection.</p></section>`;
+    const rotation = box.rotation_summary || {};
+    const flowMarkup = !flow.elapsed_minutes ? "" : `<div class="cbb-postgame-flow"><div class="cbb-postgame-flow-grid"><p><span>Largest lead</span><strong>${escapeHtml(game.away?.team)} ${integer(flow.largest_lead?.away)} · ${escapeHtml(game.home?.team)} ${integer(flow.largest_lead?.home)}</strong></p><p><span>Biggest comeback</span><strong>${integer(flow.biggest_comeback?.points)} points</strong></p><p><span>Competitive / garbage events</span><strong>${integer(flow.possession_context?.competitive_events)} / ${integer(flow.possession_context?.garbage_time_events)}</strong></p><p><span>Late FT attempts</span><strong>${integer(flow.late_free_throw_attempt_events)}</strong></p><p><span>Starter / bench points</span><strong>${integer(rotation.away?.starter_points)}/${integer(rotation.away?.bench_points)} · ${integer(rotation.home?.starter_points)}/${integer(rotation.home?.bench_points)}</strong></p></div><div class="cbb-score-checkpoints">${(flow.score_checkpoints || []).map(row => `<p><span>${escapeHtml(row.label)}</span><strong>${integer(row.away)}–${integer(row.home)}</strong></p>`).join("")}</div></div>`;
+    return `<section class="cbb-detail-section cbb-postgame-box"><div class="cbb-kicker">POSTGAME ANALYTICS</div><h3>Official box score and advanced metrics</h3>${storyMarkup}${flowMarkup}<div class="cbb-team-box"><table class="cbb-table"><thead><tr><th>Team metric</th><th>${escapeHtml(game.away?.team)}</th><th>${escapeHtml(game.home?.team)}</th></tr></thead><tbody>${teamRows.map(row => `<tr><td>${escapeHtml(row[0])}</td><td>${escapeHtml(row[1])}</td><td>${escapeHtml(row[2])}</td></tr>`).join("")}</tbody></table></div><div class="cbb-player-box-grid">${playerTable("away")}${playerTable("home")}</div><p class="cbb-model-sub">Box score data provided by CollegeBasketballData.com. Postgame statistics are display only and are never fed back into the frozen pregame projection.</p></section>`;
   }
 
   function cbbRecentResultsTable(teamId, limit = 5) {
@@ -2507,7 +2519,8 @@
     const rows = Object.values(lab.splits).map(split => `<tr><td><strong>${escapeHtml(split.label)}</strong></td><td>${integer(split.incumbent_margin?.games)}</td><td>${number(split.incumbent_margin?.mae,2)}</td><td>${number(split.raw_efficiency_margin?.mae,2)}</td><td>${number(split.market_margin?.mae,2)}</td><td>${number(split.incumbent_total?.mae,2)}</td><td>${number(split.raw_efficiency_total?.mae,2)}</td><td>${number(split.market_total?.mae,2)}</td></tr>`).join("");
     const challenger = lab.challenger || {};
     const readiness = (lab.feature_readiness || []).map(row => `<article class="is-${escapeHtml(row.state)}"><span>${escapeHtml(humanize(row.state))}</span><strong>${escapeHtml(row.feature)}</strong><small>${escapeHtml(row.reason)}</small></article>`).join("");
-    return `<div class="cbb-tracking-table-section cbb-model-lab"><div class="cbb-tracking-table-title">Model Lab · Frozen Benchmarking</div><p class="cbb-model-sub">${escapeHtml(lab.meta?.policy || "Chronological model comparison.")}</p><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Split</th><th>Games</th><th>THI Margin MAE</th><th>Raw Margin MAE</th><th>Market Margin MAE</th><th>THI Total MAE</th><th>Raw Total MAE</th><th>Market Total MAE</th></tr></thead><tbody>${rows}</tbody></table></div><div class="cbb-model-lab-status"><div><span>CHALLENGER</span><strong>${escapeHtml(humanize(challenger.name || "not selected"))}</strong><small>Inner-fold improvement ${number(challenger.inner_fold_improvement,4,true)} · ${challenger.promotion_recommended ? "Eligible for engineering review" : "Published model unchanged"}</small></div></div><div class="cbb-feature-readiness">${readiness}</div></div>`;
+    const experiments = (lab.experiments || []).map(row => `<tr><td><strong>${escapeHtml(row.label || humanize(row.family))}</strong></td><td>${escapeHtml(humanize(row.algorithm))}</td><td>${row.feature_count == null ? "—" : integer(row.feature_count)}</td><td>${row.inner_fold_margin_mae == null ? "—" : number(row.inner_fold_margin_mae,3)}</td><td>${escapeHtml(humanize(row.state))}</td></tr>`).join("");
+    return `<div class="cbb-tracking-table-section cbb-model-lab"><div class="cbb-tracking-table-title">Model Lab · Frozen Benchmarking</div><p class="cbb-model-sub">${escapeHtml(lab.meta?.policy || "Chronological model comparison.")}</p><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Split</th><th>Games</th><th>THI Margin MAE</th><th>Raw Margin MAE</th><th>Market Margin MAE</th><th>THI Total MAE</th><th>Raw Total MAE</th><th>Market Total MAE</th></tr></thead><tbody>${rows}</tbody></table></div>${experiments ? `<div class="cbb-tracking-table-title">Challenger families</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Family</th><th>Algorithm</th><th>Features</th><th>Inner-fold MAE</th><th>State</th></tr></thead><tbody>${experiments}</tbody></table></div>` : ""}<div class="cbb-model-lab-status"><div><span>CHALLENGER</span><strong>${escapeHtml(humanize(challenger.name || "not selected"))}</strong><small>Inner-fold improvement ${number(challenger.inner_fold_improvement,4,true)} · ${challenger.promotion_recommended ? "Eligible for engineering review" : "Published model unchanged"}</small></div></div><div class="cbb-feature-readiness">${readiness}</div></div>`;
   }
 
   function renderTracking() {

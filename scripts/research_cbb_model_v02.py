@@ -161,6 +161,10 @@ def build(history_dir: Path, personnel_dir: Path) -> dict[str, Any]:
         "challenger_2025_edge_5_at_least_incumbent": (validation["challenger"]["edge_5_hit_rate"] or 0) >= (validation["incumbent"]["edge_5_hit_rate"] or 0),
     }
     promote = all(promotion_checks.values()) and selected["name"] != "incumbent_full"
+    family_leaders = []
+    for family in dict.fromkeys(row["name"] for row in candidates):
+        leader = next(row for row in candidates if row["name"] == family)
+        family_leaders.append({key: leader[key] for key in ("name", "ridge", "feature_names", "mean_margin_mae", "worst_margin_mae", "folds")})
     return {
         "meta": {
             "version": VERSION,
@@ -176,6 +180,7 @@ def build(history_dir: Path, personnel_dir: Path) -> dict[str, Any]:
         "promotion": {"recommended": promote, "checks": promotion_checks, "required_next_evidence": "2027 frozen prospective results remain the clean next unseen evidence."},
         "candidate_count": len(candidates),
         "leaderboard": candidates[:8],
+        "family_leaders": family_leaders,
     }
 
 

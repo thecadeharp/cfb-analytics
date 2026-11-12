@@ -14,6 +14,7 @@ class CbbPostgameTest(unittest.TestCase):
         self.assertEqual(payload["meta"]["complete_box_score_count"], 1)
         self.assertEqual(payload["games"]["7"]["teams"]["away"]["stats"]["effective_fg_pct"], 58.2)
         self.assertEqual(payload["games"]["7"]["players"]["home"]["players"][0]["points"], 20)
+        self.assertEqual(payload["games"]["7"]["rotation_summary"]["home"]["starter_points"], 20)
 
 
 if __name__ == "__main__":

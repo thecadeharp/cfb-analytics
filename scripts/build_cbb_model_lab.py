@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "thi-cbb-model-lab-v1.0"
+VERSION = "thi-cbb-model-lab-v2.0"
 
 
 def finite(value: Any) -> float | None:
@@ -50,7 +50,7 @@ def market_metric(rows: list[dict[str, Any]], market_key: str, actual_key: str, 
     return metric(copied, "market_projection", actual_key)
 
 
-def build(predictions: dict[str, Any], card: dict[str, Any], challenger: dict[str, Any]) -> dict[str, Any]:
+def build(predictions: dict[str, Any], card: dict[str, Any], challenger: dict[str, Any], nonlinear: dict[str, Any] | None = None) -> dict[str, Any]:
     games = predictions.get("games") or []
     splits = {}
     for split, label in (("train", "Training"), ("validation", "Validation"), ("test", "Out-of-time test")):
@@ -69,6 +69,26 @@ def build(predictions: dict[str, Any], card: dict[str, Any], challenger: dict[st
 
     selected = challenger.get("selected_candidate") or {}
     comparison = challenger.get("post_selection_comparison") or {}
+    family_labels = {
+        "incumbent_full": "Published baseline",
+        "efficiency_context": "Efficiency context",
+        "efficiency_four_factors": "Shot profile + Four Factors",
+        "efficiency_personnel": "Rotation + personnel",
+        "incumbent_plus_rest": "Rest challenger",
+        "incumbent_plus_schedule_context": "Rest + schedule context",
+    }
+    experiments = [{
+        "family": row.get("name"), "label": family_labels.get(row.get("name"), row.get("name")),
+        "algorithm": "ridge", "ridge": row.get("ridge"), "inner_fold_margin_mae": row.get("mean_margin_mae"),
+        "worst_fold_margin_mae": row.get("worst_margin_mae"), "feature_count": len(row.get("feature_names") or []),
+        "state": "selected" if row.get("name") == selected.get("name") else "evaluated",
+    } for row in challenger.get("family_leaders") or []]
+    boosted = (nonlinear or {}).get("gradient_boosting") or {}
+    ensemble = (nonlinear or {}).get("selected_ensemble") or {}
+    experiments.extend([
+        {"family": "gradient_boosting", "label": "Gradient boosting correction", "algorithm": "gradient_boosting", "state": "evaluated" if boosted else "awaiting_run", "inner_fold_margin_mae": (boosted.get("validation") or {}).get("mae"), "audit_margin_mae": (boosted.get("out_of_time_audit") or {}).get("mae"), "feature_count": len(boosted.get("features") or [])},
+        {"family": "selected_ensemble", "label": "Selected ensemble", "algorithm": "ensemble", "state": "evaluated" if ensemble else "awaiting_run", "inner_fold_margin_mae": (ensemble.get("validation") or {}).get("mae"), "audit_margin_mae": (ensemble.get("out_of_time_audit") or {}).get("mae"), "weight": ensemble.get("boosted_weight")},
+    ])
     return {
         "meta": {
             "version": VERSION,
@@ -88,6 +108,7 @@ def build(predictions: dict[str, Any], card: dict[str, Any], challenger: dict[st
             "promotion_recommended": (challenger.get("promotion") or {}).get("recommended", False),
             "promotion_checks": (challenger.get("promotion") or {}).get("checks") or {},
         },
+        "experiments": experiments,
         "feature_readiness": [
             {"feature": "Rest and back-to-back", "state": "challenger_tested", "model_status": "not_promoted", "reason": "Chronological challenger testing exists; frozen promotion gates did not clear."},
             {"feature": "Shot profile and transition", "state": "display_only", "model_status": "not_tested_historically", "reason": "Current play-by-play coverage is useful for matchup context but not yet a multi-season training sample."},
@@ -112,11 +133,13 @@ def main() -> None:
     parser.add_argument("--predictions", type=Path, default=ROOT / "data/cbb/model/walk_forward_predictions.json.gz")
     parser.add_argument("--model-card", type=Path, default=ROOT / "data/cbb/model/model_card.json")
     parser.add_argument("--challenger", type=Path, default=ROOT / "data/cbb/research/model_v02_challenger.json")
+    parser.add_argument("--nonlinear", type=Path, default=ROOT / "data/cbb/research/nonlinear_challengers.json")
     parser.add_argument("--output", type=Path, default=ROOT / "data/cbb/model/model_lab.json")
     args = parser.parse_args()
     with gzip.open(args.predictions, "rt", encoding="utf-8") as handle:
         predictions = json.load(handle)
-    payload = build(predictions, json.loads(args.model_card.read_text()), json.loads(args.challenger.read_text()))
+    nonlinear = json.loads(args.nonlinear.read_text()) if args.nonlinear.exists() else None
+    payload = build(predictions, json.loads(args.model_card.read_text()), json.loads(args.challenger.read_text()), nonlinear)
     atomic_write(args.output, payload)
     print(f"{VERSION}: {len(payload['splits'])} chronological splits")
 

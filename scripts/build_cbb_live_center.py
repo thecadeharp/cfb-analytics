@@ -13,17 +13,19 @@ from typing import Any
 
 try:
     from scripts.build_cbb_play_style import aggregate_game
+    from scripts.cbb_game_flow import game_flow
     from scripts.verify_cbb_api_foundation import clean_key, fetch_json
 except ModuleNotFoundError:
     from build_cbb_play_style import aggregate_game
+    from cbb_game_flow import game_flow
     from verify_cbb_api_foundation import clean_key, fetch_json
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "thi-cbb-live-center-v1.0"
+VERSION = "thi-cbb-live-center-v2.0"
 LIVE_STATUSES = {"live", "inprogress", "in_progress", "halftime"}
 
 
-def build(board: dict[str, Any], api_key: str | None) -> dict[str, Any]:
+def build(board: dict[str, Any], api_key: str | None, profiles: dict[str, Any] | None = None, fetcher=fetch_json) -> dict[str, Any]:
     games = []
     errors = []
     live = [game for game in board.get("games") or [] if str(game.get("status") or "").lower() in LIVE_STATUSES]
@@ -33,7 +35,9 @@ def build(board: dict[str, Any], api_key: str | None) -> dict[str, Any]:
             errors.append({"game_id": game.get("game_id"), "error": "CBBD_API_KEY unavailable"})
             continue
         try:
-            style = aggregate_game(game, fetch_json(f"/plays/game/{game_id}", {}, api_key))
+            plays = fetcher(f"/plays/game/{game_id}", {}, api_key)
+            style = aggregate_game(game, plays)
+            flow = game_flow(game, plays, profiles)
             games.append({
                 "game_id": game.get("game_id"),
                 "status": game.get("status"),
@@ -44,6 +48,7 @@ def build(board: dict[str, Any], api_key: str | None) -> dict[str, Any]:
                 "teams": style.get("teams") or [],
                 "provider_play_count": style.get("provider_play_count"),
                 "coverage_state": "tracked" if int(style.get("provider_play_count") or 0) >= 20 else "developing",
+                "game_flow": flow,
             })
         except RuntimeError as error:
             errors.append({"game_id": game.get("game_id"), "error": str(error)[:180]})
@@ -53,7 +58,7 @@ def build(board: dict[str, Any], api_key: str | None) -> dict[str, Any]:
             "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "live_game_count": len(live),
             "tracked_game_count": len(games),
-            "policy": "Live score and compact play aggregates only. Live observations never alter the frozen pregame projection.",
+            "policy": "Live score, pace, Four Factors, foul and game-flow estimates are display-only. Live observations never alter the frozen pregame projection.",
         },
         "games": games,
         "fetch_errors": errors,
@@ -74,7 +79,9 @@ def main() -> None:
     parser.add_argument("--board", type=Path, default=ROOT / "data/cbb/projection_board.json")
     parser.add_argument("--output", type=Path, default=ROOT / "data/cbb/live_game_center.json")
     args = parser.parse_args()
-    payload = build(json.loads(args.board.read_text()), clean_key(os.environ.get("CBBD_API_KEY")))
+    profiles_path = ROOT / "data/cbb/team_profiles.json"
+    profiles = json.loads(profiles_path.read_text()) if profiles_path.exists() else None
+    payload = build(json.loads(args.board.read_text()), clean_key(os.environ.get("CBBD_API_KEY")), profiles)
     atomic_write(args.output, payload)
     print(f"{VERSION}: {payload['meta']['tracked_game_count']} live games enriched")
 

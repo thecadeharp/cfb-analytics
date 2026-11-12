@@ -18,7 +18,7 @@ CANDIDATES = [
     "data/cbb/team_profiles.json", "data/cbb/game_board.json", "data/cbb/foundation_status.json",
     "data/cbb/model/model_card.json", "data/cbb/model/current_priors.json", "data/cbb/model/display_power_ratings.json", "data/cbb/model/structural_power_reference.json", "data/cbb/model/preseason_index_candidate.json", "data/cbb/frozen/preseason_power_2027.json", "data/cbb/frozen/preseason_roster_power_2027.json", "data/cbb/frozen/preseason_sos_2027.json", "data/cbb/home_court_advantage.json",
     "data/cbb/history/manifest.json", "data/cbb/projection_board.json", "data/cbb/play_style.json",
-    "data/cbb/matchup_engine.json", "data/cbb/live_game_center.json", "data/cbb/situational_profiles.json", "data/cbb/intelligence_suite.json", "data/cbb/model_tracking.json", "data/cbb/model/model_lab.json",
+    "data/cbb/matchup_engine.json", "data/cbb/live_game_center.json", "data/cbb/situational_profiles.json", "data/cbb/coach_profiles.json", "data/cbb/intelligence_suite.json", "data/cbb/model_tracking.json", "data/cbb/model/model_lab.json",
     "data/cbb/bracketology.json", "data/cbb/research/model_v02_challenger.json", "data/cbb/game_day_readiness.json",
     "data/cbb/operations_context.json", "data/cbb/platform_health.json", "data/cbb/market_snapshots.json", "data/cbb/postgame.json",
     "data/cbb/market_contract.json", "data/cbb/player_ratings.json", "data/trends_lab.json",
