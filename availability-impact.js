@@ -17,6 +17,18 @@
     ST: 0.36,
     OTHER: 0.42,
   };
+  const POSITION_POINT_CAP = {
+    QB: 6.00,
+    RB: 1.20,
+    WR: 1.30,
+    TE: 0.80,
+    OL: 0.65,
+    DL: 0.80,
+    LB: 0.65,
+    DB: 0.70,
+    ST: 0.35,
+    OTHER: 0.45,
+  };
   const POSITION_ORDER = ["QB", "RB", "WR", "TE", "OL", "DL", "LB", "DB", "ST"];
 
   function number(value, fallback = 0) {
@@ -117,6 +129,15 @@
     return {key: "none", label: "None"};
   }
 
+  function diminishingTotal(values, cap) {
+    const ordered = values.filter(value => value > 0).sort((a, b) => b - a);
+    const total = ordered.reduce((sum, value, index) => {
+      const weight = Math.max(0.25, Math.pow(0.78, index));
+      return sum + value * weight;
+    }, 0);
+    return Math.min(cap, total);
+  }
+
   function rateTeam(notes, teamName, rosterData, playerIntelligence) {
     const currentNotes = Array.isArray(notes) ? notes : [];
     const roster = teamPlayers(rosterData, teamName);
@@ -142,6 +163,9 @@
         + 0.20 * leverage;
       const severity = statusSeverity(note?.status);
       const score = Math.round(severity * 10 * clamp(roleValue) * 10) / 10;
+      const pointCap = POSITION_POINT_CAP[group] ?? POSITION_POINT_CAP.OTHER;
+      const absenceValuePoints = Math.round(pointCap * (0.10 + 0.90 * clamp(roleValue)) * 10) / 10;
+      const currentExposurePoints = Math.round(absenceValuePoints * severity * 10) / 10;
       const confidence = matchedPlayer && workload > 0 && production !== null
         ? "high"
         : matchedPlayer ? "medium" : "low";
@@ -150,6 +174,8 @@
         score,
         group,
         severity,
+        absenceValuePoints,
+        currentExposurePoints,
         confidence,
         matchedPlayer: Boolean(matchedPlayer),
         workloadShare,
@@ -167,10 +193,20 @@
     const rawTotal = players.reduce((sum, player) => sum + player.score, 0);
     const total = Math.min(100, Math.round(rawTotal));
     const tier = impactTier(total);
+    const quarterbackExposure = diminishingTotal(
+      players.filter(player => player.group === "QB").map(player => player.currentExposurePoints),
+      6
+    );
+    const nonQuarterbackExposure = diminishingTotal(
+      players.filter(player => player.group !== "QB").map(player => player.currentExposurePoints),
+      4
+    );
+    const reportExposurePoints = Math.round(Math.min(8, quarterbackExposure + nonQuarterbackExposure) * 10) / 10;
     return {
       total,
       rawTotal: Math.round(rawTotal * 10) / 10,
       tier,
+      reportExposurePoints,
       byPosition,
       players,
       matchedPlayers: players.filter(player => player.matchedPlayer).length,

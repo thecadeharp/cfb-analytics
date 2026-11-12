@@ -1792,12 +1792,19 @@ function ensureMatchupView() {
     .thi-availability-item { padding:11px 0; border-top:1px solid var(--border); }
     .thi-availability-item-top { justify-content:flex-start; }
     .thi-availability-item-top strong { font-size:11px; }
+    .thi-availability-player-measures { margin-left:auto; display:flex; align-items:center; gap:5px; flex-wrap:wrap; justify-content:flex-end; }
     .thi-availability-player-impact {
-      margin-left:auto; display:inline-flex; align-items:center; gap:4px; padding:4px 7px;
+      display:inline-flex; align-items:center; gap:4px; padding:4px 7px;
       border:1px solid var(--border); border-radius:999px; background:var(--surface-soft);
       color:var(--text); font:800 8px var(--mono); white-space:nowrap;
     }
     .thi-availability-player-impact small { color:var(--muted); font-size:6px; text-transform:uppercase; }
+    .thi-availability-player-value {
+      display:inline-flex; align-items:center; gap:4px; padding:4px 7px;
+      border:1px solid #7da5ca; border-radius:999px; background:rgba(82,139,193,.12);
+      color:#235f97; font:800 8px var(--mono); white-space:nowrap;
+    }
+    .thi-availability-player-value small { font-size:6px; text-transform:uppercase; }
     .thi-availability-status {
       display:inline-flex; padding:4px 7px; border:1px solid var(--border);
       border-radius:999px; font-family:var(--mono); font-size:7px;
@@ -1833,7 +1840,7 @@ function ensureMatchupView() {
       margin:0; padding:0 16px 12px; color:var(--muted); font-size:9px; line-height:1.6;
     }
     .thi-availability-scenario {
-      display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px;
+      display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1px;
       border-top:1px solid var(--border); background:var(--border);
     }
     .thi-availability-scenario > div { min-width:0; padding:12px 16px; background:var(--surface-soft); }
@@ -7654,12 +7661,13 @@ function availabilityTeamMarkup(teamName) {
             const position = String(note?.position ?? "").trim();
             const adjustment = Number(note?.availability_adjustment_points);
             const playerImpact = impact?.players?.[noteIndex];
+            const outStatus = /out|unavailable|suspend|inactive/i.test(status);
             return `
               <div class="thi-availability-item">
                 <div class="thi-availability-item-top">
                   <span class="thi-availability-status ${availabilityStatusClass(status)}">${escapeHtml(status)}</span>
                   ${player ? `<strong>${escapeHtml(player)}${position ? ` · ${escapeHtml(position)}` : ""}</strong>` : ""}
-                  ${playerImpact ? `<span class="thi-availability-player-impact">${escapeHtml(playerImpact.score.toFixed(1))} <small>/ 10 impact</small></span>` : ""}
+                  ${playerImpact ? `<span class="thi-availability-player-measures"><span class="thi-availability-player-impact">${escapeHtml(playerImpact.score.toFixed(1))} <small>/ 10 impact</small></span><span class="thi-availability-player-value">${escapeHtml(playerImpact.absenceValuePoints.toFixed(1))} pts <small>${outStatus ? "absence value" : "if out"}</small></span></span>` : ""}
                 </div>
                 <div class="thi-availability-copy">${escapeHtml(note.text)}</div>
                 <div class="thi-availability-meta">
@@ -7689,6 +7697,13 @@ function availabilityReportMarkup(awayName, homeName, game) {
     const value = Number(note?.availability_adjustment_points);
     return sum + (Number.isFinite(value) ? value : 0);
   }, 0);
+  const awayImpact = availabilityImpactForTeam(awayName);
+  const homeImpact = availabilityImpactForTeam(homeName);
+  const reportExposureScenarioHomeSpread = Number.isFinite(modelHomeSpread)
+    ? modelHomeSpread
+      - Number(awayImpact?.reportExposurePoints ?? 0)
+      + Number(homeImpact?.reportExposurePoints ?? 0)
+    : null;
   const hasScenario = Number.isFinite(modelHomeSpread)
     && (Math.abs(awayAdjustment) > 0.001 || Math.abs(homeAdjustment) > 0.001);
   const scenarioHomeSpread = hasScenario
@@ -7711,13 +7726,14 @@ function availabilityReportMarkup(awayName, homeName, game) {
         <div><span>Published Model A · availability excluded</span><strong>${Number.isFinite(modelHomeSpread) ? `${escapeHtml(homeName)} ${escapeHtml(shortSpread(modelHomeSpread))}` : "—"}</strong></div>
         <div><span>Availability-adjusted scenario</span><strong>${hasScenario ? `${escapeHtml(homeName)} ${escapeHtml(shortSpread(scenarioHomeSpread))}` : "No sourced point adjustment active"}</strong></div>
         <div><span>Verified team-value inputs</span><strong>${escapeHtml(awayName)} ${formatSigned(awayAdjustment, 1)} · ${escapeHtml(homeName)} ${formatSigned(homeAdjustment, 1)}</strong></div>
+        <div><span>Report-exposure sensitivity · not applied</span><strong>${Number.isFinite(reportExposureScenarioHomeSpread) ? `${escapeHtml(favoredLine(homeName, awayName, reportExposureScenarioHomeSpread))} · ` : ""}${escapeHtml(awayName)} ${formatNumber(awayImpact?.reportExposurePoints, 1)} / ${escapeHtml(homeName)} ${formatNumber(homeImpact?.reportExposurePoints, 1)} pts</strong></div>
       </div>
       <div class="thi-availability-foot">
         Reports expire after seven days. Negative team-value points represent a downgrade. The scenario is shown separately and is never inserted into the published Model A projection.
       </div>
       <details class="thi-availability-method">
         <summary>How THI Availability Impact is calculated</summary>
-        <p>Availability Impact is a 0–100 display-only concern score, not a projected point-spread adjustment. Each verified status is weighted by status severity, position leverage, recorded current-season workload within that position group and, when available, THI's position-specific production rating. Player scores are capped at 10 and rolled into the team and position totals. Missing roster or workload evidence lowers confidence rather than inventing a starter designation. The published Model A projection remains unchanged.</p>
+        <p>Availability Impact is a 0–100 display-only concern score. The adjacent point sensitivity estimates how much a newly absent player could matter versus a full-strength baseline: quarterbacks are capped at 6.0 points; RB/WR at 1.2/1.3; TE, OL and defensive positions below one point; special teams at 0.35. Recorded role and THI production determine where a player falls beneath that cap. Team report exposure uses status probability, diminishing returns and an 8-point ceiling. It is not automatically deducted because an older absence may already be reflected in team performance. The published Model A projection remains unchanged until THI separately verifies and records a new adjustment.</p>
       </details>
     </section>`;
 }

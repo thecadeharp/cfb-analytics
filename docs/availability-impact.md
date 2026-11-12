@@ -11,6 +11,12 @@ THI Availability Impact is a display-only matchup research score. It summarizes 
 
 THI does not infer official starters, snap counts, injury severity, or a healthy roster when a report is missing.
 
+## Point sensitivity
+
+Each player also receives a conservative full-absence point sensitivity. This estimates how much a newly absent player could matter versus a full-strength baseline; it is not automatically deducted from Model A. Position ceilings are 6.0 points for QB, 1.2 for RB, 1.3 for WR, 0.8 for TE and DL, 0.65 for OL and LB, 0.70 for DB, and 0.35 for special teams. Recorded role, production and position leverage determine the value beneath the ceiling.
+
+The current report exposure applies the status-severity weight, discounts additional absences through diminishing returns, caps non-QB accumulation at four points and caps the full team exposure at eight. THI still requires a separate, timestamped adjustment before changing the availability-adjusted scenario. This prevents double-counting a season-long absence already reflected in the team's observed performance.
+
 ## Calculation
 
 Each listed player receives a 0–10 impact score based on four disclosed components:
