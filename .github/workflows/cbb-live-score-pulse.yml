@@ -67,15 +67,15 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
+          from scripts.refresh_cbb_scores import canonical_status
           board = json.loads(Path("data/cbb/projection_board.json").read_text())
           postgame = json.loads(Path("data/cbb/postgame.json").read_text())
           tracking = json.loads(Path("data/cbb/model_tracking.json").read_text())
           counts = board["meta"]["status_counts"]
           games = board["games"]
-          normalize = lambda value: str(value or "").lower().replace("_", "")
-          assert counts["upcoming"] == sum(normalize(g.get("status")) == "scheduled" for g in games)
-          assert counts["live"] == sum(normalize(g.get("status")) in {"live", "inprogress", "halftime"} for g in games)
-          assert counts["final"] == sum(normalize(g.get("status")) in {"final", "completed", "complete"} for g in games)
+          assert counts["upcoming"] == sum(canonical_status(g.get("status")) == "scheduled" for g in games)
+          assert counts["live"] == sum(canonical_status(g.get("status")) == "live" for g in games)
+          assert counts["final"] == sum(canonical_status(g.get("status")) == "final" for g in games)
           assert postgame["meta"]["final_game_count"] <= counts["final"]
           assert tracking["meta"]["version"] == "thi-cbb-model-tracking-v0.3"
           assert tracking["summary"]["final_games_with_frozen_projection"] <= counts["final"]
