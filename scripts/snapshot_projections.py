@@ -39,6 +39,8 @@ LEDGER_PATH = ROOT / "data" / "snapshots" / "projection_market_snapshots.jsonl"
 LATEST_PATH = ROOT / "data" / "snapshots" / "latest_snapshot.json"
 
 MODEL_VERSION = "production-model-a-2026-week1-freeze-v1"
+MAX_EXECUTION_QUOTE_AGE_MINUTES = 30.0
+MAX_EXECUTION_PRICE = -125
 
 
 def utc_now():
@@ -55,6 +57,101 @@ def number(value):
         return float(value) if value is not None else None
     except (TypeError, ValueError):
         return None
+
+
+def parse_utc(value):
+    try:
+        parsed = datetime.fromisoformat(str(value or "").replace("Z", "+00:00"))
+        return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+    except ValueError:
+        return None
+
+
+def fresh_quote(detail, captured_at):
+    updated = parse_utc((detail or {}).get("last_update"))
+    captured = parse_utc(captured_at)
+    if updated is None or captured is None:
+        return False
+    age_minutes = max(0.0, (captured - updated).total_seconds() / 60.0)
+    return age_minutes <= MAX_EXECUTION_QUOTE_AGE_MINUTES
+
+
+def acceptable_price(value):
+    price = number(value)
+    return price is not None and abs(price) >= 100 and price >= MAX_EXECUTION_PRICE
+
+
+def best_execution_spread(market, preferred_side, home_team, captured_at):
+    consensus = number(market.get("home_spread"))
+    candidates = []
+    for row in market.get("book_lines") or []:
+        detail = row.get("spread") or {}
+        if not fresh_quote(detail, captured_at):
+            continue
+        home_point = number(detail.get("home_spread"))
+        away_point = number(detail.get("away_spread"))
+        if home_point is None or away_point is None:
+            continue
+        if consensus is not None and abs(home_point - consensus) > 3.0:
+            continue
+        if preferred_side == home_team:
+            point, price = home_point, number(detail.get("home_price"))
+        else:
+            point, price = away_point, number(detail.get("away_price"))
+        if not acceptable_price(price):
+            continue
+        candidates.append((point, price, detail))
+    if not candidates:
+        return None
+    point, price, detail = max(candidates, key=lambda item: (item[0], item[1]))
+    return {
+        "team": preferred_side,
+        "team_spread": point,
+        "home_spread": point if preferred_side == home_team else -point,
+        "price": int(price),
+        "bookmaker": detail.get("bookmaker"),
+        "bookmaker_key": detail.get("bookmaker_key"),
+        "last_update": detail.get("last_update"),
+        "selection_policy": "best_fresh_two_sided_quote",
+    }
+
+
+def best_execution_total(market, direction, captured_at):
+    consensus = number(market.get("total"))
+    candidates = []
+    for row in market.get("book_lines") or []:
+        detail = row.get("total") or {}
+        if not fresh_quote(detail, captured_at):
+            continue
+        over_total = number(detail.get("total"))
+        under_total = number(detail.get("under_total"))
+        if over_total is None or under_total is None:
+            continue
+        if consensus is not None and abs(over_total - consensus) > 4.0:
+            continue
+        if direction == "OVER":
+            point, price = over_total, number(detail.get("over_price"))
+            score = (-point, price)
+        elif direction == "UNDER":
+            point, price = under_total, number(detail.get("under_price"))
+            score = (point, price)
+        else:
+            continue
+        if not acceptable_price(price):
+            continue
+        candidates.append((score, point, price, detail))
+    if not candidates:
+        return None
+    _, point, price, detail = max(candidates, key=lambda item: item[0])
+    return {
+        "direction": direction,
+        "total": point,
+        "price": int(price),
+        "bookmaker": detail.get("bookmaker"),
+        "bookmaker_key": detail.get("bookmaker_key"),
+        "last_update": detail.get("last_update"),
+        "selection_policy": "best_fresh_two_sided_quote",
+    }
 
 
 def tracking_eligible(game):
@@ -186,6 +283,17 @@ def main():
 
         home = (game.get("home") or {}).get("team")
         away = (game.get("away") or {}).get("team")
+        preferred = comparison.get("preferred_side")
+        market_total = number(market.get("total"))
+        total_direction = None
+        if public_total is not None and market_total is not None:
+            total_direction = "OVER" if public_total > market_total else "UNDER" if public_total < market_total else None
+        execution_spread = (
+            best_execution_spread(market, preferred, home, captured_at)
+            if preferred in {home, away}
+            else None
+        )
+        execution_total = best_execution_total(market, total_direction, captured_at)
 
         sid = snapshot_id(game, captured_at)
         if sid in existing_ids:
@@ -229,7 +337,13 @@ def main():
                 "bookmaker": market.get("bookmaker"),
                 "reference_spread": market.get("reference_spread"),
                 "reference_total": market.get("reference_total"),
+                "execution_spread": execution_spread,
+                "execution_total": execution_total,
                 "price_policy": "single_book_two_sided_quote_only",
+                "execution_policy": (
+                    "Best fresh two-sided quote for the THI side/direction, "
+                    "maximum -125 price, with consensus retained as benchmark."
+                ),
             },
             "comparison_at_snapshot": {
                 "disagreement": comparison.get("disagreement"),

@@ -45,6 +45,15 @@ jobs:
       - name: Enrich confirmed kickoff, broadcast and venue metadata
         run: python scripts/enrich_cfb_schedule.py
 
+      - name: Capture executable spread and total quotes
+        run: python scripts/snapshot_projections.py
+
+      - name: Publish improved-number alerts
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          THI_SITE_URL: "https://thehammerindex.com"
+        run: python scripts/post_discord_alerts.py
+
       - name: Commit refreshed projections
         run: |
           git config user.name "github-actions[bot]"
@@ -53,6 +62,9 @@ jobs:
           git add data/odds.json
           git add data/projections.json
           git add data/schedule.json
+          git add data/snapshots/projection_market_snapshots.jsonl
+          git add data/snapshots/latest_snapshot.json
+          git add data/discord_notification_state.json
 
           if git diff --cached --quiet; then
             echo "No projection changes to commit."

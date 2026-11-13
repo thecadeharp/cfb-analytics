@@ -104,11 +104,25 @@ def classify_beat_close(clv):
     return None
 
 
+def execution_home_spread(snapshot):
+    market = snapshot.get("market_at_snapshot") or {}
+    execution = market.get("execution_spread") or {}
+    value = execution.get("home_spread")
+    return value if value is not None else market.get("home_spread")
+
+
+def execution_total(snapshot):
+    market = snapshot.get("market_at_snapshot") or {}
+    execution = market.get("execution_total") or {}
+    value = execution.get("total")
+    return value if value is not None else market.get("total")
+
+
 def calculate_clv(snapshot, closing):
     snap_market = snapshot.get("market_at_snapshot") or {}
     close_market = closing.get("closing_market") or {}
 
-    snapshot_home_spread = snap_market.get("home_spread")
+    snapshot_home_spread = execution_home_spread(snapshot)
     closing_home_spread = close_market.get("home_spread")
 
     if snapshot_home_spread is None or closing_home_spread is None:
@@ -154,7 +168,7 @@ def closing_model_edge(snapshot, closing):
 
 def movement_toward_model(snapshot, closing):
     model_home = (snapshot.get("model") or {}).get("home_spread")
-    snap_home = (snapshot.get("market_at_snapshot") or {}).get("home_spread")
+    snap_home = execution_home_spread(snapshot)
     close_home = (closing.get("closing_market") or {}).get("home_spread")
 
     if model_home is None or snap_home is None or close_home is None:
@@ -223,6 +237,8 @@ def main():
         closing = closing_by_game.get(key)
         comparison = snapshot.get("comparison_at_snapshot") or {}
         market = snapshot.get("market_at_snapshot") or {}
+        execution_spread = market.get("execution_spread") or {}
+        execution_total_quote = market.get("execution_total") or {}
         model = snapshot.get("model") or {}
 
         clv = calculate_clv(snapshot, closing) if closing else None
@@ -245,9 +261,13 @@ def main():
             ),
             "status_system": comparison.get("status_system"),
             "model_home_spread": model.get("home_spread"),
-            "snapshot_home_spread": market.get("home_spread"),
-            "snapshot_total": market.get("total"),
-            "snapshot_bookmaker": market.get("bookmaker"),
+            "snapshot_home_spread": execution_home_spread(snapshot),
+            "snapshot_total": execution_total(snapshot),
+            "snapshot_bookmaker": execution_spread.get("bookmaker") or execution_total_quote.get("bookmaker") or market.get("bookmaker"),
+            "snapshot_spread_price": execution_spread.get("price"),
+            "snapshot_total_price": execution_total_quote.get("price"),
+            "snapshot_consensus_home_spread": market.get("home_spread"),
+            "snapshot_consensus_total": market.get("total"),
             "closing_home_spread": (
                 (closing.get("closing_market") or {}).get("home_spread")
                 if closing else None
@@ -267,7 +287,7 @@ def main():
                 closing.get("minutes_to_kickoff") if closing else None
             ),
             "same_bookmaker": (
-                market.get("bookmaker")
+                (execution_spread.get("bookmaker") or market.get("bookmaker"))
                 == (closing.get("closing_market") or {}).get("bookmaker")
                 if closing else None
             ),
@@ -359,6 +379,10 @@ def main():
         "snapshot_home_spread",
         "snapshot_total",
         "snapshot_bookmaker",
+        "snapshot_spread_price",
+        "snapshot_total_price",
+        "snapshot_consensus_home_spread",
+        "snapshot_consensus_total",
         "closing_home_spread",
         "closing_total",
         "closing_bookmaker",

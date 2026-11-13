@@ -175,6 +175,8 @@ def signal_events(
         home = str(snapshot.get("home_team") or "Home")
         comparison = snapshot.get("comparison_at_snapshot") or {}
         market = snapshot.get("market_at_snapshot") or {}
+        execution_spread = market.get("execution_spread") or {}
+        execution_total = market.get("execution_total") or {}
         projection = snapshot.get("public_projection") or {}
         signal = translated_signal(comparison.get("market_disagreement_status"))
         rank = SIGNAL_RANK.get(signal, 0)
@@ -184,16 +186,30 @@ def signal_events(
         previous_side = str(previous.get("side") or "")
         was_qualifying = previous_rank >= SIGNAL_RANK["PLAY"]
         is_qualifying = rank >= SIGNAL_RANK["PLAY"] and bool(side)
+        tracked_home_spread = execution_spread.get("home_spread")
+        if tracked_home_spread is None:
+            tracked_home_spread = market.get("home_spread")
+        current_team_spread = number(tracked_home_spread)
+        if current_team_spread is not None and side != home:
+            current_team_spread = -current_team_spread
+        previous_team_spread = number(previous.get("team_spread"))
+        improved_spread = (
+            is_qualifying and previous_side == side
+            and current_team_spread is not None and previous_team_spread is not None
+            and current_team_spread >= previous_team_spread + 0.5
+        )
 
         should_alert = is_qualifying and (
-            not was_qualifying or rank != previous_rank or side != previous_side
+            not was_qualifying or rank != previous_rank or side != previous_side or improved_spread
         )
         should_withdraw = was_qualifying and not is_qualifying
 
         if should_alert:
-            label = "NEW THI SIGNAL" if not was_qualifying else "THI SIGNAL UPDATE"
-            market_side = team_line(side, market.get("home_spread"), home)
+            label = "NEW THI SIGNAL" if not was_qualifying else "BETTER NUMBER AVAILABLE" if improved_spread else "THI SIGNAL UPDATE"
+            market_side = team_line(side, tracked_home_spread, home)
             fair_side = team_line(side, projection.get("home_spread"), home)
+            source = execution_spread.get("bookmaker") or market.get("bookmaker") or "Available market"
+            price = number(execution_spread.get("price"))
             description = "\n".join(
                 [
                     f"**{away} at {home}**",
@@ -202,10 +218,16 @@ def signal_events(
                     f"**Model edge:** {number(comparison.get('disagreement')) or 0:.1f} points",
                     f"**Signal:** {signal}",
                     f"**Confidence:** {confidence_for(signal, report)}",
-                    f"**Market source:** {market.get('bookmaker') or 'Available market'}",
+                    f"**Market source:** {source}{f' ({int(price):+d})' if price is not None else ''}",
                 ]
             )
-            new_value = {"rank": rank, "signal": signal, "side": side}
+            new_value = {
+                "rank": rank, "signal": signal, "side": side,
+                "line": market_side, "bookmaker": source,
+                "team_spread": current_team_spread,
+                "price": int(price) if price is not None else None,
+                "captured_at_utc": snapshot.get("captured_at_utc"),
+            }
             events.append(
                 (
                     embed(f"🔨 {label}", description, SIGNAL_COLOR.get(signal, 0x17755B)),
@@ -228,29 +250,64 @@ def signal_events(
                 )
             )
         elif not previous:
-            signal_state[key] = {"rank": rank, "signal": signal, "side": side}
+            signal_state[key] = {
+                "rank": rank, "signal": signal, "side": side,
+                "team_spread": current_team_spread,
+                "bookmaker": execution_spread.get("bookmaker") or market.get("bookmaker"),
+                "price": execution_spread.get("price"),
+                "captured_at_utc": snapshot.get("captured_at_utc"),
+            }
+        elif is_qualifying and previous_team_spread is None:
+            signal_state[key] = {
+                **previous,
+                "team_spread": current_team_spread,
+                "bookmaker": execution_spread.get("bookmaker") or market.get("bookmaker"),
+                "price": execution_spread.get("price"),
+                "captured_at_utc": snapshot.get("captured_at_utc"),
+            }
 
         tier, direction, edge = total_status(snapshot)
         total_rank = TOTAL_RANK[tier]
         prior_total = total_state.get(key, {})
         prior_rank = int(prior_total.get("rank", 0))
         prior_direction = prior_total.get("direction")
+        tracked_total = execution_total.get("total")
+        if tracked_total is None:
+            tracked_total = market.get("total")
+        tracked_total = number(tracked_total)
+        previous_total = number(prior_total.get("line"))
+        improved_total = (
+            total_rank > 0 and direction == prior_direction
+            and tracked_total is not None and previous_total is not None
+            and (
+                (direction == "OVER" and tracked_total <= previous_total - 0.5)
+                or (direction == "UNDER" and tracked_total >= previous_total + 0.5)
+            )
+        )
         total_changed = total_rank > 0 and (
-            prior_rank == 0 or total_rank != prior_rank or direction != prior_direction
+            prior_rank == 0 or total_rank != prior_rank or direction != prior_direction or improved_total
         )
         total_withdrawn = prior_rank > 0 and total_rank == 0
 
         if total_changed:
+            total_source = execution_total.get("bookmaker") or market.get("bookmaker") or "Available market"
+            total_price = number(execution_total.get("price"))
             description = "\n".join(
                 [
                     f"**{away} at {home}**",
-                    f"**{direction} {market.get('total')}**",
+                    f"**{direction} {tracked_total}**",
                     f"**THI projected total:** {projection.get('total')}",
-                    f"**Difference:** {edge:.1f} points",
+                    f"**Difference vs consensus:** {edge:.1f} points",
                     f"**Classification:** {tier}",
+                    f"**Market source:** {total_source}{f' ({int(total_price):+d})' if total_price is not None else ''}",
                 ]
             )
-            new_value = {"rank": total_rank, "tier": tier, "direction": direction}
+            new_value = {
+                "rank": total_rank, "tier": tier, "direction": direction,
+                "line": tracked_total, "bookmaker": total_source,
+                "price": int(total_price) if total_price is not None else None,
+                "captured_at_utc": snapshot.get("captured_at_utc"),
+            }
             events.append(
                 (
                     embed("📊 THI TOTAL SIGNAL", description, 0x1F6FAE),
@@ -267,7 +324,21 @@ def signal_events(
                 )
             )
         elif not prior_total:
-            total_state[key] = {"rank": total_rank, "tier": tier, "direction": direction}
+            total_state[key] = {
+                "rank": total_rank, "tier": tier, "direction": direction,
+                "line": tracked_total,
+                "bookmaker": execution_total.get("bookmaker") or market.get("bookmaker"),
+                "price": execution_total.get("price"),
+                "captured_at_utc": snapshot.get("captured_at_utc"),
+            }
+        elif total_rank > 0 and previous_total is None:
+            total_state[key] = {
+                **prior_total,
+                "line": tracked_total,
+                "bookmaker": execution_total.get("bookmaker") or market.get("bookmaker"),
+                "price": execution_total.get("price"),
+                "captured_at_utc": snapshot.get("captured_at_utc"),
+            }
 
     return events
 
@@ -365,14 +436,33 @@ def baseline(state: dict[str, Any], snapshots: list[dict[str, Any]], rows: list[
             continue
         key = game_key(snapshot)
         comparison = snapshot.get("comparison_at_snapshot") or {}
+        market = snapshot.get("market_at_snapshot") or {}
+        execution_spread = market.get("execution_spread") or {}
+        execution_total = market.get("execution_total") or {}
         signal = translated_signal(comparison.get("market_disagreement_status"))
         tier, direction, _ = total_status(snapshot)
+        preferred = str(comparison.get("preferred_side") or "")
+        tracked_home_spread = execution_spread.get("home_spread", market.get("home_spread"))
+        team_spread = number(tracked_home_spread) if preferred else None
+        if team_spread is not None and preferred != str(snapshot.get("home_team") or ""):
+            team_spread = -team_spread
         signals[key] = {
             "rank": SIGNAL_RANK.get(signal, 0),
             "signal": signal,
-            "side": str(comparison.get("preferred_side") or ""),
+            "side": preferred,
+            "home_spread": tracked_home_spread,
+            "team_spread": team_spread,
+            "bookmaker": execution_spread.get("bookmaker") or market.get("bookmaker"),
+            "price": execution_spread.get("price"),
+            "captured_at_utc": snapshot.get("captured_at_utc"),
         }
-        totals[key] = {"rank": TOTAL_RANK[tier], "tier": tier, "direction": direction}
+        totals[key] = {
+            "rank": TOTAL_RANK[tier], "tier": tier, "direction": direction,
+            "line": execution_total.get("total", market.get("total")),
+            "bookmaker": execution_total.get("bookmaker") or market.get("bookmaker"),
+            "price": execution_total.get("price"),
+            "captured_at_utc": snapshot.get("captured_at_utc"),
+        }
     for key in latest_settled_rows(rows):
         state.setdefault("finals", {})[key] = {"announced": True}
     values = list(postgames.values()) if isinstance(postgames, dict) else list(postgames)

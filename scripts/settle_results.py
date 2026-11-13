@@ -446,8 +446,24 @@ def preferred_side(snapshot):
     return (snapshot.get("comparison_at_snapshot") or {}).get("preferred_side")
 
 
+def execution_home_spread(snapshot):
+    market = snapshot.get("market_at_snapshot") or {}
+    execution = market.get("execution_spread") or {}
+    return as_number(execution.get("home_spread")) \
+        if execution.get("home_spread") is not None \
+        else as_number(market.get("home_spread"))
+
+
+def execution_total(snapshot):
+    market = snapshot.get("market_at_snapshot") or {}
+    execution = market.get("execution_total") or {}
+    return as_number(execution.get("total")) \
+        if execution.get("total") is not None \
+        else as_number(market.get("total"))
+
+
 def ats_result(snapshot, result):
-    market_home = as_number((snapshot.get("market_at_snapshot") or {}).get("home_spread"))
+    market_home = execution_home_spread(snapshot)
     if market_home is None:
         return None
 
@@ -470,11 +486,12 @@ def ats_result(snapshot, result):
 
 def total_result(snapshot, result):
     public_total = as_number((snapshot.get("public_projection") or {}).get("total"))
-    market_total = as_number((snapshot.get("market_at_snapshot") or {}).get("total"))
-    if public_total is None or market_total is None:
+    consensus_total = as_number((snapshot.get("market_at_snapshot") or {}).get("total"))
+    tracked_total = execution_total(snapshot)
+    if public_total is None or consensus_total is None or tracked_total is None:
         return {"direction": None, "edge": None, "tier": None, "result": None}
 
-    difference = public_total - market_total
+    difference = public_total - consensus_total
     edge = abs(difference)
     direction = "OVER" if difference > 0 else "UNDER" if difference < 0 else None
     tier = "TOTAL WATCH" if edge >= 7 else "TOTAL LEAN" if edge >= 4 else None
@@ -482,7 +499,7 @@ def total_result(snapshot, result):
         return {"direction": direction, "edge": edge, "tier": tier, "result": None}
 
     actual_total = result["home_points"] + result["away_points"]
-    market_margin = actual_total - market_total
+    market_margin = actual_total - tracked_total
     graded_margin = market_margin if direction == "OVER" else -market_margin
     grade = "W" if graded_margin > 0 else "L" if graded_margin < 0 else "P"
     return {"direction": direction, "edge": edge, "tier": tier, "result": grade}
@@ -520,7 +537,7 @@ def calc_clv(snapshot, closing):
     if not closing:
         return None
 
-    snap_home = as_number((snapshot.get("market_at_snapshot") or {}).get("home_spread"))
+    snap_home = execution_home_spread(snapshot)
     close_home = as_number((closing.get("closing_market") or {}).get("home_spread"))
     if snap_home is None or close_home is None:
         return None
@@ -678,6 +695,8 @@ def main():
             result["home_points"] + result["away_points"] if result else None
         )
         public_total = as_number(public_projection.get("total"))
+        execution_spread = market.get("execution_spread") or {}
+        execution_total_quote = market.get("execution_total") or {}
 
         rows.append({
             "snapshot_id": snapshot.get("snapshot_id"),
@@ -705,9 +724,13 @@ def main():
             "weather_spread_status": weather_snapshot.get("spread_status"),
             "public_margin_error": round_or_none(public_error),
             "public_abs_error": round_or_none(abs(public_error)) if public_error is not None else None,
-            "snapshot_home_spread": market.get("home_spread"),
-            "snapshot_total": market.get("total"),
-            "snapshot_bookmaker": market.get("bookmaker"),
+            "snapshot_home_spread": execution_home_spread(snapshot),
+            "snapshot_total": execution_total(snapshot),
+            "snapshot_bookmaker": execution_spread.get("bookmaker") or execution_total_quote.get("bookmaker") or market.get("bookmaker"),
+            "snapshot_spread_price": execution_spread.get("price"),
+            "snapshot_total_price": execution_total_quote.get("price"),
+            "snapshot_consensus_home_spread": market.get("home_spread"),
+            "snapshot_consensus_total": market.get("total"),
             "total_direction": total_grade["direction"],
             "total_edge": round_or_none(total_grade["edge"]),
             "total_tier": total_grade["tier"],
@@ -831,6 +854,8 @@ def main():
         "weather_spread_adjustment", "weather_spread_status",
         "public_margin_error", "public_abs_error",
         "snapshot_home_spread", "snapshot_total", "snapshot_bookmaker",
+        "snapshot_spread_price", "snapshot_total_price",
+        "snapshot_consensus_home_spread", "snapshot_consensus_total",
         "total_direction", "total_edge", "total_tier", "total_result",
         "actual_total", "total_projection_error",
         "closing_home_spread", "closing_captured_at_utc",
