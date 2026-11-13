@@ -6,6 +6,18 @@ from scripts.build_cbb_data_foundation import build_outputs, market_summary
 
 
 class CbbDataFoundationTests(unittest.TestCase):
+    def test_consensus_never_publishes_quarter_point_market_lines(self):
+        summary = market_summary([
+            {"provider": "Draft Kings", "spread": -4.5, "spreadOpen": -4.5, "overUnder": 164.5, "overUnderOpen": 161.5},
+            {"provider": "Bovada", "spread": -4.0, "spreadOpen": -4.0, "overUnder": 163.5, "overUnderOpen": 162.0},
+        ])
+        self.assertEqual(summary["consensus_home_spread"], -4.0)
+        self.assertEqual(summary["consensus_total"], 164.0)
+        self.assertEqual(summary["opening_home_spread"], -4.0)
+        self.assertEqual(summary["opening_total"], 162.0)
+        for field in ("consensus_home_spread", "consensus_total", "opening_home_spread", "opening_total"):
+            self.assertEqual(summary[field] * 2, round(summary[field] * 2))
+
     def test_normalizes_provider_spreads_to_home_team(self):
         summary = market_summary([
             {"provider": "DK", "spread": 8.5, "spreadOpen": 7.5, "homeMoneyline": -350, "awayMoneyline": 280},

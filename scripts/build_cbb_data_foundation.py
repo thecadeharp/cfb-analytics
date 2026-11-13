@@ -54,9 +54,17 @@ def difference(left: Any, right: Any) -> float | None:
     return round(a - b, 2) if a is not None and b is not None else None
 
 
-def median(rows: list[dict[str, Any]], field: str) -> float | None:
+def median_market_tick(rows: list[dict[str, Any]], field: str) -> float | None:
+    """Return a consensus on the half-point grid used by sportsbook markets.
+
+    An even number of books can produce quarter-point mathematical medians
+    (for example, -4.5 and -4.0 become -4.25). Those are useful internally as
+    averages, but they are not wagerable spread/total quotes and must not be
+    published as a market line. Match the CFB consensus contract by snapping
+    the median to the nearest half point.
+    """
     values = [number for row in rows if (number := finite(row.get(field))) is not None]
-    return round(statistics.median(values), 2) if values else None
+    return round(statistics.median(values) * 2) / 2 if values else None
 
 
 def market_summary(lines: list[dict[str, Any]]) -> dict[str, Any] | None:
@@ -79,10 +87,10 @@ def market_summary(lines: list[dict[str, Any]]) -> dict[str, Any] | None:
                 row[field] = -value
         normalized.append(row)
     lines = normalized
-    spread = median(lines, "spread")
-    total = median(lines, "overUnder")
-    open_spread = median(lines, "spreadOpen")
-    open_total = median(lines, "overUnderOpen")
+    spread = median_market_tick(lines, "spread")
+    total = median_market_tick(lines, "overUnder")
+    open_spread = median_market_tick(lines, "spreadOpen")
+    open_total = median_market_tick(lines, "overUnderOpen")
     provider_priority = {
         "pinnacle": 0,
         "circa sports": 1,
