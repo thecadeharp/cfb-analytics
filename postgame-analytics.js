@@ -5,6 +5,18 @@
   const SETTLED_URL = "./data/reports/settled_results.json";
   const SIGNAL_URL = "./data/reports/signal_report.json";
   const CLV_URL = "./data/reports/clv_report.json";
+  const FINAL_PREGAME_TRACKING_START_WEEK = 11;
+  const TRACKING_LINE_OVERRIDES = Object.freeze({
+    "401866459": Object.freeze({
+      snapshot_home_spread: -4.5,
+      market_book: "BetRivers",
+      market_captured_at_utc: "2026-11-08T13:16:03Z",
+      preferred_side: "Bowling Green",
+      ats_result: "W",
+      result_margin: 0.5,
+      reason: "Verified pregame Bowling Green -4.5 (-117) was available at BetRivers.",
+    }),
+  });
   const STYLE_ID = "hammer-postgame-analytics-styles";
   const PANEL_ID = "hammer-postgame-analysis";
   const SCORECARD_ID = "hammer-performance-scorecard";
@@ -79,6 +91,23 @@
         ? "last_verified_pregame_snapshot"
         : "unavailable";
     return official;
+  }
+
+  function officialTrackingResult(gameRows, gameId) {
+    const ordered = [...gameRows].sort((a, b) =>
+      String(a?.captured_at_utc || "").localeCompare(String(b?.captured_at_utc || ""))
+    );
+    const pregame = ordered.filter(row => {
+      const captured = resultTimestamp(row?.captured_at_utc);
+      const kickoff = resultTimestamp(row?.start_date);
+      return captured !== null && kickoff !== null && captured <= kickoff;
+    });
+    const eligible = pregame.length ? pregame : ordered;
+    const week = Number(eligible.at(-1)?.week ?? eligible[0]?.week);
+    const useFinalPregame = Number.isFinite(week) && week >= FINAL_PREGAME_TRACKING_START_WEEK;
+    const selected = { ...(useFinalPregame ? eligible.at(-1) : eligible[0]) };
+    const override = TRACKING_LINE_OVERRIDES[String(gameId || selected.game_key || "")];
+    return override ? { ...selected, ...override, tracking_override: true } : selected;
   }
 
   function format(value, digits = 3, suffix = "") {
@@ -811,34 +840,31 @@
         const rows = (settled?.rows || []).filter(row => row?.result_settled);
         const clv = clvResponse.ok ? await clvResponse.json() : { rows: [] };
         const closingBySnapshot = new Map((clv?.rows || []).map(row => [String(row.snapshot_id || ""), row]));
-        const earliest = new Map();
         const grouped = new Map();
         rows.forEach(row => {
           const id = String(row.game_key || "");
           if (!id) return;
           if (!grouped.has(id)) grouped.set(id, []);
           grouped.get(id).push(row);
-          const current = earliest.get(id);
-          if (!current || String(row.captured_at_utc || "") < String(current.captured_at_utc || "")) {
-            const closing = closingBySnapshot.get(String(row.snapshot_id || ""));
-            const totalClv = totalClvPoints(row, closing);
-            earliest.set(id, {
-              ...row,
-              closing_total: closing?.closing_total ?? null,
-              total_clv_points: Number.isFinite(totalClv) ? totalClv : null,
-            });
-          }
         });
-        settledByGame = earliest;
+        settledByGame = new Map();
         settledDisplayByGame = new Map();
         grouped.forEach((gameRows, id) => {
+          const official = officialTrackingResult(gameRows, id);
+          const closing = closingBySnapshot.get(String(official.snapshot_id || ""));
+          const totalClv = totalClvPoints(official, closing);
+          settledByGame.set(id, {
+            ...official,
+            closing_total: closing?.closing_total ?? official.closing_total ?? null,
+            total_clv_points: Number.isFinite(totalClv) ? totalClv : null,
+          });
           const display = finalDisplayResult(gameRows);
           [id, display.result_game_id]
             .filter(value => value !== null && value !== undefined)
             .forEach(value => settledDisplayByGame.set(String(value), display));
         });
         if (trackingWeek === "LATEST") {
-          const weeks = Array.from(earliest.values()).map(row => Number(row.week)).filter(Number.isFinite);
+          const weeks = Array.from(settledByGame.values()).map(row => Number(row.week)).filter(Number.isFinite);
           trackingWeek = weeks.length ? String(Math.max(...weeks)) : "ALL";
         }
       }
