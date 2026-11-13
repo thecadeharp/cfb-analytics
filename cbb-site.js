@@ -82,7 +82,7 @@
     projectionSignal: "all",
     projectionConfidence: "all",
     projectionSort: "time",
-    projectionStatus: "all",
+    projectionStatus: "upcoming",
     projectionDate: "next",
     projectionLimit: 150,
     teamDataQuery: "",
@@ -544,15 +544,44 @@
     return new Intl.DateTimeFormat("en-CA", { year:"numeric", month:"2-digit", day:"2-digit", timeZone:"America/New_York" }).format(start);
   }
 
-  function projectionDateButtons() {
+  function projectionDateInventory(games = projectionGamesBeforeDateFilter()) {
     const counts = new Map();
-    for (const game of state.data?.projectionBoard?.games || []) {
-      if (state.projectionStatus !== "all" && gameStatus(game) !== state.projectionStatus) continue;
+    for (const game of games) {
       const key = gameDateKey(game); counts.set(key, (counts.get(key) || 0) + 1);
     }
     const dates = [...counts.keys()].filter(key => key !== "tbd").sort();
+    return { counts, dates };
+  }
+
+  function resolvedProjectionDate(dates) {
+    if (!dates.length) return "";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(state.projectionDate) && dates.includes(state.projectionDate)) return state.projectionDate;
+    const today = cbbTrackingDateKey();
+    if (state.projectionStatus === "final") return [...dates].reverse().find(key => key <= today) || dates.at(-1);
+    return dates.find(key => key >= today) || dates.at(-1);
+  }
+
+  function projectionDateButtons() {
+    const { counts, dates } = projectionDateInventory();
+    const selected = state.projectionDate === "all" ? "" : resolvedProjectionDate(dates);
+    const selectedIndex = selected ? dates.indexOf(selected) : -1;
+    const today = cbbTrackingDateKey();
     const format = key => new Intl.DateTimeFormat("en-US", { weekday:"short", month:"short", day:"numeric", timeZone:"UTC" }).format(new Date(`${key}T12:00:00Z`));
-    return `<button type="button" class="${state.projectionDate === "next" ? "is-active" : ""}" data-cbb-date="next">Next slate</button>${dates.map(key => `<button type="button" class="${state.projectionDate === key ? "is-active" : ""}" data-cbb-date="${key}">${escapeHtml(format(key))}<b>${integer(counts.get(key))}</b></button>`).join("")}<button type="button" class="${state.projectionDate === "all" ? "is-active" : ""}" data-cbb-date="all">All dates</button>`;
+    const selectedLabel = state.projectionDate === "all"
+      ? `All ${state.projectionStatus === "upcoming" ? "upcoming" : "matching"} dates`
+      : selected ? `${format(selected)} · ${integer(counts.get(selected))} ${counts.get(selected) === 1 ? "game" : "games"}` : "No matching game days";
+    return `
+      <div class="cbb-date-actions">
+        <button type="button" class="${state.projectionDate === "next" ? "is-active" : ""}" data-cbb-date="next">Next slate</button>
+        <button type="button" class="${state.projectionDate === today ? "is-active" : ""}" data-cbb-date="${today}" ${dates.includes(today) ? "" : "disabled"}>Today</button>
+        <button type="button" class="${state.projectionDate === "all" ? "is-active" : ""}" data-cbb-date="all">All ${state.projectionStatus === "upcoming" ? "upcoming" : "dates"}</button>
+      </div>
+      <div class="cbb-date-jump">
+        <button type="button" data-cbb-date-step="-1" aria-label="Previous game day" ${selectedIndex > 0 ? "" : "disabled"}>←</button>
+        <label><span>Jump to date</span><input id="cbb-projection-date-picker" type="date" value="${escapeHtml(selected)}" ${dates.length ? `min="${dates[0]}" max="${dates.at(-1)}"` : "disabled"}></label>
+        <button type="button" data-cbb-date-step="1" aria-label="Next game day" ${selectedIndex >= 0 && selectedIndex < dates.length - 1 ? "" : "disabled"}>→</button>
+        <strong>${escapeHtml(selectedLabel)}</strong>
+      </div>`;
   }
 
   function statusButton(value, label, games) {
@@ -645,7 +674,7 @@
     return new Date(game.start_date).getTime() || 0;
   }
 
-  function filteredProjectionGames() {
+  function projectionGamesBeforeDateFilter() {
     const games = [...(state.data.projectionBoard?.games || [])];
     const query = state.projectionQuery.trim().toLowerCase();
     const filtered = games.filter(game => {
@@ -681,34 +710,56 @@
       const time = (new Date(a.start_date).getTime() || 0) - (new Date(b.start_date).getTime() || 0);
       return time || String(a.game_id || "").localeCompare(String(b.game_id || ""));
     });
+    return filtered;
+  }
+
+  function filteredProjectionGames() {
+    const filtered = projectionGamesBeforeDateFilter();
     if (state.projectionDate === "all") return filtered;
-    const selected = state.projectionDate === "next" ? filtered.map(gameDateKey).find(key => key !== "tbd") : state.projectionDate;
+    const dates = [...new Set(filtered.map(gameDateKey).filter(key => key !== "tbd"))].sort();
+    const selected = resolvedProjectionDate(dates);
     return selected ? filtered.filter(game => gameDateKey(game) === selected) : filtered;
   }
 
   function bindProjectionControls() {
     const view = document.getElementById("view-cbb-projections");
     const resetLimit = () => { state.projectionLimit = 150; paintProjectionBoard(); };
-    view.querySelector("#cbb-projection-search").addEventListener("input", event => { state.projectionQuery = event.target.value; resetLimit(); });
+    view.querySelector("#cbb-projection-search").addEventListener("input", event => { state.projectionQuery = event.target.value; state.projectionDate = state.projectionQuery.trim() ? "all" : "next"; resetLimit(); });
     view.querySelector("#cbb-projection-matchup").addEventListener("change", event => { state.projectionMatchup = event.target.value; resetLimit(); });
     view.querySelector("#cbb-projection-conference").addEventListener("change", event => { state.projectionConference = event.target.value; resetLimit(); });
     view.querySelector("#cbb-projection-signal").addEventListener("change", event => { state.projectionSignal = event.target.value; resetLimit(); });
     view.querySelector("#cbb-projection-confidence").addEventListener("change", event => { state.projectionConfidence = event.target.value; resetLimit(); });
     view.querySelector("#cbb-projection-sort").addEventListener("change", event => { state.projectionSort = event.target.value; resetLimit(); });
     view.querySelector("#cbb-projection-clear").addEventListener("click", () => {
-      state.projectionQuery = ""; state.projectionMatchup = "all"; state.projectionConference = "all"; state.projectionSignal = "all"; state.projectionConfidence = "all"; state.projectionSort = "time"; state.projectionStatus = "all"; state.projectionDate = "next"; state.projectionLimit = 150; renderProjections();
+      state.projectionQuery = ""; state.projectionMatchup = "all"; state.projectionConference = "all"; state.projectionSignal = "all"; state.projectionConfidence = "all"; state.projectionSort = "time"; state.projectionStatus = "upcoming"; state.projectionDate = "next"; state.projectionLimit = 150; renderProjections();
     });
     view.querySelector(".cbb-status-filter").addEventListener("click", event => {
       const button = event.target.closest("[data-cbb-status]");
       if (!button) return;
       state.projectionStatus = button.dataset.cbbStatus;
+      state.projectionDate = "next";
       state.projectionLimit = 150;
       renderProjections();
     });
     view.querySelector(".cbb-date-navigator").addEventListener("click", event => {
-      const button = event.target.closest("[data-cbb-date]");
-      if (!button) return;
-      state.projectionDate = button.dataset.cbbDate;
+      const button = event.target.closest("[data-cbb-date], [data-cbb-date-step]");
+      if (!button || button.disabled) return;
+      if (button.dataset.cbbDateStep) {
+        const { dates } = projectionDateInventory();
+        const selected = resolvedProjectionDate(dates);
+        const index = dates.indexOf(selected);
+        const target = dates[index + Number(button.dataset.cbbDateStep)];
+        if (!target) return;
+        state.projectionDate = target;
+      } else {
+        state.projectionDate = button.dataset.cbbDate;
+      }
+      state.projectionLimit = 150;
+      renderProjections();
+    });
+    view.querySelector(".cbb-date-navigator").addEventListener("change", event => {
+      if (!event.target.matches("#cbb-projection-date-picker")) return;
+      state.projectionDate = event.target.value || "next";
       state.projectionLimit = 150;
       renderProjections();
     });
@@ -725,6 +776,8 @@
   function paintProjectionBoard() {
     const body = document.getElementById("cbb-projection-body");
     if (!body) return;
+    const navigator = document.querySelector("#view-cbb-projections .cbb-date-navigator");
+    if (navigator) navigator.innerHTML = projectionDateButtons();
     const all = filteredProjectionGames();
     const shown = all.slice(0, state.projectionLimit);
     const groups = new Map();
