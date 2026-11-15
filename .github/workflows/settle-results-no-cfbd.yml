@@ -61,6 +61,7 @@ jobs:
       - name: Settle prospective projections
         run: |
           python scripts/settle_results.py
+          python -m unittest scripts/test_tracking_exclusions.py
 
       - name: Freeze and settle Variance Lab qualifiers
         run: |

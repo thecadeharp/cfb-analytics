@@ -27,7 +27,9 @@ def main():
             first[key] = row
 
     weeks = defaultdict(list)
-    for row in first.values():
+    excluded = [row for row in first.values() if row.get("tracking_eligible", True) is False]
+    qualified = [row for row in first.values() if row.get("tracking_eligible", True) is not False]
+    for row in qualified:
         if row.get("week") is not None:
             weeks[int(row["week"])].append(row)
 
@@ -53,7 +55,7 @@ def main():
             "total_sample": len(totals),
         })
 
-    settled_all = [row for row in first.values() if row.get("result_settled")]
+    settled_all = [row for row in qualified if row.get("result_settled")]
     season_margins = [numeric(row.get("model_abs_error")) for row in settled_all]
     season_margins = [value for value in season_margins if value is not None]
     season_market_margins = [
@@ -73,7 +75,7 @@ def main():
         "latest_settled_kickoff_utc": max(
             (
                 r.get("start_date")
-                for r in first.values()
+                for r in qualified
                 if r.get("result_settled") and r.get("start_date")
             ),
             default=None,
@@ -86,8 +88,10 @@ def main():
         ),
         "season": {
             "frozen_snapshot_games": len(first),
+            "qualified_snapshot_games": len(qualified),
+            "excluded_material_availability_games": len(excluded),
             "settled_games": len(settled_all),
-            "unsettled_or_unmatched": len(first) - len(settled_all),
+            "unsettled_or_unmatched": len(qualified) - len(settled_all),
             "model_margin_mae_points": (
                 round(sum(season_margins) / len(season_margins), 2)
                 if season_margins else None

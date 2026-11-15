@@ -24,6 +24,7 @@ SETTLED_PATH = ROOT / "data" / "reports" / "settled_results.json"
 POSTGAME_PATH = ROOT / "data" / "postgame_analytics.json"
 SIGNAL_REPORT_PATH = ROOT / "data" / "reports" / "signal_report.json"
 STATE_PATH = ROOT / "data" / "discord_notification_state.json"
+TRACKING_EXCLUSIONS_PATH = ROOT / "data" / "tracking_exclusions.json"
 
 SITE_URL = os.environ.get("THI_SITE_URL", "https://thehammerindex.com").rstrip("/")
 WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "").strip()
@@ -347,7 +348,11 @@ def latest_settled_rows(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]
     """Use the final pregame tracked state, never an obsolete early snapshot."""
     selected: dict[str, dict[str, Any]] = {}
     for row in rows:
-        if not row.get("result_settled") or number(row.get("snapshot_home_spread")) is None:
+        if (
+            not row.get("result_settled")
+            or row.get("tracking_eligible", True) is False
+            or number(row.get("snapshot_home_spread")) is None
+        ):
             continue
         key = game_key(row)
         current = selected.get(key)
@@ -533,7 +538,14 @@ def main() -> int:
     settled = load_json(SETTLED_PATH, {"rows": []})
     postgame = load_json(POSTGAME_PATH, {"games": {}})
     signal_report = load_json(SIGNAL_REPORT_PATH, {"signals": {}})
+    exclusion_payload = load_json(TRACKING_EXCLUSIONS_PATH, {"exclusions": []})
+    excluded_game_ids = {
+        str(row.get("game_id"))
+        for row in exclusion_payload.get("exclusions") or []
+        if row.get("exclude_from_qualified_tracking") and row.get("game_id") is not None
+    }
     snapshots = latest.get("snapshots", []) if isinstance(latest, dict) else []
+    snapshots = [row for row in snapshots if game_key(row) not in excluded_game_ids]
     rows = settled.get("rows", []) if isinstance(settled, dict) else []
     postgames = postgame.get("games", {}) if isinstance(postgame, dict) else {}
     state = load_json(STATE_PATH, initial_state())

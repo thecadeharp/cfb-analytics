@@ -45,7 +45,10 @@ def record(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 def main() -> None:
     payload = json.loads(INPUT.read_text(encoding="utf-8"))
-    rows = [row for row in payload.get("rows", []) if row.get("result_settled")]
+    rows = [
+        row for row in payload.get("rows", [])
+        if row.get("result_settled") and row.get("tracking_eligible", True) is not False
+    ]
 
     initial_by_game: dict[str, dict[str, Any]] = {}
     for row in rows:

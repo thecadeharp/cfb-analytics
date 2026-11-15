@@ -37,6 +37,13 @@ def build(cfb: dict, cbb: dict, clv: dict | None = None) -> dict:
             "ats_result": row.get("ats_result"), "total_result": row.get("total_result"),
             "clv_points": row.get("clv_points"), "model_abs_error": row.get("model_abs_error"),
         })
+        if row.get("tracking_eligible", True) is False:
+            rows[-1].update({
+                "tracking_eligible": False,
+                "tracking_exclusion_code": row.get("tracking_exclusion_code"),
+                "tracking_exclusion_reason": row.get("tracking_exclusion_reason"),
+                "diagnostic_only": True,
+            })
     for kind in ("spread_decisions", "total_decisions"):
         for row in cbb.get(kind, []):
             item = dict(row)
