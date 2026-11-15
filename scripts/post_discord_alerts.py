@@ -17,6 +17,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
+try:
+    from scripts.tracked_decisions import first_tracked_rows
+except ModuleNotFoundError:
+    from tracked_decisions import first_tracked_rows
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SNAPSHOT_PATH = ROOT / "data" / "snapshots" / "latest_snapshot.json"
@@ -185,8 +190,11 @@ def signal_events(
         previous = signal_state.get(key, {})
         previous_rank = int(previous.get("rank", 0))
         previous_side = str(previous.get("side") or "")
+        # Market movement may improve the original ticket, but it may never
+        # turn an already tracked side into its opponent.
+        side_flipped = bool(previous_side and side and side != previous_side)
         was_qualifying = previous_rank >= SIGNAL_RANK["PLAY"]
-        is_qualifying = rank >= SIGNAL_RANK["PLAY"] and bool(side)
+        is_qualifying = rank >= SIGNAL_RANK["PLAY"] and bool(side) and not side_flipped
         tracked_home_spread = execution_spread.get("home_spread")
         if tracked_home_spread is None:
             tracked_home_spread = market.get("home_spread")
@@ -203,7 +211,7 @@ def signal_events(
         should_alert = is_qualifying and (
             not was_qualifying or rank != previous_rank or side != previous_side or improved_spread
         )
-        should_withdraw = was_qualifying and not is_qualifying
+        should_withdraw = was_qualifying and not is_qualifying and not side_flipped
 
         if should_alert:
             label = "NEW THI SIGNAL" if not was_qualifying else "BETTER NUMBER AVAILABLE" if improved_spread else "THI SIGNAL UPDATE"
@@ -250,7 +258,7 @@ def signal_events(
                     lambda k=key, v=new_value: signal_state.__setitem__(k, v),
                 )
             )
-        elif not previous:
+        elif (not previous or not previous_side) and side:
             signal_state[key] = {
                 "rank": rank, "signal": signal, "side": side,
                 "team_spread": current_team_spread,
@@ -344,21 +352,9 @@ def signal_events(
     return events
 
 
-def latest_settled_rows(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
-    """Use the final pregame tracked state, never an obsolete early snapshot."""
-    selected: dict[str, dict[str, Any]] = {}
-    for row in rows:
-        if (
-            not row.get("result_settled")
-            or row.get("tracking_eligible", True) is False
-            or number(row.get("snapshot_home_spread")) is None
-        ):
-            continue
-        key = game_key(row)
-        current = selected.get(key)
-        if current is None or str(row.get("captured_at_utc") or "") > str(current.get("captured_at_utc") or ""):
-            selected[key] = row
-    return selected
+def frozen_settled_rows(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Use the first published side and price; later market moves cannot replace it."""
+    return first_tracked_rows(row for row in rows if row.get("result_settled"))
 
 
 def final_events(
@@ -366,7 +362,7 @@ def final_events(
 ) -> list[tuple[dict[str, Any], Callable[[], None]]]:
     events: list[tuple[dict[str, Any], Callable[[], None]]] = []
     final_state = state.setdefault("finals", {})
-    for key, row in latest_settled_rows(rows).items():
+    for key, row in frozen_settled_rows(rows).items():
         if key in final_state:
             continue
         away = str(row.get("away_team") or "Away")
@@ -468,7 +464,17 @@ def baseline(state: dict[str, Any], snapshots: list[dict[str, Any]], rows: list[
             "price": execution_total.get("price"),
             "captured_at_utc": snapshot.get("captured_at_utc"),
         }
-    for key in latest_settled_rows(rows):
+    for key, row in first_tracked_rows(rows).items():
+        prior = state.setdefault("signals", {}).get(key, {})
+        spread = number(row.get("snapshot_home_spread"))
+        state["signals"][key] = {
+            **prior,
+            "side": row.get("preferred_side"),
+            "home_spread": spread,
+            "team_spread": spread if row.get("preferred_side") == row.get("home_team") else -spread,
+            "captured_at_utc": row.get("captured_at_utc"),
+        }
+    for key, row in frozen_settled_rows(rows).items():
         state.setdefault("finals", {})[key] = {"announced": True}
     values = list(postgames.values()) if isinstance(postgames, dict) else list(postgames)
     for game in values:

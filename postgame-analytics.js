@@ -5,7 +5,6 @@
   const SETTLED_URL = "./data/reports/settled_results.json";
   const SIGNAL_URL = "./data/reports/signal_report.json";
   const CLV_URL = "./data/reports/clv_report.json";
-  const FINAL_PREGAME_TRACKING_START_WEEK = 11;
   const TRACKING_LINE_OVERRIDES = Object.freeze({
     "401866459": Object.freeze({
       snapshot_home_spread: -4.5,
@@ -84,12 +83,27 @@
       const kickoff = resultTimestamp(row?.start_date);
       return captured !== null && kickoff !== null && captured <= kickoff;
     });
-    official.closing_home_spread = capturedClose?.closing_home_spread ?? official.snapshot_home_spread ?? null;
+    official.closing_home_spread = capturedClose?.closing_home_spread ?? lastPregame.snapshot_home_spread ?? null;
     official.pregame_closing_source = capturedClose
       ? "near_kickoff_capture"
       : hasValue(official.snapshot_home_spread)
         ? "last_verified_pregame_snapshot"
         : "unavailable";
+    const tracked = pregame.find(row =>
+      row?.tracking_eligible !== false
+      && row?.preferred_side
+      && hasValue(row?.snapshot_home_spread)
+    );
+    if (tracked) {
+      official.preferred_side = tracked.preferred_side;
+      official.snapshot_home_spread = tracked.snapshot_home_spread;
+      official.snapshot_bookmaker = tracked.snapshot_bookmaker;
+      official.snapshot_spread_price = tracked.snapshot_spread_price;
+      official.ats_result = tracked.ats_result;
+      official.signal = tracked.signal;
+      official.tracked_captured_at_utc = tracked.captured_at_utc;
+      official.tracking_locked = true;
+    }
     return official;
   }
 
@@ -103,9 +117,12 @@
       return captured !== null && kickoff !== null && captured <= kickoff;
     });
     const eligible = pregame.length ? pregame : ordered;
-    const week = Number(eligible.at(-1)?.week ?? eligible[0]?.week);
-    const useFinalPregame = Number.isFinite(week) && week >= FINAL_PREGAME_TRACKING_START_WEEK;
-    const selected = { ...(useFinalPregame ? eligible.at(-1) : eligible[0]) };
+    const firstTracked = eligible.find(row =>
+      row?.tracking_eligible !== false
+      && row?.preferred_side
+      && hasValue(row?.snapshot_home_spread)
+    );
+    const selected = { ...(firstTracked || eligible[0]) };
     const override = TRACKING_LINE_OVERRIDES[String(gameId || selected.game_key || "")];
     return override ? { ...selected, ...override, tracking_override: true } : selected;
   }

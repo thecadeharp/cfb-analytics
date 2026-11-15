@@ -45,6 +45,11 @@ from difflib import SequenceMatcher
 from pathlib import Path
 from statistics import mean
 
+try:
+    from scripts.tracked_decisions import first_tracked_rows
+except ModuleNotFoundError:
+    from tracked_decisions import first_tracked_rows
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SNAPSHOT_LEDGER = ROOT / "data" / "snapshots" / "projection_market_snapshots.jsonl"
@@ -781,7 +786,8 @@ def main():
                 "diagnostic_only": True,
             })
 
-    # Earliest prospective snapshot per provider game key is the clean reference.
+    # Earliest forecast is the model-error reference. ATS accountability uses
+    # the first real side and executable price, which is immutable thereafter.
     first_by_game = {}
     for row in sorted(
         rows,
@@ -793,6 +799,10 @@ def main():
         first_by_game.setdefault(row["game_key"], row)
 
     initial_rows = list(first_by_game.values())
+    tracked_by_game = first_tracked_rows(rows)
+    tracked_rows = list(tracked_by_game.values())
+    for row in tracked_rows:
+        row["is_frozen_tracked_decision"] = True
     now = datetime.now(timezone.utc)
     pending_future = []
     past_due_unmatched = []
@@ -814,6 +824,14 @@ def main():
         for signal, group in sorted(by_signal_groups.items())
     }
 
+    tracked_by_signal_groups = defaultdict(list)
+    for row in tracked_rows:
+        tracked_by_signal_groups[row.get("signal") or "UNKNOWN"].append(row)
+    tracked_by_signal = {
+        signal: summarize(group)
+        for signal, group in sorted(tracked_by_signal_groups.items())
+    }
+
     initial_match_counts = defaultdict(int)
     for row in initial_rows:
         initial_match_counts[row.get("result_match_method") or "unknown"] += 1
@@ -822,6 +840,7 @@ def main():
         "report_version": "prospective-settlement-v2-provider-independent-matching",
         "methodology": {
             "primary_reference": "Earliest timestamped prospective snapshot for each game.",
+            "ats_tracking_reference": "First eligible pregame snapshot with a preferred side and executable spread; immutable after publication.",
             "result_match_hierarchy": [
                 "exact game ID",
                 "exact normalized home/away teams + week",
@@ -854,11 +873,14 @@ def main():
             "qualified_tracking_games_excluded": sum(
                 1 for row in initial_rows if row.get("tracking_eligible") is False
             ),
+            "frozen_side_decisions": len(tracked_rows),
         },
         "result_match_methods_initial": dict(sorted(initial_match_counts.items())),
         "result_match_methods_all_snapshots": dict(sorted(match_method_counts.items())),
         "initial_snapshot_summary": summarize(initial_rows),
         "initial_snapshot_by_signal": by_signal,
+        "tracked_decision_summary": summarize(tracked_rows),
+        "tracked_decision_by_signal": tracked_by_signal,
         "all_snapshot_summary": summarize(rows),
         "rows": rows,
     }
@@ -886,6 +908,7 @@ def main():
         "model_abs_error", "market_margin_error", "market_abs_error",
         "closing_margin_error", "closing_abs_error",
         "model_beats_snapshot_market", "result_settled",
+        "is_frozen_tracked_decision",
     ]
 
     with REPORT_CSV.open("w", encoding="utf-8", newline="") as f:

@@ -105,6 +105,15 @@
     return pregame[pregame.length - 1] || null;
   }
 
+  function firstTrackedResult(gameRows) {
+    return gameRows.find(row => {
+      if (row?.tracking_eligible === false || !row?.preferred_side || !hasValue(row?.snapshot_home_spread)) return false;
+      const captured = resultTimestamp(row?.captured_at_utc);
+      const kickoff = resultTimestamp(row?.start_date);
+      return captured === null || kickoff === null || captured <= kickoff;
+    }) || null;
+  }
+
   function finalDisplayResult(gameRows) {
     const pregame = latestPregameResult(gameRows);
     const official = { ...(pregame || gameRows[0] || {}) };
@@ -132,6 +141,17 @@
       : hasValue(pregame.snapshot_home_spread)
         ? "last_verified_pregame_snapshot"
         : "unavailable";
+    const tracked = firstTrackedResult(gameRows);
+    if (tracked) {
+      official.preferred_side = tracked.preferred_side;
+      official.snapshot_home_spread = tracked.snapshot_home_spread;
+      official.snapshot_bookmaker = tracked.snapshot_bookmaker;
+      official.snapshot_spread_price = tracked.snapshot_spread_price;
+      official.ats_result = tracked.ats_result;
+      official.signal = tracked.signal;
+      official.tracked_captured_at_utc = tracked.captured_at_utc;
+      official.tracking_locked = true;
+    }
     return official;
   }
 
@@ -230,6 +250,23 @@
   function effectiveComparison(game) {
     const frozen = resultComparison(game);
     if (frozen) return frozen;
+
+    const archived = (predictionArchiveData?.rows ?? []).find(row =>
+      row?.sport === "cfb"
+      && String(row?.game_id ?? "") === String(game?.game_id ?? "")
+      && row?.tracking_locked
+      && row?.preferred_side
+    );
+    if (archived) {
+      const model = Number(archived.model_home_spread);
+      const market = Number(archived.market_home_spread);
+      return {
+        disagreement: Number.isFinite(model) && Number.isFinite(market) ? Math.abs(model - market) : null,
+        preferred_side: archived.preferred_side,
+        signal: archived.signal || "ALIGNED",
+        tracking_locked: true,
+      };
+    }
 
     const marketSpread = game?.market?.home_spread;
     const adjustedSpread = effectiveModelSpread(game);
@@ -1188,8 +1225,8 @@
     const homePoints = Number(result.home_points);
     const frozenScore = frozenProjectedScore(result);
     const winnerCorrect = predictedWinnerCorrect(result);
-    const snapshotSide = result.preferred_side && hasValue(result.closing_home_spread)
-      ? marketSideForTeam(result.preferred_side, homeName, awayName, result.closing_home_spread)
+    const snapshotSide = result.preferred_side && hasValue(result.snapshot_home_spread)
+      ? marketSideForTeam(result.preferred_side, homeName, awayName, result.snapshot_home_spread)
       : "No graded side";
     const close = hasValue(result.closing_home_spread)
       ? favoredLine(homeName, awayName, result.closing_home_spread)
@@ -1527,8 +1564,8 @@
     const awayPoints = Number(result.away_points);
     const frozenScore = frozenProjectedScore(result);
     const confidence = signalConfidence(result.signal);
-    const preferredLine = result.preferred_side && hasValue(result.closing_home_spread)
-      ? marketSideForTeam(result.preferred_side, homeName, awayName, result.closing_home_spread)
+    const preferredLine = result.preferred_side && hasValue(result.snapshot_home_spread)
+      ? marketSideForTeam(result.preferred_side, homeName, awayName, result.snapshot_home_spread)
       : "No graded side";
     const close = hasValue(result.closing_home_spread)
       ? favoredLine(homeName, awayName, result.closing_home_spread)

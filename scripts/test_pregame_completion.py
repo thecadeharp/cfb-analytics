@@ -13,6 +13,24 @@ class PregameCompletionTests(unittest.TestCase):
         self.assertEqual(report["rows"][0]["model_home_spread"],-1)
         self.assertEqual(report["rows"][0]["closing_total"],48.5)
 
+    def test_prediction_archive_freezes_first_side_instead_of_late_flip(self):
+        common = {
+            "game_key": "401862826", "start_date": "2026-11-14T20:30:00Z",
+            "away_team": "Florida Atlantic", "home_team": "Tulsa",
+            "result_settled": True,
+        }
+        rows = [
+            {**common, "captured_at_utc": "2026-11-08T16:39:00Z", "snapshot_home_spread": -5.0, "preferred_side": None},
+            {**common, "captured_at_utc": "2026-11-10T17:46:00Z", "snapshot_home_spread": -5.5, "preferred_side": "Tulsa", "ats_result": "W"},
+            {**common, "captured_at_utc": "2026-11-14T16:40:00Z", "snapshot_home_spread": -6.5, "preferred_side": "Florida Atlantic", "ats_result": "L"},
+        ]
+        report = archive_build({"rows": rows}, {"spread_decisions": [], "total_decisions": []})
+        decision = report["rows"][0]
+        self.assertEqual(decision["preferred_side"], "Tulsa")
+        self.assertEqual(decision["market_home_spread"], -5.5)
+        self.assertEqual(decision["ats_result"], "W")
+        self.assertTrue(decision["tracking_locked"])
+
     def test_verified_venue_requires_provenance(self):
         with self.assertRaises(ValueError): venues_validate([{"venue_name":"Gym","city":"A","state":"KS","latitude":1,"longitude":2,"source_url":"","verified_at_utc":"2026-01-01T00:00:00Z"}])
 

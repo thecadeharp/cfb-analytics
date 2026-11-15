@@ -7,6 +7,11 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+try:
+    from scripts.tracked_decisions import frozen_rows
+except ModuleNotFoundError:
+    from tracked_decisions import frozen_rows
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -16,12 +21,7 @@ def build(cfb: dict, cbb: dict, clv: dict | None = None) -> dict:
         key = str(row.get("game_key") or "")
         if key and row.get("closing_total") is not None:
             closing_totals[key] = row.get("closing_total")
-    first: dict[str, dict] = {}
-    for row in cfb.get("rows", []):
-        key = str(row.get("game_key") or row.get("snapshot_id"))
-        stamp = str(row.get("captured_at_utc") or "")
-        if key not in first or stamp < str(first[key].get("captured_at_utc") or ""):
-            first[key] = row
+    first = frozen_rows(cfb.get("rows", []))
     rows = []
     for key, row in first.items():
         rows.append({
@@ -36,6 +36,7 @@ def build(cfb: dict, cbb: dict, clv: dict | None = None) -> dict:
             "home_points": row.get("home_points"), "away_points": row.get("away_points"),
             "ats_result": row.get("ats_result"), "total_result": row.get("total_result"),
             "clv_points": row.get("clv_points"), "model_abs_error": row.get("model_abs_error"),
+            "tracking_locked": bool(row.get("preferred_side")),
         })
         if row.get("tracking_eligible", True) is False:
             rows[-1].update({
@@ -54,7 +55,7 @@ def build(cfb: dict, cbb: dict, clv: dict | None = None) -> dict:
         "meta": {
             "version": "thi-prediction-archive-v1.0",
             "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-            "definition": "One earliest frozen CFB snapshot per game plus every frozen CBB grading decision. Later model snapshots never replace the original forecast.",
+            "definition": "One immutable CFB decision per game: the first executable pregame side when available, otherwise the earliest forecast, plus every frozen CBB grading decision. Later market moves never replace the tracked side.",
             "rows": len(rows), "cfb_games": len(first), "cbb_decisions": len(rows) - len(first),
         },
         "rows": rows,

@@ -48,8 +48,10 @@ from pathlib import Path
 from statistics import mean
 try:
     from scripts.validation_framework import exact_binomial_tail, holm_bonferroni, validation_gate
+    from scripts.tracked_decisions import first_tracked_rows
 except ModuleNotFoundError:
     from validation_framework import exact_binomial_tail, holm_bonferroni, validation_gate
+    from tracked_decisions import first_tracked_rows
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -138,25 +140,6 @@ def safe_float(value):
         return None
 
 
-def first_snapshot_rows(report):
-    rows = report.get("rows") or []
-    ordered = sorted(
-        rows,
-        key=lambda r: (
-            str(r.get("captured_at_utc") or ""),
-            str(r.get("snapshot_id") or ""),
-        ),
-    )
-
-    first = {}
-    for row in ordered:
-        key = str(row.get("game_key") or row.get("game_id") or "")
-        if not key:
-            continue
-        first.setdefault(key, row)
-    return first
-
-
 def confidence_for(decisions, ats_pct, avg_clv, beat_close_pct, validation_passed=False):
     if not validation_passed:
         return "DEVELOPING"
@@ -218,8 +201,12 @@ def main():
     settled = load_json(SETTLED_REPORT)
     clv = load_json(CLV_REPORT)
 
-    settled_first = first_snapshot_rows(settled)
-    clv_first = first_snapshot_rows(clv)
+    settled_first = first_tracked_rows(settled.get("rows") or [])
+    clv_by_snapshot = {
+        str(row.get("snapshot_id") or ""): row
+        for row in (clv.get("rows") or [])
+        if row.get("snapshot_id")
+    }
 
     grouped = {signal: [] for signal in SIGNAL_ORDER}
 
@@ -230,7 +217,7 @@ def main():
         if signal not in grouped:
             continue
 
-        clv_row = clv_first.get(game_key) or {}
+        clv_row = clv_by_snapshot.get(str(row.get("snapshot_id") or "")) or {}
 
         clv_points = safe_float(
             clv_row.get("clv_points")
