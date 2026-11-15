@@ -53,6 +53,28 @@ class CbbScorePulseTests(unittest.TestCase):
         result = refresh(board, board, lambda path, params: called.append((path, params)), datetime(2026, 11, 2, 12, tzinfo=timezone.utc))
         self.assertFalse(result["active_window"])
         self.assertFalse(called)
+        self.assertTrue(result["metadata_changed"])
+        self.assertEqual(board["meta"]["status_counts"], {"upcoming": 1, "live": 0, "final": 0})
+
+    def test_repairs_stale_status_counts_without_calling_provider(self):
+        board = {
+            "meta": {"status_counts": {"upcoming": 0, "live": 0, "final": 0}},
+            "games": [
+                {"game_id": 1, "start_date": "2026-11-20T20:00:00Z", "status": "scheduled"},
+                {"game_id": 2, "start_date": "2026-11-01T20:00:00Z", "status": "final"},
+            ],
+        }
+        called = []
+        result = refresh(
+            board,
+            board,
+            lambda path, params: called.append((path, params)),
+            datetime(2026, 11, 15, 12, tzinfo=timezone.utc),
+        )
+        self.assertFalse(result["active_window"])
+        self.assertFalse(called)
+        self.assertTrue(result["metadata_changed"])
+        self.assertEqual(board["meta"]["status_counts"], {"upcoming": 1, "live": 0, "final": 1})
 
     def test_espn_fallback_updates_provider_omitted_game(self):
         games = {"meta": {}, "games": [{

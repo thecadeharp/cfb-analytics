@@ -168,6 +168,20 @@ def candidate_window(board: dict[str, Any], now: datetime) -> tuple[datetime, da
     return min(candidates) - timedelta(hours=2), max(candidates) + timedelta(hours=10)
 
 
+def reconcile_status_counts(board: dict[str, Any]) -> bool:
+    """Keep published status metadata aligned even when no score fetch runs."""
+    games = board.get("games") or []
+    counts = {
+        "upcoming": sum(canonical_status(game.get("status")) == "scheduled" for game in games),
+        "live": sum(canonical_status(game.get("status")) == "live" for game in games),
+        "final": sum(canonical_status(game.get("status")) == "final" for game in games),
+    }
+    meta = board.setdefault("meta", {})
+    changed = meta.get("status_counts") != counts
+    meta["status_counts"] = counts
+    return changed
+
+
 def live_context(row: dict[str, Any]) -> dict[str, Any] | None:
     period = first_value(row, (("period",), ("currentPeriod",), ("gameState", "period")))
     clock = first_value(row, (("clock",), ("displayClock",), ("gameState", "clock")))
@@ -235,12 +249,7 @@ def apply_scores(
         for payload in (game_board, projection_board):
             payload.setdefault("meta", {})["generated_at_utc"] = generated_at
             payload["meta"]["score_pulse_generated_at_utc"] = generated_at
-        games = projection_board.get("games") or []
-        projection_board["meta"]["status_counts"] = {
-            "upcoming": sum(canonical_status(game.get("status")) == "scheduled" for game in games),
-            "live": sum(canonical_status(game.get("status")) == "live" for game in games),
-            "final": sum(canonical_status(game.get("status")) == "final" for game in games),
-        }
+    reconcile_status_counts(projection_board)
     return {"updated_ids": sorted(set(material_ids)), "newly_final_ids": sorted(set(newly_final_ids))}
 
 
@@ -274,9 +283,16 @@ def refresh(
     now: datetime,
     espn_fetcher: Callable[[str], dict[str, Any] | None] | None = None,
 ) -> dict[str, Any]:
+    metadata_changed = reconcile_status_counts(projection_board)
     window = candidate_window(projection_board, now)
     if window is None:
-        return {"active_window": False, "updated_ids": [], "newly_final_ids": [], "recent_final": False}
+        return {
+            "active_window": False,
+            "updated_ids": [],
+            "newly_final_ids": [],
+            "recent_final": False,
+            "metadata_changed": metadata_changed,
+        }
     start, end = window
     params = {
         "startDateRange": start.isoformat().replace("+00:00", "Z"),
@@ -312,6 +328,8 @@ def refresh(
         now.isoformat().replace("+00:00", "Z"),
     )
     result["active_window"] = True
+    counts_changed_after_scores = reconcile_status_counts(projection_board)
+    result["metadata_changed"] = metadata_changed or counts_changed_after_scores
     result["recent_final"] = any(
         canonical_status(game.get("status")) == "final"
         and (start_time := parse_time(game.get("start_date"))) is not None
@@ -338,7 +356,9 @@ def main() -> None:
     result = refresh(game_board, projection_board, lambda path, params: fetch_json(path, params, key), now)
     if result["updated_ids"]:
         atomic_write(args.game_board, game_board)
+    if result["updated_ids"] or result["metadata_changed"]:
         atomic_write(args.projection_board, projection_board)
+    if result["updated_ids"]:
         if args.changed_flag:
             args.changed_flag.write_text("\n".join(result["updated_ids"]) + "\n", encoding="utf-8")
     if result["recent_final"] and args.recent_final_flag:
