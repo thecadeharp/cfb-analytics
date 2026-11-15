@@ -101,6 +101,8 @@
       official.snapshot_spread_price = tracked.snapshot_spread_price;
       official.ats_result = tracked.ats_result;
       official.signal = tracked.signal;
+      official.clv_points = tracked.clv_points;
+      official.tracking_eligible = tracked.tracking_eligible;
       official.tracked_captured_at_utc = tracked.captured_at_utc;
       official.tracking_locked = true;
     }

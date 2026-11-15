@@ -801,8 +801,6 @@ def main():
     initial_rows = list(first_by_game.values())
     tracked_by_game = first_tracked_rows(rows)
     tracked_rows = list(tracked_by_game.values())
-    for row in tracked_rows:
-        row["is_frozen_tracked_decision"] = True
     now = datetime.now(timezone.utc)
     pending_future = []
     past_due_unmatched = []
@@ -908,7 +906,6 @@ def main():
         "model_abs_error", "market_margin_error", "market_abs_error",
         "closing_margin_error", "closing_abs_error",
         "model_beats_snapshot_market", "result_settled",
-        "is_frozen_tracked_decision",
     ]
 
     with REPORT_CSV.open("w", encoding="utf-8", newline="") as f:
