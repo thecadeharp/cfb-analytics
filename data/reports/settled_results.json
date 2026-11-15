@@ -24,7 +24,8 @@
     "initial_snapshots_settled": 605,
     "initial_snapshots_unmatched": 41,
     "initial_snapshots_pending_future": 28,
-    "initial_snapshots_past_due_unmatched": 13
+    "initial_snapshots_past_due_unmatched": 13,
+    "qualified_tracking_games_excluded": 2
   },
   "result_match_methods_initial": {
     "exact_game_id": 56,
@@ -38,24 +39,24 @@
   },
   "initial_snapshot_summary": {
     "rows": 646,
-    "settled_rows": 605,
-    "model_mae": 12.314,
-    "model_rmse": 15.579,
-    "market_snapshot_mae": 11.817,
-    "market_snapshot_rmse": 14.916,
+    "settled_rows": 604,
+    "model_mae": 12.297,
+    "model_rmse": 15.565,
+    "market_snapshot_mae": 11.809,
+    "market_snapshot_rmse": 14.913,
     "closing_proxy_mae": 10.773,
     "closing_proxy_rmse": 13.658,
     "model_beats_snapshot_market_count": 268,
-    "snapshot_market_beats_model_count": 307,
+    "snapshot_market_beats_model_count": 306,
     "prediction_error_ties": 30,
     "ats_wins": 297,
-    "ats_losses": 276,
+    "ats_losses": 275,
     "ats_pushes": 4,
-    "ats_win_pct_ex_pushes": 51.8,
+    "ats_win_pct_ex_pushes": 51.9,
     "total_wins": 109,
-    "total_losses": 114,
+    "total_losses": 113,
     "total_pushes": 1,
-    "total_win_pct_ex_pushes": 48.9
+    "total_win_pct_ex_pushes": 49.1
   },
   "initial_snapshot_by_signal": {
     "AGREE W/ MARKET": {
@@ -102,24 +103,24 @@
     },
     "EDGE": {
       "rows": 83,
-      "settled_rows": 79,
-      "model_mae": 11.759,
-      "model_rmse": 15.163,
-      "market_snapshot_mae": 10.734,
-      "market_snapshot_rmse": 14.03,
+      "settled_rows": 78,
+      "model_mae": 11.622,
+      "model_rmse": 15.046,
+      "market_snapshot_mae": 10.66,
+      "market_snapshot_rmse": 13.995,
       "closing_proxy_mae": 10.447,
       "closing_proxy_rmse": 13.068,
       "model_beats_snapshot_market_count": 33,
-      "snapshot_market_beats_model_count": 46,
+      "snapshot_market_beats_model_count": 45,
       "prediction_error_ties": 0,
       "ats_wins": 42,
-      "ats_losses": 35,
+      "ats_losses": 34,
       "ats_pushes": 2,
-      "ats_win_pct_ex_pushes": 54.5,
+      "ats_win_pct_ex_pushes": 55.3,
       "total_wins": 11,
-      "total_losses": 18,
+      "total_losses": 17,
       "total_pushes": 0,
-      "total_win_pct_ex_pushes": 37.9
+      "total_win_pct_ex_pushes": 39.3
     },
     "LEAN": {
       "rows": 28,
@@ -229,24 +230,24 @@
   },
   "all_snapshot_summary": {
     "rows": 9576,
-    "settled_rows": 9072,
-    "model_mae": 11.894,
-    "model_rmse": 15.123,
-    "market_snapshot_mae": 11.285,
-    "market_snapshot_rmse": 14.342,
+    "settled_rows": 9062,
+    "model_mae": 11.885,
+    "model_rmse": 15.115,
+    "market_snapshot_mae": 11.28,
+    "market_snapshot_rmse": 14.34,
     "closing_proxy_mae": 10.756,
     "closing_proxy_rmse": 13.683,
     "model_beats_snapshot_market_count": 3818,
-    "snapshot_market_beats_model_count": 4797,
+    "snapshot_market_beats_model_count": 4787,
     "prediction_error_ties": 457,
     "ats_wins": 4351,
-    "ats_losses": 4155,
+    "ats_losses": 4145,
     "ats_pushes": 190,
     "ats_win_pct_ex_pushes": 51.2,
     "total_wins": 1947,
-    "total_losses": 1926,
+    "total_losses": 1916,
     "total_pushes": 13,
-    "total_win_pct_ex_pushes": 50.3
+    "total_win_pct_ex_pushes": 50.4
   },
   "rows": [
     {
@@ -458999,7 +459000,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "483a929f3ca20ffe1560226a",
@@ -462751,7 +462757,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "9e07cc05a660763ecfee4aff",
@@ -466279,7 +466290,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "fe0fdcd58ab93e56df7fd6f7",
@@ -471823,7 +471839,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "159e2a50cd89232004c73ec3",
@@ -475295,7 +475316,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "0620dbbf11041f340aaddbc3",
@@ -478655,7 +478681,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "cae9e26b9826e4f39f35e1d2",
@@ -481903,7 +481934,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "c98f7d658cc5605d6cbf1219",
@@ -485711,7 +485747,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "f4cc8e5abd639300b0abb8d8",
@@ -489855,7 +489896,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "9f9bfbef7c7f418c11af8a5e",
@@ -493719,7 +493765,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": false,
-      "result_settled": true
+      "result_settled": true,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "Northwestern quarterback Aidan Chiles was a late scratch after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "53b76e946d7c87251638f673",
@@ -496015,7 +496066,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": null,
-      "result_settled": false
+      "result_settled": false,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "South Carolina starting quarterback LaNorris Sellers was a game-time decision and did not start after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "56ce933231900b94e1bfba03",
@@ -499375,7 +499431,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": null,
-      "result_settled": false
+      "result_settled": false,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "South Carolina starting quarterback LaNorris Sellers was a game-time decision and did not start after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "2b9e71d93013d8e22218a093",
@@ -503071,7 +503132,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": null,
-      "result_settled": false
+      "result_settled": false,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "South Carolina starting quarterback LaNorris Sellers was a game-time decision and did not start after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "eb2ad4ea77b7565750561605",
@@ -506655,7 +506721,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": null,
-      "result_settled": false
+      "result_settled": false,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "South Carolina starting quarterback LaNorris Sellers was a game-time decision and did not start after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "4d3da49a7f0591367a3ab20c",
@@ -510071,7 +510142,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": null,
-      "result_settled": false
+      "result_settled": false,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "South Carolina starting quarterback LaNorris Sellers was a game-time decision and did not start after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "76eeb8488faecbf8607a0a43",
@@ -513935,7 +514011,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": null,
-      "result_settled": false
+      "result_settled": false,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "South Carolina starting quarterback LaNorris Sellers was a game-time decision and did not start after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "131192f781b0da3e9821d24d",
@@ -518079,7 +518160,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": null,
-      "result_settled": false
+      "result_settled": false,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "South Carolina starting quarterback LaNorris Sellers was a game-time decision and did not start after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "3c04434242164498af3211a8",
@@ -522223,7 +522309,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": null,
-      "result_settled": false
+      "result_settled": false,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "South Carolina starting quarterback LaNorris Sellers was a game-time decision and did not start after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "d63ed404e59109a7cea3377e",
@@ -526199,7 +526290,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": null,
-      "result_settled": false
+      "result_settled": false,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "South Carolina starting quarterback LaNorris Sellers was a game-time decision and did not start after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "2ce500dda0cee86fa5989e49",
@@ -530007,7 +530103,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": null,
-      "result_settled": false
+      "result_settled": false,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "South Carolina starting quarterback LaNorris Sellers was a game-time decision and did not start after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "9e5f900a7741ebc03f90d533",
@@ -533311,7 +533412,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": null,
-      "result_settled": false
+      "result_settled": false,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "South Carolina starting quarterback LaNorris Sellers was a game-time decision and did not start after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "bf518cba5ed5c71b0ea56ffd",
@@ -534879,7 +534985,12 @@
       "closing_margin_error": null,
       "closing_abs_error": null,
       "model_beats_snapshot_market": null,
-      "result_settled": false
+      "result_settled": false,
+      "tracking_eligible": false,
+      "tracking_exclusion_code": "late_material_player_scratch",
+      "tracking_exclusion_scope": "spread_and_total_qualified_records",
+      "tracking_exclusion_reason": "South Carolina starting quarterback LaNorris Sellers was a game-time decision and did not start after THI's projection and tracked signal were frozen.",
+      "diagnostic_only": true
     },
     {
       "snapshot_id": "8efab30c745633b887421f36",
