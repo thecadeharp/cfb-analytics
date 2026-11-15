@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import json
+import struct
 import unittest
 import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
@@ -98,6 +99,25 @@ class SeoContractTests(unittest.TestCase):
         self.assertEqual(by_type["WebSite"].get("url"), SITE_URL)
         self.assertNotIn("AggregateRating", json.dumps(graph))
         self.assertNotIn("Review", json.dumps(graph))
+
+    def test_google_favicon_is_declared_and_square(self):
+        favicon = next(
+            (
+                item
+                for item in self.parser.links
+                if item.get("rel") == "icon" and item.get("sizes") == "48x48"
+            ),
+            None,
+        )
+        self.assertIsNotNone(favicon)
+        self.assertEqual(favicon.get("href"), "/favicon-48.png")
+        icon_path = ROOT / favicon["href"].lstrip("/")
+        self.assertTrue(icon_path.is_file())
+        with icon_path.open("rb") as handle:
+            self.assertEqual(handle.read(8), b"\x89PNG\r\n\x1a\n")
+            handle.read(8)
+            width, height = struct.unpack(">II", handle.read(8))
+        self.assertEqual((width, height), (48, 48))
 
     def test_robots_and_sitemap_are_valid_and_consistent(self):
         robots = (ROOT / "robots.txt").read_text(encoding="utf-8")
