@@ -114,6 +114,7 @@ jobs:
       - name: Build verified situational profiles
         env:
           RESOLVED_WEEK: ${{ steps.cutoff.outputs.week }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           python scripts/build_situational_profiles.py \
             --season 2026 \

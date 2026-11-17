@@ -8,6 +8,7 @@ import json
 import os
 import tempfile
 import time
+from http.client import IncompleteRead, RemoteDisconnected
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
@@ -49,11 +50,12 @@ def fetch_json(path: str, params: dict[str, Any], api_key: str) -> Any:
                     f"CBBD rejected {path}. Verify CBBD_API_KEY and subscription access."
                 ) from error
             raise RuntimeError(f"CBBD {path} returned HTTP {error.code}") from error
-        except URLError as error:
+        except (URLError, IncompleteRead, RemoteDisconnected, TimeoutError, ConnectionResetError, json.JSONDecodeError) as error:
             if attempt < 3:
                 time.sleep(2**attempt)
                 continue
-            raise RuntimeError(f"CBBD {path} could not be reached: {error.reason}") from error
+            detail = getattr(error, "reason", str(error))
+            raise RuntimeError(f"CBBD {path} returned an incomplete or unreadable response: {detail}") from error
     raise RuntimeError(f"CBBD {path} failed after retries")
 
 

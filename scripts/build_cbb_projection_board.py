@@ -283,7 +283,10 @@ def build_board(
                     **frozen,
                     **game,
                     "market": frozen.get("market"),
-                    "closing_market": game.get("market") if status in {"final", "completed", "complete"} else None,
+                    "closing_market": (
+                        (frozen.get("closing_market") or game.get("market"))
+                        if status in {"final", "completed", "complete"} else None
+                    ),
                     "projection": frozen["projection"],
                 })
             continue

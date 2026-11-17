@@ -35,7 +35,9 @@ IMPORTANT RULES
 from __future__ import annotations
 
 import json
+import os
 import tempfile
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -93,10 +95,25 @@ def last_non_null(series):
 
 def get_release_assets():
     print("Getting SportsDataverse release metadata...", flush=True)
-    response = requests.get(RELEASE_API, timeout=REQUEST_TIMEOUT)
-    response.raise_for_status()
-    payload = response.json()
-    return {asset["name"]: asset for asset in payload.get("assets", [])}
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "TheHammerIndex-Research/1.0",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    token = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    for attempt in range(4):
+        response = requests.get(RELEASE_API, headers=headers, timeout=REQUEST_TIMEOUT)
+        if response.status_code in {403, 429, 500, 502, 503, 504} and attempt < 3:
+            retry_after = response.headers.get("Retry-After")
+            delay = float(retry_after) if retry_after and retry_after.isdigit() else 2**attempt
+            time.sleep(min(delay, 30))
+            continue
+        response.raise_for_status()
+        payload = response.json()
+        return {asset["name"]: asset for asset in payload.get("assets", [])}
+    raise RuntimeError("SportsDataverse release metadata failed after retries")
 
 
 def download_season(year, assets, target_dir):

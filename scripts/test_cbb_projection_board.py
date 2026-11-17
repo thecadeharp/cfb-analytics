@@ -117,6 +117,14 @@ class CbbProjectionBoardTests(unittest.TestCase):
         self.assertEqual(completed["closing_market"]["consensus_home_spread"], -3)
         self.assertEqual(refreshed["meta"]["status_counts"]["final"], 1)
 
+        # Provider game feeds commonly stop returning pregame markets after
+        # tipoff. A later coordinated rebuild must retain the close captured
+        # when the game first became final instead of replacing it with null.
+        games["games"][0]["market"] = None
+        rebuilt = build_board(games, profiles, priors, model, refreshed)
+        completed_again = next(game for game in rebuilt["games"] if game["game_id"] == 1)
+        self.assertEqual(completed_again["closing_market"]["consensus_home_spread"], -3)
+
     def test_rejects_unapproved_model_version(self):
         with self.assertRaisesRegex(RuntimeError, "v0.6"):
             build_board({"games": []}, {"teams": []}, {"meta": {}}, {"meta": {"model_version": "old"}})
