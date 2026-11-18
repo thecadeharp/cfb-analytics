@@ -14,6 +14,7 @@
   <meta property="og:type" content="website">
   <title>THI Benchmark & Calibration Center</title>
   <link rel="stylesheet" href="benchmark.css?v=2026-benchmark-v01">
+  <link rel="stylesheet" href="benchmark-wave1.css?v=2026-benchmark-v02">
 </head>
 <body>
   <div class="topline"></div>
@@ -22,7 +23,7 @@
       <img src="favicon-48.png" alt="">
       <span><strong>The Hammer Index</strong><small>Public Model Accountability</small></span>
     </a>
-    <a class="back-link" href="/">← Back to THI</a>
+    <nav class="header-links" aria-label="Accountability pages"><a href="philosophy.html">Philosophy</a><a href="changelog.html">Changelog</a><a class="back-link" href="/">← Back to THI</a></nav>
   </header>
   <main class="shell">
     <section class="hero">
@@ -47,17 +48,29 @@
     <section class="notice"><span class="notice-dot"></span><div><strong>Frozen means frozen.</strong><p id="freeze-copy"></p></div></section>
     <div id="loading" class="loading">Loading frozen audit data…</div>
     <div id="benchmark-app" hidden>
-      <section class="section-head"><div><div class="eyebrow" id="sport-kicker"></div><h2>Projection accuracy</h2><p id="sample-copy"></p></div></section>
-      <section class="metric-grid" id="metrics"></section>
+      <section class="audit-nav" aria-label="Benchmark view">
+        <button class="active" data-view="predictive"><span>01</span> Predictive Accuracy</button>
+        <button data-view="market"><span>02</span> Market Translation</button>
+      </section>
 
-      <section class="section-head"><div><div class="eyebrow">Reliability / probabilities</div><h2>Calibration matrix</h2><p>Predicted favorite confidence compared with how often the projected winner actually won.</p></div><span class="data-pill" id="brier-pill"></span></section>
-      <section class="panel calibration-panel" id="calibration"></section>
+      <div id="predictive-view">
+        <section class="section-head"><div><div class="eyebrow" id="sport-kicker"></div><h2>Projection accuracy</h2><p id="sample-copy"></p></div></section>
+        <section class="metric-grid" id="metrics"></section>
 
-      <section class="section-head"><div><div class="eyebrow">Signals / market accountability</div><h2 id="signal-title">Signal-tier performance</h2><p>Records and closing-line evidence use immutable tracked decisions.</p></div></section>
-      <div class="table-wrap"><table><thead><tr><th>Signal</th><th>Record</th><th>Hit rate</th><th>Average CLV</th><th>Beat close</th><th>CLV sample</th><th>Evidence</th></tr></thead><tbody id="signal-table"></tbody></table></div>
-      <div id="totals-section" hidden>
-        <section class="section-head compact"><div><h2>CBB totals performance</h2><p>Frozen over/under decisions by research tier.</p></div></section>
-        <div class="table-wrap"><table><thead><tr><th>Signal</th><th>Record</th><th>Hit rate</th><th>Average CLV</th><th>Beat close</th><th>CLV sample</th><th>Evidence</th></tr></thead><tbody id="total-table"></tbody></table></div>
+        <section class="section-head"><div><div class="eyebrow">Reliability / probabilities</div><h2>Calibration matrix</h2><p>Predicted favorite confidence compared with how often the projected winner actually won. Actual rates include 95% Wilson intervals.</p></div><span class="data-pill" id="brier-pill"></span></section>
+        <section class="panel calibration-panel" id="calibration"></section>
+      </div>
+
+      <div id="market-view" hidden>
+        <section class="section-head"><div><div class="eyebrow">Signals / market accountability</div><h2 id="signal-title">Signal-tier performance</h2><p>Market outcomes are reported separately from forecasting accuracy. Results and CLV use distinct sample counts and 95% uncertainty intervals.</p></div></section>
+        <div class="table-wrap"><table><thead><tr><th>Signal</th><th>Record</th><th>Hit rate · 95% CI</th><th>Average CLV · 95% CI</th><th>Beat close · 95% CI</th><th>Samples</th><th>Evidence</th></tr></thead><tbody id="signal-table"></tbody></table></div>
+        <div id="totals-section" hidden>
+          <section class="section-head compact"><div><h2>CBB totals performance</h2><p>Frozen over/under decisions by research tier.</p></div></section>
+          <div class="table-wrap"><table><thead><tr><th>Signal</th><th>Record</th><th>Hit rate · 95% CI</th><th>Average CLV · 95% CI</th><th>Beat close · 95% CI</th><th>Samples</th><th>Evidence</th></tr></thead><tbody id="total-table"></tbody></table></div>
+        </div>
+
+        <section class="section-head"><div><div class="eyebrow">Market provenance</div><h2>Line-source coverage</h2><p>Coverage is disclosed for the filtered frozen decisions. It is not a claim that every provider was available for every game.</p></div><span class="data-pill" id="source-pill"></span></section>
+        <section class="source-grid" id="source-coverage"></section>
       </div>
 
       <section class="section-head"><div><div class="eyebrow warning">No spin / current limitations</div><h2>Active calibration notes</h2><p>Weak spots remain visible until new prospective evidence changes them.</p></div></section>
@@ -65,12 +78,14 @@
 
       <section class="section-head"><div><div class="eyebrow">Audit contract</div><h2>Methodology ledger</h2><p>The rules below define what every number on this page means.</p></div></section>
       <section class="method-grid" id="methodology"></section>
+
+      <section class="governance-links"><a href="philosophy.html"><span>Canonical statement</span><strong>What THI Is—and What It Isn’t →</strong></a><a href="changelog.html"><span>Append-only governance</span><strong>Public Model Changelog →</strong></a></section>
     </div>
   </main>
   <footer><span>© 2026 Cade Harper · The Hammer Index</span><span id="generated"></span></footer>
   <script src="analytics-config.js?v=2026-engagement-v01"></script>
   <script src="engagement-analytics.js?v=2026-engagement-v01"></script>
-  <script src="benchmark.js?v=2026-benchmark-v01"></script>
+  <script src="benchmark.js?v=2026-benchmark-v02"></script>
   <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"f135a7c7a74f42f4b9238f0fc45aa36a"}'></script>
 </body>
 </html>

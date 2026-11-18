@@ -72,6 +72,7 @@ class CbbProjectionBoardTests(unittest.TestCase):
         self.assertEqual(len(payload["games"]), 2)
         opening = payload["games"][0]["projection"]
         tracked = payload["games"][1]["projection"]
+        self.assertTrue(opening["generated_at_utc"].endswith("Z"))
         self.assertEqual(opening["sample_state"], "preseason")
         self.assertFalse(opening["spread_signal_eligible"])
         self.assertEqual(opening["model_input_label"], "prior_based")
@@ -114,6 +115,7 @@ class CbbProjectionBoardTests(unittest.TestCase):
         self.assertEqual(completed["status"], "final")
         self.assertEqual(completed["home"]["score"], 70)
         self.assertEqual(completed["projection"]["home_margin"], frozen_margin)
+        self.assertEqual(completed["projection"]["generated_at_utc"], opening["generated_at_utc"])
         self.assertEqual(completed["closing_market"]["consensus_home_spread"], -3)
         self.assertEqual(refreshed["meta"]["status_counts"]["final"], 1)
 

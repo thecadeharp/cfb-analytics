@@ -24,6 +24,8 @@ PATHS = {
     "cfb_board": "data/projections.json",
     "cfb_player_projections": "data/player_projections.json",
     "operations": "data/reports/operations_readiness.json",
+    "benchmark": "data/reports/benchmark_center.json",
+    "changelog": "data/model_changelog.json",
 }
 
 
@@ -77,6 +79,8 @@ def verify(payloads: dict[str, dict], raw_assets: dict[str, bytes] | None = None
     cfb_board = payloads["cfb_board"]
     cfb_player_projections = payloads["cfb_player_projections"]
     operations = payloads["operations"]
+    benchmark = payloads["benchmark"]
+    changelog = payloads["changelog"]
     power_teams = power.get("teams") or []
     prior_teams = priors.get("teams") or []
     sos_teams = sos.get("teams") or []
@@ -105,6 +109,9 @@ def verify(payloads: dict[str, dict], raw_assets: dict[str, bytes] | None = None
         (cfb_player_projections.get("meta", {}).get("projection_count") == len(projected_players), "CFB player projection count matches metadata"),
         (health.get("meta", {}).get("status") in {"healthy", "attention_required"}, "CBB health contract is readable"),
         (operations.get("meta", {}).get("version") == "thi-operations-readiness-v1.0", "Operations report is current schema"),
+        (benchmark.get("meta", {}).get("version") == "thi-benchmark-center-v2.0", "Benchmark Center uses the hardened audit schema"),
+        (len(benchmark.get("slices") or {}) == 18, "Benchmark Center publishes every sport/date/venue slice"),
+        (changelog.get("meta", {}).get("version") == "thi-public-model-changelog-v1.0", "Public changelog uses the append-only schema"),
         (model.get("meta", {}).get("model_version") == cbb_board.get("meta", {}).get("model_version"), "CBB board and model-card versions match"),
         (tracking.get("meta", {}).get("projection_board_version") == cbb_board.get("meta", {}).get("version"), "Tracking ledger matches the projection board"),
         (candidate.get("evaluation", {}).get("promotion_eligible") is False, "Roster-aware challenger remains ineligible for promotion"),

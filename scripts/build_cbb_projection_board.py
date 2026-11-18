@@ -241,6 +241,7 @@ def build_board(
     existing_payload: dict[str, Any] | None = None,
     home_court_payload: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    built_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     model_version = model_card.get("meta", {}).get("model_version")
     if model_version != "thi-cbb-walk-forward-v0.6-research":
         raise RuntimeError("projection board requires thi-cbb-walk-forward-v0.6-research")
@@ -329,6 +330,10 @@ def build_board(
             **game,
             "projection": {
                 "model_version": model_version,
+                # This is the prospective projection-build time. Once a game
+                # leaves scheduled status the existing projection object is
+                # retained, so this becomes its auditable pregame freeze time.
+                "generated_at_utc": built_at,
                 "home_points": round(home_points, 1),
                 "away_points": round(away_points, 1),
                 "home_margin": round(margin, 1),
@@ -412,7 +417,7 @@ def build_board(
             "version": VERSION,
             "model_version": model_version,
             "season": games_payload.get("meta", {}).get("season"),
-            "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            "generated_at_utc": built_at,
             "game_count": len(output),
             "status_counts": status_counts,
             "settled_minimum_games": SETTLED_MIN_GAMES,

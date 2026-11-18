@@ -1,0 +1,41 @@
+{
+  "meta": {
+    "version": "thi-public-model-changelog-v1.0",
+    "policy": "Append-only. Corrections are new entries that reference the original entry; published entries are not silently rewritten or removed.",
+    "tags": ["MODEL", "MARKET CONTRACT", "DATA/PRESENTATION"]
+  },
+  "entries": [
+    {
+      "id": "2026-11-17-data-benchmark-v2",
+      "date": "2026-11-17",
+      "tag": "DATA/PRESENTATION",
+      "title": "Benchmark Center uncertainty and governance release",
+      "summary": "Added precomputed 95% Wilson and fixed-seed bootstrap intervals, Forecasting versus Market Translation views, source coverage, distinct result and CLV samples, CSV metadata, and small-sample warnings.",
+      "impact": "Presentation and audit metadata only. No projection, grade, signal, model weight, historical result or promotion status changed."
+    },
+    {
+      "id": "2026-11-17-market-contract-publication",
+      "date": "2026-11-17",
+      "tag": "MARKET CONTRACT",
+      "title": "Existing CFB and CBB market rules documented publicly",
+      "summary": "Published the existing CFB executable-quote safeguards and closing-proxy window, plus CBB median consensus, half-point grading and first-capture opening rules.",
+      "impact": "Documentation and version registration only. This entry did not retroactively change line selection or grading."
+    },
+    {
+      "id": "2026-11-17-model-registry-initialized",
+      "date": "2026-11-17",
+      "tag": "MODEL",
+      "title": "Public version registry initialized",
+      "summary": "Registered the already-operating CFB production version production-model-a-2026-week1-freeze-v1 and CBB research version thi-cbb-walk-forward-v0.6-research in the public audit contract.",
+      "impact": "Registry initialization, not a model change. CFB remains production; CBB remains research."
+    },
+    {
+      "id": "2026-11-17-cbb-freeze-timestamps",
+      "date": "2026-11-17",
+      "tag": "DATA/PRESENTATION",
+      "title": "Prospective CBB projection timestamps enabled",
+      "summary": "Newly generated scheduled-game projections now carry their actual generated-at timestamp, which remains attached when the game settles.",
+      "impact": "Prospective archive hardening only. Historical missing timestamps are labeled not archived and are not reconstructed."
+    }
+  ]
+}

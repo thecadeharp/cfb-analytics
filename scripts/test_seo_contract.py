@@ -11,6 +11,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SITE_URL = "https://thehammerindex.com/"
 BENCHMARK_URL = f"{SITE_URL}benchmark.html"
+PHILOSOPHY_URL = f"{SITE_URL}philosophy.html"
+CHANGELOG_URL = f"{SITE_URL}changelog.html"
 
 
 class HeadParser(HTMLParser):
@@ -130,7 +132,7 @@ class SeoContractTests(unittest.TestCase):
         tree = ET.parse(ROOT / "sitemap.xml")
         namespace = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
         urls = [node.text for node in tree.findall("sm:url/sm:loc", namespace)]
-        self.assertEqual(urls, [SITE_URL, BENCHMARK_URL])
+        self.assertEqual(urls, [SITE_URL, BENCHMARK_URL, PHILOSOPHY_URL, CHANGELOG_URL])
         self.assertFalse(any("#" in url for url in urls))
 
     def test_benchmark_page_is_indexable_and_uses_primary_origin(self):
@@ -148,6 +150,20 @@ class SeoContractTests(unittest.TestCase):
         )
         self.assertIn("Benchmark & Calibration Center", parser.title)
         self.assertEqual(source.count("static.cloudflareinsights.com/beacon.min.js"), 1)
+
+    def test_public_governance_pages_are_indexable_and_analytics_preserved(self):
+        for filename, expected, title_fragment in (
+            ("philosophy.html", PHILOSOPHY_URL, "What The Hammer Index Is"),
+            ("changelog.html", CHANGELOG_URL, "Public Model Changelog"),
+        ):
+            source = (ROOT / filename).read_text(encoding="utf-8")
+            parser = HeadParser()
+            parser.feed(source)
+            canonical = next((item.get("href") for item in parser.links if item.get("rel") == "canonical"), None)
+            self.assertEqual(canonical, expected)
+            self.assertIn(title_fragment, parser.title)
+            self.assertEqual(source.count("static.cloudflareinsights.com/beacon.min.js"), 1)
+            self.assertEqual(source.count('src="engagement-analytics.js?v=2026-engagement-v01"'), 1)
 
     def test_existing_analytics_remain_present_once(self):
         self.assertEqual(self.index.count("static.cloudflareinsights.com/beacon.min.js"), 1)
