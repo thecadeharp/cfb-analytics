@@ -29,7 +29,9 @@ def build(cfb: dict, cbb: dict, clv: dict | None = None) -> dict:
             "start_date": row.get("start_date"), "week": row.get("week"),
             "away_team": row.get("away_team"), "home_team": row.get("home_team"),
             "model_version": row.get("model_version"), "model_home_spread": row.get("model_home_spread"),
-            "model_total": row.get("model_total"), "market_home_spread": row.get("snapshot_home_spread"),
+            "model_total": row.get("model_total"),
+            "model_home_win_probability": row.get("model_home_win_probability"),
+            "market_home_spread": row.get("snapshot_home_spread"),
             "market_total": row.get("snapshot_total"), "market_book": row.get("snapshot_bookmaker"),
             "closing_home_spread": row.get("closing_home_spread"), "closing_total": closing_totals.get(key), "preferred_side": row.get("preferred_side"),
             "signal": row.get("signal"), "settled": bool(row.get("result_settled")),
@@ -53,7 +55,7 @@ def build(cfb: dict, cbb: dict, clv: dict | None = None) -> dict:
     rows.sort(key=lambda row: (str(row.get("start_date") or row.get("game_date") or ""), str(row.get("sport")), str(row.get("game_id") or "")))
     return {
         "meta": {
-            "version": "thi-prediction-archive-v1.0",
+            "version": "thi-prediction-archive-v1.1",
             "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "definition": "One immutable CFB decision per game: the first executable pregame side when available, otherwise the earliest forecast, plus every frozen CBB grading decision. Later market moves never replace the tracked side.",
             "rows": len(rows), "cfb_games": len(first), "cbb_decisions": len(rows) - len(first),

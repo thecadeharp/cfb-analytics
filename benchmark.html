@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The Hammer Index public benchmark and calibration center: frozen college football and basketball projection accuracy, calibration, signal results, and closing-line value.">
+  <link rel="canonical" href="https://thehammerindex.com/benchmark.html">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta property="og:title" content="THI Benchmark & Calibration Center">
+  <meta property="og:description" content="Frozen prospective model accuracy, calibration, signal performance, and closing-line value from The Hammer Index.">
+  <meta property="og:url" content="https://thehammerindex.com/benchmark.html">
+  <meta property="og:type" content="website">
+  <title>THI Benchmark & Calibration Center</title>
+  <link rel="stylesheet" href="benchmark.css?v=2026-benchmark-v01">
+</head>
+<body>
+  <div class="topline"></div>
+  <header class="benchmark-header">
+    <a class="brand" href="/" aria-label="Return to The Hammer Index">
+      <img src="favicon-48.png" alt="">
+      <span><strong>The Hammer Index</strong><small>Public Model Accountability</small></span>
+    </a>
+    <a class="back-link" href="/">← Back to THI</a>
+  </header>
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Prospective audit / frozen evidence</div>
+        <h1>Benchmark &<br>Calibration Center</h1>
+        <p>Projection accuracy, probability calibration, signal performance and closing-line value—reported from frozen pregame records without rewriting weak results.</p>
+      </div>
+      <span class="status-badge">PUBLIC AUDIT · DEVELOPING</span>
+    </section>
+
+    <section class="controls" aria-label="Benchmark filters">
+      <div class="segmented" id="sport-filter">
+        <button class="active" data-value="cfb">College football</button>
+        <button data-value="cbb">College basketball</button>
+      </div>
+      <label><span>Date</span><select id="date-filter"><option value="all">All frozen games</option><option value="30">Rolling 30 days</option><option value="7">Rolling 7 days</option></select></label>
+      <label><span>Venue</span><select id="venue-filter"><option value="all">All venues</option><option value="campus">Campus</option><option value="neutral">Neutral</option></select></label>
+      <button class="export" id="export-csv" type="button">Export filtered CSV</button>
+    </section>
+
+    <section class="notice"><span class="notice-dot"></span><div><strong>Frozen means frozen.</strong><p id="freeze-copy"></p></div></section>
+    <div id="loading" class="loading">Loading frozen audit data…</div>
+    <div id="benchmark-app" hidden>
+      <section class="section-head"><div><div class="eyebrow" id="sport-kicker"></div><h2>Projection accuracy</h2><p id="sample-copy"></p></div></section>
+      <section class="metric-grid" id="metrics"></section>
+
+      <section class="section-head"><div><div class="eyebrow">Reliability / probabilities</div><h2>Calibration matrix</h2><p>Predicted favorite confidence compared with how often the projected winner actually won.</p></div><span class="data-pill" id="brier-pill"></span></section>
+      <section class="panel calibration-panel" id="calibration"></section>
+
+      <section class="section-head"><div><div class="eyebrow">Signals / market accountability</div><h2 id="signal-title">Signal-tier performance</h2><p>Records and closing-line evidence use immutable tracked decisions.</p></div></section>
+      <div class="table-wrap"><table><thead><tr><th>Signal</th><th>Record</th><th>Hit rate</th><th>Average CLV</th><th>Beat close</th><th>CLV sample</th><th>Evidence</th></tr></thead><tbody id="signal-table"></tbody></table></div>
+      <div id="totals-section" hidden>
+        <section class="section-head compact"><div><h2>CBB totals performance</h2><p>Frozen over/under decisions by research tier.</p></div></section>
+        <div class="table-wrap"><table><thead><tr><th>Signal</th><th>Record</th><th>Hit rate</th><th>Average CLV</th><th>Beat close</th><th>CLV sample</th><th>Evidence</th></tr></thead><tbody id="total-table"></tbody></table></div>
+      </div>
+
+      <section class="section-head"><div><div class="eyebrow warning">No spin / current limitations</div><h2>Active calibration notes</h2><p>Weak spots remain visible until new prospective evidence changes them.</p></div></section>
+      <section class="notes" id="active-notes"></section>
+
+      <section class="section-head"><div><div class="eyebrow">Audit contract</div><h2>Methodology ledger</h2><p>The rules below define what every number on this page means.</p></div></section>
+      <section class="method-grid" id="methodology"></section>
+    </div>
+  </main>
+  <footer><span>© 2026 Cade Harper · The Hammer Index</span><span id="generated"></span></footer>
+  <script src="analytics-config.js?v=2026-engagement-v01"></script>
+  <script src="engagement-analytics.js?v=2026-engagement-v01"></script>
+  <script src="benchmark.js?v=2026-benchmark-v01"></script>
+  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"f135a7c7a74f42f4b9238f0fc45aa36a"}'></script>
+</body>
+</html>

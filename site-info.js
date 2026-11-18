@@ -45,6 +45,7 @@
         <p>Production projections are frozen before eligible games and graded after the result. Model Tracking reports accuracy, record, closing line information when captured, and other measures that help show where the model performs well and where it needs work.</p>
         <p>Research candidates remain isolated from production. Promotion requires verified inputs, reproducible versions, prospective evaluation, calibration checks, and a written decision. Routine code deployment does not promote an experimental model.</p>
         <p>Labels such as provisional, developing, validated, and production describe the level of evidence behind an output. They do not describe how interesting or confident a prediction may appear.</p>
+        <a class="site-info-action" href="benchmark.html">Open Benchmark &amp; Calibration Center</a>
         <button class="site-info-action" type="button" data-site-action="model-tracking">Open Model Tracking</button>
       `
     },
