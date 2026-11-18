@@ -10,6 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE_URL = "https://thehammerindex.com/"
+BENCHMARK_URL = f"{SITE_URL}benchmark.html"
 
 
 class HeadParser(HTMLParser):
@@ -129,8 +130,24 @@ class SeoContractTests(unittest.TestCase):
         tree = ET.parse(ROOT / "sitemap.xml")
         namespace = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
         urls = [node.text for node in tree.findall("sm:url/sm:loc", namespace)]
-        self.assertEqual(urls, [SITE_URL])
+        self.assertEqual(urls, [SITE_URL, BENCHMARK_URL])
         self.assertFalse(any("#" in url for url in urls))
+
+    def test_benchmark_page_is_indexable_and_uses_primary_origin(self):
+        source = (ROOT / "benchmark.html").read_text(encoding="utf-8")
+        parser = HeadParser()
+        parser.feed(source)
+        canonical = next(
+            (item.get("href") for item in parser.links if item.get("rel") == "canonical"),
+            None,
+        )
+        self.assertEqual(canonical, BENCHMARK_URL)
+        self.assertEqual(
+            next((item.get("content") for item in parser.meta if item.get("property") == "og:url"), None),
+            BENCHMARK_URL,
+        )
+        self.assertIn("Benchmark & Calibration Center", parser.title)
+        self.assertEqual(source.count("static.cloudflareinsights.com/beacon.min.js"), 1)
 
     def test_existing_analytics_remain_present_once(self):
         self.assertEqual(self.index.count("static.cloudflareinsights.com/beacon.min.js"), 1)
