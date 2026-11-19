@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Search frozen THI forecasts, compare team performance, inspect season simulations, and download independent verification data for college football and basketball.">
+  <link rel="canonical" href="https://thehammerindex.com/research-workbench.html">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta property="og:title" content="THI Research Workbench">
+  <meta property="og:description" content="Frozen forecast history, team comparison, season outlooks, coverage disclosures, and verifier-ready THI data exports.">
+  <meta property="og:url" content="https://thehammerindex.com/research-workbench.html">
+  <meta property="og:type" content="website">
+  <title>THI Research Workbench | Historical Forecasts & Exports</title>
+  <link rel="stylesheet" href="benchmark.css?v=2026-benchmark-v01">
+  <link rel="stylesheet" href="research-workbench.css?v=2026-workbench-v01">
+</head>
+<body>
+  <div class="topline"></div>
+  <header class="benchmark-header">
+    <a class="brand" href="/" aria-label="Return to The Hammer Index"><img src="favicon-48.png" alt=""><span><strong>The Hammer Index</strong><small>Public Research Infrastructure</small></span></a>
+    <nav class="header-links" aria-label="Research pages"><a href="benchmark.html">Benchmark</a><a href="philosophy.html">Philosophy</a><a href="changelog.html">Changelog</a><a class="back-link" href="/">← Back to THI</a></nav>
+  </header>
+  <main class="shell">
+    <section class="hero">
+      <div><div class="eyebrow">Frozen evidence / open research workflow</div><h1>THI Research<br>Workbench</h1><p>Search the prospective archive, compare how team forecasts have behaved, inspect display-only simulations, and export the exact public rows used in THI’s accountability reporting.</p></div>
+      <span class="status-badge">PUBLIC · NO MODEL CHANGES</span>
+    </section>
+    <nav class="workbench-nav" aria-label="Workbench sections"><a href="#archive">Archive</a><a href="#compare">Team Compare</a><a href="#simulations">Simulations</a><a href="#coverage">Player & Lineup Coverage</a><a href="#verification">Verification</a></nav>
+    <div id="workbench-loading" class="loading">Loading public research contracts…</div>
+    <div id="workbench-app" hidden>
+      <section class="metric-grid status-grid" id="status-grid"></section>
+
+      <section id="archive" class="section-head"><div><div class="eyebrow">Searchable historical accountability</div><h2>Frozen Forecast Archive</h2><p>Filters change only the view. They never select, regrade, or rewrite a forecast.</p></div><span class="data-pill" id="archive-count"></span></section>
+      <section class="controls archive-controls" aria-label="Historical archive filters">
+        <label><span>Sport</span><select id="archive-sport"><option value="all">CFB + CBB</option><option value="cfb">College football</option><option value="cbb">College basketball</option></select></label>
+        <label><span>Team</span><input id="archive-team" list="team-options" placeholder="All teams"><datalist id="team-options"></datalist></label>
+        <label><span>From</span><input id="archive-from" type="date"></label><label><span>Through</span><input id="archive-to" type="date"></label>
+        <label><span>Venue</span><select id="archive-venue"><option value="all">All venues</option><option value="campus">Campus</option><option value="neutral">Neutral</option></select></label>
+        <label><span>Contract</span><select id="archive-env"><option value="all">All contracts</option><option value="production">Production</option><option value="research">Research</option></select></label>
+        <button class="export" id="archive-export" type="button">Export filtered CSV</button>
+      </section>
+      <div class="table-wrap archive-table"><table><thead><tr><th>Date</th><th>Matchup</th><th>Forecast margin</th><th>Actual margin</th><th>Margin error</th><th>Projected / actual total</th><th>Win probability</th><th>Signal</th><th>Contract</th></tr></thead><tbody id="archive-rows"></tbody></table></div>
+      <p class="table-note" id="archive-note"></p>
+
+      <section id="compare" class="section-head"><div><div class="eyebrow">Same frozen evidence / normalized by team</div><h2>Team Compare</h2><p>This compares historical THI forecast behavior—not current team strength or a head-to-head prediction.</p></div></section>
+      <section class="panel compare-panel"><div class="compare-selects"><label><span>Team A</span><select id="compare-a"></select></label><span class="versus">VS</span><label><span>Team B</span><select id="compare-b"></select></label></div><div class="compare-grid" id="compare-grid"></div><p class="table-note">For current ratings and matchup analysis, open the team dossiers or matchup pages in the main THI application.</p></section>
+
+      <section id="simulations" class="section-head"><div><div class="eyebrow">Explicitly separated from production ratings</div><h2>Season & Tournament Outlooks</h2><p>Existing THI simulations are surfaced with their real status and limitations intact.</p></div></section>
+      <section class="two-column"><article class="panel sim-panel"><div class="panel-title"><div><span>CFB</span><h3>Season Outlook</h3></div><span class="sample-badge" id="cfb-sim-status"></span></div><p id="cfb-sim-copy"></p><div id="cfb-sim-list" class="rank-list"></div></article><article class="panel sim-panel"><div class="panel-title"><div><span>CBB</span><h3>Bracketology Scenario</h3></div><span class="sample-badge" id="cbb-sim-status"></span></div><p id="cbb-sim-copy"></p><div id="cbb-sim-list" class="rank-list"></div></article></section>
+
+      <section id="coverage" class="section-head"><div><div class="eyebrow">Coverage before claims</div><h2>Player, Rotation & Availability Foundation</h2><p>What THI can support today—and what remains withheld until the underlying evidence exists.</p></div></section>
+      <section class="coverage-grid" id="coverage-grid"></section>
+
+      <section id="verification" class="section-head"><div><div class="eyebrow">External verification ready</div><h2>Research Registry & Independent Packet</h2><p>The public packet is formatted for independent review. “Ready” does not mean a third party has accepted or endorsed it.</p></div></section>
+      <section class="two-column"><article class="panel registry-panel"><div id="research-registry"></div></article><article class="panel download-panel"><h3>Download frozen evidence</h3><p>THI-derived forecasts, outcomes, errors, market translation, and version metadata. Raw third-party sportsbook feeds are not redistributed.</p><a href="data/reports/independent_benchmark_packet.csv" download>Download CSV</a><a href="data/reports/independent_benchmark_packet.json" download>Download JSON</a><a href="benchmark.html">Open Benchmark Center</a></article></section>
+    </div>
+  </main>
+  <footer><span>© 2026 Cade Harper · The Hammer Index</span><span id="generated"></span></footer>
+  <script src="analytics-config.js?v=2026-engagement-v01"></script>
+  <script src="engagement-analytics.js?v=2026-engagement-v01"></script>
+  <script src="research-workbench.js?v=2026-workbench-v01"></script>
+  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"f135a7c7a74f42f4b9238f0fc45aa36a"}'></script>
+</body>
+</html>

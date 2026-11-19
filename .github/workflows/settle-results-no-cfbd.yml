@@ -85,6 +85,7 @@ jobs:
           python scripts/build_signal_report.py
           python scripts/build_commercial_readiness.py
           python scripts/build_benchmark_center.py
+          python scripts/build_independent_benchmark_packet.py
 
       - name: Post deduplicated Discord report updates
         env:
@@ -107,6 +108,8 @@ jobs:
           git add data/reports/signal_report.json
           git add data/reports/commercial_readiness.json
           git add data/reports/benchmark_center.json
+          git add data/reports/independent_benchmark_packet.json
+          git add data/reports/independent_benchmark_packet.csv
           git add data/variance/prospective_tracker.json
           git add data/discord_notification_state.json
 

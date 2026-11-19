@@ -13,6 +13,7 @@ SITE_URL = "https://thehammerindex.com/"
 BENCHMARK_URL = f"{SITE_URL}benchmark.html"
 PHILOSOPHY_URL = f"{SITE_URL}philosophy.html"
 CHANGELOG_URL = f"{SITE_URL}changelog.html"
+WORKBENCH_URL = f"{SITE_URL}research-workbench.html"
 
 
 class HeadParser(HTMLParser):
@@ -132,7 +133,7 @@ class SeoContractTests(unittest.TestCase):
         tree = ET.parse(ROOT / "sitemap.xml")
         namespace = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
         urls = [node.text for node in tree.findall("sm:url/sm:loc", namespace)]
-        self.assertEqual(urls, [SITE_URL, BENCHMARK_URL, PHILOSOPHY_URL, CHANGELOG_URL])
+        self.assertEqual(urls, [SITE_URL, BENCHMARK_URL, PHILOSOPHY_URL, CHANGELOG_URL, WORKBENCH_URL])
         self.assertFalse(any("#" in url for url in urls))
 
     def test_benchmark_page_is_indexable_and_uses_primary_origin(self):
@@ -155,6 +156,7 @@ class SeoContractTests(unittest.TestCase):
         for filename, expected, title_fragment in (
             ("philosophy.html", PHILOSOPHY_URL, "What The Hammer Index Is"),
             ("changelog.html", CHANGELOG_URL, "Public Model Changelog"),
+            ("research-workbench.html", WORKBENCH_URL, "THI Research Workbench"),
         ):
             source = (ROOT / filename).read_text(encoding="utf-8")
             parser = HeadParser()

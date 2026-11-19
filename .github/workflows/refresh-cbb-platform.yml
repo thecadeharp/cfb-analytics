@@ -168,6 +168,7 @@ jobs:
           python scripts/build_variance_prospective_tracker.py
           python scripts/build_prediction_archive.py
           python scripts/build_benchmark_center.py
+          python scripts/build_independent_benchmark_packet.py
           python scripts/build_operations_readiness.py
           python scripts/build_cbb_market_contract.py
           python scripts/build_static_cache_manifest.py
@@ -386,6 +387,8 @@ jobs:
           git add \
             data/reports/prediction_archive.json \
             data/reports/benchmark_center.json \
+            data/reports/independent_benchmark_packet.json \
+            data/reports/independent_benchmark_packet.csv \
             data/reports/operations_readiness.json
           git diff --cached --quiet && exit 0
           git commit -m "Refresh coordinated CBB platform data"

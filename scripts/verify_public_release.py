@@ -25,6 +25,7 @@ PATHS = {
     "cfb_player_projections": "data/player_projections.json",
     "operations": "data/reports/operations_readiness.json",
     "benchmark": "data/reports/benchmark_center.json",
+    "benchmark_packet": "data/reports/independent_benchmark_packet.json",
     "changelog": "data/model_changelog.json",
 }
 
@@ -80,6 +81,7 @@ def verify(payloads: dict[str, dict], raw_assets: dict[str, bytes] | None = None
     cfb_player_projections = payloads["cfb_player_projections"]
     operations = payloads["operations"]
     benchmark = payloads["benchmark"]
+    benchmark_packet = payloads["benchmark_packet"]
     changelog = payloads["changelog"]
     power_teams = power.get("teams") or []
     prior_teams = priors.get("teams") or []
@@ -110,6 +112,8 @@ def verify(payloads: dict[str, dict], raw_assets: dict[str, bytes] | None = None
         (health.get("meta", {}).get("status") in {"healthy", "attention_required"}, "CBB health contract is readable"),
         (operations.get("meta", {}).get("version") == "thi-operations-readiness-v1.0", "Operations report is current schema"),
         (benchmark.get("meta", {}).get("version") == "thi-benchmark-center-v2.0", "Benchmark Center uses the hardened audit schema"),
+        (benchmark_packet.get("meta", {}).get("version") == "thi-independent-benchmark-packet-v1.0", "Independent benchmark packet uses the public verifier schema"),
+        (benchmark_packet.get("meta", {}).get("row_count") == len(benchmark.get("observations") or []), "Independent packet covers every public benchmark observation"),
         (len(benchmark.get("slices") or {}) == 18, "Benchmark Center publishes every sport/date/venue slice"),
         (changelog.get("meta", {}).get("version") == "thi-public-model-changelog-v1.0", "Public changelog uses the append-only schema"),
         (model.get("meta", {}).get("model_version") == cbb_board.get("meta", {}).get("model_version"), "CBB board and model-card versions match"),
