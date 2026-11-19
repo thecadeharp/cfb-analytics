@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "weather-engine-v1",
-    "generated": "2026-11-19T11:36:00.910568+00:00",
+    "generated": "2026-11-19T20:32:47.360285+00:00",
     "forecast_source": "Open-Meteo",
     "venue_source": "ESPN event venue metadata",
     "broadcast_source": "ESPN event broadcast metadata",
@@ -45,10 +45,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-20T00:00Z",
+        "temperature_f": 51.3,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 2.7,
+        "wind_gust_mph": 5.6,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 39.95238,
+          "longitude": -75.16362,
+          "resolved_name": "Philadelphia",
+          "resolved_admin1": "Pennsylvania",
+          "resolved_country": "United States",
+          "query": "Philadelphia, PA, USA"
+        }
+      },
+      "conditions_line": "51\u00b0F \u00b7 3 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -1.0,
         "total": 51.0
@@ -68,8 +88,27 @@
         "total": 51.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.2,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Temple",
+          "plays": 485,
+          "epa_pass": 0.083,
+          "epa_rush": 0.222,
+          "pass_lean_score": -0.139,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Rice",
+          "plays": 483,
+          "epa_pass": -0.125,
+          "epa_rush": 0.2,
+          "pass_lean_score": -0.325,
+          "eligible": true
+        }
       }
     },
     "401856869": {
@@ -79,10 +118,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-20T23:00Z",
+        "temperature_f": 68.1,
+        "precip_probability_pct": 45.0,
+        "precipitation_in": 0.087,
+        "rain_in": 0.087,
+        "snowfall_in": 0.0,
+        "wind_mph": 8.7,
+        "wind_gust_mph": 23.9,
+        "weather_code": 61,
+        "summary": "Rain",
+        "precipitation_label": "Light rain",
+        "location": {
+          "latitude": 28.53834,
+          "longitude": -81.37924,
+          "resolved_name": "Orlando",
+          "resolved_admin1": "Florida",
+          "resolved_country": "United States",
+          "query": "Orlando, FL, USA"
+        }
+      },
+      "conditions_line": "68\u00b0F \u00b7 9 mph wind \u00b7 gusts 24 \u00b7 Light rain",
+      "impact": "Moderate",
+      "note": "Rain may slightly suppress scoring efficiency.",
       "baseline": {
         "home_spread": -4.0,
         "total": 51.5
@@ -90,20 +149,39 @@
       "adjustments": {
         "breakdown": {
           "wind": 0.0,
-          "precipitation": 0.0,
+          "precipitation": -0.5,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -4.0,
-        "total": 51.5
+        "total": 51.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "UCF",
+          "plays": 507,
+          "epa_pass": 0.124,
+          "epa_rush": 0.028,
+          "pass_lean_score": 0.096,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Iowa State",
+          "plays": 537,
+          "epa_pass": 0.152,
+          "epa_rush": 0.174,
+          "pass_lean_score": -0.022,
+          "eligible": true
+        }
       }
     },
     "401866468": {
@@ -113,10 +191,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T00:00Z",
+        "temperature_f": 50.7,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 5.8,
+        "wind_gust_mph": 7.8,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 41.66394,
+          "longitude": -83.55521,
+          "resolved_name": "Toledo",
+          "resolved_admin1": "Ohio",
+          "resolved_country": "United States",
+          "query": "Toledo, OH, USA"
+        }
+      },
+      "conditions_line": "51\u00b0F \u00b7 6 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -18.0,
         "total": 52.5
@@ -136,8 +234,27 @@
         "total": 52.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Toledo",
+          "plays": 589,
+          "epa_pass": 0.317,
+          "epa_rush": 0.121,
+          "pass_lean_score": 0.196,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Bowling Green",
+          "plays": 453,
+          "epa_pass": 0.165,
+          "epa_rush": 0.019,
+          "pass_lean_score": 0.146,
+          "eligible": true
+        }
       }
     },
     "401858303": {
@@ -147,10 +264,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T00:00Z",
+        "temperature_f": 54.6,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 5.9,
+        "wind_gust_mph": 9.2,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 35.99403,
+          "longitude": -78.89862,
+          "resolved_name": "Durham",
+          "resolved_admin1": "North Carolina",
+          "resolved_country": "United States",
+          "query": "Durham, NC, USA"
+        }
+      },
+      "conditions_line": "55\u00b0F \u00b7 6 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -11.0,
         "total": 51.5
@@ -170,8 +307,27 @@
         "total": 51.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Duke",
+          "plays": 530,
+          "epa_pass": 0.26,
+          "epa_rush": 0.197,
+          "pass_lean_score": 0.063,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Clemson",
+          "plays": 546,
+          "epa_pass": -0.021,
+          "epa_rush": 0.05,
+          "pass_lean_score": -0.071,
+          "eligible": true
+        }
       }
     },
     "401858529": {
@@ -181,10 +337,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T01:00Z",
+        "temperature_f": 50.0,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 6.2,
+        "wind_gust_mph": 14.3,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 42.73698,
+          "longitude": -84.48387,
+          "resolved_name": "East Lansing",
+          "resolved_admin1": "Michigan",
+          "resolved_country": "United States",
+          "query": "East Lansing, MI, USA"
+        }
+      },
+      "conditions_line": "50\u00b0F \u00b7 6 mph wind \u00b7 gusts 14 \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": 8.0,
         "total": 51.5
@@ -204,8 +380,27 @@
         "total": 51.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Michigan State",
+          "plays": 584,
+          "epa_pass": 0.024,
+          "epa_rush": -0.003,
+          "pass_lean_score": 0.027,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Oregon",
+          "plays": 556,
+          "epa_pass": 0.174,
+          "epa_rush": 0.036,
+          "pass_lean_score": 0.138,
+          "eligible": true
+        }
       }
     },
     "401864545": {
@@ -215,31 +410,70 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T01:00Z",
+        "temperature_f": 45.4,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 11.2,
+        "wind_gust_mph": 17.9,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 38.75764,
+          "longitude": -104.30059,
+          "resolved_name": "USAF Academy Bullseye Auxiliary Airfield",
+          "resolved_admin1": "Colorado",
+          "resolved_country": "United States",
+          "query": "USAF Academy, CO, USA"
+        }
+      },
+      "conditions_line": "45\u00b0F \u00b7 11 mph wind \u00b7 gusts 18 \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": -27.0,
         "total": 51.0
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
-          "temperature": 0.0
+          "temperature": -0.5
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -1.0,
+        "total_points": -1.0,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -27.0,
-        "total": 51.0
+        "total": 50.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.0,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Air Force",
+          "plays": 624,
+          "epa_pass": -0.021,
+          "epa_rush": 0.267,
+          "pass_lean_score": -0.288,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "UTEP",
+          "plays": 430,
+          "epa_pass": -0.204,
+          "epa_rush": 0.08,
+          "pass_lean_score": -0.284,
+          "eligible": true
+        }
       }
     },
     "401864542": {
@@ -249,31 +483,70 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T02:00Z",
+        "temperature_f": 25.3,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 10.5,
+        "wind_gust_mph": 18.1,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 41.31137,
+          "longitude": -105.5911,
+          "resolved_name": "Laramie",
+          "resolved_admin1": "Wyoming",
+          "resolved_country": "United States",
+          "query": "Laramie, WY, USA"
+        }
+      },
+      "conditions_line": "25\u00b0F \u00b7 10 mph wind \u00b7 gusts 18 \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency; cold temperatures create an additional scoring drag.",
       "baseline": {
         "home_spread": 10.5,
         "total": 54.0
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
-          "temperature": 0.0
+          "temperature": -1.5
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -2.0,
+        "total_points": -2.0,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 10.5,
-        "total": 54.0
+        "total": 52.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.0,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Wyoming",
+          "plays": 495,
+          "epa_pass": 0.052,
+          "epa_rush": 0.214,
+          "pass_lean_score": -0.162,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "New Mexico",
+          "plays": 474,
+          "epa_pass": -0.004,
+          "epa_rush": 0.154,
+          "pass_lean_score": -0.158,
+          "eligible": true
+        }
       }
     },
     "401856866": {
@@ -283,31 +556,70 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T17:00Z",
+        "temperature_f": 65.5,
+        "precip_probability_pct": 1.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 17.2,
+        "wind_gust_mph": 30.5,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 38.97167,
+          "longitude": -95.23525,
+          "resolved_name": "Lawrence",
+          "resolved_admin1": "Kansas",
+          "resolved_country": "United States",
+          "query": "Lawrence, KS, USA"
+        }
+      },
+      "conditions_line": "66\u00b0F \u00b7 17 mph wind \u00b7 gusts 30 \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": 7.0,
         "total": 53.0
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -1.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -1.5,
+        "total_points": -1.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 7.0,
-        "total": 53.0
+        "total": 51.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Kansas",
+          "plays": 591,
+          "epa_pass": -0.012,
+          "epa_rush": 0.157,
+          "pass_lean_score": -0.169,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "BYU",
+          "plays": 546,
+          "epa_pass": 0.152,
+          "epa_rush": 0.171,
+          "pass_lean_score": -0.019,
+          "eligible": true
+        }
       }
     },
     "401856867": {
@@ -317,10 +629,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T17:00Z",
+        "temperature_f": 61.9,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 3.3,
+        "wind_gust_mph": 8.9,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 39.12711,
+          "longitude": -84.51439,
+          "resolved_name": "Cincinnati",
+          "resolved_admin1": "Ohio",
+          "resolved_country": "United States",
+          "query": "Cincinnati, OH, USA"
+        }
+      },
+      "conditions_line": "62\u00b0F \u00b7 3 mph wind \u00b7 gusts 9 \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -3.0,
         "total": 52.0
@@ -340,8 +672,27 @@
         "total": 52.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.2,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Cincinnati",
+          "plays": 531,
+          "epa_pass": 0.178,
+          "epa_rush": 0.236,
+          "pass_lean_score": -0.058,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Colorado",
+          "plays": 551,
+          "epa_pass": 0.129,
+          "epa_rush": -0.054,
+          "pass_lean_score": 0.183,
+          "eligible": true
+        }
       }
     },
     "401862831": {
@@ -351,10 +702,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T17:00Z",
+        "temperature_f": 58.2,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 2.4,
+        "wind_gust_mph": 3.8,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 41.39148,
+          "longitude": -73.95597,
+          "resolved_name": "West Point",
+          "resolved_admin1": "New York",
+          "resolved_country": "United States",
+          "query": "West Point, NY, USA"
+        }
+      },
+      "conditions_line": "58\u00b0F \u00b7 2 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -3.0,
         "total": 52.5
@@ -374,8 +745,27 @@
         "total": 52.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Army",
+          "plays": 470,
+          "epa_pass": 0.152,
+          "epa_rush": 0.308,
+          "pass_lean_score": -0.156,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "East Carolina",
+          "plays": 598,
+          "epa_pass": 0.01,
+          "epa_rush": 0.058,
+          "pass_lean_score": -0.048,
+          "eligible": true
+        }
       }
     },
     "401862834": {
@@ -385,10 +775,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T17:00Z",
+        "temperature_f": 59.1,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 3.8,
+        "wind_gust_mph": 7.0,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 38.97859,
+          "longitude": -76.49184,
+          "resolved_name": "Annapolis",
+          "resolved_admin1": "Maryland",
+          "resolved_country": "United States",
+          "query": "Annapolis"
+        }
+      },
+      "conditions_line": "59\u00b0F \u00b7 4 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": 3.0,
         "total": 55.5
@@ -408,8 +818,27 @@
         "total": 55.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Navy",
+          "plays": 490,
+          "epa_pass": 0.349,
+          "epa_rush": 0.269,
+          "pass_lean_score": 0.08,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Memphis",
+          "plays": 576,
+          "epa_pass": 0.438,
+          "epa_rush": 0.238,
+          "pass_lean_score": 0.2,
+          "eligible": true
+        }
       }
     },
     "401862835": {
@@ -419,31 +848,70 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T17:00Z",
+        "temperature_f": 70.9,
+        "precip_probability_pct": 2.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 10.5,
+        "wind_gust_mph": 14.5,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 29.95465,
+          "longitude": -90.07507,
+          "resolved_name": "New Orleans",
+          "resolved_admin1": "Louisiana",
+          "resolved_country": "United States",
+          "query": "New Orleans, LA, USA"
+        }
+      },
+      "conditions_line": "71\u00b0F \u00b7 10 mph wind \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": 4.5,
         "total": 51.5
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 4.5,
-        "total": 51.5
+        "total": 51.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.3,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Tulane",
+          "plays": 550,
+          "epa_pass": 0.074,
+          "epa_rush": 0.122,
+          "pass_lean_score": -0.048,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "North Texas",
+          "plays": 566,
+          "epa_pass": 0.365,
+          "epa_rush": 0.153,
+          "pass_lean_score": 0.212,
+          "eligible": true
+        }
       }
     },
     "401858530": {
@@ -453,10 +921,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T17:00Z",
+        "temperature_f": 52.3,
+        "precip_probability_pct": 20.0,
+        "precipitation_in": 0.002,
+        "rain_in": 0.002,
+        "snowfall_in": 0.0,
+        "wind_mph": 9.7,
+        "wind_gust_mph": 19.2,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Light rain",
+        "location": {
+          "latitude": 44.97997,
+          "longitude": -93.26384,
+          "resolved_name": "Minneapolis",
+          "resolved_admin1": "Minnesota",
+          "resolved_country": "United States",
+          "query": "Minneapolis, MN, USA"
+        }
+      },
+      "conditions_line": "52\u00b0F \u00b7 10 mph wind \u00b7 gusts 19 \u00b7 Light rain",
+      "impact": "Moderate",
+      "note": "Rain may slightly suppress scoring efficiency.",
       "baseline": {
         "home_spread": 7.5,
         "total": 51.5
@@ -464,20 +952,39 @@
       "adjustments": {
         "breakdown": {
           "wind": 0.0,
-          "precipitation": 0.0,
+          "precipitation": -0.5,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 7.5,
-        "total": 51.5
+        "total": 51.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Minnesota",
+          "plays": 495,
+          "epa_pass": 0.089,
+          "epa_rush": -0.105,
+          "pass_lean_score": 0.194,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Northwestern",
+          "plays": 530,
+          "epa_pass": 0.28,
+          "epa_rush": 0.194,
+          "pass_lean_score": 0.086,
+          "eligible": true
+        }
       }
     },
     "401858531": {
@@ -487,31 +994,70 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T17:00Z",
+        "temperature_f": 53.8,
+        "precip_probability_pct": 19.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 10.5,
+        "wind_gust_mph": 12.1,
+        "weather_code": 2,
+        "summary": "Partly cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 40.8,
+          "longitude": -96.66696,
+          "resolved_name": "Lincoln",
+          "resolved_admin1": "Nebraska",
+          "resolved_country": "United States",
+          "query": "Lincoln, NE, USA"
+        }
+      },
+      "conditions_line": "54\u00b0F \u00b7 10 mph wind \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": 3.5,
         "total": 56.0
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 3.5,
-        "total": 56.0
+        "total": 55.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.4,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Nebraska",
+          "plays": 561,
+          "epa_pass": 0.045,
+          "epa_rush": 0.258,
+          "pass_lean_score": -0.213,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Ohio State",
+          "plays": 616,
+          "epa_pass": 0.369,
+          "epa_rush": 0.198,
+          "pass_lean_score": 0.171,
+          "eligible": true
+        }
       }
     },
     "401858309": {
@@ -521,10 +1067,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T17:00Z",
+        "temperature_f": 57.9,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 2.3,
+        "wind_gust_mph": 3.5,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 42.33065,
+          "longitude": -71.16616,
+          "resolved_name": "Chestnut Hill",
+          "resolved_admin1": "Massachusetts",
+          "resolved_country": "United States",
+          "query": "Chestnut Hill, MA, USA"
+        }
+      },
+      "conditions_line": "58\u00b0F \u00b7 2 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": 3.5,
         "total": 51.5
@@ -544,8 +1110,27 @@
         "total": 51.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Boston College",
+          "plays": 467,
+          "epa_pass": 0.014,
+          "epa_rush": 0.144,
+          "pass_lean_score": -0.13,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Syracuse",
+          "plays": 657,
+          "epa_pass": 0.116,
+          "epa_rush": 0.117,
+          "pass_lean_score": -0.001,
+          "eligible": true
+        }
       }
     },
     "401856748": {
@@ -555,31 +1140,70 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T17:00Z",
+        "temperature_f": 69.7,
+        "precip_probability_pct": 19.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 10.5,
+        "wind_gust_mph": 16.7,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 29.65163,
+          "longitude": -82.32483,
+          "resolved_name": "Gainesville",
+          "resolved_admin1": "Florida",
+          "resolved_country": "United States",
+          "query": "Gainesville, FL, USA"
+        }
+      },
+      "conditions_line": "70\u00b0F \u00b7 10 mph wind \u00b7 gusts 17 \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": -9.5,
         "total": 51.5
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -9.5,
-        "total": 51.5
+        "total": 51.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.0,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Florida",
+          "plays": 530,
+          "epa_pass": 0.283,
+          "epa_rush": 0.089,
+          "pass_lean_score": 0.194,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Vanderbilt",
+          "plays": 503,
+          "epa_pass": 0.146,
+          "epa_rush": -0.018,
+          "pass_lean_score": 0.164,
+          "eligible": true
+        }
       }
     },
     "401858310": {
@@ -589,31 +1213,70 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T17:00Z",
+        "temperature_f": 65.2,
+        "precip_probability_pct": 1.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 11.2,
+        "wind_gust_mph": 18.0,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 33.749,
+          "longitude": -84.38798,
+          "resolved_name": "Atlanta",
+          "resolved_admin1": "Georgia",
+          "resolved_country": "United States",
+          "query": "Atlanta, GA, USA"
+        }
+      },
+      "conditions_line": "65\u00b0F \u00b7 11 mph wind \u00b7 gusts 18 \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": 24.5,
         "total": 54.5
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 24.5,
-        "total": 54.5
+        "total": 54.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.2,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Georgia Tech",
+          "plays": 548,
+          "epa_pass": 0.024,
+          "epa_rush": 0.117,
+          "pass_lean_score": -0.093,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Wake Forest",
+          "plays": 500,
+          "epa_pass": 0.444,
+          "epa_rush": 0.327,
+          "pass_lean_score": 0.117,
+          "eligible": true
+        }
       }
     },
     "401858533": {
@@ -623,10 +1286,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T17:00Z",
+        "temperature_f": 62.2,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 9.8,
+        "wind_gust_mph": 16.9,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 40.42587,
+          "longitude": -86.90807,
+          "resolved_name": "West Lafayette",
+          "resolved_admin1": "Indiana",
+          "resolved_country": "United States",
+          "query": "West Lafayette, IN, USA"
+        }
+      },
+      "conditions_line": "62\u00b0F \u00b7 10 mph wind \u00b7 gusts 17 \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": 15.5,
         "total": 51.0
@@ -646,8 +1329,27 @@
         "total": 51.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.3,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Purdue",
+          "plays": 519,
+          "epa_pass": 0.202,
+          "epa_rush": 0.001,
+          "pass_lean_score": 0.201,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Wisconsin",
+          "plays": 430,
+          "epa_pass": 0.059,
+          "epa_rush": 0.109,
+          "pass_lean_score": -0.05,
+          "eligible": true
+        }
       }
     },
     "401858305": {
@@ -657,10 +1359,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T17:00Z",
+        "temperature_f": 62.5,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 4.2,
+        "wind_gust_mph": 6.9,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 38.02931,
+          "longitude": -78.47668,
+          "resolved_name": "Charlottesville",
+          "resolved_admin1": "Virginia",
+          "resolved_country": "United States",
+          "query": "Charlottesville, VA, USA"
+        }
+      },
+      "conditions_line": "62\u00b0F \u00b7 4 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": 3.0,
         "total": 52.5
@@ -680,8 +1402,27 @@
         "total": 52.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Virginia",
+          "plays": 532,
+          "epa_pass": 0.092,
+          "epa_rush": 0.102,
+          "pass_lean_score": -0.01,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "North Carolina",
+          "plays": 523,
+          "epa_pass": 0.214,
+          "epa_rush": 0.134,
+          "pass_lean_score": 0.08,
+          "eligible": true
+        }
       }
     },
     "401856868": {
@@ -691,10 +1432,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T18:00Z",
+        "temperature_f": 65.1,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 3.5,
+        "wind_gust_mph": 5.8,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 39.62953,
+          "longitude": -79.9559,
+          "resolved_name": "Morgantown",
+          "resolved_admin1": "West Virginia",
+          "resolved_country": "United States",
+          "query": "Morgantown, WV, USA"
+        }
+      },
+      "conditions_line": "65\u00b0F \u00b7 4 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": 11.0,
         "total": 53.0
@@ -714,8 +1475,27 @@
         "total": 53.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "West Virginia",
+          "plays": 631,
+          "epa_pass": 0.221,
+          "epa_rush": 0.166,
+          "pass_lean_score": 0.055,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Houston",
+          "plays": 604,
+          "epa_pass": 0.379,
+          "epa_rush": 0.18,
+          "pass_lean_score": 0.199,
+          "eligible": true
+        }
       }
     },
     "401871080": {
@@ -725,10 +1505,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T18:00Z",
+        "temperature_f": 63.1,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 6.9,
+        "wind_gust_mph": 9.0,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 37.41375,
+          "longitude": -79.14225,
+          "resolved_name": "Lynchburg",
+          "resolved_admin1": "Virginia",
+          "resolved_country": "United States",
+          "query": "Lynchburg, VA, USA"
+        }
+      },
+      "conditions_line": "63\u00b0F \u00b7 7 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -26.5,
         "total": 54.0
@@ -748,8 +1548,27 @@
         "total": 54.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Liberty",
+          "plays": 517,
+          "epa_pass": 0.226,
+          "epa_rush": 0.327,
+          "pass_lean_score": -0.101,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Western Kentucky",
+          "plays": 562,
+          "epa_pass": -0.062,
+          "epa_rush": 0.114,
+          "pass_lean_score": -0.176,
+          "eligible": true
+        }
       }
     },
     "401862832": {
@@ -759,31 +1578,70 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T19:00Z",
+        "temperature_f": 73.4,
+        "precip_probability_pct": 9.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 15.0,
+        "wind_gust_mph": 24.6,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 36.15398,
+          "longitude": -95.99277,
+          "resolved_name": "Tulsa",
+          "resolved_admin1": "Oklahoma",
+          "resolved_country": "United States",
+          "query": "Tulsa, OK, USA"
+        }
+      },
+      "conditions_line": "73\u00b0F \u00b7 15 mph wind \u00b7 gusts 25 \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": -19.5,
         "total": 50.0
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -1.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -1.5,
+        "total_points": -1.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -19.5,
-        "total": 50.0
+        "total": 48.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Tulsa",
+          "plays": 525,
+          "epa_pass": 0.219,
+          "epa_rush": 0.23,
+          "pass_lean_score": -0.011,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Charlotte",
+          "plays": 458,
+          "epa_pass": -0.018,
+          "epa_rush": -0.058,
+          "pass_lean_score": 0.04,
+          "eligible": true
+        }
       }
     },
     "401871081": {
@@ -793,10 +1651,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T19:00Z",
+        "temperature_f": 78.4,
+        "precip_probability_pct": 2.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 8.4,
+        "wind_gust_mph": 11.2,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 30.72353,
+          "longitude": -95.55078,
+          "resolved_name": "Huntsville",
+          "resolved_admin1": "Texas",
+          "resolved_country": "United States",
+          "query": "Huntsville, TX, USA"
+        }
+      },
+      "conditions_line": "78\u00b0F \u00b7 8 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": 4.5,
         "total": 49.5
@@ -816,8 +1694,27 @@
         "total": 49.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.0,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Sam Houston",
+          "plays": 476,
+          "epa_pass": -0.123,
+          "epa_rush": -0.183,
+          "pass_lean_score": 0.06,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Middle Tennessee",
+          "plays": 541,
+          "epa_pass": 0.137,
+          "epa_rush": 0.121,
+          "pass_lean_score": 0.016,
+          "eligible": true
+        }
       }
     },
     "401871079": {
@@ -827,10 +1724,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T19:00Z",
+        "temperature_f": 70.3,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 7.6,
+        "wind_gust_mph": 9.4,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 33.81382,
+          "longitude": -85.7613,
+          "resolved_name": "Jacksonville",
+          "resolved_admin1": "Alabama",
+          "resolved_country": "United States",
+          "query": "Jacksonville, AL, USA"
+        }
+      },
+      "conditions_line": "70\u00b0F \u00b7 8 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -9.0,
         "total": 51.5
@@ -850,8 +1767,27 @@
         "total": 51.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Jacksonville State",
+          "plays": 495,
+          "epa_pass": 0.103,
+          "epa_rush": 0.159,
+          "pass_lean_score": -0.056,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Missouri State",
+          "plays": 502,
+          "epa_pass": 0.047,
+          "epa_rush": -0.012,
+          "pass_lean_score": 0.059,
+          "eligible": true
+        }
       }
     },
     "401858527": {
@@ -861,31 +1797,70 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T19:00Z",
+        "temperature_f": 66.9,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 12.5,
+        "wind_gust_mph": 15.4,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 40.11642,
+          "longitude": -88.24338,
+          "resolved_name": "Champaign",
+          "resolved_admin1": "Illinois",
+          "resolved_country": "United States",
+          "query": "Champaign, IL, USA"
+        }
+      },
+      "conditions_line": "67\u00b0F \u00b7 12 mph wind \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": 9.0,
         "total": 53.5
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 9.0,
-        "total": 53.5
+        "total": 53.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Illinois",
+          "plays": 541,
+          "epa_pass": 0.17,
+          "epa_rush": 0.126,
+          "pass_lean_score": 0.044,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Iowa",
+          "plays": 511,
+          "epa_pass": 0.214,
+          "epa_rush": 0.091,
+          "pass_lean_score": 0.123,
+          "eligible": true
+        }
       }
     },
     "401862833": {
@@ -895,31 +1870,70 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T19:00Z",
+        "temperature_f": 83.7,
+        "precip_probability_pct": 16.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 15.0,
+        "wind_gust_mph": 19.9,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 26.35869,
+          "longitude": -80.0831,
+          "resolved_name": "Boca Raton",
+          "resolved_admin1": "Florida",
+          "resolved_country": "United States",
+          "query": "Boca Raton, FL, USA"
+        }
+      },
+      "conditions_line": "84\u00b0F \u00b7 15 mph wind \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": 5.0,
         "total": 52.5
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -1.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -1.5,
+        "total_points": -1.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 5.0,
-        "total": 52.5
+        "total": 51.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.4,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Florida Atlantic",
+          "plays": 629,
+          "epa_pass": 0.296,
+          "epa_rush": 0.085,
+          "pass_lean_score": 0.211,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "South Florida",
+          "plays": 525,
+          "epa_pass": -0.001,
+          "epa_rush": 0.14,
+          "pass_lean_score": -0.141,
+          "eligible": true
+        }
       }
     },
     "401869929": {
@@ -929,10 +1943,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T19:00Z",
+        "temperature_f": 55.1,
+        "precip_probability_pct": 3.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 4.7,
+        "wind_gust_mph": 8.5,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 36.21679,
+          "longitude": -81.67455,
+          "resolved_name": "Boone",
+          "resolved_admin1": "North Carolina",
+          "resolved_country": "United States",
+          "query": "Boone, NC, USA"
+        }
+      },
+      "conditions_line": "55\u00b0F \u00b7 5 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -5.5,
         "total": 51.5
@@ -952,8 +1986,27 @@
         "total": 51.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.2,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "App State",
+          "plays": 549,
+          "epa_pass": 0.17,
+          "epa_rush": 0.028,
+          "pass_lean_score": 0.142,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "UL Monroe",
+          "plays": 511,
+          "epa_pass": 0.076,
+          "epa_rush": 0.089,
+          "pass_lean_score": -0.013,
+          "eligible": true
+        }
       }
     },
     "401869946": {
@@ -963,10 +2016,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T20:00Z",
+        "temperature_f": 77.5,
+        "precip_probability_pct": 20.0,
+        "precipitation_in": 0.004,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 5.8,
+        "wind_gust_mph": 7.8,
+        "weather_code": 51,
+        "summary": "Drizzle",
+        "precipitation_label": "Light rain",
+        "location": {
+          "latitude": 30.22409,
+          "longitude": -92.01984,
+          "resolved_name": "Lafayette",
+          "resolved_admin1": "Louisiana",
+          "resolved_country": "United States",
+          "query": "Lafayette, LA, USA"
+        }
+      },
+      "conditions_line": "78\u00b0F \u00b7 6 mph wind \u00b7 Light rain",
+      "impact": "Moderate",
+      "note": "Rain may slightly suppress scoring efficiency.",
       "baseline": {
         "home_spread": -9.5,
         "total": 53.0
@@ -974,20 +2047,39 @@
       "adjustments": {
         "breakdown": {
           "wind": 0.0,
-          "precipitation": 0.0,
+          "precipitation": -0.5,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -9.5,
-        "total": 53.0
+        "total": 52.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.3,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Louisiana",
+          "plays": 545,
+          "epa_pass": 0.155,
+          "epa_rush": 0.249,
+          "pass_lean_score": -0.094,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Coastal Carolina",
+          "plays": 517,
+          "epa_pass": 0.274,
+          "epa_rush": 0.042,
+          "pass_lean_score": 0.232,
+          "eligible": true
+        }
       }
     },
     "401871077": {
@@ -997,31 +2089,70 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T20:00Z",
+        "temperature_f": 60.6,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 23.0,
+        "wind_gust_mph": 29.5,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 32.31232,
+          "longitude": -106.77834,
+          "resolved_name": "Las Cruces",
+          "resolved_admin1": "New Mexico",
+          "resolved_country": "United States",
+          "query": "Las Cruces, NM, USA"
+        }
+      },
+      "conditions_line": "61\u00b0F \u00b7 23 mph wind \u00b7 gusts 30 \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may reduce downfield passing efficiency and kicking range.",
       "baseline": {
         "home_spread": 8.5,
         "total": 51.5
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -2.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
-        "home_spread_points": 0.0
+        "raw_total_points": -2.5,
+        "total_points": -2.5,
+        "home_spread_points": -0.4
       },
       "adjusted": {
-        "home_spread": 8.5,
-        "total": 51.5
+        "home_spread": 8.1,
+        "total": 49.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": -0.4,
+        "favored_style_team": "New Mexico State",
+        "pass_lean_gap": -0.489,
+        "reason": "weather favors the less pass-reliant offense; directional magnitude is 0.4 before the +/-1.5 cap",
+        "home_tendency": {
+          "team": "New Mexico State",
+          "plays": 512,
+          "epa_pass": -0.197,
+          "epa_rush": 0.122,
+          "pass_lean_score": -0.319,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Delaware",
+          "plays": 535,
+          "epa_pass": 0.241,
+          "epa_rush": 0.071,
+          "pass_lean_score": 0.17,
+          "eligible": true
+        }
       }
     },
     "401871078": {
@@ -1031,10 +2162,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T20:00Z",
+        "temperature_f": 67.4,
+        "precip_probability_pct": 1.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 8.8,
+        "wind_gust_mph": 11.2,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 34.02343,
+          "longitude": -84.61549,
+          "resolved_name": "Kennesaw",
+          "resolved_admin1": "Georgia",
+          "resolved_country": "United States",
+          "query": "Kennesaw, GA, USA"
+        }
+      },
+      "conditions_line": "67\u00b0F \u00b7 9 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -2.0,
         "total": 51.5
@@ -1054,8 +2205,27 @@
         "total": 51.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.0,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Kennesaw State",
+          "plays": 499,
+          "epa_pass": 0.105,
+          "epa_rush": 0.077,
+          "pass_lean_score": 0.028,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Florida International",
+          "plays": 550,
+          "epa_pass": 0.052,
+          "epa_rush": -0.004,
+          "pass_lean_score": 0.056,
+          "eligible": true
+        }
       }
     },
     "401856755": {
@@ -1065,10 +2235,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T20:00Z",
+        "temperature_f": 76.8,
+        "precip_probability_pct": 3.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 9.5,
+        "wind_gust_mph": 13.2,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 30.26715,
+          "longitude": -97.74306,
+          "resolved_name": "Austin",
+          "resolved_admin1": "Texas",
+          "resolved_country": "United States",
+          "query": "Austin, TX, USA"
+        }
+      },
+      "conditions_line": "77\u00b0F \u00b7 10 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -17.5,
         "total": 51.5
@@ -1088,8 +2278,27 @@
         "total": 51.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.0,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Texas",
+          "plays": 602,
+          "epa_pass": 0.115,
+          "epa_rush": 0.074,
+          "pass_lean_score": 0.041,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Arkansas",
+          "plays": 521,
+          "epa_pass": 0.067,
+          "epa_rush": 0.07,
+          "pass_lean_score": -0.003,
+          "eligible": true
+        }
       }
     },
     "401858535": {
@@ -1099,10 +2308,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T20:00Z",
+        "temperature_f": 46.9,
+        "precip_probability_pct": 16.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 3.7,
+        "wind_gust_mph": 5.1,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 47.60621,
+          "longitude": -122.33207,
+          "resolved_name": "Seattle",
+          "resolved_admin1": "Washington",
+          "resolved_country": "United States",
+          "query": "Seattle, WA, USA"
+        }
+      },
+      "conditions_line": "47\u00b0F \u00b7 4 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": 8.0,
         "total": 54.0
@@ -1111,19 +2340,38 @@
         "breakdown": {
           "wind": 0.0,
           "precipitation": 0.0,
-          "temperature": 0.0
+          "temperature": -0.5
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 8.0,
-        "total": 54.0
+        "total": 53.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.0,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Washington",
+          "plays": 526,
+          "epa_pass": 0.252,
+          "epa_rush": -0.1,
+          "pass_lean_score": 0.352,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Indiana",
+          "plays": 498,
+          "epa_pass": 0.474,
+          "epa_rush": 0.09,
+          "pass_lean_score": 0.384,
+          "eligible": true
+        }
       }
     },
     "401856754": {
@@ -1133,10 +2381,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T20:00Z",
+        "temperature_f": 65.8,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 1.6,
+        "wind_gust_mph": 2.7,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 35.96064,
+          "longitude": -83.92074,
+          "resolved_name": "Knoxville",
+          "resolved_admin1": "Tennessee",
+          "resolved_country": "United States",
+          "query": "Knoxville, TN, USA"
+        }
+      },
+      "conditions_line": "66\u00b0F \u00b7 2 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -0.5,
         "total": 56.0
@@ -1156,8 +2424,27 @@
         "total": 56.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.3,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Tennessee",
+          "plays": 555,
+          "epa_pass": 0.082,
+          "epa_rush": 0.208,
+          "pass_lean_score": -0.126,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "LSU",
+          "plays": 569,
+          "epa_pass": 0.327,
+          "epa_rush": 0.117,
+          "pass_lean_score": 0.21,
+          "eligible": true
+        }
       }
     },
     "401858304": {
@@ -1167,10 +2454,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T20:00Z",
+        "temperature_f": 73.4,
+        "precip_probability_pct": 4.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 7.6,
+        "wind_gust_mph": 11.2,
+        "weather_code": 1,
+        "summary": "Partly cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 30.43826,
+          "longitude": -84.28073,
+          "resolved_name": "Tallahassee",
+          "resolved_admin1": "Florida",
+          "resolved_country": "United States",
+          "query": "Tallahassee, FL, USA"
+        }
+      },
+      "conditions_line": "73\u00b0F \u00b7 8 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -13.0,
         "total": 52.0
@@ -1190,8 +2497,27 @@
         "total": 52.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Florida State",
+          "plays": 558,
+          "epa_pass": 0.22,
+          "epa_rush": 0.13,
+          "pass_lean_score": 0.09,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "NC State",
+          "plays": 555,
+          "epa_pass": 0.214,
+          "epa_rush": 0.056,
+          "pass_lean_score": 0.158,
+          "eligible": true
+        }
       }
     },
     "401861968": {
@@ -1201,10 +2527,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T20:00Z",
+        "temperature_f": 59.4,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 3.1,
+        "wind_gust_mph": 6.5,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 41.78232,
+          "longitude": -72.61203,
+          "resolved_name": "East Hartford",
+          "resolved_admin1": "Connecticut",
+          "resolved_country": "United States",
+          "query": "East Hartford, CT, USA"
+        }
+      },
+      "conditions_line": "59\u00b0F \u00b7 3 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -15.0,
         "total": 50.0
@@ -1224,8 +2570,27 @@
         "total": 50.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.0,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "UConn",
+          "plays": 513,
+          "epa_pass": 0.155,
+          "epa_rush": 0.213,
+          "pass_lean_score": -0.058,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Old Dominion",
+          "plays": 519,
+          "epa_pass": -0.18,
+          "epa_rush": -0.073,
+          "pass_lean_score": -0.107,
+          "eligible": true
+        }
       }
     },
     "401858532": {
@@ -1235,10 +2600,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T20:00Z",
+        "temperature_f": 55.4,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 4.6,
+        "wind_gust_mph": 10.7,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 40.80201,
+          "longitude": -77.85639,
+          "resolved_name": "University Park",
+          "resolved_admin1": "Pennsylvania",
+          "resolved_country": "United States",
+          "query": "University Park, PA, USA"
+        }
+      },
+      "conditions_line": "55\u00b0F \u00b7 5 mph wind \u00b7 gusts 11 \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -26.0,
         "total": 51.0
@@ -1258,8 +2643,27 @@
         "total": 51.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Penn State",
+          "plays": 575,
+          "epa_pass": 0.285,
+          "epa_rush": 0.128,
+          "pass_lean_score": 0.157,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Rutgers",
+          "plays": 488,
+          "epa_pass": 0.1,
+          "epa_rush": 0.014,
+          "pass_lean_score": 0.086,
+          "eligible": true
+        }
       }
     },
     "401856871": {
@@ -1269,31 +2673,70 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T20:00Z",
+        "temperature_f": 75.1,
+        "precip_probability_pct": 2.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 13.6,
+        "wind_gust_mph": 16.8,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 31.54933,
+          "longitude": -97.14667,
+          "resolved_name": "Waco",
+          "resolved_admin1": "Texas",
+          "resolved_country": "United States",
+          "query": "Waco, TX, USA"
+        }
+      },
+      "conditions_line": "75\u00b0F \u00b7 14 mph wind \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": 0.0,
         "total": 53.5
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 0.0,
-        "total": 53.5
+        "total": 53.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.0,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Baylor",
+          "plays": 603,
+          "epa_pass": 0.138,
+          "epa_rush": 0.075,
+          "pass_lean_score": 0.063,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Texas Tech",
+          "plays": 549,
+          "epa_pass": 0.282,
+          "epa_rush": 0.189,
+          "pass_lean_score": 0.093,
+          "eligible": true
+        }
       }
     },
     "401858528": {
@@ -1303,31 +2746,70 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T20:00Z",
+        "temperature_f": 61.7,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 12.0,
+        "wind_gust_mph": 16.6,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 42.27756,
+          "longitude": -83.74088,
+          "resolved_name": "Ann Arbor",
+          "resolved_admin1": "Michigan",
+          "resolved_country": "United States",
+          "query": "Ann Arbor, MI, USA"
+        }
+      },
+      "conditions_line": "62\u00b0F \u00b7 12 mph wind \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": 8.5,
         "total": 54.5
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 8.5,
-        "total": 54.5
+        "total": 54.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.0,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Michigan",
+          "plays": 563,
+          "epa_pass": 0.056,
+          "epa_rush": 0.109,
+          "pass_lean_score": -0.053,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "UCLA",
+          "plays": 607,
+          "epa_pass": 0.122,
+          "epa_rush": 0.153,
+          "pass_lean_score": -0.031,
+          "eligible": true
+        }
       }
     },
     "401856752": {
@@ -1337,31 +2819,70 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T21:00Z",
+        "temperature_f": 69.9,
+        "precip_probability_pct": 22.0,
+        "precipitation_in": 0.004,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 19.7,
+        "wind_gust_mph": 27.5,
+        "weather_code": 51,
+        "summary": "Drizzle",
+        "precipitation_label": "Light rain",
+        "location": {
+          "latitude": 35.22257,
+          "longitude": -97.43948,
+          "resolved_name": "Norman",
+          "resolved_admin1": "Oklahoma",
+          "resolved_country": "United States",
+          "query": "Norman, OK, USA"
+        }
+      },
+      "conditions_line": "70\u00b0F \u00b7 20 mph wind \u00b7 gusts 28 \u00b7 Light rain",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency; rain may slightly suppress scoring efficiency.",
       "baseline": {
         "home_spread": -12.5,
         "total": 51.0
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
-          "precipitation": 0.0,
+          "wind": -1.5,
+          "precipitation": -0.5,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -2.0,
+        "total_points": -2.0,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -12.5,
-        "total": 51.0
+        "total": 49.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.2,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Oklahoma",
+          "plays": 519,
+          "epa_pass": 0.139,
+          "epa_rush": -0.009,
+          "pass_lean_score": 0.148,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Texas A&M",
+          "plays": 538,
+          "epa_pass": -0.021,
+          "epa_rush": 0.075,
+          "pass_lean_score": -0.096,
+          "eligible": true
+        }
       }
     },
     "401869953": {
@@ -1371,10 +2892,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T21:00Z",
+        "temperature_f": 71.7,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 6.8,
+        "wind_gust_mph": 10.1,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 31.80877,
+          "longitude": -85.96995,
+          "resolved_name": "Troy",
+          "resolved_admin1": "Alabama",
+          "resolved_country": "United States",
+          "query": "Troy, AL, USA"
+        }
+      },
+      "conditions_line": "72\u00b0F \u00b7 7 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": 16.5,
         "total": 52.0
@@ -1394,8 +2935,27 @@
         "total": 52.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.4,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Troy",
+          "plays": 598,
+          "epa_pass": -0.084,
+          "epa_rush": 0.118,
+          "pass_lean_score": -0.202,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Georgia Southern",
+          "plays": 551,
+          "epa_pass": 0.305,
+          "epa_rush": 0.073,
+          "pass_lean_score": 0.232,
+          "eligible": true
+        }
       }
     },
     "401869958": {
@@ -1405,10 +2965,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T21:00Z",
+        "temperature_f": 63.8,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 2.9,
+        "wind_gust_mph": 2.7,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 38.41925,
+          "longitude": -82.44515,
+          "resolved_name": "Huntington",
+          "resolved_admin1": "West Virginia",
+          "resolved_country": "United States",
+          "query": "Huntington, WV, USA"
+        }
+      },
+      "conditions_line": "64\u00b0F \u00b7 3 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": 7.5,
         "total": 51.5
@@ -1428,8 +3008,27 @@
         "total": 51.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.2,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Marshall",
+          "plays": 558,
+          "epa_pass": -0.023,
+          "epa_rush": 0.078,
+          "pass_lean_score": -0.101,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Georgia State",
+          "plays": 543,
+          "epa_pass": 0.25,
+          "epa_rush": 0.148,
+          "pass_lean_score": 0.102,
+          "eligible": true
+        }
       }
     },
     "401864543": {
@@ -1473,10 +3072,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T21:00Z",
+        "temperature_f": 78.5,
+        "precip_probability_pct": 1.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 6.3,
+        "wind_gust_mph": 8.3,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 31.32712,
+          "longitude": -89.29034,
+          "resolved_name": "Hattiesburg",
+          "resolved_admin1": "Mississippi",
+          "resolved_country": "United States",
+          "query": "Hattiesburg, MS, USA"
+        }
+      },
+      "conditions_line": "78\u00b0F \u00b7 6 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": 7.5,
         "total": 50.5
@@ -1496,8 +3115,27 @@
         "total": 50.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.2,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Southern Miss",
+          "plays": 511,
+          "epa_pass": -0.113,
+          "epa_rush": 0.142,
+          "pass_lean_score": -0.255,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "South Alabama",
+          "plays": 576,
+          "epa_pass": 0.199,
+          "epa_rush": 0.219,
+          "pass_lean_score": -0.02,
+          "eligible": true
+        }
       }
     },
     "401860920": {
@@ -1507,10 +3145,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T23:00Z",
+        "temperature_f": 73.2,
+        "precip_probability_pct": 4.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 8.2,
+        "wind_gust_mph": 13.4,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 29.88327,
+          "longitude": -97.94139,
+          "resolved_name": "San Marcos",
+          "resolved_admin1": "Texas",
+          "resolved_country": "United States",
+          "query": "San Marcos, TX, USA"
+        }
+      },
+      "conditions_line": "73\u00b0F \u00b7 8 mph wind \u00b7 gusts 13 \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -19.0,
         "total": 53.0
@@ -1530,8 +3188,27 @@
         "total": 53.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.3,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Texas State",
+          "plays": 583,
+          "epa_pass": 0.306,
+          "epa_rush": 0.271,
+          "pass_lean_score": 0.035,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Washington State",
+          "plays": 539,
+          "epa_pass": -0.116,
+          "epa_rush": 0.181,
+          "pass_lean_score": -0.297,
+          "eligible": true
+        }
       }
     },
     "401858534": {
@@ -1541,10 +3218,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-21T23:00Z",
+        "temperature_f": 65.9,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 3.7,
+        "wind_gust_mph": 2.9,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 34.05223,
+          "longitude": -118.24368,
+          "resolved_name": "Los Angeles",
+          "resolved_admin1": "California",
+          "resolved_country": "United States",
+          "query": "Los Angeles, CA, USA"
+        }
+      },
+      "conditions_line": "66\u00b0F \u00b7 4 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -9.5,
         "total": 53.0
@@ -1564,8 +3261,27 @@
         "total": 53.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.3,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "USC",
+          "plays": 625,
+          "epa_pass": 0.355,
+          "epa_rush": 0.114,
+          "pass_lean_score": 0.241,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Maryland",
+          "plays": 510,
+          "epa_pass": 0.064,
+          "epa_rush": 0.084,
+          "pass_lean_score": -0.02,
+          "eligible": true
+        }
       }
     },
     "401856865": {
@@ -1575,10 +3291,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-22T00:00Z",
+        "temperature_f": 58.9,
+        "precip_probability_pct": 81.0,
+        "precipitation_in": 0.106,
+        "rain_in": 0.024,
+        "snowfall_in": 0.0,
+        "wind_mph": 7.2,
+        "wind_gust_mph": 8.1,
+        "weather_code": 81,
+        "summary": "Rain",
+        "precipitation_label": "Light rain",
+        "location": {
+          "latitude": 39.18361,
+          "longitude": -96.57167,
+          "resolved_name": "Manhattan",
+          "resolved_admin1": "Kansas",
+          "resolved_country": "United States",
+          "query": "Manhattan, KS, USA"
+        }
+      },
+      "conditions_line": "59\u00b0F \u00b7 7 mph wind \u00b7 Light rain",
+      "impact": "Moderate",
+      "note": "Rain may slightly suppress scoring efficiency.",
       "baseline": {
         "home_spread": 0.0,
         "total": 53.0
@@ -1586,20 +3322,39 @@
       "adjustments": {
         "breakdown": {
           "wind": 0.0,
-          "precipitation": 0.0,
+          "precipitation": -0.5,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 0.0,
-        "total": 53.0
+        "total": 52.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.3,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Kansas State",
+          "plays": 571,
+          "epa_pass": 0.085,
+          "epa_rush": 0.118,
+          "pass_lean_score": -0.033,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Arizona",
+          "plays": 573,
+          "epa_pass": 0.351,
+          "epa_rush": 0.075,
+          "pass_lean_score": 0.276,
+          "eligible": true
+        }
       }
     },
     "401869938": {
@@ -1609,10 +3364,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-22T00:00Z",
+        "temperature_f": 70.0,
+        "precip_probability_pct": 4.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 4.6,
+        "wind_gust_mph": 12.8,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 32.52321,
+          "longitude": -92.63793,
+          "resolved_name": "Ruston",
+          "resolved_admin1": "Louisiana",
+          "resolved_country": "United States",
+          "query": "Ruston, LA, USA"
+        }
+      },
+      "conditions_line": "70\u00b0F \u00b7 5 mph wind \u00b7 gusts 13 \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -22.0,
         "total": 53.5
@@ -1632,8 +3407,27 @@
         "total": 53.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.2,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Louisiana Tech",
+          "plays": 524,
+          "epa_pass": 0.264,
+          "epa_rush": 0.074,
+          "pass_lean_score": 0.19,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Arkansas State",
+          "plays": 535,
+          "epa_pass": 0.166,
+          "epa_rush": 0.146,
+          "pass_lean_score": 0.02,
+          "eligible": true
+        }
       }
     },
     "401864544": {
@@ -1643,10 +3437,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-22T00:00Z",
+        "temperature_f": 55.6,
+        "precip_probability_pct": 8.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 5.9,
+        "wind_gust_mph": 7.8,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 37.33939,
+          "longitude": -121.89496,
+          "resolved_name": "San Jose",
+          "resolved_admin1": "California",
+          "resolved_country": "United States",
+          "query": "San Jose, CA, USA"
+        }
+      },
+      "conditions_line": "56\u00b0F \u00b7 6 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": 2.0,
         "total": 50.0
@@ -1666,8 +3480,27 @@
         "total": 50.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "San Jose State",
+          "plays": 569,
+          "epa_pass": 0.105,
+          "epa_rush": -0.046,
+          "pass_lean_score": 0.151,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "UNLV",
+          "plays": 571,
+          "epa_pass": 0.127,
+          "epa_rush": 0.083,
+          "pass_lean_score": 0.044,
+          "eligible": true
+        }
       }
     },
     "401858302": {
@@ -1677,31 +3510,70 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-22T00:00Z",
+        "temperature_f": 78.5,
+        "precip_probability_pct": 31.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 11.7,
+        "wind_gust_mph": 13.0,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 25.94204,
+          "longitude": -80.2456,
+          "resolved_name": "Miami Gardens",
+          "resolved_admin1": "Florida",
+          "resolved_country": "United States",
+          "query": "Miami Gardens, FL, USA"
+        }
+      },
+      "conditions_line": "78\u00b0F \u00b7 12 mph wind \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": -9.5,
         "total": 54.5
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -9.5,
-        "total": 54.5
+        "total": 54.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.2,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Miami",
+          "plays": 546,
+          "epa_pass": 0.546,
+          "epa_rush": 0.108,
+          "pass_lean_score": 0.438,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Virginia Tech",
+          "plays": 601,
+          "epa_pass": 0.285,
+          "epa_rush": 0.094,
+          "pass_lean_score": 0.191,
+          "eligible": true
+        }
       }
     },
     "401860918": {
@@ -1711,10 +3583,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-22T00:00Z",
+        "temperature_f": 58.1,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 2.8,
+        "wind_gust_mph": 2.5,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 36.74773,
+          "longitude": -119.77237,
+          "resolved_name": "Fresno",
+          "resolved_admin1": "California",
+          "resolved_country": "United States",
+          "query": "Fresno, CA, USA"
+        }
+      },
+      "conditions_line": "58\u00b0F \u00b7 3 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -15.0,
         "total": 51.5
@@ -1734,8 +3626,27 @@
         "total": 51.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.4,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Fresno State",
+          "plays": 535,
+          "epa_pass": 0.35,
+          "epa_rush": -0.063,
+          "pass_lean_score": 0.413,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Colorado State",
+          "plays": 512,
+          "epa_pass": 0.271,
+          "epa_rush": 0.233,
+          "pass_lean_score": 0.038,
+          "eligible": true
+        }
       }
     },
     "401856753": {
@@ -1745,31 +3656,70 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-22T00:00Z",
+        "temperature_f": 63.1,
+        "precip_probability_pct": 15.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 12.9,
+        "wind_gust_mph": 27.3,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 34.00071,
+          "longitude": -81.03481,
+          "resolved_name": "Columbia",
+          "resolved_admin1": "South Carolina",
+          "resolved_country": "United States",
+          "query": "Columbia, SC, USA"
+        }
+      },
+      "conditions_line": "63\u00b0F \u00b7 13 mph wind \u00b7 gusts 27 \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": 15.0,
         "total": 55.5
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 15.0,
-        "total": 55.5
+        "total": 55.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "South Carolina",
+          "plays": 566,
+          "epa_pass": 0.19,
+          "epa_rush": 0.199,
+          "pass_lean_score": -0.009,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Georgia",
+          "plays": 468,
+          "epa_pass": 0.401,
+          "epa_rush": 0.261,
+          "pass_lean_score": 0.14,
+          "eligible": true
+        }
       }
     },
     "401856751": {
@@ -1779,31 +3729,70 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-22T00:00Z",
+        "temperature_f": 61.5,
+        "precip_probability_pct": 1.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 10.2,
+        "wind_gust_mph": 24.2,
+        "weather_code": 1,
+        "summary": "Partly cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 38.95171,
+          "longitude": -92.33407,
+          "resolved_name": "Columbia",
+          "resolved_admin1": "Missouri",
+          "resolved_country": "United States",
+          "query": "Columbia, MO, USA"
+        }
+      },
+      "conditions_line": "62\u00b0F \u00b7 10 mph wind \u00b7 gusts 24 \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Wind may modestly suppress passing and kicking efficiency.",
       "baseline": {
         "home_spread": -1.0,
         "total": 52.5
       },
       "adjustments": {
         "breakdown": {
-          "wind": 0.0,
+          "wind": -0.5,
           "precipitation": 0.0,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -1.0,
-        "total": 52.5
+        "total": 52.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.2,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Missouri",
+          "plays": 529,
+          "epa_pass": 0.205,
+          "epa_rush": 0.064,
+          "pass_lean_score": 0.141,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Kentucky",
+          "plays": 535,
+          "epa_pass": 0.137,
+          "epa_rush": 0.179,
+          "pass_lean_score": -0.042,
+          "eligible": true
+        }
       }
     },
     "401858306": {
@@ -1813,10 +3802,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-22T00:00Z",
+        "temperature_f": 59.5,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 3.2,
+        "wind_gust_mph": 3.4,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 38.25424,
+          "longitude": -85.75941,
+          "resolved_name": "Louisville",
+          "resolved_admin1": "Kentucky",
+          "resolved_country": "United States",
+          "query": "Louisville, KY, USA"
+        }
+      },
+      "conditions_line": "60\u00b0F \u00b7 3 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -15.0,
         "total": 54.5
@@ -1836,8 +3845,27 @@
         "total": 54.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Louisville",
+          "plays": 529,
+          "epa_pass": 0.351,
+          "epa_rush": 0.308,
+          "pass_lean_score": 0.043,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Pittsburgh",
+          "plays": 554,
+          "epa_pass": 0.025,
+          "epa_rush": 0.071,
+          "pass_lean_score": -0.046,
+          "eligible": true
+        }
       }
     },
     "401858307": {
@@ -1847,10 +3875,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-22T00:00Z",
+        "temperature_f": 53.6,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 8.5,
+        "wind_gust_mph": 19.5,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 41.70019,
+          "longitude": -86.23793,
+          "resolved_name": "Notre Dame",
+          "resolved_admin1": "Indiana",
+          "resolved_country": "United States",
+          "query": "Notre Dame, IN, USA"
+        }
+      },
+      "conditions_line": "54\u00b0F \u00b7 8 mph wind \u00b7 gusts 20 \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -16.5,
         "total": 56.5
@@ -1870,8 +3918,27 @@
         "total": 56.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Notre Dame",
+          "plays": 568,
+          "epa_pass": 0.391,
+          "epa_rush": 0.227,
+          "pass_lean_score": 0.164,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "SMU",
+          "plays": 550,
+          "epa_pass": 0.363,
+          "epa_rush": 0.119,
+          "pass_lean_score": 0.244,
+          "eligible": true
+        }
       }
     },
     "401858308": {
@@ -1881,10 +3948,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-22T00:00Z",
+        "temperature_f": 54.9,
+        "precip_probability_pct": 35.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 7.4,
+        "wind_gust_mph": 14.3,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 37.87159,
+          "longitude": -122.27275,
+          "resolved_name": "Berkeley",
+          "resolved_admin1": "California",
+          "resolved_country": "United States",
+          "query": "Berkeley, CA, USA"
+        }
+      },
+      "conditions_line": "55\u00b0F \u00b7 7 mph wind \u00b7 gusts 14 \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": 0.5,
         "total": 47.5
@@ -1904,8 +3991,27 @@
         "total": 47.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "California",
+          "plays": 557,
+          "epa_pass": -0.081,
+          "epa_rush": -0.06,
+          "pass_lean_score": -0.021,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Stanford",
+          "plays": 481,
+          "epa_pass": 0.17,
+          "epa_rush": 0.058,
+          "pass_lean_score": 0.112,
+          "eligible": true
+        }
       }
     },
     "401862836": {
@@ -1915,10 +4021,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-22T01:00Z",
+        "temperature_f": 63.3,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 5.6,
+        "wind_gust_mph": 16.6,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 33.52066,
+          "longitude": -86.80249,
+          "resolved_name": "Birmingham",
+          "resolved_admin1": "Alabama",
+          "resolved_country": "United States",
+          "query": "Birmingham, AL, USA"
+        }
+      },
+      "conditions_line": "63\u00b0F \u00b7 6 mph wind \u00b7 gusts 17 \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": 0.5,
         "total": 53.0
@@ -1938,8 +4064,27 @@
         "total": 53.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.0,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "UAB",
+          "plays": 567,
+          "epa_pass": -0.027,
+          "epa_rush": 0.106,
+          "pass_lean_score": -0.133,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "UTSA",
+          "plays": 573,
+          "epa_pass": 0.128,
+          "epa_rush": 0.278,
+          "pass_lean_score": -0.15,
+          "eligible": true
+        }
       }
     },
     "401856872": {
@@ -1949,10 +4094,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-22T02:00Z",
+        "temperature_f": 68.8,
+        "precip_probability_pct": 15.0,
+        "precipitation_in": 0.016,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 8.5,
+        "wind_gust_mph": 23.5,
+        "weather_code": 51,
+        "summary": "Drizzle",
+        "precipitation_label": "Light rain",
+        "location": {
+          "latitude": 32.72541,
+          "longitude": -97.32085,
+          "resolved_name": "Fort Worth",
+          "resolved_admin1": "Texas",
+          "resolved_country": "United States",
+          "query": "Fort Worth, TX, USA"
+        }
+      },
+      "conditions_line": "69\u00b0F \u00b7 8 mph wind \u00b7 gusts 24 \u00b7 Light rain",
+      "impact": "Moderate",
+      "note": "Rain may slightly suppress scoring efficiency.",
       "baseline": {
         "home_spread": 15.0,
         "total": 54.5
@@ -1960,20 +4125,39 @@
       "adjustments": {
         "breakdown": {
           "wind": 0.0,
-          "precipitation": 0.0,
+          "precipitation": -0.5,
           "temperature": 0.0
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": 15.0,
-        "total": 54.5
+        "total": 54.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.2,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "TCU",
+          "plays": 564,
+          "epa_pass": 0.119,
+          "epa_rush": -0.036,
+          "pass_lean_score": 0.155,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Utah",
+          "plays": 536,
+          "epa_pass": 0.247,
+          "epa_rush": 0.281,
+          "pass_lean_score": -0.034,
+          "eligible": true
+        }
       }
     },
     "401860925": {
@@ -1983,10 +4167,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-22T02:00Z",
+        "temperature_f": 42.3,
+        "precip_probability_pct": 8.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 6.6,
+        "wind_gust_mph": 22.4,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 43.6135,
+          "longitude": -116.20345,
+          "resolved_name": "Boise",
+          "resolved_admin1": "Idaho",
+          "resolved_country": "United States",
+          "query": "Boise, ID, USA"
+        }
+      },
+      "conditions_line": "42\u00b0F \u00b7 7 mph wind \u00b7 gusts 22 \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -21.5,
         "total": 53.5
@@ -1995,19 +4199,38 @@
         "breakdown": {
           "wind": 0.0,
           "precipitation": 0.0,
-          "temperature": 0.0
+          "temperature": -0.5
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -21.5,
-        "total": 53.5
+        "total": 53.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": 0.4,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Boise State",
+          "plays": 589,
+          "epa_pass": 0.533,
+          "epa_rush": 0.254,
+          "pass_lean_score": 0.279,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "San Diego State",
+          "plays": 519,
+          "epa_pass": -0.011,
+          "epa_rush": 0.085,
+          "pass_lean_score": -0.096,
+          "eligible": true
+        }
       }
     },
     "401856870": {
@@ -2017,10 +4240,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-22T03:00Z",
+        "temperature_f": 65.1,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 0.3,
+        "wind_gust_mph": 2.0,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 33.41477,
+          "longitude": -111.90931,
+          "resolved_name": "Tempe",
+          "resolved_admin1": "Arizona",
+          "resolved_country": "United States",
+          "query": "Tempe, AZ, USA"
+        }
+      },
+      "conditions_line": "65\u00b0F \u00b7 0 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": 1.0,
         "total": 54.0
@@ -2040,8 +4283,27 @@
         "total": 54.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Arizona State",
+          "plays": 563,
+          "epa_pass": 0.092,
+          "epa_rush": 0.048,
+          "pass_lean_score": 0.044,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Oklahoma State",
+          "plays": 597,
+          "epa_pass": 0.278,
+          "epa_rush": 0.135,
+          "pass_lean_score": 0.143,
+          "eligible": true
+        }
       }
     },
     "401864541": {
@@ -2051,10 +4313,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-22T03:00Z",
+        "temperature_f": 30.4,
+        "precip_probability_pct": 2.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 4.9,
+        "wind_gust_mph": 4.9,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 39.52963,
+          "longitude": -119.8138,
+          "resolved_name": "Reno",
+          "resolved_admin1": "Nevada",
+          "resolved_country": "United States",
+          "query": "Reno, NV, USA"
+        }
+      },
+      "conditions_line": "30\u00b0F \u00b7 5 mph wind \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Cold temperatures create an additional scoring drag.",
       "baseline": {
         "home_spread": -10.5,
         "total": 51.0
@@ -2063,19 +4345,38 @@
         "breakdown": {
           "wind": 0.0,
           "precipitation": 0.0,
-          "temperature": 0.0
+          "temperature": -1.5
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -1.5,
+        "total_points": -1.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -10.5,
-        "total": 51.0
+        "total": 49.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.2,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Nevada",
+          "plays": 494,
+          "epa_pass": -0.081,
+          "epa_rush": 0.126,
+          "pass_lean_score": -0.207,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Hawai'i",
+          "plays": 658,
+          "epa_pass": 0.075,
+          "epa_rush": 0.033,
+          "pass_lean_score": 0.042,
+          "eligible": true
+        }
       }
     },
     "401860919": {
@@ -2085,10 +4386,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-22T03:00Z",
+        "temperature_f": 41.8,
+        "precip_probability_pct": 60.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 2.2,
+        "wind_gust_mph": 3.1,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Light rain",
+        "location": {
+          "latitude": 44.56457,
+          "longitude": -123.26204,
+          "resolved_name": "Corvallis",
+          "resolved_admin1": "Oregon",
+          "resolved_country": "United States",
+          "query": "Corvallis, OR, USA"
+        }
+      },
+      "conditions_line": "42\u00b0F \u00b7 2 mph wind \u00b7 Light rain",
+      "impact": "Moderate",
+      "note": "Rain may slightly suppress scoring efficiency.",
       "baseline": {
         "home_spread": -12.0,
         "total": 52.5
@@ -2096,20 +4417,39 @@
       "adjustments": {
         "breakdown": {
           "wind": 0.0,
-          "precipitation": 0.0,
-          "temperature": 0.0
+          "precipitation": -0.5,
+          "temperature": -0.5
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -1.0,
+        "total_points": -1.0,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -12.0,
-        "total": 52.5
+        "total": 51.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.0,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Oregon State",
+          "plays": 565,
+          "epa_pass": 0.276,
+          "epa_rush": 0.249,
+          "pass_lean_score": 0.027,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Utah State",
+          "plays": 499,
+          "epa_pass": 0.021,
+          "epa_rush": -0.009,
+          "pass_lean_score": 0.03,
+          "eligible": true
+        }
       }
     },
     "401866470": {
@@ -2119,10 +4459,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-25T00:00Z",
+        "temperature_f": 29.4,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 7.2,
+        "wind_gust_mph": 8.3,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 42.24115,
+          "longitude": -83.61299,
+          "resolved_name": "Ypsilanti",
+          "resolved_admin1": "Michigan",
+          "resolved_country": "United States",
+          "query": "Ypsilanti, MI, USA"
+        }
+      },
+      "conditions_line": "29\u00b0F \u00b7 7 mph wind \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Cold temperatures create an additional scoring drag.",
       "baseline": {
         "home_spread": -12.5,
         "total": 48.0
@@ -2131,19 +4491,38 @@
         "breakdown": {
           "wind": 0.0,
           "precipitation": 0.0,
-          "temperature": 0.0
+          "temperature": -1.5
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -1.5,
+        "total_points": -1.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -12.5,
-        "total": 48.0
+        "total": 46.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.0,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Eastern Michigan",
+          "plays": 497,
+          "epa_pass": 0.073,
+          "epa_rush": 0.048,
+          "pass_lean_score": 0.025,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Kent State",
+          "plays": 479,
+          "epa_pass": -0.042,
+          "epa_rush": -0.117,
+          "pass_lean_score": 0.075,
+          "eligible": true
+        }
       }
     },
     "401866471": {
@@ -2153,10 +4532,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
-      "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "forecast": {
+        "forecast_time_utc": "2026-11-25T00:00Z",
+        "temperature_f": 29.5,
+        "precip_probability_pct": 0.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 5.3,
+        "wind_gust_mph": 6.3,
+        "weather_code": 0,
+        "summary": "Clear",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 42.29171,
+          "longitude": -85.58723,
+          "resolved_name": "Kalamazoo",
+          "resolved_admin1": "Michigan",
+          "resolved_country": "United States",
+          "query": "Kalamazoo, MI, USA"
+        }
+      },
+      "conditions_line": "30\u00b0F \u00b7 5 mph wind \u00b7 Dry",
+      "impact": "Moderate",
+      "note": "Cold temperatures create an additional scoring drag.",
       "baseline": {
         "home_spread": -3.5,
         "total": 52.0
@@ -2165,19 +4564,38 @@
         "breakdown": {
           "wind": 0.0,
           "precipitation": 0.0,
-          "temperature": 0.0
+          "temperature": -1.5
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -1.5,
+        "total_points": -1.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -3.5,
-        "total": 52.0
+        "total": 50.5
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Western Michigan",
+          "plays": 513,
+          "epa_pass": 0.028,
+          "epa_rush": 0.168,
+          "pass_lean_score": -0.14,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "Miami (OH)",
+          "plays": 489,
+          "epa_pass": 0.128,
+          "epa_rush": 0.165,
+          "pass_lean_score": -0.037,
+          "eligible": true
+        }
       }
     },
     "401856879": {
@@ -2187,10 +4605,30 @@
       "network": null,
       "indoor": false,
       "indoor_source": null,
-      "forecast": null,
-      "conditions_line": "Forecast unavailable",
+      "forecast": {
+        "forecast_time_utc": "2026-11-26T23:00Z",
+        "temperature_f": 46.5,
+        "precip_probability_pct": 9.0,
+        "precipitation_in": 0.0,
+        "rain_in": 0.0,
+        "snowfall_in": 0.0,
+        "wind_mph": 7.0,
+        "wind_gust_mph": 9.4,
+        "weather_code": 3,
+        "summary": "Cloudy",
+        "precipitation_label": "Dry",
+        "location": {
+          "latitude": 33.57786,
+          "longitude": -101.85517,
+          "resolved_name": "Lubbock",
+          "resolved_admin1": "Texas",
+          "resolved_country": "United States",
+          "query": "Lubbock, TX, USA"
+        }
+      },
+      "conditions_line": "46\u00b0F \u00b7 7 mph wind \u00b7 Dry",
       "impact": "Minimal",
-      "note": "Weather source unavailable: HTTPError; Model A baseline remains unchanged.",
+      "note": "No material weather-driven scoring effect is projected.",
       "baseline": {
         "home_spread": -10.5,
         "total": 53.5
@@ -2199,19 +4637,38 @@
         "breakdown": {
           "wind": 0.0,
           "precipitation": 0.0,
-          "temperature": 0.0
+          "temperature": -0.5
         },
-        "raw_total_points": 0.0,
-        "total_points": 0.0,
+        "raw_total_points": -0.5,
+        "total_points": -0.5,
         "home_spread_points": 0.0
       },
       "adjusted": {
         "home_spread": -10.5,
-        "total": 53.5
+        "total": 53.0
       },
       "spread_logic": {
-        "status": "LOCKED",
-        "reason": "forecast or tendency inputs unavailable"
+        "status": "ACTIVE",
+        "home_spread_points": 0.0,
+        "favored_style_team": null,
+        "pass_lean_gap": -0.1,
+        "reason": "tendency data is mature, but conditions do not justify a directional spread adjustment",
+        "home_tendency": {
+          "team": "Texas Tech",
+          "plays": 549,
+          "epa_pass": 0.282,
+          "epa_rush": 0.189,
+          "pass_lean_score": 0.093,
+          "eligible": true
+        },
+        "away_tendency": {
+          "team": "TCU",
+          "plays": 564,
+          "epa_pass": 0.119,
+          "epa_rush": -0.036,
+          "pass_lean_score": 0.155,
+          "eligible": true
+        }
       }
     }
   }
