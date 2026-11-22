@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "thi-rlm-monitor-v1.5",
-    "generated_at_utc": "2026-11-21T21:38:36.419979Z",
+    "generated_at_utc": "2026-11-22T02:15:11.069561Z",
     "status": "line_monitoring",
     "rlm_status": "public_splits_pending",
     "sharp_line_status": "monitoring",
@@ -18,7 +18,7 @@
     },
     "alert_count": 0,
     "sharp_move_count": 45,
-    "steam_reversal_alert_count": 1,
+    "steam_reversal_alert_count": 0,
     "steam_context_hold_count": 0,
     "sharp_tracked_event_count": 90,
     "qualified_event_count": 0,
@@ -1043,41 +1043,6 @@
       "definition": "Observed Pinnacle spread movement from THI's first captured number. Public betting splits are unavailable, so this is not an RLM or sharp-money claim."
     }
   ],
-  "steam_reversal_alerts": [
-    {
-      "sport": "cfb",
-      "event_id": "401864544",
-      "game_id": "401864544",
-      "week": 12,
-      "start_date": "2026-11-22T00:00:00.000Z",
-      "away_team": "UNLV",
-      "home_team": "San Jose State",
-      "opening_home_spread": 3.5,
-      "current_home_spread": 6.5,
-      "line_delta": 3.0,
-      "movement_points": 3.0,
-      "sharp_book": "circa",
-      "source_verified": true,
-      "source_id": "week-12:row-55:401864544",
-      "source_sheet": "WEEK 12",
-      "source_row": 55,
-      "source_opening_text": "UNLV -3.5  V  SJSU",
-      "source_movement_text": "-6.5",
-      "source_observed_at_utc": "2026-11-21T19:34:33.091049Z",
-      "definition": "Circa opening-to-later spread movement recorded in the system owner's authoritative read-only Google Sheet.",
-      "first_seen_at_utc": "2026-11-21T19:34:33.091049Z",
-      "system_id": "steam-reversal",
-      "trigger_threshold_points": 3.0,
-      "steam_side": "away",
-      "steam_team": "UNLV",
-      "fade_side": "home",
-      "fade_team": "San Jose State",
-      "fade_spread": 6.5,
-      "context_status": "unclassified",
-      "action_status": "monitor_only",
-      "context_flags": [],
-      "context_note": "Price movement alone does not establish sharp money, injury, weather or public causation."
-    }
-  ],
+  "steam_reversal_alerts": [],
   "alerts": []
 }
