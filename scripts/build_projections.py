@@ -29,7 +29,7 @@ import statistics
 import sys
 import time
 import unicodedata
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -161,8 +161,17 @@ def consensus_book_count(label):
         return 0
 
 
+def market_event_key(home, away, start_date):
+    kickoff = parse_utc(start_date)
+    return (
+        home,
+        away,
+        kickoff.date().isoformat() if kickoff else "",
+    )
+
+
 def load_frozen_pregame_markets(path=PROJECTION_SNAPSHOT_LEDGER_PATH):
-    """Return the latest immutable pre-kick market snapshot for each matchup."""
+    """Return the latest immutable pre-kick market snapshot for each event."""
     ledger = Path(path)
     if not ledger.exists():
         return {}
@@ -183,36 +192,77 @@ def load_frozen_pregame_markets(path=PROJECTION_SNAPSHOT_LEDGER_PATH):
                 continue
             if captured >= kickoff or market.get("home_spread") is None:
                 continue
-            key = (home, away)
-            previous = latest.get(key)
-            if previous is None or captured > previous[0]:
-                books = consensus_book_count(market.get("bookmaker"))
-                latest[key] = (
-                    captured,
-                    {
-                        "id": f"frozen:{row.get('game_id')}",
-                        "commence_time": row.get("start_date"),
-                        "home_team": home,
-                        "away_team": away,
-                        "home_level": "FBS",
-                        "away_level": "FBS",
-                        "spread_home": optional_number(market.get("home_spread")),
-                        "total": optional_number(market.get("total")),
-                        "bookmaker": market.get("bookmaker") or "Frozen pregame market",
-                        "spread_books": books,
-                        "total_books": books if market.get("total") is not None else 0,
-                        "spread_raw_books": books,
-                        "total_raw_books": books if market.get("total") is not None else 0,
-                        "spread_outliers_removed": [],
-                        "total_outliers_removed": [],
-                        "reference_spread": market.get("reference_spread"),
-                        "reference_total": market.get("reference_total"),
-                        "book_lines": [],
-                        "market_state": "frozen_pregame",
-                        "frozen_at": row.get("captured_at_utc"),
-                    },
-                )
+            reference_times = [
+                parse_utc((market.get(key) or {}).get("last_update"))
+                for key in ("reference_spread", "reference_total")
+            ]
+            reference_times = [value for value in reference_times if value is not None]
+            # A rematch collision can copy an earlier meeting's quote into a
+            # later event. Frozen observations must reflect a market that was
+            # actually current when the snapshot was captured.
+            if reference_times and max(reference_times) < captured - timedelta(hours=6):
+                continue
+            game_id = str(row.get("game_id") or "").strip()
+            keys = [("event", *market_event_key(home, away, row.get("start_date")))]
+            if game_id:
+                keys.append(("id", game_id))
+            books = consensus_book_count(market.get("bookmaker"))
+            frozen_value = {
+                "id": f"frozen:{row.get('game_id')}",
+                "commence_time": row.get("start_date"),
+                "home_team": home,
+                "away_team": away,
+                "home_level": "FBS",
+                "away_level": "FBS",
+                "spread_home": optional_number(market.get("home_spread")),
+                "total": optional_number(market.get("total")),
+                "bookmaker": market.get("bookmaker") or "Frozen pregame market",
+                "spread_books": books,
+                "total_books": books if market.get("total") is not None else 0,
+                "spread_raw_books": books,
+                "total_raw_books": books if market.get("total") is not None else 0,
+                "spread_outliers_removed": [],
+                "total_outliers_removed": [],
+                "reference_spread": market.get("reference_spread"),
+                "reference_total": market.get("reference_total"),
+                "book_lines": [],
+                "market_state": "frozen_pregame",
+                "frozen_at": row.get("captured_at_utc"),
+            }
+            for key in keys:
+                previous = latest.get(key)
+                if previous is None or captured > previous[0]:
+                    latest[key] = (captured, frozen_value)
     return {key: value for key, (_, value) in latest.items()}
+
+
+def frozen_market_for_game(frozen_markets, game):
+    game_id = str(game.get("game_id") or "").strip()
+    if game_id:
+        frozen = frozen_markets.get(("id", game_id))
+        if frozen:
+            return frozen
+    return frozen_markets.get((
+        "event",
+        *market_event_key(
+            game.get("home_team"),
+            game.get("away_team"),
+            game.get("start_date"),
+        ),
+    ))
+
+
+def same_market_event(market, scheduled, max_hours=36):
+    if (
+        market.get("home_team") != scheduled.get("home_team")
+        or market.get("away_team") != scheduled.get("away_team")
+    ):
+        return False
+    market_time = parse_utc(market.get("commence_time"))
+    scheduled_time = parse_utc(scheduled.get("start_date"))
+    if market_time is None or scheduled_time is None:
+        return False
+    return abs((market_time - scheduled_time).total_seconds()) <= max_hours * 3600
 
 
 def freeze_started_markets(odds, schedule, frozen_markets, now=None):
@@ -223,31 +273,49 @@ def freeze_started_markets(odds, schedule, frozen_markets, now=None):
     current = current.astimezone(timezone.utc)
 
     games = list(odds.get("games", []))
-    by_key = {
-        (game.get("home_team"), game.get("away_team")): game
-        for game in games
-        if game.get("home_team") and game.get("away_team")
-    }
     scheduled = list(schedule.get("games", [])) + collect_fcs_games(schedule)
+    pair_counts = {}
+    for game in scheduled:
+        pair = (game.get("home_team"), game.get("away_team"))
+        pair_counts[pair] = pair_counts.get(pair, 0) + 1
     frozen_count = 0
     withheld_count = 0
     for game in scheduled:
         kickoff = parse_utc(game.get("start_date"))
         if kickoff is None or kickoff > current:
             continue
-        key = (game.get("home_team"), game.get("away_team"))
-        if not all(key):
+        if not game.get("home_team") or not game.get("away_team"):
             continue
-        frozen = frozen_markets.get(key)
+        matching_indexes = [
+            index
+            for index, market in enumerate(games)
+            if same_market_event(market, game)
+        ]
+        if not matching_indexes and pair_counts.get(
+            (game.get("home_team"), game.get("away_team"))
+        ) == 1:
+            matching_indexes = [
+                index
+                for index, market in enumerate(games)
+                if market.get("home_team") == game.get("home_team")
+                and market.get("away_team") == game.get("away_team")
+            ]
+        frozen = frozen_market_for_game(frozen_markets, game)
         if frozen:
-            by_key[key] = frozen
+            if matching_indexes:
+                games[matching_indexes[0]] = frozen
+                for index in reversed(matching_indexes[1:]):
+                    games.pop(index)
+            else:
+                games.append(frozen)
             frozen_count += 1
-        elif key in by_key:
-            by_key.pop(key, None)
+        elif matching_indexes:
+            for index in reversed(matching_indexes):
+                games.pop(index)
             withheld_count += 1
 
     result = dict(odds)
-    result["games"] = list(by_key.values())
+    result["games"] = games
     result.setdefault("meta", {})["games"] = len(result["games"])
     result["meta"]["frozen_pregame_markets"] = frozen_count
     result["meta"]["post_kick_markets_withheld"] = withheld_count
@@ -1997,9 +2065,28 @@ def build_odds_lookup(odds):
         away = game.get("away_team")
 
         if home and away:
-            lookup[(home, away)] = game
+            lookup.setdefault((home, away), []).append(game)
 
     return lookup
+
+
+def market_for_schedule_game(odds_lookup, game, max_hours=36):
+    candidates = odds_lookup.get(
+        (game.get("home_team"), game.get("away_team")),
+        [],
+    )
+    kickoff = parse_utc(game.get("start_date"))
+    if kickoff is None:
+        return None
+    dated = []
+    for market in candidates:
+        commence = parse_utc(market.get("commence_time"))
+        if commence is None:
+            continue
+        distance = abs((commence - kickoff).total_seconds())
+        if distance <= max_hours * 3600:
+            dated.append((distance, market))
+    return min(dated, key=lambda item: item[0])[1] if dated else None
 
 
 def market_payload(market):
@@ -2078,7 +2165,7 @@ def build_fbs_fbs_projection(
     model_total = calculate_total(home, away)
     win_probability = calculate_win_probability(model_spread)
 
-    market = odds_lookup.get((home_name, away_name))
+    market = market_for_schedule_game(odds_lookup, game)
     market_data = market_payload(market)
 
     comparison = compare_to_market(
@@ -2241,7 +2328,7 @@ def build_fbs_fcs_projection(
         "FCS fallback game; opponent-specific live matchup adjustment withheld."
     )
 
-    market = odds_lookup.get((home_name, away_name))
+    market = market_for_schedule_game(odds_lookup, game)
     market_data = market_payload(market)
 
     comparison = compare_to_market(

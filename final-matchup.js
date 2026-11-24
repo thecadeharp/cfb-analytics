@@ -86,13 +86,63 @@
     return normalizedTeam(a) === normalizedTeam(b);
   }
 
-  function matchupFind(rows, away, home) {
-    return (
-      rows.find(game =>
-        sameTeam(game?.away_team, away) &&
-        sameTeam(game?.home_team, home)
-      ) || null
+  function projectionGames() {
+    return Array.isArray(window.THIProjectionGames)
+      ? window.THIProjectionGames
+      : Array.isArray(window.THIProjectionsPayload?.games)
+        ? window.THIProjectionsPayload.games
+        : [];
+  }
+
+  function matchupProjection(away, home, gameId = "") {
+    const id = String(gameId || "").trim();
+    if (id) {
+      const exact = projectionGames().find(game => String(game?.game_id ?? "") === id);
+      if (exact) return exact;
+    }
+    return projectionGames().find(game =>
+      sameTeam(game?.away?.team ?? game?.away_team, away) &&
+      sameTeam(game?.home?.team ?? game?.home_team, home)
+    ) || null;
+  }
+
+  function currentProjection(away, home) {
+    const params = new URLSearchParams(String(window.location.hash || "").replace(/^#/, ""));
+    return matchupProjection(away, home, params.get("matchup") || "");
+  }
+
+  function projectionForRow(row, away, home) {
+    const onclick = row?.getAttribute("onclick") || "";
+    const gameId = onclick.match(/openMatchup\(['"]([^'"]+)['"]\)/)?.[1] || "";
+    return matchupProjection(away, home, gameId);
+  }
+
+  function matchupFind(rows, away, home, projection = null) {
+    const teamMatches = rows.filter(game =>
+      sameTeam(game?.away_team, away) &&
+      sameTeam(game?.home_team, home)
     );
+    if (!projection) return teamMatches.length === 1 ? teamMatches[0] : null;
+
+    const projectionId = String(projection?.game_id ?? "").trim();
+    if (projectionId) {
+      const exact = teamMatches.find(game => String(game?.game_id ?? "").trim() === projectionId);
+      if (exact) return exact;
+    }
+    const week = Number(projection?.week);
+    if (Number.isFinite(week)) {
+      const byWeek = teamMatches.find(game => Number(game?.week) === week);
+      if (byWeek) return byWeek;
+    }
+    const start = new Date(projection?.start_date || "").getTime();
+    if (Number.isFinite(start)) {
+      const byDate = teamMatches.find(game => {
+        const gameStart = new Date(game?.start_date || "").getTime();
+        return Number.isFinite(gameStart) && Math.abs(gameStart - start) <= 36 * 60 * 60 * 1000;
+      });
+      if (byDate) return byDate;
+    }
+    return null;
   }
 
   // ==========================================================================
@@ -690,19 +740,21 @@
     };
   }
 
-  function findFinal(away, home) {
+  function findFinal(away, home, projection = null) {
     return matchupFind(
       finalGames,
       away,
-      home
+      home,
+      projection
     );
   }
 
-  function findPostgameByTeams(away, home) {
+  function findPostgameByTeams(away, home, projection = null) {
     return matchupFind(
       postgameGames,
       away,
-      home
+      home,
+      projection
     );
   }
 
@@ -857,9 +909,14 @@
       return null;
     }
 
-    const final = findFinal(
+    const selectedProjection = currentProjection(
       nodes.awayName,
       nodes.homeName
+    );
+    const final = findFinal(
+      nodes.awayName,
+      nodes.homeName,
+      selectedProjection
     );
 
     if (!final) {
@@ -1812,10 +1869,12 @@
      * convert the score card, so the board and matchup page use the SAME
      * postgame record/status.
      */
+    const selectedProjection = currentProjection(teams.away, teams.home);
     let postgame =
       findPostgameByTeams(
         teams.away,
-        teams.home
+        teams.home,
+        selectedProjection
       );
 
     /*
@@ -2085,10 +2144,12 @@
        * Board status comes DIRECTLY from the same postgame record lookup used
        * by the matchup page. No separate "complete" guess is allowed.
        */
+      const projection = projectionForRow(row, teams.away, teams.home);
       const pg =
         findPostgameByTeams(
           teams.away,
-          teams.home
+          teams.home,
+          projection
         );
 
       if (

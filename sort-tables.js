@@ -622,23 +622,6 @@
     return `${awayKey}@${homeKey}`;
   }
 
-  function gameMap(rows) {
-    const map = new Map();
-
-    (Array.isArray(rows) ? rows : []).forEach(game => {
-      if (!game || typeof game !== "object") return;
-
-      const key = matchupKey(
-        game.away_team ?? game.awayTeam ?? game.away?.team ?? game.away,
-        game.home_team ?? game.homeTeam ?? game.home?.team ?? game.home
-      );
-
-      if (key) map.set(key, game);
-    });
-
-    return map;
-  }
-
   function projectionRowTeams(row) {
     const names = Array.from(
       row.querySelectorAll(".matchup-cell .team-name")
@@ -652,25 +635,63 @@
     };
   }
 
-  function rowKey(row) {
-    const teams = projectionRowTeams(row);
-    return teams
-      ? matchupKey(teams.away, teams.home)
-      : "";
-  }
-
-  function projectionGameMap() {
+  function projectionGames() {
     const games = Array.isArray(window.THIProjectionGames)
       ? window.THIProjectionGames
       : Array.isArray(window.THIProjectionsPayload?.games)
         ? window.THIProjectionsPayload.games
         : [];
-    return gameMap(games);
+    return games;
+  }
+
+  function projectionForRow(row) {
+    const onclick = row?.getAttribute("onclick") || "";
+    const id = onclick.match(/openMatchup\(['"]([^'"]+)['"]\)/)?.[1] || "";
+    if (id) {
+      const exact = projectionGames().find(game => String(game?.game_id ?? "") === id);
+      if (exact) return exact;
+    }
+    const teams = projectionRowTeams(row);
+    if (!teams) return null;
+    return projectionGames().find(game =>
+      matchupKey(
+        game?.away_team ?? game?.awayTeam ?? game?.away?.team ?? game?.away,
+        game?.home_team ?? game?.homeTeam ?? game?.home?.team ?? game?.home
+      ) === matchupKey(teams.away, teams.home)
+    ) ?? null;
   }
 
   function dateValue(value) {
     const time = new Date(value || "").getTime();
     return Number.isFinite(time) ? time : null;
+  }
+
+  function eventMatch(rows, projection) {
+    if (!projection) return null;
+    const projectionId = String(projection?.game_id ?? "").trim();
+    if (projectionId) {
+      const exact = (Array.isArray(rows) ? rows : []).find(game =>
+        String(game?.game_id ?? "").trim() === projectionId
+      );
+      if (exact) return exact;
+    }
+    const projectionKey = matchupKey(
+      projection?.away_team ?? projection?.awayTeam ?? projection?.away?.team ?? projection?.away,
+      projection?.home_team ?? projection?.homeTeam ?? projection?.home?.team ?? projection?.home
+    );
+    const projectionStart = dateValue(
+      projection?.start_date ?? projection?.startDate ?? projection?.date
+    );
+    if (!projectionKey || projectionStart === null) return null;
+    return (Array.isArray(rows) ? rows : []).find(game => {
+      const key = matchupKey(
+        game?.away_team ?? game?.awayTeam ?? game?.away?.team ?? game?.away,
+        game?.home_team ?? game?.homeTeam ?? game?.home?.team ?? game?.home
+      );
+      const start = dateValue(game?.start_date ?? game?.startDate ?? game?.date);
+      return key === projectionKey && start !== null &&
+        Math.abs(start - projectionStart) <= 36 * 60 * 60 * 1000;
+    }) ?? null;
   }
 
   function isFreshLivePayload(now = Date.now()) {
@@ -1002,9 +1023,6 @@
     decorating = true;
 
     try {
-      const liveByMatchup = gameMap(liveGames);
-      const finalByMatchup = gameMap(completedGames);
-      const projectionByMatchup = projectionGameMap();
       const now = Date.now();
 
       const rows = document.querySelectorAll(
@@ -1018,22 +1036,21 @@
           return;
         }
 
-        const key = rowKey(row);
+        const projection = projectionForRow(row);
 
-        if (!key) {
+        if (!projection) {
           removeStatusArtifacts(row);
           row.dataset.hammerGameState = "upcoming";
           return;
         }
 
-        const final = finalByMatchup.get(key);
+        const final = eventMatch(completedGames, projection);
         if (final) {
           decorateUntrackedFinalRow(row, final);
           return;
         }
 
-        const projection = projectionByMatchup.get(key);
-        const live = liveByMatchup.get(key);
+        const live = eventMatch(liveGames, projection);
         if (live && liveGameIsPlausible(live, projection, now)) {
           decorateLiveRow(row, live);
           return;

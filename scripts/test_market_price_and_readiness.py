@@ -15,11 +15,58 @@ if "requests" not in sys.modules:
 
 from scripts.build_cbb_data_foundation import market_summary
 from scripts.build_commercial_readiness import build
-from scripts.build_projections import ODDS_SCREEN_BOOKMAKERS, extract_market
+from scripts.build_projections import (
+    ODDS_SCREEN_BOOKMAKERS,
+    extract_market,
+    freeze_started_markets,
+    market_for_schedule_game,
+)
 from scripts.capture_closing_lines import load_existing_game_keys
 
 
 class PriceContractTest(unittest.TestCase):
+    def test_same_team_rematches_do_not_share_market_or_frozen_result(self):
+        earlier = {
+            "game_id": "earlier",
+            "home_team": "Colorado State",
+            "away_team": "Boise State",
+            "start_date": "2026-11-07T23:00:00Z",
+        }
+        rematch = {
+            "game_id": "rematch",
+            "home_team": "Colorado State",
+            "away_team": "Boise State",
+            "start_date": "2026-11-28T23:00:00Z",
+        }
+        rematch_market = {
+            "id": "provider-rematch",
+            "home_team": "Colorado State",
+            "away_team": "Boise State",
+            "commence_time": "2026-11-28T23:00:00Z",
+            "spread_home": 4.5,
+        }
+        odds = {"meta": {}, "games": [rematch_market]}
+        frozen = {
+            ("id", "earlier"): {
+                "id": "frozen:earlier",
+                "home_team": "Colorado State",
+                "away_team": "Boise State",
+                "commence_time": earlier["start_date"],
+                "spread_home": 17.0,
+            }
+        }
+
+        refreshed = freeze_started_markets(
+            odds,
+            {"games": [earlier, rematch]},
+            frozen,
+            now=__import__("datetime").datetime.fromisoformat("2026-11-24T12:00:00+00:00"),
+        )
+        self.assertEqual(len(refreshed["games"]), 2)
+        lookup = {("Colorado State", "Boise State"): refreshed["games"]}
+        self.assertEqual(market_for_schedule_game(lookup, earlier)["spread_home"], 17.0)
+        self.assertEqual(market_for_schedule_game(lookup, rematch)["spread_home"], 4.5)
+
     def test_odds_screen_uses_requested_exchange_books_at_one_region_cost(self):
         books = ODDS_SCREEN_BOOKMAKERS.split(",")
         self.assertEqual(len(books), 10)
