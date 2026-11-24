@@ -10,11 +10,49 @@ from scripts.audit_data_freshness import (
     parse_time,
     postgame_covers_results,
     required_checks_pass,
+    upcoming_market_coverage,
     within_age,
 )
 
 
 class DataFreshnessAuditTests(unittest.TestCase):
+    def test_near_term_market_coverage_requires_half_the_slate(self):
+        now = datetime(2026, 11, 24, 12, tzinfo=timezone.utc)
+        games = []
+        for index in range(4):
+            games.append({
+                "status": "scheduled",
+                "start_date": f"2026-11-25T0{index}:00:00Z",
+                "market": {
+                    "home_spread": -3.5 if index < 2 else None,
+                    "total": 51.5 if index < 2 else None,
+                },
+            })
+        coverage = upcoming_market_coverage(
+            {"games": games},
+            now,
+            spread_path="market.home_spread",
+            total_path="market.total",
+        )
+        self.assertEqual(coverage["required_games"], 2)
+        self.assertTrue(coverage["spread_coverage_ok"])
+        self.assertTrue(coverage["total_coverage_ok"])
+
+    def test_empty_near_term_market_payload_fails_coverage(self):
+        now = datetime(2026, 11, 24, 12, tzinfo=timezone.utc)
+        coverage = upcoming_market_coverage(
+            {"games": [{
+                "status": "scheduled",
+                "start_date": "2026-11-25T00:00:00Z",
+                "market": {},
+            }]},
+            now,
+            spread_path="market.home_spread",
+            total_path="market.total",
+        )
+        self.assertFalse(coverage["spread_coverage_ok"])
+        self.assertFalse(coverage["total_coverage_ok"])
+
     def test_parse_time_normalizes_to_utc(self):
         self.assertEqual(
             parse_time("2026-10-16T20:00:00-04:00"),

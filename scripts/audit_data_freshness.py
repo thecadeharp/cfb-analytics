@@ -5,7 +5,8 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime, timezone
+import math
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -133,6 +134,40 @@ def in_scoreboard_live_window(projections: dict, now: datetime) -> bool:
     )
 
 
+def upcoming_market_coverage(
+    payload: dict,
+    now: datetime,
+    *,
+    spread_path: str,
+    total_path: str,
+    horizon_hours: int = 72,
+) -> dict[str, int | float | bool]:
+    """Measure whether near-term public games actually carry market lines."""
+    horizon = now + timedelta(hours=horizon_hours)
+    upcoming = []
+    for game in payload.get("games") or []:
+        kickoff = parse_time(game.get("start_date"))
+        if kickoff is None or kickoff < now or kickoff > horizon:
+            continue
+        if str(game.get("status") or "").lower() not in {"scheduled", "upcoming"}:
+            continue
+        if game.get("tracking_eligible") is False:
+            continue
+        upcoming.append(game)
+
+    required = math.ceil(len(upcoming) * 0.5) if upcoming else 0
+    spread_count = sum(nested(game, spread_path) is not None for game in upcoming)
+    total_count = sum(nested(game, total_path) is not None for game in upcoming)
+    return {
+        "eligible_games": len(upcoming),
+        "required_games": required,
+        "spread_games": spread_count,
+        "total_games": total_count,
+        "spread_coverage_ok": spread_count >= required,
+        "total_coverage_ok": total_count >= required,
+    }
+
+
 def audit(root: Path, now: datetime) -> dict:
     assets: dict[str, dict] = {}
     findings: list[dict] = []
@@ -182,6 +217,28 @@ def audit(root: Path, now: datetime) -> dict:
 
     weekend = now.weekday() in {3, 4, 5, 6}
     projections = check("cfb_projections", "data/projections.json", ["meta.generated"], 10 if weekend else 30, {"games": ("games", 800)})
+    cfb_market = upcoming_market_coverage(
+        projections,
+        now,
+        spread_path="market.home_spread",
+        total_path="market.total",
+    )
+    assets["cfb_projections"]["market_coverage"] = cfb_market
+    market_failures = [
+        label
+        for label in ("spread_coverage_ok", "total_coverage_ok")
+        if not cfb_market[label]
+    ]
+    if market_failures:
+        assets["cfb_projections"]["status"] = "fail"
+        assets["cfb_projections"]["checks"].update(
+            {label: False for label in market_failures}
+        )
+        findings.append({
+            "severity": "critical",
+            "dataset": "cfb_projections",
+            "failed_checks": market_failures,
+        })
     live_window = in_scoreboard_live_window(projections, now)
     metrics = check("cfb_team_metrics", "data/cfb_metrics.json", ["meta.generated"], 192, {"teams": ("teams", 130)})
     advanced = check("cfb_advanced_metrics", "data/advanced_metrics.json", ["meta.generated"], 192, {"teams": ("teams", 130)})
@@ -221,7 +278,29 @@ def audit(root: Path, now: datetime) -> dict:
         findings.append({"severity": "critical", "dataset": "cfb_postgame", "failed_checks": ["finals_aligned"]})
     check("cfb_signal_records", "data/reports/signal_report.json", ["generated_at_utc"], settlement_slo, {"signals": ("signals", 1)})
     check("cfb_availability", "data/roster_notes.json", ["meta.generated_at_utc"], 2.5 if weekend else 14, {"source_health": ("meta.source_health", 6)})
-    check("cbb_projection_board", "data/cbb/projection_board.json", ["meta.generated_at_utc"], 15, {"games": ("games", 300)})
+    cbb_board = check("cbb_projection_board", "data/cbb/projection_board.json", ["meta.generated_at_utc"], 15, {"games": ("games", 300)})
+    cbb_market = upcoming_market_coverage(
+        cbb_board,
+        now,
+        spread_path="market.consensus_home_spread",
+        total_path="market.consensus_total",
+    )
+    assets["cbb_projection_board"]["market_coverage"] = cbb_market
+    cbb_market_failures = [
+        label
+        for label in ("spread_coverage_ok", "total_coverage_ok")
+        if not cbb_market[label]
+    ]
+    if cbb_market_failures:
+        assets["cbb_projection_board"]["status"] = "fail"
+        assets["cbb_projection_board"]["checks"].update(
+            {label: False for label in cbb_market_failures}
+        )
+        findings.append({
+            "severity": "critical",
+            "dataset": "cbb_projection_board",
+            "failed_checks": cbb_market_failures,
+        })
     check("cbb_team_profiles", "data/cbb/team_profiles.json", ["meta.generated_at_utc"], 15, {"teams": ("teams", 350)})
     check("cbb_platform_health", "data/cbb/platform_health.json", ["meta.generated_at_utc"], 15, {"checks": ("checks", 10)})
     check("cbb_market_contract", "data/cbb/market_contract.json", ["meta.generated_at_utc"], 15, {"games": ("games", 300)})
