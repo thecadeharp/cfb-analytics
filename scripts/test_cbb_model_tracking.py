@@ -48,6 +48,7 @@ class CbbModelTrackingTests(unittest.TestCase):
         self.assertEqual(payload["summary"]["totals"]["average_clv"], 1.0)
         self.assertEqual(payload["totals_by_signal"]["total_lean"]["wins"], 3)
         self.assertEqual(payload["summary"]["projection_accuracy"]["games"], 3)
+        self.assertNotIn("notable_spread", payload["summary"])
         self.assertEqual(payload["by_week"][0]["finals"], 3)
         self.assertEqual(payload["meta"]["reporting_timezone"], "America/New_York")
         self.assertEqual(payload["game_results"][0]["game_date_et"], "2027-01-09")

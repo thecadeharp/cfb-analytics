@@ -412,8 +412,11 @@
 
   function performanceStats(rows) {
     const ats = record(rows);
-    const playRows = rows.filter(row => canonicalSignalName(row.signal) === "PLAY");
-    const play = record(playRows);
+    const spreadClvRows = rows.filter(row => hasValue(row.clv_points));
+    const spreadClv = mean(spreadClvRows, "clv_points");
+    const spreadBeatDecisions = spreadClvRows.filter(row => Math.abs(Number(row.clv_points)) > 0.001);
+    const spreadBeatWins = spreadBeatDecisions.filter(row => Number(row.clv_points) > 0).length;
+    const spreadBeatPct = spreadBeatDecisions.length ? 100 * spreadBeatWins / spreadBeatDecisions.length : null;
     const totalRows = rows.filter(row => row.total_tier && ["W", "L", "P"].includes(String(row.total_result || "").toUpperCase()));
     const totals = record(totalRows, "total_result");
     const totalClvRows = totalRows.filter(row => hasValue(row.total_clv_points));
@@ -431,10 +434,12 @@
     const postgame = rows.filter(row => gameData(row.game_key)).length;
     const su = { wins:winnerCorrect, losses:Math.max(0, winnerRows.length - winnerCorrect), pushes:0, decisions:winnerRows.length,
       pct:winnerRows.length ? 100 * winnerCorrect / winnerRows.length : null };
-    return { rows, ats, play, totals, totalRows, totalClv, totalClvSamples:totalClvRows.length,
+    return { rows, ats, spreadClv, spreadClvSamples:spreadClvRows.length,
+      spreadBeatPct, spreadBeatDecisions:spreadBeatDecisions.length,
+      totals, totalRows, totalClv, totalClvSamples:totalClvRows.length,
       totalBeatPct, totalBeatDecisions:totalBeatDecisions.length,
       su, winnerCorrect, winnerDecisions:winnerRows.length, postgame,
-      error:mean(rows, "public_abs_error") ?? mean(rows, "model_abs_error"), clv:mean(rows, "clv_points") };
+      error:mean(rows, "public_abs_error") ?? mean(rows, "model_abs_error"), clv:spreadClv };
   }
 
   function perfStat(label, value, sub = "") {
@@ -488,7 +493,7 @@
         ${perfStat("Tracked Totals",recordText(selected.totals),hasValue(selected.totals.pct) ? `${selected.totals.pct.toFixed(1)}%` : "No decisions")}
         ${perfStat("Totals Average CLV",hasValue(selected.totalClv) ? formatSigned(selected.totalClv,1," pts") : "—",`${selected.totalClvSamples} tracked totals with a close`)}
         ${perfStat("Totals Beat Close",hasValue(selected.totalBeatPct) ? `${selected.totalBeatPct.toFixed(1)}%` : "—",`${selected.totalBeatDecisions} directional decisions`)}
-        ${perfStat("Notable Tier ATS",recordText(selected.play),hasValue(selected.play.pct) ? `${selected.play.pct.toFixed(1)}%` : "No decisions")}
+        ${perfStat("ATS Beat Close",hasValue(selected.spreadBeatPct) ? `${selected.spreadBeatPct.toFixed(1)}%` : "—",`${selected.spreadBeatDecisions} directional spread decisions`)}
         ${perfStat("Average Margin Error",hasValue(selected.error) ? `${selected.error.toFixed(1)} pts` : "—","Absolute THI projection error")}
         ${perfStat("Average CLV",hasValue(selected.clv) ? formatSigned(selected.clv,1," pts") : "—","Preferred-side closing value")}
       </div>
@@ -499,7 +504,8 @@
         ${perfStat("Totals YTD",recordText(ytd.totals),hasValue(ytd.totals.pct) ? `${ytd.totals.pct.toFixed(1)}%` : "No decisions")}
         ${perfStat("Totals CLV YTD",hasValue(ytd.totalClv) ? formatSigned(ytd.totalClv,1," pts") : "—",`${ytd.totalClvSamples} tracked totals with a close`)}
         ${perfStat("Totals Beat Close YTD",hasValue(ytd.totalBeatPct) ? `${ytd.totalBeatPct.toFixed(1)}%` : "—",`${ytd.totalBeatDecisions} directional decisions`)}
-        ${perfStat("Play Tier YTD",recordText(ytd.play),hasValue(ytd.play.pct) ? `${ytd.play.pct.toFixed(1)}%` : "No decisions")}
+        ${perfStat("ATS CLV YTD",hasValue(ytd.spreadClv) ? formatSigned(ytd.spreadClv,1," pts") : "—",`${ytd.spreadClvSamples} spread decisions with a close`)}
+        ${perfStat("ATS Beat Close YTD",hasValue(ytd.spreadBeatPct) ? `${ytd.spreadBeatPct.toFixed(1)}%` : "—",`${ytd.spreadBeatDecisions} directional spread decisions`)}
       </div>
       <div class="perf-week-table"><div class="perf-ytd-title">Weekly Ledger</div><div class="perf-table-wrap"><table><thead><tr><th>Week</th><th>Finals</th><th>SU</th><th>ATS</th><th>Totals</th><th>Total CLV</th><th>Total Beat Close</th><th>Margin Error</th><th>Spread CLV</th></tr></thead><tbody>${weeklyBody}</tbody></table></div></div>
       <div class="perf-ytd"><div class="perf-ytd-title">Season-to-Date · Every Signal and Testing Key</div>

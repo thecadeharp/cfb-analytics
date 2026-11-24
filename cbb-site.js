@@ -2698,7 +2698,6 @@
     const totals = performance.totals || {};
     const straightUp = performance.straight_up || {};
     const accuracy = performance.projection_accuracy || {};
-    const notable = performance.notable_spread || {};
     const record = row => Number(row?.games) ? `${integer(row.wins)}-${integer(row.losses)}-${integer(row.pushes)}` : "—";
     const performanceCard = (label, value, note) => `<article class="cbb-panel cbb-model-card"><div class="cbb-label">${escapeHtml(label)}</div><div class="cbb-model-value">${escapeHtml(value)}</div><div class="cbb-model-sub">${escapeHtml(note)}</div></article>`;
     const periods = [["SEASON","Season"],["THIS_MONTH","This Month"],["THIS_WEEK","This Week"],["LAST_WEEK","Last Week"],["LAST_7","Last 7 Days"],["TODAY","Today"],["YESTERDAY","Yesterday"],["CUSTOM","Custom"]];
@@ -2733,7 +2732,7 @@
           ${performanceCard("Tracked totals", record(totals), totals.hit_rate == null ? "No testing keys" : `${pct(totals.hit_rate)} on 4+ point keys`)}
           ${performanceCard("Totals average CLV", totals.average_clv == null ? "—" : number(totals.average_clv,2,true), `${integer(totals.closing_line_games)} decisions with a close`)}
           ${performanceCard("Totals beat close", totals.beat_close_pct == null ? "—" : pct(totals.beat_close_pct), "Directional closing-line decisions")}
-          ${performanceCard("Notable tier ATS", record(notable), notable.hit_rate == null ? "Play, Material and Outlier" : `${pct(notable.hit_rate)} ATS`)}
+          ${performanceCard("ATS beat close", spread.beat_close_pct == null ? "—" : pct(spread.beat_close_pct), `${integer(spread.closing_line_games)} spread decisions with a close`)}
           ${performanceCard("Average margin error", accuracy.margin_mae == null ? "—" : `${number(accuracy.margin_mae,1)} pts`, "Absolute THI projection error")}
           ${performanceCard("Average CLV", spread.average_clv == null ? "—" : number(spread.average_clv,2,true), `${integer(spread.closing_line_games)} spread decisions with a close`)}
         </div>
@@ -2744,7 +2743,8 @@
           ${performanceCard("Totals YTD", record(summary.totals), summary.totals?.hit_rate == null ? "No keys" : pct(summary.totals.hit_rate))}
           ${performanceCard("Totals CLV YTD", summary.totals?.average_clv == null ? "—" : number(summary.totals.average_clv,2,true), "Average closing-line value")}
           ${performanceCard("Totals beat close YTD", summary.totals?.beat_close_pct == null ? "—" : pct(summary.totals.beat_close_pct), "Closing-line decisions")}
-          ${performanceCard("Play tier YTD", record(tracking.spread_by_signal?.play), tracking.spread_by_signal?.play?.hit_rate == null ? "No decisions" : pct(tracking.spread_by_signal.play.hit_rate))}
+          ${performanceCard("ATS CLV YTD", summary.spread?.average_clv == null ? "—" : number(summary.spread.average_clv,2,true), "Average closing-line value")}
+          ${performanceCard("ATS beat close YTD", summary.spread?.beat_close_pct == null ? "—" : pct(summary.spread.beat_close_pct), "Closing-line decisions")}
         </div>
         ${cbbModelLabMarkup()}
         <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Daily Breakdown · Selected Period</div><div class="cbb-table-wrap"><table class="cbb-table cbb-tracking-table"><thead><tr><th>Date</th><th>Finals</th><th>SU</th><th>ATS</th><th>Totals</th><th>Total CLV</th><th>Total Beat Close</th><th>Margin Error</th><th>Spread CLV</th></tr></thead><tbody>${dailyRows || `<tr><td colspan="9" class="cbb-empty">No completed games fall inside this calendar window.</td></tr>`}</tbody></table></div></div>
