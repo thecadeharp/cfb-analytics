@@ -42,8 +42,12 @@ METRICS_PATH = ROOT / "data" / "cfb_metrics.json"
 OUTPUT_PATH = ROOT / "data" / "game_conditions.json"
 
 USER_AGENT = "cfb-analytics-weather-engine-v1/1.0 (+https://github.com/thecadeharp/cfb-analytics)"
-TIMEOUT = 20
-FETCH_ATTEMPTS = 3
+# Weather is display context and must never monopolize the shared production
+# writer when an upstream provider is unavailable. Two bounded attempts still
+# absorb a transient failure while preserving the explicit zero-adjustment
+# fallback in time for the next scheduled refresh.
+TIMEOUT = 8
+FETCH_ATTEMPTS = 2
 RETRYABLE_HTTP_CODES = {429, 500, 502, 503, 504}
 
 # ---------------------------------------------------------------------------
