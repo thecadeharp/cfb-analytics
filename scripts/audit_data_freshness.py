@@ -168,6 +168,29 @@ def upcoming_market_coverage(
     }
 
 
+def live_status_freshness(
+    payload: dict,
+    now: datetime,
+    *,
+    timestamp_paths: list[str],
+    max_age_hours: float = 0.5,
+) -> dict[str, int | float | bool | None]:
+    """Require a tighter refresh contract while a board claims a game is live."""
+    live_games = sum(
+        str(game.get("status") or "").lower() == "live"
+        for game in payload.get("games") or []
+    )
+    stamp = first_time(payload, timestamp_paths)
+    age = (now - stamp).total_seconds() / 3600 if stamp else None
+    current = live_games == 0 or within_age(stamp, now, max_age_hours)
+    return {
+        "live_games": live_games,
+        "age_hours": round(age, 2) if age is not None else None,
+        "max_age_hours_when_live": max_age_hours,
+        "live_status_fresh": current,
+    }
+
+
 def audit(root: Path, now: datetime) -> dict:
     assets: dict[str, dict] = {}
     findings: list[dict] = []
@@ -300,6 +323,22 @@ def audit(root: Path, now: datetime) -> dict:
             "severity": "critical",
             "dataset": "cbb_projection_board",
             "failed_checks": cbb_market_failures,
+        })
+    cbb_live = live_status_freshness(
+        cbb_board,
+        now,
+        timestamp_paths=["meta.generated_at_utc"],
+    )
+    assets["cbb_projection_board"]["live_status"] = cbb_live
+    assets["cbb_projection_board"]["checks"]["live_status_fresh"] = bool(
+        cbb_live["live_status_fresh"]
+    )
+    if not cbb_live["live_status_fresh"]:
+        assets["cbb_projection_board"]["status"] = "fail"
+        findings.append({
+            "severity": "critical",
+            "dataset": "cbb_projection_board",
+            "failed_checks": ["live_status_fresh"],
         })
     check("cbb_team_profiles", "data/cbb/team_profiles.json", ["meta.generated_at_utc"], 15, {"teams": ("teams", 350)})
     check("cbb_platform_health", "data/cbb/platform_health.json", ["meta.generated_at_utc"], 15, {"checks": ("checks", 10)})

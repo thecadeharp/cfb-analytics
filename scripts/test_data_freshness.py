@@ -7,6 +7,7 @@ from scripts.audit_data_freshness import (
     acceptable_completed_weeks,
     current_cfb_week,
     in_scoreboard_live_window,
+    live_status_freshness,
     parse_time,
     postgame_covers_results,
     required_checks_pass,
@@ -16,6 +17,30 @@ from scripts.audit_data_freshness import (
 
 
 class DataFreshnessAuditTests(unittest.TestCase):
+    def test_live_cbb_status_requires_thirty_minute_freshness(self):
+        now = datetime(2026, 11, 24, 13, tzinfo=timezone.utc)
+        stale = live_status_freshness(
+            {
+                "meta": {"generated_at_utc": "2026-11-24T12:00:00Z"},
+                "games": [{"status": "live"}],
+            },
+            now,
+            timestamp_paths=["meta.generated_at_utc"],
+        )
+        self.assertFalse(stale["live_status_fresh"])
+
+    def test_final_only_cbb_board_does_not_require_live_cadence(self):
+        now = datetime(2026, 11, 24, 13, tzinfo=timezone.utc)
+        status = live_status_freshness(
+            {
+                "meta": {"generated_at_utc": "2026-11-24T01:00:00Z"},
+                "games": [{"status": "final"}],
+            },
+            now,
+            timestamp_paths=["meta.generated_at_utc"],
+        )
+        self.assertTrue(status["live_status_fresh"])
+
     def test_near_term_market_coverage_requires_half_the_slate(self):
         now = datetime(2026, 11, 24, 12, tzinfo=timezone.utc)
         games = []
