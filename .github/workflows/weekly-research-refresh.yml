@@ -141,7 +141,8 @@ jobs:
           if [ "$OBSERVED_WEEK" = "$RESOLVED_WEEK" ] && [ "$METRICS_WEEK" = "$RESOLVED_WEEK" ]; then
             python scripts/build_cfb_thi_index.py
           else
-            python scripts/build_cfb_thi_index.py --allow-score-only-fallback
+            echo "THI Index deferred: metrics Week $METRICS_WEEK, observed Week $OBSERVED_WEEK, predictive Week $RESOLVED_WEEK."
+            echo "The existing index remains published until all three verified inputs align."
           fi
 
       - name: Verify output and isolation contracts

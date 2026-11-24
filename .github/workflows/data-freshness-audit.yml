@@ -83,7 +83,10 @@ jobs:
             echo "Dispatched live-score recovery."
           fi
 
-          if grep -Eq '^cfb_projections$' /tmp/thi-critical-datasets.txt; then
+          if grep -Eq '^(cfb_team_metrics|cfb_season_outlook|metrics_through_week)$' /tmp/thi-critical-datasets.txt; then
+            dispatch_recovery weekly.yml
+            echo "Dispatched core CFB analytics recovery."
+          elif grep -Eq '^cfb_projections$' /tmp/thi-critical-datasets.txt; then
             dispatch_recovery refresh-projections-no-cfbd.yml
             echo "Dispatched projection-board recovery."
           fi
@@ -112,6 +115,9 @@ jobs:
               "cfb_scores",
               "cfb_live_scores",
               "cfb_projections",
+              "cfb_team_metrics",
+              "cfb_season_outlook",
+              "metrics_through_week",
               "cfb_availability",
               "players_through_week",
               "cbb_projection_board",

@@ -31,6 +31,7 @@ import time
 import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import requests
 
@@ -989,6 +990,25 @@ def fetch_schedule(valid_teams, lookup):
     }
 
 
+def kickoff_local_date(value, timezone_name="America/New_York"):
+    """Return the local calendar date for an ISO kickoff timestamp.
+
+    CFBD timestamps are UTC. Rivalry-week evening kickoffs can therefore fall
+    on the following UTC date even though the game is still played on the
+    expected local Saturday.
+    """
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return ""
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(ZoneInfo(timezone_name)).date().isoformat()
+
+
 def verify_known_schedule_errors(schedule):
     bad = []
 
@@ -996,13 +1016,14 @@ def verify_known_schedule_errors(schedule):
         home = game.get("home_team")
         away = game.get("away_team")
         date = str(game.get("start_date", ""))
+        local_date = kickoff_local_date(date)
 
         if {home, away} == {"Indiana", "Purdue"}:
-            if not date.startswith("2026-11-28"):
+            if local_date != "2026-11-28":
                 bad.append(("Indiana/Purdue", date))
 
         if {home, away} == {"Florida", "South Carolina"}:
-            if not date.startswith("2026-10-10"):
+            if local_date != "2026-10-10":
                 bad.append(("Florida/South Carolina", date))
 
         if {home, away} == {"Texas", "Oklahoma"}:
