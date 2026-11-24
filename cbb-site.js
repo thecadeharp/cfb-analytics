@@ -318,10 +318,100 @@
     return state.loading;
   }
 
+  function easternScoreboardDate(offsetDays = 0) {
+    const shifted = new Date(Date.now() + offsetDays * 86400000);
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/New_York",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(shifted).reduce((result, part) => {
+      result[part.type] = part.value;
+      return result;
+    }, {});
+    return `${parts.year}${parts.month}${parts.day}`;
+  }
+
+  function easternHour() {
+    return Number(new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/New_York",
+      hour: "2-digit",
+      hourCycle: "h23"
+    }).format(new Date()));
+  }
+
+  async function refreshDirectCbbScores() {
+    if (state.sport !== "cbb" || !state.loaded || document.hidden) return false;
+    const dates = easternHour() < 5
+      ? [easternScoreboardDate(-1), easternScoreboardDate(0)]
+      : [easternScoreboardDate(0)];
+    const payloads = await Promise.all(dates.map(async date => {
+      const url = `https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard?dates=${date}&groups=50&limit=500`;
+      const response = await fetch(url, { cache: "no-store" });
+      if (!response.ok) throw new Error(`ESPN CBB scoreboard returned ${response.status}`);
+      return response.json();
+    }));
+
+    const profiles = Array.isArray(state.data?.profiles?.teams) ? state.data.profiles.teams : [];
+    const espnToCbb = new Map(profiles
+      .filter(team => team?.espn_id != null && team?.team_id != null)
+      .map(team => [String(team.espn_id), String(team.team_id)]));
+    const games = state.data?.projectionBoard?.games || [];
+    let changed = false;
+
+    payloads.flatMap(payload => payload?.events || []).forEach(event => {
+      const competition = event?.competitions?.[0] || {};
+      const competitors = competition?.competitors || [];
+      const providerState = String(event?.status?.type?.state || "").toLowerCase();
+      if (!["in", "post"].includes(providerState) || competitors.length < 2) return;
+      const providerIds = competitors
+        .map(row => espnToCbb.get(String(row?.team?.id || "")))
+        .filter(Boolean);
+      if (providerIds.length !== 2) return;
+      const eventStart = new Date(event?.date || competition?.date || "").getTime();
+      const candidates = games.filter(game => {
+        const boardIds = [String(game?.away?.team_id || ""), String(game?.home?.team_id || "")];
+        const sameTeams = providerIds.every(id => boardIds.includes(id));
+        const boardStart = new Date(game?.start_date || "").getTime();
+        return sameTeams && Number.isFinite(eventStart) && Number.isFinite(boardStart) &&
+          Math.abs(eventStart - boardStart) <= 18 * 60 * 60 * 1000;
+      });
+      if (candidates.length !== 1) return;
+      const game = candidates[0];
+      const scoreFor = teamId => {
+        const profile = profiles.find(team => String(team?.team_id) === String(teamId));
+        const competitor = competitors.find(row => String(row?.team?.id || "") === String(profile?.espn_id || ""));
+        const score = Number(competitor?.score);
+        return Number.isFinite(score) ? score : null;
+      };
+      const nextStatus = providerState === "post" ? "final" : "live";
+      const awayScore = scoreFor(game?.away?.team_id);
+      const homeScore = scoreFor(game?.home?.team_id);
+      if (awayScore === null || homeScore === null) return;
+      const detail = event?.status?.type?.shortDetail || event?.status?.type?.detail || "";
+      if (game.status !== nextStatus || Number(game.away?.score) !== awayScore || Number(game.home?.score) !== homeScore || game.live?.clock !== detail) {
+        game.status = nextStatus;
+        game.away.score = awayScore;
+        game.home.score = homeScore;
+        game.live = {
+          ...(game.live || {}),
+          clock: detail,
+          source: "ESPN public scoreboard",
+          source_updated_at: new Date().toISOString()
+        };
+        changed = true;
+      }
+    });
+
+    if (changed) renderProjections();
+    return changed;
+  }
+
   function startScorePolling() {
     if (scorePollTimer) return;
     scorePollTimer = window.setInterval(async () => {
       if (state.sport !== "cbb" || !state.loaded || document.hidden) return;
+      try { await refreshDirectCbbScores(); } catch (_error) {}
       const oldBoardVersion = state.cacheManifest?.assets?.[PATHS.projectionBoard]?.version;
       const oldTrackingVersion = state.cacheManifest?.assets?.[PATHS.tracking]?.version;
       try {
@@ -388,7 +478,7 @@
       if (status) status.textContent = "CBB · 2027 EARLY SEASON";
       document.title = "THI College Basketball";
       showCbbView(state.cbbView, false);
-      loadData().catch(() => {});
+      loadData().then(() => refreshDirectCbbScores()).catch(() => {});
     } else {
       closeTeamDetail();
       document.body.classList.remove("thi-sport-cbb");
