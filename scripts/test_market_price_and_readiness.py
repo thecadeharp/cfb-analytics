@@ -81,8 +81,8 @@ class PriceContractTest(unittest.TestCase):
         raw = {
             "home_team": "Home",
             "bookmakers": [
-                {"key": "draftkings", "title": "DraftKings", "markets": [{"key": "spreads", "outcomes": [{"name": "Home", "point": -3.5, "price": -110}, {"name": "Away", "point": 3.5, "price": -110}]}]},
-                {"key": "pinnacle", "title": "Pinnacle", "markets": [{"key": "spreads", "outcomes": [{"name": "Home", "point": -3, "price": -105}, {"name": "Away", "point": 3, "price": -115}]}]},
+                {"key": "draftkings", "title": "DraftKings", "markets": [{"key": "spreads", "outcomes": [{"name": "Home", "point": -3.5, "price": -110}, {"name": "Away", "point": 3.5, "price": -110}]}, {"key": "h2h", "outcomes": [{"name": "Home", "price": -170}, {"name": "Away", "price": 145}]}]},
+                {"key": "pinnacle", "title": "Pinnacle", "markets": [{"key": "spreads", "outcomes": [{"name": "Home", "point": -3, "price": -105}, {"name": "Away", "point": 3, "price": -115}]}, {"key": "h2h", "outcomes": [{"name": "Home", "price": -165}, {"name": "Away", "price": 148}]}]},
             ],
         }
         market = extract_market(raw)
@@ -90,10 +90,14 @@ class PriceContractTest(unittest.TestCase):
         self.assertEqual(market["reference_spread"]["home_price"], -105)
         self.assertEqual(market["reference_spread"]["away_price"], -115)
         self.assertAlmostEqual(sum(market["reference_spread"]["no_vig_probability"].values()), 1.0)
+        self.assertEqual(market["reference_moneyline"]["bookmaker_key"], "pinnacle")
+        self.assertEqual(market["reference_moneyline"]["home_price"], -165)
+        self.assertAlmostEqual(sum(market["reference_moneyline"]["no_vig_probability"].values()), 1.0)
         self.assertEqual(len(market["book_lines"]), 2)
         pinnacle = next(row for row in market["book_lines"] if row["bookmaker_key"] == "pinnacle")
         self.assertEqual(pinnacle["spread"]["home_spread"], -3)
         self.assertEqual(pinnacle["spread"]["away_price"], -115)
+        self.assertEqual(pinnacle["moneyline"]["away_price"], 148)
 
     def test_incomplete_cfb_quote_is_not_used_for_validation(self):
         raw = {"home_team": "Home", "bookmakers": [{"key": "pinnacle", "markets": [{"key": "spreads", "outcomes": [{"name": "Home", "point": -3, "price": -105}]}]}]}
@@ -111,6 +115,17 @@ class PriceContractTest(unittest.TestCase):
         self.assertEqual(len(market["book_lines"]), 2)
         self.assertEqual(market["book_lines"][1]["provider"], "Pinnacle")
         self.assertEqual(market["book_lines"][1]["spread"], -3.5)
+
+    def test_cbb_odds_api_prices_support_two_sided_spread_validation(self):
+        market = market_summary([
+            {"provider": "DraftKings", "spread": -4, "homeSpreadPrice": -110, "awaySpreadPrice": -110, "homeMoneyline": -180, "awayMoneyline": 155},
+            {"provider": "Pinnacle", "spread": -3.5, "homeSpreadPrice": -105, "awaySpreadPrice": -115, "homeMoneyline": -172, "awayMoneyline": 151},
+        ])
+        self.assertEqual(market["reference_spread"]["provider"], "Pinnacle")
+        self.assertEqual(market["reference_spread"]["home_price"], -105)
+        self.assertEqual(market["reference_spread"]["away_price"], -115)
+        self.assertAlmostEqual(sum(market["reference_spread"]["no_vig_probability"].values()), 1.0)
+        self.assertEqual(market["spread_price_status"], "available")
 
     def test_legacy_closing_is_eligible_for_one_price_upgrade(self):
         with tempfile.TemporaryDirectory() as directory:

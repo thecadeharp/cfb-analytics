@@ -424,6 +424,12 @@
     const totalBeatDecisions = totalClvRows.filter(row => Math.abs(Number(row.total_clv_points)) > 0.001);
     const totalBeatWins = totalBeatDecisions.filter(row => Number(row.total_clv_points) > 0).length;
     const totalBeatPct = totalBeatDecisions.length ? 100 * totalBeatWins / totalBeatDecisions.length : null;
+    const moneylineRows = rows.filter(row => row.moneyline_tracking_eligible && ["W", "L", "P"].includes(String(row.moneyline_result || "").toUpperCase()));
+    const moneylines = record(moneylineRows, "moneyline_result");
+    const moneylineRoi = moneylineRows.reduce((sum,row) => sum + (hasValue(row.moneyline_roi_units) ? Number(row.moneyline_roi_units) : 0), 0);
+    const moneylineClvRows = moneylineRows.filter(row => hasValue(row.moneyline_clv_probability_points));
+    const moneylineClv = mean(moneylineClvRows, "moneyline_clv_probability_points");
+    const moneylineBeatPct = moneylineClvRows.length ? 100 * moneylineClvRows.filter(row => Number(row.moneyline_clv_probability_points) > 0).length / moneylineClvRows.length : null;
     const winnerRows = rows.filter(row => hasValue(row.actual_home_margin) && hasValue(row.public_home_spread ?? row.model_home_spread) && Math.abs(Number(row.public_home_spread ?? row.model_home_spread)) > 0.001);
     let winnerCorrect = 0;
     winnerRows.forEach(row => {
@@ -438,6 +444,8 @@
       spreadBeatPct, spreadBeatDecisions:spreadBeatDecisions.length,
       totals, totalRows, totalClv, totalClvSamples:totalClvRows.length,
       totalBeatPct, totalBeatDecisions:totalBeatDecisions.length,
+      moneylines, moneylineRows, moneylineRoi, moneylineClv,
+      moneylineClvSamples:moneylineClvRows.length, moneylineBeatPct,
       su, winnerCorrect, winnerDecisions:winnerRows.length, postgame,
       error:mean(rows, "public_abs_error") ?? mean(rows, "model_abs_error"), clv:spreadClv };
   }
@@ -468,12 +476,7 @@
   function scorecardMarkup(period, selectedRows, ytdRows, excludedRows = []) {
     const selected = performanceStats(selectedRows);
     const ytd = performanceStats(ytdRows);
-    const body = signalRows(ytdRows).map(item => `<tr>
-      <td>${escapeHtml(item.label)}</td><td>${item.sample}</td><td>${escapeHtml(recordText(item.rec))}</td>
-      <td>${hasValue(item.rec.pct) ? `${Number(item.rec.pct).toFixed(1)}%` : "—"}</td>
-      <td>${hasValue(item.clv) ? formatSigned(item.clv,1," pts") : "—"}</td>
-      <td>${hasValue(item.beatPct) ? `${Number(item.beatPct).toFixed(1)}%` : "—"}</td>
-      <td><span class="perf-confidence">${escapeHtml(item.confidence)}</span></td></tr>`).join("");
+    const moneylineBody = [...ytd.moneylineRows].sort((a,b) => String(b.start_date || "").localeCompare(String(a.start_date || ""))).slice(0,50).map(row => `<tr><td>${escapeHtml(String(row.start_date || "").slice(0,10))}</td><td>${escapeHtml(row.moneyline_team || "—")}</td><td>${formatSigned(row.moneyline_price,0)}</td><td>${hasValue(row.moneyline_model_probability) ? `${(100*Number(row.moneyline_model_probability)).toFixed(1)}%` : "—"}</td><td>${hasValue(row.moneyline_market_probability) ? `${(100*Number(row.moneyline_market_probability)).toFixed(1)}%` : "—"}</td><td>${formatSigned(row.moneyline_closing_price,0)}</td><td>${hasValue(row.moneyline_clv_probability_points) ? formatSigned(row.moneyline_clv_probability_points,2," pp") : "—"}</td><td>${hasValue(row.moneyline_roi_units) ? formatSigned(row.moneyline_roi_units,2,"u") : "—"}</td><td>${escapeHtml(row.moneyline_result || "—")}</td></tr>`).join("");
     const weeks = [...new Set(ytdRows.map(row => Number(row.week)).filter(Number.isFinite))].sort((a, b) => a - b);
     const weekLabel = period === "ALL" ? "Season to Date" : `Week ${period}`;
     const periodButtons = ["ALL", ...weeks].map(value => `<button type="button" class="perf-period ${String(value) === String(period) ? "active" : ""}" data-tracking-week="${value}">${value === "ALL" ? "Season" : `Week ${value}`}</button>`).join("");
@@ -496,6 +499,7 @@
         ${perfStat("ATS Beat Close",hasValue(selected.spreadBeatPct) ? `${selected.spreadBeatPct.toFixed(1)}%` : "—",`${selected.spreadBeatDecisions} directional spread decisions`)}
         ${perfStat("Average Margin Error",hasValue(selected.error) ? `${selected.error.toFixed(1)} pts` : "—","Absolute THI projection error")}
         ${perfStat("Average CLV",hasValue(selected.clv) ? formatSigned(selected.clv,1," pts") : "—","Preferred-side closing value")}
+        ${perfStat("Moneyline",recordText(selected.moneylines),selected.moneylineRows.length ? `${formatSigned(selected.moneylineRoi,2,"u")} return · separate ledger` : "Prospective sample accumulating")}
       </div>
       <div class="perf-section-label">Season-to-Date Records</div>
       <div class="perf-grid">
@@ -506,10 +510,12 @@
         ${perfStat("Totals Beat Close YTD",hasValue(ytd.totalBeatPct) ? `${ytd.totalBeatPct.toFixed(1)}%` : "—",`${ytd.totalBeatDecisions} directional decisions`)}
         ${perfStat("ATS CLV YTD",hasValue(ytd.spreadClv) ? formatSigned(ytd.spreadClv,1," pts") : "—",`${ytd.spreadClvSamples} spread decisions with a close`)}
         ${perfStat("ATS Beat Close YTD",hasValue(ytd.spreadBeatPct) ? `${ytd.spreadBeatPct.toFixed(1)}%` : "—",`${ytd.spreadBeatDecisions} directional spread decisions`)}
+        ${perfStat("Moneyline YTD",recordText(ytd.moneylines),ytd.moneylineRows.length ? `${formatSigned(ytd.moneylineRoi,2,"u")} · ${hasValue(ytd.moneylineClv) ? formatSigned(ytd.moneylineClv,2," pp CLV") : "close pending"}` : "Prospective sample accumulating")}
       </div>
       <div class="perf-week-table"><div class="perf-ytd-title">Weekly Ledger</div><div class="perf-table-wrap"><table><thead><tr><th>Week</th><th>Finals</th><th>SU</th><th>ATS</th><th>Totals</th><th>Total CLV</th><th>Total Beat Close</th><th>Margin Error</th><th>Spread CLV</th></tr></thead><tbody>${weeklyBody}</tbody></table></div></div>
-      <div class="perf-ytd"><div class="perf-ytd-title">Season-to-Date · Every Signal and Testing Key</div>
-        <div class="perf-table-wrap"><table><thead><tr><th>Signal / Key</th><th>Games</th><th>Record</th><th>Win %</th><th>Avg CLV</th><th>Beat Close</th><th>Confidence</th></tr></thead><tbody>${body}</tbody></table></div>
+      <div class="perf-ytd"><div class="perf-ytd-title">Prospective Moneyline Ledger · Separate from ATS</div>
+        <div class="perf-note" style="max-width:none;text-align:left;padding:0 2px 10px;">Only qualifying Relative Market Fit observations captured under the published policy after November 25, 2026. One-unit flat staking; CLV is the no-vig probability move toward the selected team.</div>
+        <div class="perf-table-wrap"><table><thead><tr><th>Date</th><th>Team</th><th>Price</th><th>THI %</th><th>Market %</th><th>Close</th><th>CLV</th><th>Return</th><th>Result</th></tr></thead><tbody>${moneylineBody || `<tr><td colspan="9">Prospective moneyline sample is accumulating.</td></tr>`}</tbody></table></div>
       </div></div>`;
   }
 
@@ -878,12 +884,14 @@
         settledDisplayByGame = new Map();
         grouped.forEach((gameRows, id) => {
           const official = officialTrackingResult(gameRows, id);
+          const officialMoneyline = [...gameRows].sort((a,b) => String(a.captured_at_utc || "").localeCompare(String(b.captured_at_utc || ""))).find(row => row.moneyline_tracking_eligible) || {};
           const closing = closingBySnapshot.get(String(official.snapshot_id || ""));
           const totalClv = totalClvPoints(official, closing);
           settledByGame.set(id, {
             ...official,
             closing_total: closing?.closing_total ?? official.closing_total ?? null,
             total_clv_points: Number.isFinite(totalClv) ? totalClv : null,
+            ...Object.fromEntries(Object.entries(officialMoneyline).filter(([key]) => key.startsWith("moneyline_"))),
           });
           const display = finalDisplayResult(gameRows);
           [id, display.result_game_id]

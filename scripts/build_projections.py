@@ -194,7 +194,7 @@ def load_frozen_pregame_markets(path=PROJECTION_SNAPSHOT_LEDGER_PATH):
                 continue
             reference_times = [
                 parse_utc((market.get(key) or {}).get("last_update"))
-                for key in ("reference_spread", "reference_total")
+                for key in ("reference_spread", "reference_total", "reference_moneyline")
             ]
             reference_times = [value for value in reference_times if value is not None]
             # A rematch collision can copy an earlier meeting's quote into a
@@ -225,6 +225,7 @@ def load_frozen_pregame_markets(path=PROJECTION_SNAPSHOT_LEDGER_PATH):
                 "total_outliers_removed": [],
                 "reference_spread": market.get("reference_spread"),
                 "reference_total": market.get("reference_total"),
+                "reference_moneyline": market.get("reference_moneyline"),
                 "book_lines": [],
                 "market_state": "frozen_pregame",
                 "frozen_at": row.get("captured_at_utc"),
@@ -643,7 +644,9 @@ def odds_get():
                 # Ten explicit books cost the same as one region while allowing
                 # THI to include the Novig and ProphetX exchange markets.
                 "bookmakers": ODDS_SCREEN_BOOKMAKERS,
-                "markets": "spreads,totals",
+                # One additional featured-market credit captures moneylines for
+                # the full slate; quota is charged per market, not per game.
+                "markets": "h2h,spreads,totals",
                 "oddsFormat": "american",
                 "dateFormat": "iso",
             },
@@ -1196,6 +1199,7 @@ def extract_market(raw_game):
     total_quotes = []
     reference_spreads = []
     reference_totals = []
+    reference_moneylines = []
     book_lines = []
 
     # A validation price must come from one named sportsbook with both sides
@@ -1217,6 +1221,7 @@ def extract_market(raw_game):
         total = None
         spread_detail = None
         total_detail = None
+        moneyline_detail = None
 
         for market in book.get("markets", []) or []:
             market_key = market.get("key")
@@ -1277,6 +1282,29 @@ def extract_market(raw_game):
                         }
                         reference_totals.append(total_detail)
 
+            elif market_key == "h2h":
+                outcomes = market.get("outcomes", []) or []
+                home_outcome = next(
+                    (row for row in outcomes if canonical_name(row.get("name")) == raw_home),
+                    None,
+                )
+                away_outcome = next(
+                    (row for row in outcomes if canonical_name(row.get("name")) != raw_home),
+                    None,
+                )
+                if home_outcome and away_outcome:
+                    home_price = optional_number(home_outcome.get("price"))
+                    away_price = optional_number(away_outcome.get("price"))
+                    if None not in (home_price, away_price) and abs(home_price) >= 100 and abs(away_price) >= 100:
+                        moneyline_detail = {
+                            "bookmaker": book_title,
+                            "bookmaker_key": book_key,
+                            "home_price": int(home_price),
+                            "away_price": int(away_price),
+                            "last_update": market.get("last_update") or book.get("last_update"),
+                        }
+                        reference_moneylines.append(moneyline_detail)
+
         if spread is not None:
             spread_quotes.append({
                 "bookmaker": book_title,
@@ -1291,13 +1319,14 @@ def extract_market(raw_game):
                 "value": total,
             })
 
-        if spread_detail or total_detail:
+        if spread_detail or total_detail or moneyline_detail:
             book_lines.append({
                 "bookmaker": book_title,
                 "bookmaker_key": book_key,
                 "last_update": book.get("last_update"),
                 "spread": spread_detail,
                 "total": total_detail,
+                "moneyline": moneyline_detail,
             })
 
     spread_consensus = market_consensus(
@@ -1347,6 +1376,10 @@ def extract_market(raw_game):
         choose_reference(reference_totals),
         "over_price", "under_price", "over", "under",
     )
+    reference_moneyline = add_no_vig_baseline(
+        choose_reference(reference_moneylines),
+        "home_price", "away_price", "home", "away",
+    )
 
     return {
         "spread": spread_consensus["value"],
@@ -1376,6 +1409,7 @@ def extract_market(raw_game):
         ],
         "reference_spread": reference_spread,
         "reference_total": reference_total,
+        "reference_moneyline": reference_moneyline,
         "book_lines": book_lines,
     }
 
@@ -1445,6 +1479,7 @@ def fetch_odds(
             "total_outliers_removed": market["total_outliers_removed"],
             "reference_spread": market["reference_spread"],
             "reference_total": market["reference_total"],
+            "reference_moneyline": market["reference_moneyline"],
             "book_lines": market["book_lines"],
         })
 
@@ -2102,6 +2137,7 @@ def market_payload(market):
             "total_outliers_removed": [],
             "reference_spread": None,
             "reference_total": None,
+            "reference_moneyline": None,
             "book_lines": [],
         }
 
@@ -2122,6 +2158,7 @@ def market_payload(market):
         ),
         "reference_spread": market.get("reference_spread"),
         "reference_total": market.get("reference_total"),
+        "reference_moneyline": market.get("reference_moneyline"),
         "book_lines": market.get("book_lines", []),
     }
 

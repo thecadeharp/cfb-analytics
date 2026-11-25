@@ -556,6 +556,65 @@ def calc_clv(snapshot, closing):
     return None
 
 
+def moneyline_decision(snapshot, closing, result):
+    """Grade only prospectively captured Relative Market Fit moneylines."""
+    market = snapshot.get("market_at_snapshot") or {}
+    if market.get("moneyline_policy_version") != "relative-market-fit-v1-2026-11-25":
+        return {}
+    if (as_int(market.get("moneyline_book_count")) or 0) < 2:
+        return {}
+    reference = market.get("reference_moneyline") or {}
+    model_home = as_number((snapshot.get("model") or {}).get("home_win_probability"))
+    if model_home is None:
+        return {}
+    model_home = model_home / 100 if model_home > 1 else model_home
+    side = "home" if model_home >= .5 else "away"
+    team = snapshot.get("home_team") if side == "home" else snapshot.get("away_team")
+    model_probability = model_home if side == "home" else 1 - model_home
+    price = as_number(reference.get(f"{side}_price"))
+    market_probability = as_number((reference.get("no_vig_probability") or {}).get(side))
+    model_spread = as_number((snapshot.get("model") or {}).get("home_spread"))
+    team_margin = (-model_spread if side == "home" else model_spread) if model_spread is not None else None
+    favorite_range = price is not None and -185 <= price <= -100
+    dog_range = price is not None and 100 <= price <= 250 and model_probability >= .5 and team_margin is not None and team_margin >= 0
+    edge = model_probability - market_probability if market_probability is not None else None
+    if not (favorite_range or dog_range) or edge is None or edge < .03:
+        return {}
+    won = result is not None and (
+        result["home_points"] > result["away_points"] if side == "home"
+        else result["away_points"] > result["home_points"]
+    )
+    lost = result is not None and result["home_points"] != result["away_points"] and not won
+    grade = "W" if won else "L" if lost else "P" if result is not None else None
+    roi = None
+    if grade == "W":
+        roi = price / 100 if price > 0 else 100 / abs(price)
+    elif grade == "L":
+        roi = -1.0
+    elif grade == "P":
+        roi = 0.0
+    closing_reference = ((closing or {}).get("closing_market") or {}).get("reference_moneyline") or {}
+    closing_price = as_number(closing_reference.get(f"{side}_price"))
+    closing_probability = as_number((closing_reference.get("no_vig_probability") or {}).get(side))
+    clv_probability_points = (closing_probability - market_probability) * 100 if closing_probability is not None else None
+    return {
+        "moneyline_tracking_eligible": True,
+        "moneyline_team": team,
+        "moneyline_side": side,
+        "moneyline_price": int(price),
+        "moneyline_model_probability": round_or_none(model_probability, 5),
+        "moneyline_market_probability": round_or_none(market_probability, 5),
+        "moneyline_probability_edge": round_or_none(edge, 5),
+        "moneyline_result": grade,
+        "moneyline_roi_units": round_or_none(roi, 4),
+        "moneyline_closing_price": int(closing_price) if closing_price is not None else None,
+        "moneyline_closing_probability": round_or_none(closing_probability, 5),
+        "moneyline_clv_probability_points": round_or_none(clv_probability_points, 3),
+        "moneyline_beat_close": clv_probability_points > 0 if clv_probability_points is not None else None,
+        "moneyline_policy_version": "relative-market-fit-v1-2026-11-25",
+    }
+
+
 def rmse(values):
     if not values:
         return None
@@ -714,6 +773,8 @@ def main():
         execution_spread = market.get("execution_spread") or {}
         execution_total_quote = market.get("execution_total") or {}
 
+        moneyline = moneyline_decision(snapshot, closing, result)
+
         rows.append({
             "snapshot_id": snapshot.get("snapshot_id"),
             "game_key": key,
@@ -776,6 +837,7 @@ def main():
                 else None
             ),
             "result_settled": result is not None,
+            **moneyline,
         })
         if exclusion:
             rows[-1].update({
@@ -898,6 +960,11 @@ def main():
         "snapshot_home_spread", "snapshot_total", "snapshot_bookmaker",
         "snapshot_spread_price", "snapshot_total_price",
         "snapshot_consensus_home_spread", "snapshot_consensus_total",
+        "moneyline_tracking_eligible", "moneyline_team", "moneyline_side",
+        "moneyline_price", "moneyline_model_probability", "moneyline_market_probability",
+        "moneyline_probability_edge", "moneyline_result", "moneyline_roi_units",
+        "moneyline_closing_price", "moneyline_closing_probability",
+        "moneyline_clv_probability_points", "moneyline_beat_close", "moneyline_policy_version",
         "total_direction", "total_edge", "total_tier", "total_result",
         "actual_total", "total_projection_error",
         "closing_home_spread", "closing_captured_at_utc",

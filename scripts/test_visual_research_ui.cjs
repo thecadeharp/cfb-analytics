@@ -24,6 +24,6 @@ assert.match(cbb, /focusin/, "CBB charts must support keyboard focus");
 assert.match(cbb, /Click to open the team dossier/, "CBB points must retain dossier navigation");
 
 assert.match(html, /thi-visual-explorer\.js\?v=2026-chart-tooltips-v02/, "CFB cache key must publish the new interaction");
-assert.match(html, /cbb-site\.js\?v=2027-rating-charts-v01/, "CBB cache key must publish the new charts");
+assert.match(html, /cbb-site\.js\?v=2027-relative-market-fit-v01/, "CBB cache key must publish the new charts");
 
 console.log("visual research UI contract passed");

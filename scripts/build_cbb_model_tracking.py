@@ -35,6 +35,11 @@ def summarize(rows):
     clv=[finite(r.get("clv")) for r in rows]; clv=[v for v in clv if v is not None]; decisions=wins+losses
     return {"games":len(rows),"wins":wins,"losses":losses,"pushes":pushes,"hit_rate":round(100*wins/decisions,2) if decisions else None,"average_clv":round(sum(clv)/len(clv),3) if clv else None,"beat_close_pct":round(100*sum(v>0 for v in clv)/len(clv),2) if clv else None,"closing_line_games":len(clv)}
 
+def summarize_moneylines(rows):
+    base=summarize(rows); roi=[finite(r.get("roi_units")) for r in rows]; roi=[v for v in roi if v is not None]
+    base.update({"roi_units":round(sum(roi),3) if roi else None,"roi_pct":round(100*sum(roi)/len(roi),2) if roi else None})
+    return base
+
 def signal_tier(edge):
     value=abs(edge)
     return "outlier" if value>=10 else "material" if value>=7 else "play" if value>=4 else "small" if value>=2 else "aligned"
@@ -51,6 +56,26 @@ def market_points(game,history):
         return row
     return normalized(first), normalized(game.get("closing_market") or last or game.get("market") or {})
 
+def moneyline_market_points(game,history):
+    rows=[dict(row) for row in history_rows(history,game.get("game_id")) if isinstance(row,dict)]
+    current=dict(game.get("market") or {})
+    if current: rows.append(current)
+    eligible=[row for row in rows if row.get("moneyline_policy_version")=="relative-market-fit-v1-2026-11-25" and (finite(row.get("moneyline_book_count")) or 0)>=2 and isinstance(row.get("reference_moneyline"),dict)]
+    return (eligible[0],eligible[-1]) if eligible else ({},{})
+
+def moneyline_decision(game,first,close,actual):
+    projection=game.get("projection") or {}; raw=finite(projection.get("home_win_probability"))
+    if raw is None: return None
+    home_probability=raw/100 if raw>1 else raw; side="home" if home_probability>=.5 else "away"; probability=home_probability if side=="home" else 1-home_probability
+    reference=first.get("reference_moneyline") or {}; price=finite(reference.get(f"{side}_price")); market_probability=finite((reference.get("no_vig_probability") or {}).get(side)); margin=finite(projection.get("home_margin")); team_margin=margin if side=="home" else -margin if margin is not None else None
+    edge=probability-market_probability if market_probability is not None else None
+    favorite=price is not None and -185<=price<=-100; dog=price is not None and 100<=price<=250 and probability>=.5 and team_margin is not None and team_margin>=0
+    if not (favorite or dog) or edge is None or edge<.03: return None
+    won=actual>0 if side=="home" else actual<0; result="win" if won else "loss" if actual!=0 else "push"; roi=(price/100 if price>0 else 100/abs(price)) if won else -1 if actual!=0 else 0
+    closing=close.get("reference_moneyline") or {}; closing_price=finite(closing.get(f"{side}_price")); closing_probability=finite((closing.get("no_vig_probability") or {}).get(side)); clv=100*(closing_probability-market_probability) if closing_probability is not None else None
+    team=(game.get(side) or {}).get("team")
+    return {"pick_team":team,"side":side,"price":int(price),"model_probability":round(probability,5),"market_probability":round(market_probability,5),"probability_edge":round(edge,5),"closing_price":int(closing_price) if closing_price is not None else None,"closing_probability":round(closing_probability,5) if closing_probability is not None else None,"clv":round(clv,3) if clv is not None else None,"beat_close":clv>0 if clv is not None else None,"result":result,"roi_units":round(roi,4),"policy_version":"relative-market-fit-v1-2026-11-25"}
+
 def projection_accuracy(games):
     margins=[]; totals=[]; winners=[]
     for game in games:
@@ -66,7 +91,7 @@ def build_tracking(board,market_history=None):
     if version!=REQUIRED_BOARD_VERSION: raise RuntimeError(f"tracking requires {REQUIRED_BOARD_VERSION}")
     finals=[g for g in board.get("games") or [] if is_final(g) and g.get("projection")]
     dates=[parse_time(g.get("start_date")) for g in finals]; dates=[d for d in dates if d]; season_start=min(dates) if dates else None
-    spreads=[]; totals=[]; su=[]
+    spreads=[]; totals=[]; moneylines=[]; su=[]
     for game in finals:
         hs=finite((game.get("home") or {}).get("score")); aw=finite((game.get("away") or {}).get("score"))
         if hs is None or aw is None: continue
@@ -74,6 +99,8 @@ def build_tracking(board,market_history=None):
         common={"game_id":game.get("game_id"),"start_date":game.get("start_date"),**calendar_fields(game.get("start_date")),"week":week,"away_team":(game.get("away") or {}).get("team"),"home_team":(game.get("home") or {}).get("team"),"neutral_site":bool(game.get("neutral_site")),"final_score":f"{int(aw)}-{int(hs)}"}
         if pm is not None: su.append({**common,"result":"win" if ((pm>=0)==(actual>=0)) else "loss","margin_error":round(abs(actual-pm),3),"total_error":round(abs(actual_total-pt),3) if pt is not None else None})
         first,close=market_points(game,market_history); opening=finite(first.get("consensus_home_spread")); closing=finite(close.get("consensus_home_spread"))
+        ml_first,ml_close=moneyline_market_points(game,market_history); ml=moneyline_decision(game,ml_first,ml_close,actual)
+        if ml: moneylines.append({**common,**ml})
         if opening is not None and pm is not None:
             edge=pm+opening; pick_home=edge>=0; line=opening if pick_home else -opening; close_line=(closing if pick_home else -closing) if closing is not None else None; grade=(actual if pick_home else -actual)+line
             spreads.append({**common,"pick_team":((game.get("home") if pick_home else game.get("away")) or {}).get("team"),"pregame_line":round(line,2),"closing_line":round(close_line,2) if close_line is not None else None,"clv":round(line-close_line,2) if close_line is not None else None,"result":result_label(grade),"result_margin":round(grade,2),"signal_tier":signal_tier(edge),"confidence":p.get("signal_confidence"),"model_edge":round(abs(edge),2),"qualified_signal":bool(p.get("spread_signal_eligible"))})
@@ -83,7 +110,7 @@ def build_tracking(board,market_history=None):
             if tier:
                 over=edge>=0; grade=actual_total-opening_total; total_clv=((closing_total-opening_total) if over else (opening_total-closing_total)) if closing_total is not None else None
                 totals.append({**common,"pick":"over" if over else "under","pregame_total":round(opening_total,2),"closing_total":round(closing_total,2) if closing_total is not None else None,"clv":round(total_clv,2) if total_clv is not None else None,"result":result_label(grade if over else -grade),"result_margin":round(grade if over else -grade,2),"signal_tier":tier,"model_edge":round(abs(edge),2),"final_total":round(actual_total,2),"qualified_signal":bool(p.get("totals_signal_eligible"))})
-    spreads.sort(key=lambda r:str(r.get("start_date") or ""),reverse=True); totals.sort(key=lambda r:str(r.get("start_date") or ""),reverse=True)
+    spreads.sort(key=lambda r:str(r.get("start_date") or ""),reverse=True); totals.sort(key=lambda r:str(r.get("start_date") or ""),reverse=True); moneylines.sort(key=lambda r:str(r.get("start_date") or ""),reverse=True)
     weeks=defaultdict(lambda:{"su":[],"spread":[],"totals":[]})
     for name,rows in (("su",su),("spread",spreads),("totals",totals)):
         for row in rows: weeks[row["week"]][name].append(row)
@@ -94,7 +121,7 @@ def build_tracking(board,market_history=None):
     spread_groups=defaultdict(list); total_groups=defaultdict(list)
     for row in spreads: spread_groups[row["signal_tier"]].append(row)
     for row in totals: total_groups[row["signal_tier"]].append(row)
-    return {"meta":{"version":VERSION,"projection_board_version":version,"model_version":board.get("meta",{}).get("model_version"),"season":board.get("meta",{}).get("season"),"generated_at_utc":datetime.now(timezone.utc).isoformat().replace("+00:00","Z"),"reporting_timezone":"America/New_York","calendar_week_definition":"Monday through Sunday by scheduled game date in Eastern Time","grading_policy":"Every frozen projection with a valid pregame market is graded for accountability. Disagreement categories remain available as descriptive audit splits, not promoted recommendations.","totals_policy":"Total disagreements of 4+ points are tracked as testing keys; promotion eligibility remains separate."},"summary":{"final_games_with_frozen_projection":len(finals),"projection_accuracy":projection_accuracy(finals),"straight_up":summarize(su),"spread":summarize(spreads),"totals":summarize(totals)},"by_week":weekly,"spread_by_signal":{k:summarize(v) for k,v in sorted(spread_groups.items())},"totals_by_signal":{k:summarize(v) for k,v in sorted(total_groups.items())},"game_results":su,"spread_decisions":spreads,"total_decisions":totals}
+    return {"meta":{"version":VERSION,"projection_board_version":version,"model_version":board.get("meta",{}).get("model_version"),"season":board.get("meta",{}).get("season"),"generated_at_utc":datetime.now(timezone.utc).isoformat().replace("+00:00","Z"),"reporting_timezone":"America/New_York","calendar_week_definition":"Monday through Sunday by scheduled game date in Eastern Time","grading_policy":"Every frozen projection with a valid pregame market is graded for accountability. Disagreement labels are descriptive and are not promoted recommendation tiers.","moneyline_policy":"Prospective only from relative-market-fit-v1-2026-11-25: at least two complete books, 3 percentage-point no-vig edge, favorites -100 through -185, or model-favored underdogs +100 through +250.","totals_policy":"Total disagreements of 4+ points are tracked as testing keys; promotion eligibility remains separate."},"summary":{"final_games_with_frozen_projection":len(finals),"projection_accuracy":projection_accuracy(finals),"straight_up":summarize(su),"spread":summarize(spreads),"totals":summarize(totals),"moneyline":summarize_moneylines(moneylines)},"by_week":weekly,"spread_by_signal":{k:summarize(v) for k,v in sorted(spread_groups.items())},"totals_by_signal":{k:summarize(v) for k,v in sorted(total_groups.items())},"game_results":su,"spread_decisions":spreads,"total_decisions":totals,"moneyline_decisions":moneylines}
 
 def atomic_write(path,payload):
     path.parent.mkdir(parents=True,exist_ok=True)

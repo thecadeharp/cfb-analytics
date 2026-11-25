@@ -195,6 +195,7 @@ def main():
                 "bookmaker": market.get("bookmaker"),
                 "reference_spread": market.get("reference_spread"),
                 "reference_total": market.get("reference_total"),
+                "reference_moneyline": market.get("reference_moneyline"),
                 "price_policy": "single_book_two_sided_quote_only",
             },
             "signal_at_close": {

@@ -4501,6 +4501,126 @@ function cfbPersonnelMatchupMarkup(awayName, homeName) {
   </details>`;
 }
 
+const RELATIVE_MARKET_FIT_POLICY = Object.freeze({
+  minProbabilityEdge: 0.03,
+  favoriteFloor: -185,
+  favoriteCeiling: -100,
+  underdogFloor: 100,
+  underdogCeiling: 250,
+  minMoneylineBooks: 2,
+  maxQuoteAgeHours: 8,
+  marginSigma: 16,
+});
+
+function americanImpliedProbability(price) {
+  const value = Number(price);
+  if (!Number.isFinite(value) || Math.abs(value) < 100) return null;
+  return value < 0 ? Math.abs(value) / (Math.abs(value) + 100) : 100 / (value + 100);
+}
+
+function americanExpectedReturn(probability, price) {
+  const p = Number(probability), value = Number(price);
+  if (!Number.isFinite(p) || !Number.isFinite(value)) return null;
+  const profit = value > 0 ? value / 100 : 100 / Math.abs(value);
+  return p * profit - (1 - p);
+}
+
+function standardNormalCdf(value) {
+  const sign = value < 0 ? -1 : 1;
+  const x = Math.abs(value) / Math.sqrt(2);
+  const t = 1 / (1 + .3275911 * x);
+  const erf = sign * (1 - (((((1.061405429*t - 1.453152027)*t) + 1.421413741)*t - .284496736)*t + .254829592)*t*Math.exp(-x*x));
+  return .5 * (1 + erf);
+}
+
+function relativeMarketAvailabilityHold(awayName, homeName) {
+  return [awayName, homeName].some(teamName => {
+    const notes = currentAvailabilityNotes(teamName);
+    const impact = availabilityImpactForTeam(teamName, notes);
+    const exposure = Number(impact?.reportExposurePoints || 0);
+    return notes.some(note => {
+      const text = `${note?.status || ""} ${note?.position || ""} ${note?.text || ""}`.toLowerCase();
+      const unresolved = /game.?time|questionable|doubtful|late scratch|unavailable|\bout\b/.test(text);
+      return unresolved && (exposure >= 1.5 || /\bqb\b|quarterback/.test(text));
+    });
+  });
+}
+
+function relativeMarketFitMarkup(game) {
+  const projection = game?.projection || {};
+  const market = game?.market || {};
+  const homeName = game?.home?.team || "Home";
+  const awayName = game?.away?.team || "Away";
+  const homeProbabilityRaw = Number(projection?.win_probability?.home);
+  const homeProbability = Number.isFinite(homeProbabilityRaw) ? (homeProbabilityRaw > 1 ? homeProbabilityRaw / 100 : homeProbabilityRaw) : null;
+  const selectedSide = homeProbability != null && homeProbability >= .5 ? "home" : "away";
+  const selectedName = selectedSide === "home" ? homeName : awayName;
+  const modelProbability = homeProbability == null ? null : selectedSide === "home" ? homeProbability : 1 - homeProbability;
+  const modelHomeMargin = Number.isFinite(Number(projection.home_spread)) ? -Number(projection.home_spread) : null;
+  const teamModelMargin = modelHomeMargin == null ? null : selectedSide === "home" ? modelHomeMargin : -modelHomeMargin;
+  const referenceMoneyline = market.reference_moneyline || {};
+  const referenceSpread = market.reference_spread || {};
+  const mlPrice = Number(referenceMoneyline[`${selectedSide}_price`]);
+  const mlNoVig = Number(referenceMoneyline.no_vig_probability?.[selectedSide]);
+  const spreadPrice = Number(referenceSpread[`${selectedSide}_price`]);
+  const teamSpread = Number(referenceSpread[`${selectedSide}_spread`]);
+  const spreadNoVig = Number(referenceSpread.no_vig_probability?.[selectedSide]);
+  const coverProbability = Number.isFinite(teamModelMargin) && Number.isFinite(teamSpread)
+    ? standardNormalCdf((teamModelMargin + teamSpread) / RELATIVE_MARKET_FIT_POLICY.marginSigma)
+    : null;
+  const completeMoneylineBooks = (market.book_lines || []).filter(row => {
+    const quote = row?.moneyline || row;
+    return Number.isFinite(Number(quote?.home_price ?? quote?.home_moneyline)) && Number.isFinite(Number(quote?.away_price ?? quote?.away_moneyline));
+  }).length;
+  const quoteTime = Date.parse(referenceMoneyline.last_update || "");
+  const quoteFresh = !Number.isFinite(quoteTime) || Date.now() - quoteTime <= RELATIVE_MARKET_FIT_POLICY.maxQuoteAgeHours * 3600000;
+  const mlRangeEligible = Number.isFinite(mlPrice) && (
+    (mlPrice >= RELATIVE_MARKET_FIT_POLICY.favoriteFloor && mlPrice <= RELATIVE_MARKET_FIT_POLICY.favoriteCeiling)
+    || (mlPrice >= RELATIVE_MARKET_FIT_POLICY.underdogFloor && mlPrice <= RELATIVE_MARKET_FIT_POLICY.underdogCeiling && modelProbability >= .5 && teamModelMargin >= 0)
+  );
+  const mlGap = Number.isFinite(modelProbability) && Number.isFinite(mlNoVig) ? modelProbability - mlNoVig : null;
+  const spreadGap = Number.isFinite(coverProbability) && Number.isFinite(spreadNoVig) ? coverProbability - spreadNoVig : null;
+  const mlEv = americanExpectedReturn(modelProbability, mlPrice);
+  const spreadEv = americanExpectedReturn(coverProbability, spreadPrice);
+  const mlEligible = mlRangeEligible && completeMoneylineBooks >= RELATIVE_MARKET_FIT_POLICY.minMoneylineBooks && quoteFresh && mlGap >= RELATIVE_MARKET_FIT_POLICY.minProbabilityEdge && mlEv > 0;
+  const spreadEligible = Number.isFinite(spreadPrice) && spreadGap >= RELATIVE_MARKET_FIT_POLICY.minProbabilityEdge && spreadEv > 0;
+  const availabilityHold = relativeMarketAvailabilityHold(awayName, homeName);
+  let headline = "No qualifying market advantage";
+  let detail = "Neither available price clears THI’s 3-point probability-edge and price-quality guardrails.";
+  if (availabilityHold) {
+    headline = "Comparison withheld — availability unresolved";
+    detail = "A meaningful late player-status question remains unresolved. The frozen projection is unchanged; this price comparison is intentionally withheld.";
+  } else if (mlEligible && spreadEligible) {
+    const difference = mlEv - spreadEv;
+    headline = Math.abs(difference) <= .015 ? "Markets are similarly priced" : difference > 0 ? "Moneyline offers stronger modeled fit" : "Spread offers stronger modeled fit";
+    detail = `${selectedName} is the model-selected side; both markets clear the published comparison guardrails.`;
+  } else if (mlEligible) {
+    headline = "Moneyline offers stronger modeled fit";
+    detail = `${selectedName} clears the moneyline range, multi-book coverage and probability-edge requirements.`;
+  } else if (spreadEligible) {
+    headline = "Spread offers stronger modeled fit";
+    detail = `${selectedName} clears the spread price and modeled cover-probability requirements.`;
+  } else if (Number.isFinite(mlPrice) && (mlPrice < RELATIVE_MARKET_FIT_POLICY.favoriteFloor || mlPrice > RELATIVE_MARKET_FIT_POLICY.underdogCeiling)) {
+    detail = `The available ${selectedName} moneyline (${mlPrice > 0 ? "+" : ""}${mlPrice}) is outside THI’s −185 to +250 evaluation window.`;
+  } else if (completeMoneylineBooks < RELATIVE_MARKET_FIT_POLICY.minMoneylineBooks) {
+    detail = "Moneyline comparison is waiting for complete two-sided prices from at least two books.";
+  }
+  const percent = value => Number.isFinite(value) ? `${(value * 100).toFixed(1)}%` : "—";
+  const price = value => Number.isFinite(value) ? `${value > 0 ? "+" : ""}${value}` : "—";
+  return `<section class="analysis-panel" style="margin-top:12px;">
+    <div class="analysis-panel-header"><div><div class="eyebrow">Price comparison · descriptive only</div><div class="analysis-panel-title">Relative Market Fit</div></div><span class="status ${availabilityHold ? "status-hold" : "status-aligned"}">${escapeHtml(headline)}</span></div>
+    <div class="analysis-panel-body"><p style="margin-top:0;"><strong>${escapeHtml(detail)}</strong></p>
+      <div class="analysis-grid">
+        <div class="analysis-card"><div class="analysis-label">THI win probability</div><div class="analysis-value">${percent(modelProbability)}</div><div class="analysis-small">${escapeHtml(selectedName)}</div></div>
+        <div class="analysis-card"><div class="analysis-label">Moneyline</div><div class="analysis-value">${price(mlPrice)}</div><div class="analysis-small">No-vig market ${percent(mlNoVig)} · gap ${percent(mlGap)}</div></div>
+        <div class="analysis-card"><div class="analysis-label">Spread</div><div class="analysis-value">${Number.isFinite(teamSpread) ? `${teamSpread > 0 ? "+" : ""}${teamSpread.toFixed(1)}` : "—"} <small>${price(spreadPrice)}</small></div><div class="analysis-small">Modeled cover ${percent(coverProbability)} · gap ${percent(spreadGap)}</div></div>
+        <div class="analysis-card"><div class="analysis-label">Price coverage</div><div class="analysis-value">${completeMoneylineBooks} books</div><div class="analysis-small">Two-sided moneylines · ${quoteFresh ? "current capture" : "stale capture"}</div></div>
+      </div>
+      <p class="analysis-small" style="margin-bottom:0;">This compares available prices; it is not a recommendation, play tier or tracked ATS result. Favorite moneylines are evaluated from −100 through −185; model-favored underdogs/pick’ems from +100 through +250.</p>
+    </div>
+  </section>`;
+}
+
 function renderMatchup(game) {
   const container = document.getElementById("matchup-container");
   if (!container) return;
@@ -4661,6 +4781,8 @@ function renderMatchup(game) {
         </div>
       </div>
     </div>
+
+    ${relativeMarketFitMarkup(game)}
 
     ${marketChangeSummaryMarkup(game)}
 

@@ -337,6 +337,13 @@ def main():
                 "bookmaker": market.get("bookmaker"),
                 "reference_spread": market.get("reference_spread"),
                 "reference_total": market.get("reference_total"),
+                "reference_moneyline": market.get("reference_moneyline"),
+                "moneyline_book_count": sum(
+                    1 for row in market.get("book_lines") or []
+                    if (row.get("moneyline") or {}).get("home_price") is not None
+                    and (row.get("moneyline") or {}).get("away_price") is not None
+                ),
+                "moneyline_policy_version": "relative-market-fit-v1-2026-11-25",
                 "execution_spread": execution_spread,
                 "execution_total": execution_total,
                 "price_policy": "single_book_two_sided_quote_only",

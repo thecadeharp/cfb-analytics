@@ -70,6 +70,35 @@ class CbbModelTrackingTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "v0.5"):
             build_tracking({"meta": {"version": "old"}, "games": []})
 
+    def test_moneyline_tracking_is_prospective_and_separate(self):
+        tracked = game(9, 3, True, 75, 70)
+        tracked["projection"]["home_win_probability"] = 70
+        board = {
+            "meta": {"version": "thi-cbb-projection-board-v0.5", "season": 2027},
+            "games": [tracked],
+        }
+        history = {"games": {"9": [
+            {
+                "captured_at_utc": "2026-11-25T18:00:00Z",
+                "moneyline_policy_version": "relative-market-fit-v1-2026-11-25",
+                "moneyline_book_count": 3,
+                "reference_moneyline": {"home_price": -150, "away_price": 135, "no_vig_probability": {"home": .58, "away": .42}},
+            },
+            {
+                "captured_at_utc": "2027-01-09T23:45:00Z",
+                "moneyline_policy_version": "relative-market-fit-v1-2026-11-25",
+                "moneyline_book_count": 4,
+                "reference_moneyline": {"home_price": -170, "away_price": 150, "no_vig_probability": {"home": .61, "away": .39}},
+            },
+        ]}}
+        payload = build_tracking(board, history)
+        decision = payload["moneyline_decisions"][0]
+        self.assertEqual(decision["result"], "win")
+        self.assertEqual(decision["price"], -150)
+        self.assertEqual(decision["clv"], 3.0)
+        self.assertEqual(payload["summary"]["moneyline"]["wins"], 1)
+        self.assertEqual(payload["summary"]["moneyline"]["roi_units"], .667)
+
 
 if __name__ == "__main__":
     unittest.main()

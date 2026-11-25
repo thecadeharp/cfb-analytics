@@ -82,8 +82,12 @@ def odds_api_lines(board: dict[str, Any], events: list[dict[str, Any]], active_i
                 outcomes = market.get("outcomes") or []
                 if market.get("key") == "spreads":
                     home = next((item for item in outcomes if item.get("name") == home_name), None)
+                    away = next((item for item in outcomes if item.get("name") == away_name), None)
                     if home is not None:
                         row["spread"] = home.get("point")
+                        row["homeSpreadPrice"] = home.get("price")
+                    if away is not None:
+                        row["awaySpreadPrice"] = away.get("price")
                 elif market.get("key") == "totals":
                     over = next((item for item in outcomes if str(item.get("name") or "").lower() == "over"), None)
                     if over is not None:
@@ -234,8 +238,8 @@ def refresh(
         merged = merge_market(previous, current, captured_at)
         merged["source"] = raw.get("source") or source
         before = game.get("market") or {}
-        material = tuple(merged.get(key) for key in ("consensus_home_spread", "consensus_total", "book_count"))
-        prior_material = tuple(before.get(key) for key in ("consensus_home_spread", "consensus_total", "book_count"))
+        material = tuple(merged.get(key) for key in ("consensus_home_spread", "consensus_total", "book_count", "reference_moneyline", "reference_spread"))
+        prior_material = tuple(before.get(key) for key in ("consensus_home_spread", "consensus_total", "book_count", "reference_moneyline", "reference_spread"))
         game["market"] = merged
         if material != prior_material or not snapshots:
             snapshots.append({
@@ -244,7 +248,7 @@ def refresh(
                 "home_team": (game.get("home") or {}).get("team"),
                 "start_date": game.get("start_date"),
                 "neutral_site": bool(game.get("neutral_site")),
-                **{key: merged.get(key) for key in ("book_count", "consensus_home_spread", "consensus_total", "opening_home_spread", "opening_total", "spread_move", "total_move", "reference_moneyline", "spread_price_status")},
+                **{key: merged.get(key) for key in ("book_count", "consensus_home_spread", "consensus_total", "opening_home_spread", "opening_total", "spread_move", "total_move", "reference_moneyline", "moneyline_book_count", "moneyline_policy_version", "reference_spread", "spread_price_status")},
             })
             history_games[game_id] = snapshots[-200:]
             changed += 1

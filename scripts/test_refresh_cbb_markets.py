@@ -33,7 +33,7 @@ class RefreshCbbMarketsTests(unittest.TestCase):
                 "key": "draftkings",
                 "title": "DraftKings",
                 "markets": [
-                    {"key": "spreads", "outcomes": [{"name": "UConn Huskies", "point": -24.5}, {"name": "American Eagles", "point": 24.5}]},
+                    {"key": "spreads", "outcomes": [{"name": "UConn Huskies", "point": -24.5, "price": -108}, {"name": "American Eagles", "point": 24.5, "price": -112}]},
                     {"key": "totals", "outcomes": [{"name": "Over", "point": 146.5}, {"name": "Under", "point": 146.5}]},
                     {"key": "h2h", "outcomes": [{"name": "UConn Huskies", "price": -5000}, {"name": "American Eagles", "price": 1800}]},
                 ],
@@ -43,6 +43,8 @@ class RefreshCbbMarketsTests(unittest.TestCase):
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]["lines"][0]["provider"], "DraftKings")
         self.assertEqual(rows[0]["lines"][0]["spread"], -24.5)
+        self.assertEqual(rows[0]["lines"][0]["homeSpreadPrice"], -108)
+        self.assertEqual(rows[0]["lines"][0]["awaySpreadPrice"], -112)
         self.assertEqual(rows[0]["lines"][0]["overUnder"], 146.5)
 
     def test_neutral_site_event_can_reverse_provider_home_and_away(self):

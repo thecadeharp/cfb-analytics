@@ -128,6 +128,39 @@ def market_summary(lines: list[dict[str, Any]]) -> dict[str, Any] | None:
         reference_moneyline["implied_probability"] = {"home": round(home_implied, 8), "away": round(away_implied, 8)}
         reference_moneyline["no_vig_probability"] = {"home": round(home_implied / total_implied, 8), "away": round(away_implied / total_implied, 8)}
         reference_moneyline["overround"] = round(total_implied - 1, 8)
+    spread_priced = [
+        row for row in lines
+        if finite(row.get("spread")) is not None
+        and finite(row.get("homeSpreadPrice")) is not None
+        and finite(row.get("awaySpreadPrice")) is not None
+        and abs(finite(row.get("homeSpreadPrice"))) >= 100
+        and abs(finite(row.get("awaySpreadPrice"))) >= 100
+    ]
+    reference_spread = None
+    if spread_priced:
+        row = min(
+            spread_priced,
+            key=lambda item: (
+                provider_priority.get(str(item.get("provider") or "").strip().lower(), 100),
+                str(item.get("provider") or ""),
+            ),
+        )
+        reference_spread = {
+            "provider": row.get("provider"),
+            "home_spread": finite(row.get("spread")),
+            "away_spread": -finite(row.get("spread")),
+            "home_price": int(finite(row.get("homeSpreadPrice"))),
+            "away_price": int(finite(row.get("awaySpreadPrice"))),
+            "price_format": "american",
+        }
+        home = finite(row.get("homeSpreadPrice"))
+        away = finite(row.get("awaySpreadPrice"))
+        home_implied = abs(home) / (abs(home) + 100) if home < 0 else 100 / (home + 100)
+        away_implied = abs(away) / (abs(away) + 100) if away < 0 else 100 / (away + 100)
+        total_implied = home_implied + away_implied
+        reference_spread["implied_probability"] = {"home": round(home_implied, 8), "away": round(away_implied, 8)}
+        reference_spread["no_vig_probability"] = {"home": round(home_implied / total_implied, 8), "away": round(away_implied / total_implied, 8)}
+        reference_spread["overround"] = round(total_implied - 1, 8)
     return {
         "book_count": len(lines),
         "consensus_home_spread": spread,
@@ -137,7 +170,10 @@ def market_summary(lines: list[dict[str, Any]]) -> dict[str, Any] | None:
         "spread_move": rounded(spread - open_spread) if spread is not None and open_spread is not None else None,
         "total_move": rounded(total - open_total) if total is not None and open_total is not None else None,
         "reference_moneyline": reference_moneyline,
-        "spread_price_status": "unavailable_from_provider_contract",
+        "moneyline_book_count": len(priced),
+        "moneyline_policy_version": "relative-market-fit-v1-2026-11-25",
+        "reference_spread": reference_spread,
+        "spread_price_status": "available" if reference_spread else "unavailable_from_provider_contract",
         "book_lines": [
             {
                 "provider": row.get("provider"),
@@ -145,6 +181,8 @@ def market_summary(lines: list[dict[str, Any]]) -> dict[str, Any] | None:
                 "total": finite(row.get("overUnder")),
                 "home_moneyline": finite(row.get("homeMoneyline")),
                 "away_moneyline": finite(row.get("awayMoneyline")),
+                "home_spread_price": finite(row.get("homeSpreadPrice")),
+                "away_spread_price": finite(row.get("awaySpreadPrice")),
                 "opening_spread": finite(row.get("spreadOpen")),
                 "opening_total": finite(row.get("overUnderOpen")),
             }

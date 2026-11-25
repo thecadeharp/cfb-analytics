@@ -12,6 +12,8 @@ class TrackingHeadlineContractTests(unittest.TestCase):
         self.assertNotIn('perfStat("Play Tier YTD"', source)
         self.assertIn('perfStat("ATS CLV YTD"', source)
         self.assertIn('perfStat("ATS Beat Close YTD"', source)
+        self.assertNotIn("Season-to-Date · Every Signal and Testing Key", source)
+        self.assertIn("Prospective Moneyline Ledger · Separate from ATS", source)
 
     def test_cbb_headline_uses_overall_clv_not_featured_tiers(self):
         source = (ROOT / "cbb-site.js").read_text()
@@ -19,6 +21,8 @@ class TrackingHeadlineContractTests(unittest.TestCase):
         self.assertNotIn('performanceCard("Play tier YTD"', source)
         self.assertIn('performanceCard("ATS CLV YTD"', source)
         self.assertIn('performanceCard("ATS beat close YTD"', source)
+        self.assertNotIn("Season-to-Date · Every Signal and Testing Key", source)
+        self.assertIn("Prospective Moneyline Ledger · Separate from ATS", source)
 
 
 if __name__ == "__main__":

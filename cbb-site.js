@@ -269,6 +269,9 @@
           ? direct.book_lines
           : Array.isArray(contractMarket.book_lines) ? contractMarket.book_lines : [],
         reference_moneyline: direct.reference_moneyline || contractMarket.reference_moneyline || {},
+        moneyline_book_count: direct.moneyline_book_count ?? contractMarket.moneyline_book_count ?? 0,
+        moneyline_policy_version: direct.moneyline_policy_version || contractMarket.moneyline_policy_version,
+        reference_spread: direct.reference_spread || contractMarket.reference_spread || {},
         source: direct.source || "THI captured market contract",
       };
       const margin = Number(game.projection?.home_margin);
@@ -1099,7 +1102,7 @@
       const homeSpread = Number.isFinite(Number(spread.home_spread)) ? Number(spread.home_spread) : Number.isFinite(Number(book.spread)) ? Number(book.spread) : null;
       const awaySpread = Number.isFinite(Number(spread.away_spread)) ? Number(spread.away_spread) : homeSpread == null ? null : -homeSpread;
       const odds = value => value === null || value === undefined || value === "" ? NaN : Number(value);
-      return {book, awaySpread, homeSpread, awayPrice:odds(spread.away_price), homePrice:odds(spread.home_price), awayMl:odds(book.away_moneyline), homeMl:odds(book.home_moneyline)};
+      return {book, awaySpread, homeSpread, awayPrice:odds(spread.away_price ?? book.away_spread_price), homePrice:odds(spread.home_price ?? book.home_spread_price), awayMl:odds(book.away_moneyline), homeMl:odds(book.home_moneyline)};
     });
     const hasSpreadPrices = normalized.some(row => Number.isFinite(row.awayPrice) || Number.isFinite(row.homePrice));
     const hasMoneylines = normalized.some(row => Number.isFinite(row.awayMl) || Number.isFinite(row.homeMl));
@@ -1421,6 +1424,74 @@
     return `<section class="cbb-situational-ats"><div class="cbb-blueprint-head"><div><div class="cbb-kicker">PROGRAM CONTEXT</div><h3>Historical ATS splits</h3></div><small>Descriptive only · not in the projection</small></div><div class="cbb-situational-ats-grid">${card(game.away)}${card(game.home)}</div><p class="cbb-style-note">Program-level results since 2022. These records are not attributed to the current coach and do not assume past covering performance will persist.</p></section>`;
   }
 
+  const CBB_RELATIVE_MARKET_FIT_POLICY = Object.freeze({ minEdge:.03, favoriteFloor:-185, favoriteCeiling:-100, underdogFloor:100, underdogCeiling:250, minBooks:2 });
+
+  function cbbAmericanImplied(price) {
+    const value = Number(price);
+    if (!Number.isFinite(value) || Math.abs(value) < 100) return null;
+    return value < 0 ? Math.abs(value) / (Math.abs(value) + 100) : 100 / (value + 100);
+  }
+
+  function cbbExpectedReturn(probability, price) {
+    const p = Number(probability), value = Number(price);
+    if (!Number.isFinite(p) || !Number.isFinite(value)) return null;
+    return p * (value > 0 ? value / 100 : 100 / Math.abs(value)) - (1 - p);
+  }
+
+  function cbbRelativeMarketFitMarkup(game) {
+    const projection = game.projection || {}, market = game.market || {};
+    const rawHomeProbability = Number(projection.home_win_probability);
+    const homeProbability = Number.isFinite(rawHomeProbability) ? (rawHomeProbability > 1 ? rawHomeProbability / 100 : rawHomeProbability) : null;
+    const side = homeProbability != null && homeProbability >= .5 ? "home" : "away";
+    const team = side === "home" ? game.home : game.away;
+    const modelProbability = homeProbability == null ? null : side === "home" ? homeProbability : 1 - homeProbability;
+    const homeMargin = Number(projection.home_margin);
+    const teamMargin = Number.isFinite(homeMargin) ? (side === "home" ? homeMargin : -homeMargin) : null;
+    const moneyline = market.reference_moneyline || {}, spread = market.reference_spread || {};
+    const finiteValue = value => value === null || value === undefined || value === "" ? null : Number.isFinite(Number(value)) ? Number(value) : null;
+    const mlPrice = finiteValue(moneyline[`${side}_price`]);
+    const mlNoVig = finiteValue(moneyline.no_vig_probability?.[side]);
+    const spreadPrice = finiteValue(spread[`${side}_price`]);
+    const teamSpread = finiteValue(spread[`${side}_spread`]);
+    const spreadNoVig = finiteValue(spread.no_vig_probability?.[side]) ?? cbbAmericanImplied(spreadPrice);
+    const residualSd = Math.max(1, Number(state.data?.model?.models?.margin_residual_sd) || 11.645421);
+    const coverProbability = Number.isFinite(teamMargin) && Number.isFinite(teamSpread) ? normalCdf((teamMargin + teamSpread) / residualSd) : null;
+    const completeBooks = (market.book_lines || []).filter(row => finiteValue(row.home_moneyline) != null && finiteValue(row.away_moneyline) != null).length;
+    const mlGap = Number.isFinite(modelProbability) && Number.isFinite(mlNoVig) ? modelProbability - mlNoVig : null;
+    const spreadGap = Number.isFinite(coverProbability) && Number.isFinite(spreadNoVig) ? coverProbability - spreadNoVig : null;
+    const mlEv = cbbExpectedReturn(modelProbability, mlPrice), spreadEv = cbbExpectedReturn(coverProbability, spreadPrice);
+    const mlRange = Number.isFinite(mlPrice) && ((mlPrice >= -185 && mlPrice <= -100) || (mlPrice >= 100 && mlPrice <= 250 && modelProbability >= .5 && teamMargin >= 0));
+    const mlEligible = mlRange && completeBooks >= CBB_RELATIVE_MARKET_FIT_POLICY.minBooks && mlGap >= CBB_RELATIVE_MARKET_FIT_POLICY.minEdge && mlEv > 0;
+    const spreadEligible = Number.isFinite(spreadPrice) && spreadGap >= CBB_RELATIVE_MARKET_FIT_POLICY.minEdge && spreadEv > 0;
+    let headline = "No qualifying market advantage";
+    let detail = "Neither available price clears THI’s 3-point probability-edge and price-quality guardrails.";
+    if (mlEligible && spreadEligible) {
+      const difference = mlEv - spreadEv;
+      headline = Math.abs(difference) <= .015 ? "Markets are similarly priced" : difference > 0 ? "Moneyline offers stronger modeled fit" : "Spread offers stronger modeled fit";
+      detail = `${team?.team || "The model-selected side"} clears both published comparison guardrails.`;
+    } else if (mlEligible) {
+      headline = "Moneyline offers stronger modeled fit";
+      detail = `${team?.team || "The model-selected side"} clears the moneyline range, multi-book coverage and probability-edge requirements.`;
+    } else if (spreadEligible) {
+      headline = "Spread offers stronger modeled fit";
+      detail = `${team?.team || "The model-selected side"} clears the spread price and modeled cover-probability requirements.`;
+    } else if (Number.isFinite(mlPrice) && (mlPrice < -185 || mlPrice > 250)) {
+      detail = `The available ${team?.team || "model-selected"} moneyline (${mlPrice > 0 ? "+" : ""}${mlPrice}) is outside THI’s −185 to +250 evaluation window.`;
+    } else if (completeBooks < CBB_RELATIVE_MARKET_FIT_POLICY.minBooks) {
+      headline = "Comparison withheld — price coverage incomplete";
+      detail = "Moneyline comparison is waiting for complete two-sided prices from at least two books.";
+    }
+    const percent = value => Number.isFinite(value) ? `${(value * 100).toFixed(1)}%` : "—";
+    const price = value => Number.isFinite(value) ? `${value > 0 ? "+" : ""}${value}` : "—";
+    return `<section class="cbb-detail-section cbb-relative-market-fit"><div class="cbb-simulator-heading"><div><span class="cbb-kicker">PRICE COMPARISON · DESCRIPTIVE ONLY</span><h3>Relative Market Fit</h3></div><span class="cbb-context-pending">${escapeHtml(headline)}</span></div>
+      <strong>${escapeHtml(detail)}</strong><div class="cbb-detail-grid">
+        ${detailStat("THI win probability", `${team?.team || "—"} · ${percent(modelProbability)}`)}
+        ${detailStat("Moneyline", `${price(mlPrice)} · no-vig ${percent(mlNoVig)} · gap ${percent(mlGap)}`)}
+        ${detailStat("Spread", `${Number.isFinite(teamSpread) ? number(teamSpread,1,true) : "—"} ${price(spreadPrice)} · cover ${percent(coverProbability)} · gap ${percent(spreadGap)}`)}
+        ${detailStat("Price coverage", `${completeBooks} complete two-sided books`)}
+      </div><p class="cbb-model-sub">This compares available prices; it is not a recommendation, play tier or tracked ATS result. Favorite moneylines are evaluated from −100 through −185; model-favored underdogs/pick’ems from +100 through +250. CBB availability remains display-only unless verified.</p></section>`;
+  }
+
   function cbbParityHeader(game, date) {
     const projection = game.projection || {};
     const market = game.market || {};
@@ -1459,6 +1530,7 @@
         <article><span>THI TOTAL</span><strong>${number(projection.total,1)}</strong><small>Market ${validMarketTotal(market.consensus_total) ? number(market.consensus_total,1) : "—"}</small></article>
         <article><span>SIGNAL SIZE</span><strong>${Number.isFinite(edge) ? `${number(Math.abs(edge),1)} pts` : "—"}</strong><small>${edgeTeam ? `Market side: ${escapeHtml(edgeTeam.team)}` : "No market comparison"}</small></article>
       </div>
+      ${cbbRelativeMarketFitMarkup(game)}
       <section class="cbb-parity-why"><div class="cbb-kicker">WHY THI LEANS ${escapeHtml(edgeTeam?.team || favored?.team || "THIS SIDE")}</div>${why}</section>`;
   }
 
@@ -2677,6 +2749,7 @@
     const allResults = tracking.game_results || [];
     const allSpreads = tracking.spread_decisions || [];
     const allTotals = tracking.total_decisions || [];
+    const allMoneylines = tracking.moneyline_decisions || [];
     const availableDates = allResults.map(cbbTrackingRowDate).filter(Boolean).sort();
     if (state.trackingPeriod === "CUSTOM") {
       state.trackingCustomStart ||= availableDates[0] || "";
@@ -2686,17 +2759,19 @@
     const results = cbbFilterTrackingRows(allResults,bounds);
     const spreadRows = cbbFilterTrackingRows(allSpreads,bounds);
     const totalRows = cbbFilterTrackingRows(allTotals,bounds);
+    const moneylineRows = cbbFilterTrackingRows(allMoneylines,bounds);
     const performance = {
       finals:results.length,
       straight_up:cbbSummarizeTrackingRows(results),
       spread:cbbSummarizeTrackingRows(spreadRows),
       totals:cbbSummarizeTrackingRows(totalRows),
-      projection_accuracy:cbbTrackingAccuracy(results),
-      notable_spread:cbbSummarizeTrackingRows(spreadRows.filter(row => ["play","material","outlier"].includes(row.signal_tier)))
+      moneyline:cbbSummarizeTrackingRows(moneylineRows),
+      projection_accuracy:cbbTrackingAccuracy(results)
     };
     const spread = performance.spread || {};
     const totals = performance.totals || {};
     const straightUp = performance.straight_up || {};
+    const moneyline = performance.moneyline || {};
     const accuracy = performance.projection_accuracy || {};
     const record = row => Number(row?.games) ? `${integer(row.wins)}-${integer(row.losses)}-${integer(row.pushes)}` : "—";
     const performanceCard = (label, value, note) => `<article class="cbb-panel cbb-model-card"><div class="cbb-label">${escapeHtml(label)}</div><div class="cbb-model-value">${escapeHtml(value)}</div><div class="cbb-model-sub">${escapeHtml(note)}</div></article>`;
@@ -2708,11 +2783,8 @@
       const label=new Intl.DateTimeFormat("en-US",{weekday:"short",month:"short",day:"numeric",timeZone:"UTC"}).format(new Date(`${key}T12:00:00Z`));
       return `<tr><td><strong>${escapeHtml(label)}</strong></td><td class="cbb-number">${integer(dayResults.length)}</td><td class="cbb-number">${record(su)}</td><td class="cbb-number">${record(ats)}</td><td class="cbb-number">${record(total)}</td><td class="cbb-number">${total.average_clv == null ? "—" : number(total.average_clv,2,true)}</td><td class="cbb-number">${total.beat_close_pct == null ? "—" : pct(total.beat_close_pct)}</td><td class="cbb-number">${acc.margin_mae == null ? "—" : `${number(acc.margin_mae,1)} pts`}</td><td class="cbb-number">${ats.average_clv == null ? "—" : number(ats.average_clv,2,true)}</td></tr>`;
     }).join("");
-    const signalEntries = [
-      ...Object.entries(tracking.spread_by_signal || {}).map(([key,row]) => [publicSignalLabel(key),row]),
-      ...Object.entries(tracking.totals_by_signal || {}).map(([key,row]) => [key === "total_watch" ? "Total Watch" : "Total Lean",row]),
-    ];
-    const signalRows = signalEntries.map(([label,row]) => `<tr><td><strong>${escapeHtml(label)}</strong></td><td class="cbb-number">${integer(row.games)}</td><td class="cbb-number">${record(row)}</td><td class="cbb-number">${row.hit_rate == null ? "—" : pct(row.hit_rate)}</td><td class="cbb-number">${row.average_clv == null ? "—" : number(row.average_clv,2,true)}</td><td class="cbb-number">${row.beat_close_pct == null ? "—" : pct(row.beat_close_pct)}</td><td><span class="cbb-tracking-confidence">DEVELOPING</span></td></tr>`).join("");
+    const moneylineRoi = moneylineRows.map(row => Number(row.roi_units)).filter(Number.isFinite).reduce((sum,value) => sum+value,0);
+    const moneylineDecisionRows = moneylineRows.slice(0,50).map(row => { const grade=String(row.result||"").toLowerCase(); return `<tr><td>${escapeHtml(row.game_date_et || String(row.start_date || "").slice(0,10))}</td><td><strong>${escapeHtml(row.pick_team)}</strong></td><td class="cbb-number">${number(row.price,0,true)}</td><td class="cbb-number">${pct(100*Number(row.model_probability || 0))}</td><td class="cbb-number">${pct(100*Number(row.market_probability || 0))}</td><td class="cbb-number">${row.closing_price == null ? "—" : number(row.closing_price,0,true)}</td><td class="cbb-number">${row.clv == null ? "—" : `${number(row.clv,2,true)} pp`}</td><td class="cbb-number">${number(row.roi_units,2,true)}u</td><td><span class="cbb-result-badge ${grade==="win"?"is-positive":grade==="loss"?"is-negative":"is-push"}">${escapeHtml(grade==="win"?"WIN":grade==="loss"?"LOSS":"PUSH")}</span></td></tr>`; }).join("");
     const decisions = spreadRows.slice(0,50);
     const decisionRows = decisions.map(trackingDecisionRow).join("");
     const view = document.getElementById("view-cbb-tracking");
@@ -2735,6 +2807,7 @@
           ${performanceCard("ATS beat close", spread.beat_close_pct == null ? "—" : pct(spread.beat_close_pct), `${integer(spread.closing_line_games)} spread decisions with a close`)}
           ${performanceCard("Average margin error", accuracy.margin_mae == null ? "—" : `${number(accuracy.margin_mae,1)} pts`, "Absolute THI projection error")}
           ${performanceCard("Average CLV", spread.average_clv == null ? "—" : number(spread.average_clv,2,true), `${integer(spread.closing_line_games)} spread decisions with a close`)}
+          ${performanceCard("Moneyline", record(moneyline), moneyline.games ? `${number(moneylineRoi,2,true)}u return · separate ledger` : "Prospective sample accumulating")}
         </div>
         <div class="cbb-tracking-section-label">Season to date</div>
         <div class="cbb-tracking-grid cbb-tracking-ytd-grid">
@@ -2745,10 +2818,11 @@
           ${performanceCard("Totals beat close YTD", summary.totals?.beat_close_pct == null ? "—" : pct(summary.totals.beat_close_pct), "Closing-line decisions")}
           ${performanceCard("ATS CLV YTD", summary.spread?.average_clv == null ? "—" : number(summary.spread.average_clv,2,true), "Average closing-line value")}
           ${performanceCard("ATS beat close YTD", summary.spread?.beat_close_pct == null ? "—" : pct(summary.spread.beat_close_pct), "Closing-line decisions")}
+          ${performanceCard("Moneyline YTD", record(summary.moneyline), summary.moneyline?.roi_units == null ? "Prospective sample accumulating" : `${number(summary.moneyline.roi_units,2,true)}u · ${pct(summary.moneyline.roi_pct)} ROI`)}
         </div>
         ${cbbModelLabMarkup()}
         <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Daily Breakdown · Selected Period</div><div class="cbb-table-wrap"><table class="cbb-table cbb-tracking-table"><thead><tr><th>Date</th><th>Finals</th><th>SU</th><th>ATS</th><th>Totals</th><th>Total CLV</th><th>Total Beat Close</th><th>Margin Error</th><th>Spread CLV</th></tr></thead><tbody>${dailyRows || `<tr><td colspan="9" class="cbb-empty">No completed games fall inside this calendar window.</td></tr>`}</tbody></table></div></div>
-        <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Season-to-Date · Every Signal and Testing Key</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Signal / Key</th><th>Games</th><th>Record</th><th>Win %</th><th>Average CLV</th><th>Beat Close</th><th>Confidence</th></tr></thead><tbody>${signalRows || `<tr><td colspan="7" class="cbb-empty">Signal records will populate as games are graded.</td></tr>`}</tbody></table></div></div>
+        <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Prospective Moneyline Ledger · Separate from ATS</div><div class="cbb-model-sub">Only qualifying Relative Market Fit observations captured under the published policy after November 25, 2026. One-unit flat staking; CLV is the no-vig probability move toward the selected team.</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Date</th><th>Team</th><th>Price</th><th>THI %</th><th>Market %</th><th>Close</th><th>CLV</th><th>Return</th><th>Result</th></tr></thead><tbody>${moneylineDecisionRows || `<tr><td colspan="9" class="cbb-empty">Prospective moneyline sample is accumulating.</td></tr>`}</tbody></table></div></div>
         <div class="cbb-tracking-table-section"><div class="cbb-tracking-table-title">Game-Level Accountability Ledger</div><div class="cbb-table-wrap"><table class="cbb-table"><thead><tr><th>Date</th><th>Matchup</th><th>THI side</th><th>Frozen line</th><th>Closing line</th><th>CLV</th><th>Edge</th><th>Result</th><th>Final</th></tr></thead><tbody>${decisionRows || `<tr><td colspan="9" class="cbb-empty">Decisions will appear after a frozen projection reaches final status.</td></tr>`}</tbody></table></div></div>
       </section>`;
     view.querySelectorAll("[data-cbb-tracking-period]").forEach(button => button.addEventListener("click", () => { state.trackingPeriod = button.dataset.cbbTrackingPeriod; renderTracking(); }));

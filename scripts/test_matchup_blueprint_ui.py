@@ -69,7 +69,7 @@ class MatchupBlueprintUiTests(unittest.TestCase):
         self.assertIn("preseason_prior?.adjusted", self.cbb)
         self.assertIn("factor_advantages", self.cbb)
         self.assertIn("KEY TO WIN OR COVER", self.cbb)
-        self.assertIn("${cbbParityHeader(game, date)}\n      ${cbbMatchupBlueprint(game)}", self.cbb)
+        self.assertIn("${cbbParityHeader(game, date)}\n      ${cbbLiveCenterMarkup(game)}\n      ${cbbMatchupBlueprint(game)}", self.cbb)
         self.assertIn('class="is-${escapeHtml(card.grade.toLowerCase())}"', self.cbb)
         self.assertIn("--blueprint-accent", self.cbb_css)
 
@@ -125,10 +125,10 @@ class MatchupBlueprintUiTests(unittest.TestCase):
                 self.assertIn(declaration, self.cbb_css)
 
     def test_asset_versions_are_bumped(self):
-        self.assertIn("app.js?v=2026-blueprint-grades-v04", self.index)
-        self.assertIn("cbb-site.css?v=2027-cbb-date-parity-v04", self.index)
-        self.assertIn("cbb-site.js?v=2027-cbb-date-parity-v04", self.index)
-        self.assertIn("dark-mode.css?v=2026-standout-contrast-v11", self.index)
+        self.assertIn("app.js?v=2026-relative-market-fit-v01", self.index)
+        self.assertIn("cbb-site.css?v=2027-date-navigation-v01", self.index)
+        self.assertIn("cbb-site.js?v=2027-relative-market-fit-v01", self.index)
+        self.assertIn("dark-mode.css?v=2026-availability-point-value-v13", self.index)
 
 
 if __name__ == "__main__":
