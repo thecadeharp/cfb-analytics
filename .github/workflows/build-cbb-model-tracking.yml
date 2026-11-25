@@ -37,11 +37,13 @@ jobs:
 
       - name: Test tracking contract
         run: |
-          python -m py_compile scripts/build_cbb_model_tracking.py scripts/test_cbb_model_tracking.py
-          python -m unittest scripts/test_cbb_model_tracking.py
+          python -m py_compile scripts/build_cbb_model_tracking.py scripts/segment_tracking.py scripts/test_cbb_model_tracking.py scripts/test_segment_tracking.py
+          python -m unittest scripts/test_cbb_model_tracking.py scripts/test_segment_tracking.py
 
       - name: Grade frozen projections
-        run: python scripts/build_cbb_model_tracking.py
+        run: |
+          python scripts/build_cbb_model_tracking.py
+          python scripts/build_static_cache_manifest.py
 
       - name: Validate output and isolation
         run: |
@@ -60,11 +62,11 @@ jobs:
           assert payload["summary"]["totals"]["games"] == len(payload["total_decisions"])
           PY
 
-      - name: Commit tracking output only
+      - name: Commit tracking output and cache contract
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/cbb/model_tracking.json
+          git add data/cbb/model_tracking.json data/cbb/cache_manifest.json
           git diff --cached --quiet && exit 0
           git commit -m "Update CBB prospective model tracking"
           git pull --rebase origin main
