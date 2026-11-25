@@ -1,6 +1,7 @@
 import unittest
 
 from scripts.segment_tracking import (
+    build_conference_team_tracking,
     build_segment_tracking,
     classify_cbb,
     classify_cfb,
@@ -57,6 +58,39 @@ class SegmentTrackingTest(unittest.TestCase):
         self.assertIn("1", p5["by_week"])
         self.assertIn("2026-11", p5["by_month"])
         self.assertEqual(ledger["visibility"], "data_only_not_rendered_in_public_ui")
+
+    def test_all_conferences_and_teams_receive_descriptive_tracking(self):
+        games = [
+            {"home_team": "A", "away_team": "B", "home_conference": "SEC", "away_conference": "SEC", "margin_error": 3, "margin_bias": 3, "total_error": 4, "total_bias": -4},
+            {"home_team": "C", "away_team": "D", "home_conference": "Big Sky", "away_conference": "MWC", "margin_error": 2, "margin_bias": 2, "total_error": 1, "total_bias": 1},
+        ]
+        spreads = [
+            {**games[0], "pick_team": "A", "result": "win", "clv": 1, "model_edge": 4},
+            {**games[1], "pick_team": "D", "result": "loss", "clv": -1, "model_edge": 6},
+        ]
+        totals = [
+            {**games[0], "result": "win", "clv": 0.5, "model_edge": 7},
+            {**games[1], "result": "loss", "clv": -0.5, "model_edge": 5},
+        ]
+        ledger = build_conference_team_tracking(
+            games,
+            spreads,
+            totals,
+            spread_result_key="result",
+            total_result_key="result",
+            spread_clv_key="clv",
+            total_clv_key="clv",
+            margin_error_key="margin_error",
+            margin_bias_key="margin_bias",
+            total_error_key="total_error",
+            total_bias_key="total_bias",
+        )
+        self.assertEqual(set(ledger["conferences"]), {"BIG SKY", "MOUNTAIN WEST", "SEC"})
+        self.assertEqual(set(ledger["teams"]), {"A", "B", "C", "D"})
+        self.assertEqual(ledger["conferences"]["SEC"]["intra_conference_spreads"]["games"], 1)
+        self.assertEqual(ledger["conferences"]["MOUNTAIN WEST"]["model_favored_conference_team"]["games"], 1)
+        self.assertEqual(ledger["conferences"]["BIG SKY"]["model_opposed_conference_team"]["games"], 1)
+        self.assertEqual(ledger["teams"]["D"]["forecasting"]["margin_signed_bias"], -2.0)
 
 
 if __name__ == "__main__":

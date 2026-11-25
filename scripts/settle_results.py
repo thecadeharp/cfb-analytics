@@ -50,9 +50,9 @@ try:
 except ModuleNotFoundError:
     from tracked_decisions import first_tracked_rows
 try:
-    from scripts.segment_tracking import build_segment_tracking, classify_cfb
+    from scripts.segment_tracking import build_conference_team_tracking, build_segment_tracking, classify_cfb
 except ModuleNotFoundError:
-    from segment_tracking import build_segment_tracking, classify_cfb
+    from segment_tracking import build_conference_team_tracking, build_segment_tracking, classify_cfb
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -927,6 +927,22 @@ def main():
         spread_edge_key="model_edge",
         total_edge_key="total_edge",
     )
+    settled_initial_rows = [row for row in initial_rows if row.get("result_settled")]
+    conference_team_tracking = build_conference_team_tracking(
+        settled_initial_rows,
+        settled_tracked_rows,
+        settled_tracked_rows,
+        spread_result_key="ats_result",
+        total_result_key="total_result",
+        spread_clv_key="clv_points",
+        total_clv_key="total_clv_points",
+        margin_error_key="model_abs_error",
+        margin_bias_key="model_margin_error",
+        total_error_key="total_projection_error",
+        total_bias_key="total_projection_error",
+        spread_edge_key="model_edge",
+        total_edge_key="total_edge",
+    )
     # These fields support the private segment rollups above but do not need to
     # inflate the public row-level audit artifact. Future snapshots freeze the
     # conference and segment at capture time; the aggregate ledger remains the
@@ -1002,6 +1018,10 @@ def main():
                 "Data-only P4-vs-P4 and G6-vs-G6 audit ledger. It is not rendered "
                 "in the public UI and does not affect projections, signals, or grading."
             ),
+            "conference_team_tracking": (
+                "Data-only all-conference and all-team forecasting, ATS, totals, CLV, "
+                "and beat-close splits. Team samples are descriptive and never alter the model."
+            ),
             "no_retroactive_model_changes": True,
         },
         "results_source": str(results_source.relative_to(ROOT)) if results_source else None,
@@ -1025,6 +1045,7 @@ def main():
         "tracked_decision_summary": summarize(tracked_rows),
         "tracked_decision_by_signal": tracked_by_signal,
         "segment_tracking": segment_tracking,
+        "conference_team_tracking": conference_team_tracking,
         "all_snapshot_summary": summarize(rows),
         "rows": rows,
     }
