@@ -307,6 +307,10 @@ def audit(root: Path, now: datetime) -> dict:
         now,
         spread_path="market.consensus_home_spread",
         total_path="market.consensus_total",
+        # CBB books generally publish the next daily slate rather than a full
+        # three-day board. Auditing 72 hours treated legitimately unposted
+        # games as missing data even when tonight and tomorrow were complete.
+        horizon_hours=36,
     )
     assets["cbb_projection_board"]["market_coverage"] = cbb_market
     cbb_market_failures = [

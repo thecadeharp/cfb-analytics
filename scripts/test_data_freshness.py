@@ -78,6 +78,30 @@ class DataFreshnessAuditTests(unittest.TestCase):
         self.assertFalse(coverage["spread_coverage_ok"])
         self.assertFalse(coverage["total_coverage_ok"])
 
+    def test_market_coverage_horizon_excludes_unposted_future_slates(self):
+        now = datetime(2026, 11, 25, 12, tzinfo=timezone.utc)
+        coverage = upcoming_market_coverage(
+            {"games": [
+                {
+                    "status": "scheduled",
+                    "start_date": "2026-11-26T12:00:00Z",
+                    "market": {"spread": -4.5, "total": 151.5},
+                },
+                {
+                    "status": "scheduled",
+                    "start_date": "2026-11-28T12:00:00Z",
+                    "market": {},
+                },
+            ]},
+            now,
+            spread_path="market.spread",
+            total_path="market.total",
+            horizon_hours=36,
+        )
+        self.assertEqual(coverage["eligible_games"], 1)
+        self.assertTrue(coverage["spread_coverage_ok"])
+        self.assertTrue(coverage["total_coverage_ok"])
+
     def test_parse_time_normalizes_to_utc(self):
         self.assertEqual(
             parse_time("2026-10-16T20:00:00-04:00"),
