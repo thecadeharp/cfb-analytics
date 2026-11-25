@@ -31,6 +31,11 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+try:
+    from scripts.segment_tracking import classify_cfb
+except ModuleNotFoundError:
+    from segment_tracking import classify_cfb
+
 
 ROOT = Path(__file__).resolve().parents[1]
 PROJECTIONS_PATH = ROOT / "data" / "projections.json"
@@ -283,6 +288,8 @@ def main():
 
         home = (game.get("home") or {}).get("team")
         away = (game.get("away") or {}).get("team")
+        home_conference = (game.get("home") or {}).get("conference")
+        away_conference = (game.get("away") or {}).get("conference")
         preferred = comparison.get("preferred_side")
         market_total = number(market.get("total"))
         total_direction = None
@@ -311,6 +318,10 @@ def main():
             "start_date": game.get("start_date"),
             "home_team": home,
             "away_team": away,
+            "home_conference": home_conference,
+            "away_conference": away_conference,
+            "matchup_segment": classify_cfb(home_conference, away_conference),
+            "matchup_segment_version": "thi-matchup-segments-v1-2026-11-25",
             "neutral_site": bool(game.get("neutral_site", False)),
             "model": {
                 "home_spread": model_spread,

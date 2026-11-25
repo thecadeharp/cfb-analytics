@@ -7,6 +7,10 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
+try:
+    from scripts.segment_tracking import build_segment_tracking, classify_cbb
+except ModuleNotFoundError:
+    from segment_tracking import build_segment_tracking, classify_cbb
 ROOT=Path(__file__).resolve().parents[1]
 VERSION="thi-cbb-model-tracking-v0.3"
 REQUIRED_BOARD_VERSION="thi-cbb-projection-board-v0.5"
@@ -96,7 +100,8 @@ def build_tracking(board,market_history=None):
         hs=finite((game.get("home") or {}).get("score")); aw=finite((game.get("away") or {}).get("score"))
         if hs is None or aw is None: continue
         p=game.get("projection") or {}; pm=finite(p.get("home_margin")); pt=finite(p.get("total")); actual=hs-aw; actual_total=hs+aw; started=parse_time(game.get("start_date")); week=1+max(0,(started.date()-season_start.date()).days//7) if started and season_start else 1
-        common={"game_id":game.get("game_id"),"start_date":game.get("start_date"),**calendar_fields(game.get("start_date")),"week":week,"away_team":(game.get("away") or {}).get("team"),"home_team":(game.get("home") or {}).get("team"),"neutral_site":bool(game.get("neutral_site")),"final_score":f"{int(aw)}-{int(hs)}"}
+        home_conference=(game.get("home") or {}).get("conference"); away_conference=(game.get("away") or {}).get("conference")
+        common={"game_id":game.get("game_id"),"start_date":game.get("start_date"),**calendar_fields(game.get("start_date")),"week":week,"away_team":(game.get("away") or {}).get("team"),"home_team":(game.get("home") or {}).get("team"),"home_conference":home_conference,"away_conference":away_conference,"matchup_segment":classify_cbb(home_conference,away_conference),"matchup_segment_version":"thi-matchup-segments-v1-2026-11-25","neutral_site":bool(game.get("neutral_site")),"final_score":f"{int(aw)}-{int(hs)}"}
         if pm is not None: su.append({**common,"result":"win" if ((pm>=0)==(actual>=0)) else "loss","margin_error":round(abs(actual-pm),3),"total_error":round(abs(actual_total-pt),3) if pt is not None else None})
         first,close=market_points(game,market_history); opening=finite(first.get("consensus_home_spread")); closing=finite(close.get("consensus_home_spread"))
         ml_first,ml_close=moneyline_market_points(game,market_history); ml=moneyline_decision(game,ml_first,ml_close,actual)
@@ -121,7 +126,8 @@ def build_tracking(board,market_history=None):
     spread_groups=defaultdict(list); total_groups=defaultdict(list)
     for row in spreads: spread_groups[row["signal_tier"]].append(row)
     for row in totals: total_groups[row["signal_tier"]].append(row)
-    return {"meta":{"version":VERSION,"projection_board_version":version,"model_version":board.get("meta",{}).get("model_version"),"season":board.get("meta",{}).get("season"),"generated_at_utc":datetime.now(timezone.utc).isoformat().replace("+00:00","Z"),"reporting_timezone":"America/New_York","calendar_week_definition":"Monday through Sunday by scheduled game date in Eastern Time","grading_policy":"Every frozen projection with a valid pregame market is graded for accountability. Disagreement labels are descriptive and are not promoted recommendation tiers.","moneyline_policy":"Prospective only from relative-market-fit-v1-2026-11-25: at least two complete books, 3 percentage-point no-vig edge, favorites -100 through -185, or model-favored underdogs +100 through +250.","totals_policy":"Total disagreements of 4+ points are tracked as testing keys; promotion eligibility remains separate."},"summary":{"final_games_with_frozen_projection":len(finals),"projection_accuracy":projection_accuracy(finals),"straight_up":summarize(su),"spread":summarize(spreads),"totals":summarize(totals),"moneyline":summarize_moneylines(moneylines)},"by_week":weekly,"spread_by_signal":{k:summarize(v) for k,v in sorted(spread_groups.items())},"totals_by_signal":{k:summarize(v) for k,v in sorted(total_groups.items())},"game_results":su,"spread_decisions":spreads,"total_decisions":totals,"moneyline_decisions":moneylines}
+    segment_tracking=build_segment_tracking(spreads,totals,included_segments=("p5_vs_p5","mid_major_vs_mid_major"),spread_result_key="result",total_result_key="result",spread_clv_key="clv",total_clv_key="clv")
+    return {"meta":{"version":VERSION,"projection_board_version":version,"model_version":board.get("meta",{}).get("model_version"),"season":board.get("meta",{}).get("season"),"generated_at_utc":datetime.now(timezone.utc).isoformat().replace("+00:00","Z"),"reporting_timezone":"America/New_York","calendar_week_definition":"Monday through Sunday by scheduled game date in Eastern Time","grading_policy":"Every frozen projection with a valid pregame market is graded for accountability. Disagreement labels are descriptive and are not promoted recommendation tiers.","moneyline_policy":"Prospective only from relative-market-fit-v1-2026-11-25: at least two complete books, 3 percentage-point no-vig edge, favorites -100 through -185, or model-favored underdogs +100 through +250.","totals_policy":"Total disagreements of 4+ points are tracked as testing keys; promotion eligibility remains separate.","segment_tracking_policy":"Data-only P5-vs-P5 and Mid-Major-vs-Mid-Major splits; no public UI or model influence."},"summary":{"final_games_with_frozen_projection":len(finals),"projection_accuracy":projection_accuracy(finals),"straight_up":summarize(su),"spread":summarize(spreads),"totals":summarize(totals),"moneyline":summarize_moneylines(moneylines)},"by_week":weekly,"spread_by_signal":{k:summarize(v) for k,v in sorted(spread_groups.items())},"totals_by_signal":{k:summarize(v) for k,v in sorted(total_groups.items())},"segment_tracking":segment_tracking,"game_results":su,"spread_decisions":spreads,"total_decisions":totals,"moneyline_decisions":moneylines}
 
 def atomic_write(path,payload):
     path.parent.mkdir(parents=True,exist_ok=True)

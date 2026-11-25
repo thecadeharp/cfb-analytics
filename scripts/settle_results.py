@@ -49,6 +49,10 @@ try:
     from scripts.tracked_decisions import first_tracked_rows
 except ModuleNotFoundError:
     from tracked_decisions import first_tracked_rows
+try:
+    from scripts.segment_tracking import build_segment_tracking, classify_cfb
+except ModuleNotFoundError:
+    from segment_tracking import build_segment_tracking, classify_cfb
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -56,6 +60,7 @@ SNAPSHOT_LEDGER = ROOT / "data" / "snapshots" / "projection_market_snapshots.jso
 CLOSING_LEDGER = ROOT / "data" / "snapshots" / "closing_lines.jsonl"
 CLV_REPORT = ROOT / "data" / "reports" / "clv_report.json"
 TRACKING_EXCLUSIONS = ROOT / "data" / "tracking_exclusions.json"
+PROJECTIONS_PATH = ROOT / "data" / "projections.json"
 
 RESULT_SOURCES = [
     ROOT / "data" / "results.json",
@@ -556,6 +561,16 @@ def calc_clv(snapshot, closing):
     return None
 
 
+def calc_total_clv(snapshot, closing, direction):
+    if not closing or direction not in {"OVER", "UNDER"}:
+        return None
+    snap_total = execution_total(snapshot)
+    close_total = as_number((closing.get("closing_market") or {}).get("total"))
+    if snap_total is None or close_total is None:
+        return None
+    return close_total - snap_total if direction == "OVER" else snap_total - close_total
+
+
 def moneyline_decision(snapshot, closing, result):
     """Grade only prospectively captured Relative Market Fit moneylines."""
     market = snapshot.get("market_at_snapshot") or {}
@@ -731,6 +746,25 @@ def main():
     result_indexes = build_result_indexes(results)
     closing_index = build_closing_index(closings)
     exclusion_payload = load_json(TRACKING_EXCLUSIONS) or {}
+    projection_payload = load_json(PROJECTIONS_PATH) or {}
+    if isinstance(projection_payload, dict):
+        projection_games = (
+            projection_payload.get("games")
+            or projection_payload.get("projections")
+            or []
+        )
+    elif isinstance(projection_payload, list):
+        projection_games = projection_payload
+    else:
+        projection_games = []
+    conferences_by_game = {
+        str(game.get("game_id") or game.get("id")): {
+            "home": (game.get("home") or {}).get("conference"),
+            "away": (game.get("away") or {}).get("conference"),
+        }
+        for game in projection_games
+        if isinstance(game, dict) and (game.get("game_id") or game.get("id")) is not None
+    }
     exclusions_by_game = {
         str(item.get("game_id")): item
         for item in exclusion_payload.get("exclusions") or []
@@ -766,6 +800,7 @@ def main():
         total_grade = total_result(snapshot, result) if result else {
             "direction": None, "edge": None, "tier": None, "result": None
         }
+        total_clv = calc_total_clv(snapshot, closing, total_grade["direction"])
         actual_total = (
             result["home_points"] + result["away_points"] if result else None
         )
@@ -774,6 +809,17 @@ def main():
         execution_total_quote = market.get("execution_total") or {}
 
         moneyline = moneyline_decision(snapshot, closing, result)
+        conference_context = conferences_by_game.get(str(key), {})
+        home_conference = snapshot.get("home_conference") or conference_context.get("home")
+        away_conference = snapshot.get("away_conference") or conference_context.get("away")
+        frozen_segment = snapshot.get("matchup_segment") or classify_cfb(home_conference, away_conference)
+        frozen_model_spread = as_number(model.get("home_spread"))
+        frozen_market_spread = execution_home_spread(snapshot)
+        model_edge = (
+            abs(frozen_model_spread - frozen_market_spread)
+            if frozen_model_spread is not None and frozen_market_spread is not None
+            else None
+        )
 
         rows.append({
             "snapshot_id": snapshot.get("snapshot_id"),
@@ -786,11 +832,16 @@ def main():
             "start_date": snapshot.get("start_date"),
             "away_team": snapshot.get("away_team"),
             "home_team": snapshot.get("home_team"),
+            "home_conference": home_conference,
+            "away_conference": away_conference,
+            "matchup_segment": frozen_segment,
+            "matchup_segment_version": snapshot.get("matchup_segment_version") or "thi-matchup-segments-v1-2026-11-25",
             "preferred_side": preferred_side(snapshot),
             "signal": comparison.get("signal") or comparison.get("market_disagreement_status"),
             "model_home_spread": model.get("home_spread"),
             "model_total": model.get("total"),
             "model_home_win_probability": model.get("home_win_probability"),
+            "model_edge": round_or_none(model_edge),
             "public_home_spread": public_projection.get("home_spread"),
             "public_total": public_projection.get("total"),
             "weather_applied": public_projection.get("weather_applied"),
@@ -812,6 +863,7 @@ def main():
             "total_edge": round_or_none(total_grade["edge"]),
             "total_tier": total_grade["tier"],
             "total_result": total_grade["result"],
+            "total_clv_points": round_or_none(total_clv),
             "actual_total": actual_total,
             "total_projection_error": round_or_none(actual_total - public_total)
             if actual_total is not None and public_total is not None else None,
@@ -863,6 +915,33 @@ def main():
     initial_rows = list(first_by_game.values())
     tracked_by_game = first_tracked_rows(rows)
     tracked_rows = list(tracked_by_game.values())
+    settled_tracked_rows = [row for row in tracked_rows if row.get("result_settled")]
+    segment_tracking = build_segment_tracking(
+        settled_tracked_rows,
+        settled_tracked_rows,
+        included_segments=("p4_vs_p4", "g6_vs_g6"),
+        spread_result_key="ats_result",
+        total_result_key="total_result",
+        spread_clv_key="clv_points",
+        total_clv_key="total_clv_points",
+        spread_edge_key="model_edge",
+        total_edge_key="total_edge",
+    )
+    # These fields support the private segment rollups above but do not need to
+    # inflate the public row-level audit artifact. Future snapshots freeze the
+    # conference and segment at capture time; the aggregate ledger remains the
+    # durable reporting surface.
+    segment_internal_fields = (
+        "away_conference",
+        "home_conference",
+        "matchup_segment",
+        "matchup_segment_version",
+        "model_edge",
+        "total_clv_points",
+    )
+    for row in rows:
+        for field in segment_internal_fields:
+            row.pop(field, None)
     now = datetime.now(timezone.utc)
     pending_future = []
     past_due_unmatched = []
@@ -919,6 +998,10 @@ def main():
                 "prospective edge was at least four points. Total Watch begins at seven."
             ),
             "closing_line": "Near-kickoff closing proxy, not asserted to be the canonical close.",
+            "segment_tracking": (
+                "Data-only P4-vs-P4 and G6-vs-G6 audit ledger. It is not rendered "
+                "in the public UI and does not affect projections, signals, or grading."
+            ),
             "no_retroactive_model_changes": True,
         },
         "results_source": str(results_source.relative_to(ROOT)) if results_source else None,
@@ -941,6 +1024,7 @@ def main():
         "initial_snapshot_by_signal": by_signal,
         "tracked_decision_summary": summarize(tracked_rows),
         "tracked_decision_by_signal": tracked_by_signal,
+        "segment_tracking": segment_tracking,
         "all_snapshot_summary": summarize(rows),
         "rows": rows,
     }

@@ -15,6 +15,7 @@
     "ats_result": "Result for the model-preferred side using the market spread captured in that prospective snapshot.",
     "totals_result": "Result for weather-adjusted projected-total direction when the prospective edge was at least four points. Total Watch begins at seven.",
     "closing_line": "Near-kickoff closing proxy, not asserted to be the canonical close.",
+    "segment_tracking": "Data-only P4-vs-P4 and G6-vs-G6 audit ledger. It is not rendered in the public UI and does not affect projections, signals, or grading.",
     "no_retroactive_model_changes": true
   },
   "results_source": "data/results.json",
@@ -419,6 +420,1804 @@
       "total_losses": 8,
       "total_pushes": 0,
       "total_win_pct_ex_pushes": 61.9
+    }
+  },
+  "segment_tracking": {
+    "version": "thi-matchup-segments-v1-2026-11-25",
+    "visibility": "data_only_not_rendered_in_public_ui",
+    "classification_counts": {
+      "cross_tier_or_other": 92,
+      "g6_vs_g6": 300,
+      "p4_vs_p4": 290
+    },
+    "segments": {
+      "p4_vs_p4": {
+        "all_spreads": {
+          "games": 290,
+          "wins": 151,
+          "losses": 136,
+          "pushes": 3,
+          "hit_rate": 52.61,
+          "hit_rate_ci_95": {
+            "low": 46.84,
+            "high": 58.32,
+            "method": "wilson_95"
+          },
+          "average_clv": -0.293,
+          "beat_close_pct": 43.9,
+          "clv_games": 123,
+          "average_model_edge": 3.464,
+          "sample_warning": null
+        },
+        "spread_disagreements_2_5_plus": {
+          "games": 180,
+          "wins": 99,
+          "losses": 80,
+          "pushes": 1,
+          "hit_rate": 55.31,
+          "hit_rate_ci_95": {
+            "low": 47.99,
+            "high": 62.4,
+            "method": "wilson_95"
+          },
+          "average_clv": -0.158,
+          "beat_close_pct": 46.58,
+          "clv_games": 73,
+          "average_model_edge": 4.856,
+          "sample_warning": null
+        },
+        "spread_disagreements_5_plus": {
+          "games": 72,
+          "wins": 37,
+          "losses": 35,
+          "pushes": 0,
+          "hit_rate": 51.39,
+          "hit_rate_ci_95": {
+            "low": 40.07,
+            "high": 62.57,
+            "method": "wilson_95"
+          },
+          "average_clv": 0.125,
+          "beat_close_pct": 42.86,
+          "clv_games": 28,
+          "average_model_edge": 7.062,
+          "sample_warning": "n_below_100"
+        },
+        "tracked_totals_4_plus": {
+          "games": 117,
+          "wins": 60,
+          "losses": 56,
+          "pushes": 1,
+          "hit_rate": 51.72,
+          "hit_rate_ci_95": {
+            "low": 42.72,
+            "high": 60.62,
+            "method": "wilson_95"
+          },
+          "average_clv": 0.456,
+          "beat_close_pct": 42.22,
+          "clv_games": 90,
+          "average_model_edge": 4.44,
+          "sample_warning": null
+        },
+        "by_week": {
+          "1": {
+            "all_spreads": {
+              "games": 8,
+              "wins": 3,
+              "losses": 4,
+              "pushes": 1,
+              "hit_rate": 42.86,
+              "hit_rate_ci_95": {
+                "low": 15.82,
+                "high": 74.95,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.312,
+              "beat_close_pct": 50.0,
+              "clv_games": 8,
+              "average_model_edge": 2.938,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 4,
+              "wins": 1,
+              "losses": 2,
+              "pushes": 1,
+              "hit_rate": 33.33,
+              "hit_rate_ci_95": {
+                "low": 6.15,
+                "high": 79.23,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.25,
+              "beat_close_pct": 50.0,
+              "clv_games": 4,
+              "average_model_edge": 4.75,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 0,
+              "wins": 0,
+              "losses": 0,
+              "pushes": 0,
+              "hit_rate": null,
+              "hit_rate_ci_95": null,
+              "average_clv": null,
+              "beat_close_pct": null,
+              "clv_games": 0,
+              "average_model_edge": null,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "2": {
+            "all_spreads": {
+              "games": 16,
+              "wins": 9,
+              "losses": 7,
+              "pushes": 0,
+              "hit_rate": 56.25,
+              "hit_rate_ci_95": {
+                "low": 33.18,
+                "high": 76.9,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.188,
+              "beat_close_pct": 50.0,
+              "clv_games": 16,
+              "average_model_edge": 2.656,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 9,
+              "wins": 5,
+              "losses": 4,
+              "pushes": 0,
+              "hit_rate": 55.56,
+              "hit_rate_ci_95": {
+                "low": 26.66,
+                "high": 81.12,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.056,
+              "beat_close_pct": 55.56,
+              "clv_games": 9,
+              "average_model_edge": 4.0,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 2,
+              "wins": 1,
+              "losses": 1,
+              "pushes": 0,
+              "hit_rate": 50.0,
+              "hit_rate_ci_95": {
+                "low": 9.45,
+                "high": 90.55,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.083,
+              "beat_close_pct": 50.0,
+              "clv_games": 6,
+              "average_model_edge": 3.167,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "3": {
+            "all_spreads": {
+              "games": 18,
+              "wins": 5,
+              "losses": 13,
+              "pushes": 0,
+              "hit_rate": 27.78,
+              "hit_rate_ci_95": {
+                "low": 12.5,
+                "high": 50.87,
+                "method": "wilson_95"
+              },
+              "average_clv": -1.833,
+              "beat_close_pct": 11.11,
+              "clv_games": 9,
+              "average_model_edge": 3.417,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 7,
+              "wins": 3,
+              "losses": 4,
+              "pushes": 0,
+              "hit_rate": 42.86,
+              "hit_rate_ci_95": {
+                "low": 15.82,
+                "high": 74.95,
+                "method": "wilson_95"
+              },
+              "average_clv": -1.8,
+              "beat_close_pct": 20.0,
+              "clv_games": 5,
+              "average_model_edge": 7.0,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 4,
+              "wins": 4,
+              "losses": 0,
+              "pushes": 0,
+              "hit_rate": 100.0,
+              "hit_rate_ci_95": {
+                "low": 51.01,
+                "high": 100.0,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.929,
+              "beat_close_pct": 42.86,
+              "clv_games": 7,
+              "average_model_edge": 3.367,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "4": {
+            "all_spreads": {
+              "games": 24,
+              "wins": 13,
+              "losses": 11,
+              "pushes": 0,
+              "hit_rate": 54.17,
+              "hit_rate_ci_95": {
+                "low": 35.07,
+                "high": 72.11,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.375,
+              "beat_close_pct": 33.33,
+              "clv_games": 12,
+              "average_model_edge": 3.833,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 16,
+              "wins": 10,
+              "losses": 6,
+              "pushes": 0,
+              "hit_rate": 62.5,
+              "hit_rate_ci_95": {
+                "low": 38.64,
+                "high": 81.52,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.222,
+              "beat_close_pct": 44.44,
+              "clv_games": 9,
+              "average_model_edge": 5.094,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 12,
+              "wins": 7,
+              "losses": 5,
+              "pushes": 0,
+              "hit_rate": 58.33,
+              "hit_rate_ci_95": {
+                "low": 31.95,
+                "high": 80.67,
+                "method": "wilson_95"
+              },
+              "average_clv": 1.45,
+              "beat_close_pct": 60.0,
+              "clv_games": 10,
+              "average_model_edge": 4.568,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "5": {
+            "all_spreads": {
+              "games": 26,
+              "wins": 14,
+              "losses": 12,
+              "pushes": 0,
+              "hit_rate": 53.85,
+              "hit_rate_ci_95": {
+                "low": 35.46,
+                "high": 71.24,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.708,
+              "beat_close_pct": 50.0,
+              "clv_games": 12,
+              "average_model_edge": 3.981,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 18,
+              "wins": 9,
+              "losses": 9,
+              "pushes": 0,
+              "hit_rate": 50.0,
+              "hit_rate_ci_95": {
+                "low": 29.03,
+                "high": 70.97,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.625,
+              "beat_close_pct": 50.0,
+              "clv_games": 8,
+              "average_model_edge": 5.111,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 8,
+              "wins": 4,
+              "losses": 4,
+              "pushes": 0,
+              "hit_rate": 50.0,
+              "hit_rate_ci_95": {
+                "low": 21.52,
+                "high": 78.48,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.6,
+              "beat_close_pct": 20.0,
+              "clv_games": 10,
+              "average_model_edge": 3.08,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "6": {
+            "all_spreads": {
+              "games": 25,
+              "wins": 14,
+              "losses": 10,
+              "pushes": 1,
+              "hit_rate": 58.33,
+              "hit_rate_ci_95": {
+                "low": 38.83,
+                "high": 75.53,
+                "method": "wilson_95"
+              },
+              "average_clv": 1.167,
+              "beat_close_pct": 66.67,
+              "clv_games": 3,
+              "average_model_edge": 3.48,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 18,
+              "wins": 11,
+              "losses": 7,
+              "pushes": 0,
+              "hit_rate": 61.11,
+              "hit_rate_ci_95": {
+                "low": 38.62,
+                "high": 79.7,
+                "method": "wilson_95"
+              },
+              "average_clv": 1.167,
+              "beat_close_pct": 66.67,
+              "clv_games": 3,
+              "average_model_edge": 4.528,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 10,
+              "wins": 5,
+              "losses": 5,
+              "pushes": 0,
+              "hit_rate": 50.0,
+              "hit_rate_ci_95": {
+                "low": 23.66,
+                "high": 76.34,
+                "method": "wilson_95"
+              },
+              "average_clv": 1.0,
+              "beat_close_pct": 66.67,
+              "clv_games": 3,
+              "average_model_edge": 3.848,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "7": {
+            "all_spreads": {
+              "games": 27,
+              "wins": 15,
+              "losses": 11,
+              "pushes": 1,
+              "hit_rate": 57.69,
+              "hit_rate_ci_95": {
+                "low": 38.95,
+                "high": 74.46,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.263,
+              "beat_close_pct": 47.37,
+              "clv_games": 19,
+              "average_model_edge": 2.815,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 14,
+              "wins": 9,
+              "losses": 5,
+              "pushes": 0,
+              "hit_rate": 64.29,
+              "hit_rate_ci_95": {
+                "low": 38.76,
+                "high": 83.66,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.944,
+              "beat_close_pct": 22.22,
+              "clv_games": 9,
+              "average_model_edge": 4.321,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 9,
+              "wins": 3,
+              "losses": 6,
+              "pushes": 0,
+              "hit_rate": 33.33,
+              "hit_rate_ci_95": {
+                "low": 12.06,
+                "high": 64.58,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.607,
+              "beat_close_pct": 42.86,
+              "clv_games": 14,
+              "average_model_edge": 4.071,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "8": {
+            "all_spreads": {
+              "games": 27,
+              "wins": 12,
+              "losses": 15,
+              "pushes": 0,
+              "hit_rate": 44.44,
+              "hit_rate_ci_95": {
+                "low": 27.59,
+                "high": 62.69,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.421,
+              "beat_close_pct": 47.37,
+              "clv_games": 19,
+              "average_model_edge": 2.833,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 14,
+              "wins": 7,
+              "losses": 7,
+              "pushes": 0,
+              "hit_rate": 50.0,
+              "hit_rate_ci_95": {
+                "low": 26.8,
+                "high": 73.2,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.778,
+              "beat_close_pct": 55.56,
+              "clv_games": 9,
+              "average_model_edge": 4.357,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 11,
+              "wins": 5,
+              "losses": 6,
+              "pushes": 0,
+              "hit_rate": 45.45,
+              "hit_rate_ci_95": {
+                "low": 21.27,
+                "high": 71.99,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.088,
+              "beat_close_pct": 35.29,
+              "clv_games": 17,
+              "average_model_edge": 4.217,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "9": {
+            "all_spreads": {
+              "games": 28,
+              "wins": 17,
+              "losses": 11,
+              "pushes": 0,
+              "hit_rate": 60.71,
+              "hit_rate_ci_95": {
+                "low": 42.41,
+                "high": 76.43,
+                "method": "wilson_95"
+              },
+              "average_clv": -6.5,
+              "beat_close_pct": 0.0,
+              "clv_games": 1,
+              "average_model_edge": 2.982,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 15,
+              "wins": 9,
+              "losses": 6,
+              "pushes": 0,
+              "hit_rate": 60.0,
+              "hit_rate_ci_95": {
+                "low": 35.75,
+                "high": 80.18,
+                "method": "wilson_95"
+              },
+              "average_clv": -6.5,
+              "beat_close_pct": 0.0,
+              "clv_games": 1,
+              "average_model_edge": 4.533,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 14,
+              "wins": 7,
+              "losses": 6,
+              "pushes": 1,
+              "hit_rate": 53.85,
+              "hit_rate_ci_95": {
+                "low": 29.14,
+                "high": 76.79,
+                "method": "wilson_95"
+              },
+              "average_clv": -1.0,
+              "beat_close_pct": 0.0,
+              "clv_games": 1,
+              "average_model_edge": 4.426,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "10": {
+            "all_spreads": {
+              "games": 28,
+              "wins": 15,
+              "losses": 13,
+              "pushes": 0,
+              "hit_rate": 53.57,
+              "hit_rate_ci_95": {
+                "low": 35.81,
+                "high": 70.47,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.4,
+              "beat_close_pct": 40.0,
+              "clv_games": 5,
+              "average_model_edge": 3.375,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 17,
+              "wins": 9,
+              "losses": 8,
+              "pushes": 0,
+              "hit_rate": 52.94,
+              "hit_rate_ci_95": {
+                "low": 30.96,
+                "high": 73.84,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.0,
+              "beat_close_pct": 50.0,
+              "clv_games": 2,
+              "average_model_edge": 4.588,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 14,
+              "wins": 6,
+              "losses": 8,
+              "pushes": 0,
+              "hit_rate": 42.86,
+              "hit_rate_ci_95": {
+                "low": 21.38,
+                "high": 67.41,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.2,
+              "beat_close_pct": 40.0,
+              "clv_games": 5,
+              "average_model_edge": 4.896,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "11": {
+            "all_spreads": {
+              "games": 32,
+              "wins": 18,
+              "losses": 14,
+              "pushes": 0,
+              "hit_rate": 56.25,
+              "hit_rate_ci_95": {
+                "low": 39.33,
+                "high": 71.83,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.333,
+              "beat_close_pct": 55.56,
+              "clv_games": 9,
+              "average_model_edge": 3.969,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 22,
+              "wins": 11,
+              "losses": 11,
+              "pushes": 0,
+              "hit_rate": 50.0,
+              "hit_rate_ci_95": {
+                "low": 30.72,
+                "high": 69.28,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.714,
+              "beat_close_pct": 71.43,
+              "clv_games": 7,
+              "average_model_edge": 5.25,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 18,
+              "wins": 9,
+              "losses": 9,
+              "pushes": 0,
+              "hit_rate": 50.0,
+              "hit_rate_ci_95": {
+                "low": 29.03,
+                "high": 70.97,
+                "method": "wilson_95"
+              },
+              "average_clv": 2.0,
+              "beat_close_pct": 66.67,
+              "clv_games": 9,
+              "average_model_edge": 5.538,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "12": {
+            "all_spreads": {
+              "games": 31,
+              "wins": 16,
+              "losses": 15,
+              "pushes": 0,
+              "hit_rate": 51.61,
+              "hit_rate_ci_95": {
+                "low": 34.84,
+                "high": 68.03,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.5,
+              "beat_close_pct": 40.0,
+              "clv_games": 10,
+              "average_model_edge": 4.419,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 26,
+              "wins": 15,
+              "losses": 11,
+              "pushes": 0,
+              "hit_rate": 57.69,
+              "hit_rate_ci_95": {
+                "low": 38.95,
+                "high": 74.46,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.071,
+              "beat_close_pct": 42.86,
+              "clv_games": 7,
+              "average_model_edge": 5.077,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 15,
+              "wins": 9,
+              "losses": 6,
+              "pushes": 0,
+              "hit_rate": 60.0,
+              "hit_rate_ci_95": {
+                "low": 35.75,
+                "high": 80.18,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.438,
+              "beat_close_pct": 25.0,
+              "clv_games": 8,
+              "average_model_edge": 5.946,
+              "sample_warning": "n_below_100"
+            }
+          }
+        },
+        "by_month": {
+          "2026-09": {
+            "all_spreads": {
+              "games": 66,
+              "wins": 30,
+              "losses": 35,
+              "pushes": 1,
+              "hit_rate": 46.15,
+              "hit_rate_ci_95": {
+                "low": 34.59,
+                "high": 58.15,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.478,
+              "beat_close_pct": 37.78,
+              "clv_games": 45,
+              "average_model_edge": 3.326,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 36,
+              "wins": 19,
+              "losses": 16,
+              "pushes": 1,
+              "hit_rate": 54.29,
+              "hit_rate_ci_95": {
+                "low": 38.19,
+                "high": 69.53,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.241,
+              "beat_close_pct": 44.44,
+              "clv_games": 27,
+              "average_model_edge": 5.153,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 18,
+              "wins": 12,
+              "losses": 6,
+              "pushes": 0,
+              "hit_rate": 66.67,
+              "hit_rate_ci_95": {
+                "low": 43.75,
+                "high": 83.72,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.935,
+              "beat_close_pct": 52.17,
+              "clv_games": 23,
+              "average_model_edge": 3.953,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "2026-10": {
+            "all_spreads": {
+              "games": 132,
+              "wins": 71,
+              "losses": 59,
+              "pushes": 2,
+              "hit_rate": 54.62,
+              "hit_rate_ci_95": {
+                "low": 46.05,
+                "high": 62.92,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.269,
+              "beat_close_pct": 48.15,
+              "clv_games": 54,
+              "average_model_edge": 3.193,
+              "sample_warning": null
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 78,
+              "wins": 44,
+              "losses": 34,
+              "pushes": 0,
+              "hit_rate": 56.41,
+              "hit_rate_ci_95": {
+                "low": 45.36,
+                "high": 66.86,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.317,
+              "beat_close_pct": 43.33,
+              "clv_games": 30,
+              "average_model_edge": 4.59,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 51,
+              "wins": 24,
+              "losses": 26,
+              "pushes": 1,
+              "hit_rate": 48.0,
+              "hit_rate_ci_95": {
+                "low": 34.8,
+                "high": 61.49,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.133,
+              "beat_close_pct": 35.56,
+              "clv_games": 45,
+              "average_model_edge": 3.894,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "2026-11": {
+            "all_spreads": {
+              "games": 92,
+              "wins": 50,
+              "losses": 42,
+              "pushes": 0,
+              "hit_rate": 54.35,
+              "hit_rate_ci_95": {
+                "low": 44.2,
+                "high": 64.15,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.0,
+              "beat_close_pct": 45.83,
+              "clv_games": 24,
+              "average_model_edge": 3.951,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 66,
+              "wins": 36,
+              "losses": 30,
+              "pushes": 0,
+              "hit_rate": 54.55,
+              "hit_rate_ci_95": {
+                "low": 42.61,
+                "high": 65.98,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.281,
+              "beat_close_pct": 56.25,
+              "clv_games": 16,
+              "average_model_edge": 5.008,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 48,
+              "wins": 24,
+              "losses": 24,
+              "pushes": 0,
+              "hit_rate": 50.0,
+              "hit_rate_ci_95": {
+                "low": 36.39,
+                "high": 63.61,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.614,
+              "beat_close_pct": 45.45,
+              "clv_games": 22,
+              "average_model_edge": 5.519,
+              "sample_warning": "n_below_100"
+            }
+          }
+        }
+      },
+      "g6_vs_g6": {
+        "all_spreads": {
+          "games": 300,
+          "wins": 156,
+          "losses": 142,
+          "pushes": 2,
+          "hit_rate": 52.35,
+          "hit_rate_ci_95": {
+            "low": 46.68,
+            "high": 57.95,
+            "method": "wilson_95"
+          },
+          "average_clv": 0.142,
+          "beat_close_pct": 46.9,
+          "clv_games": 113,
+          "average_model_edge": 3.66,
+          "sample_warning": null
+        },
+        "spread_disagreements_2_5_plus": {
+          "games": 182,
+          "wins": 95,
+          "losses": 85,
+          "pushes": 2,
+          "hit_rate": 52.78,
+          "hit_rate_ci_95": {
+            "low": 45.5,
+            "high": 59.94,
+            "method": "wilson_95"
+          },
+          "average_clv": 0.303,
+          "beat_close_pct": 50.0,
+          "clv_games": 66,
+          "average_model_edge": 5.272,
+          "sample_warning": null
+        },
+        "spread_disagreements_5_plus": {
+          "games": 78,
+          "wins": 41,
+          "losses": 35,
+          "pushes": 2,
+          "hit_rate": 53.95,
+          "hit_rate_ci_95": {
+            "low": 42.82,
+            "high": 64.69,
+            "method": "wilson_95"
+          },
+          "average_clv": 0.293,
+          "beat_close_pct": 55.17,
+          "clv_games": 29,
+          "average_model_edge": 7.686,
+          "sample_warning": "n_below_100"
+        },
+        "tracked_totals_4_plus": {
+          "games": 134,
+          "wins": 64,
+          "losses": 70,
+          "pushes": 0,
+          "hit_rate": 47.76,
+          "hit_rate_ci_95": {
+            "low": 39.48,
+            "high": 56.16,
+            "method": "wilson_95"
+          },
+          "average_clv": 0.46,
+          "beat_close_pct": 51.52,
+          "clv_games": 99,
+          "average_model_edge": 4.25,
+          "sample_warning": null
+        },
+        "by_week": {
+          "1": {
+            "all_spreads": {
+              "games": 9,
+              "wins": 5,
+              "losses": 4,
+              "pushes": 0,
+              "hit_rate": 55.56,
+              "hit_rate_ci_95": {
+                "low": 26.66,
+                "high": 81.12,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.167,
+              "beat_close_pct": 44.44,
+              "clv_games": 9,
+              "average_model_edge": 1.889,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 3,
+              "wins": 2,
+              "losses": 1,
+              "pushes": 0,
+              "hit_rate": 66.67,
+              "hit_rate_ci_95": {
+                "low": 20.77,
+                "high": 93.85,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.333,
+              "beat_close_pct": 66.67,
+              "clv_games": 3,
+              "average_model_edge": 3.0,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 1,
+              "wins": 1,
+              "losses": 0,
+              "pushes": 0,
+              "hit_rate": 100.0,
+              "hit_rate_ci_95": {
+                "low": 20.65,
+                "high": 100.0,
+                "method": "wilson_95"
+              },
+              "average_clv": 2.0,
+              "beat_close_pct": 100.0,
+              "clv_games": 1,
+              "average_model_edge": 4.5,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "2": {
+            "all_spreads": {
+              "games": 16,
+              "wins": 5,
+              "losses": 11,
+              "pushes": 0,
+              "hit_rate": 31.25,
+              "hit_rate_ci_95": {
+                "low": 14.16,
+                "high": 55.6,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.344,
+              "beat_close_pct": 31.25,
+              "clv_games": 16,
+              "average_model_edge": 2.219,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 5,
+              "wins": 0,
+              "losses": 5,
+              "pushes": 0,
+              "hit_rate": 0.0,
+              "hit_rate_ci_95": {
+                "low": 0.0,
+                "high": 43.45,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.1,
+              "beat_close_pct": 40.0,
+              "clv_games": 5,
+              "average_model_edge": 4.2,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 3,
+              "wins": 2,
+              "losses": 1,
+              "pushes": 0,
+              "hit_rate": 66.67,
+              "hit_rate_ci_95": {
+                "low": 20.77,
+                "high": 93.85,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.667,
+              "beat_close_pct": 41.67,
+              "clv_games": 12,
+              "average_model_edge": 2.214,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "3": {
+            "all_spreads": {
+              "games": 17,
+              "wins": 12,
+              "losses": 5,
+              "pushes": 0,
+              "hit_rate": 70.59,
+              "hit_rate_ci_95": {
+                "low": 46.87,
+                "high": 86.72,
+                "method": "wilson_95"
+              },
+              "average_clv": 1.15,
+              "beat_close_pct": 70.0,
+              "clv_games": 10,
+              "average_model_edge": 3.765,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 10,
+              "wins": 7,
+              "losses": 3,
+              "pushes": 0,
+              "hit_rate": 70.0,
+              "hit_rate_ci_95": {
+                "low": 39.68,
+                "high": 89.22,
+                "method": "wilson_95"
+              },
+              "average_clv": 1.5,
+              "beat_close_pct": 83.33,
+              "clv_games": 6,
+              "average_model_edge": 5.55,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 9,
+              "wins": 4,
+              "losses": 5,
+              "pushes": 0,
+              "hit_rate": 44.44,
+              "hit_rate_ci_95": {
+                "low": 18.88,
+                "high": 73.34,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.15,
+              "beat_close_pct": 40.0,
+              "clv_games": 10,
+              "average_model_edge": 4.794,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "4": {
+            "all_spreads": {
+              "games": 23,
+              "wins": 11,
+              "losses": 12,
+              "pushes": 0,
+              "hit_rate": 47.83,
+              "hit_rate_ci_95": {
+                "low": 29.24,
+                "high": 67.04,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.9,
+              "beat_close_pct": 30.0,
+              "clv_games": 10,
+              "average_model_edge": 4.065,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 15,
+              "wins": 6,
+              "losses": 9,
+              "pushes": 0,
+              "hit_rate": 40.0,
+              "hit_rate_ci_95": {
+                "low": 19.82,
+                "high": 64.25,
+                "method": "wilson_95"
+              },
+              "average_clv": -1.6,
+              "beat_close_pct": 20.0,
+              "clv_games": 5,
+              "average_model_edge": 5.733,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 10,
+              "wins": 6,
+              "losses": 4,
+              "pushes": 0,
+              "hit_rate": 60.0,
+              "hit_rate_ci_95": {
+                "low": 31.27,
+                "high": 83.18,
+                "method": "wilson_95"
+              },
+              "average_clv": 1.3,
+              "beat_close_pct": 60.0,
+              "clv_games": 10,
+              "average_model_edge": 3.5,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "5": {
+            "all_spreads": {
+              "games": 26,
+              "wins": 12,
+              "losses": 14,
+              "pushes": 0,
+              "hit_rate": 46.15,
+              "hit_rate_ci_95": {
+                "low": 28.76,
+                "high": 64.54,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.636,
+              "beat_close_pct": 45.45,
+              "clv_games": 11,
+              "average_model_edge": 4.173,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 19,
+              "wins": 8,
+              "losses": 11,
+              "pushes": 0,
+              "hit_rate": 42.11,
+              "hit_rate_ci_95": {
+                "low": 23.14,
+                "high": 63.72,
+                "method": "wilson_95"
+              },
+              "average_clv": -1.5,
+              "beat_close_pct": 25.0,
+              "clv_games": 8,
+              "average_model_edge": 5.368,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 10,
+              "wins": 3,
+              "losses": 7,
+              "pushes": 0,
+              "hit_rate": 30.0,
+              "hit_rate_ci_95": {
+                "low": 10.78,
+                "high": 60.32,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.818,
+              "beat_close_pct": 36.36,
+              "clv_games": 11,
+              "average_model_edge": 3.442,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "6": {
+            "all_spreads": {
+              "games": 29,
+              "wins": 18,
+              "losses": 10,
+              "pushes": 1,
+              "hit_rate": 64.29,
+              "hit_rate_ci_95": {
+                "low": 45.83,
+                "high": 79.29,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.214,
+              "beat_close_pct": 71.43,
+              "clv_games": 7,
+              "average_model_edge": 3.776,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 17,
+              "wins": 10,
+              "losses": 6,
+              "pushes": 1,
+              "hit_rate": 62.5,
+              "hit_rate_ci_95": {
+                "low": 38.64,
+                "high": 81.52,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.625,
+              "beat_close_pct": 75.0,
+              "clv_games": 4,
+              "average_model_edge": 5.676,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 11,
+              "wins": 6,
+              "losses": 5,
+              "pushes": 0,
+              "hit_rate": 54.55,
+              "hit_rate_ci_95": {
+                "low": 28.01,
+                "high": 78.73,
+                "method": "wilson_95"
+              },
+              "average_clv": 1.071,
+              "beat_close_pct": 57.14,
+              "clv_games": 7,
+              "average_model_edge": 3.276,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "7": {
+            "all_spreads": {
+              "games": 30,
+              "wins": 14,
+              "losses": 15,
+              "pushes": 1,
+              "hit_rate": 48.28,
+              "hit_rate_ci_95": {
+                "low": 31.39,
+                "high": 65.57,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.333,
+              "beat_close_pct": 46.67,
+              "clv_games": 15,
+              "average_model_edge": 3.717,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 20,
+              "wins": 10,
+              "losses": 9,
+              "pushes": 1,
+              "hit_rate": 52.63,
+              "hit_rate_ci_95": {
+                "low": 31.71,
+                "high": 72.67,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.7,
+              "beat_close_pct": 50.0,
+              "clv_games": 10,
+              "average_model_edge": 4.925,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 11,
+              "wins": 8,
+              "losses": 3,
+              "pushes": 0,
+              "hit_rate": 72.73,
+              "hit_rate_ci_95": {
+                "low": 43.43,
+                "high": 90.25,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.786,
+              "beat_close_pct": 71.43,
+              "clv_games": 14,
+              "average_model_edge": 3.45,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "8": {
+            "all_spreads": {
+              "games": 28,
+              "wins": 14,
+              "losses": 14,
+              "pushes": 0,
+              "hit_rate": 50.0,
+              "hit_rate_ci_95": {
+                "low": 32.63,
+                "high": 67.37,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.25,
+              "beat_close_pct": 42.86,
+              "clv_games": 14,
+              "average_model_edge": 2.946,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 15,
+              "wins": 8,
+              "losses": 7,
+              "pushes": 0,
+              "hit_rate": 53.33,
+              "hit_rate_ci_95": {
+                "low": 30.12,
+                "high": 75.19,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.333,
+              "beat_close_pct": 44.44,
+              "clv_games": 9,
+              "average_model_edge": 4.667,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 15,
+              "wins": 5,
+              "losses": 10,
+              "pushes": 0,
+              "hit_rate": 33.33,
+              "hit_rate_ci_95": {
+                "low": 15.18,
+                "high": 58.29,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.714,
+              "beat_close_pct": 64.29,
+              "clv_games": 14,
+              "average_model_edge": 4.161,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "9": {
+            "all_spreads": {
+              "games": 25,
+              "wins": 15,
+              "losses": 10,
+              "pushes": 0,
+              "hit_rate": 60.0,
+              "hit_rate_ci_95": {
+                "low": 40.74,
+                "high": 76.6,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.0,
+              "beat_close_pct": 50.0,
+              "clv_games": 2,
+              "average_model_edge": 3.46,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 15,
+              "wins": 11,
+              "losses": 4,
+              "pushes": 0,
+              "hit_rate": 73.33,
+              "hit_rate_ci_95": {
+                "low": 48.05,
+                "high": 89.1,
+                "method": "wilson_95"
+              },
+              "average_clv": 3.0,
+              "beat_close_pct": 100.0,
+              "clv_games": 1,
+              "average_model_edge": 4.933,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 16,
+              "wins": 6,
+              "losses": 10,
+              "pushes": 0,
+              "hit_rate": 37.5,
+              "hit_rate_ci_95": {
+                "low": 18.48,
+                "high": 61.36,
+                "method": "wilson_95"
+              },
+              "average_clv": 4.0,
+              "beat_close_pct": 100.0,
+              "clv_games": 1,
+              "average_model_edge": 5.68,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "10": {
+            "all_spreads": {
+              "games": 31,
+              "wins": 13,
+              "losses": 18,
+              "pushes": 0,
+              "hit_rate": 41.94,
+              "hit_rate_ci_95": {
+                "low": 26.42,
+                "high": 59.23,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.25,
+              "beat_close_pct": 50.0,
+              "clv_games": 6,
+              "average_model_edge": 3.226,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 18,
+              "wins": 8,
+              "losses": 10,
+              "pushes": 0,
+              "hit_rate": 44.44,
+              "hit_rate_ci_95": {
+                "low": 24.56,
+                "high": 66.28,
+                "method": "wilson_95"
+              },
+              "average_clv": -1.25,
+              "beat_close_pct": 25.0,
+              "clv_games": 4,
+              "average_model_edge": 4.639,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 13,
+              "wins": 4,
+              "losses": 9,
+              "pushes": 0,
+              "hit_rate": 30.77,
+              "hit_rate_ci_95": {
+                "low": 12.68,
+                "high": 57.63,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.167,
+              "beat_close_pct": 50.0,
+              "clv_games": 6,
+              "average_model_edge": 4.694,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "11": {
+            "all_spreads": {
+              "games": 32,
+              "wins": 14,
+              "losses": 18,
+              "pushes": 0,
+              "hit_rate": 43.75,
+              "hit_rate_ci_95": {
+                "low": 28.17,
+                "high": 60.67,
+                "method": "wilson_95"
+              },
+              "average_clv": 1.0,
+              "beat_close_pct": 37.5,
+              "clv_games": 8,
+              "average_model_edge": 3.25,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 19,
+              "wins": 7,
+              "losses": 12,
+              "pushes": 0,
+              "hit_rate": 36.84,
+              "hit_rate_ci_95": {
+                "low": 19.15,
+                "high": 58.96,
+                "method": "wilson_95"
+              },
+              "average_clv": 1.833,
+              "beat_close_pct": 50.0,
+              "clv_games": 6,
+              "average_model_edge": 4.711,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 17,
+              "wins": 6,
+              "losses": 11,
+              "pushes": 0,
+              "hit_rate": 35.29,
+              "hit_rate_ci_95": {
+                "low": 17.31,
+                "high": 58.7,
+                "method": "wilson_95"
+              },
+              "average_clv": -1.062,
+              "beat_close_pct": 25.0,
+              "clv_games": 8,
+              "average_model_edge": 5.078,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "12": {
+            "all_spreads": {
+              "games": 32,
+              "wins": 22,
+              "losses": 10,
+              "pushes": 0,
+              "hit_rate": 68.75,
+              "hit_rate_ci_95": {
+                "low": 51.43,
+                "high": 82.05,
+                "method": "wilson_95"
+              },
+              "average_clv": 1.6,
+              "beat_close_pct": 80.0,
+              "clv_games": 5,
+              "average_model_edge": 5.453,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 24,
+              "wins": 17,
+              "losses": 7,
+              "pushes": 0,
+              "hit_rate": 70.83,
+              "hit_rate_ci_95": {
+                "low": 50.83,
+                "high": 85.09,
+                "method": "wilson_95"
+              },
+              "average_clv": 1.6,
+              "beat_close_pct": 80.0,
+              "clv_games": 5,
+              "average_model_edge": 6.792,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 17,
+              "wins": 12,
+              "losses": 5,
+              "pushes": 0,
+              "hit_rate": 70.59,
+              "hit_rate_ci_95": {
+                "low": 46.87,
+                "high": 86.72,
+                "method": "wilson_95"
+              },
+              "average_clv": 1.4,
+              "beat_close_pct": 40.0,
+              "clv_games": 5,
+              "average_model_edge": 5.422,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "13": {
+            "all_spreads": {
+              "games": 2,
+              "wins": 1,
+              "losses": 1,
+              "pushes": 0,
+              "hit_rate": 50.0,
+              "hit_rate_ci_95": {
+                "low": 9.45,
+                "high": 90.55,
+                "method": "wilson_95"
+              },
+              "average_clv": null,
+              "beat_close_pct": null,
+              "clv_games": 0,
+              "average_model_edge": 5.5,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 2,
+              "wins": 1,
+              "losses": 1,
+              "pushes": 0,
+              "hit_rate": 50.0,
+              "hit_rate_ci_95": {
+                "low": 9.45,
+                "high": 90.55,
+                "method": "wilson_95"
+              },
+              "average_clv": null,
+              "beat_close_pct": null,
+              "clv_games": 0,
+              "average_model_edge": 5.5,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 1,
+              "wins": 1,
+              "losses": 0,
+              "pushes": 0,
+              "hit_rate": 100.0,
+              "hit_rate_ci_95": {
+                "low": 20.65,
+                "high": 100.0,
+                "method": "wilson_95"
+              },
+              "average_clv": null,
+              "beat_close_pct": null,
+              "clv_games": 0,
+              "average_model_edge": 3.5,
+              "sample_warning": "n_below_100"
+            }
+          }
+        },
+        "by_month": {
+          "2026-09": {
+            "all_spreads": {
+              "games": 65,
+              "wins": 33,
+              "losses": 32,
+              "pushes": 0,
+              "hit_rate": 50.77,
+              "hit_rate_ci_95": {
+                "low": 38.92,
+                "high": 62.54,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.033,
+              "beat_close_pct": 42.22,
+              "clv_games": 45,
+              "average_model_edge": 3.231,
+              "sample_warning": "n_below_100"
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 33,
+              "wins": 15,
+              "losses": 18,
+              "pushes": 0,
+              "hit_rate": 45.45,
+              "hit_rate_ci_95": {
+                "low": 29.84,
+                "high": 62.01,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.132,
+              "beat_close_pct": 52.63,
+              "clv_games": 19,
+              "average_model_edge": 5.197,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 23,
+              "wins": 13,
+              "losses": 10,
+              "pushes": 0,
+              "hit_rate": 56.52,
+              "hit_rate_ci_95": {
+                "low": 36.81,
+                "high": 74.37,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.742,
+              "beat_close_pct": 48.48,
+              "clv_games": 33,
+              "average_model_edge": 3.591,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "2026-10": {
+            "all_spreads": {
+              "games": 134,
+              "wins": 70,
+              "losses": 62,
+              "pushes": 2,
+              "hit_rate": 53.03,
+              "hit_rate_ci_95": {
+                "low": 44.55,
+                "high": 61.34,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.061,
+              "beat_close_pct": 48.98,
+              "clv_games": 49,
+              "average_model_edge": 3.649,
+              "sample_warning": null
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 84,
+              "wins": 45,
+              "losses": 37,
+              "pushes": 2,
+              "hit_rate": 54.88,
+              "hit_rate_ci_95": {
+                "low": 44.13,
+                "high": 65.19,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.109,
+              "beat_close_pct": 46.88,
+              "clv_games": 32,
+              "average_model_edge": 5.161,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 60,
+              "wins": 28,
+              "losses": 32,
+              "pushes": 0,
+              "hit_rate": 46.67,
+              "hit_rate_ci_95": {
+                "low": 34.63,
+                "high": 59.11,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.5,
+              "beat_close_pct": 59.57,
+              "clv_games": 47,
+              "average_model_edge": 3.925,
+              "sample_warning": "n_below_100"
+            }
+          },
+          "2026-11": {
+            "all_spreads": {
+              "games": 101,
+              "wins": 53,
+              "losses": 48,
+              "pushes": 0,
+              "hit_rate": 52.48,
+              "hit_rate_ci_95": {
+                "low": 42.82,
+                "high": 61.94,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.763,
+              "beat_close_pct": 52.63,
+              "clv_games": 19,
+              "average_model_edge": 3.95,
+              "sample_warning": null
+            },
+            "spread_disagreements_2_5_plus": {
+              "games": 65,
+              "wins": 35,
+              "losses": 30,
+              "pushes": 0,
+              "hit_rate": 53.85,
+              "hit_rate_ci_95": {
+                "low": 41.85,
+                "high": 65.41,
+                "method": "wilson_95"
+              },
+              "average_clv": 0.933,
+              "beat_close_pct": 53.33,
+              "clv_games": 15,
+              "average_model_edge": 5.454,
+              "sample_warning": "n_below_100"
+            },
+            "tracked_totals_4_plus": {
+              "games": 51,
+              "wins": 23,
+              "losses": 28,
+              "pushes": 0,
+              "hit_rate": 45.1,
+              "hit_rate_ci_95": {
+                "low": 32.27,
+                "high": 58.62,
+                "method": "wilson_95"
+              },
+              "average_clv": -0.132,
+              "beat_close_pct": 36.84,
+              "clv_games": 19,
+              "average_model_edge": 5.04,
+              "sample_warning": "n_below_100"
+            }
+          }
+        }
+      }
     }
   },
   "all_snapshot_summary": {
