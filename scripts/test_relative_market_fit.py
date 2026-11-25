@@ -33,6 +33,8 @@ class RelativeMarketFitContractTest(unittest.TestCase):
 
     def test_cfb_capture_contract_freezes_moneylines(self):
         self.assertIn('"markets": "h2h,spreads,totals"', self.builder)
+        self.assertIn('"moneyline_book_count": len(reference_moneylines)', self.builder)
+        self.assertIn('"moneyline_book_count": market.get("moneyline_book_count", 0)', self.builder)
         self.assertIn('"reference_moneyline"', self.snapshot)
         self.assertIn('"reference_moneyline"', self.closing)
 

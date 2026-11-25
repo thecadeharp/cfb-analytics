@@ -1410,6 +1410,7 @@ def extract_market(raw_game):
         "reference_spread": reference_spread,
         "reference_total": reference_total,
         "reference_moneyline": reference_moneyline,
+        "moneyline_book_count": len(reference_moneylines),
         "book_lines": book_lines,
     }
 
@@ -1480,6 +1481,7 @@ def fetch_odds(
             "reference_spread": market["reference_spread"],
             "reference_total": market["reference_total"],
             "reference_moneyline": market["reference_moneyline"],
+            "moneyline_book_count": market["moneyline_book_count"],
             "book_lines": market["book_lines"],
         })
 
@@ -2138,6 +2140,7 @@ def market_payload(market):
             "reference_spread": None,
             "reference_total": None,
             "reference_moneyline": None,
+            "moneyline_book_count": 0,
             "book_lines": [],
         }
 
@@ -2159,6 +2162,7 @@ def market_payload(market):
         "reference_spread": market.get("reference_spread"),
         "reference_total": market.get("reference_total"),
         "reference_moneyline": market.get("reference_moneyline"),
+        "moneyline_book_count": market.get("moneyline_book_count", 0),
         "book_lines": market.get("book_lines", []),
     }
 
