@@ -1,575 +1,16 @@
 {
-  "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+  "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
   "model_version": "production-model-a-2026-week1-freeze-v1",
-  "snapshots_added": 63,
+  "snapshots_added": 59,
   "excluded_untracked_games": 127,
   "ledger_path": "data/snapshots/projection_market_snapshots.jsonl",
   "note": "Prospective timestamped Model A model/market snapshot. Closing lines are evaluation targets only. tracking_eligible=false and FCS fallback games are excluded.",
   "snapshots": [
     {
-      "snapshot_id": "129a639eccd87d25c6055fe2",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "e3fb80d22288aee2a530d09a",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401869930,
-      "week": 13,
-      "start_date": "2026-11-27T20:00:00.000Z",
-      "season_type": "regular",
-      "schedule_phase": "regular_season",
-      "postseason_round": null,
-      "bowl_name": null,
-      "display_label": null,
-      "home_team": "South Alabama",
-      "away_team": "App State",
-      "home_conference": "Sun Belt",
-      "away_conference": "Sun Belt",
-      "matchup_segment": "g6_vs_g6",
-      "matchup_segment_version": "thi-matchup-segments-v1-2026-11-25",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -3.0,
-        "total": 51.5,
-        "home_win_probability": 57.4
-      },
-      "public_projection": {
-        "home_spread": -3.0,
-        "total": 51.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "56\u00b0F \u00b7 6 mph wind \u00b7 gusts 16 \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "ACTIVE"
-      },
-      "market_at_snapshot": {
-        "home_spread": -3.0,
-        "total": 56.5,
-        "bookmaker": "Consensus (10 books)",
-        "reference_spread": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "home_spread": -3.0,
-          "home_price": -115,
-          "away_spread": 3.0,
-          "away_price": -105,
-          "last_update": "2026-11-27T19:32:15Z",
-          "implied_probability": {
-            "home": 0.53488372,
-            "away": 0.51219512
-          },
-          "no_vig_probability": {
-            "home": 0.51083424,
-            "away": 0.48916576
-          },
-          "overround": 0.04707884,
-          "price_format": "american"
-        },
-        "reference_total": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "total": 56.5,
-          "under_total": 56.5,
-          "over_price": -115,
-          "under_price": -105,
-          "last_update": "2026-11-27T19:32:15Z",
-          "implied_probability": {
-            "over": 0.53488372,
-            "under": 0.51219512
-          },
-          "no_vig_probability": {
-            "over": 0.51083424,
-            "under": 0.48916576
-          },
-          "overround": 0.04707884,
-          "price_format": "american"
-        },
-        "reference_moneyline": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "home_price": -155,
-          "away_price": 135,
-          "last_update": "2026-11-27T19:32:15Z",
-          "implied_probability": {
-            "home": 0.60784314,
-            "away": 0.42553191
-          },
-          "no_vig_probability": {
-            "home": 0.58821155,
-            "away": 0.41178845
-          },
-          "overround": 0.03337505,
-          "price_format": "american"
-        },
-        "moneyline_book_count": 10,
-        "moneyline_policy_version": "relative-market-fit-v1-2026-11-25",
-        "execution_spread": null,
-        "execution_total": {
-          "direction": "UNDER",
-          "total": 57.0,
-          "price": -110,
-          "bookmaker": "Fanatics",
-          "bookmaker_key": "fanatics",
-          "last_update": "2026-11-27T19:27:56Z",
-          "selection_policy": "best_fresh_two_sided_quote"
-        },
-        "price_policy": "single_book_two_sided_quote_only",
-        "execution_policy": "Best fresh two-sided quote for the THI side/direction, maximum -125 price, with consensus retained as benchmark."
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 0.0,
-        "preferred_side": null,
-        "market_disagreement_status": "ALIGNED",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "f37a7ddb28f1f847068989a6",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401856759,
-      "week": 13,
-      "start_date": "2026-11-27T20:30:00.000Z",
-      "season_type": "regular",
-      "schedule_phase": "regular_season",
-      "postseason_round": null,
-      "bowl_name": null,
-      "display_label": null,
-      "home_team": "Florida State",
-      "away_team": "Florida",
-      "home_conference": "ACC",
-      "away_conference": "SEC",
-      "matchup_segment": "p4_vs_p4",
-      "matchup_segment_version": "thi-matchup-segments-v1-2026-11-25",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -2.0,
-        "total": 53.0,
-        "home_win_probability": 55.0
-      },
-      "public_projection": {
-        "home_spread": -2.0,
-        "total": 53.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "59\u00b0F \u00b7 10 mph wind \u00b7 gusts 16 \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "ACTIVE"
-      },
-      "market_at_snapshot": {
-        "home_spread": 6.5,
-        "total": 54.5,
-        "bookmaker": "Consensus (10 books)",
-        "reference_spread": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "home_spread": 6.5,
-          "home_price": -109,
-          "away_spread": -6.5,
-          "away_price": -111,
-          "last_update": "2026-11-27T19:32:15Z",
-          "implied_probability": {
-            "home": 0.5215311,
-            "away": 0.52606635
-          },
-          "no_vig_probability": {
-            "home": 0.4978354,
-            "away": 0.5021646
-          },
-          "overround": 0.04759745,
-          "price_format": "american"
-        },
-        "reference_total": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "total": 54.5,
-          "under_total": 54.5,
-          "over_price": -110,
-          "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
-          "implied_probability": {
-            "over": 0.52380952,
-            "under": 0.52380952
-          },
-          "no_vig_probability": {
-            "over": 0.5,
-            "under": 0.5
-          },
-          "overround": 0.04761905,
-          "price_format": "american"
-        },
-        "reference_moneyline": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "home_price": 203,
-          "away_price": -245,
-          "last_update": "2026-11-27T19:32:15Z",
-          "implied_probability": {
-            "home": 0.330033,
-            "away": 0.71014493
-          },
-          "no_vig_probability": {
-            "home": 0.31728514,
-            "away": 0.68271486
-          },
-          "overround": 0.04017793,
-          "price_format": "american"
-        },
-        "moneyline_book_count": 10,
-        "moneyline_policy_version": "relative-market-fit-v1-2026-11-25",
-        "execution_spread": {
-          "team": "Florida State",
-          "team_spread": 6.5,
-          "home_spread": 6.5,
-          "price": 104,
-          "bookmaker": "ProphetX",
-          "bookmaker_key": "prophetx",
-          "last_update": "2026-11-27T19:32:16Z",
-          "selection_policy": "best_fresh_two_sided_quote"
-        },
-        "execution_total": {
-          "direction": "UNDER",
-          "total": 54.5,
-          "price": 100,
-          "bookmaker": "ProphetX",
-          "bookmaker_key": "prophetx",
-          "last_update": "2026-11-27T19:32:16Z",
-          "selection_policy": "best_fresh_two_sided_quote"
-        },
-        "price_policy": "single_book_two_sided_quote_only",
-        "execution_policy": "Best fresh two-sided quote for the THI side/direction, maximum -125 price, with consensus retained as benchmark."
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 8.5,
-        "preferred_side": "Florida State",
-        "market_disagreement_status": "STRONG EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "f181fdac803d394fe65d3e6c",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401864549,
-      "week": 13,
-      "start_date": "2026-11-27T20:30:00.000Z",
-      "season_type": "regular",
-      "schedule_phase": "regular_season",
-      "postseason_round": null,
-      "bowl_name": null,
-      "display_label": null,
-      "home_team": "San Jose State",
-      "away_team": "North Dakota State",
-      "home_conference": "Mountain West",
-      "away_conference": "Mountain West",
-      "matchup_segment": "g6_vs_g6",
-      "matchup_segment_version": "thi-matchup-segments-v1-2026-11-25",
-      "neutral_site": false,
-      "model": {
-        "home_spread": 13.5,
-        "total": 51.5,
-        "home_win_probability": 19.9
-      },
-      "public_projection": {
-        "home_spread": 13.5,
-        "total": 51.5,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "58\u00b0F \u00b7 4 mph wind \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": 0.0,
-        "spread_adjustment": 0.0,
-        "spread_status": "ACTIVE"
-      },
-      "market_at_snapshot": {
-        "home_spread": 9.5,
-        "total": 41.0,
-        "bookmaker": "Consensus (10 books)",
-        "reference_spread": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "home_spread": 9.5,
-          "home_price": -110,
-          "away_spread": -9.5,
-          "away_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
-          "implied_probability": {
-            "home": 0.52380952,
-            "away": 0.52380952
-          },
-          "no_vig_probability": {
-            "home": 0.5,
-            "away": 0.5
-          },
-          "overround": 0.04761905,
-          "price_format": "american"
-        },
-        "reference_total": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "total": 41.0,
-          "under_total": 41.0,
-          "over_price": -115,
-          "under_price": -105,
-          "last_update": "2026-11-27T19:32:15Z",
-          "implied_probability": {
-            "over": 0.53488372,
-            "under": 0.51219512
-          },
-          "no_vig_probability": {
-            "over": 0.51083424,
-            "under": 0.48916576
-          },
-          "overround": 0.04707884,
-          "price_format": "american"
-        },
-        "reference_moneyline": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "home_price": 316,
-          "away_price": -400,
-          "last_update": "2026-11-27T19:32:15Z",
-          "implied_probability": {
-            "home": 0.24038462,
-            "away": 0.8
-          },
-          "no_vig_probability": {
-            "home": 0.2310536,
-            "away": 0.7689464
-          },
-          "overround": 0.04038462,
-          "price_format": "american"
-        },
-        "moneyline_book_count": 10,
-        "moneyline_policy_version": "relative-market-fit-v1-2026-11-25",
-        "execution_spread": {
-          "team": "North Dakota State",
-          "team_spread": -9.0,
-          "home_spread": 9.0,
-          "price": -114,
-          "bookmaker": "BetRivers",
-          "bookmaker_key": "betrivers",
-          "last_update": "2026-11-27T19:31:49Z",
-          "selection_policy": "best_fresh_two_sided_quote"
-        },
-        "execution_total": {
-          "direction": "OVER",
-          "total": 40.5,
-          "price": -108,
-          "bookmaker": "BetRivers",
-          "bookmaker_key": "betrivers",
-          "last_update": "2026-11-27T19:31:49Z",
-          "selection_policy": "best_fresh_two_sided_quote"
-        },
-        "price_policy": "single_book_two_sided_quote_only",
-        "execution_policy": "Best fresh two-sided quote for the THI side/direction, maximum -125 price, with consensus retained as benchmark."
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 4.0,
-        "preferred_side": "North Dakota State",
-        "market_disagreement_status": "SLIGHT EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "71a00f0e74a7787e1908b374",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
-      "model_type": "fbs_full_model",
-      "tracking_eligible": true,
-      "game_id": 401862838,
-      "week": 13,
-      "start_date": "2026-11-27T20:30:00.000Z",
-      "season_type": "regular",
-      "schedule_phase": "regular_season",
-      "postseason_round": null,
-      "bowl_name": null,
-      "display_label": null,
-      "home_team": "Memphis",
-      "away_team": "Temple",
-      "home_conference": "American Athletic",
-      "away_conference": "American Athletic",
-      "matchup_segment": "g6_vs_g6",
-      "matchup_segment_version": "thi-matchup-segments-v1-2026-11-25",
-      "neutral_site": false,
-      "model": {
-        "home_spread": -16.0,
-        "total": 53.5,
-        "home_win_probability": 84.1
-      },
-      "public_projection": {
-        "home_spread": -16.0,
-        "total": 53.0,
-        "weather_applied": true
-      },
-      "weather_at_snapshot": {
-        "conditions_line": "49\u00b0F \u00b7 9 mph wind \u00b7 gusts 18 \u00b7 Dry",
-        "impact": "Minimal",
-        "total_adjustment": -0.5,
-        "spread_adjustment": 0.0,
-        "spread_status": "ACTIVE"
-      },
-      "market_at_snapshot": {
-        "home_spread": -19.5,
-        "total": 66.5,
-        "bookmaker": "Consensus (10 books)",
-        "reference_spread": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "home_spread": -19.5,
-          "home_price": -105,
-          "away_spread": 19.5,
-          "away_price": -115,
-          "last_update": "2026-11-27T19:32:15Z",
-          "implied_probability": {
-            "home": 0.51219512,
-            "away": 0.53488372
-          },
-          "no_vig_probability": {
-            "home": 0.48916576,
-            "away": 0.51083424
-          },
-          "overround": 0.04707884,
-          "price_format": "american"
-        },
-        "reference_total": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "total": 66.5,
-          "under_total": 66.5,
-          "over_price": -110,
-          "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
-          "implied_probability": {
-            "over": 0.52380952,
-            "under": 0.52380952
-          },
-          "no_vig_probability": {
-            "over": 0.5,
-            "under": 0.5
-          },
-          "overround": 0.04761905,
-          "price_format": "american"
-        },
-        "reference_moneyline": {
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "home_price": -1150,
-          "away_price": 732,
-          "last_update": "2026-11-27T19:32:15Z",
-          "implied_probability": {
-            "home": 0.92,
-            "away": 0.12019231
-          },
-          "no_vig_probability": {
-            "home": 0.88445184,
-            "away": 0.11554816
-          },
-          "overround": 0.04019231,
-          "price_format": "american"
-        },
-        "moneyline_book_count": 10,
-        "moneyline_policy_version": "relative-market-fit-v1-2026-11-25",
-        "execution_spread": {
-          "team": "Temple",
-          "team_spread": 19.5,
-          "home_spread": -19.5,
-          "price": -105,
-          "bookmaker": "ProphetX",
-          "bookmaker_key": "prophetx",
-          "last_update": "2026-11-27T19:32:16Z",
-          "selection_policy": "best_fresh_two_sided_quote"
-        },
-        "execution_total": {
-          "direction": "UNDER",
-          "total": 66.5,
-          "price": -108,
-          "bookmaker": "Novig",
-          "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
-          "selection_policy": "best_fresh_two_sided_quote"
-        },
-        "price_policy": "single_book_two_sided_quote_only",
-        "execution_policy": "Best fresh two-sided quote for the THI side/direction, maximum -125 price, with consensus retained as benchmark."
-      },
-      "comparison_at_snapshot": {
-        "disagreement": 3.5,
-        "preferred_side": "Temple",
-        "market_disagreement_status": "SLIGHT EDGE",
-        "status_system": "v2_the_signal"
-      },
-      "clv": {
-        "closing_home_spread": null,
-        "clv_points_preferred_side": null,
-        "beat_close": null,
-        "settled": false
-      },
-      "result": {
-        "home_points": null,
-        "away_points": null,
-        "actual_home_margin": null,
-        "ats_result_at_snapshot": null,
-        "settled": false
-      }
-    },
-    {
-      "snapshot_id": "d059aef75369c76fd4feb3a5",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
-      "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401864546,
@@ -612,19 +53,19 @@
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
           "home_spread": -7.0,
-          "home_price": -118,
+          "home_price": -110,
           "away_spread": 7.0,
-          "away_price": -102,
-          "last_update": "2026-11-27T19:32:15Z",
+          "away_price": -110,
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
-            "home": 0.5412844,
-            "away": 0.5049505
+            "home": 0.52380952,
+            "away": 0.52380952
           },
           "no_vig_probability": {
-            "home": 0.51736413,
-            "away": 0.48263587
+            "home": 0.5,
+            "away": 0.5
           },
-          "overround": 0.0462349,
+          "overround": 0.04761905,
           "price_format": "american"
         },
         "reference_total": {
@@ -634,7 +75,7 @@
           "under_total": 42.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -649,18 +90,18 @@
         "reference_moneyline": {
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "home_price": -285,
-          "away_price": 234,
-          "last_update": "2026-11-27T19:32:15Z",
+          "home_price": -275,
+          "away_price": 226,
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
-            "home": 0.74025974,
-            "away": 0.2994012
+            "home": 0.73333333,
+            "away": 0.30674847
           },
           "no_vig_probability": {
-            "home": 0.71202035,
-            "away": 0.28797965
+            "home": 0.70507275,
+            "away": 0.29492725
           },
-          "overround": 0.03966094,
+          "overround": 0.0400818,
           "price_format": "american"
         },
         "moneyline_book_count": 10,
@@ -669,19 +110,19 @@
           "team": "Air Force",
           "team_spread": 7.5,
           "home_spread": -7.5,
-          "price": -110,
-          "bookmaker": "ProphetX",
-          "bookmaker_key": "prophetx",
-          "last_update": "2026-11-27T19:32:16Z",
+          "price": -111,
+          "bookmaker": "Novig",
+          "bookmaker_key": "novig",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
           "direction": "OVER",
           "total": 42.5,
-          "price": -104,
-          "bookmaker": "Novig",
-          "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "price": -105,
+          "bookmaker": "ProphetX",
+          "bookmaker_key": "prophetx",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -708,10 +149,10 @@
       }
     },
     {
-      "snapshot_id": "b2cfebc1af68c7fe3f8f481d",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "55bd6b68b508badc69e356c3",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858544,
@@ -757,7 +198,7 @@
           "home_price": -110,
           "away_spread": 9.5,
           "away_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -776,7 +217,7 @@
           "under_total": 37.0,
           "over_price": -115,
           "under_price": -105,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51219512
@@ -793,7 +234,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -345,
           "away_price": 278,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.7752809,
             "away": 0.26455026
@@ -809,12 +250,12 @@
         "moneyline_policy_version": "relative-market-fit-v1-2026-11-25",
         "execution_spread": {
           "team": "Wisconsin",
-          "team_spread": -8.5,
-          "home_spread": -8.5,
-          "price": -106,
-          "bookmaker": "Novig",
-          "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "team_spread": -8.0,
+          "home_spread": -8.0,
+          "price": -110,
+          "bookmaker": "BetRivers",
+          "bookmaker_key": "betrivers",
+          "last_update": "2026-11-27T21:08:48Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -823,7 +264,7 @@
           "price": -115,
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -850,10 +291,10 @@
       }
     },
     {
-      "snapshot_id": "15f8e558064369f69e0a3155",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "6b1c7eb40002149c56d58181",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856756,
@@ -889,26 +330,26 @@
         "spread_status": "ACTIVE"
       },
       "market_at_snapshot": {
-        "home_spread": 11.0,
+        "home_spread": 10.5,
         "total": 41.5,
         "bookmaker": "Consensus (10 books)",
         "reference_spread": {
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "home_spread": 11.0,
-          "home_price": -110,
-          "away_spread": -11.0,
-          "away_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "home_spread": 10.5,
+          "home_price": -108,
+          "away_spread": -10.5,
+          "away_price": -112,
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
-            "home": 0.52380952,
-            "away": 0.52380952
+            "home": 0.51923077,
+            "away": 0.52830189
           },
           "no_vig_probability": {
-            "home": 0.5,
-            "away": 0.5
+            "home": 0.49567025,
+            "away": 0.50432975
           },
-          "overround": 0.04761905,
+          "overround": 0.04753266,
           "price_format": "american"
         },
         "reference_total": {
@@ -916,16 +357,16 @@
           "bookmaker_key": "betonlineag",
           "total": 42.0,
           "under_total": 42.0,
-          "over_price": -108,
-          "under_price": -112,
-          "last_update": "2026-11-27T19:32:15Z",
+          "over_price": -112,
+          "under_price": -108,
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
-            "over": 0.51923077,
-            "under": 0.52830189
+            "over": 0.52830189,
+            "under": 0.51923077
           },
           "no_vig_probability": {
-            "over": 0.49567025,
-            "under": 0.50432975
+            "over": 0.50432975,
+            "under": 0.49567025
           },
           "overround": 0.04753266,
           "price_format": "american"
@@ -933,18 +374,18 @@
         "reference_moneyline": {
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "home_price": 364,
-          "away_price": -470,
-          "last_update": "2026-11-27T19:32:15Z",
+          "home_price": 350,
+          "away_price": -450,
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
-            "home": 0.21551724,
-            "away": 0.8245614
+            "home": 0.22222222,
+            "away": 0.81818182
           },
           "no_vig_probability": {
-            "home": 0.20721245,
-            "away": 0.79278755
+            "home": 0.21359223,
+            "away": 0.78640777
           },
-          "overround": 0.04007864,
+          "overround": 0.04040404,
           "price_format": "american"
         },
         "moneyline_book_count": 10,
@@ -953,10 +394,10 @@
           "team": "Texas",
           "team_spread": -10.5,
           "home_spread": 10.5,
-          "price": -106,
-          "bookmaker": "Novig",
-          "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "price": -108,
+          "bookmaker": "DraftKings",
+          "bookmaker_key": "draftkings",
+          "last_update": "2026-11-27T21:08:46Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -965,16 +406,16 @@
           "price": 102,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
         "execution_policy": "Best fresh two-sided quote for the THI side/direction, maximum -125 price, with consensus retained as benchmark."
       },
       "comparison_at_snapshot": {
-        "disagreement": 2.5,
+        "disagreement": 3.0,
         "preferred_side": "Texas",
-        "market_disagreement_status": "ALIGNED",
+        "market_disagreement_status": "SLIGHT EDGE",
         "status_system": "v2_the_signal"
       },
       "clv": {
@@ -992,10 +433,10 @@
       }
     },
     {
-      "snapshot_id": "7a7ead296983109cac09c718",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "983a091de8e428a420ed4d43",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856880,
@@ -1041,7 +482,7 @@
           "home_price": -107,
           "away_spread": 25.0,
           "away_price": -113,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.51690821,
             "away": 0.53051643
@@ -1060,7 +501,7 @@
           "under_total": 65.0,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -1077,7 +518,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -2500,
           "away_price": 1156,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.96153846,
             "away": 0.07961783
@@ -1098,7 +539,7 @@
           "price": -107,
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -1107,7 +548,7 @@
           "price": -125,
           "bookmaker": "BetRivers",
           "bookmaker_key": "betrivers",
-          "last_update": "2026-11-27T19:31:49Z",
+          "last_update": "2026-11-27T21:08:48Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -1134,10 +575,10 @@
       }
     },
     {
-      "snapshot_id": "d5684d4af2de4d3765b2352f",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "82c244bbb98cc51c1d8c3cdf",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858311,
@@ -1183,7 +624,7 @@
           "home_price": -110,
           "away_spread": 25.0,
           "away_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -1202,7 +643,7 @@
           "under_total": 54.0,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -1219,7 +660,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -3000,
           "away_price": 1256,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.96774194,
             "away": 0.07374631
@@ -1240,7 +681,7 @@
           "price": -115,
           "bookmaker": "theScore Bet",
           "bookmaker_key": "espnbet",
-          "last_update": "2026-11-27T19:31:50Z",
+          "last_update": "2026-11-27T21:08:52Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": null,
@@ -1268,10 +709,10 @@
       }
     },
     {
-      "snapshot_id": "5c063841ee6b9527ac58db0c",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "adf87c7072952957430799c0",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401866474,
@@ -1317,7 +758,7 @@
           "home_price": -105,
           "away_spread": -3.5,
           "away_price": -115,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.51219512,
             "away": 0.53488372
@@ -1336,7 +777,7 @@
           "under_total": 51.0,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -1353,7 +794,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 151,
           "away_price": -172,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.39840637,
             "away": 0.63235294
@@ -1371,19 +812,19 @@
           "team": "Central Michigan",
           "team_spread": -3.5,
           "home_spread": 3.5,
-          "price": -103,
-          "bookmaker": "ProphetX",
-          "bookmaker_key": "prophetx",
-          "last_update": "2026-11-27T19:32:16Z",
+          "price": -104,
+          "bookmaker": "Novig",
+          "bookmaker_key": "novig",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
           "direction": "UNDER",
-          "total": 51.5,
-          "price": -115,
-          "bookmaker": "theScore Bet",
-          "bookmaker_key": "espnbet",
-          "last_update": "2026-11-27T19:31:50Z",
+          "total": 51.0,
+          "price": -110,
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -1410,10 +851,10 @@
       }
     },
     {
-      "snapshot_id": "fb0c64d401c9455cdc7027eb",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "f242564e2bac9962b6fd8882",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401869954,
@@ -1459,7 +900,7 @@
           "home_price": -118,
           "away_spread": 2.0,
           "away_price": -102,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.5412844,
             "away": 0.5049505
@@ -1478,7 +919,7 @@
           "under_total": 54.0,
           "over_price": -105,
           "under_price": -115,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.51219512,
             "under": 0.53488372
@@ -1495,7 +936,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -130,
           "away_price": 110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.56521739,
             "away": 0.47619048
@@ -1516,7 +957,7 @@
           "price": -102,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -1525,7 +966,7 @@
           "price": -106,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -1552,10 +993,10 @@
       }
     },
     {
-      "snapshot_id": "6667846e3917cb8f874dc88f",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "4733bc0666d2c34d1aed4289",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856761,
@@ -1601,7 +1042,7 @@
           "home_price": -115,
           "away_spread": -3.0,
           "away_price": -105,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.53488372,
             "away": 0.51219512
@@ -1620,7 +1061,7 @@
           "under_total": 53.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -1637,7 +1078,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 117,
           "away_price": -137,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.46082949,
             "away": 0.57805907
@@ -1658,7 +1099,7 @@
           "price": -117,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -1667,7 +1108,7 @@
           "price": -104,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -1694,10 +1135,10 @@
       }
     },
     {
-      "snapshot_id": "dfc61d36aa91541fc165c33e",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "c8a801ddc0c86728643940b9",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858540,
@@ -1743,7 +1184,7 @@
           "home_price": -112,
           "away_spread": 10.0,
           "away_price": -108,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52830189,
             "away": 0.51923077
@@ -1762,7 +1203,7 @@
           "under_total": 36.5,
           "over_price": -115,
           "under_price": -105,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51219512
@@ -1779,7 +1220,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -410,
           "away_price": 324,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.80392157,
             "away": 0.23584906
@@ -1800,7 +1241,7 @@
           "price": -112,
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -1809,7 +1250,7 @@
           "price": -115,
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -1836,10 +1277,10 @@
       }
     },
     {
-      "snapshot_id": "af09650f3ff039e368d9719b",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "7cc2149305971046b2d487ca",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858313,
@@ -1885,7 +1326,7 @@
           "home_price": -112,
           "away_spread": 5.0,
           "away_price": -108,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52830189,
             "away": 0.51923077
@@ -1904,7 +1345,7 @@
           "under_total": 53.0,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -1921,7 +1362,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -215,
           "away_price": 183,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.68253968,
             "away": 0.35335689
@@ -1942,7 +1383,7 @@
           "price": -112,
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -1951,7 +1392,7 @@
           "price": -104,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -1978,10 +1419,10 @@
       }
     },
     {
-      "snapshot_id": "fb22f9268715ad244d1ed79c",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "421833eba4dd8625da03871b",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401862842,
@@ -2027,7 +1468,7 @@
           "home_price": -117,
           "away_spread": -16.5,
           "away_price": -103,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.53917051,
             "away": 0.50738916
@@ -2046,7 +1487,7 @@
           "under_total": 54.0,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -2063,7 +1504,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 579,
           "away_price": -835,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.14727541,
             "away": 0.89304813
@@ -2084,7 +1525,7 @@
           "price": 100,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -2093,7 +1534,7 @@
           "price": -114,
           "bookmaker": "ProphetX",
           "bookmaker_key": "prophetx",
-          "last_update": "2026-11-27T19:32:16Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -2120,10 +1561,10 @@
       }
     },
     {
-      "snapshot_id": "118a8e81733da7e575c1398a",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "215fd415cc361058d3a88805",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858314,
@@ -2169,7 +1610,7 @@
           "home_price": -110,
           "away_spread": -25.5,
           "away_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -2188,7 +1629,7 @@
           "under_total": 53.0,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -2205,7 +1646,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 1216,
           "away_price": -2800,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.07598784,
             "away": 0.96551724
@@ -2226,7 +1667,7 @@
           "price": -118,
           "bookmaker": "BetRivers",
           "bookmaker_key": "betrivers",
-          "last_update": "2026-11-27T19:31:49Z",
+          "last_update": "2026-11-27T21:08:48Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -2235,7 +1676,7 @@
           "price": -110,
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -2262,10 +1703,10 @@
       }
     },
     {
-      "snapshot_id": "564d119c08351b0736970561",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "89ca9176d0856c895164fe6d",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401861969,
@@ -2302,7 +1743,7 @@
       },
       "market_at_snapshot": {
         "home_spread": 3.5,
-        "total": 45.0,
+        "total": 44.5,
         "bookmaker": "Consensus (10 books)",
         "reference_spread": {
           "bookmaker": "BetOnline.ag",
@@ -2311,7 +1752,7 @@
           "home_price": -112,
           "away_spread": -3.5,
           "away_price": -108,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52830189,
             "away": 0.51923077
@@ -2330,7 +1771,7 @@
           "under_total": 45.0,
           "over_price": -105,
           "under_price": -115,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.51219512,
             "under": 0.53488372
@@ -2347,7 +1788,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 147,
           "away_price": -167,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.4048583,
             "away": 0.62546816
@@ -2368,16 +1809,16 @@
           "price": -106,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
           "direction": "OVER",
           "total": 44.5,
-          "price": -113,
+          "price": -112,
           "bookmaker": "ProphetX",
           "bookmaker_key": "prophetx",
-          "last_update": "2026-11-27T19:32:16Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -2404,10 +1845,10 @@
       }
     },
     {
-      "snapshot_id": "8376c78d6327166e0ecf4b00",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "9dec78377d003bf1038d9687",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858537,
@@ -2453,7 +1894,7 @@
           "home_price": -118,
           "away_spread": 2.5,
           "away_price": -102,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.5412844,
             "away": 0.5049505
@@ -2472,7 +1913,7 @@
           "under_total": 50.0,
           "over_price": -115,
           "under_price": -105,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51219512
@@ -2489,7 +1930,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -146,
           "away_price": 126,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.59349593,
             "away": 0.44247788
@@ -2510,7 +1951,7 @@
           "price": -113,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -2519,7 +1960,7 @@
           "price": -115,
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -2546,10 +1987,10 @@
       }
     },
     {
-      "snapshot_id": "755778dce232081548fcae6c",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "4abb256a1e202442b1ff114d",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856758,
@@ -2595,7 +2036,7 @@
           "home_price": -105,
           "away_spread": -14.0,
           "away_price": -115,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.51219512,
             "away": 0.53488372
@@ -2614,7 +2055,7 @@
           "under_total": 49.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -2631,7 +2072,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 488,
           "away_price": -670,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.17006803,
             "away": 0.87012987
@@ -2652,7 +2093,7 @@
           "price": -115,
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -2661,7 +2102,7 @@
           "price": -104,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -2688,10 +2129,10 @@
       }
     },
     {
-      "snapshot_id": "7ccceb2d7fc523ba9925b854",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "2a25248ec229a532b667f350",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401862837,
@@ -2737,7 +2178,7 @@
           "home_price": -111,
           "away_spread": 1.0,
           "away_price": -109,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52606635,
             "away": 0.5215311
@@ -2756,7 +2197,7 @@
           "under_total": 58.0,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -2773,7 +2214,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -120,
           "away_price": 100,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.54545455,
             "away": 0.5
@@ -2794,16 +2235,16 @@
           "price": -114,
           "bookmaker": "BetRivers",
           "bookmaker_key": "betrivers",
-          "last_update": "2026-11-27T19:31:49Z",
+          "last_update": "2026-11-27T21:08:48Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
           "direction": "UNDER",
           "total": 58.5,
-          "price": -113,
+          "price": -111,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -2830,10 +2271,10 @@
       }
     },
     {
-      "snapshot_id": "0da6248873ecb79974dbcfcf",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "d6b32d5cb9949b327085a20b",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401870804,
@@ -2879,7 +2320,7 @@
           "home_price": -113,
           "away_spread": -3.5,
           "away_price": -107,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.53051643,
             "away": 0.51690821
@@ -2896,18 +2337,18 @@
           "bookmaker_key": "betonlineag",
           "total": 54.0,
           "under_total": 54.0,
-          "over_price": -110,
-          "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "over_price": -115,
+          "under_price": -105,
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
-            "over": 0.52380952,
-            "under": 0.52380952
+            "over": 0.53488372,
+            "under": 0.51219512
           },
           "no_vig_probability": {
-            "over": 0.5,
-            "under": 0.5
+            "over": 0.51083424,
+            "under": 0.48916576
           },
-          "overround": 0.04761905,
+          "overround": 0.04707884,
           "price_format": "american"
         },
         "reference_moneyline": {
@@ -2915,7 +2356,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 145,
           "away_price": -165,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.40816327,
             "away": 0.62264151
@@ -2936,7 +2377,7 @@
           "price": -115,
           "bookmaker": "Fanatics",
           "bookmaker_key": "fanatics",
-          "last_update": "2026-11-27T19:27:56Z",
+          "last_update": "2026-11-27T20:56:46Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -2945,7 +2386,7 @@
           "price": 102,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -2972,10 +2413,10 @@
       }
     },
     {
-      "snapshot_id": "2d93df322a81f0e29f597c78",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "5913120c1afac57b9af73db6",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401871102,
@@ -3021,7 +2462,7 @@
           "home_price": -105,
           "away_spread": -6.0,
           "away_price": -115,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.51219512,
             "away": 0.53488372
@@ -3040,7 +2481,7 @@
           "under_total": 51.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -3057,7 +2498,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 192,
           "away_price": -230,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.34246575,
             "away": 0.6969697
@@ -3078,16 +2519,16 @@
           "price": -104,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
           "direction": "UNDER",
           "total": 51.5,
-          "price": -103,
+          "price": -104,
           "bookmaker": "ProphetX",
           "bookmaker_key": "prophetx",
-          "last_update": "2026-11-27T19:32:16Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -3114,10 +2555,10 @@
       }
     },
     {
-      "snapshot_id": "b9717c4cad24c2ac64454799",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "53c9d57356afcd41a273dab1",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401871103,
@@ -3163,7 +2604,7 @@
           "home_price": -115,
           "away_spread": 6.0,
           "away_price": -105,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.53488372,
             "away": 0.51219512
@@ -3182,7 +2623,7 @@
           "under_total": 49.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -3199,7 +2640,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -245,
           "away_price": 203,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.71014493,
             "away": 0.330033
@@ -3217,10 +2658,10 @@
           "team": "Southern Miss",
           "team_spread": 6.5,
           "home_spread": -6.5,
-          "price": -106,
+          "price": -104,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -3229,7 +2670,7 @@
           "price": -106,
           "bookmaker": "Caesars",
           "bookmaker_key": "williamhill_us",
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:07:19Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -3256,10 +2697,10 @@
       }
     },
     {
-      "snapshot_id": "785ddd19d5bbc7f91a82bcba",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "4bd27ccab15fe8758e4f9860",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401862841,
@@ -3305,7 +2746,7 @@
           "home_price": -110,
           "away_spread": -5.0,
           "away_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -3324,7 +2765,7 @@
           "under_total": 47.0,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -3341,7 +2782,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 170,
           "away_price": -195,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.37037037,
             "away": 0.66101695
@@ -3362,7 +2803,7 @@
           "price": -113,
           "bookmaker": "BetRivers",
           "bookmaker_key": "betrivers",
-          "last_update": "2026-11-27T19:31:49Z",
+          "last_update": "2026-11-27T21:08:48Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -3371,7 +2812,7 @@
           "price": -106,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -3398,10 +2839,10 @@
       }
     },
     {
-      "snapshot_id": "c32dd9936b1cfcef6cc5879b",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "81b2aaaab825d97931c52c9d",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401869947,
@@ -3447,7 +2888,7 @@
           "home_price": -115,
           "away_spread": 17.0,
           "away_price": -105,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.53488372,
             "away": 0.51219512
@@ -3466,7 +2907,7 @@
           "under_total": 54.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -3483,7 +2924,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -950,
           "away_price": 637,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.9047619,
             "away": 0.13568521
@@ -3501,10 +2942,10 @@
           "team": "Coastal Carolina",
           "team_spread": 17.5,
           "home_spread": -17.5,
-          "price": -108,
+          "price": -111,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -3513,7 +2954,7 @@
           "price": 104,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -3540,10 +2981,10 @@
       }
     },
     {
-      "snapshot_id": "8f02dc1c5fbc692d27a34d18",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "676aa76094d88b5267f7c40c",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856878,
@@ -3589,7 +3030,7 @@
           "home_price": -115,
           "away_spread": 4.0,
           "away_price": -105,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.53488372,
             "away": 0.51219512
@@ -3608,7 +3049,7 @@
           "under_total": 54.0,
           "over_price": 100,
           "under_price": -120,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.5,
             "under": 0.54545455
@@ -3625,7 +3066,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -185,
           "away_price": 161,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.64912281,
             "away": 0.38314176
@@ -3646,7 +3087,7 @@
           "price": -104,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -3655,7 +3096,7 @@
           "price": -120,
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -3682,10 +3123,10 @@
       }
     },
     {
-      "snapshot_id": "4169b5dad7c89dcb6556d5c9",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "026861c85261b0865d861782",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401871063,
@@ -3731,7 +3172,7 @@
           "home_price": -110,
           "away_spread": -19.0,
           "away_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -3750,7 +3191,7 @@
           "under_total": 52.5,
           "over_price": -107,
           "under_price": -113,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.51690821,
             "under": 0.53051643
@@ -3767,7 +3208,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 709,
           "away_price": -1100,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.12360939,
             "away": 0.91666667
@@ -3788,7 +3229,7 @@
           "price": -105,
           "bookmaker": "theScore Bet",
           "bookmaker_key": "espnbet",
-          "last_update": "2026-11-27T19:31:50Z",
+          "last_update": "2026-11-27T21:08:52Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -3797,7 +3238,7 @@
           "price": -106,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -3824,10 +3265,10 @@
       }
     },
     {
-      "snapshot_id": "cf59f3ced62473c5ea6f9941",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "c2189e4f7e12f20edfee8fa4",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401869959,
@@ -3873,7 +3314,7 @@
           "home_price": -105,
           "away_spread": -4.5,
           "away_price": -115,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.51219512,
             "away": 0.53488372
@@ -3892,7 +3333,7 @@
           "under_total": 56.0,
           "over_price": 102,
           "under_price": -122,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.4950495,
             "under": 0.54954955
@@ -3909,7 +3350,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 161,
           "away_price": -185,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.38314176,
             "away": 0.64912281
@@ -3930,7 +3371,7 @@
           "price": -110,
           "bookmaker": "ProphetX",
           "bookmaker_key": "prophetx",
-          "last_update": "2026-11-27T19:32:16Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -3939,7 +3380,7 @@
           "price": -122,
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -3966,10 +3407,10 @@
       }
     },
     {
-      "snapshot_id": "7af47e362507de65b4ed5711",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "bf01481f92b45c1b05982078",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401871083,
@@ -4005,7 +3446,7 @@
         "spread_status": "ACTIVE"
       },
       "market_at_snapshot": {
-        "home_spread": -3.0,
+        "home_spread": -3.5,
         "total": 51.5,
         "bookmaker": "Consensus (10 books)",
         "reference_spread": {
@@ -4015,7 +3456,7 @@
           "home_price": -120,
           "away_spread": 3.0,
           "away_price": 100,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.54545455,
             "away": 0.5
@@ -4034,7 +3475,7 @@
           "under_total": 51.0,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -4051,7 +3492,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -155,
           "away_price": 135,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.60784314,
             "away": 0.42553191
@@ -4069,26 +3510,26 @@
           "team": "Middle Tennessee",
           "team_spread": -3.0,
           "home_spread": -3.0,
-          "price": -115,
-          "bookmaker": "Fanatics",
-          "bookmaker_key": "fanatics",
-          "last_update": "2026-11-27T19:27:56Z",
+          "price": -118,
+          "bookmaker": "BetMGM",
+          "bookmaker_key": "betmgm",
+          "last_update": "2026-11-27T21:09:16Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
           "direction": "UNDER",
           "total": 51.5,
-          "price": -107,
+          "price": -106,
           "bookmaker": "ProphetX",
           "bookmaker_key": "prophetx",
-          "last_update": "2026-11-27T19:32:16Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
         "execution_policy": "Best fresh two-sided quote for the THI side/direction, maximum -125 price, with consensus retained as benchmark."
       },
       "comparison_at_snapshot": {
-        "disagreement": 3.5,
+        "disagreement": 3.0,
         "preferred_side": "Middle Tennessee",
         "market_disagreement_status": "SLIGHT EDGE",
         "status_system": "v2_the_signal"
@@ -4108,10 +3549,10 @@
       }
     },
     {
-      "snapshot_id": "9e116ea37f1dac788b5cdafa",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "b44ca0ff80f37119923726bd",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401871082,
@@ -4148,7 +3589,7 @@
       },
       "market_at_snapshot": {
         "home_spread": -11.5,
-        "total": 41.0,
+        "total": 41.5,
         "bookmaker": "Consensus (10 books)",
         "reference_spread": {
           "bookmaker": "BetOnline.ag",
@@ -4157,7 +3598,7 @@
           "home_price": -112,
           "away_spread": 11.5,
           "away_price": -108,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52830189,
             "away": 0.51923077
@@ -4172,11 +3613,11 @@
         "reference_total": {
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "total": 40.5,
-          "under_total": 40.5,
+          "total": 41.0,
+          "under_total": 41.0,
           "over_price": -112,
           "under_price": -108,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52830189,
             "under": 0.51923077
@@ -4193,7 +3634,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -480,
           "away_price": 370,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.82758621,
             "away": 0.21276596
@@ -4214,16 +3655,16 @@
           "price": -110,
           "bookmaker": "BetMGM",
           "bookmaker_key": "betmgm",
-          "last_update": "2026-11-27T19:31:48Z",
+          "last_update": "2026-11-27T21:09:16Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
           "direction": "OVER",
-          "total": 40.5,
+          "total": 41.0,
           "price": -112,
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -4250,10 +3691,10 @@
       }
     },
     {
-      "snapshot_id": "7407a1e911284b41707fd74c",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "13ce5ecba3808a041007cd44",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856875,
@@ -4299,7 +3740,7 @@
           "home_price": -110,
           "away_spread": 2.5,
           "away_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -4318,7 +3759,7 @@
           "under_total": 48.0,
           "over_price": -105,
           "under_price": -115,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.51219512,
             "under": 0.53488372
@@ -4335,7 +3776,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -130,
           "away_price": 110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.56521739,
             "away": 0.47619048
@@ -4356,7 +3797,7 @@
           "price": -101,
           "bookmaker": "ProphetX",
           "bookmaker_key": "prophetx",
-          "last_update": "2026-11-27T19:32:16Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": null,
@@ -4384,10 +3825,10 @@
       }
     },
     {
-      "snapshot_id": "061441b70f903a34bd34d8e9",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "f8c8af96c39d07bdd4859e86",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856764,
@@ -4433,7 +3874,7 @@
           "home_price": -105,
           "away_spread": -6.5,
           "away_price": -115,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.51219512,
             "away": 0.53488372
@@ -4452,7 +3893,7 @@
           "under_total": 42.5,
           "over_price": -115,
           "under_price": -105,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51219512
@@ -4469,7 +3910,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 207,
           "away_price": -250,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.3257329,
             "away": 0.71428571
@@ -4490,7 +3931,7 @@
           "price": 102,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -4499,7 +3940,7 @@
           "price": -108,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -4526,10 +3967,10 @@
       }
     },
     {
-      "snapshot_id": "8a2a00edc5932d5cc9087290",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "25fa832b135a0fb11d8dbf89",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401869939,
@@ -4575,7 +4016,7 @@
           "home_price": -110,
           "away_spread": 3.5,
           "away_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -4594,7 +4035,7 @@
           "under_total": 46.0,
           "over_price": -116,
           "under_price": -104,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.53703704,
             "under": 0.50980392
@@ -4611,7 +4052,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -180,
           "away_price": 157,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.64285714,
             "away": 0.38910506
@@ -4632,7 +4073,7 @@
           "price": -102,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -4641,7 +4082,7 @@
           "price": -116,
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -4668,10 +4109,10 @@
       }
     },
     {
-      "snapshot_id": "0947aca5b1e0c8e851a43a09",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "9da8cdbd83c439111b0f7268",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858317,
@@ -4717,7 +4158,7 @@
           "home_price": -120,
           "away_spread": 2.5,
           "away_price": 100,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.54545455,
             "away": 0.5
@@ -4736,7 +4177,7 @@
           "under_total": 50.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -4753,7 +4194,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -148,
           "away_price": 128,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.59677419,
             "away": 0.43859649
@@ -4771,10 +4212,10 @@
           "team": "Virginia Tech",
           "team_spread": -2.5,
           "home_spread": -2.5,
-          "price": -115,
+          "price": -111,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": null,
@@ -4802,10 +4243,10 @@
       }
     },
     {
-      "snapshot_id": "29f507b81eec1457593bd8a1",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "7a294ed93c2834a6cff43409",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856876,
@@ -4851,7 +4292,7 @@
           "home_price": -111,
           "away_spread": 16.0,
           "away_price": -109,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52606635,
             "away": 0.5215311
@@ -4870,7 +4311,7 @@
           "under_total": 56.0,
           "over_price": -105,
           "under_price": -115,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.51219512,
             "under": 0.53488372
@@ -4887,7 +4328,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -720,
           "away_price": 517,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.87804878,
             "away": 0.16207455
@@ -4903,12 +4344,12 @@
         "moneyline_policy_version": "relative-market-fit-v1-2026-11-25",
         "execution_spread": {
           "team": "Cincinnati",
-          "team_spread": 16.5,
-          "home_spread": -16.5,
-          "price": -106,
-          "bookmaker": "Novig",
-          "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "team_spread": 16.0,
+          "home_spread": -16.0,
+          "price": -109,
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -4917,7 +4358,7 @@
           "price": -115,
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -4944,10 +4385,10 @@
       }
     },
     {
-      "snapshot_id": "af53f3e11655c40e7f0dcdbc",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "0671338f85c95758c25bbac0",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858312,
@@ -4993,7 +4434,7 @@
           "home_price": -113,
           "away_spread": 14.5,
           "away_price": -107,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.53051643,
             "away": 0.51690821
@@ -5012,7 +4453,7 @@
           "under_total": 54.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -5029,7 +4470,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -660,
           "away_price": 482,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.86842105,
             "away": 0.17182131
@@ -5050,7 +4491,7 @@
           "price": 100,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -5059,7 +4500,7 @@
           "price": -110,
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -5086,10 +4527,10 @@
       }
     },
     {
-      "snapshot_id": "fb23bffad7b635921b246ec9",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "5a13189ff6dd2fbe6b9e3055",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856760,
@@ -5135,7 +4576,7 @@
           "home_price": -105,
           "away_spread": 35.5,
           "away_price": -115,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.51219512,
             "away": 0.53488372
@@ -5154,7 +4595,7 @@
           "under_total": 55.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -5171,7 +4612,7 @@
           "bookmaker_key": "betmgm",
           "home_price": -50000,
           "away_price": 5500,
-          "last_update": "2026-11-27T19:31:48Z",
+          "last_update": "2026-11-27T21:09:16Z",
           "implied_probability": {
             "home": 0.99800399,
             "away": 0.01785714
@@ -5187,12 +4628,12 @@
         "moneyline_policy_version": "relative-market-fit-v1-2026-11-25",
         "execution_spread": {
           "team": "Georgia Tech",
-          "team_spread": 35.5,
-          "home_spread": -35.5,
-          "price": -106,
-          "bookmaker": "ProphetX",
-          "bookmaker_key": "prophetx",
-          "last_update": "2026-11-27T19:32:16Z",
+          "team_spread": 36.5,
+          "home_spread": -36.5,
+          "price": -115,
+          "bookmaker": "Novig",
+          "bookmaker_key": "novig",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -5201,7 +4642,7 @@
           "price": -109,
           "bookmaker": "ProphetX",
           "bookmaker_key": "prophetx",
-          "last_update": "2026-11-27T19:32:16Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -5228,10 +4669,10 @@
       }
     },
     {
-      "snapshot_id": "2406c60588ee5b32b11f1113",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "cba849d10a15f148eaeafc65",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401871062,
@@ -5277,7 +4718,7 @@
           "home_price": -118,
           "away_spread": 2.5,
           "away_price": -102,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.5412844,
             "away": 0.5049505
@@ -5296,7 +4737,7 @@
           "under_total": 58.0,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -5313,7 +4754,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -138,
           "away_price": 118,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.57983193,
             "away": 0.4587156
@@ -5334,7 +4775,7 @@
           "price": -106,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -5361,10 +4802,10 @@
       }
     },
     {
-      "snapshot_id": "53b86101157c80facdee44da",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "384ebf62ec6e7cd33bba8766",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401866475,
@@ -5410,7 +4851,7 @@
           "home_price": -117,
           "away_spread": 3.0,
           "away_price": -103,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.53917051,
             "away": 0.50738916
@@ -5429,7 +4870,7 @@
           "under_total": 41.0,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -5446,7 +4887,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -155,
           "away_price": 135,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.60784314,
             "away": 0.42553191
@@ -5467,7 +4908,7 @@
           "price": -115,
           "bookmaker": "theScore Bet",
           "bookmaker_key": "espnbet",
-          "last_update": "2026-11-27T19:31:50Z",
+          "last_update": "2026-11-27T21:08:52Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -5476,7 +4917,7 @@
           "price": -110,
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -5503,10 +4944,10 @@
       }
     },
     {
-      "snapshot_id": "4a0b625894da4660b719cb15",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "7ace85fd35e6087caa6cda2a",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858539,
@@ -5552,7 +4993,7 @@
           "home_price": -110,
           "away_spread": -8.0,
           "away_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -5571,7 +5012,7 @@
           "under_total": 48.5,
           "over_price": -108,
           "under_price": -112,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.51923077,
             "under": 0.52830189
@@ -5588,7 +5029,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 237,
           "away_price": -290,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.29673591,
             "away": 0.74358974
@@ -5609,7 +5050,7 @@
           "price": 101,
           "bookmaker": "ProphetX",
           "bookmaker_key": "prophetx",
-          "last_update": "2026-11-27T19:32:16Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -5636,10 +5077,10 @@
       }
     },
     {
-      "snapshot_id": "4015e54eb69316890bbbd0cd",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "d485eea76a22c4a6ab078e2e",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858316,
@@ -5685,7 +5126,7 @@
           "home_price": -102,
           "away_spread": -7.0,
           "away_price": -118,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.5049505,
             "away": 0.5412844
@@ -5704,7 +5145,7 @@
           "under_total": 61.0,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -5721,7 +5162,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 237,
           "away_price": -290,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.29673591,
             "away": 0.74358974
@@ -5742,7 +5183,7 @@
           "price": -117,
           "bookmaker": "BetRivers",
           "bookmaker_key": "betrivers",
-          "last_update": "2026-11-27T19:31:49Z",
+          "last_update": "2026-11-27T21:08:48Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -5751,7 +5192,7 @@
           "price": -112,
           "bookmaker": "BetMGM",
           "bookmaker_key": "betmgm",
-          "last_update": "2026-11-27T19:31:48Z",
+          "last_update": "2026-11-27T21:09:16Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -5778,10 +5219,10 @@
       }
     },
     {
-      "snapshot_id": "fe3d0139a5b34d07a2fcdcaf",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "0bda7f878cd7ebb3280d59b7",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401862839,
@@ -5827,7 +5268,7 @@
           "home_price": -110,
           "away_spread": 6.5,
           "away_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -5846,7 +5287,7 @@
           "under_total": 43.5,
           "over_price": -120,
           "under_price": 100,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.54545455,
             "under": 0.5
@@ -5863,7 +5304,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -250,
           "away_price": 207,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.71428571,
             "away": 0.3257329
@@ -5884,7 +5325,7 @@
           "price": -112,
           "bookmaker": "BetRivers",
           "bookmaker_key": "betrivers",
-          "last_update": "2026-11-27T19:31:49Z",
+          "last_update": "2026-11-27T21:08:48Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -5893,7 +5334,7 @@
           "price": -117,
           "bookmaker": "BetRivers",
           "bookmaker_key": "betrivers",
-          "last_update": "2026-11-27T19:31:49Z",
+          "last_update": "2026-11-27T21:08:48Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -5920,10 +5361,10 @@
       }
     },
     {
-      "snapshot_id": "8c8f1e9e09cf086df1ffe40d",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "8fd34028e657a5d88aeb3dce",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858543,
@@ -5969,7 +5410,7 @@
           "home_price": -110,
           "away_spread": -4.5,
           "away_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -5988,7 +5429,7 @@
           "under_total": 46.0,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -6005,7 +5446,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 174,
           "away_price": -200,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.3649635,
             "away": 0.66666667
@@ -6023,19 +5464,19 @@
           "team": "UCLA",
           "team_spread": 5.5,
           "home_spread": 5.5,
-          "price": -110,
-          "bookmaker": "FanDuel",
-          "bookmaker_key": "fanduel",
-          "last_update": "2026-11-27T19:32:16Z",
+          "price": -109,
+          "bookmaker": "ProphetX",
+          "bookmaker_key": "prophetx",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
           "direction": "OVER",
           "total": 45.5,
-          "price": -112,
+          "price": -114,
           "bookmaker": "ProphetX",
           "bookmaker_key": "prophetx",
-          "last_update": "2026-11-27T19:32:16Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -6062,10 +5503,10 @@
       }
     },
     {
-      "snapshot_id": "279dd1c354407f134938b48b",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "ef6184d29b7b8b982d0e1ecd",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401864550,
@@ -6111,7 +5552,7 @@
           "home_price": -104,
           "away_spread": 4.5,
           "away_price": -116,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.50980392,
             "away": 0.53703704
@@ -6130,7 +5571,7 @@
           "under_total": 50.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -6147,7 +5588,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -180,
           "away_price": 157,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.64285714,
             "away": 0.38910506
@@ -6168,7 +5609,7 @@
           "price": -115,
           "bookmaker": "theScore Bet",
           "bookmaker_key": "espnbet",
-          "last_update": "2026-11-27T19:31:50Z",
+          "last_update": "2026-11-27T21:08:52Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -6195,10 +5636,10 @@
       }
     },
     {
-      "snapshot_id": "aa474a66133d268de42db4c7",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "6914a8ba30dd1a0f1d4fb61a",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401862843,
@@ -6240,11 +5681,11 @@
         "reference_spread": {
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "home_spread": -2.0,
+          "home_spread": -2.5,
           "home_price": -115,
-          "away_spread": 2.0,
+          "away_spread": 2.5,
           "away_price": -105,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.53488372,
             "away": 0.51219512
@@ -6263,7 +5704,7 @@
           "under_total": 45.5,
           "over_price": -105,
           "under_price": -115,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.51219512,
             "under": 0.53488372
@@ -6278,30 +5719,30 @@
         "reference_moneyline": {
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "home_price": -140,
-          "away_price": 120,
-          "last_update": "2026-11-27T19:32:15Z",
+          "home_price": -142,
+          "away_price": 122,
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
-            "home": 0.58333333,
-            "away": 0.45454545
+            "home": 0.58677686,
+            "away": 0.45045045
           },
           "no_vig_probability": {
-            "home": 0.5620438,
-            "away": 0.4379562
+            "home": 0.56571675,
+            "away": 0.43428325
           },
-          "overround": 0.03787879,
+          "overround": 0.03722731,
           "price_format": "american"
         },
         "moneyline_book_count": 10,
         "moneyline_policy_version": "relative-market-fit-v1-2026-11-25",
         "execution_spread": {
           "team": "North Texas",
-          "team_spread": -2.0,
-          "home_spread": -2.0,
-          "price": -115,
-          "bookmaker": "BetOnline.ag",
-          "bookmaker_key": "betonlineag",
-          "last_update": "2026-11-27T19:32:15Z",
+          "team_spread": -2.5,
+          "home_spread": -2.5,
+          "price": -108,
+          "bookmaker": "Novig",
+          "bookmaker_key": "novig",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -6310,7 +5751,7 @@
           "price": -113,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:39Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -6337,10 +5778,10 @@
       }
     },
     {
-      "snapshot_id": "5ef6d2fbce0765695980f7ad",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "ff73013d1bb095518cf74c89",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858542,
@@ -6386,7 +5827,7 @@
           "home_price": -108,
           "away_spread": -2.5,
           "away_price": -112,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.51923077,
             "away": 0.52830189
@@ -6405,7 +5846,7 @@
           "under_total": 46.5,
           "over_price": -104,
           "under_price": -116,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.50980392,
             "under": 0.53703704
@@ -6422,7 +5863,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 115,
           "away_price": -135,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.46511628,
             "away": 0.57446809
@@ -6443,7 +5884,7 @@
           "price": -108,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:40Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -6452,7 +5893,7 @@
           "price": 100,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:40Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -6479,10 +5920,10 @@
       }
     },
     {
-      "snapshot_id": "19560fbda0c1777cf692ccd1",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "528df7d1a9d0a978fa833ad6",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856763,
@@ -6528,7 +5969,7 @@
           "home_price": -112,
           "away_spread": 2.0,
           "away_price": -108,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52830189,
             "away": 0.51923077
@@ -6547,7 +5988,7 @@
           "under_total": 41.5,
           "over_price": -115,
           "under_price": -105,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51219512
@@ -6564,7 +6005,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -130,
           "away_price": 110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.56521739,
             "away": 0.47619048
@@ -6585,7 +6026,7 @@
           "price": -110,
           "bookmaker": "ProphetX",
           "bookmaker_key": "prophetx",
-          "last_update": "2026-11-27T19:32:16Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -6612,10 +6053,10 @@
       }
     },
     {
-      "snapshot_id": "15c0a98c65fef7985b8f5e34",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "38f40230cdfcd4a4ab1f5a56",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401860926,
@@ -6661,7 +6102,7 @@
           "home_price": -105,
           "away_spread": -21.0,
           "away_price": -115,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.51219512,
             "away": 0.53488372
@@ -6680,7 +6121,7 @@
           "under_total": 76.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -6697,7 +6138,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 910,
           "away_price": -1600,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.0990099,
             "away": 0.94117647
@@ -6718,7 +6159,7 @@
           "price": -115,
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -6727,7 +6168,7 @@
           "price": -110,
           "bookmaker": "Fanatics",
           "bookmaker_key": "fanatics",
-          "last_update": "2026-11-27T19:27:56Z",
+          "last_update": "2026-11-27T20:56:46Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -6754,10 +6195,10 @@
       }
     },
     {
-      "snapshot_id": "324e727c8ce42129a1ad205b",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "8ecf5cc373117484bedc4319",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856877,
@@ -6803,7 +6244,7 @@
           "home_price": -110,
           "away_spread": 6.0,
           "away_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -6822,7 +6263,7 @@
           "under_total": 65.0,
           "over_price": -105,
           "under_price": -115,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.51219512,
             "under": 0.53488372
@@ -6839,7 +6280,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -210,
           "away_price": 180,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.67741935,
             "away": 0.35714286
@@ -6860,16 +6301,16 @@
           "price": -102,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:40Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
           "direction": "UNDER",
-          "total": 65.5,
-          "price": -111,
-          "bookmaker": "Novig",
-          "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:40Z",
+          "total": 65.0,
+          "price": -110,
+          "bookmaker": "Fanatics",
+          "bookmaker_key": "fanatics",
+          "last_update": "2026-11-27T20:56:46Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -6896,10 +6337,10 @@
       }
     },
     {
-      "snapshot_id": "d97b4462673187d07484929c",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "3cc57647090832fe3fe07efb",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401860929,
@@ -6945,7 +6386,7 @@
           "home_price": -125,
           "away_spread": 2.5,
           "away_price": 105,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.55555556,
             "away": 0.48780488
@@ -6964,7 +6405,7 @@
           "under_total": 46.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -6981,7 +6422,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -150,
           "away_price": 130,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.6,
             "away": 0.43478261
@@ -6999,10 +6440,10 @@
           "team": "San Diego State",
           "team_spread": 3.5,
           "home_spread": -3.5,
-          "price": -120,
-          "bookmaker": "theScore Bet",
-          "bookmaker_key": "espnbet",
-          "last_update": "2026-11-27T19:31:50Z",
+          "price": -122,
+          "bookmaker": "FanDuel",
+          "bookmaker_key": "fanduel",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -7011,7 +6452,7 @@
           "price": -108,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:40Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -7038,10 +6479,10 @@
       }
     },
     {
-      "snapshot_id": "08c91c8d2e8d728f1e6dcd95",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "6e0016a75e5e220c8943c979",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858538,
@@ -7087,7 +6528,7 @@
           "home_price": -115,
           "away_spread": 23.5,
           "away_price": -105,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.53488372,
             "away": 0.51219512
@@ -7106,7 +6547,7 @@
           "under_total": 52.0,
           "over_price": -115,
           "under_price": -105,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51219512
@@ -7123,7 +6564,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -2600,
           "away_price": 1176,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.96296296,
             "away": 0.07836991
@@ -7141,19 +6582,19 @@
           "team": "Indiana",
           "team_spread": -23.5,
           "home_spread": -23.5,
-          "price": -104,
-          "bookmaker": "Novig",
-          "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:40Z",
+          "price": -103,
+          "bookmaker": "ProphetX",
+          "bookmaker_key": "prophetx",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
           "direction": "UNDER",
           "total": 52.5,
-          "price": -106,
+          "price": -104,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:40Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -7180,10 +6621,10 @@
       }
     },
     {
-      "snapshot_id": "1e6e6e0565098f81c8ca3a9c",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "cd1f7ba861ca139d1d8b82e7",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856765,
@@ -7229,7 +6670,7 @@
           "home_price": -110,
           "away_spread": -13.5,
           "away_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -7248,7 +6689,7 @@
           "under_total": 43.0,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -7265,7 +6706,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 415,
           "away_price": -550,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.19417476,
             "away": 0.84615385
@@ -7283,10 +6724,10 @@
           "team": "Tennessee",
           "team_spread": -13.5,
           "home_spread": 13.5,
-          "price": 100,
+          "price": 102,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:40Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -7295,7 +6736,7 @@
           "price": -104,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:40Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -7322,10 +6763,10 @@
       }
     },
     {
-      "snapshot_id": "b34370527ee4c4ac14353d6a",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "824b52b980afe2f3b58c9c78",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856757,
@@ -7371,7 +6812,7 @@
           "home_price": -105,
           "away_spread": 15.5,
           "away_price": -115,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.51219512,
             "away": 0.53488372
@@ -7390,7 +6831,7 @@
           "under_total": 49.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -7407,7 +6848,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -750,
           "away_price": 534,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.88235294,
             "away": 0.15772871
@@ -7425,10 +6866,10 @@
           "team": "Alabama",
           "team_spread": -14.5,
           "home_spread": -14.5,
-          "price": -102,
+          "price": 100,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:40Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -7437,7 +6878,7 @@
           "price": -107,
           "bookmaker": "Caesars",
           "bookmaker_key": "williamhill_us",
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:07:19Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -7464,10 +6905,10 @@
       }
     },
     {
-      "snapshot_id": "dbd3f23b6439ac2d9b69f621",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "0ad5151e4aa59675588bb4d7",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858315,
@@ -7513,7 +6954,7 @@
           "home_price": -110,
           "away_spread": -9.5,
           "away_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -7532,7 +6973,7 @@
           "under_total": 47.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -7549,7 +6990,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 289,
           "away_price": -360,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.25706941,
             "away": 0.7826087
@@ -7570,7 +7011,7 @@
           "price": -109,
           "bookmaker": "ProphetX",
           "bookmaker_key": "prophetx",
-          "last_update": "2026-11-27T19:32:16Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -7579,7 +7020,7 @@
           "price": 104,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:40Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -7606,10 +7047,10 @@
       }
     },
     {
-      "snapshot_id": "6bd7f8b890deef8d499adcbe",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "112a295070a7a1f04f919d8c",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858541,
@@ -7655,7 +7096,7 @@
           "home_price": -115,
           "away_spread": 13.0,
           "away_price": -105,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.53488372,
             "away": 0.51219512
@@ -7674,7 +7115,7 @@
           "under_total": 51.0,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -7691,7 +7132,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -580,
           "away_price": 434,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.85294118,
             "away": 0.18726592
@@ -7712,7 +7153,7 @@
           "price": -120,
           "bookmaker": "FanDuel",
           "bookmaker_key": "fanduel",
-          "last_update": "2026-11-27T19:32:16Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -7721,7 +7162,7 @@
           "price": -108,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:40Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -7748,10 +7189,10 @@
       }
     },
     {
-      "snapshot_id": "efa2fca939640db383471f55",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "12ade777693a24005315b2ce",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856873,
@@ -7797,7 +7238,7 @@
           "home_price": -110,
           "away_spread": 9.0,
           "away_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.52380952,
             "away": 0.52380952
@@ -7816,7 +7257,7 @@
           "under_total": 54.0,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -7833,7 +7274,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -335,
           "away_price": 270,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.77011494,
             "away": 0.27027027
@@ -7849,12 +7290,12 @@
         "moneyline_policy_version": "relative-market-fit-v1-2026-11-25",
         "execution_spread": {
           "team": "Arizona State",
-          "team_spread": 9.5,
-          "home_spread": -9.5,
+          "team_spread": 9.0,
+          "home_spread": -9.0,
           "price": -110,
-          "bookmaker": "theScore Bet",
-          "bookmaker_key": "espnbet",
-          "last_update": "2026-11-27T19:31:50Z",
+          "bookmaker": "BetOnline.ag",
+          "bookmaker_key": "betonlineag",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -7863,7 +7304,7 @@
           "price": -110,
           "bookmaker": "BetRivers",
           "bookmaker_key": "betrivers",
-          "last_update": "2026-11-27T19:31:49Z",
+          "last_update": "2026-11-27T21:08:48Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -7890,10 +7331,10 @@
       }
     },
     {
-      "snapshot_id": "dc8c10ade893ae9b795bbab9",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "53f3e2fc46b7e668f1a38d9c",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401864548,
@@ -7939,7 +7380,7 @@
           "home_price": -105,
           "away_spread": 5.5,
           "away_price": -115,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.51219512,
             "away": 0.53488372
@@ -7958,7 +7399,7 @@
           "under_total": 44.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -7973,18 +7414,18 @@
         "reference_moneyline": {
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "home_price": -220,
-          "away_price": 186,
-          "last_update": "2026-11-27T19:32:15Z",
+          "home_price": -205,
+          "away_price": 177,
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
-            "home": 0.6875,
-            "away": 0.34965035
+            "home": 0.67213115,
+            "away": 0.36101083
           },
           "no_vig_probability": {
-            "home": 0.662874,
-            "away": 0.337126
+            "home": 0.65056997,
+            "away": 0.34943003
           },
-          "overround": 0.03715035,
+          "overround": 0.03314198,
           "price_format": "american"
         },
         "moneyline_book_count": 10,
@@ -7996,7 +7437,7 @@
           "price": -109,
           "bookmaker": "ProphetX",
           "bookmaker_key": "prophetx",
-          "last_update": "2026-11-27T19:32:16Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -8005,7 +7446,7 @@
           "price": -118,
           "bookmaker": "BetRivers",
           "bookmaker_key": "betrivers",
-          "last_update": "2026-11-27T19:31:49Z",
+          "last_update": "2026-11-27T21:08:48Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -8032,10 +7473,10 @@
       }
     },
     {
-      "snapshot_id": "35a94c271b279cfe7eba7fb3",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "b8674f6a63ff4c61f4538791",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401856874,
@@ -8081,7 +7522,7 @@
           "home_price": -105,
           "away_spread": 3.5,
           "away_price": -115,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.51219512,
             "away": 0.53488372
@@ -8100,7 +7541,7 @@
           "under_total": 56.5,
           "over_price": -107,
           "under_price": -113,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.51690821,
             "under": 0.53051643
@@ -8117,7 +7558,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -170,
           "away_price": 149,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.62962963,
             "away": 0.40160643
@@ -8133,12 +7574,12 @@
         "moneyline_policy_version": "relative-market-fit-v1-2026-11-25",
         "execution_spread": {
           "team": "Baylor",
-          "team_spread": 4.0,
-          "home_spread": -4.0,
-          "price": -109,
-          "bookmaker": "BetRivers",
-          "bookmaker_key": "betrivers",
-          "last_update": "2026-11-27T19:31:49Z",
+          "team_spread": 3.5,
+          "home_spread": -3.5,
+          "price": -108,
+          "bookmaker": "ProphetX",
+          "bookmaker_key": "prophetx",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -8147,7 +7588,7 @@
           "price": -112,
           "bookmaker": "BetMGM",
           "bookmaker_key": "betmgm",
-          "last_update": "2026-11-27T19:31:49Z",
+          "last_update": "2026-11-27T21:09:16Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -8174,10 +7615,10 @@
       }
     },
     {
-      "snapshot_id": "6b3b18ce65646d4a9309705a",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "27bc09606ede9a4f62ea7511",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401860928,
@@ -8223,7 +7664,7 @@
           "home_price": -118,
           "away_spread": -7.5,
           "away_price": -102,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.5412844,
             "away": 0.5049505
@@ -8242,7 +7683,7 @@
           "under_total": 52.5,
           "over_price": -115,
           "under_price": -105,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51219512
@@ -8259,7 +7700,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": 245,
           "away_price": -300,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.28985507,
             "away": 0.75
@@ -8280,7 +7721,7 @@
           "price": -108,
           "bookmaker": "BetRivers",
           "bookmaker_key": "betrivers",
-          "last_update": "2026-11-27T19:31:49Z",
+          "last_update": "2026-11-27T21:08:48Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -8289,7 +7730,7 @@
           "price": -104,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:40Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -8316,10 +7757,10 @@
       }
     },
     {
-      "snapshot_id": "c0f1afa99395f69c474a3826",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "3cdd5cdcfa0dd7df4857d887",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401860927,
@@ -8365,7 +7806,7 @@
           "home_price": -107,
           "away_spread": 3.0,
           "away_price": -113,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.51690821,
             "away": 0.53051643
@@ -8384,7 +7825,7 @@
           "under_total": 59.0,
           "over_price": -115,
           "under_price": -105,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.53488372,
             "under": 0.51219512
@@ -8401,7 +7842,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -145,
           "away_price": 125,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.59183673,
             "away": 0.44444444
@@ -8422,7 +7863,7 @@
           "price": -106,
           "bookmaker": "BetRivers",
           "bookmaker_key": "betrivers",
-          "last_update": "2026-11-27T19:31:49Z",
+          "last_update": "2026-11-27T21:08:48Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -8431,7 +7872,7 @@
           "price": -105,
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -8458,10 +7899,10 @@
       }
     },
     {
-      "snapshot_id": "f7764b7a49583a1236f9e28d",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "964ceab4a3d429c7d0ecb40a",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401864547,
@@ -8507,7 +7948,7 @@
           "home_price": -108,
           "away_spread": 13.5,
           "away_price": -112,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.51923077,
             "away": 0.52830189
@@ -8526,7 +7967,7 @@
           "under_total": 39.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -8543,7 +7984,7 @@
           "bookmaker_key": "betonlineag",
           "home_price": -575,
           "away_price": 431,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.85185185,
             "away": 0.18832392
@@ -8564,7 +8005,7 @@
           "price": -102,
           "bookmaker": "ProphetX",
           "bookmaker_key": "prophetx",
-          "last_update": "2026-11-27T19:32:16Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -8573,7 +8014,7 @@
           "price": -108,
           "bookmaker": "Novig",
           "bookmaker_key": "novig",
-          "last_update": "2026-11-27T19:31:40Z",
+          "last_update": "2026-11-27T21:09:01Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -8600,10 +8041,10 @@
       }
     },
     {
-      "snapshot_id": "ef4c2f7645baf46ae3cd1437",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "77a611261e09b2c2b40b82df",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401869542,
@@ -8641,7 +8082,7 @@
       "market_at_snapshot": {
         "home_spread": -15.5,
         "total": 58.0,
-        "bookmaker": "Consensus (8 books)",
+        "bookmaker": "Consensus (9 books)",
         "reference_spread": {
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
@@ -8649,7 +8090,7 @@
           "home_price": -115,
           "away_spread": 15.5,
           "away_price": -105,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.53488372,
             "away": 0.51219512
@@ -8668,7 +8109,7 @@
           "under_total": 58.0,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -8685,7 +8126,7 @@
           "bookmaker_key": "betmgm",
           "home_price": -750,
           "away_price": 575,
-          "last_update": "2026-11-27T19:31:49Z",
+          "last_update": "2026-11-27T21:09:16Z",
           "implied_probability": {
             "home": 0.88235294,
             "away": 0.14814815
@@ -8697,16 +8138,16 @@
           "overround": 0.03050109,
           "price_format": "american"
         },
-        "moneyline_book_count": 7,
+        "moneyline_book_count": 8,
         "moneyline_policy_version": "relative-market-fit-v1-2026-11-25",
         "execution_spread": {
           "team": "Boise State",
           "team_spread": -15.5,
           "home_spread": -15.5,
-          "price": -112,
-          "bookmaker": "DraftKings",
-          "bookmaker_key": "draftkings",
-          "last_update": "2026-11-27T19:32:16Z",
+          "price": -110,
+          "bookmaker": "theScore Bet",
+          "bookmaker_key": "espnbet",
+          "last_update": "2026-11-27T21:08:52Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": {
@@ -8715,7 +8156,7 @@
           "price": -108,
           "bookmaker": "FanDuel",
           "bookmaker_key": "fanduel",
-          "last_update": "2026-11-27T19:32:16Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "price_policy": "single_book_two_sided_quote_only",
@@ -8742,10 +8183,10 @@
       }
     },
     {
-      "snapshot_id": "97f6741e8237b37a0c131c69",
-      "captured_at_utc": "2026-11-27T19:32:34.500962+00:00",
+      "snapshot_id": "95165ae6ed5a21bdb4a1a989",
+      "captured_at_utc": "2026-11-27T21:09:36.385413+00:00",
       "model_version": "production-model-a-2026-week1-freeze-v1",
-      "projection_source_generated": "2026-11-27T19:32:34.148646",
+      "projection_source_generated": "2026-11-27T21:09:32.067457",
       "model_type": "fbs_full_model",
       "tracking_eligible": true,
       "game_id": 401858318,
@@ -8777,7 +8218,7 @@
       "market_at_snapshot": {
         "home_spread": -2.5,
         "total": 57.5,
-        "bookmaker": "Consensus (8 books)",
+        "bookmaker": "Consensus (9 books)",
         "reference_spread": {
           "bookmaker": "BetOnline.ag",
           "bookmaker_key": "betonlineag",
@@ -8785,7 +8226,7 @@
           "home_price": -120,
           "away_spread": 2.5,
           "away_price": 100,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "home": 0.54545455,
             "away": 0.5
@@ -8804,7 +8245,7 @@
           "under_total": 57.5,
           "over_price": -110,
           "under_price": -110,
-          "last_update": "2026-11-27T19:32:15Z",
+          "last_update": "2026-11-27T21:09:15Z",
           "implied_probability": {
             "over": 0.52380952,
             "under": 0.52380952
@@ -8821,7 +8262,7 @@
           "bookmaker_key": "betmgm",
           "home_price": -145,
           "away_price": 120,
-          "last_update": "2026-11-27T19:31:49Z",
+          "last_update": "2026-11-27T21:09:16Z",
           "implied_probability": {
             "home": 0.59183673,
             "away": 0.45454545
@@ -8833,7 +8274,7 @@
           "overround": 0.04638219,
           "price_format": "american"
         },
-        "moneyline_book_count": 7,
+        "moneyline_book_count": 8,
         "moneyline_policy_version": "relative-market-fit-v1-2026-11-25",
         "execution_spread": {
           "team": "Wake Forest",
@@ -8842,7 +8283,7 @@
           "price": -115,
           "bookmaker": "BetMGM",
           "bookmaker_key": "betmgm",
-          "last_update": "2026-11-27T19:31:49Z",
+          "last_update": "2026-11-27T21:09:16Z",
           "selection_policy": "best_fresh_two_sided_quote"
         },
         "execution_total": null,
