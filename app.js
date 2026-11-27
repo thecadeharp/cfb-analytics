@@ -3119,6 +3119,7 @@ function renderProjectionRow(game) {
   const disagreementDriver = marketDisagreementDriver(game);
   const cssStatus = statusClass(status);
   const confidenceCss = confidenceClass(confidence);
+  const researchOnly = game?.tracking_eligible === false && game?.schedule_phase === "bowl";
 
   const disagreementNote = hasValue(disagreement)
     ? (preferred ? `Model favors ${preferred}` : "Model agrees with market")
@@ -3205,10 +3206,10 @@ function renderProjectionRow(game) {
 
       <td class="status-cell">
         <span class="status ${confidenceCss}">
-          ${escapeHtml(confidence)}${coverage.state !== "isolated" && confidenceSample !== null ? ` [n=${confidenceSample}]` : ""}
+          ${researchOnly ? "NOT TRACKED" : `${escapeHtml(confidence)}${coverage.state !== "isolated" && confidenceSample !== null ? ` [n=${confidenceSample}]` : ""}`}
         </span>
         <div class="signal-record">
-          ${coverage.state === "isolated" ? "Excluded from qualified signal record" : `${escapeHtml(signalRecordText(status))} · ${escapeHtml(signalAtsText(status))}`}
+          ${researchOnly ? "Bowl research only · excluded from YTD" : coverage.state === "isolated" ? "Excluded from qualified signal record" : `${escapeHtml(signalRecordText(status))} · ${escapeHtml(signalAtsText(status))}`}
         </div>
       </td>
     </tr>
@@ -4712,6 +4713,7 @@ function renderMatchup(game) {
   const statusCss = statusClass(status);
   const confidenceCss = confidenceClass(confidence);
   const edgeClass = statusEdgeClass(status);
+  const researchOnly = game?.tracking_eligible === false && game?.schedule_phase === "bowl";
 
   const winProb = projection?.win_probability ?? {};
   const awayWin = hasValue(winProb.away) ? Number(winProb.away) : null;
@@ -4773,7 +4775,7 @@ function renderMatchup(game) {
           ${escapeHtml(displayStatus(status))}
         </span>
         <span class="status ${confidenceCss}">
-          Signal Confidence: ${escapeHtml(confidence)}
+          ${researchOnly ? "Bowl research only · not tracked" : `Signal Confidence: ${escapeHtml(confidence)}`}
         </span>
       </div>
     </div>
@@ -4782,13 +4784,15 @@ function renderMatchup(game) {
 
     <div class="model-edge-banner">
       <div>
-        <div class="model-edge-title">Model Signal</div>
+        <div class="model-edge-title">${researchOnly ? "Research Comparison" : "Model Signal"}</div>
         <div class="model-edge-side ${edgeClass}">
           ${escapeHtml(modelEdgeSide)}
         </div>
         <div class="model-edge-context">
           ${hasValue(edgeSize)
-            ? `${formatNumber(edgeSize, 1)}-point model edge versus the current market. Signal tier measures separation; confidence measures evidence.`
+            ? researchOnly
+              ? `${formatNumber(edgeSize, 1)}-point model-market separation. Traditional bowl games are excluded from official THI records.`
+              : `${formatNumber(edgeSize, 1)}-point model edge versus the current market. Signal tier measures separation; confidence measures evidence.`
             : "No current market line is available."}
         </div>
       </div>
@@ -4798,7 +4802,7 @@ function renderMatchup(game) {
           ${escapeHtml(displayStatus(status))}
         </span>
         <span class="status ${confidenceCss}">
-          ${escapeHtml(confidence)}
+          ${researchOnly ? "NOT TRACKED" : escapeHtml(confidence)}
         </span>
       </div>
     </div>

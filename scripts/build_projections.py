@@ -940,6 +940,16 @@ def classify_schedule_phase(raw, season_type, registry_entry=None):
         "display_label": display_label,
     }
 
+
+def is_official_tracking_game(game):
+    """Traditional bowls are published for research but excluded from records.
+
+    Conference championships and every CFP round remain eligible. The phase,
+    not the provider's postseason flag, controls this policy because CFP games
+    are also returned as postseason events.
+    """
+    return str(game.get("schedule_phase") or "regular_season") != "bowl"
+
 def fetch_schedule(valid_teams, lookup):
     print("")
     print(f"📅 Fetching {YEAR} schedule...")
@@ -2323,6 +2333,11 @@ def build_fbs_fbs_projection(
         home_name,
         away_name,
     )
+    tracking_eligible = is_official_tracking_game(game)
+    if not tracking_eligible:
+        comparison["tracking_eligible"] = False
+        comparison["tracking_exclusion_reason"] = "traditional_bowl_research_only"
+        comparison["bet_status"] = "RESEARCH ONLY"
 
     return {
         "game_id": game.get("id"),
@@ -2339,7 +2354,11 @@ def build_fbs_fbs_projection(
         "bowl_name": game.get("bowl_name"),
         "display_label": game.get("display_label"),
         "model_type": "fbs_full_model",
-        "tracking_eligible": True,
+        "tracking_eligible": tracking_eligible,
+        "diagnostic_only": not tracking_eligible,
+        "tracking_exclusion_reason": (
+            None if tracking_eligible else "traditional_bowl_research_only"
+        ),
 
         "home": {
             "team": home_name,
@@ -3347,6 +3366,11 @@ def main():
                 season_projections
             ),
             "version": "3.4-fcs-fallback-board",
+            "postseason_tracking_policy": {
+                "conference_championships": "official_record",
+                "cfp": "official_record",
+                "traditional_bowls": "research_only_excluded_from_record",
+            },
             "calibration": calibration,
 
             "market": {
