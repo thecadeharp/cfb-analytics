@@ -48,6 +48,7 @@ ODDS_BASE = "https://api.the-odds-api.com/v4"
 METRICS_PATH = "data/cfb_metrics.json"
 HFA_PATH = "data/hfa_2026.json"
 SCHEDULE_PATH = "data/schedule.json"
+POSTSEASON_REGISTRY_PATH = "data/postseason_game_registry.json"
 ODDS_PATH = "data/odds.json"
 ODDS_SCREEN_BOOKMAKERS = (
     "betonlineag,draftkings,fanduel,fanatics,betmgm,betrivers,"
@@ -864,11 +865,86 @@ def calculate_rating_scale(teams):
 # SCHEDULE
 # =============================================================================
 
+POSTSEASON_ROUND_LABELS = {
+    "first_round": "CFP First Round",
+    "quarterfinal": "CFP Quarterfinals",
+    "semifinal": "CFP Semifinals",
+    "national_championship": "CFP National Championship",
+}
+
+
+def load_postseason_registry(path=POSTSEASON_REGISTRY_PATH):
+    """Load verified postseason labels keyed by CFBD game id."""
+    registry_path = Path(path)
+    if not registry_path.exists():
+        return {}
+    with registry_path.open("r", encoding="utf-8") as handle:
+        payload = json.load(handle)
+    games = payload.get("games", {}) if isinstance(payload, dict) else {}
+    return {
+        str(game_id): value
+        for game_id, value in games.items()
+        if isinstance(value, dict)
+    }
+
+
+def classify_schedule_phase(raw, season_type, registry_entry=None):
+    """Return stable postseason metadata without relying on raw week values."""
+    override = registry_entry or {}
+    notes = str(first_value(raw, "notes", default="") or "").strip()
+    normalized = notes.lower()
+    phase = str(override.get("schedule_phase") or "").strip()
+    round_name = str(override.get("postseason_round") or "").strip() or None
+    bowl_name = str(override.get("bowl_name") or "").strip() or None
+
+    if not phase:
+        if str(season_type).lower() == "postseason":
+            phase = "bowl"
+        elif "conference championship" in normalized:
+            phase = "conference_championship"
+        else:
+            phase = "regular_season"
+
+    if not round_name:
+        if "national championship" in normalized and "conference" not in normalized:
+            round_name = "national_championship"
+        elif "semifinal" in normalized:
+            round_name = "semifinal"
+        elif "quarterfinal" in normalized:
+            round_name = "quarterfinal"
+        elif "first round" in normalized or "first-round" in normalized:
+            round_name = "first_round"
+
+    if round_name:
+        phase = "cfp"
+
+    if phase == "bowl" and not bowl_name and notes:
+        bowl_name = notes
+
+    display_label = str(override.get("display_label") or "").strip()
+    if not display_label:
+        if round_name:
+            display_label = POSTSEASON_ROUND_LABELS.get(round_name, "CFP")
+        elif phase == "conference_championship":
+            display_label = "Conference Championships"
+        elif phase == "bowl":
+            display_label = bowl_name or "Bowl Games"
+        else:
+            display_label = None
+
+    return {
+        "season_type": str(season_type).lower(),
+        "schedule_phase": phase,
+        "postseason_round": round_name,
+        "bowl_name": bowl_name,
+        "display_label": display_label,
+    }
+
 def fetch_schedule(valid_teams, lookup):
     print("")
     print(f"📅 Fetching {YEAR} schedule...")
 
-    raw_games = cfbd_get(
+    regular_games = cfbd_get(
         "/games",
         {
             "year": YEAR,
@@ -876,8 +952,25 @@ def fetch_schedule(valid_teams, lookup):
             "classification": "fbs",
         },
     )
+    postseason_games = cfbd_get(
+        "/games",
+        {
+            "year": YEAR,
+            "seasonType": "postseason",
+            "classification": "fbs",
+        },
+    )
+    raw_games = [
+        (raw, "regular") for raw in regular_games
+    ] + [
+        (raw, "postseason") for raw in postseason_games
+    ]
+    postseason_registry = load_postseason_registry()
 
-    print(f"   Raw CFBD games returned: {len(raw_games)}")
+    print(
+        "   Raw CFBD games returned: "
+        f"{len(regular_games)} regular + {len(postseason_games)} postseason"
+    )
 
     fbs_fbs_games = []
     full_team_schedule = {team: [] for team in valid_teams}
@@ -885,7 +978,7 @@ def fetch_schedule(valid_teams, lookup):
     rejected_non_fbs = 0
     seen = set()
 
-    for raw in raw_games:
+    for raw, season_type in raw_games:
         raw_home = first_value(raw, "homeTeam", "home_team")
         raw_away = first_value(raw, "awayTeam", "away_team")
 
@@ -910,6 +1003,11 @@ def fetch_schedule(valid_teams, lookup):
         away_points = first_value(raw, "awayPoints", "away_points")
         completed = first_value(raw, "completed", default=False)
         is_completed = completed is True
+        postseason = classify_schedule_phase(
+            raw,
+            season_type,
+            postseason_registry.get(str(game_id), {}),
+        )
 
         unique_key = (
             str(game_id)
@@ -951,6 +1049,7 @@ def fetch_schedule(valid_teams, lookup):
                 "away_points": away_points,
                 "status": "completed" if is_completed else "scheduled",
                 "opponent_type": "FBS",
+                **postseason,
             }
 
             fbs_fbs_games.append(game)
@@ -986,6 +1085,7 @@ def fetch_schedule(valid_teams, lookup):
                 "away_points": away_points,
                 "status": "completed" if is_completed else "scheduled",
                 "opponent_type": "FCS",
+                **postseason,
             })
             continue
 
@@ -1005,6 +1105,7 @@ def fetch_schedule(valid_teams, lookup):
                 "away_points": away_points,
                 "status": "completed" if is_completed else "scheduled",
                 "opponent_type": "FCS",
+                **postseason,
             })
             continue
 
@@ -1036,6 +1137,11 @@ def fetch_schedule(valid_teams, lookup):
         for game in games
         if game.get("opponent_type") == "FCS"
     )
+    postseason_count = sum(
+        1
+        for game in fbs_fbs_games
+        if game.get("season_type") == "postseason"
+    )
 
     print(f"✅ TRUE FBS-vs-FBS games: {len(fbs_fbs_games)}")
     print(f"✅ Team schedule entries: {full_entries}")
@@ -1053,6 +1159,8 @@ def fetch_schedule(valid_teams, lookup):
             "team_schedule_entries": full_entries,
             "fbs_fcs_entries": fcs_entries,
             "rejected_non_fbs": rejected_non_fbs,
+            "postseason_games": postseason_count,
+            "postseason_registry": POSTSEASON_REGISTRY_PATH,
             "source": "CollegeFootballData",
             "matching": "strict_fbs_school_names",
         },
@@ -2225,6 +2333,11 @@ def build_fbs_fbs_projection(
         "network": game.get("network"),
         "status": game.get("status"),
         "opponent_type": "FBS",
+        "season_type": game.get("season_type", "regular"),
+        "schedule_phase": game.get("schedule_phase", "regular_season"),
+        "postseason_round": game.get("postseason_round"),
+        "bowl_name": game.get("bowl_name"),
+        "display_label": game.get("display_label"),
         "model_type": "fbs_full_model",
         "tracking_eligible": True,
 
@@ -2430,6 +2543,11 @@ def build_fbs_fcs_projection(
         "network": game.get("network"),
         "status": game.get("status"),
         "opponent_type": "FCS",
+        "season_type": game.get("season_type", "regular"),
+        "schedule_phase": game.get("schedule_phase", "regular_season"),
+        "postseason_round": game.get("postseason_round"),
+        "bowl_name": game.get("bowl_name"),
+        "display_label": game.get("display_label"),
         "model_type": "fcs_fallback",
         "tracking_eligible": False,
 

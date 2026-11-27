@@ -288,7 +288,7 @@ function updateProjectionDataAnchor() {
   const snapshot = parsed
     ? parsed.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/New_York", timeZoneName: "short" })
     : "awaiting refresh";
-  node.textContent = `${currentWeek === null ? "Active week" : `Week ${currentWeek}`} · all times Eastern · market snapshot ${snapshot}`;
+  node.textContent = `${currentWeek === null ? "Active period" : projectionPeriodLabel(currentWeek)} · all times Eastern · market snapshot ${snapshot}`;
 }
 
 function confidenceClass(confidence) {
@@ -705,7 +705,7 @@ function restoreNavigationState(state) {
   if (!state) return;
 
   if (state.week !== null && state.week !== undefined) {
-    currentWeek = Number(state.week);
+    currentWeek = normalizeProjectionPeriod(state.week);
   }
   if (typeof state.search === "string") currentSearch = state.search;
   if (typeof state.projectionSort === "string") currentProjectionSort = state.projectionSort;
@@ -2765,9 +2765,52 @@ function updateHeader() {
   })}`;
 }
 
+const POSTSEASON_PERIODS = [
+  ["conference_championship", "Conference Championships"],
+  ["cfp_first_round", "CFP First Round"],
+  ["cfp_quarterfinal", "CFP Quarterfinals"],
+  ["cfp_semifinal", "CFP Semifinals"],
+  ["cfp_national_championship", "CFP National Championship"],
+  ["bowl_games", "Bowl Games"],
+];
+
+function normalizeProjectionPeriod(value) {
+  const text = String(value ?? "").trim();
+  if (/^\d+$/.test(text)) return Number(text);
+  return text || null;
+}
+
+function gameProjectionPeriod(game) {
+  const round = String(game?.postseason_round || "").trim();
+  if (round) return `cfp_${round}`;
+  if (game?.schedule_phase === "conference_championship") return "conference_championship";
+  if (game?.schedule_phase === "bowl" || game?.season_type === "postseason") return "bowl_games";
+  const week = Number(game?.week);
+  return Number.isFinite(week) ? week : null;
+}
+
+function projectionPeriodLabel(value) {
+  const normalized = normalizeProjectionPeriod(value);
+  if (typeof normalized === "number") return normalized === 0 ? "Week 0" : `Week ${normalized}`;
+  return new Map(POSTSEASON_PERIODS).get(normalized) || "Postseason";
+}
+
+function gameStageLabel(game) {
+  const period = gameProjectionPeriod(game);
+  if (typeof period === "string") {
+    if (period === "bowl_games" && game?.bowl_name) return String(game.bowl_name);
+    return projectionPeriodLabel(period);
+  }
+  return projectionPeriodLabel(period);
+}
+
+function gameMatchesProjectionPeriod(game, period) {
+  return String(gameProjectionPeriod(game)) === String(normalizeProjectionPeriod(period));
+}
+
 function availableWeeks() {
   const weeks = projections
-    .map(game => game.week)
+    .map(gameProjectionPeriod)
     .filter(week => week !== null && week !== undefined)
     .map(Number)
     .filter(week => !Number.isNaN(week));
@@ -2775,8 +2818,19 @@ function availableWeeks() {
   return [...new Set(weeks)].sort((a, b) => a - b);
 }
 
-function determineDefaultWeek(weeks) {
-  if (!weeks.length) return null;
+function availableProjectionPeriods() {
+  const weeks = availableWeeks();
+  const present = new Set(projections.map(gameProjectionPeriod).filter(value => value !== null));
+  return [
+    ...weeks.map(week => ({ key: week, label: projectionPeriodLabel(week) })),
+    ...POSTSEASON_PERIODS
+      .filter(([key]) => present.has(key))
+      .map(([key, label]) => ({ key, label })),
+  ];
+}
+
+function determineDefaultWeek(periods) {
+  if (!periods.length) return null;
 
   const completedGames = Array.isArray(resultsData?.games)
     ? resultsData.games
@@ -2786,28 +2840,25 @@ function determineDefaultWeek(weeks) {
     ? liveScoresData.games
     : [];
 
-  // The public scoreboard refreshes every five minutes. Keep the earliest
-  // unfinished week selected, then move forward once every scheduled game is
-  // final. The grace period prevents a canceled or provider-missed game from
-  // pinning the board indefinitely.
+  // The public scoreboard refreshes every five minutes. Keep the period with
+  // the earliest unfinished kickoff selected. Game ids are used here because
+  // provider postseason week numbers can restart at 1.
   if (completedGames.length || liveGames.length) {
     const now = Date.now();
     const completionGraceMs = 18 * 60 * 60 * 1000;
+    const completedIds = new Set(completedGames.map(game => String(game?.game_id ?? "")));
+    const liveIds = new Set(liveGames.map(game => String(game?.game_id ?? "")));
+    const candidates = [];
 
-    for (const week of weeks) {
-      const scheduled = projections.filter(
-        game => Number(game.week) === Number(week)
-      );
-
+    for (const period of periods) {
+      const scheduled = projections.filter(game => gameMatchesProjectionPeriod(game, period));
       if (!scheduled.length) continue;
 
-      const completedCount = completedGames.filter(
-        game => Number(game.week) === Number(week)
-      ).length;
-
-      const hasLiveGame = liveGames.some(
-        game => Number(game.week) === Number(week)
-      );
+      const hasLiveGame = scheduled.some(game => liveIds.has(String(game?.game_id ?? "")));
+      const everyGameFinal = scheduled.every(game =>
+        String(game?.status || "").toLowerCase() === "completed" ||
+        completedIds.has(String(game?.game_id ?? ""))
+      ) && !hasLiveGame;
 
       const kickoffTimes = scheduled
         .map(game => new Date(game.start_date).getTime())
@@ -2817,60 +2868,71 @@ function determineDefaultWeek(weeks) {
         ? Math.max(...kickoffTimes)
         : null;
 
-      const everyGameFinal =
-        completedCount >= scheduled.length && !hasLiveGame;
-
-      const safelyPastWeek =
+      const safelyPastPeriod =
         latestKickoff !== null &&
         now >= latestKickoff + completionGraceMs &&
         !hasLiveGame;
 
-      if (!everyGameFinal && !safelyPastWeek) return week;
+      if (!everyGameFinal && !safelyPastPeriod) {
+        candidates.push({
+          period,
+          kickoff: kickoffTimes.length ? Math.min(...kickoffTimes) : Number.POSITIVE_INFINITY,
+          live: hasLiveGame,
+        });
+      }
     }
 
-    return weeks[weeks.length - 1];
+    if (candidates.length) {
+      candidates.sort((a, b) => Number(b.live) - Number(a.live) || a.kickoff - b.kickoff);
+      return candidates[0].period;
+    }
+
+    return periods[periods.length - 1];
   }
 
-  const marketWeeks = projections
+  const marketPeriods = projections
     .filter(game => hasValue(game?.market?.home_spread))
-    .map(game => Number(game.week))
-    .filter(week => !Number.isNaN(week));
+    .map(gameProjectionPeriod)
+    .filter(period => period !== null);
 
-  return marketWeeks.length ? Math.min(...marketWeeks) : weeks[0];
+  return marketPeriods.length ? marketPeriods[0] : periods[0];
 }
 
 function buildWeekTabs() {
   const container = document.getElementById("week-tabs");
   if (!container) return;
 
-  const weeks = availableWeeks();
+  const periods = availableProjectionPeriods();
 
-  if (!weeks.length) {
+  if (!periods.length) {
     container.innerHTML = "";
     return;
   }
 
-  if (currentWeek === null) currentWeek = determineDefaultWeek(weeks);
+  if (currentWeek === null) currentWeek = determineDefaultWeek(periods.map(period => period.key));
+  if (!periods.some(period => String(period.key) === String(currentWeek))) {
+    currentWeek = determineDefaultWeek(periods.map(period => period.key));
+  }
 
-  container.innerHTML = weeks.map(week => `
+  container.innerHTML = periods.map(period => `
     <button
-      class="week-tab ${Number(week) === Number(currentWeek) ? "active" : ""}"
-      onclick="selectWeek(${week})"
+      class="week-tab ${String(period.key) === String(currentWeek) ? "active" : ""}"
+      onclick="selectWeek('${escapeJsString(String(period.key))}')"
     >
-      ${week === 0 ? "Week 0" : `Week ${week}`}
+      ${escapeHtml(period.label)}
     </button>
   `).join("");
 }
 
 function selectWeek(week) {
-  currentWeek = Number(week);
+  currentWeek = normalizeProjectionPeriod(week);
   buildWeekTabs();
   renderProjections();
 }
 
 function byeWeekRows(week) {
   const schedules = scheduleData?.team_schedules ?? {};
-  if (!Number.isFinite(Number(week))) return [];
+  if (typeof normalizeProjectionPeriod(week) !== "number") return [];
   const scheduledTeams = new Set();
   projections.filter(game => Number(game?.week) === Number(week)).forEach(game => {
     if (game?.home?.team) scheduledTeams.add(game.home.team);
@@ -2927,7 +2989,7 @@ function projectionGamesForCurrentView() {
     .filter(game => {
       if (
         currentWeek !== null &&
-        Number(game.week) !== Number(currentWeek)
+        !gameMatchesProjectionPeriod(game, currentWeek)
       ) return false;
 
       if (!currentSearch) return true;
@@ -4697,7 +4759,7 @@ function renderMatchup(game) {
           ${escapeHtml(awayName)} @ ${escapeHtml(homeName)}
         </div>
         <div class="matchup-subtitle">
-          Week ${game.week ?? "—"}
+          ${escapeHtml(gameStageLabel(game))}
           · ${escapeHtml(gameDateText(game.start_date))}
           · ${escapeHtml(broadcast)}
           · ${escapeHtml(venue)}
@@ -7129,7 +7191,7 @@ function renderSeasonOutlook(team) {
     return `
       <tr>
         <td data-label="Week / Date">
-          <strong>Week ${game.week ?? "—"}</strong>
+          <strong>${escapeHtml(gameStageLabel({ ...official, ...game }))}</strong>
           <div class="schedule-date">${escapeHtml(gameDateText(game.start_date))}</div>
           <div class="schedule-secondary">${escapeHtml(broadcast)}</div>
         </td>
