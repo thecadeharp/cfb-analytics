@@ -27,7 +27,9 @@ jobs:
         if: ${{ github.event_name == 'workflow_run' }}
         run: sleep 20
       - name: Verify responsive public status contracts
-        run: python -m unittest scripts.test_public_data_status scripts.test_seo_contract scripts.test_benchmark_contract scripts.test_research_workbench -v
+        run: |
+          python -m unittest scripts.test_public_data_status scripts.test_seo_contract scripts.test_benchmark_contract scripts.test_research_workbench -v
+          node scripts/test_playoff_projection.cjs
       - name: Verify public data contracts
         run: |
           attempts=6

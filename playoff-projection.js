@@ -70,6 +70,7 @@
         mostLikelyRecord: season.most_likely_record || null,
         projectedWinPct,
         powerRank,
+        powerRating: safe(power.rating),
         sorRank,
         sosRank,
         selectionScore,
@@ -113,10 +114,22 @@
   function simulateGame(entryA, entryB, venue = 'neutral') {
     if (!entryA || !entryB) return null;
     let projection = null;
-    try {
-      projection = buildInteractiveProjection(entryA.team, entryB.team, venue);
-    } catch (_) {
-      projection = null;
+    const teamA = getTeam(entryA.team);
+    const teamB = getTeam(entryB.team);
+    const ratingA = safe(entryA.powerRating);
+    const ratingB = safe(entryB.powerRating);
+    if (teamA && teamB && ratingA !== null && ratingB !== null) {
+      const hfa = venue === 'neutral'
+        ? 0
+        : safe(hfaData?.teams?.[venue === 'team_b_home' ? entryB.team : entryA.team], safe(hfaData?.meta?.default_hfa, 2));
+      const total = calculateInteractiveTotal(teamA, teamB);
+      projection = core.projectRatingMatchup(entryA, entryB, venue, hfa, total);
+    } else {
+      try {
+        projection = buildInteractiveProjection(entryA.team, entryB.team, venue);
+      } catch (_) {
+        projection = null;
+      }
     }
     const winA = safe(projection?.teamAWin, 50);
     const winner = winA >= 50 ? entryA : entryB;
@@ -211,7 +224,7 @@
         <section class="thi-cfp-field"><h3>Projected field</h3>${data.field.map(fieldRow).join('')}
           <div class="thi-cfp-bubble"><div><span>First team out</span><strong>${html(data.firstOut?.team ?? '—')}</strong></div><div><span>Second team out</span><strong>${html(data.secondOut?.team ?? '—')}</strong></div></div>
         </section>
-        <section class="thi-cfp-champion"><span>Projected champion</span>${simulation.champion ? `${typeof teamLogoMarkup === 'function' ? teamLogoMarkup(simulation.champion.team, 'dossier') : ''}<strong>${html(simulation.champion.team)}</strong><small>Favorite advances in each hypothetical matchup</small>` : '—'}</section>
+        <section class="thi-cfp-champion"><span>Projected champion</span>${simulation.champion ? `${typeof teamLogoMarkup === 'function' ? teamLogoMarkup(simulation.champion.team, 'dossier') : ''}<strong>${html(simulation.champion.team)}</strong><small>THI Power favorite advances in each hypothetical matchup</small>` : '—'}</section>
       </div>
       <div class="thi-cfp-bracket" aria-label="THI simulated College Football Playoff bracket">
         ${roundColumn('First Round · Campus', simulation.firstRound)}
@@ -219,7 +232,7 @@
         ${roundColumn('Semifinals', simulation.semifinals)}
         ${roundColumn('Championship', simulation.title ? [simulation.title] : [])}
       </div>
-      <details class="thi-cfp-method"><summary>How this projection works</summary><p>This is a weekly THI research view, not the CFP committee ranking. The projected field balances accomplishment, schedule and team quality, then applies the official automatic-bid and seeding rules. Matchups use the site's existing hypothetical spread, total and win-probability engine. They are not official Model A plays and are excluded from tracking.</p></details>`;
+      <details class="thi-cfp-method"><summary>How this projection works</summary><p>This is a weekly THI research view, not the CFP committee ranking. The projected field balances accomplishment, schedule and team quality, then applies the official automatic-bid and seeding rules. Hypothetical bracket matchups use the same THI Power point scale displayed in the projected field, plus home-field advantage for first-round campus games. They are not official Model A plays and are excluded from tracking.</p></details>`;
   }
 
   function mountNavigation() {
@@ -294,6 +307,43 @@
 })(typeof window !== 'undefined' ? window : null, () => {
   'use strict';
 
+  function normalCdf(value) {
+    const sign = value < 0 ? -1 : 1;
+    const x = Math.abs(value) / Math.sqrt(2);
+    const t = 1 / (1 + 0.3275911 * x);
+    const erf = sign * (1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x));
+    return 0.5 * (1 + erf);
+  }
+
+  function projectRatingMatchup(entryA, entryB, venue = 'neutral', homeField = 0, total = 52.5) {
+    const ratingA = Number(entryA?.powerRating);
+    const ratingB = Number(entryB?.powerRating);
+    if (!Number.isFinite(ratingA) || !Number.isFinite(ratingB)) return null;
+    const teamAHome = venue !== 'team_b_home';
+    const neutral = venue === 'neutral';
+    const venueEdgeA = neutral ? 0 : teamAHome ? Number(homeField || 0) : -Number(homeField || 0);
+    const marginA = ratingA - ratingB + venueEdgeA;
+    const teamAWin = normalCdf(marginA / 16) * 100;
+    const scoreA = Math.round((Number(total) + marginA) / 2);
+    const scoreB = Math.round((Number(total) - marginA) / 2);
+    const homeName = teamAHome ? entryA.team : entryB.team;
+    const awayName = teamAHome ? entryB.team : entryA.team;
+    const homeMargin = teamAHome ? marginA : -marginA;
+    return {
+      teamA: { team: entryA.team },
+      teamB: { team: entryB.team },
+      homeName,
+      awayName,
+      homeSpread: Math.round((-homeMargin) * 2) / 2,
+      total: Number(total),
+      scoreA,
+      scoreB,
+      teamAWin,
+      teamBWin: 100 - teamAWin,
+      ratingSource: 'thi_power_ratings',
+    };
+  }
+
   function selectField(rows, majorConferences, groupConferences) {
     const ranked = Array.isArray(rows) ? rows.slice() : [];
     const bestIn = conference => ranked.find(row => row.conference === conference) ?? null;
@@ -318,5 +368,5 @@
     return { field, firstOut: bubble[0] ?? null, secondOut: bubble[1] ?? null };
   }
 
-  return { selectField };
+  return { selectField, projectRatingMatchup };
 });
