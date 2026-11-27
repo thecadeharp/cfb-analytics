@@ -50,6 +50,8 @@ class ScheduledWriterWorkflowSafetyTest(unittest.TestCase):
     def test_projection_board_has_in_season_freshness_schedule(self):
         source = (WORKFLOWS / "refresh-projections-no-cfbd.yml").read_text()
         self.assertIn('cron: "11 0,6,12,18 * 8-12 *"', source)
+        self.assertIn('cron: "3 14 * 8-10 4,5,6"', source)
+        self.assertIn('cron: "3 15 * 11-12 4,5,6"', source)
 
     def test_closing_capture_covers_weeknight_kickoffs(self):
         source = (WORKFLOWS / "capture-closing-lines-no-cfbd.yml").read_text()
