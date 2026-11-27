@@ -2,7 +2,11 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 with patch.dict("sys.modules", {"requests": MagicMock()}):
-    from scripts.build_projections import classify_schedule_phase, kickoff_local_date
+    from scripts.build_projections import (
+        classify_schedule_phase,
+        is_official_tracking_game,
+        kickoff_local_date,
+    )
 
 
 class ScheduleSanityTests(unittest.TestCase):
@@ -52,6 +56,15 @@ class ScheduleSanityTests(unittest.TestCase):
         self.assertEqual(result["postseason_round"], "semifinal")
         self.assertEqual(result["bowl_name"], "Peach Bowl")
         self.assertEqual(result["display_label"], "CFP Semifinals")
+
+    def test_traditional_bowls_are_research_only(self):
+        self.assertFalse(is_official_tracking_game({"schedule_phase": "bowl"}))
+
+    def test_cfp_and_conference_titles_remain_in_official_record(self):
+        self.assertTrue(is_official_tracking_game({"schedule_phase": "cfp"}))
+        self.assertTrue(
+            is_official_tracking_game({"schedule_phase": "conference_championship"})
+        )
 
 
 if __name__ == "__main__":

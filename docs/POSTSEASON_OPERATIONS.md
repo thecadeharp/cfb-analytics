@@ -18,6 +18,8 @@ THI must preserve two separate concepts throughout bowl season:
 
 The availability scenario must never silently overwrite Model A. Each layer receives its own value, timestamp, method version, and source coverage. Public ATS, total, and CLV grading remains tied to the projection/market pair frozen under the published grading contract.
 
+Traditional bowl projections are research-only and are excluded from the official ATS, totals, moneyline, CLV, beat-close, confidence-tier, and YTD records. Conference championships and CFP games remain eligible for the official record. The projection board must label the traditional-bowl distinction visibly.
+
 ## Player absence valuation
 
 The existing `thi-availability-impact-v1` layer is the starting point. It uses roster identity, workload share, player production rating, position leverage, and replacement quality. Current per-player caps are intentionally conservative:
