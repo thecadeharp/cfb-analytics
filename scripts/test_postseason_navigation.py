@@ -26,6 +26,13 @@ class PostseasonNavigationTests(unittest.TestCase):
         self.assertEqual(registry["meta"]["season"], 2026)
         self.assertEqual(registry["games"], {})
 
+    def test_bowl_availability_ui_is_strictly_phase_gated(self):
+        source = (ROOT / "app.js").read_text(encoding="utf-8")
+        self.assertIn('game?.schedule_phase !== "bowl"', source)
+        self.assertIn('game?.schedule_phase === "bowl"', source)
+        self.assertIn("Bowl research only · not tracked", source)
+        self.assertIn("Comparison held — roster unstable", source)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -46,6 +46,14 @@ Multiple absences receive diminishing weights. Non-QB exposure is capped at 4.0 
 
 Every bowl matchup should expose roster certainty as `CONFIRMED`, `DEVELOPING`, or `UNSTABLE`. An unstable roster can hold the public market-comparison signal while leaving the baseline projection visible.
 
+The source-linked declaration file is `data/postseason_availability.json`. It is inert for regular-season, conference-championship, and CFP projections. Manual player point values are prohibited: the display-only scenario derives conservative sensitivity from the existing player-versus-replacement method. Staff notes are always unpriced.
+
+Roster certainty means:
+
+- `CONFIRMED`: both team records are explicitly marked confirmed after source review.
+- `DEVELOPING`: declarations are incomplete or a team has not completed source review.
+- `UNSTABLE`: at least one team has a material unresolved status; the bowl market comparison is held.
+
 ## Freeze cadence
 
 - Assignment freeze: immediately after the official matchup is announced.

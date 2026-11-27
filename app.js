@@ -24,6 +24,7 @@ const DATA_URLS = {
   thiPowerRatings: "./data/thi_power_ratings.json",
   cfbThiIndex: "./data/cfb_thi_index.json",
   rosterNotes: "./data/roster_notes.json",
+  postseasonAvailability: "./data/postseason_availability.json",
   teamIntelligence: "./data/team_intelligence.json",
   marketHistory: "./data/market_history.json",
   predictionArchive: "./data/reports/prediction_archive.json",
@@ -50,6 +51,7 @@ let thiObservedRatingsData = null;
 let thiPowerRatingsData = null;
 let cfbThiIndexData = null;
 let rosterNotesData = null;
+let postseasonAvailabilityData = null;
 let teamIntelligenceData = null;
 let marketHistoryData = null;
 let predictionArchiveData = null;
@@ -2666,6 +2668,7 @@ async function init() {
       thiPowerRatingsData,
       cfbThiIndexData,
       rosterNotesData,
+      postseasonAvailabilityData,
       teamIntelligenceData,
       marketHistoryData,
       predictionArchiveData
@@ -2689,6 +2692,7 @@ async function init() {
       loadJson(DATA_URLS.thiPowerRatings).catch(() => null),
       loadJson(DATA_URLS.cfbThiIndex).catch(() => null),
       loadJson(DATA_URLS.rosterNotes).catch(() => null),
+      loadJson(DATA_URLS.postseasonAvailability).catch(() => ({ games: {} })),
       loadJson(DATA_URLS.teamIntelligence).catch(() => null),
       loadJson(DATA_URLS.marketHistory).catch(() => ({ games: {} })),
       loadJson(DATA_URLS.predictionArchive).catch(() => ({ rows: [] })),
@@ -3109,7 +3113,9 @@ function renderProjectionRow(game) {
   const disagreement = game?.comparison?.disagreement;
   const preferred = game?.comparison?.preferred_side;
   const status = game?.comparison?.signal ?? game?.comparison?.status;
-  const recommendedSide = preferred && status !== "ALIGNED" && hasValue(marketSpread)
+  const researchOnly = game?.tracking_eligible === false && game?.schedule_phase === "bowl";
+  const rosterHold = researchOnly && bowlRosterCertainty(game)?.key === "unstable";
+  const recommendedSide = !rosterHold && preferred && status !== "ALIGNED" && hasValue(marketSpread)
     ? marketSideForTeam(preferred, homeName, awayName, marketSpread)
     : null;
   const baseConfidence = signalConfidence(status);
@@ -3119,7 +3125,6 @@ function renderProjectionRow(game) {
   const disagreementDriver = marketDisagreementDriver(game);
   const cssStatus = statusClass(status);
   const confidenceCss = confidenceClass(confidence);
-  const researchOnly = game?.tracking_eligible === false && game?.schedule_phase === "bowl";
 
   const disagreementNote = hasValue(disagreement)
     ? (preferred ? `Model favors ${preferred}` : "Model agrees with market")
@@ -3199,7 +3204,7 @@ function renderProjectionRow(game) {
 
       <td class="status-cell">
         <span class="status ${cssStatus}">
-          ${escapeHtml(displayStatus(status))}
+          ${rosterHold ? "ROSTER HOLD" : escapeHtml(displayStatus(status))}
         </span>
         ${disagreementDriver ? `<div class="signal-record">${escapeHtml(disagreementDriver)}</div>` : ""}
       </td>
@@ -4596,7 +4601,10 @@ function standardNormalCdf(value) {
   return .5 * (1 + erf);
 }
 
-function relativeMarketAvailabilityHold(awayName, homeName) {
+function relativeMarketAvailabilityHold(awayName, homeName, game) {
+  if (game?.schedule_phase === "bowl" && bowlRosterCertainty(game)?.key === "unstable") {
+    return true;
+  }
   return [awayName, homeName].some(teamName => {
     const notes = currentAvailabilityNotes(teamName);
     const impact = availabilityImpactForTeam(teamName, notes);
@@ -4647,7 +4655,7 @@ function relativeMarketFitMarkup(game) {
   const spreadEv = americanExpectedReturn(coverProbability, spreadPrice);
   const mlEligible = mlRangeEligible && completeMoneylineBooks >= RELATIVE_MARKET_FIT_POLICY.minMoneylineBooks && quoteFresh && mlGap >= RELATIVE_MARKET_FIT_POLICY.minProbabilityEdge && mlEv > 0;
   const spreadEligible = Number.isFinite(spreadPrice) && spreadGap >= RELATIVE_MARKET_FIT_POLICY.minProbabilityEdge && spreadEv > 0;
-  const availabilityHold = relativeMarketAvailabilityHold(awayName, homeName);
+  const availabilityHold = relativeMarketAvailabilityHold(awayName, homeName, game);
   let headline = "No qualifying market advantage";
   let detail = "Neither available price clears THI’s 3-point probability-edge and price-quality guardrails.";
   if (availabilityHold) {
@@ -4714,6 +4722,7 @@ function renderMatchup(game) {
   const confidenceCss = confidenceClass(confidence);
   const edgeClass = statusEdgeClass(status);
   const researchOnly = game?.tracking_eligible === false && game?.schedule_phase === "bowl";
+  const rosterHold = researchOnly && bowlRosterCertainty(game)?.key === "unstable";
 
   const winProb = projection?.win_probability ?? {};
   const awayWin = hasValue(winProb.away) ? Number(winProb.away) : null;
@@ -4772,7 +4781,7 @@ function renderMatchup(game) {
         <button class="thi-account-button" type="button" onclick="copyMatchupLink('${escapeJsString(String(game.game_id ?? ""))}', this)">Share matchup</button>
         <button class="thi-account-button" type="button" onclick="trackMatchupPlay('${escapeJsString(String(game.game_id ?? ""))}')">Track a Play</button>
         <span class="status ${statusCss}">
-          ${escapeHtml(displayStatus(status))}
+          ${rosterHold ? "ROSTER HOLD" : escapeHtml(displayStatus(status))}
         </span>
         <span class="status ${confidenceCss}">
           ${researchOnly ? "Bowl research only · not tracked" : `Signal Confidence: ${escapeHtml(confidence)}`}
@@ -4786,7 +4795,7 @@ function renderMatchup(game) {
       <div>
         <div class="model-edge-title">${researchOnly ? "Research Comparison" : "Model Signal"}</div>
         <div class="model-edge-side ${edgeClass}">
-          ${escapeHtml(modelEdgeSide)}
+          ${rosterHold ? "Comparison held — roster unstable" : escapeHtml(modelEdgeSide)}
         </div>
         <div class="model-edge-context">
           ${hasValue(edgeSize)
@@ -4799,7 +4808,7 @@ function renderMatchup(game) {
 
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
         <span class="status ${statusCss}">
-          ${escapeHtml(displayStatus(status))}
+          ${rosterHold ? "ROSTER HOLD" : escapeHtml(displayStatus(status))}
         </span>
         <span class="status ${confidenceCss}">
           ${researchOnly ? "NOT TRACKED" : escapeHtml(confidence)}
@@ -7775,6 +7784,83 @@ function currentAvailabilityNotes(teamName) {
   });
 }
 
+function postseasonAvailabilityRecord(game) {
+  if (game?.schedule_phase !== "bowl") return null;
+  return postseasonAvailabilityData?.games?.[String(game?.game_id ?? "")] ?? null;
+}
+
+function postseasonTeamAvailability(teamName, game) {
+  const record = postseasonAvailabilityRecord(game);
+  const team = record?.teams?.[teamName] ?? {};
+  const certainty = String(team?.certainty || "developing").toLowerCase();
+  const players = Array.isArray(team?.players) ? team.players : [];
+  const now = Date.now();
+  const notes = players.filter(player => {
+    const verified = Date.parse(player?.verified_at_utc ?? "");
+    return Boolean(String(player?.player ?? "").trim())
+      && /^https:\/\//i.test(String(player?.source_url ?? ""))
+      && Number.isFinite(verified) && verified <= now;
+  }).map(player => {
+    const category = String(player?.category || "questionable").toLowerCase();
+    const statusByCategory = {
+      injury_out: "Out — injury",
+      opt_out: "Out — opt-out",
+      portal_departure: "Unavailable — portal departure",
+      suspension: "Out — suspension",
+      questionable: "Questionable",
+      available: "Available",
+    };
+    return {
+      ...player,
+      status: statusByCategory[category] || String(player?.status || "Update"),
+      text: String(player?.text || `${player.player} is listed ${statusByCategory[category] || category}.`),
+      source_type: "postseason_declaration",
+      postseason_category: category,
+      valid_until_utc: player?.valid_until_utc || game?.start_date,
+      _postseason: true,
+    };
+  });
+  const sources = Array.isArray(team?.sources) ? team.sources.filter(source =>
+    /^https:\/\//i.test(String(source?.url ?? ""))
+  ) : [];
+  const staffNotes = Array.isArray(team?.staff_notes) ? team.staff_notes.filter(note =>
+    /^https:\/\//i.test(String(note?.source_url ?? ""))
+  ) : [];
+  return { certainty, notes, sources, staffNotes };
+}
+
+function availabilityNotesForGame(teamName, game) {
+  const regular = currentAvailabilityNotes(teamName);
+  if (game?.schedule_phase !== "bowl") return regular;
+  return [...regular, ...postseasonTeamAvailability(teamName, game).notes];
+}
+
+function bowlRosterCertainty(game) {
+  if (game?.schedule_phase !== "bowl") return null;
+  const away = postseasonTeamAvailability(game?.away?.team, game).certainty;
+  const home = postseasonTeamAvailability(game?.home?.team, game).certainty;
+  const values = [away, home];
+  const key = values.includes("unstable")
+    ? "unstable"
+    : values.every(value => value === "confirmed")
+      ? "confirmed"
+      : "developing";
+  return {
+    key,
+    label: key === "confirmed" ? "Confirmed" : key === "unstable" ? "Unstable" : "Developing",
+    away,
+    home,
+  };
+}
+
+function bowlScenarioExposure(teamName, game) {
+  const eligible = postseasonTeamAvailability(teamName, game).notes.filter(note =>
+    ["injury_out", "opt_out", "portal_departure", "suspension"].includes(note.postseason_category)
+      && note.adjustment_eligible !== false
+  );
+  return availabilityImpactForTeam(teamName, eligible)?.reportExposurePoints ?? 0;
+}
+
 function availabilityStatusClass(status) {
   const value = String(status ?? "").toLowerCase();
   if (/out|unavailable/.test(value)) return "out";
@@ -7821,13 +7907,14 @@ function availabilityImpactSummaryMarkup(impact) {
     </div>`;
 }
 
-function availabilityTeamMarkup(teamName) {
+function availabilityTeamMarkup(teamName, game) {
   const team = getTeam(teamName) ?? {};
   const conference = team?.conference ?? "Independent";
   const source = rosterNotesData?.conference_sources?.[conference];
   const officialUrl = String(source?.url ?? "");
-  const notes = currentAvailabilityNotes(teamName);
+  const notes = availabilityNotesForGame(teamName, game);
   const impact = availabilityImpactForTeam(teamName, notes);
+  const postseason = postseasonTeamAvailability(teamName, game);
   const sourceLink = /^https:\/\//i.test(officialUrl)
     ? `<a class="thi-availability-source" href="${escapeHtml(officialUrl)}" target="_blank" rel="noopener noreferrer">Official ${escapeHtml(conference)} reports ↗</a>`
     : `<span class="thi-availability-source muted">No official conference index listed</span>`;
@@ -7841,6 +7928,11 @@ function availabilityTeamMarkup(teamName) {
         ${sourceLink}
       </div>
       ${notes.length ? availabilityImpactSummaryMarkup(impact) : ""}
+      ${game?.schedule_phase === "bowl" ? `
+        <div class="thi-availability-meta" style="margin:8px 0 12px;">
+          Roster certainty: <strong>${escapeHtml(postseason.certainty.toUpperCase())}</strong>
+          · ${postseason.sources.length} verified source${postseason.sources.length === 1 ? "" : "s"}
+        </div>` : ""}
       ${notes.length ? `
         <div class="thi-availability-list">
           ${notes.map((note, noteIndex) => {
@@ -7870,6 +7962,10 @@ function availabilityTeamMarkup(teamName) {
         <div class="thi-availability-empty">
           No current player-status report has been verified for this team. Status is unknown, not fully healthy.
         </div>`}
+      ${postseason.staffNotes.length ? `
+        <div class="thi-availability-list" style="margin-top:10px;">
+          ${postseason.staffNotes.map(note => `<div class="thi-availability-item"><div class="thi-availability-item-top"><span class="thi-availability-status unknown">STAFF CONTEXT · UNPRICED</span></div><div class="thi-availability-copy">${escapeHtml(note.text || "Staff transition")}</div><div class="thi-availability-meta"><a href="${escapeHtml(note.source_url)}" target="_blank" rel="noopener noreferrer">Source ↗</a></div></div>`).join("")}
+        </div>` : ""}
     </article>`;
 }
 
@@ -7885,17 +7981,24 @@ function availabilityReportMarkup(awayName, homeName, game) {
     const value = Number(note?.availability_adjustment_points);
     return sum + (Number.isFinite(value) ? value : 0);
   }, 0);
-  const awayImpact = availabilityImpactForTeam(awayName);
-  const homeImpact = availabilityImpactForTeam(homeName);
+  const awayImpact = availabilityImpactForTeam(awayName, availabilityNotesForGame(awayName, game));
+  const homeImpact = availabilityImpactForTeam(homeName, availabilityNotesForGame(homeName, game));
+  const bowlGame = game?.schedule_phase === "bowl";
+  const rosterCertainty = bowlRosterCertainty(game);
+  const awayBowlExposure = bowlGame ? Number(bowlScenarioExposure(awayName, game)) : 0;
+  const homeBowlExposure = bowlGame ? Number(bowlScenarioExposure(homeName, game)) : 0;
   const reportExposureScenarioHomeSpread = Number.isFinite(modelHomeSpread)
     ? modelHomeSpread
       - Number(awayImpact?.reportExposurePoints ?? 0)
       + Number(homeImpact?.reportExposurePoints ?? 0)
     : null;
-  const hasScenario = Number.isFinite(modelHomeSpread)
-    && (Math.abs(awayAdjustment) > 0.001 || Math.abs(homeAdjustment) > 0.001);
+  const hasScenario = Number.isFinite(modelHomeSpread) && (bowlGame
+    ? Math.abs(awayBowlExposure) > 0.001 || Math.abs(homeBowlExposure) > 0.001
+    : Math.abs(awayAdjustment) > 0.001 || Math.abs(homeAdjustment) > 0.001);
   const scenarioHomeSpread = hasScenario
-    ? modelHomeSpread + awayAdjustment - homeAdjustment
+    ? bowlGame
+      ? modelHomeSpread - awayBowlExposure + homeBowlExposure
+      : modelHomeSpread + awayAdjustment - homeAdjustment
     : null;
   return `
     <section class="thi-availability-report" aria-label="Matchup availability report">
@@ -7904,20 +8007,20 @@ function availabilityReportMarkup(awayName, homeName, game) {
           <div class="eyebrow">Verified player status</div>
           <h3>Availability Report</h3>
         </div>
-        <div class="thi-availability-disclosure">Display and research context only · Model A unchanged</div>
+        <div class="thi-availability-disclosure">${bowlGame ? `Roster certainty: ${escapeHtml(rosterCertainty?.label || "Developing")} · bowl research only` : "Display and research context only"} · Model A unchanged</div>
       </div>
       <div class="thi-availability-grid">
-        ${availabilityTeamMarkup(awayName)}
-        ${availabilityTeamMarkup(homeName)}
+        ${availabilityTeamMarkup(awayName, game)}
+        ${availabilityTeamMarkup(homeName, game)}
       </div>
       <div class="thi-availability-scenario">
         <div><span>Published Model A · availability excluded</span><strong>${Number.isFinite(modelHomeSpread) ? `${escapeHtml(homeName)} ${escapeHtml(shortSpread(modelHomeSpread))}` : "—"}</strong></div>
-        <div><span>Availability-adjusted scenario</span><strong>${hasScenario ? `${escapeHtml(homeName)} ${escapeHtml(shortSpread(scenarioHomeSpread))}` : "No sourced point adjustment active"}</strong></div>
-        <div><span>Verified team-value inputs</span><strong>${escapeHtml(awayName)} ${formatSigned(awayAdjustment, 1)} · ${escapeHtml(homeName)} ${formatSigned(homeAdjustment, 1)}</strong></div>
+        <div><span>${bowlGame ? "Verified bowl-roster scenario" : "Availability-adjusted scenario"}</span><strong>${hasScenario ? `${escapeHtml(homeName)} ${escapeHtml(shortSpread(scenarioHomeSpread))}` : "No sourced point adjustment active"}</strong></div>
+        <div><span>Verified team-value inputs</span><strong>${escapeHtml(awayName)} ${bowlGame ? formatNumber(awayBowlExposure, 1) : formatSigned(awayAdjustment, 1)} · ${escapeHtml(homeName)} ${bowlGame ? formatNumber(homeBowlExposure, 1) : formatSigned(homeAdjustment, 1)} pts</strong></div>
         <div><span>Report-exposure sensitivity · not applied</span><strong>${Number.isFinite(reportExposureScenarioHomeSpread) ? `${escapeHtml(favoredLine(homeName, awayName, reportExposureScenarioHomeSpread))} · ` : ""}${escapeHtml(awayName)} ${formatNumber(awayImpact?.reportExposurePoints, 1)} / ${escapeHtml(homeName)} ${formatNumber(homeImpact?.reportExposurePoints, 1)} pts</strong></div>
       </div>
       <div class="thi-availability-foot">
-        Reports expire after seven days. Negative team-value points represent a downgrade. The scenario is shown separately and is never inserted into the published Model A projection.
+        ${bowlGame ? "Bowl declarations require a timestamped source. Confirmed absences use conservative player-versus-replacement sensitivity; questionable players and staff changes remain unpriced." : "Reports expire after seven days. Negative team-value points represent a downgrade."} The scenario is shown separately and is never inserted into the published Model A projection.
       </div>
       <details class="thi-availability-method">
         <summary>How THI Availability Impact is calculated</summary>

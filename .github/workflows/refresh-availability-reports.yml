@@ -46,6 +46,8 @@ jobs:
       - name: Test official-report normalization
         run: |
           python -m unittest scripts.test_availability_report
+          python -m unittest scripts.test_postseason_availability
+          python scripts/validate_postseason_availability.py
           node scripts/test_availability_impact.cjs
 
       - name: Validate freshness and isolation
